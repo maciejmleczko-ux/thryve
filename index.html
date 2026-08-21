@@ -204,7 +204,10 @@ button{font-family:inherit;}
 .run-tip{margin:16px 20px 0;}
 
 /* ---------- calendar (history) ---------- */
-.cal-wrap{background:var(--orange);border-radius:24px;margin:20px;padding:20px;}
+.cal-wrap{background:var(--orange);border-radius:0 0 24px 24px;margin:0 0 20px;padding:20px;}
+.topbar.topbar-orange{background:var(--orange);margin:0;padding:calc(16px + env(safe-area-inset-top, 0px)) 20px 0;border-radius:0;}
+.topbar.topbar-orange .plan-pill{background:#fff;color:var(--orange);}
+.header-row.on-orange{background:var(--orange);margin:0;padding:32px 20px 4px;}
 .cal-head{display:flex;align-items:center;justify-content:space-between;color:#fff;}
 .cal-head .ph{width:18px;height:18px;cursor:pointer;}
 .cal-head select{background:transparent;border:none;color:#fff;font-size:16px;font-weight:400;font-family:inherit;}
@@ -220,6 +223,15 @@ button{font-family:inherit;}
 .cal-day:disabled{cursor:not-allowed;}
 .hist-detail-wrap{padding:0 12px;display:flex;flex-direction:column;gap:12px;}
 .hist-card{background:var(--light);border-radius:12px;padding:20px;color:var(--text-dark);}
+.hist-card.collapsed{cursor:pointer;}
+.hist-card.collapsed:active{transform:scale(.99);}
+.hist-right{display:flex;align-items:center;gap:10px;}
+.hist-date{font-size:10px;color:rgba(44,39,39,.6);}
+.hist-close{cursor:pointer;display:flex;}
+.hist-close .ph{width:20px;height:20px;color:var(--text-dark);}
+.run-stat-tile .v{font-size:28px;font-weight:700;color:var(--text-dark);width:100%;text-align:center;}
+.run-stat-tile.orange{background:var(--orange);border-color:var(--orange);}
+.run-stat-tile.orange .v{color:#fff;}
 
 /* ---------- date picker modal (gym/running) ---------- */
 .dp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
@@ -435,7 +447,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
   <!-- ===================== HISTORY ===================== -->
   <section class="view" id="view-history">
-    <div class="header-row">
+    <div class="header-row on-orange">
       <div class="section-label">__PH_CALENDAR__<span>HISTORY</span></div>
       <div class="icon-btn-row">
         <span class="ph" data-ph="upload-simple" onclick="document.getElementById('importFile').click()"></span>
@@ -746,6 +758,7 @@ function goRoute(route){
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===route));
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running');
+  document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
   if(route==='gym'){ document.getElementById('gymDate').value = document.getElementById('gymDate').value || todayStr(); updateGymDateLabel(); renderGymGrid(); }
   if(route==='running'){ document.getElementById('runDate').value = document.getElementById('runDate').value || todayStr(); updateRunDateLabel(); }
   if(route==='history'){ renderCalendar(); }
@@ -1234,10 +1247,18 @@ function renderCalendar(){
     if(logCount>=1) btn.classList.add('has-log');
     if(logCount>=2) btn.classList.add('multi-log');
     if(iso===selectedHistDate) btn.classList.add('selected');
-    btn.onclick = ()=>{ selectedHistDate = iso; renderCalendar(); renderHistDetail(); };
+    btn.onclick = ()=>{ selectedHistDate = iso; histExpanded = {}; renderCalendar(); renderHistDetail(); };
     grid.appendChild(btn);
   }
   renderHistDetail();
+}
+let histExpanded = {};
+function toggleHistExpand(key){
+  histExpanded[key] = !histExpanded[key];
+  renderHistDetail();
+}
+function histRightHtml(dateHuman, exp, key){
+  return `<div class="hist-right"><span class="hist-date">${dateHuman}</span>${exp?`<span class="hist-close" onclick="event.stopPropagation();toggleHistExpand('${key}')">${ph('x')}</span>`:''}</div>`;
 }
 function renderHistDetail(){
   const wrap = document.getElementById('histDetail');
@@ -1248,26 +1269,34 @@ function renderHistDetail(){
   let html = '';
   if(w){
     const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
+    const exp = !!histExpanded.workout;
     html += `
-      <div class="hist-card">
-        <div class="lbl-row"><div class="l">${ph('barbell')}<span>TRENING</span></div><div>${fmtDateHuman(w.date)}</div></div>
+      <div class="hist-card${exp?'':' collapsed'}"${exp?'':` onclick="toggleHistExpand('workout')"`}>
+        <div class="lbl-row"><div class="l">${ph('barbell')}<span>TRENING</span></div>${histRightHtml(fmtDateHuman(w.date), exp, 'workout')}</div>
         <div class="vol">${w.exercises.length} ćwiczeń · objętość ${Math.round(totalVol)} kg</div>
-        <div class="hist-ex-list">
+        ${exp?`<div class="hist-ex-list">
           ${w.exercises.map(e=>`
             <div class="hist-ex-item">
               <div class="nm">${e.name}</div>
               <div class="st">${e.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ')}</div>
             </div>`).join('')}
-        </div>
+        </div>`:''}
       </div>`;
   }
   if(r){
     const min = Math.floor(r.pace), sec = Math.round((r.pace-min)*60);
+    const exp = !!histExpanded.run;
     html += `
-      <div class="hist-card">
-        <div class="lbl-row"><div class="l">${ph('sneaker-move')}<span>BIEGANIE</span></div><div>${fmtDateHuman(r.date)}</div></div>
-        <div class="vol">${r.type} · ${r.distance} km · ${r.time} min · tempo ${min}:${sec.toString().padStart(2,'0')} min/km</div>
-        ${r.notes?`<div class="hist-ex-item"><div class="st">${r.notes}</div></div>`:''}
+      <div class="hist-card${exp?'':' collapsed'}"${exp?'':` onclick="toggleHistExpand('run')"`}>
+        <div class="lbl-row"><div class="l">${ph('sneaker-move')}<span>BIEGANIE</span></div>${histRightHtml(fmtDateHuman(r.date), exp, 'run')}</div>
+        <div class="vol">${r.type}</div>
+        ${exp?`<div class="run-stat-tiles">
+          <div class="run-stat-tile orange"><div class="v">${r.distance}</div></div>
+          <div class="run-stat-tile"><div class="v">${r.time}</div></div>
+          <div class="run-stat-tile"><div class="v">${min}:${sec.toString().padStart(2,'0')}</div></div>
+        </div>
+        <div class="run-stat-labels"><div>Kilometry</div><div>Minuty</div><div>Tempo (min/km)</div></div>
+        ${r.notes?`<div class="hist-ex-item" style="margin-top:12px;"><div class="st">${r.notes}</div></div>`:''}`:''}
       </div>`;
   }
   wrap.innerHTML = html;
