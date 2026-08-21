@@ -203,7 +203,8 @@ button{font-family:inherit;}
 .cal-day.empty{visibility:hidden;}
 .cal-day.future{opacity:.28;cursor:not-allowed;}
 .cal-day:disabled{cursor:not-allowed;}
-.hist-detail-wrap{padding:0 20px;color:#fff;}
+.hist-detail-wrap{padding:0 12px;display:flex;flex-direction:column;gap:12px;}
+.hist-card{background:var(--light);border-radius:20px;padding:20px;color:var(--text-dark);}
 
 /* ---------- date picker modal (gym/running) ---------- */
 .dp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
@@ -213,15 +214,17 @@ button{font-family:inherit;}
 .dp-head-nav.disabled{opacity:.3;cursor:not-allowed;pointer-events:none;}
 .dp-actions{display:flex;justify-content:center;margin-top:14px;}
 .dp-actions button{background:#fff;color:var(--text-dark);border:none;border-radius:12px;padding:10px 26px;font-weight:700;font-family:inherit;cursor:pointer;font-size:13px;}
-.hist-detail-wrap .lbl-row{display:flex;align-items:center;justify-content:space-between;margin-top:20px;}
-.hist-detail-wrap .lbl-row .l{display:flex;align-items:center;gap:11px;font-size:16px;letter-spacing:.48px;}
-.hist-detail-wrap .lbl-row .l .ph{width:32px;height:32px;}
-.hist-detail-wrap .vol{margin-top:16px;font-size:16px;letter-spacing:.48px;}
-.hist-ex-list{margin-top:20px;}
-.hist-ex-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.15);}
+.hist-detail-wrap .lbl-row{display:flex;align-items:center;justify-content:space-between;}
+.hist-detail-wrap .lbl-row .l{display:flex;align-items:center;gap:11px;font-size:16px;font-weight:600;letter-spacing:.48px;}
+.hist-detail-wrap .lbl-row .l .ph{width:32px;height:32px;color:var(--orange);}
+.hist-detail-wrap .lbl-row>div:last-child{font-size:10px;color:rgba(44,39,39,.6);}
+.hist-detail-wrap .vol{margin-top:16px;font-size:18px;font-weight:700;letter-spacing:.2px;}
+.hist-ex-list{margin-top:16px;}
+.hist-ex-item{padding:10px 0;border-bottom:1px solid #e5e7eb;}
+.hist-ex-item:last-child{border-bottom:none;}
 .hist-ex-item .nm{font-size:14px;}
-.hist-ex-item .st{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;letter-spacing:.36px;}
-.hist-empty{padding:0 20px;color:rgba(255,255,255,.6);font-size:14px;margin-top:20px;}
+.hist-ex-item .st{font-size:12px;color:rgba(44,39,39,.6);margin-top:2px;letter-spacing:.36px;}
+.hist-empty{padding:0 12px;color:rgba(255,255,255,.6);font-size:14px;margin-top:20px;}
 
 /* ---------- stats ---------- */
 .stats-card{background:var(--card);border-radius:24px;margin:20px;padding:1px;}
@@ -1219,22 +1222,26 @@ function renderHistDetail(){
   if(w){
     const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
     html += `
-      <div class="lbl-row"><div class="l">${ph('barbell')}<span>TRENING</span></div><div>${fmtDateHuman(w.date)}</div></div>
-      <div class="vol">${w.exercises.length} ćwiczeń · objętość ${Math.round(totalVol)} kg</div>
-      <div class="hist-ex-list">
-        ${w.exercises.map(e=>`
-          <div class="hist-ex-item">
-            <div class="nm">${e.name}</div>
-            <div class="st">${e.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ')}</div>
-          </div>`).join('')}
+      <div class="hist-card">
+        <div class="lbl-row"><div class="l">${ph('barbell')}<span>TRENING</span></div><div>${fmtDateHuman(w.date)}</div></div>
+        <div class="vol">${w.exercises.length} ćwiczeń · objętość ${Math.round(totalVol)} kg</div>
+        <div class="hist-ex-list">
+          ${w.exercises.map(e=>`
+            <div class="hist-ex-item">
+              <div class="nm">${e.name}</div>
+              <div class="st">${e.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ')}</div>
+            </div>`).join('')}
+        </div>
       </div>`;
   }
   if(r){
     const min = Math.floor(r.pace), sec = Math.round((r.pace-min)*60);
     html += `
-      <div class="lbl-row"><div class="l">${ph('sneaker-move')}<span>BIEGANIE</span></div><div>${fmtDateHuman(r.date)}</div></div>
-      <div class="vol">${r.type} · ${r.distance} km · ${r.time} min · tempo ${min}:${sec.toString().padStart(2,'0')} min/km</div>
-      ${r.notes?`<div class="hist-ex-item"><div class="st">${r.notes}</div></div>`:''}`;
+      <div class="hist-card">
+        <div class="lbl-row"><div class="l">${ph('sneaker-move')}<span>BIEGANIE</span></div><div>${fmtDateHuman(r.date)}</div></div>
+        <div class="vol">${r.type} · ${r.distance} km · ${r.time} min · tempo ${min}:${sec.toString().padStart(2,'0')} min/km</div>
+        ${r.notes?`<div class="hist-ex-item"><div class="st">${r.notes}</div></div>`:''}
+      </div>`;
   }
   wrap.innerHTML = html;
 }
