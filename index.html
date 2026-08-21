@@ -259,8 +259,11 @@ button{font-family:inherit;}
 .stats-title{font-size:20px;font-weight:700;}
 .stats-sub{font-size:10px;font-weight:400;letter-spacing:normal;text-transform:none;margin-top:8px;color:var(--text-dark);}
 .check-toggle-row{display:flex;gap:8px;margin-top:8px;}
-.check-toggle-row button{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:8px;
-  height:31px;padding:6px;font-size:9.5px;font-weight:700;letter-spacing:.1px;text-transform:uppercase;color:var(--text-dark);font-family:inherit;cursor:pointer;}
+.check-toggle-row button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:8px;
+  height:31px;padding:6px;font-size:9.5px;font-weight:700;letter-spacing:.1px;text-transform:uppercase;font-family:inherit;cursor:pointer;}
+.check-toggle-row button svg{width:12px;height:12px;flex-shrink:0;}
+.check-toggle-row .check-toggle-all{background:var(--orange);color:#fff;}
+.check-toggle-row .check-toggle-none{background:var(--orange-pill);color:var(--text-dark);}
 .check-cols{display:flex;gap:12px;margin-top:8px;}
 .check-col{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;}
 .check-item{display:flex;align-items:center;gap:6px;padding:0 4px;border-radius:6px;cursor:pointer;height:22px;}
@@ -279,9 +282,9 @@ button{font-family:inherit;}
 .stat-tile .lbl{font-size:9px;letter-spacing:.3px;text-transform:uppercase;margin-top:4px;}
 .stat-tile.orange{background:var(--orange);}
 .stat-tile.orange .lbl{color:var(--orange-pill);}
-.stat-tile.gray{background:#fff;border:1px solid #e5e7eb;}
-.stat-tile.gray .num{color:var(--orange);}
-.stat-tile.gray .lbl{color:var(--card);}
+.stat-tile.gray{background:var(--card);}
+.stat-tile.gray .num{color:#fff;}
+.stat-tile.gray .lbl{color:#e5e5e5;}
 
 /* ---------- misc ---------- */
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:#fff;color:var(--text-dark);
@@ -483,8 +486,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="stats-title">Siłownia — progres ciężaru</div>
         <div class="stats-sub">Ćwiczenia (zaznacz / odznacz)</div>
         <div class="check-toggle-row">
-          <button onclick="setAllGymChecks(true)">ZAZNACZ WSZYSTKIE</button>
-          <button onclick="setAllGymChecks(false)">ODZNACZ WSZYSTKIE</button>
+          <button class="check-toggle-all" onclick="setAllGymChecks(true)"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2L4.6 8.7L10 3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>ZAZNACZ WSZYSTKIE</button>
+          <button class="check-toggle-none" onclick="setAllGymChecks(false)"><svg viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>ODZNACZ WSZYSTKIE</button>
         </div>
         <div class="check-cols" id="gymExerciseChecks"><div class="check-col" id="gymExerciseChecksLeft"></div><div class="check-col" id="gymExerciseChecksRight"></div></div>
         <div class="chart-wrap"><canvas id="gymChart" height="200"></canvas></div>
