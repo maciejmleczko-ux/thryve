@@ -198,7 +198,9 @@ button{font-family:inherit;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:16px;text-align:center;}
 .cal-dow{color:rgba(255,255,255,.7);font-size:12px;padding:4px 0;}
 .cal-day{color:#fff;font-size:14px;width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;padding:0;border-radius:50%;cursor:pointer;border:2px solid transparent;background:none;font-family:inherit;}
-.cal-day.has-log{border-color:#fff;}
+.cal-day.has-log{border-color:#fff;position:relative;}
+.cal-day.multi-log::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#fff;}
+.cal-day.multi-log.selected::after{background:var(--orange);}
 .cal-day.selected{background:#fff;color:var(--text-dark);border-color:#fff;}
 .cal-day.empty{visibility:hidden;}
 .cal-day.future{opacity:.28;cursor:not-allowed;}
@@ -1167,10 +1169,11 @@ function calMove(delta){
   renderCalendar();
 }
 function datesWithLogs(){
-  const s = new Set();
-  workouts.forEach(w=>s.add(w.date));
-  runs.forEach(r=>s.add(r.date));
-  return s;
+  const m = new Map();
+  const bump = date => m.set(date, (m.get(date)||0) + 1);
+  workouts.forEach(w=>bump(w.date));
+  runs.forEach(r=>bump(r.date));
+  return m;
 }
 function renderCalendar(){
   initCalSelects();
@@ -1206,7 +1209,9 @@ function renderCalendar(){
     const btn = document.createElement('button');
     btn.className = 'cal-day';
     btn.textContent = d;
-    if(logged.has(iso)) btn.classList.add('has-log');
+    const logCount = logged.get(iso) || 0;
+    if(logCount>=1) btn.classList.add('has-log');
+    if(logCount>=2) btn.classList.add('multi-log');
     if(iso===selectedHistDate) btn.classList.add('selected');
     btn.onclick = ()=>{ selectedHistDate = iso; renderCalendar(); renderHistDetail(); };
     grid.appendChild(btn);
