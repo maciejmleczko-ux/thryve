@@ -190,6 +190,17 @@ button{font-family:inherit;}
 .field select, .field input{background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:13px;
   font-size:15px;color:var(--text-dark);font-family:inherit;width:100%;}
 .field input:disabled{color:#8a8a8a;}
+.week-progress{display:flex;gap:6px;margin-top:12px;}
+.week-progress .dot{flex:1;height:6px;border-radius:45px;background:#d9d9d9;}
+.week-progress .dot.done{background:var(--orange);}
+.run-stat-tiles{display:flex;gap:8px;margin-top:12px;}
+.run-stat-tile{flex:1;border:1px solid #e5e7eb;border-radius:12px;background:var(--light-2);padding:20px 4px;text-align:center;}
+.run-stat-tile input{width:100%;border:none;background:none;text-align:center;font-size:28px;font-weight:700;color:var(--text-dark);font-family:inherit;padding:0;-moz-appearance:textfield;}
+.run-stat-tile input::placeholder{color:#bebebe;}
+.run-stat-tile input::-webkit-outer-spin-button,.run-stat-tile input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.run-stat-tile input:disabled{color:var(--text-dark);opacity:1;}
+.run-stat-labels{display:flex;gap:8px;margin-top:10px;}
+.run-stat-labels div{flex:1;text-align:center;font-size:10px;letter-spacing:.3px;text-transform:uppercase;color:var(--card);}
 .run-tip{margin:16px 20px 0;}
 
 /* ---------- calendar (history) ---------- */
@@ -401,20 +412,17 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
             </select>
           </div>
         </div>
-        <div class="tip-box run-tip" id="runHint" style="margin:14px 0 0;"></div>
-        <div class="field-row" style="padding:0;margin-top:14px;">
-          <div class="field">
-            <label>Dystans (km)</label>
-            <input type="number" id="runDistance" step="0.1" min="0" placeholder="np. 5.0">
-          </div>
-          <div class="field">
-            <label>Czas (min)</label>
-            <input type="number" id="runTime" step="1" min="0" placeholder="np. 30">
-          </div>
+        <div class="week-progress" id="weekProgress"></div>
+        <div class="tip-box run-tip" id="runHint" style="margin:12px 0 0;"></div>
+        <div class="run-stat-tiles">
+          <div class="run-stat-tile"><input type="number" id="runDistance" step="0.1" min="0" placeholder="0.0"></div>
+          <div class="run-stat-tile"><input type="number" id="runTime" step="1" min="0" placeholder="0"></div>
+          <div class="run-stat-tile"><input type="text" id="runPaceDisplay" disabled placeholder="—"></div>
         </div>
-        <div class="field" style="padding:0 0;margin-top:14px;">
-          <label>Tempo (min/km)</label>
-          <input type="text" id="runPaceDisplay" disabled placeholder="wyliczy się automatycznie">
+        <div class="run-stat-labels">
+          <div>Dystans (km)</div>
+          <div>Czas (min)</div>
+          <div>Tempo (min/km)</div>
         </div>
         <div class="field" style="padding:0;margin-top:14px;">
           <label>Uwagi</label>
@@ -1095,6 +1103,19 @@ RUN_PLAN.forEach(w=>{
   opt.textContent = (typeof w.week === 'number' ? 'Tydzień ' + w.week : w.week);
   runWeekSelect.appendChild(opt);
 });
+const RUN_PLAN_TOTAL_WEEKS = RUN_PLAN.filter(w=>typeof w.week==='number').length;
+function renderWeekProgress(){
+  const wk = runWeekSelect.value;
+  const wkNum = parseInt(wk);
+  const done = isNaN(wkNum) ? RUN_PLAN_TOTAL_WEEKS : wkNum;
+  const wrap = document.getElementById('weekProgress');
+  wrap.innerHTML = '';
+  for(let i=1;i<=RUN_PLAN_TOTAL_WEEKS;i++){
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i<=done ? ' done' : '');
+    wrap.appendChild(dot);
+  }
+}
 function updateRunHint(){
   const wk = runWeekSelect.value;
   const plan = RUN_PLAN.find(w => String(w.week) === String(wk));
@@ -1102,6 +1123,7 @@ function updateRunHint(){
   if(plan){
     hint.innerHTML = `<b>Wtorek:</b> ${plan.tue}<br><b>Sobota:</b> ${plan.sat}`;
   } else { hint.textContent = ''; }
+  renderWeekProgress();
 }
 updateRunHint();
 function updatePaceDisplay(){
@@ -1112,7 +1134,7 @@ function updatePaceDisplay(){
     const pace = time/dist;
     const min = Math.floor(pace);
     const sec = Math.round((pace-min)*60);
-    out.value = `${min}:${sec.toString().padStart(2,'0')} min/km`;
+    out.value = `${min}:${sec.toString().padStart(2,'0')}`;
   } else { out.value = ''; }
 }
 document.getElementById('runDistance').addEventListener('input', updatePaceDisplay);
