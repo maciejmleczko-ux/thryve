@@ -87,8 +87,11 @@ button{font-family:inherit;}
 .icon-btn-row .ph{width:24px;height:24px;color:var(--light);cursor:pointer;}
 
 /* ---------- generic card ---------- */
-.panel{background:var(--card);border-radius:var(--radius-lg);margin:20px;padding:1px;}
-.panel-inner{background:var(--light);border-radius:var(--radius-md);margin:11px;padding:16px;color:var(--text-dark);}
+.panel{background:var(--light);border-radius:0 0 20px 20px;margin:0 12px 20px;padding:16px;color:var(--text-dark);}
+.panel-inner{background:none;border-radius:0;margin:0;padding:0;}
+.header-row.on-panel{background:var(--light);color:var(--text-dark);margin:20px 12px 0;padding:16px 16px 4px;border-radius:20px 20px 0 0;}
+.header-row.on-panel .section-label .ph{color:var(--orange);}
+.header-row.on-panel .section-label span{color:var(--text-dark);}
 
 /* ---------- ambient background glow (whole app, behind every screen) ---------- */
 .app-glow{position:fixed;top:-260px;left:-100px;width:640px;height:640px;border-radius:50%;
@@ -140,18 +143,18 @@ button{font-family:inherit;}
 
 /* ---------- exercise grid ---------- */
 .ex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
-.ex-tile{position:relative;border-radius:12px;aspect-ratio:1/1;border:none;padding:0;cursor:pointer;overflow:hidden;background:none;transition:transform .12s ease;}
+.ex-tile{position:relative;border-radius:12px;aspect-ratio:1/1;border:1px solid #e5e7eb;padding:0;cursor:pointer;overflow:hidden;background:#fff;transition:transform .12s ease;}
 .ex-tile:active{transform:scale(.93);}
 .ex-tile img{width:100%;height:100%;display:block;object-fit:cover;}
-.ex-tile.custom-tile{background:var(--orange);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;}
-.ex-tile.custom-tile.added{background:#fff;color:var(--text-dark);border:1px solid #e5e7eb;}
-.ex-tile.custom-tile .ph{width:24px;height:24px;}
+.ex-tile.custom-tile{background:#fff;color:var(--text-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.ex-tile.custom-tile .ph{width:24px;height:24px;color:var(--orange);}
+.ex-tile.custom-tile.added{filter:grayscale(1);opacity:.5;}
 .ex-tile.custom-tile .t{font-size:9px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;padding:0 3px;line-height:1.15;}
 
-.add-pill{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange-pill);
-  color:var(--text-dark);border:none;border-radius:12px;padding:10px 20px;margin-top:28px;font-size:11px;
-  font-weight:600;letter-spacing:.32px;text-transform:uppercase;cursor:pointer;width:auto;}
-.add-pill .ph{width:16px;height:16px;}
+.add-pill{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);
+  color:#fff;border:none;border-radius:12px;padding:14px 20px;margin-top:16px;font-size:12px;
+  font-weight:700;letter-spacing:.32px;text-transform:uppercase;cursor:pointer;width:100%;}
+.add-pill .ph{width:20px;height:20px;}
 
 /* ---------- exercise editor panel ---------- */
 .ex-panel{background:#fff;border-radius:16px;padding:16px;margin-top:14px;color:var(--text-dark);position:relative;}
@@ -329,7 +332,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
   <!-- ===================== GYM ===================== -->
   <section class="view" id="view-gym">
-    <div class="header-row">
+    <div class="header-row on-panel">
       <div class="section-label">__PH_BARBELL__<span>GYM</span></div>
       <button class="date-pill" id="gymDatePill">
         <span id="gymDateLabel">—</span>__PH_CARET__
@@ -366,7 +369,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
   <!-- ===================== RUNNING ===================== -->
   <section class="view" id="view-running">
-    <div class="header-row">
+    <div class="header-row on-panel">
       <div class="section-label">__PH_SNEAKER__<span>RUNNING</span></div>
       <button class="date-pill" id="runDatePill">
         <span id="runDateLabel">—</span>__PH_CARET__
@@ -919,7 +922,8 @@ function renderGymGrid(){
     btn.onclick = ()=> onTileTap(ex);
     if(slug){
       const img = document.createElement('img');
-      img.src = iconSrc(slug, added ? 'white' : 'orange');
+      img.src = iconSrc(slug, 'white');
+      if(added){ img.style.filter = 'grayscale(1)'; img.style.opacity = '.5'; }
       btn.appendChild(img);
     } else {
       btn.classList.add('custom-tile');
