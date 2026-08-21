@@ -311,6 +311,7 @@ button{font-family:inherit;}
 .new-ex-form .btns .cancel{background:var(--light-2);color:var(--text-dark);}
 .new-ex-form .btns .save{background:var(--orange);color:#fff;}
 </style>
+<script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <script>
@@ -725,6 +726,11 @@ let runs = loadRuns();
 let customExercises = loadCustomExercises();
 if(migrateLegacyExerciseNames(workouts)){ saveWorkouts(workouts); }
 
+function trackEvent(path, title){
+  if(window.goatcounter && typeof window.goatcounter.count === 'function'){
+    window.goatcounter.count({path, title, event: true});
+  }
+}
 function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -761,6 +767,7 @@ function fmtDate(iso){
 let currentRoute = 'welcome';
 function goRoute(route){
   currentRoute = route;
+  trackEvent('/' + route, route);
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+route).classList.add('active');
   document.getElementById('bottomNav').style.display = route==='welcome' ? 'none' : 'flex';
@@ -1073,6 +1080,7 @@ function saveNewExercise(){
   const newEx = {name, group, sets, repLow, repHigh, rest:"wg uznania"};
   customExercises.push(newEx);
   saveCustomExercises(customExercises);
+  trackEvent('/event/add-custom-exercise', 'Dodano własne ćwiczenie');
   toggleNewExerciseForm();
   onTileTap({...newEx, day:'Własne'});
   toast('Dodano nowe ćwiczenie do listy i do sesji');
@@ -1107,6 +1115,7 @@ function saveWorkout(){
   };
   workouts.push(workout);
   saveWorkouts(workouts);
+  trackEvent('/event/save-workout', 'Zapisano trening');
   toast('Trening zapisany');
   pulseSaveBtn(document.querySelector('#view-gym .save-btn'));
   sessionExercises = [];
@@ -1177,6 +1186,7 @@ function saveRun(){
   };
   runs.push(run);
   saveRuns(runs);
+  trackEvent('/event/save-run', 'Zapisano bieg');
   toast('Bieg zapisany');
   pulseSaveBtn(document.querySelector('#view-running .save-btn'));
   document.getElementById('runDistance').value = '';
