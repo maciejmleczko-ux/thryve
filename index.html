@@ -70,7 +70,7 @@ button{font-family:inherit;}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(26px + env(safe-area-inset-top, 0px)) 20px 0;}
 .brand-mark{display:flex;align-items:center;}
 .logo-svg{height:53px;width:auto;display:block;color:#fff;}
-.topbar.topbar-light{background:var(--light);margin:calc(26px + env(safe-area-inset-top, 0px)) 12px 0;padding:16px 16px 0;border-radius:20px 20px 0 0;}
+.topbar.topbar-light{background:var(--light);margin:0;padding:calc(16px + env(safe-area-inset-top, 0px)) 20px 0;border-radius:0;}
 .topbar.topbar-light .logo-svg{color:var(--orange);}
 .plan-pill{background:var(--orange);color:#fff;border:none;border-radius:8px;padding:8px;width:136px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;letter-spacing:.42px;font-weight:700;cursor:pointer;transition:transform .12s ease;}
 .plan-pill:active{transform:scale(.94);}
@@ -89,9 +89,9 @@ button{font-family:inherit;}
 .icon-btn-row .ph{width:24px;height:24px;color:var(--light);cursor:pointer;}
 
 /* ---------- generic card ---------- */
-.panel{background:var(--light);border-radius:0 0 20px 20px;margin:0 12px 20px;padding:16px;color:var(--text-dark);}
+.panel{background:var(--light);border-radius:0 0 20px 20px;margin:0 0 20px;padding:16px 20px;color:var(--text-dark);}
 .panel-inner{background:none;border-radius:0;margin:0;padding:0;}
-.header-row.on-panel{background:var(--light);color:var(--text-dark);margin:0 12px 0;padding:32px 16px 4px;border-radius:0;}
+.header-row.on-panel{background:var(--light);color:var(--text-dark);margin:0;padding:32px 20px 4px;border-radius:0;}
 .header-row.on-panel .section-label .ph{color:var(--orange);}
 .header-row.on-panel .section-label span{color:var(--text-dark);}
 
@@ -261,7 +261,6 @@ button{font-family:inherit;}
 .stat-tile.gray .lbl{color:var(--card);}
 
 /* ---------- misc ---------- */
-.empty-hint{padding:0 20px;color:rgba(255,255,255,.55);font-size:13px;margin-top:14px;line-height:1.5;}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:#fff;color:var(--text-dark);
   padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:50;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -369,7 +368,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
 
         <div id="exercisePanelArea"></div>
-        <div class="empty-hint" id="gymEmptyHint" style="display:none;">Wybierz ćwiczenie z siatki powyżej, żeby zacząć wpisywać serie.</div>
       </div>
     </div>
     <button class="save-btn" onclick="saveWorkout()">Zapisz trening</button>
@@ -739,7 +737,7 @@ function goRoute(route){
   document.getElementById('bottomNav').style.display = route==='welcome' ? 'none' : 'flex';
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===route));
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
-  document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym');
+  document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running');
   if(route==='gym'){ document.getElementById('gymDate').value = document.getElementById('gymDate').value || todayStr(); updateGymDateLabel(); renderGymGrid(); }
   if(route==='running'){ document.getElementById('runDate').value = document.getElementById('runDate').value || todayStr(); updateRunDateLabel(); }
   if(route==='history'){ renderCalendar(); }
@@ -970,9 +968,7 @@ function setLive(name, idx, field, val){
 
 function renderExercisePanels(){
   const area = document.getElementById('exercisePanelArea');
-  const emptyHint = document.getElementById('gymEmptyHint');
   area.innerHTML = '';
-  emptyHint.style.display = sessionExercises.length ? 'none' : 'block';
 
   sessionExercises.forEach(ex=>{
     if(ex.name === openExerciseName){
