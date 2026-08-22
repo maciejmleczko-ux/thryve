@@ -253,6 +253,21 @@ button{font-family:inherit;}
 .hist-ex-item .st{font-size:12px;color:rgba(44,39,39,.6);margin-top:2px;letter-spacing:.36px;}
 .hist-empty{padding:0 12px;color:rgba(255,255,255,.6);font-size:14px;margin-top:20px;}
 
+/* ---------- onboarding: local profile + backup notice ---------- */
+.onboard-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;}
+.onboard-overlay.hidden{display:none;}
+.onboard-box{background:#fff;color:var(--text-dark);border-radius:20px;padding:28px 24px;max-width:360px;width:100%;}
+.onboard-box h3{margin:0 0 8px;font-size:20px;font-weight:700;}
+.onboard-box p{margin:0 0 16px;font-size:13px;line-height:1.5;color:#5b5555;}
+.onboard-box input{width:100%;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:15px;color:var(--text-dark);font-family:inherit;margin-bottom:16px;}
+.onboard-note{background:var(--tip);border-radius:12px;padding:12px 14px;font-size:11.5px;line-height:1.5;margin-bottom:18px;color:var(--text-dark);}
+.onboard-actions{display:flex;gap:10px;}
+.onboard-actions button{flex:1;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+.onboard-actions .skip{background:var(--light-2);color:var(--text-dark);}
+.onboard-actions .save{background:var(--orange);color:#fff;}
+.welcome-greeting{display:none;position:relative;z-index:1;padding:0 20px;margin-top:16px;font-size:13px;font-weight:700;color:var(--orange);letter-spacing:.4px;text-transform:uppercase;}
+.backup-hint{padding:0 20px;margin-top:10px;font-size:10.5px;line-height:1.5;color:rgba(255,255,255,.5);}
+
 /* ---------- stats ---------- */
 .stats-card{background:var(--light);border-radius:12px;margin:12px;padding:20px;color:var(--text-dark);}
 .header-row + .stats-card{margin-top:24px;}
@@ -340,6 +355,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
   <!-- ===================== WELCOME ===================== -->
   <section class="view active view-welcome" id="view-welcome">
+    <div class="welcome-greeting" id="welcomeGreeting"></div>
     <div class="welcome-headline">Ready for<br>Today's<br>Challenges?</div>
     <div class="welcome-grid">
       <button class="welcome-tile orange" onclick="goRoute('gym')">
@@ -458,8 +474,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="header-row on-orange">
       <div class="section-label">__PH_CALENDAR__<span>HISTORY</span></div>
       <div class="icon-btn-row">
-        <span class="ph" data-ph="upload-simple" onclick="document.getElementById('importFile').click()"></span>
-        <span class="ph" data-ph="download-simple" onclick="exportData()"></span>
+        <span class="ph" data-ph="upload-simple" title="Importuj kopię zapasową" onclick="document.getElementById('importFile').click()"></span>
+        <span class="ph" data-ph="download-simple" title="Pobierz kopię zapasową" onclick="exportData()"></span>
         <input type="file" id="importFile" accept="application/json" style="display:none;" onchange="importData(event)">
       </div>
     </div>
@@ -473,6 +489,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
       <div class="cal-grid" id="calGrid"></div>
     </div>
+    <div class="backup-hint">Dane są zapisane tylko na tym urządzeniu. Rób kopię zapasową co jakiś czas — ikona pobierania powyżej ↑</div>
 
     <div class="hist-detail-wrap" id="histDetail"></div>
   </section>
@@ -550,6 +567,19 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="cal-grid" id="dpGrid"></div>
     </div>
     <div class="dp-actions"><button onclick="closeDatePicker()">Zamknij</button></div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden" id="onboardOverlay">
+  <div class="onboard-box">
+    <h3>Cześć! Jak Cię nazywać?</h3>
+    <p>Podpiszemy Twoim imieniem kopie zapasowe treningów. Możesz to pominąć.</p>
+    <input type="text" id="onboardName" placeholder="np. Maciek" maxlength="30">
+    <div class="onboard-note">Dane treningowe trzymamy tylko na tym urządzeniu — nie w chmurze. Jeśli zmienisz telefon albo wyczyścisz dane przeglądarki, stracisz historię. Warto od czasu do czasu zrobić kopię zapasową — ikona pobierania na ekranie Historia.</div>
+    <div class="onboard-actions">
+      <button class="skip" onclick="skipOnboarding()">Pomiń</button>
+      <button class="save" onclick="saveOnboarding()">Zapisz</button>
+    </div>
   </div>
 </div>
 
@@ -697,6 +727,31 @@ function loadRuns(){ try{ return JSON.parse(localStorage.getItem(LS_RUNS)) || []
 function saveRuns(arr){ localStorage.setItem(LS_RUNS, JSON.stringify(arr)); }
 function loadCustomExercises(){ try{ return JSON.parse(localStorage.getItem(LS_CUSTOM_EX)) || []; }catch(e){ return []; } }
 function saveCustomExercises(arr){ localStorage.setItem(LS_CUSTOM_EX, JSON.stringify(arr)); }
+
+/* ---------- local profile (no account, no backend) ---------- */
+const LS_PROFILE_NAME = "fitlog_profile_name_v1";
+const LS_ONBOARD_SEEN = "fitlog_onboard_seen_v1";
+let profileName = localStorage.getItem(LS_PROFILE_NAME) || '';
+function updateWelcomeGreeting(){
+  const el = document.getElementById('welcomeGreeting');
+  if(!el) return;
+  if(profileName){ el.textContent = 'Cześć, ' + profileName; el.style.display = 'block'; }
+  else { el.style.display = 'none'; }
+}
+function saveOnboarding(){
+  const val = document.getElementById('onboardName').value.trim();
+  if(val){
+    profileName = val;
+    localStorage.setItem(LS_PROFILE_NAME, profileName);
+    updateWelcomeGreeting();
+  }
+  localStorage.setItem(LS_ONBOARD_SEEN, '1');
+  document.getElementById('onboardOverlay').classList.add('hidden');
+}
+function skipOnboarding(){
+  localStorage.setItem(LS_ONBOARD_SEEN, '1');
+  document.getElementById('onboardOverlay').classList.add('hidden');
+}
 /* one-time migration: old Polish exercise names -> new English names (matching icon tiles) */
 const LEGACY_NAME_MAP = {
   "Wyciskanie na maszynie (chest press)": "Chest Press",
@@ -1330,16 +1385,18 @@ function renderHistDetail(){
    EXPORT
    ============================================================ */
 function exportData(){
-  const data = {workouts, runs, exportedAt: new Date().toISOString()};
+  const data = {workouts, runs, profileName, exportedAt: new Date().toISOString()};
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'thryve-backup-' + todayStr() + '.json';
+  const namePart = profileName ? profileName.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') + '-' : '';
+  a.download = 'thryve-backup-' + namePart + todayStr() + '.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  toast('Kopia zapasowa pobrana');
 }
 
 function importData(evt){
@@ -1351,6 +1408,11 @@ function importData(evt){
       const data = JSON.parse(e.target.result);
       if(!Array.isArray(data.workouts) || !Array.isArray(data.runs)) throw new Error('bad format');
       migrateLegacyExerciseNames(data.workouts);
+      if(data.profileName && !profileName){
+        profileName = data.profileName;
+        localStorage.setItem(LS_PROFILE_NAME, profileName);
+        updateWelcomeGreeting();
+      }
       const mode = confirm('OK = połącz z istniejącymi danymi, Anuluj = zastąp istniejące dane');
       if(mode){
         const existingWIds = new Set(workouts.map(w=>w.id));
@@ -1512,6 +1574,10 @@ updateStatsDateLabel();
 renderGymGrid();
 renderExercisePanels();
 goRoute('welcome');
+updateWelcomeGreeting();
+if(!localStorage.getItem(LS_ONBOARD_SEEN)){
+  document.getElementById('onboardOverlay').classList.remove('hidden');
+}
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('sw.js').catch(()=>{});
