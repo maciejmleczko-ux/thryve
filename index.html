@@ -216,6 +216,7 @@ button{font-family:inherit;}
 .cal-head .ph{width:18px;height:18px;cursor:pointer;}
 .cal-nav-btn,.dp-head-nav{width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 .cal-head select{background:transparent;border:none;color:#fff;font-size:16px;font-weight:400;font-family:inherit;}
+.cal-head-label{color:#fff;font-size:16px;font-weight:400;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:16px;text-align:center;}
 .cal-dow{color:rgba(255,255,255,.7);font-size:12px;padding:4px 0;}
 .cal-day{color:#fff;font-size:14px;width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;padding:0;border-radius:50%;cursor:pointer;border:2px solid transparent;background:none;font-family:inherit;}
@@ -386,10 +387,9 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </button>
     </div>
 
-    <!-- App version — MAJOR_MINOR_PATCH, keep in sync with APP_VERSION in <script>:
-         MAJOR = duże nowe funkcjonalności, MINOR = ikonki/UI-UX w obrębie wersji, PATCH = drobne poprawki. -->
+    <!-- App version — filled in from APP_VERSION (see CHANGELOG comment near it for the MAJOR.MINOR.PATCH convention). -->
     <div class="app-footer">
-      <div class="app-version">Thryve_v2_1_2</div>
+      <div class="app-version" id="appVersionLabel"></div>
       <div class="app-copyright">© 2026 Maciej Mleczko · <a href="https://www.maciejmleczko.pl" target="_blank" rel="noopener">www.maciejmleczko.pl</a></div>
     </div>
   </section>
@@ -494,12 +494,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="cal-head">
         <div class="cal-head-group">
           <span class="cal-nav-btn" onclick="calMoveMonth(-1)">__PH_CARET_LEFT__</span>
-          <select id="calMonth" onchange="renderCalendar()"></select>
+          <span id="calMonthLabel" class="cal-head-label"></span>
           <span class="cal-nav-btn" onclick="calMoveMonth(1)">__PH_CARET_RIGHT__</span>
         </div>
         <div class="cal-head-group">
           <span class="cal-nav-btn" onclick="calMoveYear(-1)">__PH_CARET_LEFT__</span>
-          <select id="calYear" onchange="renderCalendar()"></select>
+          <span id="calYearLabel" class="cal-head-label"></span>
           <span class="cal-nav-btn" onclick="calMoveYear(1)">__PH_CARET_RIGHT__</span>
         </div>
       </div>
@@ -790,9 +790,12 @@ function skipOnboarding(){
    MINOR — zmiany w obrębie istniejącej wersji: ikonki, UI/UX
    PATCH — drobne poprawki, zauważone błędy
    Dopisz nowy wpis na górze CHANGELOG przy każdym bumpie APP_VERSION. */
-const APP_VERSION = "2.1.2";
+const APP_VERSION = "2.1.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "2.1.3": [
+    "Historia: usunięto rozwijane listy miesiąca i roku — samo przełączanie strzałkami",
+  ],
   "2.1.2": [
     "Historia: osobne strzałki przy miesiącu i osobne przy roku, zamiast jednej pary na oba naraz",
   ],
@@ -1323,26 +1326,16 @@ const MONTH_NAMES = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Li
 let calState = (()=>{ const d=new Date(); return {year:d.getFullYear(), month:d.getMonth()}; })();
 let selectedHistDate = null;
 
-function initCalSelects(){
-  const mSel = document.getElementById('calMonth');
-  const ySel = document.getElementById('calYear');
-  mSel.innerHTML = MONTH_NAMES.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
-  const years = new Set([new Date().getFullYear(), calState.year]);
-  workouts.forEach(w=>years.add(parseInt(w.date.slice(0,4))));
-  runs.forEach(r=>years.add(parseInt(r.date.slice(0,4))));
-  const sortedYears = Array.from(years).sort();
-  ySel.innerHTML = sortedYears.map(y=>`<option value="${y}">${y}</option>`).join('');
-  mSel.value = calState.month;
-  ySel.value = calState.year;
+function updateCalLabels(){
+  document.getElementById('calMonthLabel').textContent = MONTH_NAMES[calState.month];
+  document.getElementById('calYearLabel').textContent = calState.year;
 }
 function calMoveMonth(delta){
   calState.month = (calState.month + delta + 12) % 12;
-  initCalSelects();
   renderCalendar();
 }
 function calMoveYear(delta){
   calState.year += delta;
-  initCalSelects();
   renderCalendar();
 }
 function datesWithLogs(){
@@ -1353,11 +1346,7 @@ function datesWithLogs(){
   return m;
 }
 function renderCalendar(){
-  initCalSelects();
-  const mSel = document.getElementById('calMonth');
-  const ySel = document.getElementById('calYear');
-  calState.month = parseInt(mSel.value);
-  calState.year = parseInt(ySel.value);
+  updateCalLabels();
   const {year, month} = calState;
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
@@ -1634,7 +1623,8 @@ function renderRunCharts(){
 /* ============================================================
    INIT
    ============================================================ */
-initCalSelects();
+updateCalLabels();
+document.getElementById('appVersionLabel').textContent = 'Thryve v' + APP_VERSION;
 updateGymDateLabel();
 updateRunDateLabel();
 updateStatsDateLabel();
