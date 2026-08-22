@@ -140,22 +140,14 @@ button{font-family:inherit;}
 .app-footer .app-copyright a{color:inherit;text-decoration:underline;}
 
 /* ---------- views ---------- */
-/* Always applied on the welcome screen — the whole page is pinned to
-   exactly one viewport and clipped, no matter whether the fixed welcome
-   layout happens to be a little taller than the screen. Plain
-   overflow:hidden on html/body isn't enough to stop touch-driven
-   scroll/bounce on iOS Safari, so the body is additionally pinned with
-   position:fixed — the technique real scroll-lock libraries use.
-   Deliberately NOT setting an explicit height (e.g. 100dvh) here: with
-   top/left/right/bottom all pinned, the box's height is derived live from
-   the actual current viewport on every layout pass. An explicit height
-   would win over that (per the CSS over-constrained-box rules) and pin the
-   box to whatever dvh resolved to at the moment it was set — on a freshly
-   launched iOS standalone PWA that can be a transiently-too-small value
-   before the viewport chrome settles, clipping content (reported: the
-   footer disappeared until a route change forced a relayout). */
+/* Welcome-screen scroll lock. See the full explanation and the JS-measured
+   height (applyWelcomeLockHeight) next to updateWelcomeScrollLock(). The
+   min-height:0 overrides here matter: body{} and .app{} both carry
+   min-height:100vh in their base rules, which stayed active even with
+   position:fixed set and silently overrode the fixed box's size. */
 html.welcome-lock{overflow:hidden;}
-body.welcome-lock{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;overflow:hidden;}
+body.welcome-lock{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;min-height:0;overflow:hidden;}
+body.welcome-lock .app{min-height:0;}
 .view-stack{position:relative;overflow-x:hidden;}
 .view-stack.view-stack-sliding{transition:height .38s cubic-bezier(.16,1,.3,1);}
 .view{display:none;}
@@ -633,7 +625,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
 <div class="onboard-overlay hidden" id="whatsnewOverlay">
   <div class="onboard-box whatsnew-box">
-    <div class="whatsnew-version" id="whatsnewVersion">Wersja 2.5.6</div>
+    <div class="whatsnew-version" id="whatsnewVersion">Wersja 2.5.7</div>
     <h3>Co nowego w Thryve?</h3>
     <div class="whatsnew-scroll" id="whatsnewList"></div>
     <div class="onboard-actions">
@@ -821,7 +813,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "2.5.6";
+const APP_VERSION = "2.5.7";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "2.5.0": [
@@ -947,19 +939,38 @@ let currentRoute = 'welcome';
 const ROUTE_ORDER = ['welcome', 'gym', 'running', 'history', 'stats'];
 let viewTransitioning = false, viewTransitionCleanup = null;
 let pendingTransition = null;
-/* Always locks page scroll on the welcome screen (the page is pinned to
-   exactly 100dvh and clipped — see .welcome-lock rules — rather than only
-   locking when content happens to fit, since that check was unreliable on
-   at least one real device).
-   position:fixed on body (below) isn't enough on its own — installed
-   (standalone) PWAs on iOS still let WKWebView's own scroll view
-   rubber-band/bounce through it. touchmove is blocked at the document
-   level as a third layer, except inside modal content that legitimately
-   scrolls (the changelog list, the plan modal). */
+/* Always locks page scroll on the welcome screen — the page is pinned to
+   exactly the current viewport and clipped, rather than only locking when
+   content happens to fit (that check was unreliable on a real device).
+   Three layers, found the hard way:
+   1) position:fixed on body (top/left/right/bottom:0) — but body{} and
+      .app{} both carry min-height:100vh from their base (unscoped) rules,
+      which are NOT overridden just by adding the .welcome-lock class, and
+      min-height wins over a smaller box-derived-from-insets height. If
+      100vh resolves taller than what's actually visible (seen on a real
+      iPhone in standalone PWA mode), the box — and the footer inside it —
+      extends past the visible screen and disappears. Explicitly zeroed
+      here on both elements to remove that as a factor entirely.
+   2) An explicit inline pixel height, set from window.visualViewport.height
+      (falling back to window.innerHeight) — the actual authoritative
+      "what's visible right now" value, sidestepping vh/dvh/svh timing
+      quirks in standalone iOS PWAs altogether. Kept in sync on resize,
+      visualViewport resize, and pageshow (app foreground/relaunch).
+   3) touchmove is blocked at the document level, since plain overflow:hidden
+      doesn't stop WKWebView's own rubber-band/bounce on iOS — except inside
+      modal content that legitimately scrolls (changelog list, plan modal). */
 let welcomeTouchLockActive = false;
 function preventWelcomeTouchScroll(e){
   if(e.target.closest('.whatsnew-scroll, .plan-modal-inner')) return;
   e.preventDefault();
+}
+function applyWelcomeLockHeight(){
+  if(!document.body.classList.contains('welcome-lock')){
+    document.body.style.height = '';
+    return;
+  }
+  const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.body.style.height = h + 'px';
 }
 function updateWelcomeScrollLock(){
   document.documentElement.classList.remove('welcome-lock');
@@ -969,6 +980,7 @@ function updateWelcomeScrollLock(){
     document.documentElement.classList.add('welcome-lock');
     document.body.classList.add('welcome-lock');
   }
+  applyWelcomeLockHeight();
   if(shouldLock && !welcomeTouchLockActive){
     document.addEventListener('touchmove', preventWelcomeTouchScroll, {passive:false});
     welcomeTouchLockActive = true;
@@ -977,17 +989,24 @@ function updateWelcomeScrollLock(){
     welcomeTouchLockActive = false;
   }
 }
-window.addEventListener('resize', updateWelcomeScrollLock);
+let welcomeLockDebounceTimer = null;
+function updateWelcomeScrollLockDebounced(){
+  // visualViewport can fire several times in quick succession while iOS
+  // settles its chrome after launch/rotation — applying every intermediate
+  // value directly to body's height caused visible jumping. Debounced here;
+  // pageshow and the direct route-change calls fire once and stay immediate.
+  clearTimeout(welcomeLockDebounceTimer);
+  welcomeLockDebounceTimer = setTimeout(updateWelcomeScrollLock, 120);
+}
+window.addEventListener('resize', updateWelcomeScrollLockDebounced);
 window.addEventListener('pageshow', updateWelcomeScrollLock);
 if(window.visualViewport){
-  window.visualViewport.addEventListener('resize', updateWelcomeScrollLock);
+  window.visualViewport.addEventListener('resize', updateWelcomeScrollLockDebounced);
 }
-/* On a freshly launched iOS standalone PWA, 100dvh can briefly resolve
-   against a not-yet-settled viewport (status bar/home indicator chrome),
-   clipping the footer out of view until something forces a fresh layout —
-   which is why navigating away and back "fixed" it for the reporting user.
-   Re-toggling the lock class shortly after load forces that same
-   recalculation automatically, without needing a navigation. */
+/* Re-apply shortly after load in case the viewport hasn't settled yet on a
+   freshly launched iOS standalone PWA (see note above) — belt-and-braces on
+   top of the min-height fix and the JS-measured height, which should
+   already make this unnecessary on their own. */
 setTimeout(updateWelcomeScrollLock, 60);
 setTimeout(updateWelcomeScrollLock, 350);
 function beginViewTransition(newRoute, forward){
