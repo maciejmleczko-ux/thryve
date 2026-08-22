@@ -625,7 +625,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
 <div class="onboard-overlay hidden" id="whatsnewOverlay">
   <div class="onboard-box whatsnew-box">
-    <div class="whatsnew-version" id="whatsnewVersion">Wersja 2.5.1</div>
+    <div class="whatsnew-version" id="whatsnewVersion">Wersja 2.5.2</div>
     <h3>Co nowego w Thryve?</h3>
     <div class="whatsnew-scroll" id="whatsnewList"></div>
     <div class="onboard-actions">
@@ -813,7 +813,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "2.5.1";
+const APP_VERSION = "2.5.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "2.5.0": [
@@ -942,14 +942,31 @@ let pendingTransition = null;
 /* Locks page scroll on the welcome screen, but only when its (fixed-size,
    non-responsive) content actually fits the current viewport — standard
    and large phones. Smaller screens where it doesn't fit are left
-   scrollable as normal so nothing gets clipped. */
+   scrollable as normal so nothing gets clipped.
+   position:fixed on body (below) isn't enough on its own — installed
+   (standalone) PWAs on iOS still let WKWebView's own scroll view
+   rubber-band/bounce through it. touchmove is blocked at the document
+   level as a third layer, except inside modal content that legitimately
+   scrolls (the changelog list, the plan modal). */
+let welcomeTouchLockActive = false;
+function preventWelcomeTouchScroll(e){
+  if(e.target.closest('.whatsnew-scroll, .plan-modal-inner')) return;
+  e.preventDefault();
+}
 function updateWelcomeScrollLock(){
   document.documentElement.classList.remove('welcome-lock');
   document.body.classList.remove('welcome-lock');
-  if(currentRoute !== 'welcome') return;
-  if(document.documentElement.scrollHeight <= window.innerHeight + 1){
+  const shouldLock = currentRoute === 'welcome' && document.documentElement.scrollHeight <= window.innerHeight + 1;
+  if(shouldLock){
     document.documentElement.classList.add('welcome-lock');
     document.body.classList.add('welcome-lock');
+  }
+  if(shouldLock && !welcomeTouchLockActive){
+    document.addEventListener('touchmove', preventWelcomeTouchScroll, {passive:false});
+    welcomeTouchLockActive = true;
+  } else if(!shouldLock && welcomeTouchLockActive){
+    document.removeEventListener('touchmove', preventWelcomeTouchScroll, {passive:false});
+    welcomeTouchLockActive = false;
   }
 }
 window.addEventListener('resize', updateWelcomeScrollLock);
