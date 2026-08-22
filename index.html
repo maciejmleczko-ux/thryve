@@ -113,7 +113,6 @@ button{font-family:inherit;}
 }
 
 /* ---------- welcome ---------- */
-.view-welcome{padding-bottom:60px;}
 .welcome-headline{position:relative;z-index:1;padding:0 20px;margin-top:60px;font-size:40px;line-height:1.08;font-weight:700;color:#fff;}
 .welcome-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:21px 17px;padding:0 12px;margin-top:49px;}
 .welcome-tile{border:none;border-radius:25px;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:31px;cursor:pointer;color:#fff;}
@@ -131,12 +130,14 @@ button{font-family:inherit;}
 .nav-item.active{background:var(--orange);}
 .nav-item.active .ph{color:#fff;}
 
-/* ---------- app footer (version + copyright, welcome screen only) ---------- */
-.app-footer{position:fixed;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;text-align:center;
-  padding:0 20px calc(16px + env(safe-area-inset-bottom));z-index:5;pointer-events:none;}
+/* ---------- app footer (version + copyright, welcome screen only) ----------
+   Flows normally below the tile grid (not position:fixed) so it can never
+   overlap the tiles — on a device where the grid reaches close to the
+   bottom of the viewport, a fixed-position footer would sit on top of it. */
+.app-footer{text-align:center;padding:32px 20px calc(16px + env(safe-area-inset-bottom));}
 .app-footer .app-version{font-size:11px;letter-spacing:.3px;font-weight:700;color:var(--light);opacity:.55;}
 .app-footer .app-copyright{margin-top:3px;font-size:10px;color:var(--light);opacity:.4;}
-.app-footer .app-copyright a{color:inherit;text-decoration:underline;pointer-events:auto;}
+.app-footer .app-copyright a{color:inherit;text-decoration:underline;}
 
 /* ---------- views ---------- */
 /* Always applied on the welcome screen — the whole page is pinned to
@@ -624,7 +625,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
 <div class="onboard-overlay hidden" id="whatsnewOverlay">
   <div class="onboard-box whatsnew-box">
-    <div class="whatsnew-version" id="whatsnewVersion">Wersja 2.5.4</div>
+    <div class="whatsnew-version" id="whatsnewVersion">Wersja 2.5.5</div>
     <h3>Co nowego w Thryve?</h3>
     <div class="whatsnew-scroll" id="whatsnewList"></div>
     <div class="onboard-actions">
@@ -812,7 +813,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "2.5.4";
+const APP_VERSION = "2.5.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "2.5.0": [
