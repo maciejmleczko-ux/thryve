@@ -1273,7 +1273,7 @@ function initCalSelects(){
   const mSel = document.getElementById('calMonth');
   const ySel = document.getElementById('calYear');
   mSel.innerHTML = MONTH_NAMES.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
-  const years = new Set([new Date().getFullYear()]);
+  const years = new Set([new Date().getFullYear(), calState.year]);
   workouts.forEach(w=>years.add(parseInt(w.date.slice(0,4))));
   runs.forEach(r=>years.add(parseInt(r.date.slice(0,4))));
   const sortedYears = Array.from(years).sort();
