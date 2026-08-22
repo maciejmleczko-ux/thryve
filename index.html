@@ -85,6 +85,9 @@ button{font-family:inherit;}
 
 .date-pill{background:var(--card);border:none;border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:10px;color:var(--light);font-weight:700;font-size:14px;cursor:pointer;}
 .date-pill .ph{width:18px;height:18px;}
+.date-nav{display:flex;align-items:center;gap:10px;color:var(--light);font-weight:400;font-size:14px;}
+.date-nav-btn{width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.date-nav-btn .ph{width:18px;height:18px;}
 .icon-btn-row{display:flex;gap:8px;align-items:center;}
 .icon-btn-row .ph{width:24px;height:24px;color:var(--light);cursor:pointer;}
 
@@ -500,9 +503,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <section class="view" id="view-stats">
     <div class="header-row">
       <div class="section-label">__PH_CHART__<span>STATS</span></div>
-      <button class="date-pill" id="statsDatePill">
-        <span id="statsDateLabel">—</span>__PH_CARET__
-      </button>
+      <div class="date-nav" id="statsDateNav">
+        <span class="date-nav-btn" id="statsPrevBtn">__PH_CARET_LEFT__</span>
+        <span id="statsDateLabel">—</span>
+        <span class="date-nav-btn" id="statsNextBtn">__PH_CARET_RIGHT__</span>
+      </div>
     </div>
 
     <div class="stats-card">
@@ -1455,13 +1460,16 @@ let statsPeriod = (()=>{ const d=new Date(); return {year:d.getFullYear(), month
 function updateStatsDateLabel(){
   document.getElementById('statsDateLabel').textContent = MONTH_NAMES[statsPeriod.month] + ' ' + statsPeriod.year;
 }
-document.getElementById('statsDatePill').addEventListener('click', ()=>{
-  statsPeriod.month += 1;
+function statsMove(delta){
+  statsPeriod.month += delta;
   if(statsPeriod.month>11){ statsPeriod.month=0; statsPeriod.year++; }
+  else if(statsPeriod.month<0){ statsPeriod.month=11; statsPeriod.year--; }
   updateStatsDateLabel();
   renderGymChart();
   renderRunCharts();
-});
+}
+document.getElementById('statsPrevBtn').addEventListener('click', ()=> statsMove(-1));
+document.getElementById('statsNextBtn').addEventListener('click', ()=> statsMove(1));
 
 function inStatsPeriod(iso){
   return iso.slice(0,7) === `${statsPeriod.year}-${String(statsPeriod.month+1).padStart(2,'0')}`;
