@@ -112,20 +112,15 @@ button{font-family:inherit;}
   }
 }
 
-/* ---------- welcome ----------
-   Sized with dvh-based clamp()s so the whole home screen fits within one
-   viewport on short phones (no scroll) instead of overflowing — max end of
-   each clamp matches the original fixed px value, so normal/tall phones
-   are pixel-identical to before; only short viewports shrink. */
-.view-welcome{padding-bottom:clamp(48px, 8dvh, 60px);overflow:hidden;}
-html.welcome-lock,body.welcome-lock{overflow:hidden;height:100dvh;}
-.welcome-headline{position:relative;z-index:1;padding:0 20px;margin-top:clamp(16px, 8dvh, 60px);font-size:clamp(28px, 5.2dvh, 40px);line-height:1.08;font-weight:700;color:#fff;}
-.welcome-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;justify-items:center;gap:clamp(10px, 3dvh, 21px) 17px;padding:0 12px;margin-top:clamp(16px, 6.5dvh, 49px);}
-.welcome-tile{border:none;border-radius:25px;aspect-ratio:1/1;height:clamp(105px, 21dvh, 175px);width:auto;max-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px, 3.7dvh, 31px);cursor:pointer;color:#fff;}
+/* ---------- welcome ---------- */
+.view-welcome{padding-bottom:60px;}
+.welcome-headline{position:relative;z-index:1;padding:0 20px;margin-top:60px;font-size:40px;line-height:1.08;font-weight:700;color:#fff;}
+.welcome-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:21px 17px;padding:0 12px;margin-top:49px;}
+.welcome-tile{border:none;border-radius:25px;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:31px;cursor:pointer;color:#fff;}
 .welcome-tile.orange{background:var(--orange);}
 .welcome-tile.gray{background:var(--card);}
-.welcome-tile .ph{width:clamp(42px, 9.4dvh, 79px);height:clamp(42px, 9.4dvh, 79px);}
-.welcome-tile .lbl{font-size:clamp(13px, 2.3dvh, 19px);letter-spacing:.5px;font-weight:400;}
+.welcome-tile .ph{width:79px;height:79px;}
+.welcome-tile .lbl{font-size:19px;letter-spacing:.5px;font-weight:400;}
 
 /* ---------- bottom nav ---------- */
 .bottom-nav{position:fixed;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;background:var(--bg);
@@ -147,8 +142,10 @@ html.welcome-lock,body.welcome-lock{overflow:hidden;height:100dvh;}
 .view{display:none;}
 .view.active{display:block;}
 @media (prefers-reduced-motion: no-preference){
-  .view.active{animation:viewIn .28s cubic-bezier(.16,1,.3,1);}
-  @keyframes viewIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .view.active.dir-fwd{animation:viewInFwd .32s cubic-bezier(.16,1,.3,1);}
+  .view.active.dir-back{animation:viewInBack .32s cubic-bezier(.16,1,.3,1);}
+  @keyframes viewInFwd{from{opacity:0;transform:translateX(28px);}to{opacity:1;transform:translateX(0);}}
+  @keyframes viewInBack{from{opacity:0;transform:translateX(-28px);}to{opacity:1;transform:translateX(0);}}
 }
 
 /* ---------- exercise grid ---------- */
@@ -288,7 +285,7 @@ html.welcome-lock,body.welcome-lock{overflow:hidden;height:100dvh;}
 .whatsnew-list{margin:0;padding-left:18px;font-size:13px;line-height:1.6;color:#5b5555;}
 .whatsnew-list li{margin-bottom:8px;}
 .whatsnew-list li:last-child{margin-bottom:0;}
-.welcome-greeting{display:none;position:relative;z-index:1;padding:0 20px;margin-top:clamp(16px, 8dvh, 60px);font-size:18px;font-weight:400;color:#fff;}
+.welcome-greeting{display:none;position:relative;z-index:1;padding:0 20px;margin-top:60px;font-size:18px;font-weight:400;color:#fff;}
 .welcome-greeting.visible{display:block;}
 .welcome-greeting.visible ~ .welcome-headline{margin-top:4px;}
 .backup-hint{padding:0 20px;margin-top:10px;font-size:10.5px;line-height:1.5;color:rgba(255,255,255,.5);}
@@ -617,7 +614,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
 <div class="onboard-overlay hidden" id="whatsnewOverlay">
   <div class="onboard-box whatsnew-box">
-    <div class="whatsnew-version" id="whatsnewVersion">Wersja 2.3.0</div>
+    <div class="whatsnew-version" id="whatsnewVersion">Wersja 2.4.0</div>
     <h3>Co nowego w Thryve?</h3>
     <div class="whatsnew-scroll" id="whatsnewList"></div>
     <div class="onboard-actions">
@@ -805,14 +802,16 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "2.3.0";
+const APP_VERSION = "2.4.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "2.4.0": [
+    "Płynne, kierunkowe animacje przejścia między ekranami",
+  ],
   "2.3.0": [
     "Przesuwanie palcem (swipe) między GYM, RUNNING, HISTORY i STATS",
   ],
   "2.2.0": [
-    "Ekran główny dopasowuje się teraz do każdego rozmiaru telefonu — bez przewijania",
     "Popup „Co nowego” grupuje zmiany według wersji i przewija się, gdy jest ich więcej",
   ],
   "2.1.1": [
@@ -923,17 +922,18 @@ function fmtDate(iso){
    ROUTER
    ============================================================ */
 let currentRoute = 'welcome';
+const ROUTE_ORDER = ['welcome', 'gym', 'running', 'history', 'stats'];
 function goRoute(route){
+  const oldIndex = ROUTE_ORDER.indexOf(currentRoute);
+  const newIndex = ROUTE_ORDER.indexOf(route);
+  const direction = newIndex < oldIndex ? 'dir-back' : 'dir-fwd';
   currentRoute = route;
   trackEvent('/' + route, route);
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-'+route).classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active', 'dir-back', 'dir-fwd'));
+  document.getElementById('view-'+route).classList.add('active', direction);
   document.getElementById('bottomNav').style.display = route==='welcome' ? 'none' : 'flex';
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===route));
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
-  document.body.classList.toggle('welcome-lock', route==='welcome');
-  document.documentElement.classList.toggle('welcome-lock', route==='welcome');
-  document.querySelector('.app').style.paddingBottom = route==='welcome' ? '0' : '';
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running');
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
   if(route==='gym'){ document.getElementById('gymDate').value = document.getElementById('gymDate').value || todayStr(); updateGymDateLabel(); renderGymGrid(); }
