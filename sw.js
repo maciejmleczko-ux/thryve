@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thryve-cache-v2';
+const CACHE_NAME = 'thryve-cache-v3';
 const URLS_TO_CACHE = ['./', './index.html'];
 
 self.addEventListener('install', (event) => {
@@ -20,7 +20,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-store' })
       .then((response) => {
         const clone = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
