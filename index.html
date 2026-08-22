@@ -139,14 +139,11 @@ button{font-family:inherit;}
 .app-footer .app-copyright a{color:inherit;text-decoration:underline;pointer-events:auto;}
 
 /* ---------- views ---------- */
+.view-stack{position:relative;overflow-x:hidden;}
 .view{display:none;}
 .view.active{display:block;}
-@media (prefers-reduced-motion: no-preference){
-  .view.active.dir-fwd{animation:viewInFwd .32s cubic-bezier(.16,1,.3,1);}
-  .view.active.dir-back{animation:viewInBack .32s cubic-bezier(.16,1,.3,1);}
-  @keyframes viewInFwd{from{opacity:0;transform:translateX(28px);}to{opacity:1;transform:translateX(0);}}
-  @keyframes viewInBack{from{opacity:0;transform:translateX(-28px);}to{opacity:1;transform:translateX(0);}}
-}
+.view.view-slide{display:block;position:absolute;top:0;left:0;width:100%;}
+.view.view-sliding{transition:transform .38s cubic-bezier(.16,1,.3,1);}
 
 /* ---------- exercise grid ---------- */
 .ex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
@@ -375,6 +372,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <button class="plan-pill" onclick="openPlanModal()"><span>MÓJ PLAN</span>__PH_CARET__</button>
   </div>
 
+  <div class="view-stack" id="viewStack">
+
   <!-- ===================== WELCOME ===================== -->
   <section class="view active view-welcome" id="view-welcome">
     <div class="welcome-greeting" id="welcomeGreeting"></div>
@@ -559,6 +558,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
   </section>
 
+  </div>
+
   <!-- ===================== BOTTOM NAV ===================== -->
   <nav class="bottom-nav" id="bottomNav">
     <button class="nav-item" data-route="welcome" onclick="goRoute('welcome')">__PH_HOUSE__</button>
@@ -614,7 +615,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
 <div class="onboard-overlay hidden" id="whatsnewOverlay">
   <div class="onboard-box whatsnew-box">
-    <div class="whatsnew-version" id="whatsnewVersion">Wersja 2.4.0</div>
+    <div class="whatsnew-version" id="whatsnewVersion">Wersja 2.4.1</div>
     <h3>Co nowego w Thryve?</h3>
     <div class="whatsnew-scroll" id="whatsnewList"></div>
     <div class="onboard-actions">
@@ -802,7 +803,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "2.4.0";
+const APP_VERSION = "2.4.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "2.4.0": [
@@ -923,14 +924,59 @@ function fmtDate(iso){
    ============================================================ */
 let currentRoute = 'welcome';
 const ROUTE_ORDER = ['welcome', 'gym', 'running', 'history', 'stats'];
+let viewTransitioning = false, viewTransitionCleanup = null;
+function switchView(newRoute, forward){
+  const stack = document.getElementById('viewStack');
+  if(viewTransitioning && viewTransitionCleanup) viewTransitionCleanup();
+  const oldEl = document.querySelector('.view.active');
+  const newEl = document.getElementById('view-' + newRoute);
+  if(oldEl === newEl) return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!oldEl || reduceMotion){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    newEl.classList.add('active');
+    return;
+  }
+
+  stack.style.height = oldEl.getBoundingClientRect().height + 'px';
+  oldEl.classList.add('view-slide');
+  newEl.classList.add('view-slide', 'active');
+  oldEl.style.transform = 'translateX(0)';
+  newEl.style.transform = forward ? 'translateX(100%)' : 'translateX(-100%)';
+  newEl.offsetWidth; // force reflow so the starting transform applies before transitioning
+  oldEl.classList.add('view-sliding');
+  newEl.classList.add('view-sliding');
+  requestAnimationFrame(()=>{
+    oldEl.style.transform = forward ? 'translateX(-100%)' : 'translateX(100%)';
+    newEl.style.transform = 'translateX(0)';
+  });
+
+  viewTransitioning = true;
+  const cleanup = ()=>{
+    if(!viewTransitioning) return;
+    viewTransitioning = false;
+    oldEl.classList.remove('active', 'view-slide', 'view-sliding');
+    oldEl.style.transform = '';
+    newEl.classList.remove('view-slide', 'view-sliding');
+    newEl.style.transform = '';
+    stack.style.height = '';
+    newEl.removeEventListener('transitionend', onEnd);
+    clearTimeout(fallbackTimer);
+    viewTransitionCleanup = null;
+  };
+  function onEnd(e){ if(e.target === newEl && e.propertyName === 'transform') cleanup(); }
+  newEl.addEventListener('transitionend', onEnd);
+  const fallbackTimer = setTimeout(cleanup, 450);
+  viewTransitionCleanup = cleanup;
+}
 function goRoute(route){
   const oldIndex = ROUTE_ORDER.indexOf(currentRoute);
   const newIndex = ROUTE_ORDER.indexOf(route);
-  const direction = newIndex < oldIndex ? 'dir-back' : 'dir-fwd';
+  const forward = newIndex >= oldIndex;
   currentRoute = route;
   trackEvent('/' + route, route);
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active', 'dir-back', 'dir-fwd'));
-  document.getElementById('view-'+route).classList.add('active', direction);
+  switchView(route, forward);
   document.getElementById('bottomNav').style.display = route==='welcome' ? 'none' : 'flex';
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===route));
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
