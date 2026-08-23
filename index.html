@@ -64,7 +64,7 @@ body{
   padding-bottom:env(safe-area-inset-bottom);
 }
 button{font-family:inherit;}
-.app{max-width:440px;margin:0 auto;position:relative;min-height:100vh;padding-bottom:106px;}
+.app{max-width:440px;margin:0 auto;position:relative;min-height:100vh;padding-bottom:126px;}
 
 /* ---------- header ---------- */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(16px + env(safe-area-inset-top, 0px)) 20px 0;}
@@ -128,11 +128,14 @@ button{font-family:inherit;}
 .welcome-tile .lbl{font-size:19px;letter-spacing:.5px;font-weight:400;}
 
 /* ---------- bottom nav ---------- */
-.bottom-nav{position:fixed;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;background:var(--bg);
-  border-top:1px solid var(--card);display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px calc(14px + env(safe-area-inset-bottom));z-index:20;}
-.nav-item{background:none;border:none;display:flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:50%;cursor:pointer;}
-.nav-item .ph{width:28px;height:28px;color:var(--light);}
+.bottom-nav{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom));
+  width:calc(100% - 40px);max-width:400px;margin:0 auto;
+  background:rgba(44,39,39,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:15px 19px;z-index:20;}
+.nav-item{background:none;border:none;display:flex;align-items:center;justify-content:center;width:55px;height:55px;border-radius:50%;cursor:pointer;flex-shrink:0;}
+.nav-item .ph{width:27px;height:27px;color:var(--light);}
 .nav-item.active{background:var(--orange);}
 .nav-item.active .ph{color:#fff;}
 
@@ -845,9 +848,12 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "2.7.0";
+const APP_VERSION = "2.8.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "2.8.0": [
+    "Nowy wygląd dolnej nawigacji — pływająca, półprzezroczysta pigułka zamiast pełnej belki",
+  ],
   "2.7.0": [
     "Nowość: udostępnij trening albo bieg jako grafikę — od razu po zapisie i z poziomu Historii",
   ],
