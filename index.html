@@ -75,6 +75,11 @@ button{font-family:inherit;}
 .plan-pill{display:none;} /* temporarily disabled, was: background:var(--orange);color:#fff;border:none;border-radius:8px;padding:8px;width:136px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;letter-spacing:.42px;font-weight:700;cursor:pointer;transition:transform .12s ease; */
 .plan-pill:active{transform:scale(.94);}
 .plan-pill .ph{width:13px;height:13px;}
+.topbar-icon-btn{background:none;border:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--light);flex-shrink:0;}
+.topbar-icon-btn .ph{width:24px;height:24px;}
+.topbar-icon-btn:active{transform:scale(.9);}
+.topbar.topbar-light .topbar-icon-btn{color:var(--orange);}
+.topbar.topbar-orange .topbar-icon-btn{color:#fff;}
 
 .section-label{display:flex;align-items:center;gap:11px;padding:0 20px;margin-top:32px;}
 .section-label ph-icon{width:32px;height:32px;}
@@ -274,6 +279,11 @@ button{font-family:inherit;}
 .onboard-actions button{flex:1;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
 .onboard-actions .skip{background:var(--light-2);color:var(--text-dark);}
 .onboard-actions .save{background:var(--orange);color:#fff;}
+.onboard-actions button:disabled{opacity:.5;cursor:default;}
+.onboard-box textarea{width:100%;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:14px;line-height:1.5;color:var(--text-dark);font-family:inherit;margin-bottom:16px;resize:vertical;min-height:100px;}
+.feedback-type-row{display:flex;gap:8px;margin-bottom:14px;}
+.feedback-type{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:9px 4px;font-size:12.5px;font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
+.feedback-type.active{background:var(--orange);border-color:var(--orange);color:#fff;}
 .whatsnew-version{display:inline-block;background:var(--tip);color:var(--orange);font-size:11px;font-weight:700;letter-spacing:.3px;padding:4px 10px;border-radius:20px;margin-bottom:12px;flex-shrink:0;}
 .whatsnew-box{display:flex;flex-direction:column;max-height:calc(100dvh - 40px);}
 .whatsnew-box h3{flex-shrink:0;}
@@ -372,6 +382,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </svg>
     </div>
     <button class="plan-pill" onclick="openPlanModal()"><span>MÓJ PLAN</span>__PH_CARET__</button>
+    <button class="topbar-icon-btn" onclick="openFeedback()" title="Feedback"><span class="ph" data-ph="chat-dots"></span></button>
   </div>
 
   <div class="view-stack" id="viewStack">
@@ -626,6 +637,23 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<div class="onboard-overlay hidden" id="feedbackOverlay" onclick="if(event.target===this) closeFeedback()">
+  <div class="onboard-box">
+    <h3>Podziel się opinią</h3>
+    <p>Zgłoś błąd albo podrzuć pomysł — czytamy każde zgłoszenie.</p>
+    <div class="feedback-type-row" id="feedbackTypeRow">
+      <button type="button" class="feedback-type active" data-type="Błąd" onclick="setFeedbackType(this)">Błąd</button>
+      <button type="button" class="feedback-type" data-type="Pomysł" onclick="setFeedbackType(this)">Pomysł</button>
+      <button type="button" class="feedback-type" data-type="Inne" onclick="setFeedbackType(this)">Inne</button>
+    </div>
+    <textarea id="feedbackMessage" rows="5" maxlength="2000" placeholder="Opisz co się stało albo co chciałbyś zmienić..."></textarea>
+    <div class="onboard-actions">
+      <button class="skip" onclick="closeFeedback()">Anuluj</button>
+      <button class="save" id="feedbackSubmitBtn" onclick="submitFeedback()">Wyślij</button>
+    </div>
+  </div>
+</div>
+
 <script>/*!
  * Chart.js v4.4.4
  * https://www.chartjs.org
@@ -645,7 +673,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
    PHOSPHOR ICONS (inline, offline)
    ============================================================ */
 const PH = {
-"house": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z\"/></svg>", "barbell": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M248,120h-8V88a16,16,0,0,0-16-16H208V64a16,16,0,0,0-16-16H168a16,16,0,0,0-16,16v56H104V64A16,16,0,0,0,88,48H64A16,16,0,0,0,48,64v8H32A16,16,0,0,0,16,88v32H8a8,8,0,0,0,0,16h8v32a16,16,0,0,0,16,16H48v8a16,16,0,0,0,16,16H88a16,16,0,0,0,16-16V136h48v56a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,16-16V136h8a8,8,0,0,0,0-16ZM32,168V88H48v80Zm56,24H64V64H88V192Zm104,0H168V64h24V175.82c0,.06,0,.12,0,.18s0,.12,0,.18V192Zm32-24H208V88h16Z\"/></svg>", "sneaker-move": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M231.16,166.63l-28.63-14.31A47.74,47.74,0,0,1,176,109.39V80a8,8,0,0,0-8-8,48.05,48.05,0,0,1-48-48,8,8,0,0,0-12.83-6.37L30.13,76l-.2.16a16,16,0,0,0-1.24,23.75L142.4,213.66a8,8,0,0,0,5.66,2.34H224a16,16,0,0,0,16-16V180.94A15.92,15.92,0,0,0,231.16,166.63ZM224,200H151.37L40,88.63l12.87-9.76,38.79,38.79A8,8,0,0,0,103,106.34L65.74,69.11l40-30.31A64.15,64.15,0,0,0,160,87.5v21.89a63.65,63.65,0,0,0,35.38,57.24L224,180.94ZM70.8,184H32a8,8,0,0,1,0-16H70.8a8,8,0,1,1,0,16Zm40,24a8,8,0,0,1-8,8H48a8,8,0,0,1,0-16h54.8A8,8,0,0,1,110.8,208Z\"/></svg>", "calendar-dots": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-68-76a12,12,0,1,1-12-12A12,12,0,0,1,140,132Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,184,132ZM96,172a12,12,0,1,1-12-12A12,12,0,0,1,96,172Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,140,172Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,184,172Z\"/></svg>", "chart-line-up": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V156.69l50.34-50.35a8,8,0,0,1,11.32,0L128,132.69,180.69,80H160a8,8,0,0,1,0-16h40a8,8,0,0,1,8,8v40a8,8,0,0,1-16,0V91.31l-58.34,58.35a8,8,0,0,1-11.32,0L96,123.31l-56,56V200H224A8,8,0,0,1,232,208Z\"/></svg>", "caret-down": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z\"/></svg>", "pencil": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM51.31,160,136,75.31,152.69,92,68,176.68ZM48,179.31,76.69,208H48Zm48,25.38L79.31,188,164,103.31,180.69,120Zm96-96L147.31,64l24-24L216,84.68Z\"/></svg>", "x": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z\"/></svg>", "download-simple": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z\"/></svg>", "upload-simple": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0ZM93.66,77.66,120,51.31V144a8,8,0,0,0,16,0V51.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,77.66Z\"/></svg>"
+"house": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z\"/></svg>", "barbell": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M248,120h-8V88a16,16,0,0,0-16-16H208V64a16,16,0,0,0-16-16H168a16,16,0,0,0-16,16v56H104V64A16,16,0,0,0,88,48H64A16,16,0,0,0,48,64v8H32A16,16,0,0,0,16,88v32H8a8,8,0,0,0,0,16h8v32a16,16,0,0,0,16,16H48v8a16,16,0,0,0,16,16H88a16,16,0,0,0,16-16V136h48v56a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,16-16V136h8a8,8,0,0,0,0-16ZM32,168V88H48v80Zm56,24H64V64H88V192Zm104,0H168V64h24V175.82c0,.06,0,.12,0,.18s0,.12,0,.18V192Zm32-24H208V88h16Z\"/></svg>", "sneaker-move": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M231.16,166.63l-28.63-14.31A47.74,47.74,0,0,1,176,109.39V80a8,8,0,0,0-8-8,48.05,48.05,0,0,1-48-48,8,8,0,0,0-12.83-6.37L30.13,76l-.2.16a16,16,0,0,0-1.24,23.75L142.4,213.66a8,8,0,0,0,5.66,2.34H224a16,16,0,0,0,16-16V180.94A15.92,15.92,0,0,0,231.16,166.63ZM224,200H151.37L40,88.63l12.87-9.76,38.79,38.79A8,8,0,0,0,103,106.34L65.74,69.11l40-30.31A64.15,64.15,0,0,0,160,87.5v21.89a63.65,63.65,0,0,0,35.38,57.24L224,180.94ZM70.8,184H32a8,8,0,0,1,0-16H70.8a8,8,0,1,1,0,16Zm40,24a8,8,0,0,1-8,8H48a8,8,0,0,1,0-16h54.8A8,8,0,0,1,110.8,208Z\"/></svg>", "calendar-dots": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-68-76a12,12,0,1,1-12-12A12,12,0,0,1,140,132Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,184,132ZM96,172a12,12,0,1,1-12-12A12,12,0,0,1,96,172Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,140,172Zm44,0a12,12,0,1,1-12-12A12,12,0,0,1,184,172Z\"/></svg>", "chart-line-up": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V156.69l50.34-50.35a8,8,0,0,1,11.32,0L128,132.69,180.69,80H160a8,8,0,0,1,0-16h40a8,8,0,0,1,8,8v40a8,8,0,0,1-16,0V91.31l-58.34,58.35a8,8,0,0,1-11.32,0L96,123.31l-56,56V200H224A8,8,0,0,1,232,208Z\"/></svg>", "caret-down": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z\"/></svg>", "pencil": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM51.31,160,136,75.31,152.69,92,68,176.68ZM48,179.31,76.69,208H48Zm48,25.38L79.31,188,164,103.31,180.69,120Zm96-96L147.31,64l24-24L216,84.68Z\"/></svg>", "x": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z\"/></svg>", "download-simple": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z\"/></svg>", "upload-simple": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0ZM93.66,77.66,120,51.31V144a8,8,0,0,0,16,0V51.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,77.66Z\"/></svg>",
+"chat-dots": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><rect x=\"24\" y=\"48\" width=\"208\" height=\"136\" rx=\"20\"/><polygon points=\"64,184 64,224 104,184\"/><circle cx=\"88\" cy=\"116\" r=\"12\"/><circle cx=\"128\" cy=\"116\" r=\"12\"/><circle cx=\"168\" cy=\"116\" r=\"12\"/></svg>"
 };
 function ph(name, cls){ return `<span class="ph ${cls||''}">${PH[name]}</span>`; }
 
@@ -805,9 +834,12 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "2.5.11";
+const APP_VERSION = "2.6.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "2.6.0": [
+    "Nowa opcja: zgłoś błąd albo pomysł bezpośrednio z aplikacji — ikonka w górnym pasku",
+  ],
   "2.5.0": [
     "Ekran główny nie przewija się już na standardowych telefonach — na mniejszych ekranach scrollowanie działa jak wcześniej",
   ],
@@ -854,6 +886,52 @@ function renderWhatsNew(){
 function closeWhatsNew(){
   localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);
   document.getElementById('whatsnewOverlay').classList.add('hidden');
+}
+
+/* ---------- feedback ---------- */
+const FEEDBACK_ENDPOINT = 'https://formspree.io/f/xkjwaqpo';
+let feedbackType = 'Błąd';
+function setFeedbackType(btn){
+  feedbackType = btn.dataset.type;
+  document.querySelectorAll('#feedbackTypeRow .feedback-type').forEach(b=> b.classList.toggle('active', b===btn));
+}
+function openFeedback(){
+  document.getElementById('feedbackMessage').value = '';
+  feedbackType = 'Błąd';
+  document.querySelectorAll('#feedbackTypeRow .feedback-type').forEach(b=> b.classList.toggle('active', b.dataset.type===feedbackType));
+  document.getElementById('feedbackOverlay').classList.remove('hidden');
+}
+function closeFeedback(){
+  document.getElementById('feedbackOverlay').classList.add('hidden');
+}
+async function submitFeedback(){
+  const message = document.getElementById('feedbackMessage').value.trim();
+  if(!message){ toast('Napisz coś zanim wyślesz 🙂'); return; }
+  const btn = document.getElementById('feedbackSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Wysyłanie...';
+  try{
+    const res = await fetch(FEEDBACK_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        typ: feedbackType,
+        wiadomosc: message,
+        wersja: APP_VERSION,
+        ekran: currentRoute,
+        imie: (typeof profileName !== 'undefined' && profileName) ? profileName : '',
+        userAgent: navigator.userAgent,
+      }),
+    });
+    if(!res.ok) throw new Error('bad status');
+    closeFeedback();
+    toast('Dzięki! Zgłoszenie wysłane.');
+  }catch(err){
+    toast('Nie udało się wysłać — spróbuj ponownie.');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Wyślij';
+  }
 }
 /* one-time migration: old Polish exercise names -> new English names (matching icon tiles) */
 const LEGACY_NAME_MAP = {
@@ -1021,6 +1099,7 @@ const SWIPE_ROUTES = ['gym', 'running', 'history', 'stats'];
 function anyModalOpen(){
   return !document.getElementById('onboardOverlay').classList.contains('hidden')
     || !document.getElementById('whatsnewOverlay').classList.contains('hidden')
+    || !document.getElementById('feedbackOverlay').classList.contains('hidden')
     || document.getElementById('planModal').classList.contains('open')
     || !document.getElementById('dpOverlay').classList.contains('hidden');
 }
