@@ -1116,6 +1116,23 @@ function goRoute(route){
 
 /* ---------- swipe between GYM / RUNNING / HISTORY / STATS ---------- */
 const SWIPE_ROUTES = ['gym', 'running', 'history', 'stats'];
+/* ---------- hide the bottom nav while the on-screen keyboard is open —
+   fixed-position elements get shoved around by mobile browsers when the
+   keyboard resizes the viewport, so it's cleaner to just hide it ---------- */
+(function hideNavOnKeyboard(){
+  const nav = document.getElementById('bottomNav');
+  const isTextField = el => el && (el.tagName==='TEXTAREA' || (el.tagName==='INPUT' && !['button','checkbox','radio','range','submit'].includes(el.type)));
+  document.addEventListener('focusin', e=>{
+    if(isTextField(e.target)) nav.style.display = 'none';
+  });
+  document.addEventListener('focusout', e=>{
+    if(!isTextField(e.target)) return;
+    setTimeout(()=>{
+      if(isTextField(document.activeElement)) return;
+      nav.style.display = currentRoute==='welcome' ? 'none' : 'flex';
+    }, 60);
+  });
+})();
 function anyModalOpen(){
   return !document.getElementById('onboardOverlay').classList.contains('hidden')
     || !document.getElementById('whatsnewOverlay').classList.contains('hidden')
