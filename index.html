@@ -190,9 +190,9 @@ button{font-family:inherit;}
   .save-btn.success{animation:saveSuccess .5s ease;}
   @keyframes saveSuccess{0%{transform:scale(1);}35%{transform:scale(1.04);background:#3ecf8e;}100%{transform:scale(1);}}
 }
-.share-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 40px);margin:12px auto 0;
+.share-btn{display:none;} /* temporarily disabled until the share-card template is ready, was: display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 40px);margin:12px auto 0;
   background:var(--light-2);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text-dark);
-  font-size:13px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;font-family:inherit;transition:transform .12s ease;}
+  font-size:13px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;font-family:inherit;transition:transform .12s ease; */
 .share-btn.hidden{display:none;}
 .share-btn .ph{width:18px;height:18px;}
 .share-btn:active{transform:scale(.97);}
@@ -248,7 +248,7 @@ button{font-family:inherit;}
 .hist-date{font-size:10px;color:rgba(44,39,39,.6);}
 .hist-close{cursor:pointer;display:flex;}
 .hist-close .ph{width:20px;height:20px;color:var(--text-dark);}
-.hist-right>.ph{width:20px;height:20px;color:var(--text-dark);cursor:pointer;flex-shrink:0;}
+.hist-share-btn{display:none;} /* temporarily disabled until the share-card template is ready, was: width:20px;height:20px;color:var(--text-dark);cursor:pointer;flex-shrink:0; */
 .run-stat-tile .v{font-size:28px;font-weight:700;color:var(--text-dark);width:100%;text-align:center;}
 .run-stat-tile.orange{background:var(--orange);border-color:var(--orange);}
 .run-stat-tile.orange .v{color:#fff;}
@@ -1637,7 +1637,7 @@ function toggleHistExpand(key){
   renderHistDetail();
 }
 function histRightHtml(dateHuman, exp, key, shareId){
-  return `<div class="hist-right"><span class="ph" onclick="event.stopPropagation();shareHistCard('${key}','${shareId}')" title="Udostępnij">${PH.share}</span><span class="hist-date">${dateHuman}</span>${exp?`<span class="hist-close" onclick="event.stopPropagation();toggleHistExpand('${key}')">${ph('x')}</span>`:''}</div>`;
+  return `<div class="hist-right"><span class="ph hist-share-btn" onclick="event.stopPropagation();shareHistCard('${key}','${shareId}')" title="Udostępnij">${PH.share}</span><span class="hist-date">${dateHuman}</span>${exp?`<span class="hist-close" onclick="event.stopPropagation();toggleHistExpand('${key}')">${ph('x')}</span>`:''}</div>`;
 }
 function renderHistDetail(){
   const wrap = document.getElementById('histDetail');
