@@ -660,6 +660,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="panel">
       <div class="panel-inner">
         <div class="onboard-note hidden" id="planOnboardingIntro" data-i18n="planOnboardingIntro">Zanim zaczniesz, wybierz gotowy plan albo stwórz własny — zobaczysz go od razu w GYM.</div>
+        <button type="button" class="copy-days-btn hidden" id="skipPlanOnboardingBtn" onclick="skipPlanOnboarding()" data-i18n="skipPlanOnboarding" style="margin-top:-6px;margin-bottom:14px;display:block;">Pomiń na razie, zdecyduję później</button>
         <div id="plansList"></div>
         <button class="add-pill" onclick="openPlanEditor(null)">__PH_PLUS__<span data-i18n="planCreateNew">Stwórz mój plan treningowy</span></button>
       </div>
@@ -872,6 +873,7 @@ const T_EN = {
   copyDaysDone: n => `Copied to ${n} day${n===1?'':'s'}`,
   favFilterAll: 'All',
   favFilterFavorites: 'Favorites',
+  skipPlanOnboarding: "Skip for now, I'll decide later",
   shareIconTitle: 'Share',
   importTitle: 'Import backup',
   exportTitle: 'Download backup',
@@ -2534,17 +2536,25 @@ function saveTrainingPlansList(){ localStorage.setItem(LS_TRAINING_PLANS, JSON.s
 let trainingPlans = loadTrainingPlans();
 let starredPlanId = localStorage.getItem(LS_STARRED_PLAN) || null;
 let planOnboardingActive = false; // true while a brand-new user is being forced to pick/create their first plan
-function completePlanOnboardingIfNeeded(){
-  if(!planOnboardingActive) return;
+function exitPlanOnboarding(){
   planOnboardingActive = false;
   document.getElementById('plansCloseX').classList.remove('hidden');
   document.getElementById('planOnboardingIntro').classList.add('hidden');
+  document.getElementById('skipPlanOnboardingBtn').classList.add('hidden');
   goRoute('welcome');
+}
+function completePlanOnboardingIfNeeded(){
+  if(!planOnboardingActive) return;
+  exitPlanOnboarding();
+}
+function skipPlanOnboarding(){
+  exitPlanOnboarding();
 }
 function startPlanOnboarding(){
   planOnboardingActive = true;
   document.getElementById('plansCloseX').classList.add('hidden');
   document.getElementById('planOnboardingIntro').classList.remove('hidden');
+  document.getElementById('skipPlanOnboardingBtn').classList.remove('hidden');
   renderPlansList();
   goRoute('plans');
 }
