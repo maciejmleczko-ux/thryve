@@ -1126,7 +1126,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.3.0";
+const APP_VERSION = "3.3.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "3.3.0": {
@@ -1869,6 +1869,10 @@ function removeExerciseFromSession(name){
   renderGymGrid();
   renderExercisePanels();
 }
+function collapseExercisePanel(){
+  openExerciseName = null;
+  renderExercisePanels();
+}
 
 function setLive(name, idx, field, val){
   const ex = sessionExercises.find(e=>e.name===name);
@@ -1899,7 +1903,7 @@ function renderExercisePanels(){
           </div>`;
       }
       panel.innerHTML = `
-        <span class="close-x" onclick="removeExerciseFromSession('${ex.name.replace(/'/g,"\\'")}')">${ph('x')}</span>
+        <span class="close-x" onclick="collapseExercisePanel()">${ph('x')}</span>
         <div class="ex-name">${ex.name}</div>
         <div class="ex-meta">${t('exMeta', `${groupLabel(ex.group)} · ${ex.sets} serie x ${ex.repLow}-${ex.repHigh} powt. · przerwa ${ex.rest}`, groupLabel(ex.group), ex.sets, ex.repLow, ex.repHigh, ex.rest)}</div>
         <div class="tip-box">${sugg.text}</div>
