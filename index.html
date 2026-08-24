@@ -197,6 +197,16 @@ button{font-family:inherit;}
 .plan-ex-group-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
 .plan-ex-group-header .ph{width:18px;height:18px;color:var(--orange);flex-shrink:0;}
 .plan-ex-group-header span{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--text-dark);}
+.equip-filter-row{display:flex;gap:6px;margin-top:8px;}
+.equip-filter-chip{flex:1;text-align:center;background:var(--light-2);border:1px solid var(--border);border-radius:8px;padding:8px 0;font-size:12px;font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
+.equip-filter-chip.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+.fav-filter-row{display:flex;gap:6px;padding:0 20px;margin-top:12px;}
+.fav-filter-chip{flex:1;text-align:center;background:var(--light-2);border:1px solid var(--border);border-radius:8px;padding:9px 0;font-size:12px;font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.fav-filter-chip.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+.fav-filter-chip .ph{width:15px;height:15px;flex-shrink:0;}
+.fav-filter-row.hidden{display:none;}
+.ex-tile-fav{position:absolute;top:6px;left:6px;z-index:2;cursor:pointer;display:flex;background:rgba(255,255,255,.85);border-radius:50%;padding:3px;}
+.ex-tile-fav .ph{width:15px;height:15px;color:var(--orange);}
 .ex-tile.plan-ex-selected{border:2px solid var(--orange);}
 .plan-ex-check{position:absolute;top:6px;right:6px;width:20px;height:20px;color:var(--orange);background:#fff;border-radius:50%;}
 .today-plan-banner{background:var(--orange);border-radius:14px;padding:12px 16px;margin:16px 20px 0;color:#fff;}
@@ -508,9 +518,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
     </div>
 
+    <div class="fav-filter-row hidden" id="gymFavFilterRow"></div>
     <div class="panel">
       <div class="panel-inner">
-        <div class="ex-grid" id="gymGrid"></div>
+        <div id="gymGrid"></div>
         <button class="add-pill secondary hidden" id="pickFromLibraryBtn" onclick="openExercisePicker()">__PH_PLUS__<span data-i18n="pickFromLibrary">Wybierz inne ćwiczenie</span></button>
         <button class="add-pill" onclick="toggleNewExerciseForm()">__PH_PLUS__<span data-i18n="addNew">Dodaj nowe</span></button>
 
@@ -675,6 +686,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
         <div class="field" style="margin-top:14px;">
           <label><span data-i18n="planExercisesLabel">Ćwiczenia</span> — <span id="planEditorDayName"></span> (<span id="planExCount">0</span>)</label>
+          <div class="equip-filter-row" id="planEquipFilterRow"></div>
           <div id="planEditorGrid" style="margin-top:8px;"></div>
         </div>
         <div class="btns" style="margin-top:16px;display:flex;gap:10px;">
@@ -858,6 +870,8 @@ const T_EN = {
   copyDaysHint: (day) => `Pick which days should get the same exercises as ${day}.`,
   copyDaysConfirm: 'Copy',
   copyDaysDone: n => `Copied to ${n} day${n===1?'':'s'}`,
+  favFilterAll: 'All',
+  favFilterFavorites: 'Favorites',
   shareIconTitle: 'Share',
   importTitle: 'Import backup',
   exportTitle: 'Download backup',
@@ -1028,6 +1042,34 @@ function muscleGroupBucket(group){
   const g = (group || '').toLowerCase();
   return PLAN_EX_GROUPS.find(b => b.match.some(k => g.includes(k))) || PLAN_EX_GROUPS[PLAN_EX_GROUPS.length-1];
 }
+function renderGroupedExerciseGrid(container, exercises, stateFn, clickFn, tileFn){
+  container.innerHTML = '';
+  const buckets = new Map();
+  exercises.forEach(ex=>{
+    const b = muscleGroupBucket(ex.group);
+    if(!buckets.has(b.key)) buckets.set(b.key, []);
+    buckets.get(b.key).push(ex);
+  });
+  PLAN_EX_GROUPS.forEach(b=>{
+    const list = buckets.get(b.key);
+    if(!list || !list.length) return;
+    const section = document.createElement('div');
+    section.className = 'plan-ex-group';
+    const header = document.createElement('div');
+    header.className = 'plan-ex-group-header';
+    header.innerHTML = `${ph('barbell')}<span>${LANG==='en' ? b.en : b.pl}</span>`;
+    section.appendChild(header);
+    const grid = document.createElement('div');
+    grid.className = 'ex-grid';
+    list.forEach(ex=>{
+      const btn = tileFn ? tileFn(ex) : buildExerciseTile(ex, stateFn(ex));
+      if(!tileFn) btn.onclick = ()=> clickFn(ex);
+      grid.appendChild(btn);
+    });
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+}
 function groupLabel(group){ return LANG==='en' ? (GROUP_LABELS_EN[group] || group) : group; }
 const RUN_TYPE_LABELS = {
   run_walk: {pl:'Marszobieg', en:'Run/walk'},
@@ -1052,7 +1094,9 @@ const PH = {
 Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>",
 "star": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M239.18,97.26A16.38,16.38,0,0,0,224.92,86l-59-4.76L143.14,26.15a16.36,16.36,0,0,0-30.27,0L90.11,81.23,31.08,86a16.46,16.46,0,0,0-9.37,28.86l45,38.83L53,211.75a16.38,16.38,0,0,0,24.5,17.82L128,198.49l50.53,31.08A16.4,16.4,0,0,0,203,211.75l-13.76-58.07,45-38.83A16.43,16.43,0,0,0,239.18,97.26Zm-15.34,5.47-48.7,42a8,8,0,0,0-2.56,7.91l14.88,62.8a.37.37,0,0,1-.17.48c-.18.14-.23.11-.38,0l-54.72-33.65a8,8,0,0,0-8.38,0L69.09,215.94c-.15.09-.19.12-.38,0a.37.37,0,0,1-.17-.48l14.88-62.8a8,8,0,0,0-2.56-7.91l-48.7-42c-.12-.1-.23-.19-.13-.5s.18-.27.33-.29l63.92-5.16A8,8,0,0,0,103,91.86l24.62-59.61c.08-.17.11-.25.35-.25s.27.08.35.25L153,91.86a8,8,0,0,0,6.75,4.92l63.92,5.16c.15,0,.24,0,.33.29S224,102.63,223.84,102.73Z\"/></svg>",
 "star-fill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z\"/></svg>",
-"check-circle": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z\"/></svg>"});
+"check-circle": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z\"/></svg>",
+"heart": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z\"/></svg>",
+"heart-fill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M240,102c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,228.66,16,172,16,102A62.07,62.07,0,0,1,78,40c20.65,0,38.73,8.88,50,23.89C139.27,48.88,157.35,40,178,40A62.07,62.07,0,0,1,240,102Z\"/></svg>"});
 function ph(name, cls){ return `<span class="ph ${cls||''}">${PH[name]}</span>`; }
 
 /* Resolve all __PH_*__ placeholders in the static markup into real icon
@@ -1220,54 +1264,54 @@ function updateExerciseIconSuggestion(){
    ============================================================ */
 const GYM_PLAN = {
   A: [
-    {name:"Chest Press", group:"Klatka piersiowa", sets:3, repLow:10, repHigh:12, rest:"75-90s"},
-    {name:"Lat Pulldown", group:"Plecy (szerokość)", sets:3, repLow:10, repHigh:12, rest:"75-90s"},
-    {name:"Leg Press", group:"Nogi (uda, pośladki)", sets:3, repLow:10, repHigh:12, rest:"90-120s"},
-    {name:"Shoulder Press", group:"Barki", sets:3, repLow:10, repHigh:12, rest:"75-90s"},
-    {name:"Leg Curl", group:"Uda (dwugłowe)", sets:3, repLow:12, repHigh:15, rest:"60-75s"},
-    {name:"Bicep Curl", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s"},
-    {name:"Triceps Pushdown", group:"Triceps", sets:2, repLow:12, repHigh:15, rest:"60s"},
-    {name:"Ab Crunch", group:"Brzuch", sets:2, repLow:15, repHigh:20, rest:"45-60s"},
+    {name:"Chest Press", group:"Klatka piersiowa", sets:3, repLow:10, repHigh:12, rest:"75-90s", equipment:"maszyny"},
+    {name:"Lat Pulldown", group:"Plecy (szerokość)", sets:3, repLow:10, repHigh:12, rest:"75-90s", equipment:"maszyny"},
+    {name:"Leg Press", group:"Nogi (uda, pośladki)", sets:3, repLow:10, repHigh:12, rest:"90-120s", equipment:"maszyny"},
+    {name:"Shoulder Press", group:"Barki", sets:3, repLow:10, repHigh:12, rest:"75-90s", equipment:"maszyny"},
+    {name:"Leg Curl", group:"Uda (dwugłowe)", sets:3, repLow:12, repHigh:15, rest:"60-75s", equipment:"maszyny"},
+    {name:"Bicep Curl", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", equipment:"hantle"},
+    {name:"Triceps Pushdown", group:"Triceps", sets:2, repLow:12, repHigh:15, rest:"60s", equipment:"maszyny"},
+    {name:"Ab Crunch", group:"Brzuch", sets:2, repLow:15, repHigh:20, rest:"45-60s", equipment:"maszyny"},
   ],
   B: [
-    {name:"Incline Chest", group:"Klatka piersiowa (górna)", sets:3, repLow:10, repHigh:12, rest:"75-90s"},
-    {name:"Seated Row", group:"Plecy (grubość)", sets:3, repLow:10, repHigh:12, rest:"75-90s"},
-    {name:"Leg Extension", group:"Nogi (czworogłowe)", sets:3, repLow:12, repHigh:15, rest:"60-75s"},
-    {name:"Hip Abduction", group:"Pośladki", sets:3, repLow:12, repHigh:15, rest:"60-75s"},
-    {name:"Pec Deck", group:"Klatka piersiowa (izolacja)", sets:2, repLow:12, repHigh:15, rest:"60s"},
-    {name:"Calf Raise", group:"Łydki", sets:3, repLow:15, repHigh:20, rest:"45-60s"},
-    {name:"Bicep Curl (Alt Grip)", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s"},
-    {name:"Triceps Dip", group:"Triceps", sets:2, repLow:12, repHigh:15, rest:"60s"},
-    {name:"Barbell Deadlift", group:"Plecy (dół, całość)", sets:3, repLow:6, repHigh:10, rest:"120s"},
-    {name:"Dumbbell Row", group:"Plecy (jednostronnie)", sets:3, repLow:10, repHigh:12, rest:"75-90s"},
+    {name:"Incline Chest", group:"Klatka piersiowa (górna)", sets:3, repLow:10, repHigh:12, rest:"75-90s", equipment:"maszyny"},
+    {name:"Seated Row", group:"Plecy (grubość)", sets:3, repLow:10, repHigh:12, rest:"75-90s", equipment:"maszyny"},
+    {name:"Leg Extension", group:"Nogi (czworogłowe)", sets:3, repLow:12, repHigh:15, rest:"60-75s", equipment:"maszyny"},
+    {name:"Hip Abduction", group:"Pośladki", sets:3, repLow:12, repHigh:15, rest:"60-75s", equipment:"maszyny"},
+    {name:"Pec Deck", group:"Klatka piersiowa (izolacja)", sets:2, repLow:12, repHigh:15, rest:"60s", equipment:"maszyny"},
+    {name:"Calf Raise", group:"Łydki", sets:3, repLow:15, repHigh:20, rest:"45-60s", equipment:"maszyny"},
+    {name:"Bicep Curl (Alt Grip)", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", equipment:"hantle"},
+    {name:"Triceps Dip", group:"Triceps", sets:2, repLow:12, repHigh:15, rest:"60s", equipment:"maszyny"},
+    {name:"Barbell Deadlift", group:"Plecy (dół, całość)", sets:3, repLow:6, repHigh:10, rest:"120s", equipment:"hantle"},
+    {name:"Dumbbell Row", group:"Plecy (jednostronnie)", sets:3, repLow:10, repHigh:12, rest:"75-90s", equipment:"hantle"},
   ]
 };
 /* The other 22 of the 40 icons we have — previously only used as icon
    suggestions when adding a custom exercise, now full library entries
    like the original 18, just tagged day:'C' instead of 'A'/'B'. */
 const GYM_PLAN_C_EXTRA = [
-  {name:"Preacher Curl", group:"Biceps", sets:2, repLow:10, repHigh:12, rest:"60s", icon:"preacher_curl"},
-  {name:"Overhead Triceps", group:"Triceps", sets:2, repLow:10, repHigh:12, rest:"60s", icon:"overhead_triceps"},
-  {name:"Hanging Leg Raise", group:"Brzuch", sets:3, repLow:10, repHigh:15, rest:"45-60s", icon:"hanging_leg_raise"},
-  {name:"Dumbbell Shoulder Press", group:"Barki", sets:3, repLow:8, repHigh:12, rest:"75-90s", icon:"dumbbell_shoulder_press"},
-  {name:"Dumbbell Walking Lunge", group:"Nogi (uda, pośladki)", sets:3, repLow:10, repHigh:12, rest:"75-90s", icon:"walking_lunge"},
-  {name:"Back Extension", group:"Plecy (dół, całość)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"back_extension"},
-  {name:"Cable Curl", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", icon:"cable_curl"},
-  {name:"Barbell Curl", group:"Biceps", sets:3, repLow:8, repHigh:12, rest:"75s", icon:"barbell_curl"},
-  {name:"Dumbbell Lateral Raise", group:"Barki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_lateral_raise"},
-  {name:"Cable Crossover", group:"Klatka piersiowa (izolacja)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"cable_crossover"},
-  {name:"Cable Curl Neutral", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", icon:"cable_curl_neutral"},
-  {name:"Cable Lateral Raise", group:"Barki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"cable_lateral_raise"},
-  {name:"Hack Squat Machine", group:"Nogi (czworogłowe)", sets:3, repLow:8, repHigh:12, rest:"90-120s", icon:"hack_squat"},
-  {name:"Dumbbell Bench Press", group:"Klatka piersiowa", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"dumbbell_bench_press"},
-  {name:"Reverse Pec Deck", group:"Barki (tylne)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"reverse_pec_deck"},
-  {name:"Hip Thrust", group:"Pośladki", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"hip_thrust"},
-  {name:"Straight-Arm Pulldown", group:"Plecy (szerokość)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"straight_arm_pulldown"},
-  {name:"Chest Dip", group:"Klatka piersiowa (dół)", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"chest_dip"},
-  {name:"Cable Woodchopper", group:"Brzuch (skos)", sets:3, repLow:12, repHigh:15, rest:"45-60s", icon:"cable_woodchopper"},
-  {name:"Face Pull", group:"Barki (tylne)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"face_pull"},
-  {name:"Barbell Back Squat", group:"Nogi (całość)", sets:4, repLow:6, repHigh:10, rest:"120s", icon:"barbell_back_squat"},
-  {name:"Dumbbell Fly", group:"Klatka piersiowa (izolacja)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_fly"},
+  {name:"Preacher Curl", group:"Biceps", sets:2, repLow:10, repHigh:12, rest:"60s", icon:"preacher_curl", equipment:"maszyny"},
+  {name:"Overhead Triceps", group:"Triceps", sets:2, repLow:10, repHigh:12, rest:"60s", icon:"overhead_triceps", equipment:"hantle"},
+  {name:"Hanging Leg Raise", group:"Brzuch", sets:3, repLow:10, repHigh:15, rest:"45-60s", icon:"hanging_leg_raise", equipment:"maszyny"},
+  {name:"Dumbbell Shoulder Press", group:"Barki", sets:3, repLow:8, repHigh:12, rest:"75-90s", icon:"dumbbell_shoulder_press", equipment:"hantle"},
+  {name:"Dumbbell Walking Lunge", group:"Nogi (uda, pośladki)", sets:3, repLow:10, repHigh:12, rest:"75-90s", icon:"walking_lunge", equipment:"hantle"},
+  {name:"Back Extension", group:"Plecy (dół, całość)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"back_extension", equipment:"maszyny"},
+  {name:"Cable Curl", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", icon:"cable_curl", equipment:"maszyny"},
+  {name:"Barbell Curl", group:"Biceps", sets:3, repLow:8, repHigh:12, rest:"75s", icon:"barbell_curl", equipment:"hantle"},
+  {name:"Dumbbell Lateral Raise", group:"Barki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_lateral_raise", equipment:"hantle"},
+  {name:"Cable Crossover", group:"Klatka piersiowa (izolacja)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"cable_crossover", equipment:"maszyny"},
+  {name:"Cable Curl Neutral", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", icon:"cable_curl_neutral", equipment:"maszyny"},
+  {name:"Cable Lateral Raise", group:"Barki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"cable_lateral_raise", equipment:"maszyny"},
+  {name:"Hack Squat Machine", group:"Nogi (czworogłowe)", sets:3, repLow:8, repHigh:12, rest:"90-120s", icon:"hack_squat", equipment:"maszyny"},
+  {name:"Dumbbell Bench Press", group:"Klatka piersiowa", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"dumbbell_bench_press", equipment:"hantle"},
+  {name:"Reverse Pec Deck", group:"Barki (tylne)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"reverse_pec_deck", equipment:"maszyny"},
+  {name:"Hip Thrust", group:"Pośladki", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"hip_thrust", equipment:"hantle"},
+  {name:"Straight-Arm Pulldown", group:"Plecy (szerokość)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"straight_arm_pulldown", equipment:"maszyny"},
+  {name:"Chest Dip", group:"Klatka piersiowa (dół)", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"chest_dip", equipment:"maszyny"},
+  {name:"Cable Woodchopper", group:"Brzuch (skos)", sets:3, repLow:12, repHigh:15, rest:"45-60s", icon:"cable_woodchopper", equipment:"maszyny"},
+  {name:"Face Pull", group:"Barki (tylne)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"face_pull", equipment:"maszyny"},
+  {name:"Barbell Back Squat", group:"Nogi (całość)", sets:4, repLow:6, repHigh:10, rest:"120s", icon:"barbell_back_squat", equipment:"hantle"},
+  {name:"Dumbbell Fly", group:"Klatka piersiowa (izolacja)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_fly", equipment:"hantle"},
 ];
 const BUILTIN_EXERCISES = [
   ...GYM_PLAN.A.map(e => ({...e, day:'A'})),
@@ -1913,6 +1957,32 @@ function selectDpDate(iso){
    ============================================================ */
 let sessionExercises = []; // {name, group, sets, repLow, repHigh, rest, day, setValues:[{weight,reps}], rpe, notes}
 let extraGymTiles = []; // exercises picked via "Wybierz inne ćwiczenie" for today — visible as tiles, not yet logged
+const LS_FAVORITE_EXERCISES = "fitlog_favorite_exercises_v1";
+function loadFavoriteExercises(){
+  try{ return new Set(JSON.parse(localStorage.getItem(LS_FAVORITE_EXERCISES)) || []); }catch(e){ return new Set(); }
+}
+function saveFavoriteExercises(){ localStorage.setItem(LS_FAVORITE_EXERCISES, JSON.stringify([...favoriteExercises])); }
+let favoriteExercises = loadFavoriteExercises();
+let gymFavFilter = 'all'; // 'all' | 'favorites'
+function toggleFavoriteExercise(name){
+  if(favoriteExercises.has(name)) favoriteExercises.delete(name);
+  else favoriteExercises.add(name);
+  saveFavoriteExercises();
+  renderGymGrid();
+}
+function setGymFavFilter(key){
+  gymFavFilter = key;
+  renderGymFavFilterRow();
+  renderGymGrid();
+}
+function renderGymFavFilterRow(){
+  const row = document.getElementById('gymFavFilterRow');
+  if(!row) return;
+  row.innerHTML = `
+    <button type="button" class="fav-filter-chip${gymFavFilter==='all'?' active':''}" onclick="setGymFavFilter('all')">${t('favFilterAll','Wszystkie')}</button>
+    <button type="button" class="fav-filter-chip${gymFavFilter==='favorites'?' active':''}" onclick="setGymFavFilter('favorites')">${ph(gymFavFilter==='favorites'?'heart-fill':'heart')}<span>${t('favFilterFavorites','Ulubione')}</span></button>
+  `;
+}
 let openExerciseName = null;
 
 function lastSessionsFor(exerciseName){
@@ -1993,17 +2063,19 @@ function todayPlanExerciseNames(){
   return (list && list.length) ? list : null;
 }
 let gymGridFiltered = false;
+let gymGridGrouped = false; // true when showing the full library grouped by muscle group (drag-reorder doesn't apply there)
 function renderGymGrid(){
   const grid = document.getElementById('gymGrid');
-  grid.innerHTML = '';
   const fullLib = orderedExerciseLibrary();
   const planEx = todayPlanExerciseNames();
   gymGridFiltered = !!planEx;
-  let lib;
+  gymGridGrouped = !gymGridFiltered;
+  grid.classList.toggle('ex-grid', gymGridFiltered);
   if(planEx){
+    grid.innerHTML = '';
     const byName = new Map(fullLib.map(ex=>[ex.name, ex]));
     const planNames = new Set(planEx.map(e=>e.name));
-    lib = planEx.map(e=> byName.get(e.name) || e);
+    const lib = planEx.map(e=> byName.get(e.name) || e);
     const shown = new Set(planNames);
     extraGymTiles.forEach(ex=>{
       if(!shown.has(ex.name)){ lib.push(byName.get(ex.name) || ex); shown.add(ex.name); }
@@ -2011,19 +2083,33 @@ function renderGymGrid(){
     sessionExercises.forEach(se=>{
       if(!shown.has(se.name) && byName.has(se.name)){ lib.push(byName.get(se.name)); shown.add(se.name); }
     });
+    lib.forEach(ex=>{
+      const inSession = sessionExercises.some(e=>e.name===ex.name);
+      const isExtra = extraGymTiles.some(e=>e.name===ex.name);
+      const state = inSession ? 'added' : (isExtra ? 'picked' : 'plain');
+      const btn = buildExerciseTile(ex, state);
+      btn.onclick = ()=> onTileTap(ex);
+      grid.appendChild(btn);
+    });
   } else {
-    lib = fullLib;
+    const lib = gymFavFilter === 'favorites' ? fullLib.filter(ex=>favoriteExercises.has(ex.name)) : fullLib;
+    renderGroupedExerciseGrid(grid, lib, null, null, ex=>{
+      const inSession = sessionExercises.some(e=>e.name===ex.name);
+      const btn = buildExerciseTile(ex, inSession ? 'added' : 'plain');
+      btn.onclick = ()=> onTileTap(ex);
+      const heart = document.createElement('span');
+      heart.className = 'ex-tile-fav';
+      heart.innerHTML = ph(favoriteExercises.has(ex.name) ? 'heart-fill' : 'heart');
+      heart.onclick = (e)=>{ e.stopPropagation(); toggleFavoriteExercise(ex.name); };
+      btn.appendChild(heart);
+      return btn;
+    });
   }
-  lib.forEach(ex=>{
-    const inSession = sessionExercises.some(e=>e.name===ex.name);
-    const isExtra = extraGymTiles.some(e=>e.name===ex.name);
-    const state = inSession ? 'added' : (isExtra ? 'picked' : 'plain');
-    const btn = buildExerciseTile(ex, state);
-    btn.onclick = ()=> onTileTap(ex);
-    grid.appendChild(btn);
-  });
   const pickBtn = document.getElementById('pickFromLibraryBtn');
   if(pickBtn) pickBtn.classList.toggle('hidden', !gymGridFiltered);
+  const favRow = document.getElementById('gymFavFilterRow');
+  if(favRow) favRow.classList.toggle('hidden', gymGridFiltered);
+  renderGymFavFilterRow();
 }
 let pickerSelected = new Set();
 function openExercisePicker(){
@@ -2090,7 +2176,7 @@ let tileDrag = null; // {name, ghost, offsetX, offsetY, lastTarget}
   grid.addEventListener('contextmenu', e=> e.preventDefault());
 
   grid.addEventListener('touchstart', (e)=>{
-    if(e.touches.length !== 1 || tileDrag || gymGridFiltered) return;
+    if(e.touches.length !== 1 || tileDrag || gymGridFiltered || gymGridGrouped) return;
     const tile = e.target.closest('.ex-tile');
     if(!tile) return;
     const t = e.touches[0];
@@ -2515,6 +2601,8 @@ function openPlanEditor(id){
   document.getElementById('planEditorTitle').textContent = existing ? existing.name : t('planNewTitle','NOWY PLAN');
   document.getElementById('planNameInput').value = editingPlan.name;
   document.getElementById('planDeleteBtn').style.display = (existing && !existing.builtin) ? 'block' : 'none';
+  planEditorEquipmentFilter = 'all';
+  renderPlanEquipFilterRow();
   renderPlanDayRow();
   renderPlanEditorGrid();
   goRoute('planEditor');
@@ -2537,38 +2625,36 @@ function selectPlanEditorDay(d){
   renderPlanDayRow();
   renderPlanEditorGrid();
 }
+const PLAN_EQUIP_FILTERS = [
+  {key:'all', pl:'Wszystkie', en:'All'},
+  {key:'hantle', pl:'Hantle', en:'Free weights'},
+  {key:'maszyny', pl:'Maszyny', en:'Machines'},
+];
+let planEditorEquipmentFilter = 'all';
+function setPlanEquipFilter(key){
+  planEditorEquipmentFilter = key;
+  renderPlanEquipFilterRow();
+  renderPlanEditorGrid();
+}
+function renderPlanEquipFilterRow(){
+  const row = document.getElementById('planEquipFilterRow');
+  if(!row) return;
+  row.innerHTML = PLAN_EQUIP_FILTERS.map(f=>
+    `<button type="button" class="equip-filter-chip${planEditorEquipmentFilter===f.key?' active':''}" onclick="setPlanEquipFilter('${f.key}')">${LANG==='en'?f.en:f.pl}</button>`
+  ).join('');
+}
 function renderPlanEditorGrid(){
   const container = document.getElementById('planEditorGrid');
-  container.innerHTML = '';
-  const lib = orderedExerciseLibrary();
+  let lib = orderedExerciseLibrary();
+  if(planEditorEquipmentFilter !== 'all'){
+    lib = lib.filter(ex => !ex.equipment || ex.equipment === planEditorEquipmentFilter);
+  }
   const dayExercises = editingPlan.schedule[editingPlan.activeDay];
   document.getElementById('planExCount').textContent = dayExercises.length;
-  const buckets = new Map();
-  lib.forEach(ex=>{
-    const b = muscleGroupBucket(ex.group);
-    if(!buckets.has(b.key)) buckets.set(b.key, []);
-    buckets.get(b.key).push(ex);
-  });
-  PLAN_EX_GROUPS.forEach(b=>{
-    const exercises = buckets.get(b.key);
-    if(!exercises || !exercises.length) return;
-    const section = document.createElement('div');
-    section.className = 'plan-ex-group';
-    const header = document.createElement('div');
-    header.className = 'plan-ex-group-header';
-    header.innerHTML = `${ph('barbell')}<span>${LANG==='en' ? b.en : b.pl}</span>`;
-    section.appendChild(header);
-    const grid = document.createElement('div');
-    grid.className = 'ex-grid';
-    exercises.forEach(ex=>{
-      const selected = dayExercises.some(e=>e.name===ex.name);
-      const btn = buildExerciseTile(ex, selected ? 'selected' : 'plain');
-      btn.onclick = ()=> togglePlanExercise(ex);
-      grid.appendChild(btn);
-    });
-    section.appendChild(grid);
-    container.appendChild(section);
-  });
+  renderGroupedExerciseGrid(container, lib,
+    ex => dayExercises.some(e=>e.name===ex.name) ? 'selected' : 'plain',
+    ex => togglePlanExercise(ex)
+  );
 }
 function togglePlanExercise(ex){
   const dayExercises = editingPlan.schedule[editingPlan.activeDay];
