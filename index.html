@@ -176,11 +176,18 @@ button{font-family:inherit;}
 .add-pill.secondary{background:#fff;color:var(--orange);border:1.5px solid var(--orange);}
 .add-pill:disabled{opacity:.45;cursor:default;}
 .add-pill.hidden{display:none;}
+.save-btn.hidden{display:none;}
+.gym-no-plan-prompt{text-align:center;padding:28px 12px 36px;}
+.gym-no-plan-prompt h2{font-size:40px;line-height:1.08;font-weight:700;color:var(--text-dark);margin:0 0 12px;}
+.gym-no-plan-prompt p{color:var(--text-dark);opacity:.65;font-size:18px;font-weight:400;line-height:1.4;margin:0 0 26px;}
+.gym-no-plan-prompt .add-pill{display:inline-flex;margin:0 auto;}
+.gym-no-plan-skip{display:block;margin-top:16px;font-size:13px;font-weight:600;color:var(--text-dark);opacity:.55;text-decoration:underline;}
 
 /* ---------- training plans (beta) ---------- */
 .plan-card{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;color:var(--text-dark);}
 .plan-card-star{cursor:pointer;flex-shrink:0;display:flex;}
-.plan-card-star .ph{width:24px;height:24px;color:var(--orange);}
+.plan-card-star .ph{width:24px;height:24px;color:var(--border);}
+.plan-card-star.active .ph{color:var(--orange);}
 .plan-card-body{flex:1;cursor:pointer;min-width:0;}
 .plan-card-name{font-size:14px;font-weight:700;letter-spacing:.42px;text-transform:uppercase;}
 .plan-card-meta{font-size:11px;color:#5b5555;margin-top:3px;}
@@ -523,12 +530,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="fav-filter-row hidden" id="gymFavFilterRow"></div>
         <div id="gymGrid"></div>
         <button class="add-pill secondary hidden" id="pickFromLibraryBtn" onclick="openExercisePicker()">__PH_PLUS__<span data-i18n="pickFromLibrary">Wybierz inne ćwiczenie</span></button>
-        <button class="add-pill" onclick="toggleNewExerciseForm()">__PH_PLUS__<span data-i18n="addNew">Dodaj nowe</span></button>
+        <button class="add-pill" id="gymAddNewBtn" onclick="toggleNewExerciseForm()">__PH_PLUS__<span data-i18n="addNew">Dodaj nowe</span></button>
 
         <div id="exercisePanelArea"></div>
       </div>
     </div>
-    <button class="save-btn" onclick="saveWorkout()" data-i18n="saveWorkout">Zapisz trening</button>
+    <button class="save-btn" id="gymSaveBtn" onclick="saveWorkout()" data-i18n="saveWorkout">Zapisz trening</button>
     <button class="share-btn hidden" id="gymShareBtn" onclick="shareHistCard('workout', this.dataset.id)">__PH_SHARE__<span data-i18n="shareWorkout">Udostępnij trening</span></button>
   </section>
 
@@ -2066,12 +2073,18 @@ function todayPlanExerciseNames(){
 }
 let gymGridFiltered = false;
 let gymGridGrouped = false; // true when showing the full library grouped by muscle group (drag-reorder doesn't apply there)
+let gymShowFullLibrary = false; // escape hatch for this visit — bypasses the "build a plan first" prompt below
+function showFullGymLibrary(){
+  gymShowFullLibrary = true;
+  renderGymGrid();
+}
 function renderGymGrid(){
   const grid = document.getElementById('gymGrid');
   const fullLib = orderedExerciseLibrary();
   const planEx = todayPlanExerciseNames();
   gymGridFiltered = !!planEx;
-  gymGridGrouped = !gymGridFiltered;
+  const showPlanPrompt = !gymGridFiltered && !starredPlanId && !gymShowFullLibrary;
+  gymGridGrouped = !gymGridFiltered && !showPlanPrompt;
   grid.classList.toggle('ex-grid', gymGridFiltered);
   if(planEx){
     grid.innerHTML = '';
@@ -2093,6 +2106,14 @@ function renderGymGrid(){
       btn.onclick = ()=> onTileTap(ex);
       grid.appendChild(btn);
     });
+  } else if(showPlanPrompt){
+    grid.innerHTML = `
+      <div class="gym-no-plan-prompt">
+        <h2>${t('gymNoPlanHeadline','Stwórz swój plan treningowy')}</h2>
+        <p>${t('gymNoPlanPrompt','Albo wybierz gotowy — GYM samo pokaże, co dziś zrobić.')}</p>
+        <button type="button" class="add-pill" onclick="goRoute('plans')">+<span>${t('gymNoPlanCta','Stwórz lub wybierz plan')}</span></button>
+        <a href="#" class="gym-no-plan-skip" onclick="event.preventDefault();showFullGymLibrary();">${t('gymShowAllLink','Zobacz wszystkie ćwiczenia')}</a>
+      </div>`;
   } else {
     const lib = gymFavFilter === 'favorites' ? fullLib.filter(ex=>favoriteExercises.has(ex.name)) : fullLib;
     renderGroupedExerciseGrid(grid, lib, null, null, ex=>{
@@ -2110,7 +2131,11 @@ function renderGymGrid(){
   const pickBtn = document.getElementById('pickFromLibraryBtn');
   if(pickBtn) pickBtn.classList.toggle('hidden', !gymGridFiltered);
   const favRow = document.getElementById('gymFavFilterRow');
-  if(favRow) favRow.classList.toggle('hidden', gymGridFiltered);
+  if(favRow) favRow.classList.toggle('hidden', gymGridFiltered || showPlanPrompt);
+  const addNewBtn = document.getElementById('gymAddNewBtn');
+  if(addNewBtn) addNewBtn.classList.toggle('hidden', showPlanPrompt);
+  const saveBtn = document.getElementById('gymSaveBtn');
+  if(saveBtn) saveBtn.classList.toggle('hidden', showPlanPrompt);
   renderGymFavFilterRow();
 }
 let pickerSelected = new Set();
@@ -2178,7 +2203,7 @@ let tileDrag = null; // {name, ghost, offsetX, offsetY, lastTarget}
   grid.addEventListener('contextmenu', e=> e.preventDefault());
 
   grid.addEventListener('touchstart', (e)=>{
-    if(e.touches.length !== 1 || tileDrag || gymGridFiltered || gymGridGrouped) return;
+    if(e.touches.length !== 1 || tileDrag || gymGridGrouped) return;
     const tile = e.target.closest('.ex-tile');
     if(!tile) return;
     const t = e.touches[0];
@@ -2259,7 +2284,16 @@ function moveTileDrag(x, y){
       const toIdx = tiles.indexOf(targetTile);
       if(fromIdx < toIdx) grid.insertBefore(placeholderEl, targetTile.nextSibling);
       else grid.insertBefore(placeholderEl, targetTile);
-      exerciseOrder = [...grid.querySelectorAll('.ex-tile')].map(el=>el.dataset.name);
+      // Only the currently visible tiles (e.g. today's filtered plan list)
+      // get reordered here — merge them back into the full exerciseOrder
+      // instead of replacing it outright, so exercises outside this view
+      // (grouped-grid-only, not shown right now) don't lose their spot.
+      const visibleNames = [...grid.querySelectorAll('.ex-tile')].map(el=>el.dataset.name);
+      const visibleSet = new Set(visibleNames);
+      let insertAt = 0;
+      for(const n of exerciseOrder){ if(visibleSet.has(n)) break; insertAt++; }
+      const rest = exerciseOrder.filter(n=>!visibleSet.has(n));
+      exerciseOrder = [...rest.slice(0, insertAt), ...visibleNames, ...rest.slice(insertAt)];
       tileDrag.lastTarget = targetName;
     }
   }
@@ -2465,8 +2499,14 @@ function dayKeyFromDate(iso){
   const map = ['sun','mon','tue','wed','thu','fri','sat'];
   return map[new Date(iso+'T00:00:00').getDay()];
 }
+function plExercisesWord(n){
+  const mod10 = n % 10, mod100 = n % 100;
+  if(n === 1) return 'ćwiczenie';
+  if(mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return 'ćwiczenia';
+  return 'ćwiczeń';
+}
 function planExCountText(n){
-  return t('planExercisesCount', n===1 ? '1 ćwiczenie' : `${n} ćwiczeń`, n);
+  return t('planExercisesCount', `${n} ${plExercisesWord(n)}`, n);
 }
 function emptySchedule(){
   const s = {};
@@ -2588,11 +2628,11 @@ function renderPlansList(){
     const daysTxt = activeDays.length ? activeDays.map(planDayLabel).join(', ') : t('planNoDays','Brak przypisanych dni');
     return `
       <div class="plan-card">
-        <span class="plan-card-star" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'star-fill':'star')}</span>
         <div class="plan-card-body" onclick="openPlanEditor('${p.id}')">
           <div class="plan-card-name">${p.name}</div>
           <div class="plan-card-meta">${daysTxt} · ${planExCountText(planTotalExercises(p))}</div>
         </div>
+        <span class="plan-card-star${starred?' active':''}" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph('check-circle')}</span>
       </div>`;
   }).join('');
 }
@@ -2937,7 +2977,7 @@ function renderHistDetail(){
     html += `
       <div class="hist-card${exp?'':' collapsed'}"${exp?'':` onclick="toggleHistExpand('workout')"`}>
         <div class="lbl-row"><div class="l">${ph('barbell')}<span>${t('histWorkoutLabel','TRENING')}</span></div>${histRightHtml(fmtDateHuman(w.date), exp, 'workout', w.id)}</div>
-        <div class="vol">${t('histWorkoutVol', `${w.exercises.length} ćwiczeń · objętość ${Math.round(totalVol)} kg`, w.exercises.length, Math.round(totalVol))}</div>
+        <div class="vol">${t('histWorkoutVol', `${w.exercises.length} ${plExercisesWord(w.exercises.length)} · objętość ${Math.round(totalVol)} kg`, w.exercises.length, Math.round(totalVol))}</div>
         ${exp?`<div class="hist-ex-list">
           ${w.exercises.map(e=>`
             <div class="hist-ex-item">
