@@ -206,6 +206,8 @@ button{font-family:inherit;}
 .pick-ex-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .pick-ex-header h3{margin:0;}
 .pick-ex-header .ph{width:20px;height:20px;color:var(--text-dark);cursor:pointer;flex-shrink:0;}
+#plansCloseX.hidden{display:none;}
+#planOnboardingIntro.hidden{display:none;}
 #emptyWorkoutOverlay{align-items:center;padding:20px;}
 .onboard-box.empty-workout-box{background:var(--orange);text-align:center;}
 .onboard-box.empty-workout-box h3{color:#fff;}
@@ -637,21 +639,22 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
   </section>
 
-  <!-- ===================== PLANS (beta — triple-tap the logo) ===================== -->
+  <!-- ===================== PLANS ===================== -->
   <section class="view" id="view-plans">
     <div class="header-row on-panel">
       <div class="section-label"><span class="ph" data-ph="barbell"></span><span>PLANS</span></div>
-      <span class="ph" data-ph="x" style="cursor:pointer;width:20px;height:20px;color:var(--text-dark);" onclick="goRoute('gym')"></span>
+      <span class="ph" data-ph="x" id="plansCloseX" style="cursor:pointer;width:20px;height:20px;color:var(--text-dark);" onclick="goRoute('gym')"></span>
     </div>
     <div class="panel">
       <div class="panel-inner">
+        <div class="onboard-note hidden" id="planOnboardingIntro" data-i18n="planOnboardingIntro">Zanim zaczniesz, wybierz gotowy plan albo stwórz własny — zobaczysz go od razu w GYM.</div>
         <div id="plansList"></div>
         <button class="add-pill" onclick="openPlanEditor(null)">__PH_PLUS__<span data-i18n="planCreateNew">Stwórz mój plan treningowy</span></button>
       </div>
     </div>
   </section>
 
-  <!-- ===================== PLAN EDITOR (beta) ===================== -->
+  <!-- ===================== PLAN EDITOR ===================== -->
   <section class="view" id="view-planEditor">
     <div class="header-row on-panel">
       <div class="section-label"><span class="ph" data-ph="pencil"></span><span id="planEditorTitle">NOWY PLAN</span></div>
@@ -835,6 +838,7 @@ document.title = LANG === 'en' ? 'Thryve — Gym & Running' : 'Thryve — Siłow
 document.documentElement.lang = LANG;
 const T_EN = {
   planPill: 'Training plans',
+  planOnboardingIntro: "Before you start, pick a ready-made plan or build your own — you'll see it right away in GYM.",
   shareIconTitle: 'Share',
   importTitle: 'Import backup',
   exportTitle: 'Download backup',
@@ -1275,11 +1279,13 @@ function saveOnboarding(){
   localStorage.setItem(LS_ONBOARD_SEEN, '1');
   localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);
   document.getElementById('onboardOverlay').classList.add('hidden');
+  if(!starredPlanId) startPlanOnboarding();
 }
 function skipOnboarding(){
   localStorage.setItem(LS_ONBOARD_SEEN, '1');
   localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);
   document.getElementById('onboardOverlay').classList.add('hidden');
+  if(!starredPlanId) startPlanOnboarding();
 }
 
 /* ---------- what's new / changelog ----------
@@ -1619,7 +1625,7 @@ function goRoute(route){
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward);
-  document.getElementById('bottomNav').style.display = route==='welcome' ? 'none' : 'flex';
+  document.getElementById('bottomNav').style.display = (route==='welcome' || planOnboardingActive) ? 'none' : 'flex';
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===route));
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
@@ -2354,6 +2360,21 @@ function loadTrainingPlans(){
 function saveTrainingPlansList(){ localStorage.setItem(LS_TRAINING_PLANS, JSON.stringify(trainingPlans)); }
 let trainingPlans = loadTrainingPlans();
 let starredPlanId = localStorage.getItem(LS_STARRED_PLAN) || null;
+let planOnboardingActive = false; // true while a brand-new user is being forced to pick/create their first plan
+function completePlanOnboardingIfNeeded(){
+  if(!planOnboardingActive) return;
+  planOnboardingActive = false;
+  document.getElementById('plansCloseX').classList.remove('hidden');
+  document.getElementById('planOnboardingIntro').classList.add('hidden');
+  goRoute('welcome');
+}
+function startPlanOnboarding(){
+  planOnboardingActive = true;
+  document.getElementById('plansCloseX').classList.add('hidden');
+  document.getElementById('planOnboardingIntro').classList.remove('hidden');
+  renderPlansList();
+  goRoute('plans');
+}
 function planActiveDays(p){
   return PLAN_DAYS.filter(d=>(p.schedule[d]||[]).length>0);
 }
@@ -2373,6 +2394,7 @@ function toggleStarredPlan(id){
   renderPlansList();
   updateTodayPlanBanner();
   updatePlanPillLabel();
+  if(starredPlanId) completePlanOnboardingIfNeeded();
 }
 function renderPlansList(){
   const wrap = document.getElementById('plansList');
@@ -2472,17 +2494,24 @@ function savePlanEditor(){
   if(!name){ toast(t('planNameRequired','Podaj nazwę planu')); return; }
   if(!planTotalExercises(editingPlan)){ toast(t('planNeedsExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
   editingPlan.name = name;
+  let savedId;
   if(editingPlan.id){
     const idx = trainingPlans.findIndex(p=>p.id===editingPlan.id);
     trainingPlans[idx] = {...trainingPlans[idx], name: editingPlan.name, schedule: editingPlan.schedule};
+    savedId = editingPlan.id;
   } else {
-    trainingPlans.push({id:'plan_'+Date.now(), name: editingPlan.name, builtin:false, schedule: editingPlan.schedule});
+    savedId = 'plan_'+Date.now();
+    trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, schedule: editingPlan.schedule});
   }
   saveTrainingPlansList();
   toast(t('planSaved','Plan zapisany'));
-  goRoute('plans');
   updateTodayPlanBanner();
   updatePlanPillLabel();
+  if(planOnboardingActive && starredPlanId !== savedId){
+    toggleStarredPlan(savedId); // stars it and, since we're mid plan-onboarding, carries the user onward
+  } else {
+    goRoute('plans');
+  }
 }
 function deleteCurrentPlan(){
   if(!editingPlan || !editingPlan.id) return;
