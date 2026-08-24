@@ -359,7 +359,6 @@ button{font-family:inherit;}
 .plan-modal td,.plan-modal th{padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left;}
 .plan-modal-close{background:var(--orange);border:none;color:#fff;border-radius:10px;padding:10px 18px;font-weight:700;font-size:13px;width:100%;margin-top:10px;cursor:pointer;}
 
-.new-ex-form{background:#fff;border-radius:16px;padding:16px;margin-top:12px;color:var(--text-dark);}
 .new-ex-form .field{margin-bottom:10px;}
 .new-ex-form .row2{display:flex;gap:10px;}
 .new-ex-form .btns{display:flex;gap:10px;margin-top:6px;}
@@ -445,25 +444,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="panel-inner">
         <div class="ex-grid" id="gymGrid"></div>
         <button class="add-pill" onclick="toggleNewExerciseForm()">__PH_PLUS__<span data-i18n="addNew">Dodaj nowe</span></button>
-        <div class="new-ex-form" id="newExerciseForm" style="display:none;">
-          <div class="field"><label data-i18n="exNameLabel">Nazwa ćwiczenia</label><input type="text" id="newExName" data-i18n-ph="exNamePh" placeholder="np. Wykroki z hantlami" oninput="updateExerciseIconSuggestion()"></div>
-          <div class="icon-suggest hidden" id="iconSuggestBox">
-            <img id="iconSuggestImg" alt="">
-            <span data-i18n="iconSuggestLabel">Sugerowana ikonka</span>
-          </div>
-          <div class="row2">
-            <div class="field" style="flex:1;"><label data-i18n="muscleGroupLabel">Grupa mięśniowa</label><input type="text" id="newExGroup" data-i18n-ph="muscleGroupPh" placeholder="np. Nogi"></div>
-            <div class="field" style="width:70px;flex:none;"><label data-i18n="setsLabel">Serie</label><input type="number" id="newExSets" value="3" min="1"></div>
-          </div>
-          <div class="row2">
-            <div class="field"><label data-i18n="repsFromLabel">Powt. od</label><input type="number" id="newExRepLow" value="8" min="1"></div>
-            <div class="field"><label data-i18n="repsToLabel">Powt. do</label><input type="number" id="newExRepHigh" value="12" min="1"></div>
-          </div>
-          <div class="btns">
-            <button class="cancel" onclick="toggleNewExerciseForm()" data-i18n="cancel">Anuluj</button>
-            <button class="save" onclick="saveNewExercise()" data-i18n="saveAddToSession">Zapisz i dodaj do sesji</button>
-          </div>
-        </div>
 
         <div id="exercisePanelArea"></div>
       </div>
@@ -674,6 +654,29 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<div class="onboard-overlay hidden" id="newExerciseOverlay" onclick="if(event.target===this) toggleNewExerciseForm()">
+  <div class="onboard-box new-ex-form" id="newExerciseForm">
+    <h3 data-i18n="newExerciseTitle">Dodaj własne ćwiczenie</h3>
+    <div class="field"><label data-i18n="exNameLabel">Nazwa ćwiczenia</label><input type="text" id="newExName" data-i18n-ph="exNamePh" placeholder="np. Wykroki z hantlami" oninput="updateExerciseIconSuggestion()"></div>
+    <div class="icon-suggest hidden" id="iconSuggestBox">
+      <img id="iconSuggestImg" alt="">
+      <span data-i18n="iconSuggestLabel">Sugerowana ikonka</span>
+    </div>
+    <div class="row2">
+      <div class="field" style="flex:1;"><label data-i18n="muscleGroupLabel">Grupa mięśniowa</label><input type="text" id="newExGroup" data-i18n-ph="muscleGroupPh" placeholder="np. Nogi"></div>
+      <div class="field" style="width:70px;flex:none;"><label data-i18n="setsLabel">Serie</label><input type="number" id="newExSets" value="3" min="1"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label data-i18n="repsFromLabel">Powt. od</label><input type="number" id="newExRepLow" value="8" min="1"></div>
+      <div class="field"><label data-i18n="repsToLabel">Powt. do</label><input type="number" id="newExRepHigh" value="12" min="1"></div>
+    </div>
+    <div class="btns">
+      <button class="cancel" onclick="toggleNewExerciseForm()" data-i18n="cancel">Anuluj</button>
+      <button class="save" onclick="saveNewExercise()" data-i18n="saveAddToSession">Zapisz i dodaj do sesji</button>
+    </div>
+  </div>
+</div>
+
 <script>/*!
  * Chart.js v4.4.4
  * https://www.chartjs.org
@@ -817,6 +820,7 @@ const T_EN = {
   shareFileWorkout: 'workout',
   shareFileRun: 'run',
   iconSuggestLabel: 'Suggested icon',
+  newExerciseTitle: 'Add your own exercise',
 };
 function t(key, plText, ...args){
   const val = (LANG === 'en' && T_EN[key] !== undefined) ? T_EN[key] : plText;
@@ -1112,9 +1116,13 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.1.0";
+const APP_VERSION = "3.1.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "3.1.1": {
+    pl: ["GYM: dodawanie własnego ćwiczenia otwiera się teraz jako popup, zamiast rozwijać się w miejscu"],
+    en: ["GYM: adding a custom exercise now opens as a popup instead of expanding inline"],
+  },
   "3.1.0": {
     pl: ["GYM: przy dodawaniu własnego ćwiczenia apka sama podpowie pasującą ikonkę — 22 nowe ikony do wyboru"],
     en: ["GYM: adding a custom exercise now suggests a matching icon automatically — 22 new icons to draw from"],
@@ -1434,6 +1442,7 @@ function anyModalOpen(){
   return !document.getElementById('onboardOverlay').classList.contains('hidden')
     || !document.getElementById('whatsnewOverlay').classList.contains('hidden')
     || !document.getElementById('feedbackOverlay').classList.contains('hidden')
+    || !document.getElementById('newExerciseOverlay').classList.contains('hidden')
     || document.getElementById('planModal').classList.contains('open')
     || !document.getElementById('dpOverlay').classList.contains('hidden');
 }
@@ -1737,9 +1746,9 @@ function renderExercisePanels(){
 }
 
 function toggleNewExerciseForm(){
-  const form = document.getElementById('newExerciseForm');
-  const willShow = form.style.display === 'none';
-  form.style.display = willShow ? 'block' : 'none';
+  const overlay = document.getElementById('newExerciseOverlay');
+  const willShow = overlay.classList.contains('hidden');
+  overlay.classList.toggle('hidden', !willShow);
   if(willShow){
     document.getElementById('newExName').value = '';
     document.getElementById('newExGroup').value = '';
