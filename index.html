@@ -1829,7 +1829,7 @@ function orderedExerciseLibrary(){
 }
 
 function buildExerciseTile(ex, state){
-  // state: 'plain' (default) | 'picked' (orange, added but not logged yet) |
+  // state: 'plain' (default, also used for 'picked' — added but not logged, looks the same) |
   //        'added' (grayed out, already logged in this session) |
   //        'selected' (orange + checkmark, picker's own in-progress selection)
   const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
@@ -1848,9 +1848,9 @@ function buildExerciseTile(ex, state){
     if(state==='added') btn.classList.add('added');
     btn.innerHTML = `${ph('barbell')}<span class="t">${ex.name}</span>`;
   }
-  if(state==='picked' || state==='selected'){
+  if(state==='selected'){
     btn.classList.add('plan-ex-selected');
-    if(state==='selected') btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
+    btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
   }
   return btn;
 }
@@ -2127,7 +2127,7 @@ function renderExercisePanels(){
       bar.onclick = ()=>{ openExerciseName = ex.name; renderExercisePanels(); };
       bar.innerHTML = `
         <div class="ex-bar-info">
-          <span class="ex-bar-check">${PH['check-circle']}</span>
+          ${validSets.length ? `<span class="ex-bar-check">${PH['check-circle']}</span>` : ''}
           <div>
             <div class="nm">${ex.name}</div>
             <div class="st">${summary}</div>
