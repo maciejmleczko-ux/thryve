@@ -1118,7 +1118,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.1.7";
+const APP_VERSION = "3.1.8";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "3.1.1": {
@@ -1445,15 +1445,19 @@ const SWIPE_ROUTES = ['gym', 'running', 'history', 'stats'];
    position:fixed + inset:0 can still misbehave on iOS when the keyboard
    opens (the "layout viewport" it resolves against isn't always the
    visible one) — window.visualViewport is the authoritative live value,
-   so drive the overlay's top/height from it directly instead of trusting
-   CSS to react to the keyboard on its own. */
+   so drive the overlay's top from it directly instead of trusting CSS to
+   react to the keyboard on its own. Only `top` is set here — `bottom`
+   stays 0 from the base .onboard-overlay rule so the backdrop always
+   reaches the true screen edge and never leaves a gap that shows the
+   page behind it (setting an explicit height from vv.height caused
+   exactly that gap, since vv.height excludes the area under the
+   keyboard). */
 (function pinOverlaysToVisualViewport(){
   if(!window.visualViewport) return;
   const vv = window.visualViewport;
   function sync(){
     document.querySelectorAll('.onboard-overlay').forEach(el=>{
       el.style.top = vv.offsetTop + 'px';
-      el.style.height = vv.height + 'px';
     });
   }
   vv.addEventListener('resize', sync);
