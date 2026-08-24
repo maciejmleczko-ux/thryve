@@ -494,7 +494,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
         <div class="field" style="padding:0;margin-top:14px;">
           <label data-i18n="notesLabel">Uwagi</label>
-          <input type="text" id="runNotes" data-i18n-ph="optionalPh" placeholder="opcjonalnie">
+          <input type="text" id="runNotes" data-i18n-ph="optionalPh" placeholder="opcjonalnie" autocomplete="off">
         </div>
       </div>
     </div>
@@ -617,7 +617,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <div class="onboard-box">
     <h3 data-i18n="onboardTitle">Cześć! Jak Cię nazywać?</h3>
     <p data-i18n="onboardBody">Podpiszemy Twoim imieniem kopie zapasowe treningów. Możesz to pominąć.</p>
-    <input type="text" id="onboardName" data-i18n-ph="onboardNamePh" placeholder="np. Maciek" maxlength="30">
+    <input type="text" id="onboardName" data-i18n-ph="onboardNamePh" placeholder="np. Maciek" maxlength="30" autocomplete="off">
     <div class="onboard-note" data-i18n="onboardNote">Dane treningowe trzymamy tylko na tym urządzeniu — nie w chmurze. Jeśli zmienisz telefon albo wyczyścisz dane przeglądarki, stracisz historię. Warto od czasu do czasu zrobić kopię zapasową — ikona pobierania na ekranie Historia.</div>
     <div class="onboard-actions">
       <button class="skip" onclick="skipOnboarding()" data-i18n="skip">Pomiń</button>
@@ -646,7 +646,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button type="button" class="feedback-type" data-type="idea" onclick="setFeedbackType(this)" data-i18n="feedbackIdea">Pomysł</button>
       <button type="button" class="feedback-type" data-type="other" onclick="setFeedbackType(this)" data-i18n="feedbackOther">Inne</button>
     </div>
-    <textarea id="feedbackMessage" rows="5" maxlength="2000" data-i18n-ph="feedbackPh" placeholder="Opisz co się stało albo co chciałbyś zmienić..."></textarea>
+    <textarea id="feedbackMessage" rows="5" maxlength="2000" data-i18n-ph="feedbackPh" placeholder="Opisz co się stało albo co chciałbyś zmienić..." autocomplete="off"></textarea>
     <div class="onboard-actions">
       <button class="skip" onclick="closeFeedback()" data-i18n="cancel">Anuluj</button>
       <button class="save" id="feedbackSubmitBtn" onclick="submitFeedback()" data-i18n="send">Wyślij</button>
@@ -657,13 +657,13 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <div class="onboard-overlay hidden" id="newExerciseOverlay" onclick="if(event.target===this) toggleNewExerciseForm()">
   <div class="onboard-box new-ex-form" id="newExerciseForm">
     <h3 data-i18n="newExerciseTitle">Dodaj własne ćwiczenie</h3>
-    <div class="field"><label data-i18n="exNameLabel">Nazwa ćwiczenia</label><input type="text" id="newExName" data-i18n-ph="exNamePh" placeholder="np. Wykroki z hantlami" oninput="updateExerciseIconSuggestion()"></div>
+    <div class="field"><label data-i18n="exNameLabel">Nazwa ćwiczenia</label><input type="text" id="newExName" data-i18n-ph="exNamePh" placeholder="np. Wykroki z hantlami" oninput="updateExerciseIconSuggestion()" autocomplete="off"></div>
     <div class="icon-suggest hidden" id="iconSuggestBox">
       <img id="iconSuggestImg" alt="">
       <span data-i18n="iconSuggestLabel">Sugerowana ikonka</span>
     </div>
     <div class="row2">
-      <div class="field" style="flex:1;"><label data-i18n="muscleGroupLabel">Grupa mięśniowa</label><input type="text" id="newExGroup" data-i18n-ph="muscleGroupPh" placeholder="np. Nogi"></div>
+      <div class="field" style="flex:1;"><label data-i18n="muscleGroupLabel">Grupa mięśniowa</label><input type="text" id="newExGroup" data-i18n-ph="muscleGroupPh" placeholder="np. Nogi" autocomplete="off"></div>
       <div class="field" style="width:70px;flex:none;"><label data-i18n="setsLabel">Serie</label><input type="number" id="newExSets" value="3" min="1"></div>
     </div>
     <div class="row2">
@@ -1116,7 +1116,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.1.1";
+const APP_VERSION = "3.1.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "3.1.1": {
