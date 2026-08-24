@@ -1118,7 +1118,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.1.6";
+const APP_VERSION = "3.1.7";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "3.1.1": {
@@ -1440,6 +1440,25 @@ const SWIPE_ROUTES = ['gym', 'running', 'history', 'stats'];
       nav.style.display = currentRoute==='welcome' ? 'none' : 'flex';
     }, 60);
   });
+})();
+/* ---------- keep .onboard-overlay pinned to the real visible area ----------
+   position:fixed + inset:0 can still misbehave on iOS when the keyboard
+   opens (the "layout viewport" it resolves against isn't always the
+   visible one) — window.visualViewport is the authoritative live value,
+   so drive the overlay's top/height from it directly instead of trusting
+   CSS to react to the keyboard on its own. */
+(function pinOverlaysToVisualViewport(){
+  if(!window.visualViewport) return;
+  const vv = window.visualViewport;
+  function sync(){
+    document.querySelectorAll('.onboard-overlay').forEach(el=>{
+      el.style.top = vv.offsetTop + 'px';
+      el.style.height = vv.height + 'px';
+    });
+  }
+  vv.addEventListener('resize', sync);
+  vv.addEventListener('scroll', sync);
+  sync();
 })();
 function anyModalOpen(){
   return !document.getElementById('onboardOverlay').classList.contains('hidden')
