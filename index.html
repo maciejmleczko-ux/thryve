@@ -171,6 +171,7 @@ button{font-family:inherit;}
   color:#fff;border:none;border-radius:12px;padding:14px 20px;margin-top:16px;font-size:12px;
   font-weight:700;letter-spacing:.32px;text-transform:uppercase;cursor:pointer;width:100%;}
 .add-pill .ph{width:24px;height:24px;}
+.add-pill.secondary{background:#fff;color:var(--orange);border:1.5px solid var(--orange);}
 
 /* ---------- training plans (beta) ---------- */
 .plan-card{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;color:var(--text-dark);}
@@ -192,6 +193,10 @@ button{font-family:inherit;}
 .today-plan-label{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;opacity:.6;}
 .today-plan-name{font-size:15px;font-weight:700;margin-top:2px;}
 .today-plan-exercises{font-size:11px;color:#5b5555;margin-top:4px;line-height:1.5;}
+.pick-ex-box{max-width:420px;}
+.pick-ex-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.pick-ex-header h3{margin:0;}
+.pick-ex-header .ph{width:20px;height:20px;color:var(--text-dark);cursor:pointer;flex-shrink:0;}
 
 /* ---------- exercise editor panel ---------- */
 .ex-panel{background:#fff;border-radius:16px;padding:16px;margin-top:14px;color:var(--text-dark);position:relative;}
@@ -477,6 +482,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="panel">
       <div class="panel-inner">
         <div class="ex-grid" id="gymGrid"></div>
+        <button class="add-pill secondary hidden" id="pickFromLibraryBtn" onclick="openExercisePicker()">__PH_PLUS__<span data-i18n="pickFromLibrary">Wybierz inne ćwiczenie</span></button>
         <button class="add-pill" onclick="toggleNewExerciseForm()">__PH_PLUS__<span data-i18n="addNew">Dodaj nowe</span></button>
 
         <div id="exercisePanelArea"></div>
@@ -730,6 +736,16 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<div class="onboard-overlay hidden" id="pickExerciseOverlay" onclick="if(event.target===this) closeExercisePicker()">
+  <div class="onboard-box pick-ex-box">
+    <div class="pick-ex-header">
+      <h3 data-i18n="pickFromLibraryTitle">Wybierz ćwiczenie</h3>
+      <span class="ph" data-ph="x" onclick="closeExercisePicker()"></span>
+    </div>
+    <div class="ex-grid" id="pickExerciseGrid"></div>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden" id="newExerciseOverlay" onclick="if(event.target===this) toggleNewExerciseForm()">
   <div class="onboard-box new-ex-form" id="newExerciseForm">
     <h3 data-i18n="newExerciseTitle">Dodaj własne ćwiczenie</h3>
@@ -917,6 +933,8 @@ const T_EN = {
   planNoPlans: 'No plans yet.',
   planDayHint: 'Pick a day and assign exercises to it',
   planRestDay: 'Rest day',
+  pickFromLibrary: 'Pick another exercise',
+  pickFromLibraryTitle: 'Pick an exercise',
 };
 function t(key, plText, ...args){
   const val = (LANG === 'en' && T_EN[key] !== undefined) ? T_EN[key] : plText;
@@ -1638,6 +1656,7 @@ function updateGymDateLabel(){
   document.getElementById('gymDateLabel').textContent = fmtDateHuman(v);
   document.getElementById('gymShareBtn').classList.add('hidden');
   updateTodayPlanBanner();
+  renderGymGrid();
 }
 
 document.getElementById('runDate').addEventListener('change', updateRunDateLabel);
@@ -1797,29 +1816,77 @@ function orderedExerciseLibrary(){
   return ordered;
 }
 
+function buildExerciseTile(ex, added){
+  const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
+  const btn = document.createElement('button');
+  btn.className = 'ex-tile';
+  btn.dataset.name = ex.name;
+  if(slug){
+    const img = document.createElement('img');
+    img.src = iconSrc(slug, 'white');
+    img.draggable = false;
+    img.alt = '';
+    if(added){ img.style.filter = 'grayscale(1)'; img.style.opacity = '.5'; }
+    btn.appendChild(img);
+  } else {
+    btn.classList.add('custom-tile');
+    if(added) btn.classList.add('added');
+    btn.innerHTML = `${ph('barbell')}<span class="t">${ex.name}</span>`;
+  }
+  return btn;
+}
+function todayPlanExerciseNames(){
+  if(!starredPlanId) return null;
+  const plan = trainingPlans.find(p=>p.id===starredPlanId);
+  if(!plan) return null;
+  const iso = document.getElementById('gymDate').value || todayStr();
+  const list = plan.schedule[dayKeyFromDate(iso)];
+  return (list && list.length) ? list : null;
+}
+let gymGridFiltered = false;
 function renderGymGrid(){
   const grid = document.getElementById('gymGrid');
   grid.innerHTML = '';
-  const lib = orderedExerciseLibrary();
+  const fullLib = orderedExerciseLibrary();
+  const planEx = todayPlanExerciseNames();
+  gymGridFiltered = !!planEx;
+  let lib;
+  if(planEx){
+    const byName = new Map(fullLib.map(ex=>[ex.name, ex]));
+    const planNames = new Set(planEx.map(e=>e.name));
+    lib = planEx.map(e=> byName.get(e.name) || e);
+    sessionExercises.forEach(se=>{
+      if(!planNames.has(se.name) && byName.has(se.name)) lib.push(byName.get(se.name));
+    });
+  } else {
+    lib = fullLib;
+  }
   lib.forEach(ex=>{
     const added = sessionExercises.some(e=>e.name===ex.name);
-    const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
-    const btn = document.createElement('button');
-    btn.className = 'ex-tile';
-    btn.dataset.name = ex.name;
+    const btn = buildExerciseTile(ex, added);
     btn.onclick = ()=> onTileTap(ex);
-    if(slug){
-      const img = document.createElement('img');
-      img.src = iconSrc(slug, 'white');
-      img.draggable = false;
-      img.alt = '';
-      if(added){ img.style.filter = 'grayscale(1)'; img.style.opacity = '.5'; }
-      btn.appendChild(img);
-    } else {
-      btn.classList.add('custom-tile');
-      if(added) btn.classList.add('added');
-      btn.innerHTML = `${ph('barbell')}<span class="t">${ex.name}</span>`;
-    }
+    grid.appendChild(btn);
+  });
+  const pickBtn = document.getElementById('pickFromLibraryBtn');
+  if(pickBtn) pickBtn.classList.toggle('hidden', !gymGridFiltered);
+}
+function openExercisePicker(){
+  renderExercisePickerGrid();
+  document.getElementById('pickExerciseOverlay').classList.remove('hidden');
+}
+function closeExercisePicker(){
+  document.getElementById('pickExerciseOverlay').classList.add('hidden');
+}
+function renderExercisePickerGrid(){
+  const grid = document.getElementById('pickExerciseGrid');
+  grid.innerHTML = '';
+  orderedExerciseLibrary().forEach(ex=>{
+    const added = sessionExercises.some(e=>e.name===ex.name);
+    const btn = buildExerciseTile(ex, added);
+    btn.onclick = ()=>{
+      onTileTap(ex);
+      renderExercisePickerGrid();
+    };
     grid.appendChild(btn);
   });
 }
@@ -1843,7 +1910,7 @@ let tileDrag = null; // {name, ghost, offsetX, offsetY, lastTarget}
   grid.addEventListener('contextmenu', e=> e.preventDefault());
 
   grid.addEventListener('touchstart', (e)=>{
-    if(e.touches.length !== 1 || tileDrag) return;
+    if(e.touches.length !== 1 || tileDrag || gymGridFiltered) return;
     const tile = e.target.closest('.ex-tile');
     if(!tile) return;
     const t = e.touches[0];
