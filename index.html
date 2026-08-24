@@ -617,7 +617,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <div class="onboard-box">
     <h3 data-i18n="onboardTitle">Cześć! Jak Cię nazywać?</h3>
     <p data-i18n="onboardBody">Podpiszemy Twoim imieniem kopie zapasowe treningów. Możesz to pominąć.</p>
-    <input type="text" id="onboardName" data-i18n-ph="onboardNamePh" placeholder="np. Maciek" maxlength="30" autocomplete="off">
+    <input type="text" id="onboardNick" data-i18n-ph="onboardNamePh" placeholder="np. Maciek" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false">
     <div class="onboard-note" data-i18n="onboardNote">Dane treningowe trzymamy tylko na tym urządzeniu — nie w chmurze. Jeśli zmienisz telefon albo wyczyścisz dane przeglądarki, stracisz historię. Warto od czasu do czasu zrobić kopię zapasową — ikona pobierania na ekranie Historia.</div>
     <div class="onboard-actions">
       <button class="skip" onclick="skipOnboarding()" data-i18n="skip">Pomiń</button>
@@ -657,7 +657,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <div class="onboard-overlay hidden" id="newExerciseOverlay" onclick="if(event.target===this) toggleNewExerciseForm()">
   <div class="onboard-box new-ex-form" id="newExerciseForm">
     <h3 data-i18n="newExerciseTitle">Dodaj własne ćwiczenie</h3>
-    <div class="field"><label data-i18n="exNameLabel">Nazwa ćwiczenia</label><input type="text" id="newExName" data-i18n-ph="exNamePh" placeholder="np. Wykroki z hantlami" oninput="updateExerciseIconSuggestion()" autocomplete="off"></div>
+    <div class="field"><label data-i18n="exNameLabel">Nazwa ćwiczenia</label><input type="text" id="newExTitle" data-i18n-ph="exNamePh" placeholder="np. Wykroki z hantlami" oninput="updateExerciseIconSuggestion()" autocomplete="off"></div>
     <div class="icon-suggest hidden" id="iconSuggestBox">
       <img id="iconSuggestImg" alt="">
       <span data-i18n="iconSuggestLabel">Sugerowana ikonka</span>
@@ -1005,7 +1005,7 @@ function suggestIconForName(name){
 }
 let suggestedExerciseIcon = null;
 function updateExerciseIconSuggestion(){
-  const name = document.getElementById('newExName').value;
+  const name = document.getElementById('newExTitle').value;
   suggestedExerciseIcon = suggestIconForName(name);
   const box = document.getElementById('iconSuggestBox');
   if(suggestedExerciseIcon){
@@ -1093,7 +1093,7 @@ function updateWelcomeGreeting(){
   else { el.classList.remove('visible'); }
 }
 function saveOnboarding(){
-  const val = document.getElementById('onboardName').value.trim();
+  const val = document.getElementById('onboardNick').value.trim();
   if(val){
     profileName = val;
     localStorage.setItem(LS_PROFILE_NAME, profileName);
@@ -1116,7 +1116,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.1.2";
+const APP_VERSION = "3.1.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "3.1.1": {
@@ -1750,18 +1750,18 @@ function toggleNewExerciseForm(){
   const willShow = overlay.classList.contains('hidden');
   overlay.classList.toggle('hidden', !willShow);
   if(willShow){
-    document.getElementById('newExName').value = '';
+    document.getElementById('newExTitle').value = '';
     document.getElementById('newExGroup').value = '';
     document.getElementById('newExSets').value = 3;
     document.getElementById('newExRepLow').value = 8;
     document.getElementById('newExRepHigh').value = 12;
     suggestedExerciseIcon = null;
     document.getElementById('iconSuggestBox').classList.add('hidden');
-    document.getElementById('newExName').focus();
+    document.getElementById('newExTitle').focus();
   }
 }
 function saveNewExercise(){
-  const name = document.getElementById('newExName').value.trim();
+  const name = document.getElementById('newExTitle').value.trim();
   if(!name){ toast(t('enterExerciseName','Podaj nazwę ćwiczenia')); return; }
   const existing = getExerciseLibrary().find(e => e.name.toLowerCase() === name.toLowerCase());
   if(existing){
