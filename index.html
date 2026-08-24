@@ -172,6 +172,24 @@ button{font-family:inherit;}
   font-weight:700;letter-spacing:.32px;text-transform:uppercase;cursor:pointer;width:100%;}
 .add-pill .ph{width:24px;height:24px;}
 
+/* ---------- training plans (beta) ---------- */
+.plan-card{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;color:var(--text-dark);}
+.plan-card-star{cursor:pointer;flex-shrink:0;display:flex;}
+.plan-card-star .ph{width:24px;height:24px;color:var(--orange);}
+.plan-card-body{flex:1;cursor:pointer;min-width:0;}
+.plan-card-name{font-size:14px;font-weight:700;letter-spacing:.42px;text-transform:uppercase;}
+.plan-card-meta{font-size:11px;color:#5b5555;margin-top:3px;}
+.plan-day-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.plan-day-chip{flex:1;min-width:36px;text-align:center;background:var(--light-2);border:1px solid var(--border);border-radius:8px;padding:9px 0;font-size:12px;font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
+.plan-day-chip.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+.ex-tile.plan-ex-selected{border:2px solid var(--orange);}
+.plan-ex-check{position:absolute;top:6px;right:6px;width:20px;height:20px;color:var(--orange);background:#fff;border-radius:50%;}
+.today-plan-banner{background:var(--tip);border-radius:14px;padding:12px 16px;margin:16px 20px 0;color:var(--text-dark);}
+.today-plan-banner.hidden{display:none;}
+.today-plan-label{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;opacity:.6;}
+.today-plan-name{font-size:15px;font-weight:700;margin-top:2px;}
+.today-plan-exercises{font-size:11px;color:#5b5555;margin-top:4px;line-height:1.5;}
+
 /* ---------- exercise editor panel ---------- */
 .ex-panel{background:#fff;border-radius:16px;padding:16px;margin-top:14px;color:var(--text-dark);position:relative;}
 .ex-panel .close-x{position:absolute;top:16px;right:16px;width:18px;height:18px;cursor:pointer;color:var(--text-dark);}
@@ -447,6 +465,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <input type="date" id="gymDate" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;">
     </div>
 
+    <div class="today-plan-banner hidden" id="todayPlanBanner">
+      <div class="today-plan-label" data-i18n="todayPlanLabel">Dzisiejszy plan</div>
+      <div class="today-plan-name" id="todayPlanName"></div>
+      <div class="today-plan-exercises" id="todayPlanExercises"></div>
+    </div>
+
     <div class="panel">
       <div class="panel-inner">
         <div class="ex-grid" id="gymGrid"></div>
@@ -574,6 +598,47 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="chart-wrap"><canvas id="runDistChart" height="180"></canvas></div>
         <div class="stats-section-label" data-i18n="paceMinKm">Tempo (min/km)</div>
         <div class="chart-wrap"><canvas id="runPaceChart" height="180"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PLANS (beta — triple-tap the logo) ===================== -->
+  <section class="view" id="view-plans">
+    <div class="header-row on-panel">
+      <div class="section-label"><span class="ph" data-ph="barbell"></span><span>PLANS</span></div>
+    </div>
+    <div class="panel">
+      <div class="panel-inner">
+        <div id="plansList"></div>
+        <button class="add-pill" onclick="openPlanEditor(null)">__PH_PLUS__<span data-i18n="planCreateNew">Stwórz mój plan treningowy</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PLAN EDITOR (beta) ===================== -->
+  <section class="view" id="view-planEditor">
+    <div class="header-row on-panel">
+      <div class="section-label"><span class="ph" data-ph="pencil"></span><span id="planEditorTitle">NOWY PLAN</span></div>
+      <span class="ph" data-ph="x" style="cursor:pointer;width:20px;height:20px;color:var(--text-dark);" onclick="goRoute('plans')"></span>
+    </div>
+    <div class="panel">
+      <div class="panel-inner">
+        <div class="field">
+          <label data-i18n="planNameLabel">Nazwa planu</label>
+          <input type="text" id="planNameInput" data-i18n-ph="planNamePh" placeholder="np. Full Body A" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" onblur="this.setAttribute('readonly','')">
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label data-i18n="planDaysLabel">Dni tygodnia</label>
+          <div class="plan-day-row" id="planDayRow"></div>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label><span data-i18n="planExercisesLabel">Ćwiczenia</span> (<span id="planExCount">0</span>)</label>
+          <div class="ex-grid" id="planEditorGrid" style="margin-top:8px;"></div>
+        </div>
+        <div class="btns" style="margin-top:16px;display:flex;gap:10px;">
+          <button class="cancel" id="planDeleteBtn" onclick="deleteCurrentPlan()" data-i18n="planDelete" style="flex:1;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;background:var(--light-2);color:var(--text-dark);">Usuń plan</button>
+          <button class="save" onclick="savePlanEditor()" data-i18n="planSave" style="flex:1;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;background:var(--orange);color:#fff;">Zapisz plan</button>
+        </div>
       </div>
     </div>
   </section>
@@ -830,6 +895,22 @@ const T_EN = {
   shareFileRun: 'run',
   iconSuggestLabel: 'Suggested icon',
   newExerciseTitle: 'Add your own exercise',
+  planCreateNew: 'Create my training plan',
+  planNameLabel: 'Plan name',
+  planNamePh: 'e.g. Full Body A',
+  planDaysLabel: 'Days of the week',
+  planExercisesLabel: 'Exercises',
+  planDelete: 'Delete plan',
+  planSave: 'Save plan',
+  planNewTitle: 'NEW PLAN',
+  todayPlanLabel: "Today's plan",
+  planNoDays: 'No days assigned',
+  planExercisesCount: n => `${n} exercise${n===1?'':'s'}`,
+  planNameRequired: 'Give the plan a name',
+  planNeedsExercise: 'Add at least one exercise',
+  planSaved: 'Plan saved',
+  planDeleted: 'Plan deleted',
+  planNoPlans: 'No plans yet.',
 };
 function t(key, plText, ...args){
   const val = (LANG === 'en' && T_EN[key] !== undefined) ? T_EN[key] : plText;
@@ -864,7 +945,10 @@ const PH = {
 "share": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><line x1=\"56\" y1=\"128\" x2=\"196\" y2=\"64\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\"/><line x1=\"56\" y1=\"128\" x2=\"196\" y2=\"192\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\"/><circle cx=\"56\" cy=\"128\" r=\"28\"/><circle cx=\"196\" cy=\"64\" r=\"28\"/><circle cx=\"196\" cy=\"192\" r=\"28\"/></svg>",
 "chat-dots": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 146 146\" fill=\"none\"><path d=\"M122.933 28.4567H22.7655C20.6523 28.4567 18.6256 29.2962 17.1313 30.7905C15.6371 32.2847 14.7976 34.3114 14.7976 36.4246V127.486C14.7894 129.005 15.2193 130.495 16.036 131.775C16.8526 133.056 18.0212 134.075 19.4019 134.708C20.456 135.197 21.6036 135.452 22.7655 135.454C24.6426 135.455 26.4586 134.787 27.8877 133.57L27.9218 133.542L46.8 117.242H122.933C125.046 117.242 127.073 116.402 128.567 114.908C130.062 113.414 130.901 111.387 130.901 109.274V36.4246C130.901 34.3114 130.062 32.2847 128.567 30.7905C127.073 29.2962 125.046 28.4567 122.933 28.4567ZM124.071 109.274C124.071 109.576 123.951 109.865 123.738 110.079C123.525 110.292 123.235 110.412 122.933 110.412H45.5309C44.7116 110.412 43.9198 110.707 43.2999 111.243L23.4826 128.357C23.3164 128.492 23.1157 128.577 22.9033 128.603C22.6909 128.629 22.4755 128.594 22.2818 128.503C22.0881 128.413 21.924 128.269 21.8082 128.089C21.6924 127.909 21.6297 127.7 21.6272 127.486V36.4246C21.6272 36.1227 21.7471 35.8332 21.9606 35.6197C22.1741 35.4063 22.4636 35.2863 22.7655 35.2863H122.933C123.235 35.2863 123.525 35.4063 123.738 35.6197C123.951 35.8332 124.071 36.1227 124.071 36.4246V109.274ZM94.4764 63.7431C94.4764 64.6487 94.1167 65.5173 93.4763 66.1577C92.8359 66.7981 91.9673 67.1579 91.0616 67.1579H54.637C53.7314 67.1579 52.8628 66.7981 52.2224 66.1577C51.582 65.5173 51.2222 64.6487 51.2222 63.7431C51.2222 62.8374 51.582 61.9688 52.2224 61.3284C52.8628 60.688 53.7314 60.3283 54.637 60.3283H91.0616C91.9673 60.3283 92.8359 60.688 93.4763 61.3284C94.1167 61.9688 94.4764 62.8374 94.4764 63.7431ZM94.4764 81.9554C94.4764 82.861 94.1167 83.7296 93.4763 84.37C92.8359 85.0104 91.9673 85.3702 91.0616 85.3702H54.637C53.7314 85.3702 52.8628 85.0104 52.2224 84.37C51.582 83.7296 51.2222 82.861 51.2222 81.9554C51.2222 81.0497 51.582 80.1811 52.2224 79.5407C52.8628 78.9003 53.7314 78.5406 54.637 78.5406H91.0616C91.9673 78.5406 92.8359 78.9003 93.4763 79.5407C94.1167 80.1811 94.4764 81.0497 94.4764 81.9554Z\" fill=\"currentColor\"/></svg>"
 };
-Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>"});
+Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>",
+"star": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M239.18,97.26A16.38,16.38,0,0,0,224.92,86l-59-4.76L143.14,26.15a16.36,16.36,0,0,0-30.27,0L90.11,81.23,31.08,86a16.46,16.46,0,0,0-9.37,28.86l45,38.83L53,211.75a16.38,16.38,0,0,0,24.5,17.82L128,198.49l50.53,31.08A16.4,16.4,0,0,0,203,211.75l-13.76-58.07,45-38.83A16.43,16.43,0,0,0,239.18,97.26Zm-15.34,5.47-48.7,42a8,8,0,0,0-2.56,7.91l14.88,62.8a.37.37,0,0,1-.17.48c-.18.14-.23.11-.38,0l-54.72-33.65a8,8,0,0,0-8.38,0L69.09,215.94c-.15.09-.19.12-.38,0a.37.37,0,0,1-.17-.48l14.88-62.8a8,8,0,0,0-2.56-7.91l-48.7-42c-.12-.1-.23-.19-.13-.5s.18-.27.33-.29l63.92-5.16A8,8,0,0,0,103,91.86l24.62-59.61c.08-.17.11-.25.35-.25s.27.08.35.25L153,91.86a8,8,0,0,0,6.75,4.92l63.92,5.16c.15,0,.24,0,.33.29S224,102.63,223.84,102.73Z\"/></svg>",
+"star-fill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z\"/></svg>",
+"check-circle": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z\"/></svg>"});
 function ph(name, cls){ return `<span class="ph ${cls||''}">${PH[name]}</span>`; }
 
 /* Resolve all __PH_*__ placeholders in the static markup into real icon
@@ -1126,7 +1210,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.3.1";
+const APP_VERSION = "3.4.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "3.3.0": {
@@ -1434,6 +1518,7 @@ function goRoute(route){
   if(route==='running'){ document.getElementById('runDate').value = document.getElementById('runDate').value || todayStr(); updateRunDateLabel(); }
   if(route==='history'){ renderCalendar(); }
   if(route==='stats'){ renderGymChecklist(); renderGymChart(); renderRunCharts(); updateStatsDateLabel(); }
+  if(route==='plans'){ renderPlansList(); }
   commitViewTransition();
   window.scrollTo(0,0);
 }
@@ -1546,6 +1631,7 @@ function updateGymDateLabel(){
   document.getElementById('gymDate').value = v;
   document.getElementById('gymDateLabel').textContent = fmtDateHuman(v);
   document.getElementById('gymShareBtn').classList.add('hidden');
+  updateTodayPlanBanner();
 }
 
 document.getElementById('runDate').addEventListener('change', updateRunDateLabel);
@@ -2009,6 +2095,174 @@ function saveWorkout(){
   renderGymGrid();
   renderExercisePanels();
 }
+
+/* ============================================================
+   TRAINING PLANS — beta, triple-tap the Thryve logo to open.
+   Not wired into the bottom nav or ROUTE_ORDER on purpose so regular
+   users never see it while it's being tested.
+   ============================================================ */
+const LS_TRAINING_PLANS = "fitlog_training_plans_v1";
+const LS_STARRED_PLAN = "fitlog_starred_plan_v1";
+const PLAN_DAYS = ['mon','tue','wed','thu','fri','sat','sun'];
+function planDayLabel(d){
+  const pl = {mon:'Pn',tue:'Wt',wed:'Śr',thu:'Cz',fri:'Pt',sat:'So',sun:'Nd'};
+  const en = {mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',fri:'Fri',sat:'Sat',sun:'Sun'};
+  return (LANG==='en' ? en : pl)[d];
+}
+function dayKeyFromDate(iso){
+  const map = ['sun','mon','tue','wed','thu','fri','sat'];
+  return map[new Date(iso+'T00:00:00').getDay()];
+}
+function planExCountText(n){
+  return t('planExercisesCount', n===1 ? '1 ćwiczenie' : `${n} ćwiczeń`, n);
+}
+function defaultTrainingPlans(){
+  return [
+    {id:'plan_a', name:'Trening A', builtin:true, days:[], exercises: GYM_PLAN.A.map(e=>({...e}))},
+    {id:'plan_b', name:'Trening B', builtin:true, days:[], exercises: GYM_PLAN.B.map(e=>({...e}))},
+  ];
+}
+function loadTrainingPlans(){
+  try{
+    const raw = localStorage.getItem(LS_TRAINING_PLANS);
+    if(raw){ const parsed = JSON.parse(raw); if(Array.isArray(parsed) && parsed.length) return parsed; }
+  }catch(e){}
+  return defaultTrainingPlans();
+}
+function saveTrainingPlansList(){ localStorage.setItem(LS_TRAINING_PLANS, JSON.stringify(trainingPlans)); }
+let trainingPlans = loadTrainingPlans();
+let starredPlanId = localStorage.getItem(LS_STARRED_PLAN) || null;
+function planForDay(dayKey){
+  return trainingPlans.find(p => (p.days||[]).includes(dayKey)) || null;
+}
+function toggleStarredPlan(id){
+  starredPlanId = (starredPlanId === id) ? null : id;
+  if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId);
+  else localStorage.removeItem(LS_STARRED_PLAN);
+  renderPlansList();
+}
+function renderPlansList(){
+  const wrap = document.getElementById('plansList');
+  if(!trainingPlans.length){ wrap.innerHTML = `<div class="hist-empty" style="padding:0;">${t('planNoPlans','Brak planów.')}</div>`; return; }
+  wrap.innerHTML = trainingPlans.map(p=>{
+    const starred = starredPlanId === p.id;
+    const daysTxt = (p.days||[]).length ? p.days.map(planDayLabel).join(', ') : t('planNoDays','Brak przypisanych dni');
+    return `
+      <div class="plan-card">
+        <span class="plan-card-star" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'star-fill':'star')}</span>
+        <div class="plan-card-body" onclick="openPlanEditor('${p.id}')">
+          <div class="plan-card-name">${p.name}</div>
+          <div class="plan-card-meta">${daysTxt} · ${planExCountText(p.exercises.length)}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+let editingPlan = null; // working copy: {id, name, builtin, days:[], exercises:[]}
+function openPlanEditor(id){
+  const existing = id ? trainingPlans.find(p=>p.id===id) : null;
+  editingPlan = existing
+    ? {id: existing.id, name: existing.name, builtin: !!existing.builtin, days:[...(existing.days||[])], exercises: existing.exercises.map(e=>({...e}))}
+    : {id: null, name: '', builtin:false, days:[], exercises:[]};
+  document.getElementById('planEditorTitle').textContent = existing ? existing.name : t('planNewTitle','NOWY PLAN');
+  document.getElementById('planNameInput').value = editingPlan.name;
+  document.getElementById('planDeleteBtn').style.display = (existing && !existing.builtin) ? 'block' : 'none';
+  renderPlanDayRow();
+  renderPlanEditorGrid();
+  goRoute('planEditor');
+}
+function renderPlanDayRow(){
+  const row = document.getElementById('planDayRow');
+  row.innerHTML = PLAN_DAYS.map(d=>`<button type="button" class="plan-day-chip${editingPlan.days.includes(d)?' active':''}" onclick="togglePlanDay('${d}')">${planDayLabel(d)}</button>`).join('');
+}
+function togglePlanDay(d){
+  const idx = editingPlan.days.indexOf(d);
+  if(idx===-1) editingPlan.days.push(d); else editingPlan.days.splice(idx,1);
+  renderPlanDayRow();
+}
+function renderPlanEditorGrid(){
+  const grid = document.getElementById('planEditorGrid');
+  grid.innerHTML = '';
+  const lib = orderedExerciseLibrary();
+  document.getElementById('planExCount').textContent = editingPlan.exercises.length;
+  lib.forEach(ex=>{
+    const selected = editingPlan.exercises.some(e=>e.name===ex.name);
+    const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ex-tile';
+    btn.onclick = ()=> togglePlanExercise(ex);
+    if(slug){
+      const img = document.createElement('img');
+      img.src = iconSrc(slug, 'white');
+      img.draggable = false; img.alt = '';
+      btn.appendChild(img);
+    } else {
+      btn.classList.add('custom-tile');
+      btn.innerHTML = `${ph('barbell')}<span class="t">${ex.name}</span>`;
+    }
+    if(selected){
+      btn.classList.add('plan-ex-selected');
+      btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
+    }
+    grid.appendChild(btn);
+  });
+}
+function togglePlanExercise(ex){
+  const idx = editingPlan.exercises.findIndex(e=>e.name===ex.name);
+  if(idx===-1) editingPlan.exercises.push({...ex});
+  else editingPlan.exercises.splice(idx,1);
+  renderPlanEditorGrid();
+}
+function savePlanEditor(){
+  const name = document.getElementById('planNameInput').value.trim();
+  if(!name){ toast(t('planNameRequired','Podaj nazwę planu')); return; }
+  if(!editingPlan.exercises.length){ toast(t('planNeedsExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
+  editingPlan.name = name;
+  if(editingPlan.id){
+    const idx = trainingPlans.findIndex(p=>p.id===editingPlan.id);
+    trainingPlans[idx] = {...trainingPlans[idx], name: editingPlan.name, days: editingPlan.days, exercises: editingPlan.exercises};
+  } else {
+    trainingPlans.push({id:'plan_'+Date.now(), name: editingPlan.name, builtin:false, days: editingPlan.days, exercises: editingPlan.exercises});
+  }
+  saveTrainingPlansList();
+  toast(t('planSaved','Plan zapisany'));
+  goRoute('plans');
+}
+function deleteCurrentPlan(){
+  if(!editingPlan || !editingPlan.id) return;
+  trainingPlans = trainingPlans.filter(p=>p.id!==editingPlan.id);
+  if(starredPlanId===editingPlan.id){ starredPlanId=null; localStorage.removeItem(LS_STARRED_PLAN); }
+  saveTrainingPlansList();
+  toast(t('planDeleted','Plan usunięty'));
+  goRoute('plans');
+}
+function updateTodayPlanBanner(){
+  const banner = document.getElementById('todayPlanBanner');
+  if(!banner) return;
+  const iso = document.getElementById('gymDate').value || todayStr();
+  const plan = planForDay(dayKeyFromDate(iso));
+  if(!plan){ banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+  document.getElementById('todayPlanName').textContent = plan.name;
+  document.getElementById('todayPlanExercises').textContent = plan.exercises.map(e=>e.name).join(' · ');
+}
+(function initSecretPlansGesture(){
+  const logo = document.querySelector('.brand-mark');
+  if(!logo) return;
+  logo.style.cursor = 'pointer';
+  let taps = 0, tapTimer = null;
+  logo.addEventListener('click', ()=>{
+    taps++;
+    clearTimeout(tapTimer);
+    if(taps >= 3){
+      taps = 0;
+      renderPlansList();
+      goRoute('plans');
+      return;
+    }
+    tapTimer = setTimeout(()=>{ taps = 0; }, 600);
+  });
+})();
 
 /* ============================================================
    RUNNING
