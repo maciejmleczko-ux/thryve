@@ -1778,6 +1778,7 @@ function selectDpDate(iso){
    GYM — icon grid + session
    ============================================================ */
 let sessionExercises = []; // {name, group, sets, repLow, repHigh, rest, day, setValues:[{weight,reps}], rpe, notes}
+let extraGymTiles = []; // exercises picked via "Wybierz inne ćwiczenie" for today — visible as tiles, not yet logged
 let openExerciseName = null;
 
 function lastSessionsFor(exerciseName){
@@ -1823,7 +1824,8 @@ function orderedExerciseLibrary(){
   return ordered;
 }
 
-function buildExerciseTile(ex, added){
+function buildExerciseTile(ex, state){
+  // state: 'plain' (default) | 'picked' (orange, not logged yet) | 'added' (orange + checkmark, logged)
   const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
   const btn = document.createElement('button');
   btn.className = 'ex-tile';
@@ -1838,9 +1840,9 @@ function buildExerciseTile(ex, added){
     btn.classList.add('custom-tile');
     btn.innerHTML = `${ph('barbell')}<span class="t">${ex.name}</span>`;
   }
-  if(added){
+  if(state==='added' || state==='picked'){
     btn.classList.add('plan-ex-selected');
-    btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
+    if(state==='added') btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
   }
   return btn;
 }
@@ -1864,15 +1866,21 @@ function renderGymGrid(){
     const byName = new Map(fullLib.map(ex=>[ex.name, ex]));
     const planNames = new Set(planEx.map(e=>e.name));
     lib = planEx.map(e=> byName.get(e.name) || e);
+    const shown = new Set(planNames);
+    extraGymTiles.forEach(ex=>{
+      if(!shown.has(ex.name)){ lib.push(byName.get(ex.name) || ex); shown.add(ex.name); }
+    });
     sessionExercises.forEach(se=>{
-      if(!planNames.has(se.name) && byName.has(se.name)) lib.push(byName.get(se.name));
+      if(!shown.has(se.name) && byName.has(se.name)){ lib.push(byName.get(se.name)); shown.add(se.name); }
     });
   } else {
     lib = fullLib;
   }
   lib.forEach(ex=>{
-    const added = sessionExercises.some(e=>e.name===ex.name);
-    const btn = buildExerciseTile(ex, added);
+    const inSession = sessionExercises.some(e=>e.name===ex.name);
+    const isExtra = extraGymTiles.some(e=>e.name===ex.name);
+    const state = inSession ? 'added' : (isExtra ? 'picked' : 'plain');
+    const btn = buildExerciseTile(ex, state);
     btn.onclick = ()=> onTileTap(ex);
     grid.appendChild(btn);
   });
@@ -1897,10 +1905,10 @@ function renderExercisePickerGrid(){
   const grid = document.getElementById('pickExerciseGrid');
   grid.innerHTML = '';
   const planEx = todayPlanExerciseNames() || [];
-  const alreadyVisible = new Set([...planEx.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
+  const alreadyVisible = new Set([...planEx.map(e=>e.name), ...extraGymTiles.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
   orderedExerciseLibrary().forEach(ex=>{
     if(alreadyVisible.has(ex.name)) return;
-    const btn = buildExerciseTile(ex, pickerSelected.has(ex.name));
+    const btn = buildExerciseTile(ex, pickerSelected.has(ex.name) ? 'added' : 'plain');
     btn.onclick = ()=> togglePickerExercise(ex);
     grid.appendChild(btn);
   });
@@ -1913,15 +1921,12 @@ function renderExercisePickerGrid(){
 function confirmExercisePicker(){
   if(!pickerSelected.size) return;
   const byName = new Map(orderedExerciseLibrary().map(ex=>[ex.name, ex]));
-  let lastAdded = null;
   pickerSelected.forEach(name=>{
     const ex = byName.get(name);
-    if(ex && !sessionExercises.some(e=>e.name===name)){
-      sessionExercises.push({...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''});
-      lastAdded = name;
+    if(ex && !extraGymTiles.some(e=>e.name===name) && !sessionExercises.some(e=>e.name===name)){
+      extraGymTiles.push({...ex});
     }
   });
-  if(pickerSelected.size===1) openExerciseName = lastAdded;
   pickerSelected = new Set();
   closeExercisePicker();
   renderGymGrid();
@@ -2201,6 +2206,7 @@ function saveWorkout(){
   gymShareBtn.dataset.id = workout.id;
   gymShareBtn.classList.remove('hidden');
   sessionExercises = [];
+  extraGymTiles = [];
   openExerciseName = null;
   renderGymGrid();
   renderExercisePanels();
