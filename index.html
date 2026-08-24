@@ -187,6 +187,10 @@ button{font-family:inherit;}
 .ex-bar .nm{font-size:14px;font-weight:600;letter-spacing:.42px;text-transform:uppercase;}
 .ex-bar .st{font-size:10px;color:#5b5555;margin-top:3px;}
 .ex-bar .ph{width:18px;height:18px;flex-shrink:0;color:var(--text-dark);}
+.ex-bar-actions{display:flex;align-items:center;gap:14px;flex-shrink:0;}
+.ex-bar .ph.ex-bar-edit{width:22px;height:22px;}
+.ex-bar .ex-bar-delete{display:flex;cursor:pointer;}
+.ex-bar .ex-bar-delete .ph{width:22px;height:22px;color:var(--orange);}
 
 .save-btn{display:block;width:calc(100% - 40px);margin:20px auto 0;background:var(--orange);border:none;
   border-radius:12px;padding:16px;color:#fff;font-size:14px;font-weight:700;letter-spacing:.42px;
@@ -860,6 +864,7 @@ const PH = {
 "share": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><line x1=\"56\" y1=\"128\" x2=\"196\" y2=\"64\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\"/><line x1=\"56\" y1=\"128\" x2=\"196\" y2=\"192\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\"/><circle cx=\"56\" cy=\"128\" r=\"28\"/><circle cx=\"196\" cy=\"64\" r=\"28\"/><circle cx=\"196\" cy=\"192\" r=\"28\"/></svg>",
 "chat-dots": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 146 146\" fill=\"none\"><path d=\"M122.933 28.4567H22.7655C20.6523 28.4567 18.6256 29.2962 17.1313 30.7905C15.6371 32.2847 14.7976 34.3114 14.7976 36.4246V127.486C14.7894 129.005 15.2193 130.495 16.036 131.775C16.8526 133.056 18.0212 134.075 19.4019 134.708C20.456 135.197 21.6036 135.452 22.7655 135.454C24.6426 135.455 26.4586 134.787 27.8877 133.57L27.9218 133.542L46.8 117.242H122.933C125.046 117.242 127.073 116.402 128.567 114.908C130.062 113.414 130.901 111.387 130.901 109.274V36.4246C130.901 34.3114 130.062 32.2847 128.567 30.7905C127.073 29.2962 125.046 28.4567 122.933 28.4567ZM124.071 109.274C124.071 109.576 123.951 109.865 123.738 110.079C123.525 110.292 123.235 110.412 122.933 110.412H45.5309C44.7116 110.412 43.9198 110.707 43.2999 111.243L23.4826 128.357C23.3164 128.492 23.1157 128.577 22.9033 128.603C22.6909 128.629 22.4755 128.594 22.2818 128.503C22.0881 128.413 21.924 128.269 21.8082 128.089C21.6924 127.909 21.6297 127.7 21.6272 127.486V36.4246C21.6272 36.1227 21.7471 35.8332 21.9606 35.6197C22.1741 35.4063 22.4636 35.2863 22.7655 35.2863H122.933C123.235 35.2863 123.525 35.4063 123.738 35.6197C123.951 35.8332 124.071 36.1227 124.071 36.4246V109.274ZM94.4764 63.7431C94.4764 64.6487 94.1167 65.5173 93.4763 66.1577C92.8359 66.7981 91.9673 67.1579 91.0616 67.1579H54.637C53.7314 67.1579 52.8628 66.7981 52.2224 66.1577C51.582 65.5173 51.2222 64.6487 51.2222 63.7431C51.2222 62.8374 51.582 61.9688 52.2224 61.3284C52.8628 60.688 53.7314 60.3283 54.637 60.3283H91.0616C91.9673 60.3283 92.8359 60.688 93.4763 61.3284C94.1167 61.9688 94.4764 62.8374 94.4764 63.7431ZM94.4764 81.9554C94.4764 82.861 94.1167 83.7296 93.4763 84.37C92.8359 85.0104 91.9673 85.3702 91.0616 85.3702H54.637C53.7314 85.3702 52.8628 85.0104 52.2224 84.37C51.582 83.7296 51.2222 82.861 51.2222 81.9554C51.2222 81.0497 51.582 80.1811 52.2224 79.5407C52.8628 78.9003 53.7314 78.5406 54.637 78.5406H91.0616C91.9673 78.5406 92.8359 78.9003 93.4763 79.5407C94.1167 80.1811 94.4764 81.0497 94.4764 81.9554Z\" fill=\"currentColor\"/></svg>"
 };
+Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>"});
 function ph(name, cls){ return `<span class="ph ${cls||''}">${PH[name]}</span>`; }
 
 /* Resolve all __PH_*__ placeholders in the static markup into real icon
@@ -1121,9 +1126,13 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.2.2";
+const APP_VERSION = "3.3.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "3.3.0": {
+    pl: ["GYM: drugie tapnięcie pustego ćwiczenia usuwa je z sesji; na liście większy ołówek i nowa ikonka kosza do szybkiego usuwania"],
+    en: ["GYM: tapping an empty exercise a second time removes it from the session; bigger edit icon plus a new trash icon for quick removal"],
+  },
   "3.2.0": {
     pl: ["GYM: przytrzymaj i przeciągnij kafelek ćwiczenia, żeby ustawić własną kolejność — zapamiętujemy ją na stałe"],
     en: ["GYM: press and hold an exercise tile to drag it into your own order — it's remembered from now on"],
@@ -1843,6 +1852,11 @@ function onTileTap(ex){
     sessionExercises.push({...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''});
     openExerciseName = ex.name;
   } else {
+    const hasData = already.setValues.some(s => s.weight !== '' || s.reps !== '');
+    if(!hasData){
+      removeExerciseFromSession(ex.name);
+      return;
+    }
     openExerciseName = (openExerciseName===ex.name) ? null : ex.name;
   }
   renderGymGrid();
@@ -1903,7 +1917,10 @@ function renderExercisePanels(){
           <div class="nm">${ex.name}</div>
           <div class="st">${summary}</div>
         </div>
-        ${ph('pencil')}
+        <div class="ex-bar-actions">
+          ${ph('pencil', 'ex-bar-edit')}
+          <span class="ex-bar-delete" onclick="event.stopPropagation();removeExerciseFromSession('${ex.name.replace(/'/g,"\\'")}')">${ph('trash')}</span>
+        </div>
       `;
       area.appendChild(bar);
     }
