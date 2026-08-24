@@ -100,6 +100,7 @@ button{font-family:inherit;}
 .panel{background:var(--light);border-radius:0 0 20px 20px;margin:0 0 20px;padding:16px 20px;color:var(--text-dark);}
 .panel-inner{background:none;border-radius:0;margin:0;padding:0;}
 .header-row.on-panel{background:var(--light);color:var(--text-dark);margin:0;padding:32px 20px 4px;border-radius:0;}
+#view-gym{background:var(--light);}
 .header-row.on-panel .section-label .ph{color:var(--orange);}
 .header-row.on-panel .section-label span{color:var(--text-dark);}
 
@@ -164,7 +165,6 @@ button{font-family:inherit;}
 .ex-tile-placeholder{opacity:.35;}
 .ex-tile-ghost{transition:box-shadow .15s ease;}
 .ex-tile.custom-tile .ph{width:24px;height:24px;color:var(--orange);}
-.ex-tile.custom-tile.added{filter:grayscale(1);opacity:.5;}
 .ex-tile.custom-tile .t{font-size:9px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;padding:0 3px;line-height:1.15;}
 
 .add-pill{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);
@@ -189,11 +189,11 @@ button{font-family:inherit;}
 .plan-editor-day-label{font-size:11px;color:#5b5555;margin-top:6px;font-weight:600;}
 .ex-tile.plan-ex-selected{border:2px solid var(--orange);}
 .plan-ex-check{position:absolute;top:6px;right:6px;width:20px;height:20px;color:var(--orange);background:#fff;border-radius:50%;}
-.today-plan-banner{background:var(--light);border-radius:14px;padding:12px 16px;margin:16px 20px 0;color:var(--text-dark);}
+.today-plan-banner{background:var(--orange);border-radius:14px;padding:12px 16px;margin:16px 20px 0;color:#fff;}
 .today-plan-banner.hidden{display:none;}
-.today-plan-label{display:inline-block;background:var(--orange);color:#fff;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:3px 8px;border-radius:6px;}
-.today-plan-name{font-size:15px;font-weight:700;margin-top:2px;}
-.today-plan-exercises{font-size:11px;color:#5b5555;margin-top:4px;line-height:1.5;}
+.today-plan-label{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#fff;opacity:.85;}
+.today-plan-name{font-size:15px;font-weight:700;margin-top:2px;color:#fff;}
+.today-plan-exercises{font-size:11px;color:rgba(255,255,255,.85);margin-top:4px;line-height:1.5;}
 .pick-ex-box{max-width:420px;}
 .pick-ex-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .pick-ex-header h3{margin:0;}
@@ -1830,12 +1830,14 @@ function buildExerciseTile(ex, added){
     img.src = iconSrc(slug, 'white');
     img.draggable = false;
     img.alt = '';
-    if(added){ img.style.filter = 'grayscale(1)'; img.style.opacity = '.5'; }
     btn.appendChild(img);
   } else {
     btn.classList.add('custom-tile');
-    if(added) btn.classList.add('added');
     btn.innerHTML = `${ph('barbell')}<span class="t">${ex.name}</span>`;
+  }
+  if(added){
+    btn.classList.add('plan-ex-selected');
+    btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
   }
   return btn;
 }
@@ -1895,11 +1897,7 @@ function renderExercisePickerGrid(){
   const alreadyVisible = new Set([...planEx.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
   orderedExerciseLibrary().forEach(ex=>{
     if(alreadyVisible.has(ex.name)) return;
-    const btn = buildExerciseTile(ex, false);
-    if(pickerSelected.has(ex.name)){
-      btn.classList.add('plan-ex-selected');
-      btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
-    }
+    const btn = buildExerciseTile(ex, pickerSelected.has(ex.name));
     btn.onclick = ()=> togglePickerExercise(ex);
     grid.appendChild(btn);
   });
