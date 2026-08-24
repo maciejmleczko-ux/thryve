@@ -160,6 +160,8 @@ button{font-family:inherit;}
 .ex-tile:active{transform:scale(.93);}
 .ex-tile img{width:100%;height:100%;display:block;object-fit:cover;}
 .ex-tile.custom-tile{background:#fff;color:var(--text-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.ex-tile-placeholder{opacity:.35;}
+.ex-tile-ghost{transition:box-shadow .15s ease;}
 .ex-tile.custom-tile .ph{width:24px;height:24px;color:var(--orange);}
 .ex-tile.custom-tile.added{filter:grayscale(1);opacity:.5;}
 .ex-tile.custom-tile .t{font-size:9px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;padding:0 3px;line-height:1.15;}
@@ -1118,9 +1120,13 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.1.8";
+const APP_VERSION = "3.2.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "3.2.0": {
+    pl: ["GYM: przytrzymaj i przeciągnij kafelek ćwiczenia, żeby ustawić własną kolejność — zapamiętujemy ją na stałe"],
+    en: ["GYM: press and hold an exercise tile to drag it into your own order — it's remembered from now on"],
+  },
   "3.1.1": {
     pl: ["GYM: dodawanie własnego ćwiczenia otwiera się teraz jako popup, zamiast rozwijać się w miejscu"],
     en: ["GYM: adding a custom exercise now opens as a popup instead of expanding inline"],
@@ -1486,7 +1492,7 @@ function anyModalOpen(){
     tracking = true;
   }, {passive:true});
   app.addEventListener('touchend', (e)=>{
-    if(!tracking) return;
+    if(!tracking || tileDrag) return;
     tracking = false;
     const t = e.changedTouches[0];
     const dx = t.clientX - startX;
@@ -1674,15 +1680,31 @@ function buildSuggestion(exMeta, history){
   return {cls:'', text:t('suggestHold', `Zostań przy ${lastWeight} kg i spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, lastWeight, exMeta.repHigh)};
 }
 
+/* ---------- persisted, user-draggable exercise tile order ---------- */
+const LS_EXERCISE_ORDER = "fitlog_exercise_order_v1";
+function loadExerciseOrder(){ try{ return JSON.parse(localStorage.getItem(LS_EXERCISE_ORDER)) || []; }catch(e){ return []; } }
+function saveExerciseOrderList(order){ localStorage.setItem(LS_EXERCISE_ORDER, JSON.stringify(order)); }
+let exerciseOrder = loadExerciseOrder();
+function orderedExerciseLibrary(){
+  const lib = getExerciseLibrary();
+  const byName = new Map(lib.map(ex=>[ex.name, ex]));
+  const ordered = [];
+  exerciseOrder.forEach(name=>{ if(byName.has(name)){ ordered.push(byName.get(name)); byName.delete(name); } });
+  byName.forEach(ex=> ordered.push(ex)); // new/unseen exercises (e.g. just added) land at the end
+  exerciseOrder = ordered.map(ex=>ex.name); // self-heal so drag reordering always has the full, current list
+  return ordered;
+}
+
 function renderGymGrid(){
   const grid = document.getElementById('gymGrid');
   grid.innerHTML = '';
-  const lib = getExerciseLibrary();
+  const lib = orderedExerciseLibrary();
   lib.forEach(ex=>{
     const added = sessionExercises.some(e=>e.name===ex.name);
     const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
     const btn = document.createElement('button');
     btn.className = 'ex-tile';
+    btn.dataset.name = ex.name;
     btn.onclick = ()=> onTileTap(ex);
     if(slug){
       const img = document.createElement('img');
@@ -1696,6 +1718,110 @@ function renderGymGrid(){
     }
     grid.appendChild(btn);
   });
+}
+
+/* ---------- long-press to drag-reorder exercise tiles ----------
+   Listeners live on the stable #gymGrid container (event delegation),
+   NOT on individual tile buttons — moveTileDrag() calls renderGymGrid()
+   mid-drag, which destroys and recreates every tile, including the one
+   under the finger. A listener attached to that now-removed node never
+   sees its touchend, which left tileDrag stuck forever (ghost tile and
+   all future taps frozen) the first time this was tried. */
+let tileDrag = null; // {name, ghost, offsetX, offsetY, lastTarget}
+(function initGymGridDrag(){
+  const grid = document.getElementById('gymGrid');
+  let timer = null, startX = 0, startY = 0, pendingName = null;
+  const cancelTimer = ()=>{ clearTimeout(timer); timer = null; pendingName = null; };
+
+  grid.addEventListener('touchstart', (e)=>{
+    if(e.touches.length !== 1 || tileDrag) return;
+    const tile = e.target.closest('.ex-tile');
+    if(!tile) return;
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY;
+    pendingName = tile.dataset.name;
+    timer = setTimeout(()=>{
+      const el = document.querySelector(`#gymGrid .ex-tile[data-name="${CSS.escape(pendingName)}"]`);
+      if(el) beginTileDrag(el, pendingName, startX, startY);
+    }, 350);
+  }, {passive:true});
+
+  grid.addEventListener('touchmove', (e)=>{
+    if(tileDrag){
+      e.preventDefault();
+      const t = e.touches[0];
+      moveTileDrag(t.clientX, t.clientY);
+      return;
+    }
+    if(timer){
+      const t = e.touches[0];
+      if(Math.abs(t.clientX-startX) > 10 || Math.abs(t.clientY-startY) > 10) cancelTimer();
+    }
+  }, {passive:false});
+
+  grid.addEventListener('touchend', (e)=>{
+    cancelTimer();
+    if(tileDrag){
+      e.preventDefault();
+      endTileDrag();
+    }
+  });
+  grid.addEventListener('touchcancel', ()=>{
+    cancelTimer();
+    if(tileDrag) endTileDrag();
+  });
+  // safety net: if a touchend/touchcancel is ever swallowed anyway,
+  // don't let a stuck drag permanently block every future tap.
+  document.addEventListener('touchstart', ()=>{
+    if(tileDrag && tileDrag.startedAt && Date.now() - tileDrag.startedAt > 8000) endTileDrag();
+  }, {capture:true, passive:true});
+})();
+function beginTileDrag(btn, name, x, y){
+  const rect = btn.getBoundingClientRect();
+  const ghost = btn.cloneNode(true);
+  ghost.classList.add('ex-tile-ghost');
+  ghost.style.position = 'fixed';
+  ghost.style.left = rect.left + 'px';
+  ghost.style.top = rect.top + 'px';
+  ghost.style.width = rect.width + 'px';
+  ghost.style.height = rect.height + 'px';
+  ghost.style.zIndex = '200';
+  ghost.style.pointerEvents = 'none';
+  ghost.style.transform = 'scale(1.06)';
+  ghost.style.boxShadow = '0 8px 24px rgba(0,0,0,.35)';
+  document.body.appendChild(ghost);
+  btn.classList.add('ex-tile-placeholder');
+  if(navigator.vibrate) navigator.vibrate(8);
+  tileDrag = {name, ghost, offsetX: x - rect.left, offsetY: y - rect.top, lastTarget: name, startedAt: Date.now()};
+  tileDrag.safetyTimer = setTimeout(()=>{ if(tileDrag) endTileDrag(); }, 15000);
+}
+function moveTileDrag(x, y){
+  if(!tileDrag) return;
+  tileDrag.ghost.style.left = (x - tileDrag.offsetX) + 'px';
+  tileDrag.ghost.style.top = (y - tileDrag.offsetY) + 'px';
+  const under = document.elementFromPoint(x, y);
+  const targetTile = under ? under.closest('.ex-tile') : null;
+  const targetName = targetTile ? targetTile.dataset.name : null;
+  if(targetName && targetName !== tileDrag.name && targetName !== tileDrag.lastTarget){
+    const fromIdx = exerciseOrder.indexOf(tileDrag.name);
+    const toIdx = exerciseOrder.indexOf(targetName);
+    if(fromIdx !== -1 && toIdx !== -1){
+      exerciseOrder.splice(fromIdx, 1);
+      exerciseOrder.splice(toIdx, 0, tileDrag.name);
+      tileDrag.lastTarget = targetName;
+      renderGymGrid();
+      const el = document.querySelector(`#gymGrid .ex-tile[data-name="${CSS.escape(tileDrag.name)}"]`);
+      if(el) el.classList.add('ex-tile-placeholder');
+    }
+  }
+}
+function endTileDrag(){
+  if(!tileDrag) return;
+  clearTimeout(tileDrag.safetyTimer);
+  tileDrag.ghost.remove();
+  document.querySelectorAll('.ex-tile-placeholder').forEach(el=>el.classList.remove('ex-tile-placeholder'));
+  tileDrag = null;
+  saveExerciseOrderList(exerciseOrder);
 }
 
 function onTileTap(ex){
