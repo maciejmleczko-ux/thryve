@@ -180,8 +180,11 @@ button{font-family:inherit;}
 .plan-card-name{font-size:14px;font-weight:700;letter-spacing:.42px;text-transform:uppercase;}
 .plan-card-meta{font-size:11px;color:#5b5555;margin-top:3px;}
 .plan-day-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-.plan-day-chip{flex:1;min-width:36px;text-align:center;background:var(--light-2);border:1px solid var(--border);border-radius:8px;padding:9px 0;font-size:12px;font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
+.plan-day-chip{position:relative;flex:1;min-width:36px;text-align:center;background:var(--light-2);border:1px solid var(--border);border-radius:8px;padding:9px 0;font-size:12px;font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
 .plan-day-chip.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+.plan-day-chip.has-ex::after{content:'';position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--orange);}
+.plan-day-chip.active.has-ex::after{background:#fff;}
+.plan-editor-day-label{font-size:11px;color:#5b5555;margin-top:6px;font-weight:600;}
 .ex-tile.plan-ex-selected{border:2px solid var(--orange);}
 .plan-ex-check{position:absolute;top:6px;right:6px;width:20px;height:20px;color:var(--orange);background:#fff;border-radius:50%;}
 .today-plan-banner{background:var(--tip);border-radius:14px;padding:12px 16px;margin:16px 20px 0;color:var(--text-dark);}
@@ -630,9 +633,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="field" style="margin-top:14px;">
           <label data-i18n="planDaysLabel">Dni tygodnia</label>
           <div class="plan-day-row" id="planDayRow"></div>
+          <div class="plan-editor-day-label" data-i18n="planDayHint">Wybierz dzień i przypisz mu ćwiczenia</div>
         </div>
         <div class="field" style="margin-top:14px;">
-          <label><span data-i18n="planExercisesLabel">Ćwiczenia</span> (<span id="planExCount">0</span>)</label>
+          <label><span data-i18n="planExercisesLabel">Ćwiczenia</span> — <span id="planEditorDayName"></span> (<span id="planExCount">0</span>)</label>
           <div class="ex-grid" id="planEditorGrid" style="margin-top:8px;"></div>
         </div>
         <div class="btns" style="margin-top:16px;display:flex;gap:10px;">
@@ -911,6 +915,8 @@ const T_EN = {
   planSaved: 'Plan saved',
   planDeleted: 'Plan deleted',
   planNoPlans: 'No plans yet.',
+  planDayHint: 'Pick a day and assign exercises to it',
+  planRestDay: 'Rest day',
 };
 function t(key, plText, ...args){
   const val = (LANG === 'en' && T_EN[key] !== undefined) ? T_EN[key] : plText;
@@ -2116,53 +2122,77 @@ function dayKeyFromDate(iso){
 function planExCountText(n){
   return t('planExercisesCount', n===1 ? '1 ćwiczenie' : `${n} ćwiczeń`, n);
 }
+function emptySchedule(){
+  const s = {};
+  PLAN_DAYS.forEach(d=>s[d]=[]);
+  return s;
+}
 function defaultTrainingPlans(){
+  const a = emptySchedule(); a.mon = GYM_PLAN.A.map(e=>({...e}));
+  const b = emptySchedule(); b.tue = GYM_PLAN.B.map(e=>({...e}));
   return [
-    {id:'plan_a', name:'Trening A', builtin:true, days:[], exercises: GYM_PLAN.A.map(e=>({...e}))},
-    {id:'plan_b', name:'Trening B', builtin:true, days:[], exercises: GYM_PLAN.B.map(e=>({...e}))},
+    {id:'plan_a', name:'Trening A', builtin:true, schedule: a},
+    {id:'plan_b', name:'Trening B', builtin:true, schedule: b},
   ];
+}
+function migratePlan(p){
+  if(p.schedule) return p;
+  const s = emptySchedule();
+  (p.days||[]).forEach(d=>{ if(s[d]) s[d] = (p.exercises||[]).map(e=>({...e})); });
+  return {id: p.id, name: p.name, builtin: !!p.builtin, schedule: s};
 }
 function loadTrainingPlans(){
   try{
     const raw = localStorage.getItem(LS_TRAINING_PLANS);
-    if(raw){ const parsed = JSON.parse(raw); if(Array.isArray(parsed) && parsed.length) return parsed; }
+    if(raw){ const parsed = JSON.parse(raw); if(Array.isArray(parsed) && parsed.length) return parsed.map(migratePlan); }
   }catch(e){}
   return defaultTrainingPlans();
 }
 function saveTrainingPlansList(){ localStorage.setItem(LS_TRAINING_PLANS, JSON.stringify(trainingPlans)); }
 let trainingPlans = loadTrainingPlans();
 let starredPlanId = localStorage.getItem(LS_STARRED_PLAN) || null;
-function planForDay(dayKey){
-  return trainingPlans.find(p => (p.days||[]).includes(dayKey)) || null;
+function planActiveDays(p){
+  return PLAN_DAYS.filter(d=>(p.schedule[d]||[]).length>0);
+}
+function planTotalExercises(p){
+  return PLAN_DAYS.reduce((sum,d)=>sum+(p.schedule[d]||[]).length,0);
 }
 function toggleStarredPlan(id){
   starredPlanId = (starredPlanId === id) ? null : id;
   if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId);
   else localStorage.removeItem(LS_STARRED_PLAN);
   renderPlansList();
+  updateTodayPlanBanner();
 }
 function renderPlansList(){
   const wrap = document.getElementById('plansList');
   if(!trainingPlans.length){ wrap.innerHTML = `<div class="hist-empty" style="padding:0;">${t('planNoPlans','Brak planów.')}</div>`; return; }
   wrap.innerHTML = trainingPlans.map(p=>{
     const starred = starredPlanId === p.id;
-    const daysTxt = (p.days||[]).length ? p.days.map(planDayLabel).join(', ') : t('planNoDays','Brak przypisanych dni');
+    const activeDays = planActiveDays(p);
+    const daysTxt = activeDays.length ? activeDays.map(planDayLabel).join(', ') : t('planNoDays','Brak przypisanych dni');
     return `
       <div class="plan-card">
         <span class="plan-card-star" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'star-fill':'star')}</span>
         <div class="plan-card-body" onclick="openPlanEditor('${p.id}')">
           <div class="plan-card-name">${p.name}</div>
-          <div class="plan-card-meta">${daysTxt} · ${planExCountText(p.exercises.length)}</div>
+          <div class="plan-card-meta">${daysTxt} · ${planExCountText(planTotalExercises(p))}</div>
         </div>
       </div>`;
   }).join('');
 }
-let editingPlan = null; // working copy: {id, name, builtin, days:[], exercises:[]}
+let editingPlan = null; // working copy: {id, name, builtin, schedule:{mon:[],...}, activeDay}
 function openPlanEditor(id){
   const existing = id ? trainingPlans.find(p=>p.id===id) : null;
-  editingPlan = existing
-    ? {id: existing.id, name: existing.name, builtin: !!existing.builtin, days:[...(existing.days||[])], exercises: existing.exercises.map(e=>({...e}))}
-    : {id: null, name: '', builtin:false, days:[], exercises:[]};
+  const schedule = emptySchedule();
+  if(existing) PLAN_DAYS.forEach(d=>{ schedule[d] = (existing.schedule[d]||[]).map(e=>({...e})); });
+  editingPlan = {
+    id: existing ? existing.id : null,
+    name: existing ? existing.name : '',
+    builtin: existing ? !!existing.builtin : false,
+    schedule,
+    activeDay: dayKeyFromDate(todayStr()),
+  };
   document.getElementById('planEditorTitle').textContent = existing ? existing.name : t('planNewTitle','NOWY PLAN');
   document.getElementById('planNameInput').value = editingPlan.name;
   document.getElementById('planDeleteBtn').style.display = (existing && !existing.builtin) ? 'block' : 'none';
@@ -2172,20 +2202,28 @@ function openPlanEditor(id){
 }
 function renderPlanDayRow(){
   const row = document.getElementById('planDayRow');
-  row.innerHTML = PLAN_DAYS.map(d=>`<button type="button" class="plan-day-chip${editingPlan.days.includes(d)?' active':''}" onclick="togglePlanDay('${d}')">${planDayLabel(d)}</button>`).join('');
+  row.innerHTML = PLAN_DAYS.map(d=>{
+    const cls = ['plan-day-chip'];
+    if(d===editingPlan.activeDay) cls.push('active');
+    if((editingPlan.schedule[d]||[]).length>0) cls.push('has-ex');
+    return `<button type="button" class="${cls.join(' ')}" onclick="selectPlanEditorDay('${d}')">${planDayLabel(d)}</button>`;
+  }).join('');
+  const nameEl = document.getElementById('planEditorDayName');
+  if(nameEl) nameEl.textContent = planDayLabel(editingPlan.activeDay);
 }
-function togglePlanDay(d){
-  const idx = editingPlan.days.indexOf(d);
-  if(idx===-1) editingPlan.days.push(d); else editingPlan.days.splice(idx,1);
+function selectPlanEditorDay(d){
+  editingPlan.activeDay = d;
   renderPlanDayRow();
+  renderPlanEditorGrid();
 }
 function renderPlanEditorGrid(){
   const grid = document.getElementById('planEditorGrid');
   grid.innerHTML = '';
   const lib = orderedExerciseLibrary();
-  document.getElementById('planExCount').textContent = editingPlan.exercises.length;
+  const dayExercises = editingPlan.schedule[editingPlan.activeDay];
+  document.getElementById('planExCount').textContent = dayExercises.length;
   lib.forEach(ex=>{
-    const selected = editingPlan.exercises.some(e=>e.name===ex.name);
+    const selected = dayExercises.some(e=>e.name===ex.name);
     const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -2208,25 +2246,28 @@ function renderPlanEditorGrid(){
   });
 }
 function togglePlanExercise(ex){
-  const idx = editingPlan.exercises.findIndex(e=>e.name===ex.name);
-  if(idx===-1) editingPlan.exercises.push({...ex});
-  else editingPlan.exercises.splice(idx,1);
+  const dayExercises = editingPlan.schedule[editingPlan.activeDay];
+  const idx = dayExercises.findIndex(e=>e.name===ex.name);
+  if(idx===-1) dayExercises.push({...ex});
+  else dayExercises.splice(idx,1);
+  renderPlanDayRow();
   renderPlanEditorGrid();
 }
 function savePlanEditor(){
   const name = document.getElementById('planNameInput').value.trim();
   if(!name){ toast(t('planNameRequired','Podaj nazwę planu')); return; }
-  if(!editingPlan.exercises.length){ toast(t('planNeedsExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
+  if(!planTotalExercises(editingPlan)){ toast(t('planNeedsExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
   editingPlan.name = name;
   if(editingPlan.id){
     const idx = trainingPlans.findIndex(p=>p.id===editingPlan.id);
-    trainingPlans[idx] = {...trainingPlans[idx], name: editingPlan.name, days: editingPlan.days, exercises: editingPlan.exercises};
+    trainingPlans[idx] = {...trainingPlans[idx], name: editingPlan.name, schedule: editingPlan.schedule};
   } else {
-    trainingPlans.push({id:'plan_'+Date.now(), name: editingPlan.name, builtin:false, days: editingPlan.days, exercises: editingPlan.exercises});
+    trainingPlans.push({id:'plan_'+Date.now(), name: editingPlan.name, builtin:false, schedule: editingPlan.schedule});
   }
   saveTrainingPlansList();
   toast(t('planSaved','Plan zapisany'));
   goRoute('plans');
+  updateTodayPlanBanner();
 }
 function deleteCurrentPlan(){
   if(!editingPlan || !editingPlan.id) return;
@@ -2235,16 +2276,20 @@ function deleteCurrentPlan(){
   saveTrainingPlansList();
   toast(t('planDeleted','Plan usunięty'));
   goRoute('plans');
+  updateTodayPlanBanner();
 }
 function updateTodayPlanBanner(){
   const banner = document.getElementById('todayPlanBanner');
   if(!banner) return;
-  const iso = document.getElementById('gymDate').value || todayStr();
-  const plan = planForDay(dayKeyFromDate(iso));
+  const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   if(!plan){ banner.classList.add('hidden'); return; }
+  const iso = document.getElementById('gymDate').value || todayStr();
+  const exercises = plan.schedule[dayKeyFromDate(iso)] || [];
   banner.classList.remove('hidden');
   document.getElementById('todayPlanName').textContent = plan.name;
-  document.getElementById('todayPlanExercises').textContent = plan.exercises.map(e=>e.name).join(' · ');
+  document.getElementById('todayPlanExercises').textContent = exercises.length
+    ? exercises.map(e=>e.name).join(' · ')
+    : t('planRestDay','Dzień odpoczynku');
 }
 (function initSecretPlansGesture(){
   const logo = document.querySelector('.brand-mark');
