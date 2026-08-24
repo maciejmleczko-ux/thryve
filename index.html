@@ -166,6 +166,7 @@ button{font-family:inherit;}
 .ex-tile-ghost{transition:box-shadow .15s ease;}
 .ex-tile.custom-tile .ph{width:24px;height:24px;color:var(--orange);}
 .ex-tile.custom-tile .t{font-size:9px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;padding:0 3px;line-height:1.15;}
+.ex-tile.custom-tile.added{filter:grayscale(1);opacity:.5;}
 
 .add-pill{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);
   color:#fff;border:none;border-radius:12px;padding:14px 20px;margin-top:16px;font-size:12px;
@@ -212,6 +213,9 @@ button{font-family:inherit;}
 .set-row input{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text-dark);font-family:inherit;min-width:0;}
 
 .ex-bar{background:#fff;border-radius:16px;padding:12px 16px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;color:var(--text-dark);cursor:pointer;}
+.ex-bar-info{display:flex;align-items:center;gap:10px;min-width:0;}
+.ex-bar-check{flex-shrink:0;display:flex;}
+.ex-bar-check svg{width:18px;height:18px;color:var(--orange);}
 .ex-bar .nm{font-size:14px;font-weight:600;letter-spacing:.42px;text-transform:uppercase;}
 .ex-bar .st{font-size:10px;color:#5b5555;margin-top:3px;}
 .ex-bar .ph{width:18px;height:18px;flex-shrink:0;color:var(--text-dark);}
@@ -1825,7 +1829,9 @@ function orderedExerciseLibrary(){
 }
 
 function buildExerciseTile(ex, state){
-  // state: 'plain' (default) | 'picked' (orange, not logged yet) | 'added' (orange + checkmark, logged)
+  // state: 'plain' (default) | 'picked' (orange, added but not logged yet) |
+  //        'added' (grayed out, already logged in this session) |
+  //        'selected' (orange + checkmark, picker's own in-progress selection)
   const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
   const btn = document.createElement('button');
   btn.className = 'ex-tile';
@@ -1835,14 +1841,16 @@ function buildExerciseTile(ex, state){
     img.src = iconSrc(slug, 'white');
     img.draggable = false;
     img.alt = '';
+    if(state==='added'){ img.style.filter = 'grayscale(1)'; img.style.opacity = '.5'; }
     btn.appendChild(img);
   } else {
     btn.classList.add('custom-tile');
+    if(state==='added') btn.classList.add('added');
     btn.innerHTML = `${ph('barbell')}<span class="t">${ex.name}</span>`;
   }
-  if(state==='added' || state==='picked'){
+  if(state==='picked' || state==='selected'){
     btn.classList.add('plan-ex-selected');
-    if(state==='added') btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
+    if(state==='selected') btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
   }
   return btn;
 }
@@ -1908,7 +1916,7 @@ function renderExercisePickerGrid(){
   const alreadyVisible = new Set([...planEx.map(e=>e.name), ...extraGymTiles.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
   orderedExerciseLibrary().forEach(ex=>{
     if(alreadyVisible.has(ex.name)) return;
-    const btn = buildExerciseTile(ex, pickerSelected.has(ex.name) ? 'added' : 'plain');
+    const btn = buildExerciseTile(ex, pickerSelected.has(ex.name) ? 'selected' : 'plain');
     btn.onclick = ()=> togglePickerExercise(ex);
     grid.appendChild(btn);
   });
@@ -2118,9 +2126,12 @@ function renderExercisePanels(){
       bar.className = 'ex-bar';
       bar.onclick = ()=>{ openExerciseName = ex.name; renderExercisePanels(); };
       bar.innerHTML = `
-        <div>
-          <div class="nm">${ex.name}</div>
-          <div class="st">${summary}</div>
+        <div class="ex-bar-info">
+          <span class="ex-bar-check">${PH['check-circle']}</span>
+          <div>
+            <div class="nm">${ex.name}</div>
+            <div class="st">${summary}</div>
+          </div>
         </div>
         <div class="ex-bar-actions">
           ${ph('pencil', 'ex-bar-edit')}
