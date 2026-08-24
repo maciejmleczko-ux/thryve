@@ -992,6 +992,8 @@ const GROUP_LABELS_EN = {
   'Pośladki':'Glutes', 'Klatka piersiowa (izolacja)':'Chest (isolation)', 'Łydki':'Calves',
   'Plecy (dół, całość)':'Back (lower, overall)', 'Plecy (jednostronnie)':'Back (unilateral)',
   'Własne':'Custom', 'Custom':'Custom',
+  'Barki (tylne)':'Shoulders (rear)', 'Nogi (całość)':'Legs (overall)',
+  'Klatka piersiowa (dół)':'Chest (lower)', 'Brzuch (skos)':'Abs (obliques)',
 };
 const PLAN_EX_GROUPS = [
   {key:'Klatka', match:['klatka'], pl:'Klatka', en:'Chest'},
@@ -1221,9 +1223,37 @@ const GYM_PLAN = {
     {name:"Dumbbell Row", group:"Plecy (jednostronnie)", sets:3, repLow:10, repHigh:12, rest:"75-90s"},
   ]
 };
+/* The other 22 of the 40 icons we have — previously only used as icon
+   suggestions when adding a custom exercise, now full library entries
+   like the original 18, just tagged day:'C' instead of 'A'/'B'. */
+const GYM_PLAN_C_EXTRA = [
+  {name:"Preacher Curl", group:"Biceps", sets:2, repLow:10, repHigh:12, rest:"60s", icon:"preacher_curl"},
+  {name:"Overhead Triceps", group:"Triceps", sets:2, repLow:10, repHigh:12, rest:"60s", icon:"overhead_triceps"},
+  {name:"Hanging Leg Raise", group:"Brzuch", sets:3, repLow:10, repHigh:15, rest:"45-60s", icon:"hanging_leg_raise"},
+  {name:"Dumbbell Shoulder Press", group:"Barki", sets:3, repLow:8, repHigh:12, rest:"75-90s", icon:"dumbbell_shoulder_press"},
+  {name:"Dumbbell Walking Lunge", group:"Nogi (uda, pośladki)", sets:3, repLow:10, repHigh:12, rest:"75-90s", icon:"walking_lunge"},
+  {name:"Back Extension", group:"Plecy (dół, całość)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"back_extension"},
+  {name:"Cable Curl", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", icon:"cable_curl"},
+  {name:"Barbell Curl", group:"Biceps", sets:3, repLow:8, repHigh:12, rest:"75s", icon:"barbell_curl"},
+  {name:"Dumbbell Lateral Raise", group:"Barki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_lateral_raise"},
+  {name:"Cable Crossover", group:"Klatka piersiowa (izolacja)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"cable_crossover"},
+  {name:"Cable Curl Neutral", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", icon:"cable_curl_neutral"},
+  {name:"Cable Lateral Raise", group:"Barki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"cable_lateral_raise"},
+  {name:"Hack Squat Machine", group:"Nogi (czworogłowe)", sets:3, repLow:8, repHigh:12, rest:"90-120s", icon:"hack_squat"},
+  {name:"Dumbbell Bench Press", group:"Klatka piersiowa", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"dumbbell_bench_press"},
+  {name:"Reverse Pec Deck", group:"Barki (tylne)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"reverse_pec_deck"},
+  {name:"Hip Thrust", group:"Pośladki", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"hip_thrust"},
+  {name:"Straight-Arm Pulldown", group:"Plecy (szerokość)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"straight_arm_pulldown"},
+  {name:"Chest Dip", group:"Klatka piersiowa (dół)", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"chest_dip"},
+  {name:"Cable Woodchopper", group:"Brzuch (skos)", sets:3, repLow:12, repHigh:15, rest:"45-60s", icon:"cable_woodchopper"},
+  {name:"Face Pull", group:"Barki (tylne)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"face_pull"},
+  {name:"Barbell Back Squat", group:"Nogi (całość)", sets:4, repLow:6, repHigh:10, rest:"120s", icon:"barbell_back_squat"},
+  {name:"Dumbbell Fly", group:"Klatka piersiowa (izolacja)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_fly"},
+];
 const BUILTIN_EXERCISES = [
   ...GYM_PLAN.A.map(e => ({...e, day:'A'})),
   ...GYM_PLAN.B.map(e => ({...e, day:'B'})),
+  ...GYM_PLAN_C_EXTRA.map(e => ({...e, day:'C'})),
 ];
 function getExerciseLibrary(){
   return [...BUILTIN_EXERCISES, ...customExercises.map(e => ({...e, day:'Własne'}))];
@@ -2336,12 +2366,36 @@ function emptySchedule(){
   PLAN_DAYS.forEach(d=>s[d]=[]);
   return s;
 }
+function scheduleOnDays(days, exercises){
+  const s = emptySchedule();
+  days.forEach(d=> s[d] = exercises.map(e=>({...e})));
+  return s;
+}
+const DEFAULT_PLAN_EX_SOURCE = [...GYM_PLAN.A, ...GYM_PLAN.B, ...GYM_PLAN_C_EXTRA];
+function defEx(...names){
+  return names.map(name=>{
+    const found = DEFAULT_PLAN_EX_SOURCE.find(e=>e.name===name);
+    if(!found) throw new Error('defaultTrainingPlans: unknown exercise name "'+name+'"');
+    return {...found};
+  });
+}
 function defaultTrainingPlans(){
-  const a = emptySchedule(); a.mon = GYM_PLAN.A.map(e=>({...e}));
-  const b = emptySchedule(); b.tue = GYM_PLAN.B.map(e=>({...e}));
+  const pushDay = defEx('Chest Press','Incline Chest','Dumbbell Shoulder Press','Dumbbell Lateral Raise','Triceps Pushdown','Overhead Triceps');
+  const pullDay = defEx('Lat Pulldown','Seated Row','Straight-Arm Pulldown','Barbell Curl','Cable Curl','Face Pull');
+  const legsDay = defEx('Leg Press','Leg Curl','Leg Extension','Barbell Back Squat','Hip Thrust','Calf Raise');
+  const upperA = defEx('Chest Press','Lat Pulldown','Shoulder Press','Bicep Curl','Triceps Pushdown');
+  const lowerA = defEx('Leg Press','Leg Curl','Leg Extension','Calf Raise','Hip Thrust');
+  const upperB = defEx('Incline Chest','Seated Row','Dumbbell Lateral Raise','Barbell Curl','Overhead Triceps');
+  const lowerB = defEx('Barbell Back Squat','Hack Squat Machine','Dumbbell Walking Lunge','Back Extension');
   return [
-    {id:'plan_a', name:'Trening A', builtin:true, schedule: a},
-    {id:'plan_b', name:'Trening B', builtin:true, schedule: b},
+    {id:'plan_a', name:'Fullbody workout 1', builtin:true, schedule: scheduleOnDays(['mon','wed','fri'], GYM_PLAN.A)},
+    {id:'plan_b', name:'Fullbody workout 2', builtin:true, schedule: scheduleOnDays(['mon','wed','fri'], GYM_PLAN.B)},
+    {id:'plan_ppl', name:'Push / Pull / Legs', builtin:true, schedule: {
+      ...emptySchedule(), mon: pushDay, wed: pullDay, fri: legsDay,
+    }},
+    {id:'plan_ul', name:'Upper / Lower Split', builtin:true, schedule: {
+      ...emptySchedule(), mon: upperA, tue: lowerA, thu: upperB, fri: lowerB,
+    }},
   ];
 }
 function migratePlan(p){
@@ -2350,10 +2404,24 @@ function migratePlan(p){
   (p.days||[]).forEach(d=>{ if(s[d]) s[d] = (p.exercises||[]).map(e=>({...e})); });
   return {id: p.id, name: p.name, builtin: !!p.builtin, schedule: s};
 }
+function renameDefaultPlanIfUntouched(plans, id, oldName, newName, newDays, exercises){
+  const idx = plans.findIndex(p=>p.id===id);
+  if(idx===-1 || plans[idx].name !== oldName) return; // missing, or user already renamed it — leave it alone
+  plans[idx] = {...plans[idx], name:newName, schedule: scheduleOnDays(newDays, exercises)};
+}
 function loadTrainingPlans(){
   try{
     const raw = localStorage.getItem(LS_TRAINING_PLANS);
-    if(raw){ const parsed = JSON.parse(raw); if(Array.isArray(parsed) && parsed.length) return parsed.map(migratePlan); }
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length){
+        const plans = parsed.map(migratePlan);
+        renameDefaultPlanIfUntouched(plans, 'plan_a', 'Trening A', 'Fullbody workout 1', ['mon','wed','fri'], GYM_PLAN.A);
+        renameDefaultPlanIfUntouched(plans, 'plan_b', 'Trening B', 'Fullbody workout 2', ['mon','wed','fri'], GYM_PLAN.B);
+        defaultTrainingPlans().forEach(dp=>{ if(!plans.some(p=>p.id===dp.id)) plans.push(dp); });
+        return plans;
+      }
+    }
   }catch(e){}
   return defaultTrainingPlans();
 }
