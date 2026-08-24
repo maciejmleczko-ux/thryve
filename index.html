@@ -172,6 +172,7 @@ button{font-family:inherit;}
   font-weight:700;letter-spacing:.32px;text-transform:uppercase;cursor:pointer;width:100%;}
 .add-pill .ph{width:24px;height:24px;}
 .add-pill.secondary{background:#fff;color:var(--orange);border:1.5px solid var(--orange);}
+.add-pill:disabled{opacity:.45;cursor:default;}
 
 /* ---------- training plans (beta) ---------- */
 .plan-card{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;color:var(--text-dark);}
@@ -188,9 +189,9 @@ button{font-family:inherit;}
 .plan-editor-day-label{font-size:11px;color:#5b5555;margin-top:6px;font-weight:600;}
 .ex-tile.plan-ex-selected{border:2px solid var(--orange);}
 .plan-ex-check{position:absolute;top:6px;right:6px;width:20px;height:20px;color:var(--orange);background:#fff;border-radius:50%;}
-.today-plan-banner{background:var(--tip);border-radius:14px;padding:12px 16px;margin:16px 20px 0;color:var(--text-dark);}
+.today-plan-banner{background:var(--light);border-radius:14px;padding:12px 16px;margin:16px 20px 0;color:var(--text-dark);}
 .today-plan-banner.hidden{display:none;}
-.today-plan-label{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;opacity:.6;}
+.today-plan-label{display:inline-block;background:var(--orange);color:#fff;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:3px 8px;border-radius:6px;}
 .today-plan-name{font-size:15px;font-weight:700;margin-top:2px;}
 .today-plan-exercises{font-size:11px;color:#5b5555;margin-top:4px;line-height:1.5;}
 .pick-ex-box{max-width:420px;}
@@ -743,6 +744,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <span class="ph" data-ph="x" onclick="closeExercisePicker()"></span>
     </div>
     <div class="ex-grid" id="pickExerciseGrid"></div>
+    <button type="button" class="add-pill" id="pickExerciseAddBtn" onclick="confirmExercisePicker()" disabled>__PH_PLUS__<span id="pickExerciseAddLabel" data-i18n="addSelected">Dodaj</span></button>
   </div>
 </div>
 
@@ -935,6 +937,8 @@ const T_EN = {
   planRestDay: 'Rest day',
   pickFromLibrary: 'Pick another exercise',
   pickFromLibraryTitle: 'Pick an exercise',
+  addSelected: 'Add',
+  addSelectedCount: n => `Add (${n})`,
 };
 function t(key, plText, ...args){
   const val = (LANG === 'en' && T_EN[key] !== undefined) ? T_EN[key] : plText;
@@ -1870,25 +1874,57 @@ function renderGymGrid(){
   const pickBtn = document.getElementById('pickFromLibraryBtn');
   if(pickBtn) pickBtn.classList.toggle('hidden', !gymGridFiltered);
 }
+let pickerSelected = new Set();
 function openExercisePicker(){
+  pickerSelected = new Set();
   renderExercisePickerGrid();
   document.getElementById('pickExerciseOverlay').classList.remove('hidden');
 }
 function closeExercisePicker(){
   document.getElementById('pickExerciseOverlay').classList.add('hidden');
 }
+function togglePickerExercise(ex){
+  if(pickerSelected.has(ex.name)) pickerSelected.delete(ex.name);
+  else pickerSelected.add(ex.name);
+  renderExercisePickerGrid();
+}
 function renderExercisePickerGrid(){
   const grid = document.getElementById('pickExerciseGrid');
   grid.innerHTML = '';
+  const planEx = todayPlanExerciseNames() || [];
+  const alreadyVisible = new Set([...planEx.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
   orderedExerciseLibrary().forEach(ex=>{
-    const added = sessionExercises.some(e=>e.name===ex.name);
-    const btn = buildExerciseTile(ex, added);
-    btn.onclick = ()=>{
-      onTileTap(ex);
-      renderExercisePickerGrid();
-    };
+    if(alreadyVisible.has(ex.name)) return;
+    const btn = buildExerciseTile(ex, false);
+    if(pickerSelected.has(ex.name)){
+      btn.classList.add('plan-ex-selected');
+      btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
+    }
+    btn.onclick = ()=> togglePickerExercise(ex);
     grid.appendChild(btn);
   });
+  const addBtn = document.getElementById('pickExerciseAddBtn');
+  addBtn.disabled = pickerSelected.size === 0;
+  document.getElementById('pickExerciseAddLabel').textContent = pickerSelected.size
+    ? t('addSelectedCount', `Dodaj (${pickerSelected.size})`, pickerSelected.size)
+    : t('addSelected', 'Dodaj');
+}
+function confirmExercisePicker(){
+  if(!pickerSelected.size) return;
+  const byName = new Map(orderedExerciseLibrary().map(ex=>[ex.name, ex]));
+  let lastAdded = null;
+  pickerSelected.forEach(name=>{
+    const ex = byName.get(name);
+    if(ex && !sessionExercises.some(e=>e.name===name)){
+      sessionExercises.push({...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''});
+      lastAdded = name;
+    }
+  });
+  if(pickerSelected.size===1) openExerciseName = lastAdded;
+  pickerSelected = new Set();
+  closeExercisePicker();
+  renderGymGrid();
+  renderExercisePanels();
 }
 
 /* ---------- long-press to drag-reorder exercise tiles ----------
