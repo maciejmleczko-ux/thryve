@@ -657,6 +657,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <div class="onboard-overlay hidden" id="newExerciseOverlay" onclick="if(event.target===this) toggleNewExerciseForm()">
   <div class="onboard-box new-ex-form" id="newExerciseForm">
     <h3 data-i18n="newExerciseTitle">Dodaj własne ćwiczenie</h3>
+    <form autocomplete="off" onsubmit="return false;">
     <div class="field"><label data-i18n="exNameLabel">Nazwa ćwiczenia</label><input type="text" id="newExTitle" data-i18n-ph="exNamePh" placeholder="np. Wykroki z hantlami" oninput="updateExerciseIconSuggestion()" autocomplete="off"></div>
     <div class="icon-suggest hidden" id="iconSuggestBox">
       <img id="iconSuggestImg" alt="">
@@ -671,9 +672,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="field"><label data-i18n="repsToLabel">Powt. do</label><input type="number" id="newExRepHigh" value="12" min="1"></div>
     </div>
     <div class="btns">
-      <button class="cancel" onclick="toggleNewExerciseForm()" data-i18n="cancel">Anuluj</button>
-      <button class="save" onclick="saveNewExercise()" data-i18n="saveAddToSession">Zapisz i dodaj do sesji</button>
+      <button type="button" class="cancel" onclick="toggleNewExerciseForm()" data-i18n="cancel">Anuluj</button>
+      <button type="button" class="save" onclick="saveNewExercise()" data-i18n="saveAddToSession">Zapisz i dodaj do sesji</button>
     </div>
+    </form>
   </div>
 </div>
 
@@ -1116,7 +1118,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.1.3";
+const APP_VERSION = "3.1.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "3.1.1": {
@@ -2396,6 +2398,15 @@ function renderRunCharts(){
     borderColor:'#f5b942', backgroundColor:'rgba(245,185,66,.15)', tension:.25, fill:true, pointRadius:4, pointBackgroundColor:'#f5b942'}]},
     options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#8a8a8a'},grid:{color:'#e5e5e5'}}, y:{ticks:{color:'#8a8a8a'},grid:{color:'#e5e5e5'}} } } });
 }
+
+/* Safari's WKWebView "AutoFill Contact" heuristic can trigger on a
+   text field regardless of autocomplete="off" — it seems to key partly
+   off recognizing that literal value. A random, never-seen token
+   defeats the pattern match more reliably. */
+['newExTitle','newExGroup','onboardNick','runNotes','feedbackMessage'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.setAttribute('autocomplete', 'off-' + Math.random().toString(36).slice(2));
+});
 
 /* ============================================================
    INIT
