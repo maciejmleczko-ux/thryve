@@ -1121,7 +1121,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.2.1";
+const APP_VERSION = "3.2.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "3.2.0": {
@@ -1811,15 +1811,20 @@ function moveTileDrag(x, y){
   const targetTile = under ? under.closest('.ex-tile') : null;
   const targetName = targetTile ? targetTile.dataset.name : null;
   if(targetName && targetName !== tileDrag.name && targetName !== tileDrag.lastTarget){
-    const fromIdx = exerciseOrder.indexOf(tileDrag.name);
-    const toIdx = exerciseOrder.indexOf(targetName);
-    if(fromIdx !== -1 && toIdx !== -1){
-      exerciseOrder.splice(fromIdx, 1);
-      exerciseOrder.splice(toIdx, 0, tileDrag.name);
+    // Move the actual placeholder node via insertBefore instead of a full
+    // renderGymGrid() rebuild — rebuilding every tile (all the base64 <img>s)
+    // on every single crossing was heavy enough to visibly stutter, making
+    // the drag feel like it needed several nudges to "catch up".
+    const grid = document.getElementById('gymGrid');
+    const placeholderEl = grid.querySelector(`.ex-tile[data-name="${CSS.escape(tileDrag.name)}"]`);
+    if(placeholderEl && targetTile){
+      const tiles = [...grid.children];
+      const fromIdx = tiles.indexOf(placeholderEl);
+      const toIdx = tiles.indexOf(targetTile);
+      if(fromIdx < toIdx) grid.insertBefore(placeholderEl, targetTile.nextSibling);
+      else grid.insertBefore(placeholderEl, targetTile);
+      exerciseOrder = [...grid.querySelectorAll('.ex-tile')].map(el=>el.dataset.name);
       tileDrag.lastTarget = targetName;
-      renderGymGrid();
-      const el = document.querySelector(`#gymGrid .ex-tile[data-name="${CSS.escape(tileDrag.name)}"]`);
-      if(el) el.classList.add('ex-tile-placeholder');
     }
   }
 }
