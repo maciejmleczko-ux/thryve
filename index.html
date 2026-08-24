@@ -200,6 +200,10 @@ button{font-family:inherit;}
 .pick-ex-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .pick-ex-header h3{margin:0;}
 .pick-ex-header .ph{width:20px;height:20px;color:var(--text-dark);cursor:pointer;flex-shrink:0;}
+.onboard-box.empty-workout-box{background:var(--orange);text-align:center;}
+.onboard-box.empty-workout-box h3{color:#fff;}
+.onboard-box.empty-workout-box p{color:rgba(255,255,255,.9);}
+.empty-workout-ok{width:100%;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;background:#fff;color:var(--orange);}
 
 /* ---------- exercise editor panel ---------- */
 .ex-panel{background:#fff;border-radius:16px;padding:16px;margin-top:14px;color:var(--text-dark);position:relative;}
@@ -755,6 +759,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<div class="onboard-overlay hidden" id="emptyWorkoutOverlay" onclick="if(event.target===this) closeEmptyWorkoutPopup()">
+  <div class="onboard-box empty-workout-box">
+    <h3 data-i18n="emptyWorkoutTitle">Nie ma jeszcze co zapisać</h3>
+    <p id="emptyWorkoutMsg"></p>
+    <button type="button" class="empty-workout-ok" onclick="closeEmptyWorkoutPopup()" data-i18n="gotIt">Rozumiem</button>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden" id="newExerciseOverlay" onclick="if(event.target===this) toggleNewExerciseForm()">
   <div class="onboard-box new-ex-form" id="newExerciseForm">
     <h3 data-i18n="newExerciseTitle">Dodaj własne ćwiczenie</h3>
@@ -946,6 +958,8 @@ const T_EN = {
   pickFromLibraryTitle: 'Pick an exercise',
   addSelected: 'Add',
   addSelectedCount: n => `Add (${n})`,
+  emptyWorkoutTitle: 'Nothing to save yet',
+  gotIt: 'Got it',
 };
 function t(key, plText, ...args){
   const val = (LANG === 'en' && T_EN[key] !== undefined) ? T_EN[key] : plText;
@@ -1245,9 +1259,13 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "3.4.0";
+const APP_VERSION = "3.5.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "3.5.0": {
+    pl: ["GYM: próba zapisu pustego treningu (bez ćwiczeń albo bez wpisanych wyników) pokazuje teraz wyraźny pomarańczowy popup zamiast cichej dymki"],
+    en: ["GYM: trying to save an empty workout (no exercises, or no results entered) now shows a clear orange popup instead of a quiet toast"],
+  },
   "3.3.0": {
     pl: ["GYM: drugie tapnięcie pustego ćwiczenia usuwa je z sesji; na liście większy ołówek i nowa ikonka kosza do szybkiego usuwania"],
     en: ["GYM: tapping an empty exercise a second time removes it from the session; bigger edit icon plus a new trash icon for quick removal"],
@@ -2190,8 +2208,15 @@ function classifySession(exNames){
   return {label:'własny'};
 }
 
+function showEmptyWorkoutPopup(msg){
+  document.getElementById('emptyWorkoutMsg').textContent = msg;
+  document.getElementById('emptyWorkoutOverlay').classList.remove('hidden');
+}
+function closeEmptyWorkoutPopup(){
+  document.getElementById('emptyWorkoutOverlay').classList.add('hidden');
+}
 function saveWorkout(){
-  if(!sessionExercises.length){ toast(t('addAtLeastOneExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
+  if(!sessionExercises.length){ showEmptyWorkoutPopup(t('addAtLeastOneExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
   const result = sessionExercises.map(ex=>({
     name: ex.name,
     group: ex.group,
@@ -2200,7 +2225,7 @@ function saveWorkout(){
     notes: ex.notes || ''
   }));
   const hasAny = result.some(e => e.sets.some(s => s.weight>0 || s.reps>0));
-  if(!hasAny){ toast(t('enterAtLeastOneResult','Wpisz przynajmniej jeden wynik przed zapisem')); return; }
+  if(!hasAny){ showEmptyWorkoutPopup(t('enterAtLeastOneResult','Wpisz przynajmniej jeden wynik przed zapisem')); return; }
   const cls = classifySession(result.map(e=>e.name));
   const workout = {
     id: 'w_' + Date.now(),
