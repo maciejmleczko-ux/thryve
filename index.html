@@ -190,6 +190,8 @@ button{font-family:inherit;}
 .plan-day-chip.has-ex::after{content:'';position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--orange);}
 .plan-day-chip.active.has-ex::after{background:#fff;}
 .plan-editor-day-label{font-size:11px;color:#5b5555;margin-top:6px;font-weight:600;}
+.copy-days-btn{margin-top:8px;background:none;border:none;color:var(--orange);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline;}
+.copy-days-btn.hidden{display:none;}
 .plan-ex-group{background:var(--light-2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;}
 .plan-ex-group:last-child{margin-bottom:0;}
 .plan-ex-group-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
@@ -669,6 +671,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <label data-i18n="planDaysLabel">Dni tygodnia</label>
           <div class="plan-day-row" id="planDayRow"></div>
           <div class="plan-editor-day-label" data-i18n="planDayHint">Wybierz dzień i przypisz mu ćwiczenia</div>
+          <button type="button" class="copy-days-btn hidden" id="copyDaysBtn" onclick="openCopyDaysModal()" data-i18n="copyDaysBtn">Kopiuj do innych dni</button>
         </div>
         <div class="field" style="margin-top:14px;">
           <label><span data-i18n="planExercisesLabel">Ćwiczenia</span> — <span id="planEditorDayName"></span> (<span id="planExCount">0</span>)</label>
@@ -784,6 +787,18 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<div class="onboard-overlay hidden" id="copyDaysOverlay" onclick="if(event.target===this) closeCopyDaysModal()">
+  <div class="onboard-box new-ex-form">
+    <h3 data-i18n="copyDaysTitle">Kopiuj do innych dni</h3>
+    <p id="copyDaysHint"></p>
+    <div class="plan-day-row" id="copyDaysRow"></div>
+    <div class="btns" style="margin-top:16px;">
+      <button type="button" class="cancel" onclick="closeCopyDaysModal()" data-i18n="cancel">Anuluj</button>
+      <button type="button" class="save" onclick="confirmCopyToDays()" data-i18n="copyDaysConfirm">Kopiuj</button>
+    </div>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden" id="newExerciseOverlay" onclick="if(event.target===this) toggleNewExerciseForm()">
   <div class="onboard-box new-ex-form" id="newExerciseForm">
     <h3 data-i18n="newExerciseTitle">Dodaj własne ćwiczenie</h3>
@@ -838,6 +853,11 @@ document.documentElement.lang = LANG;
 const T_EN = {
   planPill: 'Training plans',
   planOnboardingIntro: "Before you start, pick a ready-made plan or build your own — you'll see it right away in GYM.",
+  copyDaysBtn: 'Copy to other days',
+  copyDaysTitle: 'Copy to other days',
+  copyDaysHint: (day) => `Pick which days should get the same exercises as ${day}.`,
+  copyDaysConfirm: 'Copy',
+  copyDaysDone: n => `Copied to ${n} day${n===1?'':'s'}`,
   shareIconTitle: 'Share',
   importTitle: 'Import backup',
   exportTitle: 'Download backup',
@@ -2509,6 +2529,8 @@ function renderPlanDayRow(){
   }).join('');
   const nameEl = document.getElementById('planEditorDayName');
   if(nameEl) nameEl.textContent = planDayLabel(editingPlan.activeDay);
+  const copyBtn = document.getElementById('copyDaysBtn');
+  if(copyBtn) copyBtn.classList.toggle('hidden', editingPlan.schedule[editingPlan.activeDay].length === 0);
 }
 function selectPlanEditorDay(d){
   editingPlan.activeDay = d;
@@ -2555,6 +2577,41 @@ function togglePlanExercise(ex){
   else dayExercises.splice(idx,1);
   renderPlanDayRow();
   renderPlanEditorGrid();
+}
+let copyDaysSelected = new Set();
+function openCopyDaysModal(){
+  const sourceDay = editingPlan.activeDay;
+  if(!editingPlan.schedule[sourceDay].length) return;
+  copyDaysSelected = new Set();
+  document.getElementById('copyDaysHint').textContent = t('copyDaysHint', `Wybierz dni, które mają dostać te same ćwiczenia co ${planDayLabel(sourceDay)}.`, planDayLabel(sourceDay));
+  renderCopyDaysRow();
+  document.getElementById('copyDaysOverlay').classList.remove('hidden');
+}
+function closeCopyDaysModal(){
+  document.getElementById('copyDaysOverlay').classList.add('hidden');
+}
+function toggleCopyDay(d){
+  if(copyDaysSelected.has(d)) copyDaysSelected.delete(d);
+  else copyDaysSelected.add(d);
+  renderCopyDaysRow();
+}
+function renderCopyDaysRow(){
+  const row = document.getElementById('copyDaysRow');
+  const sourceDay = editingPlan.activeDay;
+  row.innerHTML = PLAN_DAYS.filter(d=>d!==sourceDay).map(d=>{
+    const active = copyDaysSelected.has(d);
+    return `<button type="button" class="plan-day-chip${active?' active':''}" onclick="toggleCopyDay('${d}')">${planDayLabel(d)}</button>`;
+  }).join('');
+}
+function confirmCopyToDays(){
+  const count = copyDaysSelected.size;
+  if(!count){ closeCopyDaysModal(); return; }
+  const sourceExercises = editingPlan.schedule[editingPlan.activeDay];
+  copyDaysSelected.forEach(d=>{ editingPlan.schedule[d] = sourceExercises.map(e=>({...e})); });
+  copyDaysSelected = new Set();
+  closeCopyDaysModal();
+  renderPlanDayRow();
+  toast(t('copyDaysDone', `Skopiowano do ${count} ${count===1?'dnia':'dni'}`, count));
 }
 function savePlanEditor(){
   const name = document.getElementById('planNameInput').value.trim();
