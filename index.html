@@ -142,11 +142,14 @@ button{font-family:inherit;}
 .nav-item.active .ph{color:#fff;}
 
 /* ---------- app footer (version + copyright, welcome screen only) ---------- */
-.app-footer{position:fixed;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;text-align:center;
+.app-footer{position:fixed;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
   padding:0 20px calc(16px + env(safe-area-inset-bottom));z-index:5;pointer-events:none;}
 .app-footer .app-version{font-size:11px;letter-spacing:.3px;font-weight:700;color:var(--light);opacity:.55;}
 .app-footer .app-copyright{margin-top:3px;font-size:10px;color:var(--light);opacity:.4;}
 .app-footer .app-copyright a{color:inherit;text-decoration:underline;pointer-events:auto;}
+.app-footer-feedback{flex-shrink:0;background:none;border:none;padding:6px;margin:0 -6px -6px 0;cursor:pointer;pointer-events:auto;color:var(--light);opacity:.55;}
+.app-footer-feedback .ph{width:20px;height:20px;display:block;}
 
 /* ---------- views ---------- */
 .view-stack{position:relative;overflow-x:hidden;}
@@ -502,8 +505,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
     <!-- App version — filled in from APP_VERSION (see CHANGELOG comment near it for the MAJOR.MINOR.PATCH convention). -->
     <div class="app-footer">
-      <div class="app-version" id="appVersionLabel"></div>
-      <div class="app-copyright">© 2026 Maciej Mleczko · <a href="https://www.maciejmleczko.pl" target="_blank" rel="noopener">www.maciejmleczko.pl</a></div>
+      <div>
+        <div class="app-version" id="appVersionLabel"></div>
+        <div class="app-copyright">© 2026 Maciej Mleczko · <a href="https://www.maciejmleczko.pl" target="_blank" rel="noopener">www.maciejmleczko.pl</a></div>
+      </div>
+      <button type="button" class="app-footer-feedback" onclick="openFeedback()" data-i18n-title="feedbackTitle" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
     </div>
   </section>
 
