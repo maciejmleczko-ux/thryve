@@ -189,9 +189,12 @@ button{font-family:inherit;}
 
 /* ---------- training plans (beta) ---------- */
 .plan-card{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;color:var(--text-dark);}
+.plan-card-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .plan-card-star{cursor:pointer;flex-shrink:0;display:flex;}
 .plan-card-star .ph{width:24px;height:24px;color:var(--border);}
 .plan-card-star.active .ph{color:var(--orange);}
+.plan-card-export{cursor:pointer;flex-shrink:0;display:flex;}
+.plan-card-export .ph{width:20px;height:20px;color:var(--text-dark);opacity:.4;}
 .plan-card-body{flex:1;cursor:pointer;min-width:0;}
 .plan-card-name{font-size:14px;font-weight:700;letter-spacing:.42px;text-transform:uppercase;}
 .plan-card-meta{font-size:11px;color:#5b5555;margin-top:3px;}
@@ -690,7 +693,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="header-row on-panel">
       <div class="section-label"><span class="ph" data-ph="pencil"></span><span id="planEditorTitle">NOWY PLAN</span></div>
       <div class="icon-btn-row">
-        <span class="ph hidden" data-ph="share" id="planEditorShareBtn" data-i18n-title="sharePlanTitle" title="Udostępnij plan" style="cursor:pointer;width:20px;height:20px;color:var(--text-dark);" onclick="sharePlanEditor()"></span>
         <span class="ph" data-ph="x" style="cursor:pointer;width:20px;height:20px;color:var(--text-dark);" onclick="goRoute('plans')"></span>
       </div>
     </div>
@@ -1131,6 +1133,7 @@ Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\
 "star": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M239.18,97.26A16.38,16.38,0,0,0,224.92,86l-59-4.76L143.14,26.15a16.36,16.36,0,0,0-30.27,0L90.11,81.23,31.08,86a16.46,16.46,0,0,0-9.37,28.86l45,38.83L53,211.75a16.38,16.38,0,0,0,24.5,17.82L128,198.49l50.53,31.08A16.4,16.4,0,0,0,203,211.75l-13.76-58.07,45-38.83A16.43,16.43,0,0,0,239.18,97.26Zm-15.34,5.47-48.7,42a8,8,0,0,0-2.56,7.91l14.88,62.8a.37.37,0,0,1-.17.48c-.18.14-.23.11-.38,0l-54.72-33.65a8,8,0,0,0-8.38,0L69.09,215.94c-.15.09-.19.12-.38,0a.37.37,0,0,1-.17-.48l14.88-62.8a8,8,0,0,0-2.56-7.91l-48.7-42c-.12-.1-.23-.19-.13-.5s.18-.27.33-.29l63.92-5.16A8,8,0,0,0,103,91.86l24.62-59.61c.08-.17.11-.25.35-.25s.27.08.35.25L153,91.86a8,8,0,0,0,6.75,4.92l63.92,5.16c.15,0,.24,0,.33.29S224,102.63,223.84,102.73Z\"/></svg>",
 "star-fill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z\"/></svg>",
 "check-circle": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z\"/></svg>",
+"export": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M20.0625 10.5V19.5C20.0625 19.8481 19.9242 20.1819 19.6781 20.4281C19.4319 20.6742 19.0981 20.8125 18.75 20.8125H5.25C4.9019 20.8125 4.56806 20.6742 4.32192 20.4281C4.07578 20.1819 3.9375 19.8481 3.9375 19.5V10.5C3.9375 10.1519 4.07578 9.81806 4.32192 9.57191C4.56806 9.32577 4.9019 9.18749 5.25 9.18749H7.5C7.64918 9.18749 7.79226 9.24676 7.89775 9.35225C8.00324 9.45773 8.0625 9.60081 8.0625 9.74999C8.0625 9.89918 8.00324 10.0423 7.89775 10.1477C7.79226 10.2532 7.64918 10.3125 7.5 10.3125H5.25C5.20027 10.3125 5.15258 10.3322 5.11742 10.3674C5.08225 10.4026 5.0625 10.4503 5.0625 10.5V19.5C5.0625 19.5497 5.08225 19.5974 5.11742 19.6326C5.15258 19.6677 5.20027 19.6875 5.25 19.6875H18.75C18.7997 19.6875 18.8474 19.6677 18.8826 19.6326C18.9177 19.5974 18.9375 19.5497 18.9375 19.5V10.5C18.9375 10.4503 18.9177 10.4026 18.8826 10.3674C18.8474 10.3322 18.7997 10.3125 18.75 10.3125H16.5C16.3508 10.3125 16.2077 10.2532 16.1023 10.1477C15.9968 10.0423 15.9375 9.89918 15.9375 9.74999C15.9375 9.60081 15.9968 9.45773 16.1023 9.35225C16.2077 9.24676 16.3508 9.18749 16.5 9.18749H18.75C19.0981 9.18749 19.4319 9.32577 19.6781 9.57191C19.9242 9.81806 20.0625 10.1519 20.0625 10.5ZM8.6475 6.39749L11.4375 3.60843V12.75C11.4375 12.8992 11.4968 13.0423 11.6023 13.1477C11.7077 13.2532 11.8508 13.3125 12 13.3125C12.1492 13.3125 12.2923 13.2532 12.3977 13.1477C12.5032 13.0423 12.5625 12.8992 12.5625 12.75V3.60843L15.3525 6.39749C15.404 6.45276 15.4661 6.49708 15.5351 6.52783C15.6041 6.55857 15.6786 6.5751 15.7541 6.57644C15.8296 6.57777 15.9047 6.56388 15.9747 6.53559C16.0447 6.50729 16.1084 6.46519 16.1618 6.41177C16.2152 6.35836 16.2573 6.29473 16.2856 6.22469C16.3139 6.15465 16.3278 6.07963 16.3264 6.0041C16.3251 5.92857 16.3086 5.85409 16.2778 5.78509C16.2471 5.71609 16.2028 5.65399 16.1475 5.60249L12.3975 1.85249C12.292 1.74716 12.1491 1.68799 12 1.68799C11.8509 1.68799 11.708 1.74716 11.6025 1.85249L7.8525 5.60249C7.79724 5.65399 7.75291 5.71609 7.72216 5.78509C7.69142 5.85409 7.67489 5.92857 7.67356 6.0041C7.67222 6.07963 7.68612 6.15465 7.71441 6.22469C7.7427 6.29473 7.78481 6.35836 7.83822 6.41177C7.89164 6.46519 7.95526 6.50729 8.0253 6.53559C8.09534 6.56388 8.17036 6.57777 8.24589 6.57644C8.32142 6.5751 8.3959 6.55857 8.4649 6.52783C8.5339 6.49708 8.596 6.45276 8.6475 6.39749Z\"/></svg>",
 "heart": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z\"/></svg>",
 "heart-fill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M240,102c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,228.66,16,172,16,102A62.07,62.07,0,0,1,78,40c20.65,0,38.73,8.88,50,23.89C139.27,48.88,157.35,40,178,40A62.07,62.07,0,0,1,240,102Z\"/></svg>"});
 function ph(name, cls){ return `<span class="ph ${cls||''}">${PH[name]}</span>`; }
@@ -2702,7 +2705,10 @@ function renderPlansList(){
           <div class="plan-card-name">${p.name}</div>
           <div class="plan-card-meta">${daysTxt} · ${planExCountText(planTotalExercises(p))}</div>
         </div>
-        <span class="plan-card-star${starred?' active':''}" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph('check-circle')}</span>
+        <div class="plan-card-actions">
+          <span class="plan-card-export" onclick="event.stopPropagation();sharePlan(trainingPlans.find(x=>x.id==='${p.id}'))" title="${t('sharePlanTitle','Udostępnij plan')}">${ph('export')}</span>
+          <span class="plan-card-star${starred?' active':''}" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph('check-circle')}</span>
+        </div>
       </div>`;
   }).join('');
 }
@@ -2721,7 +2727,6 @@ function openPlanEditor(id){
   document.getElementById('planEditorTitle').textContent = existing ? existing.name : t('planNewTitle','NOWY PLAN');
   document.getElementById('planNameInput').value = editingPlan.name;
   document.getElementById('planDeleteBtn').style.display = (existing && !existing.builtin) ? 'block' : 'none';
-  document.getElementById('planEditorShareBtn').classList.toggle('hidden', !existing);
   planEditorEquipmentFilter = 'all';
   renderPlanEquipFilterRow();
   renderPlanDayRow();
@@ -2890,11 +2895,6 @@ async function sharePlan(plan){
   }catch(e){
     toast(t('planLinkCopyFailed','Nie udało się skopiować linku'));
   }
-}
-function sharePlanEditor(){
-  if(!editingPlan || !editingPlan.id) return;
-  const plan = trainingPlans.find(p=>p.id===editingPlan.id);
-  if(plan) sharePlan(plan);
 }
 let pendingImportPlan = null;
 function checkForImportedPlan(){
