@@ -180,6 +180,7 @@ button{font-family:inherit;}
 .add-pill:disabled{opacity:.45;cursor:default;}
 .add-pill.hidden{display:none;}
 .save-btn.hidden{display:none;}
+.ph.hidden{display:none;}
 .gym-no-plan-prompt{text-align:center;padding:28px 12px 36px;}
 .gym-no-plan-prompt h2{font-size:40px;line-height:1.08;font-weight:700;color:var(--text-dark);margin:0 0 12px;}
 .gym-no-plan-prompt p{color:var(--text-dark);opacity:.65;font-size:18px;font-weight:400;line-height:1.4;margin:0 0 26px;}
@@ -688,7 +689,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <section class="view" id="view-planEditor">
     <div class="header-row on-panel">
       <div class="section-label"><span class="ph" data-ph="pencil"></span><span id="planEditorTitle">NOWY PLAN</span></div>
-      <span class="ph" data-ph="x" style="cursor:pointer;width:20px;height:20px;color:var(--text-dark);" onclick="goRoute('plans')"></span>
+      <div class="icon-btn-row">
+        <span class="ph hidden" data-ph="share" id="planEditorShareBtn" data-i18n-title="sharePlanTitle" title="Udostępnij plan" style="cursor:pointer;width:20px;height:20px;color:var(--text-dark);" onclick="sharePlanEditor()"></span>
+        <span class="ph" data-ph="x" style="cursor:pointer;width:20px;height:20px;color:var(--text-dark);" onclick="goRoute('plans')"></span>
+      </div>
     </div>
     <div class="panel">
       <div class="panel-inner">
@@ -814,6 +818,19 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <h3 data-i18n="emptyWorkoutTitle">Nie ma jeszcze co zapisać</h3>
     <p id="emptyWorkoutMsg"></p>
     <button type="button" class="empty-workout-ok" onclick="closeEmptyWorkoutPopup()" data-i18n="gotIt">Rozumiem</button>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden" id="importPlanOverlay" onclick="if(event.target===this) cancelImportPlan()">
+  <div class="onboard-box new-ex-form">
+    <h3 data-i18n="importPlanTitle">Zaimportować plan?</h3>
+    <p id="importPlanName" style="font-weight:700;font-size:15px;margin:0 0 4px;"></p>
+    <p id="importPlanMeta" style="color:#5b5555;font-size:12.5px;margin:0 0 4px;"></p>
+    <p data-i18n="importPlanHint">Zostanie dodany jako nowy plan — Twoje istniejące plany zostają bez zmian.</p>
+    <div class="btns" style="margin-top:16px;">
+      <button type="button" class="cancel" onclick="cancelImportPlan()" data-i18n="cancel">Anuluj</button>
+      <button type="button" class="save" onclick="confirmImportPlan()" data-i18n="importPlanConfirm">Importuj</button>
+    </div>
   </div>
 </div>
 
@@ -1407,9 +1424,17 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.1.1";
+const APP_VERSION = "4.2.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "4.2.0": {
+    pl: [
+      {featured:true, icon:'share', badge:'Nowość', title:'Udostępnij plan', text:'Udostępnij plan treningowy jako link — wyślij SMS-em albo na WhatsApp, druga osoba klika i ma go od razu u siebie, bez zakładania konta.'},
+    ],
+    en: [
+      {featured:true, icon:'share', badge:'New', title:'Share a plan', text:"Share a training plan as a link — send it over SMS or WhatsApp, the other person taps it and has it right away, no account needed."},
+    ],
+  },
   "4.1.0": {
     pl: [
       {featured:true, icon:'heart-fill', badge:'Nowość', title:'GYM po nowemu', text:'Siatka ćwiczeń w GYM podzielona na partie mięśniowe, plus ulubione (serduszko) i filtr sprzętu (hantle/maszyny) — łatwiej znaleźć to, czego szukasz.'},
@@ -2696,6 +2721,7 @@ function openPlanEditor(id){
   document.getElementById('planEditorTitle').textContent = existing ? existing.name : t('planNewTitle','NOWY PLAN');
   document.getElementById('planNameInput').value = editingPlan.name;
   document.getElementById('planDeleteBtn').style.display = (existing && !existing.builtin) ? 'block' : 'none';
+  document.getElementById('planEditorShareBtn').classList.toggle('hidden', !existing);
   planEditorEquipmentFilter = 'all';
   renderPlanEquipFilterRow();
   renderPlanDayRow();
@@ -2827,6 +2853,92 @@ function deleteCurrentPlan(){
   goRoute('plans');
   updateTodayPlanBanner();
   updatePlanPillLabel();
+}
+
+/* ---------- share a plan as a link (no backend — the plan itself lives in the URL) ---------- */
+function b64urlEncode(str){
+  return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64urlDecode(str){
+  str = str.replace(/-/g,'+').replace(/_/g,'/');
+  while(str.length % 4) str += '=';
+  return decodeURIComponent(escape(atob(str)));
+}
+function planShareUrl(plan){
+  const byName = new Set(orderedExerciseLibrary().map(e=>e.name));
+  const compactSchedule = {};
+  PLAN_DAYS.forEach(d=>{
+    compactSchedule[d] = (plan.schedule[d]||[]).map(ex=> byName.has(ex.name) ? ex.name : ex);
+  });
+  const encoded = b64urlEncode(JSON.stringify({n: plan.name, s: compactSchedule}));
+  const url = new URL(location.href);
+  url.search = '';
+  url.hash = '';
+  url.searchParams.set('importPlan', encoded);
+  return url.toString();
+}
+async function sharePlan(plan){
+  const url = planShareUrl(plan);
+  const text = t('sharePlanText', `Plan treningowy „${plan.name}" z Thryve`, plan.name);
+  if(navigator.share){
+    try{ await navigator.share({title:'Thryve', text, url}); return; }
+    catch(err){ if(err && err.name === 'AbortError') return; }
+  }
+  try{
+    await navigator.clipboard.writeText(url);
+    toast(t('planLinkCopied','Link do planu skopiowany do schowka'));
+  }catch(e){
+    toast(t('planLinkCopyFailed','Nie udało się skopiować linku'));
+  }
+}
+function sharePlanEditor(){
+  if(!editingPlan || !editingPlan.id) return;
+  const plan = trainingPlans.find(p=>p.id===editingPlan.id);
+  if(plan) sharePlan(plan);
+}
+let pendingImportPlan = null;
+function checkForImportedPlan(){
+  const encoded = new URLSearchParams(location.search).get('importPlan');
+  if(!encoded) return;
+  history.replaceState(null, '', location.pathname);
+  try{
+    const payload = JSON.parse(b64urlDecode(encoded));
+    if(!payload || typeof payload.n !== 'string' || typeof payload.s !== 'object') throw new Error('bad shape');
+    pendingImportPlan = payload;
+    const days = PLAN_DAYS.filter(d=>(payload.s[d]||[]).length>0);
+    const exCount = PLAN_DAYS.reduce((sum,d)=>sum+(payload.s[d]||[]).length, 0);
+    document.getElementById('importPlanName').textContent = payload.n;
+    document.getElementById('importPlanMeta').textContent = `${days.length ? days.map(planDayLabel).join(', ') : t('planNoDays','Brak przypisanych dni')} · ${planExCountText(exCount)}`;
+    document.getElementById('importPlanOverlay').classList.remove('hidden');
+  }catch(e){
+    toast(t('planImportFailed','Nie udało się wczytać linku planu — spróbuj poprosić o niego jeszcze raz'));
+  }
+}
+function cancelImportPlan(){
+  pendingImportPlan = null;
+  document.getElementById('importPlanOverlay').classList.add('hidden');
+}
+function confirmImportPlan(){
+  if(!pendingImportPlan) return;
+  const byName = new Map(orderedExerciseLibrary().map(e=>[e.name, e]));
+  const schedule = emptySchedule();
+  PLAN_DAYS.forEach(d=>{
+    schedule[d] = (pendingImportPlan.s[d]||[]).map(entry=>{
+      if(typeof entry === 'string'){
+        const found = byName.get(entry);
+        return found ? {...found} : {name: entry, group: t('customGroupFallback','Własne'), sets:3, repLow:8, repHigh:12, rest:t('asNeeded','wg uznania')};
+      }
+      return {...entry};
+    });
+  });
+  const id = 'plan_imported_'+Date.now();
+  trainingPlans.push({id, name: pendingImportPlan.n, builtin:false, schedule});
+  saveTrainingPlansList();
+  pendingImportPlan = null;
+  document.getElementById('importPlanOverlay').classList.add('hidden');
+  toast(t('planImported','Plan zaimportowany'));
+  renderPlansList();
+  goRoute('plans');
 }
 function updateTodayPlanBanner(){
   const banner = document.getElementById('todayPlanBanner');
@@ -3465,6 +3577,7 @@ if(!localStorage.getItem(LS_ONBOARD_SEEN)){
     localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);
   }
 }
+checkForImportedPlan();
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('sw.js').catch(()=>{});
