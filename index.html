@@ -155,6 +155,7 @@ button{font-family:inherit;}
   display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
   padding:0 20px calc(16px + env(safe-area-inset-bottom));z-index:5;pointer-events:none;}
 .app-footer .app-version{font-size:11px;letter-spacing:.3px;font-weight:700;color:var(--light);opacity:.55;}
+.app-footer .app-mode{margin-top:2px;font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--orange);}
 .app-footer .app-copyright{margin-top:3px;font-size:10px;color:var(--light);opacity:.4;}
 .app-footer .app-copyright a{color:inherit;text-decoration:underline;pointer-events:auto;}
 .app-footer-feedback{flex-shrink:0;background:none;border:none;padding:6px;margin:0 -6px -8px 0;cursor:pointer;pointer-events:auto;color:var(--light);opacity:.55;}
@@ -536,6 +537,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="app-footer">
       <div>
         <div class="app-version" id="appVersionLabel"></div>
+        <div class="app-mode" id="appModeLabel"></div>
         <div class="app-copyright">© 2026 Maciej Mleczko · <a href="https://www.maciejmleczko.pl" target="_blank" rel="noopener">www.maciejmleczko.pl</a></div>
       </div>
       <button type="button" class="app-footer-feedback" onclick="openFeedback()" data-i18n-title="feedbackTitle" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
@@ -1490,7 +1492,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.2.2";
+const APP_VERSION = "4.2.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.2.0": {
@@ -3762,6 +3764,9 @@ function renderRunCharts(){
    ============================================================ */
 updateCalLabels();
 document.getElementById('appVersionLabel').textContent = 'Thryve v' + APP_VERSION;
+document.getElementById('appModeLabel').textContent = isStandaloneApp()
+  ? t('appModeStandalone','Zainstalowana apka')
+  : t('appModeBrowser','Przeglądarka');
 updateGymDateLabel();
 updateRunDateLabel();
 updateStatsDateLabel();
