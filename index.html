@@ -234,7 +234,8 @@ button{font-family:inherit;}
 .ex-tile-fav{position:absolute;top:6px;left:6px;z-index:2;cursor:pointer;display:flex;background:rgba(255,255,255,.85);border-radius:50%;padding:3px;}
 .ex-tile-fav .ph{width:15px;height:15px;color:var(--orange);}
 .ex-tile.plan-ex-selected{border:2px solid var(--orange);}
-.plan-ex-check{position:absolute;top:6px;right:6px;width:26px;height:26px;color:#fff;background:var(--orange);border-radius:50%;}
+.plan-ex-check{position:absolute;top:6px;right:6px;width:26px;height:26px;}
+.plan-ex-check svg{display:block;width:100%;height:100%;}
 .today-plan-banner{background:#2C2727;border-radius:14px;padding:12px 16px;margin:16px 20px 0;color:#fff;}
 .today-plan-banner.hidden{display:none;}
 .today-plan-label{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#A9A9A9;}
@@ -2202,6 +2203,7 @@ function orderedExerciseLibrary(){
   return ordered;
 }
 
+const PLAN_EX_CHECK_SVG = `<svg width="365" height="365" viewBox="0 0 365 365" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M327.93 182.5C327.93 211.263 319.4 239.381 303.42 263.296C287.44 287.212 264.727 305.852 238.153 316.86C211.58 327.867 182.339 330.747 154.128 325.135C125.917 319.524 100.004 305.673 79.6656 285.334C59.3269 264.996 45.4761 239.083 39.8646 210.872C34.2532 182.661 37.1332 153.42 48.1404 126.846C59.1477 100.273 77.7877 77.5597 101.704 61.5796C125.619 45.5996 153.737 37.0703 182.5 37.0703C221.056 37.1156 258.021 52.4521 285.284 79.7157C312.548 106.979 327.884 143.944 327.93 182.5Z" fill="#F15A23"/><path d="M248.078 148.282C248.078 146.015 247.179 143.84 245.576 142.236C243.972 140.634 241.798 139.734 239.531 139.734C237.264 139.734 235.09 140.634 233.486 142.236L159.687 216.02L131.514 187.861C129.892 186.35 127.747 185.527 125.531 185.567C123.315 185.606 121.2 186.503 119.633 188.071C118.066 189.638 117.168 191.753 117.129 193.969C117.09 196.185 117.912 198.33 119.423 199.952L153.642 234.171C155.246 235.773 157.42 236.672 159.687 236.672C161.954 236.672 164.129 235.773 165.733 234.171L245.576 154.327C247.179 152.723 248.078 150.549 248.078 148.282Z" fill="white"/></svg>`;
 function buildExerciseTile(ex, state){
   // state: 'plain' (default, also used for 'picked' — added but not logged, looks the same) |
   //        'added' (grayed out, already logged in this session) |
@@ -2224,7 +2226,7 @@ function buildExerciseTile(ex, state){
   }
   if(state==='selected'){
     btn.classList.add('plan-ex-selected');
-    btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PH['check-circle']}</span>`);
+    btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PLAN_EX_CHECK_SVG}</span>`);
   }
   return btn;
 }
