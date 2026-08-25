@@ -476,6 +476,7 @@ button{font-family:inherit;}
 .new-ex-form .btns button{flex:1;border:none;border-radius:10px;padding:11px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;}
 .new-ex-form .btns .cancel{background:var(--light-2);color:var(--text-dark);}
 .new-ex-form .btns .save{background:var(--orange);color:#fff;}
+.new-ex-form .btns .save.hidden{display:none;}
 .icon-suggest{display:flex;align-items:center;gap:10px;background:var(--tip);border-radius:10px;padding:8px 12px;margin:-2px 0 10px;}
 .icon-suggest.hidden{display:none;}
 .icon-suggest img{width:34px;height:34px;border-radius:8px;flex-shrink:0;}
@@ -851,6 +852,18 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <h3 data-i18n="emptyWorkoutTitle">Nie ma jeszcze co zapisać</h3>
     <p id="emptyWorkoutMsg"></p>
     <button type="button" class="empty-workout-ok" onclick="closeEmptyWorkoutPopup()" data-i18n="gotIt">Rozumiem</button>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden" id="installPromptOverlay" onclick="if(event.target===this) dismissInstallPrompt()">
+  <div class="onboard-box new-ex-form">
+    <h3 data-i18n="installPromptTitle">Zainstaluj Thryve</h3>
+    <p data-i18n="installPromptBody">Używasz apki w przeglądarce. Jeśli masz (albo planujesz mieć) Thryve zainstalowaną na ekranie głównym albo w docku, to osobne miejsce na dane — to, co dodasz tutaj, może się tam nie pojawić. Zainstaluj i korzystaj z jednego miejsca.</p>
+    <p id="installPromptHowTo" style="font-weight:600;"></p>
+    <div class="btns" style="margin-top:16px;">
+      <button type="button" class="cancel" onclick="dismissInstallPrompt()" data-i18n="installPromptDismiss">Rozumiem, później</button>
+      <button type="button" class="save hidden" id="installPromptActionBtn" onclick="triggerInstallPrompt()" data-i18n="installPromptAction">Zainstaluj teraz</button>
+    </div>
   </div>
 </div>
 
@@ -1492,7 +1505,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.2.3";
+const APP_VERSION = "4.2.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.2.0": {
@@ -3119,6 +3132,44 @@ function isStandaloneApp(){
 function closeImportPlanBrowserNotice(){
   document.getElementById('importPlanBrowserNoticeOverlay').classList.add('hidden');
 }
+
+/* ---------- nudge browser-tab users to install, so their data doesn't
+   end up split between here and a separately-installed icon ---------- */
+const LS_INSTALL_PROMPT_DISMISSED = "fitlog_install_prompt_dismissed_v1";
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('installPromptActionBtn');
+  if(btn && !document.getElementById('installPromptOverlay').classList.contains('hidden')){
+    btn.classList.remove('hidden');
+  }
+});
+function installPromptHowToText(){
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isMac = /Macintosh/.test(ua) && !isIOS;
+  if(isIOS) return t('installPromptHowToIOS','Dotknij ikony udostępniania na dole ekranu i wybierz „Dodaj do ekranu głównego".');
+  if(isMac) return t('installPromptHowToMac','W pasku menu: Plik → Dodaj do docka.');
+  return '';
+}
+function checkInstallPrompt(){
+  if(isStandaloneApp() || localStorage.getItem(LS_INSTALL_PROMPT_DISMISSED)) return;
+  document.getElementById('installPromptHowTo').textContent = installPromptHowToText();
+  document.getElementById('installPromptActionBtn').classList.toggle('hidden', !deferredInstallPrompt);
+  document.getElementById('installPromptOverlay').classList.remove('hidden');
+}
+function dismissInstallPrompt(){
+  localStorage.setItem(LS_INSTALL_PROMPT_DISMISSED, '1');
+  document.getElementById('installPromptOverlay').classList.add('hidden');
+}
+async function triggerInstallPrompt(){
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  dismissInstallPrompt();
+}
 function updateTodayPlanBanner(){
   const banner = document.getElementById('todayPlanBanner');
   if(!banner) return;
@@ -3786,6 +3837,7 @@ if(!localStorage.getItem(LS_ONBOARD_SEEN)){
   }
 }
 checkForImportedPlan();
+checkInstallPrompt();
 // Best-effort native orientation lock — only actually works in a handful of
 // contexts (mainly an installed Android PWA in standalone display mode).
 // iOS Safari/home-screen apps don't implement this API at all, and the
