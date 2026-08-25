@@ -2882,11 +2882,33 @@ function b64urlDecode(str){
 }
 function planShareUrl(plan){
   const byName = new Set(orderedExerciseLibrary().map(e=>e.name));
-  const compactSchedule = {};
+  const plainSchedule = {};
   PLAN_DAYS.forEach(d=>{
-    compactSchedule[d] = (plan.schedule[d]||[]).map(ex=> byName.has(ex.name) ? ex.name : ex);
+    plainSchedule[d] = (plan.schedule[d]||[]).map(ex=> byName.has(ex.name) ? ex.name : ex);
   });
-  const encoded = b64urlEncode(JSON.stringify({n: plan.name, s: compactSchedule}));
+  const plainPayload = JSON.stringify({n: plan.name, s: plainSchedule});
+
+  // De-dup exercises into a per-plan dictionary and reference them by index —
+  // default plans often repeat the exact same day 2-3x a week (e.g. Fullbody
+  // workout 1 on mon/wed/fri), which this exploits. But the dictionary itself
+  // adds overhead, so it can lose to the plain form when nothing repeats
+  // (e.g. Push/Pull/Legs, where every exercise appears once) — pick whichever
+  // actually comes out shorter. resolveImportedExercise() handles both: a
+  // payload without "d" is read as the plain form.
+  const dict = [];
+  const dictIndex = new Map();
+  const dictSchedule = {};
+  PLAN_DAYS.forEach(d=>{
+    dictSchedule[d] = (plan.schedule[d]||[]).map(ex=>{
+      const entry = byName.has(ex.name) ? ex.name : ex;
+      const key = JSON.stringify(entry);
+      if(!dictIndex.has(key)){ dictIndex.set(key, dict.length); dict.push(entry); }
+      return dictIndex.get(key);
+    });
+  });
+  const dictPayload = JSON.stringify({n: plan.name, d: dict, s: dictSchedule});
+
+  const encoded = b64urlEncode(dictPayload.length < plainPayload.length ? dictPayload : plainPayload);
   const url = new URL(location.href);
   url.search = '';
   url.hash = '';
@@ -2957,18 +2979,22 @@ function cancelImportPlan(){
   pendingImportPlan = null;
   document.getElementById('importPlanOverlay').classList.add('hidden');
 }
+function resolveImportedExercise(entry){
+  const byName = new Map(orderedExerciseLibrary().map(e=>[e.name, e]));
+  if(typeof entry === 'string'){
+    const found = byName.get(entry);
+    return found ? {...found} : {name: entry, group: t('customGroupFallback','Własne'), sets:3, repLow:8, repHigh:12, rest:t('asNeeded','wg uznania')};
+  }
+  return {...entry};
+}
 function confirmImportPlan(){
   if(!pendingImportPlan) return;
-  const byName = new Map(orderedExerciseLibrary().map(e=>[e.name, e]));
+  const dict = pendingImportPlan.d; // dictionary of exercise names/objects, referenced by index — absent on older links (pre-dictionary format)
   const schedule = emptySchedule();
   PLAN_DAYS.forEach(d=>{
-    schedule[d] = (pendingImportPlan.s[d]||[]).map(entry=>{
-      if(typeof entry === 'string'){
-        const found = byName.get(entry);
-        return found ? {...found} : {name: entry, group: t('customGroupFallback','Własne'), sets:3, repLow:8, repHigh:12, rest:t('asNeeded','wg uznania')};
-      }
-      return {...entry};
-    });
+    schedule[d] = (pendingImportPlan.s[d]||[]).map(entry=>
+      resolveImportedExercise(dict ? dict[entry] : entry)
+    );
   });
   const id = 'plan_imported_'+Date.now();
   trainingPlans.push({id, name: pendingImportPlan.n, builtin:false, schedule});
