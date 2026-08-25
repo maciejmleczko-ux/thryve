@@ -1276,7 +1276,6 @@ const EXERCISE_ICON_MAP = {
   "Leg Press": "leg_press",
   "Shoulder Press": "shoulder_press",
   "Leg Curl": "leg_curl",
-  "Bicep Curl": "bicep_curl",
   "Triceps Pushdown": "triceps_pushdown",
   "Ab Crunch": "ab_crunch",
   "Incline Chest": "incline_chest",
@@ -1307,7 +1306,7 @@ const CUSTOM_EXERCISE_ICON_SUGGEST = [
   {slug:'leg_press', keywords:['leg press','wyciskanie nog','suwnica nogi']},
   {slug:'shoulder_press', keywords:['shoulder press','wyciskanie barkow na maszynie']},
   {slug:'leg_curl', keywords:['leg curl','uginanie nog lezac','uginanie nog siedzac']},
-  {slug:'bicep_curl', keywords:['bicep curl','uginanie ramion ze sztanga stojac']},
+  {slug:'barbell_curl', keywords:['bicep curl','uginanie ramion ze sztanga stojac']},
   {slug:'triceps_pushdown', keywords:['triceps pushdown','prostowanie ramion na wyciagu']},
   {slug:'ab_crunch', keywords:['ab crunch','brzuszki na maszynie']},
   {slug:'incline_chest', keywords:['incline chest','wyciskanie skos gorny','wyciskanie pod katem']},
@@ -1385,7 +1384,6 @@ const GYM_PLAN = {
     {name:"Leg Press", group:"Nogi (uda, pośladki)", sets:3, repLow:10, repHigh:12, rest:"90-120s", equipment:"maszyny"},
     {name:"Shoulder Press", group:"Barki", sets:3, repLow:10, repHigh:12, rest:"75-90s", equipment:"maszyny"},
     {name:"Leg Curl", group:"Uda (dwugłowe)", sets:3, repLow:12, repHigh:15, rest:"60-75s", equipment:"maszyny"},
-    {name:"Bicep Curl", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", equipment:"hantle"},
     {name:"Triceps Pushdown", group:"Triceps", sets:2, repLow:12, repHigh:15, rest:"60s", equipment:"maszyny"},
     {name:"Ab Crunch", group:"Brzuch", sets:2, repLow:15, repHigh:20, rest:"45-60s", equipment:"maszyny"},
   ],
@@ -1512,7 +1510,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.5.1";
+const APP_VERSION = "4.5.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.5.0": {
@@ -1747,7 +1745,7 @@ const LEGACY_NAME_MAP = {
   "Wyciskanie nóg na suwnicy (leg press)": "Leg Press",
   "Wyciskanie barków na maszynie": "Shoulder Press",
   "Uginanie nóg leżąc/siedząc (leg curl)": "Leg Curl",
-  "Modlitewnik / maszyna do bicepsa": "Bicep Curl",
+  "Modlitewnik / maszyna do bicepsa": "Barbell Curl",
   "Prostowanie ramion na wyciągu górnym (triceps)": "Triceps Pushdown",
   "Brzuszki na maszynie (ab crunch)": "Ab Crunch",
   "Wyciskanie na maszynie siedząc / incline press": "Incline Chest",
@@ -2762,7 +2760,7 @@ function defaultTrainingPlans(){
   const pushDay = defEx('Chest Press','Incline Chest','Dumbbell Shoulder Press','Dumbbell Lateral Raise','Triceps Pushdown','Overhead Triceps');
   const pullDay = defEx('Lat Pulldown','Seated Row','Straight-Arm Pulldown','Barbell Curl','Cable Curl','Face Pull');
   const legsDay = defEx('Leg Press','Leg Curl','Leg Extension','Barbell Back Squat','Hip Thrust','Calf Raise');
-  const upperA = defEx('Chest Press','Lat Pulldown','Shoulder Press','Bicep Curl','Triceps Pushdown');
+  const upperA = defEx('Chest Press','Lat Pulldown','Shoulder Press','Barbell Curl','Triceps Pushdown');
   const lowerA = defEx('Leg Press','Leg Curl','Leg Extension','Calf Raise','Hip Thrust');
   const upperB = defEx('Incline Chest','Seated Row','Dumbbell Lateral Raise','Barbell Curl','Overhead Triceps');
   const lowerB = defEx('Barbell Back Squat','Hack Squat Machine','Dumbbell Walking Lunge','Back Extension');
@@ -2785,15 +2783,25 @@ function defaultTrainingPlans(){
    This re-syncs any such entry to the current library definition, keyed
    by the OLD name it was saved under (mirrors LEGACY_NAME_MAP, but for
    plan schedules instead of workout history). */
-const EXERCISE_RENAME_MAP = { "Bicep Curl (Alt Grip)": "Dumbbell Hammer Curl" };
+const EXERCISE_RENAME_MAP = {
+  "Bicep Curl (Alt Grip)": "Dumbbell Hammer Curl",
+  "Bicep Curl": "Barbell Curl",
+};
 function applyExerciseRenames(schedule){
   const byName = new Map(BUILTIN_EXERCISES.map(e=>[e.name, e]));
   PLAN_DAYS.forEach(d=>{
     if(!schedule[d] || !schedule[d].length) return;
+    const seen = new Set();
     schedule[d] = schedule[d].map(e=>{
       const newName = EXERCISE_RENAME_MAP[e.name];
       const fresh = newName && byName.get(newName);
       return fresh ? {...fresh} : e;
+    }).filter(e=>{
+      // guards against a day that already had both the old and new name
+      // (e.g. a custom plan with both "Bicep Curl" and "Barbell Curl")
+      if(seen.has(e.name)) return false;
+      seen.add(e.name);
+      return true;
     });
   });
 }
