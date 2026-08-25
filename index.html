@@ -702,6 +702,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <button type="button" class="copy-days-btn hidden" id="skipPlanOnboardingBtn" onclick="skipPlanOnboarding()" data-i18n="skipPlanOnboarding" style="margin-top:-6px;margin-bottom:14px;display:block;">Pomiń na razie, zdecyduję później</button>
         <div id="plansList"></div>
         <button class="add-pill" onclick="openPlanEditor(null)">__PH_PLUS__<span data-i18n="planCreateNew">Stwórz mój plan treningowy</span></button>
+        <button class="add-pill secondary" onclick="openImportPlanCodeModal()">__PH_PLUS__<span data-i18n="planImportBtn">Importuj plan treningowy</span></button>
       </div>
     </div>
   </section>
@@ -848,9 +849,9 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
 <div class="onboard-overlay hidden" id="planLinkFallbackOverlay" onclick="if(event.target===this) closePlanLinkFallback()">
   <div class="onboard-box new-ex-form">
-    <h3 data-i18n="planLinkFallbackTitle">Twój link do planu</h3>
-    <p data-i18n="planLinkFallbackHint">Nie udało się skopiować automatycznie — zaznacz link poniżej i skopiuj ręcznie (Cmd/Ctrl+C).</p>
-    <input type="text" id="planLinkFallbackInput" readonly onclick="this.select()" style="width:100%;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:13px;color:var(--text-dark);font-family:inherit;margin-top:4px;">
+    <h3 data-i18n="planLinkFallbackTitle">Twoja wiadomość do wysłania</h3>
+    <p data-i18n="planLinkFallbackHint">Nie udało się skopiować automatycznie — zaznacz treść poniżej i skopiuj ręcznie (Cmd/Ctrl+C).</p>
+    <textarea id="planLinkFallbackInput" readonly onclick="this.select()" rows="6" style="width:100%;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:13px;color:var(--text-dark);font-family:inherit;margin-top:4px;resize:none;"></textarea>
     <div class="btns" style="margin-top:16px;">
       <button type="button" class="save" onclick="closePlanLinkFallback()" data-i18n="planLinkFallbackClose" style="flex:1;">Zamknij</button>
     </div>
@@ -864,6 +865,18 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="btns" style="margin-top:16px;">
       <button type="button" class="cancel" onclick="closeImportPlanBrowserNotice()" data-i18n="planLinkFallbackClose">Zamknij</button>
       <button type="button" class="save" onclick="exportData();closeImportPlanBrowserNotice();" data-i18n="importPlanBrowserExport">Pobierz kopię teraz</button>
+    </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden" id="importPlanCodeOverlay" onclick="if(event.target===this) closeImportPlanCodeModal()">
+  <div class="onboard-box new-ex-form">
+    <h3 data-i18n="planImportCodeTitle">Importuj plan</h3>
+    <p data-i18n="planImportCodeHint">Wklej kod, który dostałeś od kogoś innego.</p>
+    <textarea id="importPlanCodeInput" rows="5" data-i18n-ph="planImportCodePh" placeholder="Wklej tutaj..." style="width:100%;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:13px;color:var(--text-dark);font-family:inherit;margin-top:4px;resize:none;"></textarea>
+    <div class="btns" style="margin-top:16px;">
+      <button type="button" class="cancel" onclick="closeImportPlanCodeModal()" data-i18n="cancel">Anuluj</button>
+      <button type="button" class="save" onclick="submitImportPlanCode()" data-i18n="planImportCodeConfirm">Importuj</button>
     </div>
   </div>
 </div>
@@ -2918,7 +2931,7 @@ function b64urlDecode(str){
   while(str.length % 4) str += '=';
   return decodeURIComponent(escape(atob(str)));
 }
-function planShareUrl(plan){
+function planShareCode(plan){
   const byName = new Set(orderedExerciseLibrary().map(e=>e.name));
   const plainSchedule = {};
   PLAN_DAYS.forEach(d=>{
@@ -2946,11 +2959,13 @@ function planShareUrl(plan){
   });
   const dictPayload = JSON.stringify({n: plan.name, d: dict, s: dictSchedule});
 
-  const encoded = b64urlEncode(dictPayload.length < plainPayload.length ? dictPayload : plainPayload);
+  return b64urlEncode(dictPayload.length < plainPayload.length ? dictPayload : plainPayload);
+}
+function planShareUrl(plan){
   const url = new URL(location.href);
   url.search = '';
   url.hash = '';
-  url.searchParams.set('importPlan', encoded);
+  url.searchParams.set('importPlan', planShareCode(plan));
   return url.toString();
 }
 function legacyCopyToClipboard(text){
@@ -2976,41 +2991,81 @@ function closePlanLinkFallback(){
   document.getElementById('planLinkFallbackOverlay').classList.add('hidden');
 }
 async function sharePlan(plan){
-  const url = planShareUrl(plan);
-  const text = t('sharePlanText', `Plan treningowy „${plan.name}" z Thryve`, plan.name);
+  // Shared as a plain-text code to paste into "Importuj plan", not a
+  // clickable link — sidesteps two real problems at once: chat apps
+  // treating the link as a live URL (WhatsApp's markdown quirks aside,
+  // any auto-linkified URL always opens in the browser, not an installed
+  // PWA), and Safari/PWA not reliably sharing localStorage on iOS. Pasting
+  // the code inside whichever copy of the app the recipient actually has
+  // open guarantees the import lands in the right place.
+  const code = planShareCode(plan);
+  const text = t('sharePlanText',
+    `Plan treningowy „${plan.name}" z Thryve. Otwórz apkę → Plany → „Importuj plan" i wklej ten kod:\n\n${code}`,
+    plan.name, code);
   if(navigator.share){
-    try{ await navigator.share({title:'Thryve', text, url}); return; }
+    try{ await navigator.share({title:'Thryve', text}); return; }
     catch(err){ if(err && err.name === 'AbortError') return; }
   }
   if(navigator.clipboard && navigator.clipboard.writeText){
     try{
-      await navigator.clipboard.writeText(url);
-      toast(t('planLinkCopied','Link do planu skopiowany do schowka'));
+      await navigator.clipboard.writeText(text);
+      toast(t('planLinkCopied','Kod planu skopiowany do schowka'));
       return;
     }catch(e){}
   }
-  if(legacyCopyToClipboard(url)){
-    toast(t('planLinkCopied','Link do planu skopiowany do schowka'));
+  if(legacyCopyToClipboard(text)){
+    toast(t('planLinkCopied','Kod planu skopiowany do schowka'));
     return;
   }
-  showPlanLinkFallback(url);
+  showPlanLinkFallback(text);
 }
 let pendingImportPlan = null;
+function showImportPlanConfirmation(payload){
+  pendingImportPlan = payload;
+  const days = PLAN_DAYS.filter(d=>(payload.s[d]||[]).length>0);
+  const exCount = PLAN_DAYS.reduce((sum,d)=>sum+(payload.s[d]||[]).length, 0);
+  document.getElementById('importPlanName').textContent = payload.n;
+  document.getElementById('importPlanMeta').textContent = `${days.length ? days.map(planDayLabel).join(', ') : t('planNoDays','Brak przypisanych dni')} · ${planExCountText(exCount)}`;
+  document.getElementById('importPlanOverlay').classList.remove('hidden');
+}
+function decodePlanPayload(code){
+  const payload = JSON.parse(b64urlDecode(code));
+  if(!payload || typeof payload.n !== 'string' || typeof payload.s !== 'object') throw new Error('bad shape');
+  return payload;
+}
 function checkForImportedPlan(){
   const encoded = new URLSearchParams(location.search).get('importPlan');
   if(!encoded) return;
   history.replaceState(null, '', location.pathname);
   try{
-    const payload = JSON.parse(b64urlDecode(encoded));
-    if(!payload || typeof payload.n !== 'string' || typeof payload.s !== 'object') throw new Error('bad shape');
-    pendingImportPlan = payload;
-    const days = PLAN_DAYS.filter(d=>(payload.s[d]||[]).length>0);
-    const exCount = PLAN_DAYS.reduce((sum,d)=>sum+(payload.s[d]||[]).length, 0);
-    document.getElementById('importPlanName').textContent = payload.n;
-    document.getElementById('importPlanMeta').textContent = `${days.length ? days.map(planDayLabel).join(', ') : t('planNoDays','Brak przypisanych dni')} · ${planExCountText(exCount)}`;
-    document.getElementById('importPlanOverlay').classList.remove('hidden');
+    showImportPlanConfirmation(decodePlanPayload(encoded));
   }catch(e){
     toast(t('planImportFailed','Nie udało się wczytać linku planu — spróbuj poprosić o niego jeszcze raz'));
+  }
+}
+function openImportPlanCodeModal(){
+  document.getElementById('importPlanCodeInput').value = '';
+  document.getElementById('importPlanCodeOverlay').classList.remove('hidden');
+}
+function closeImportPlanCodeModal(){
+  document.getElementById('importPlanCodeOverlay').classList.add('hidden');
+}
+function extractPlanCode(raw){
+  // Accept either a bare code or the whole shared message (instructions +
+  // code pasted together) — pull out the longest base64url-looking run.
+  const matches = raw.match(/[A-Za-z0-9\-.]{20,}/g);
+  if(!matches) return raw.trim();
+  return matches.reduce((a,b)=> b.length>a.length ? b : a);
+}
+function submitImportPlanCode(){
+  const raw = document.getElementById('importPlanCodeInput').value.trim();
+  if(!raw) return;
+  try{
+    const payload = decodePlanPayload(extractPlanCode(raw));
+    closeImportPlanCodeModal();
+    showImportPlanConfirmation(payload);
+  }catch(e){
+    toast(t('planImportCodeInvalid','Nieprawidłowy kod planu — sprawdź, czy skopiowałeś go w całości.'));
   }
 }
 function cancelImportPlan(){
