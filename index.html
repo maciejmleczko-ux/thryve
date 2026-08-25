@@ -857,6 +857,17 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<div class="onboard-overlay hidden" id="importPlanBrowserNoticeOverlay" onclick="if(event.target===this) closeImportPlanBrowserNotice()">
+  <div class="onboard-box new-ex-form">
+    <h3 data-i18n="importPlanBrowserTitle">Plan dodany — ale tutaj</h3>
+    <p data-i18n="importPlanBrowserHint">Otworzyłeś ten link w przeglądarce, nie w zainstalowanej apce Thryve — jeśli korzystasz z ikonki na ekranie głównym, to osobne miejsce na dane. Pobierz kopię zapasową tutaj i wgraj ją w apce, żeby zobaczyć tam ten plan.</p>
+    <div class="btns" style="margin-top:16px;">
+      <button type="button" class="cancel" onclick="closeImportPlanBrowserNotice()" data-i18n="planLinkFallbackClose">Zamknij</button>
+      <button type="button" class="save" onclick="exportData();closeImportPlanBrowserNotice();" data-i18n="importPlanBrowserExport">Pobierz kopię teraz</button>
+    </div>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden" id="importPlanOverlay" onclick="if(event.target===this) cancelImportPlan()">
   <div class="onboard-box new-ex-form">
     <h3 data-i18n="importPlanTitle">Zaimportować plan?</h3>
@@ -3031,6 +3042,20 @@ function confirmImportPlan(){
   toast(t('planImported','Plan zaimportowany'));
   renderPlansList();
   goRoute('plans');
+  // On iOS, Safari and an installed ("Add to Home Screen") copy of the app
+  // don't reliably share localStorage — a plan imported here in the browser
+  // can be invisible from the home-screen icon. Point the user at the
+  // backup export/import flow (which now covers plans too) as the way to
+  // carry it over, instead of leaving them to wonder where it went.
+  if(!isStandaloneApp()){
+    document.getElementById('importPlanBrowserNoticeOverlay').classList.remove('hidden');
+  }
+}
+function isStandaloneApp(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function closeImportPlanBrowserNotice(){
+  document.getElementById('importPlanBrowserNoticeOverlay').classList.add('hidden');
 }
 function updateTodayPlanBanner(){
   const banner = document.getElementById('todayPlanBanner');
