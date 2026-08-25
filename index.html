@@ -188,6 +188,9 @@ button{font-family:inherit;}
 .add-pill.secondary{background:#fff;color:var(--orange);border:1.5px solid var(--orange);}
 .add-pill:disabled{opacity:.45;cursor:default;}
 .add-pill.hidden{display:none;}
+.plan-actions-row{display:flex;gap:10px;margin-bottom:16px;}
+.plan-actions-row .add-pill{width:auto;flex:1;min-width:0;margin-top:0;padding:12px 10px;font-size:10.5px;text-align:center;}
+.plan-actions-row .add-pill .ph{width:18px;height:18px;flex-shrink:0;}
 .save-btn.hidden{display:none;}
 .ph.hidden{display:none;}
 .gym-no-plan-prompt{text-align:center;padding:28px 12px 36px;}
@@ -700,9 +703,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="panel-inner">
         <div class="onboard-note hidden" id="planOnboardingIntro" data-i18n="planOnboardingIntro">Zanim zaczniesz, wybierz gotowy plan albo stwórz własny — zobaczysz go od razu w GYM.</div>
         <button type="button" class="copy-days-btn hidden" id="skipPlanOnboardingBtn" onclick="skipPlanOnboarding()" data-i18n="skipPlanOnboarding" style="margin-top:-6px;margin-bottom:14px;display:block;">Pomiń na razie, zdecyduję później</button>
+        <div class="plan-actions-row">
+          <button class="add-pill" onclick="openPlanEditor(null)">__PH_PLUS__<span data-i18n="planCreateNew">Stwórz mój plan treningowy</span></button>
+          <button class="add-pill secondary" onclick="openImportPlanCodeModal()">__PH_PLUS__<span data-i18n="planImportBtn">Importuj plan treningowy</span></button>
+        </div>
         <div id="plansList"></div>
-        <button class="add-pill" onclick="openPlanEditor(null)">__PH_PLUS__<span data-i18n="planCreateNew">Stwórz mój plan treningowy</span></button>
-        <button class="add-pill secondary" onclick="openImportPlanCodeModal()">__PH_PLUS__<span data-i18n="planImportBtn">Importuj plan treningowy</span></button>
       </div>
     </div>
   </section>
