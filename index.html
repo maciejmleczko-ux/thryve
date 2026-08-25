@@ -823,6 +823,17 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<div class="onboard-overlay hidden" id="planLinkFallbackOverlay" onclick="if(event.target===this) closePlanLinkFallback()">
+  <div class="onboard-box new-ex-form">
+    <h3 data-i18n="planLinkFallbackTitle">Twój link do planu</h3>
+    <p data-i18n="planLinkFallbackHint">Nie udało się skopiować automatycznie — zaznacz link poniżej i skopiuj ręcznie (Cmd/Ctrl+C).</p>
+    <input type="text" id="planLinkFallbackInput" readonly onclick="this.select()" style="width:100%;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:13px;color:var(--text-dark);font-family:inherit;margin-top:4px;">
+    <div class="btns" style="margin-top:16px;">
+      <button type="button" class="save" onclick="closePlanLinkFallback()" data-i18n="planLinkFallbackClose" style="flex:1;">Zamknij</button>
+    </div>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden" id="importPlanOverlay" onclick="if(event.target===this) cancelImportPlan()">
   <div class="onboard-box new-ex-form">
     <h3 data-i18n="importPlanTitle">Zaimportować plan?</h3>
@@ -2882,6 +2893,28 @@ function planShareUrl(plan){
   url.searchParams.set('importPlan', encoded);
   return url.toString();
 }
+function legacyCopyToClipboard(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  let ok = false;
+  try{ ok = document.execCommand('copy'); }catch(e){ ok = false; }
+  ta.remove();
+  return ok;
+}
+function showPlanLinkFallback(url){
+  document.getElementById('planLinkFallbackInput').value = url;
+  document.getElementById('planLinkFallbackOverlay').classList.remove('hidden');
+  const input = document.getElementById('planLinkFallbackInput');
+  setTimeout(()=>{ input.focus(); input.select(); }, 50);
+}
+function closePlanLinkFallback(){
+  document.getElementById('planLinkFallbackOverlay').classList.add('hidden');
+}
 async function sharePlan(plan){
   const url = planShareUrl(plan);
   const text = t('sharePlanText', `Plan treningowy „${plan.name}" z Thryve`, plan.name);
@@ -2889,12 +2922,18 @@ async function sharePlan(plan){
     try{ await navigator.share({title:'Thryve', text, url}); return; }
     catch(err){ if(err && err.name === 'AbortError') return; }
   }
-  try{
-    await navigator.clipboard.writeText(url);
-    toast(t('planLinkCopied','Link do planu skopiowany do schowka'));
-  }catch(e){
-    toast(t('planLinkCopyFailed','Nie udało się skopiować linku'));
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    try{
+      await navigator.clipboard.writeText(url);
+      toast(t('planLinkCopied','Link do planu skopiowany do schowka'));
+      return;
+    }catch(e){}
   }
+  if(legacyCopyToClipboard(url)){
+    toast(t('planLinkCopied','Link do planu skopiowany do schowka'));
+    return;
+  }
+  showPlanLinkFallback(url);
 }
 let pendingImportPlan = null;
 function checkForImportedPlan(){
