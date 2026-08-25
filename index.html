@@ -3455,7 +3455,13 @@ function shareHistCard(kind, id){
    EXPORT
    ============================================================ */
 function exportData(){
-  const data = {workouts, runs, profileName, exportedAt: new Date().toISOString()};
+  const data = {
+    workouts, runs, profileName,
+    trainingPlans, customExercises,
+    favoriteExercises: [...favoriteExercises],
+    starredPlanId, exerciseOrder,
+    exportedAt: new Date().toISOString(),
+  };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3489,12 +3495,32 @@ function importData(evt){
         const existingRIds = new Set(runs.map(r=>r.id));
         data.workouts.forEach(w=>{ if(!existingWIds.has(w.id)) workouts.push(w); });
         data.runs.forEach(r=>{ if(!existingRIds.has(r.id)) runs.push(r); });
+        if(Array.isArray(data.trainingPlans)){
+          const existingPIds = new Set(trainingPlans.map(p=>p.id));
+          data.trainingPlans.forEach(p=>{ if(!existingPIds.has(p.id)) trainingPlans.push(p); });
+        }
+        if(Array.isArray(data.customExercises)){
+          const existingCNames = new Set(customExercises.map(e=>e.name));
+          data.customExercises.forEach(e=>{ if(!existingCNames.has(e.name)) customExercises.push(e); });
+        }
+        if(Array.isArray(data.favoriteExercises)) data.favoriteExercises.forEach(n=> favoriteExercises.add(n));
+        if(!starredPlanId && data.starredPlanId) starredPlanId = data.starredPlanId;
       } else {
         workouts = data.workouts;
         runs = data.runs;
+        if(Array.isArray(data.trainingPlans)) trainingPlans = data.trainingPlans;
+        if(Array.isArray(data.customExercises)) customExercises = data.customExercises;
+        if(Array.isArray(data.favoriteExercises)) favoriteExercises = new Set(data.favoriteExercises);
+        if(Array.isArray(data.exerciseOrder)) exerciseOrder = data.exerciseOrder;
+        starredPlanId = data.starredPlanId || null;
       }
       saveWorkouts(workouts);
       saveRuns(runs);
+      saveTrainingPlansList();
+      saveCustomExercises(customExercises);
+      saveFavoriteExercises();
+      if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId); else localStorage.removeItem(LS_STARRED_PLAN);
+      saveExerciseOrderList(exerciseOrder);
       renderCalendar();
       toast(t('dataImported','Zaimportowano dane'));
     }catch(err){
