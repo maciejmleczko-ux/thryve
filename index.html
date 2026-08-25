@@ -246,6 +246,8 @@ button{font-family:inherit;}
 .set-row{display:flex;align-items:center;gap:15px;}
 .set-row .set-no{font-size:12px;width:22px;flex-shrink:0;}
 .set-row input{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text-dark);font-family:inherit;min-width:0;}
+.set-row .set-delete{flex-shrink:0;display:flex;cursor:pointer;color:var(--text-dark);opacity:.35;}
+.set-row .set-delete .ph{width:16px;height:16px;}
 
 .ex-bar{background:#fff;border-radius:16px;padding:12px 16px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;color:var(--text-dark);cursor:pointer;}
 .ex-bar-info{display:flex;align-items:center;gap:10px;min-width:0;}
@@ -836,11 +838,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
     <div class="row2">
       <div class="field" style="flex:1;"><label data-i18n="muscleGroupLabel">Grupa mięśniowa</label><input type="text" id="newExGroup" data-i18n-ph="muscleGroupPh" placeholder="np. Nogi" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" onblur="this.setAttribute('readonly','')"></div>
-      <div class="field" style="width:70px;flex:none;"><label data-i18n="setsLabel">Serie</label><input type="number" id="newExSets" value="3" min="1"></div>
+      <div class="field" style="width:70px;flex:none;"><label data-i18n="setsLabel">Serie</label><input type="number" id="newExSets" placeholder="3" min="1"></div>
     </div>
     <div class="row2">
-      <div class="field"><label data-i18n="repsFromLabel">Powt. od</label><input type="number" id="newExRepLow" value="8" min="1"></div>
-      <div class="field"><label data-i18n="repsToLabel">Powt. do</label><input type="number" id="newExRepHigh" value="12" min="1"></div>
+      <div class="field"><label data-i18n="repsFromLabel">Powt. od</label><input type="number" id="newExRepLow" placeholder="8" min="1"></div>
+      <div class="field"><label data-i18n="repsToLabel">Powt. do</label><input type="number" id="newExRepHigh" placeholder="12" min="1"></div>
     </div>
     <div class="btns">
       <button type="button" class="cancel" onclick="toggleNewExerciseForm()" data-i18n="cancel">Anuluj</button>
@@ -2364,6 +2366,13 @@ function setLive(name, idx, field, val){
   if(!ex) return;
   ex.setValues[idx][field] = val;
 }
+function removeSetRow(name, idx){
+  const ex = sessionExercises.find(e=>e.name===name);
+  if(!ex || ex.sets<=1) return;
+  ex.setValues.splice(idx,1);
+  ex.sets = ex.setValues.length;
+  renderExercisePanels();
+}
 
 function renderExercisePanels(){
   const area = document.getElementById('exercisePanelArea');
@@ -2385,6 +2394,7 @@ function renderExercisePanels(){
             <div class="set-no">S${s+1}</div>
             <input type="number" step="0.5" min="0" placeholder="${lastW!==''?lastW+' kg':'kg'}" value="${ex.setValues[s].weight}" oninput="setLive('${ex.name.replace(/'/g,"\\'")}',${s},'weight',this.value)">
             <input type="number" step="1" min="0" placeholder="${lastR!==''?lastR+' '+t('repsUnit','powt.'):t('repsUnit','powt.')}" value="${ex.setValues[s].reps}" oninput="setLive('${ex.name.replace(/'/g,"\\'")}',${s},'reps',this.value)">
+            ${ex.sets>1?`<span class="set-delete" onclick="removeSetRow('${ex.name.replace(/'/g,"\\'")}',${s})">${ph('x')}</span>`:''}
           </div>`;
       }
       panel.innerHTML = `
@@ -2428,9 +2438,9 @@ function toggleNewExerciseForm(){
     document.getElementById('newExTitle').setAttribute('readonly', '');
     document.getElementById('newExGroup').value = '';
     document.getElementById('newExGroup').setAttribute('readonly', '');
-    document.getElementById('newExSets').value = 3;
-    document.getElementById('newExRepLow').value = 8;
-    document.getElementById('newExRepHigh').value = 12;
+    document.getElementById('newExSets').value = '';
+    document.getElementById('newExRepLow').value = '';
+    document.getElementById('newExRepHigh').value = '';
     suggestedExerciseIcon = null;
     document.getElementById('iconSuggestBox').classList.add('hidden');
   }
