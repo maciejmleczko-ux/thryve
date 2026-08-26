@@ -331,9 +331,7 @@ button{font-family:inherit;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:16px;text-align:center;}
 .cal-dow{color:rgba(255,255,255,.7);font-size:12px;padding:4px 0;}
 .cal-day{color:#fff;font-size:14px;width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;padding:0;border-radius:50%;cursor:pointer;border:2px solid transparent;background:none;font-family:inherit;}
-.cal-day.has-log{border-color:#fff;position:relative;}
-.cal-day.multi-log::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#fff;}
-.cal-day.multi-log.selected::after{background:var(--orange);}
+.cal-day.has-log{border-color:#fff;}
 .cal-day.selected{background:#fff;color:var(--text-dark);border-color:#fff;}
 .cal-day.empty{visibility:hidden;}
 .cal-day.future{opacity:.28;cursor:not-allowed;}
@@ -1509,7 +1507,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.5.5";
+const APP_VERSION = "4.5.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.5.0": {
@@ -3450,9 +3448,7 @@ function renderCalendar(){
     const btn = document.createElement('button');
     btn.className = 'cal-day';
     btn.textContent = d;
-    const logCount = logged.get(iso) || 0;
-    if(logCount>=1) btn.classList.add('has-log');
-    if(logCount>=2) btn.classList.add('multi-log');
+    if(logged.get(iso)) btn.classList.add('has-log');
     if(iso===selectedHistDate) btn.classList.add('selected');
     btn.onclick = ()=>{ selectedHistDate = iso; histExpanded = {}; renderCalendar(); renderHistDetail(); };
     grid.appendChild(btn);
@@ -3471,8 +3467,8 @@ function renderHistDetail(){
   const wrap = document.getElementById('histDetail');
   if(!selectedHistDate){ wrap.innerHTML = `<div class="hist-empty">${t('histEmptyPick','Wybierz dzień, żeby zobaczyć szczegóły.')}</div>`; return; }
   // a day can hold more than one saved workout/run (e.g. a session logged in
-  // two parts) — the calendar's multi-log dot and the stats charts already
-  // account for every entry, so this has to show all of them too, not just
+  // two parts) — the stats charts already account for every entry, so this
+  // has to show all of them too, not just
   // the first match, or logged data silently "disappears" from History.
   const dayWorkouts = workouts.filter(w=>w.date===selectedHistDate);
   const dayRuns = runs.filter(r=>r.date===selectedHistDate);
