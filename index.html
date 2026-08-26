@@ -253,11 +253,12 @@ button{font-family:inherit;}
 .onboard-box.empty-workout-box p{color:rgba(255,255,255,.9);}
 .empty-workout-ok{width:100%;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;background:#fff;color:var(--orange);}
 
-/* ---------- exercise editor panel ---------- */
-.ex-panel{background:#fff;border-radius:16px;padding:16px;margin-top:14px;color:var(--text-dark);position:relative;}
-.ex-panel .close-x{position:absolute;top:16px;right:16px;width:18px;height:18px;cursor:pointer;color:var(--text-dark);}
-.ex-panel .ex-name{font-size:14px;font-weight:600;letter-spacing:.42px;text-transform:uppercase;padding-right:24px;}
-.ex-panel .ex-meta{font-size:10px;color:#5b5555;margin-top:4px;}
+/* ---------- exercise logging popup ---------- */
+.ex-popup-box{position:relative;}
+.ex-popup-box .close-x{position:absolute;top:16px;right:16px;width:18px;height:18px;cursor:pointer;color:var(--text-dark);}
+.ex-popup-box .ex-name{font-size:14px;font-weight:600;letter-spacing:.42px;text-transform:uppercase;padding-right:24px;}
+.ex-popup-box .ex-meta{font-size:10px;color:#5b5555;margin-top:4px;}
+.ex-popup-box .popup-add-btn{display:block;width:100%;margin-top:18px;background:var(--orange);border:none;border-radius:12px;padding:16px;color:#fff;font-size:14px;font-weight:700;letter-spacing:.42px;text-align:center;cursor:pointer;text-transform:uppercase;font-family:inherit;}
 .tip-box{background:var(--tip);border-radius:12px;padding:12px 24px;margin-top:12px;font-size:10px;line-height:1.5;text-align:center;}
 .set-rows{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
 .set-row{display:flex;align-items:center;gap:15px;}
@@ -948,6 +949,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<div class="onboard-overlay hidden" id="exercisePopupOverlay" onclick="if(event.target===this) closeExercisePopup()">
+  <div class="onboard-box ex-popup-box" id="exercisePopupBox"></div>
+</div>
+
 <script>/*!
  * Chart.js v4.4.4
  * https://www.chartjs.org
@@ -998,6 +1003,7 @@ const T_EN = {
   repsToLabel: 'Reps to',
   cancel: 'Cancel',
   saveAddToSession: 'Save and add to session',
+  addToWorkout: 'Add to workout',
   saveWorkout: 'Save workout',
   shareWorkout: 'Share workout',
   planWeekLabel: 'Plan week',
@@ -1507,9 +1513,17 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.5.6";
+const APP_VERSION = "4.6.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "4.6.0": {
+    pl: [
+      {featured:true, icon:'barbell', badge:'Nowość', title:'Logowanie serii w popupie', text:'Wpisywanie ciężaru i powtórzeń otwiera się teraz na środku ekranu, zamiast wjeżdżać na dole listy — łatwiej znaleźć przy dłuższych treningach, mniejsza szansa, że coś przeoczysz przewijając. Potwierdzasz przyciskiem "Dodaj do treningu".'},
+    ],
+    en: [
+      {featured:true, icon:'barbell', badge:'New', title:'Logging sets in a popup', text:'Entering weight and reps now opens centered on screen instead of sliding in at the bottom of the list — easier to find on longer workouts, less chance of missing it while scrolling. Confirm with "Add to workout".'},
+    ],
+  },
   "4.5.0": {
     pl: [
       {featured:true, icon:'check-circle', badge:'Nowość', title:'Rozgrzewka i rozciąganie', text:'Każdy dzień planu treningowego zaczyna się teraz od rozgrzewki i kończy rozciąganiem — automatycznie, także w planach, które już masz. Zaznaczasz jednym stuknięciem, bez wpisywania serii.'},
@@ -2152,7 +2166,11 @@ function renderGymFavFilterRow(){
     <button type="button" class="fav-filter-chip${gymFavFilter==='favorites'?' active':''}" onclick="setGymFavFilter('favorites')">${ph(gymFavFilter==='favorites'?'heart-fill':'heart')}<span>${t('favFilterFavorites','Ulubione')}</span></button>
   `;
 }
-let openExerciseName = null;
+// Exercise logging happens in a centered popup, not inline in the page flow
+// — with a long grid, an inline panel could scroll out of view and get
+// missed entirely. popupExercise is a draft copy; nothing touches
+// sessionExercises until "Dodaj do treningu" confirms it.
+let popupExercise = null;
 
 function lastSessionsFor(exerciseName){
   return workouts
@@ -2469,57 +2487,95 @@ function endTileDrag(){
 }
 
 function onTileTap(ex){
-  const already = sessionExercises.find(e=>e.name===ex.name);
   if(ex.type === 'checklist'){
     // simple tap-to-toggle "done" item — no sets/weight/reps, tapping again undoes it
+    const already = sessionExercises.find(e=>e.name===ex.name);
     if(already) removeExerciseFromSession(ex.name);
     else { sessionExercises.push({...ex, done:true}); renderGymGrid(); renderExercisePanels(); }
     return;
   }
-  if(!already){
-    sessionExercises.push({...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''});
-    openExerciseName = ex.name;
-  } else {
-    const hasData = already.setValues.some(s => s.weight !== '' || s.reps !== '');
-    if(!hasData){
-      removeExerciseFromSession(ex.name);
-      return;
-    }
-    openExerciseName = (openExerciseName===ex.name) ? null : ex.name;
-  }
-  renderGymGrid();
-  renderExercisePanels();
+  openExercisePopup(ex);
 }
 
 function removeExerciseFromSession(name){
   sessionExercises = sessionExercises.filter(e => e.name !== name);
-  if(openExerciseName===name) openExerciseName = null;
   renderGymGrid();
   renderExercisePanels();
 }
-function collapseExercisePanel(){
-  openExerciseName = null;
+
+function openExercisePopup(ex){
+  const already = sessionExercises.find(e=>e.name===ex.name);
+  popupExercise = already
+    ? {...already, setValues: already.setValues.map(s=>({...s}))}
+    : {...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''};
+  renderExercisePopup();
+  document.getElementById('exercisePopupOverlay').classList.remove('hidden');
+}
+function closeExercisePopup(){
+  document.getElementById('exercisePopupOverlay').classList.add('hidden');
+  popupExercise = null;
+}
+function popupSetLive(idx, field, val){
+  if(!popupExercise) return;
+  popupExercise.setValues[idx][field] = val;
+}
+function popupRemoveSetRow(idx){
+  if(!popupExercise || popupExercise.sets<=1) return;
+  popupExercise.setValues.splice(idx,1);
+  popupExercise.sets = popupExercise.setValues.length;
+  renderExercisePopup();
+}
+function popupAddSetRow(){
+  if(!popupExercise) return;
+  popupExercise.setValues.push({weight:'', reps:''});
+  popupExercise.sets = popupExercise.setValues.length;
+  renderExercisePopup();
+}
+function confirmExercisePopup(){
+  if(!popupExercise) return;
+  const idx = sessionExercises.findIndex(e=>e.name===popupExercise.name);
+  const hasData = popupExercise.setValues.some(s=>s.weight!=='' || s.reps!=='');
+  if(!hasData){
+    // nothing filled in — don't leave an empty stub (or drop it if it was already there)
+    if(idx!==-1) sessionExercises.splice(idx,1);
+  } else if(idx===-1){
+    sessionExercises.push(popupExercise);
+  } else {
+    sessionExercises[idx] = popupExercise;
+  }
+  closeExercisePopup();
+  renderGymGrid();
   renderExercisePanels();
 }
 
-function setLive(name, idx, field, val){
-  const ex = sessionExercises.find(e=>e.name===name);
-  if(!ex) return;
-  ex.setValues[idx][field] = val;
-}
-function removeSetRow(name, idx){
-  const ex = sessionExercises.find(e=>e.name===name);
-  if(!ex || ex.sets<=1) return;
-  ex.setValues.splice(idx,1);
-  ex.sets = ex.setValues.length;
-  renderExercisePanels();
-}
-function addSetRow(name){
-  const ex = sessionExercises.find(e=>e.name===name);
-  if(!ex) return;
-  ex.setValues.push({weight:'', reps:''});
-  ex.sets = ex.setValues.length;
-  renderExercisePanels();
+function renderExercisePopup(){
+  const box = document.getElementById('exercisePopupBox');
+  if(!popupExercise){ box.innerHTML = ''; return; }
+  const ex = popupExercise;
+  const history = lastSessionsFor(ex.name);
+  const sugg = buildSuggestion(ex, history);
+  const lastSets = history[0] ? history[0].sets : [];
+  let rowsHtml = '';
+  for(let s=0;s<ex.sets;s++){
+    const lastW = lastSets[s] ? lastSets[s].weight : '';
+    const lastR = lastSets[s] ? lastSets[s].reps : '';
+    const isLast = s === ex.sets-1;
+    rowsHtml += `
+      <div class="set-row">
+        <div class="set-no">S${s+1}</div>
+        <input type="number" step="0.5" min="0" placeholder="${lastW!==''?lastW+' kg':'kg'}" value="${ex.setValues[s].weight}" oninput="popupSetLive(${s},'weight',this.value)">
+        <input type="number" step="1" min="0" placeholder="${lastR!==''?lastR+' '+t('repsUnit','powt.'):t('repsUnit','powt.')}" value="${ex.setValues[s].reps}" oninput="popupSetLive(${s},'reps',this.value)">
+        ${isLast?`<div class="set-steppers">${ex.sets>1?`<button type="button" class="set-step minus" onclick="popupRemoveSetRow(${s})">−</button>`:''}<button type="button" class="set-step plus" onclick="popupAddSetRow()">+</button></div>`:''}
+      </div>`;
+  }
+  box.innerHTML = `
+    <span class="close-x" onclick="closeExercisePopup()">${ph('x')}</span>
+    <div class="ex-name">${ex.name}</div>
+    <div class="ex-meta">${t('exMeta', `${groupLabel(ex.group)} · ${ex.sets} serie x ${ex.repLow}-${ex.repHigh} powt. · przerwa ${ex.rest}`, groupLabel(ex.group), ex.sets, ex.repLow, ex.repHigh, ex.rest)}</div>
+    <div class="tip-box">${sugg.text}</div>
+    <div class="set-rows">${rowsHtml}</div>
+    <button type="button" class="popup-add-btn" onclick="confirmExercisePopup()">${t('addToWorkout','Dodaj do treningu')}</button>
+  `;
 }
 
 function renderExercisePanels(){
@@ -2546,55 +2602,25 @@ function renderExercisePanels(){
       area.appendChild(bar);
       return;
     }
-    if(ex.name === openExerciseName){
-      const history = lastSessionsFor(ex.name);
-      const sugg = buildSuggestion(ex, history);
-      const lastSets = history[0] ? history[0].sets : [];
-      const panel = document.createElement('div');
-      panel.className = 'ex-panel';
-      let rowsHtml = '';
-      const safeName = ex.name.replace(/'/g,"\\'");
-      for(let s=0;s<ex.sets;s++){
-        const lastW = lastSets[s] ? lastSets[s].weight : '';
-        const lastR = lastSets[s] ? lastSets[s].reps : '';
-        const isLast = s === ex.sets-1;
-        rowsHtml += `
-          <div class="set-row">
-            <div class="set-no">S${s+1}</div>
-            <input type="number" step="0.5" min="0" placeholder="${lastW!==''?lastW+' kg':'kg'}" value="${ex.setValues[s].weight}" oninput="setLive('${safeName}',${s},'weight',this.value)">
-            <input type="number" step="1" min="0" placeholder="${lastR!==''?lastR+' '+t('repsUnit','powt.'):t('repsUnit','powt.')}" value="${ex.setValues[s].reps}" oninput="setLive('${safeName}',${s},'reps',this.value)">
-            ${isLast?`<div class="set-steppers">${ex.sets>1?`<button type="button" class="set-step minus" onclick="removeSetRow('${safeName}',${s})">−</button>`:''}<button type="button" class="set-step plus" onclick="addSetRow('${safeName}')">+</button></div>`:''}
-          </div>`;
-      }
-      panel.innerHTML = `
-        <span class="close-x" onclick="collapseExercisePanel()">${ph('x')}</span>
-        <div class="ex-name">${ex.name}</div>
-        <div class="ex-meta">${t('exMeta', `${groupLabel(ex.group)} · ${ex.sets} serie x ${ex.repLow}-${ex.repHigh} powt. · przerwa ${ex.rest}`, groupLabel(ex.group), ex.sets, ex.repLow, ex.repHigh, ex.rest)}</div>
-        <div class="tip-box">${sugg.text}</div>
-        <div class="set-rows">${rowsHtml}</div>
-      `;
-      area.appendChild(panel);
-    } else {
-      const validSets = ex.setValues.filter(s=>s.weight!=='' || s.reps!=='');
-      const summary = validSets.length ? validSets.map(s=>`${s.weight||0}kg×${s.reps||0}`).join(' · ') : t('noSetsLogged','brak wpisanych serii');
-      const bar = document.createElement('div');
-      bar.className = 'ex-bar';
-      bar.onclick = ()=>{ openExerciseName = ex.name; renderExercisePanels(); };
-      bar.innerHTML = `
-        <div class="ex-bar-info">
-          ${validSets.length ? `<span class="ex-bar-check">${PH['check-circle']}</span>` : ''}
-          <div>
-            <div class="nm">${ex.name}</div>
-            <div class="st">${summary}</div>
-          </div>
+    const validSets = ex.setValues.filter(s=>s.weight!=='' || s.reps!=='');
+    const summary = validSets.length ? validSets.map(s=>`${s.weight||0}kg×${s.reps||0}`).join(' · ') : t('noSetsLogged','brak wpisanych serii');
+    const bar = document.createElement('div');
+    bar.className = 'ex-bar';
+    bar.onclick = ()=> openExercisePopup(ex);
+    bar.innerHTML = `
+      <div class="ex-bar-info">
+        ${validSets.length ? `<span class="ex-bar-check">${PH['check-circle']}</span>` : ''}
+        <div>
+          <div class="nm">${ex.name}</div>
+          <div class="st">${summary}</div>
         </div>
-        <div class="ex-bar-actions">
-          ${ph('pencil', 'ex-bar-edit')}
-          <span class="ex-bar-delete" onclick="event.stopPropagation();removeExerciseFromSession('${ex.name.replace(/'/g,"\\'")}')">${ph('trash')}</span>
-        </div>
-      `;
-      area.appendChild(bar);
-    }
+      </div>
+      <div class="ex-bar-actions">
+        ${ph('pencil', 'ex-bar-edit')}
+        <span class="ex-bar-delete" onclick="event.stopPropagation();removeExerciseFromSession('${ex.name.replace(/'/g,"\\'")}')">${ph('trash')}</span>
+      </div>
+    `;
+    area.appendChild(bar);
   });
 }
 
@@ -2678,7 +2704,7 @@ function saveWorkout(){
   gymShareBtn.classList.remove('hidden');
   sessionExercises = [];
   extraGymTiles = [];
-  openExerciseName = null;
+  closeExercisePopup();
   renderGymGrid();
   renderExercisePanels();
 }
