@@ -1004,6 +1004,7 @@ const T_EN = {
   cancel: 'Cancel',
   saveAddToSession: 'Save and add to session',
   addToWorkout: 'Add to workout',
+  saveChanges: 'Save',
   saveWorkout: 'Save workout',
   shareWorkout: 'Share workout',
   planWeekLabel: 'Plan week',
@@ -1513,7 +1514,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.6.0";
+const APP_VERSION = "4.6.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.6.0": {
@@ -2568,13 +2569,15 @@ function renderExercisePopup(){
         ${isLast?`<div class="set-steppers">${ex.sets>1?`<button type="button" class="set-step minus" onclick="popupRemoveSetRow(${s})">−</button>`:''}<button type="button" class="set-step plus" onclick="popupAddSetRow()">+</button></div>`:''}
       </div>`;
   }
+  const isEdit = sessionExercises.some(e=>e.name===ex.name);
+  const btnLabel = isEdit ? t('saveChanges','Zapisz') : t('addToWorkout','Dodaj do treningu');
   box.innerHTML = `
     <span class="close-x" onclick="closeExercisePopup()">${ph('x')}</span>
     <div class="ex-name">${ex.name}</div>
     <div class="ex-meta">${t('exMeta', `${groupLabel(ex.group)} · ${ex.sets} serie x ${ex.repLow}-${ex.repHigh} powt. · przerwa ${ex.rest}`, groupLabel(ex.group), ex.sets, ex.repLow, ex.repHigh, ex.rest)}</div>
     <div class="tip-box">${sugg.text}</div>
     <div class="set-rows">${rowsHtml}</div>
-    <button type="button" class="popup-add-btn" onclick="confirmExercisePopup()">${t('addToWorkout','Dodaj do treningu')}</button>
+    <button type="button" class="popup-add-btn" onclick="confirmExercisePopup()">${btnLabel}</button>
   `;
 }
 
