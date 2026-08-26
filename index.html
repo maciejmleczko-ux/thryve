@@ -16,6 +16,9 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.png">
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -77,6 +80,7 @@ button{font-family:inherit;}
 
 /* ---------- header ---------- */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(16px + env(safe-area-inset-top, 0px)) 20px 0;}
+.topbar.hidden{display:none;}
 .brand-mark{display:flex;align-items:center;}
 .logo-svg{height:53px;width:auto;display:block;color:#fff;}
 .topbar.topbar-light{background:var(--light);margin:0;padding:calc(16px + env(safe-area-inset-top, 0px)) 20px 0;border-radius:0;}
@@ -482,6 +486,68 @@ button{font-family:inherit;}
 .icon-suggest.hidden{display:none;}
 .icon-suggest img{width:34px;height:34px;border-radius:8px;flex-shrink:0;}
 .icon-suggest span{font-size:12px;font-weight:700;color:var(--text-dark);opacity:.75;}
+
+/* ============================================================
+   DASHBOARD — hidden preview of the new Figma "v3" redesign.
+   Scoped entirely under .dash-* / #view-dashboard: its own font
+   (Geist) and color set, deliberately not touching the app-wide
+   --bg/--card/--orange tokens used everywhere else yet. Reachable
+   only via the triple-tap-logo gesture until the rest of the app
+   is migrated to this design.
+   ============================================================ */
+#view-dashboard{background:#eceaf1;min-height:100vh;font-family:'Geist','Inter',-apple-system,sans-serif;}
+.dash-root{position:relative;padding:calc(20px + env(safe-area-inset-top,0px)) 10px 110px;}
+.dash-chat-btn{position:absolute;top:calc(20px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.dash-chat-btn .ph{width:24px;height:24px;color:#343941;}
+.dash-header{padding:0 3px 20px;}
+.dash-hi{margin:0 0 4px;font-size:16px;font-weight:400;color:#343941;}
+.dash-headline{margin:0;font-size:28px;line-height:1.15;font-weight:600;color:#343941;letter-spacing:-.02em;padding-right:50px;}
+
+.dash-eyebrow{margin:0;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.8);}
+.dash-eyebrow.dark{color:rgba(52,57,65,.6);}
+
+.dash-hero{background:#f30;border-radius:16px;padding:16px;color:#fff;margin-bottom:4px;}
+.dash-hero-stats{display:flex;flex-direction:column;gap:8px;margin:14px 0 18px;}
+.dash-hero-row{display:flex;align-items:center;gap:16px;}
+.dash-hero-row .ph{width:32px;height:32px;flex-shrink:0;}
+.dash-hero-num{margin:0;font-size:36px;font-weight:400;letter-spacing:-.02em;}
+.dash-hero-num small{font-size:15px;font-weight:400;color:rgba(255,255,255,.8);margin-left:4px;}
+.dash-hero-badges{display:flex;gap:12px;flex-wrap:wrap;}
+.dash-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 18px;border-radius:999px;font-size:12px;font-weight:600;}
+.dash-badge.outline{border:1px solid rgba(255,255,255,.8);color:#fff;}
+.dash-badge.fill{background:rgba(255,255,255,.85);color:#f30;}
+.dash-badge.fill .ph{width:16px;height:16px;}
+
+.dash-grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:4px 0;}
+.dash-plan-card{background:#3b63cb;border-radius:16px;padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:14px;cursor:pointer;}
+.dash-plan-name{margin:0 0 4px;font-size:20px;font-weight:500;line-height:1.1;letter-spacing:.02em;text-transform:uppercase;}
+.dash-plan-count{margin:0;font-size:14px;font-weight:300;color:rgba(255,255,255,.85);}
+.dash-mini-col{display:flex;flex-direction:column;gap:4px;}
+.dash-mini-card{background:#fdfbff;border-radius:16px;padding:12px 14px;}
+.dash-mini-label{margin:0 0 6px;font-size:9px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:rgba(52,57,65,.6);}
+.dash-mini-row{display:flex;align-items:center;justify-content:space-between;}
+.dash-mini-num{margin:0;font-size:24px;font-weight:400;color:#343941;}
+.dash-mini-row .ph{width:22px;height:22px;color:#f30;}
+.dash-mini-sub{margin:2px 0 0;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#96959b;}
+.dash-trend{display:flex;align-items:flex-end;gap:2px;height:27px;}
+.dash-trend span{flex:1;min-width:3px;border-radius:3px;background:#f30;}
+
+.dash-week-card{background:#2642a4;border-radius:16px;padding:16px;color:#fff;margin:4px 0;}
+.dash-week-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.dash-week-count{margin:0;font-size:12px;font-weight:700;}
+.dash-week-days{display:flex;justify-content:space-between;}
+.dash-week-day{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.dash-week-day span:first-child{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.35);}
+.dash-week-day.done span:first-child{background:#fff;border-color:#fff;}
+.dash-week-day.done span:first-child .ph{width:14px;height:14px;color:#2642a4;}
+.dash-week-day.today span:first-child{border-color:#fff;}
+.dash-week-day em{font-style:normal;font-size:11px;color:rgba(255,255,255,.85);}
+
+.dash-nav{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:calc(100% - 20px);max-width:355px;height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-radius:999px;background:rgba(253,251,255,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid #fff;box-shadow:0 8px 24px rgba(0,0,0,.08);}
+.dash-nav button{background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;}
+.dash-nav .ph{width:26px;height:26px;color:#96959b;}
+.dash-nav button.active{background:#f30;}
+.dash-nav button.active .ph{color:#fff;}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -542,6 +608,70 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="app-copyright">© 2026 Maciej Mleczko · <a href="https://www.maciejmleczko.pl" target="_blank" rel="noopener">www.maciejmleczko.pl</a></div>
       </div>
       <button type="button" class="app-footer-feedback" onclick="openFeedback()" data-i18n-title="feedbackTitle" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
+    </div>
+  </section>
+
+  <!-- ===================== DASHBOARD (hidden preview, triple-tap logo) ===================== -->
+  <section class="view" id="view-dashboard">
+    <div class="dash-root">
+      <button type="button" class="dash-chat-btn" onclick="openFeedback()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
+
+      <div class="dash-header">
+        <p class="dash-hi" id="dashHi"></p>
+        <h1 class="dash-headline" id="dashHeadline"></h1>
+      </div>
+
+      <div class="dash-hero">
+        <p class="dash-eyebrow">Podsumowanie tygodnia</p>
+        <div class="dash-hero-stats">
+          <div class="dash-hero-row"><span class="ph" data-ph="barbell"></span><p class="dash-hero-num" id="dashKg">0 <small>kg</small></p></div>
+          <div class="dash-hero-row"><span class="ph" data-ph="sneaker-move"></span><p class="dash-hero-num" id="dashKm">0 <small>km</small></p></div>
+        </div>
+        <div class="dash-hero-badges">
+          <span class="dash-badge outline" id="dashSessions">0 treningów</span>
+          <span class="dash-badge fill"><span class="ph" data-ph="flame"></span><span id="dashMinutes">0 min aktywności</span></span>
+        </div>
+      </div>
+
+      <div class="dash-grid2">
+        <div class="dash-plan-card" onclick="goRoute('gym')">
+          <p class="dash-eyebrow">Twój plan</p>
+          <div>
+            <p class="dash-plan-name" id="dashPlanName">—</p>
+            <p class="dash-plan-count" id="dashPlanCount"></p>
+          </div>
+        </div>
+        <div class="dash-mini-col">
+          <div class="dash-mini-card">
+            <p class="dash-mini-label">Nowy rekord</p>
+            <div class="dash-mini-row">
+              <p class="dash-mini-num" id="dashPrNum">—</p>
+              <span class="ph" data-ph="trophy"></span>
+            </div>
+            <p class="dash-mini-sub" id="dashPrName"></p>
+          </div>
+          <div class="dash-mini-card">
+            <p class="dash-mini-label">Trend objętości</p>
+            <div class="dash-trend" id="dashTrend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-week-card">
+        <div class="dash-week-head">
+          <p class="dash-eyebrow">Postęp tygodniowy</p>
+          <p class="dash-week-count" id="dashWeekCount"></p>
+        </div>
+        <div class="dash-week-days" id="dashWeekDays"></div>
+      </div>
+
+      <div class="dash-nav" id="dashNav">
+        <button type="button" class="active" onclick="goRoute('welcome')"><span class="ph" data-ph="house"></span></button>
+        <button type="button" onclick="goRoute('gym')"><span class="ph" data-ph="barbell"></span></button>
+        <button type="button" onclick="goRoute('running')"><span class="ph" data-ph="sneaker-move"></span></button>
+        <button type="button" onclick="goRoute('history')"><span class="ph" data-ph="calendar-dots"></span></button>
+        <button type="button" onclick="goRoute('stats')"><span class="ph" data-ph="chart-line-up"></span></button>
+      </div>
     </div>
   </section>
 
@@ -1221,7 +1351,10 @@ Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\
 "check-circle": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z\"/></svg>",
 "export": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M20.0625 10.5V19.5C20.0625 19.8481 19.9242 20.1819 19.6781 20.4281C19.4319 20.6742 19.0981 20.8125 18.75 20.8125H5.25C4.9019 20.8125 4.56806 20.6742 4.32192 20.4281C4.07578 20.1819 3.9375 19.8481 3.9375 19.5V10.5C3.9375 10.1519 4.07578 9.81806 4.32192 9.57191C4.56806 9.32577 4.9019 9.18749 5.25 9.18749H7.5C7.64918 9.18749 7.79226 9.24676 7.89775 9.35225C8.00324 9.45773 8.0625 9.60081 8.0625 9.74999C8.0625 9.89918 8.00324 10.0423 7.89775 10.1477C7.79226 10.2532 7.64918 10.3125 7.5 10.3125H5.25C5.20027 10.3125 5.15258 10.3322 5.11742 10.3674C5.08225 10.4026 5.0625 10.4503 5.0625 10.5V19.5C5.0625 19.5497 5.08225 19.5974 5.11742 19.6326C5.15258 19.6677 5.20027 19.6875 5.25 19.6875H18.75C18.7997 19.6875 18.8474 19.6677 18.8826 19.6326C18.9177 19.5974 18.9375 19.5497 18.9375 19.5V10.5C18.9375 10.4503 18.9177 10.4026 18.8826 10.3674C18.8474 10.3322 18.7997 10.3125 18.75 10.3125H16.5C16.3508 10.3125 16.2077 10.2532 16.1023 10.1477C15.9968 10.0423 15.9375 9.89918 15.9375 9.74999C15.9375 9.60081 15.9968 9.45773 16.1023 9.35225C16.2077 9.24676 16.3508 9.18749 16.5 9.18749H18.75C19.0981 9.18749 19.4319 9.32577 19.6781 9.57191C19.9242 9.81806 20.0625 10.1519 20.0625 10.5ZM8.6475 6.39749L11.4375 3.60843V12.75C11.4375 12.8992 11.4968 13.0423 11.6023 13.1477C11.7077 13.2532 11.8508 13.3125 12 13.3125C12.1492 13.3125 12.2923 13.2532 12.3977 13.1477C12.5032 13.0423 12.5625 12.8992 12.5625 12.75V3.60843L15.3525 6.39749C15.404 6.45276 15.4661 6.49708 15.5351 6.52783C15.6041 6.55857 15.6786 6.5751 15.7541 6.57644C15.8296 6.57777 15.9047 6.56388 15.9747 6.53559C16.0447 6.50729 16.1084 6.46519 16.1618 6.41177C16.2152 6.35836 16.2573 6.29473 16.2856 6.22469C16.3139 6.15465 16.3278 6.07963 16.3264 6.0041C16.3251 5.92857 16.3086 5.85409 16.2778 5.78509C16.2471 5.71609 16.2028 5.65399 16.1475 5.60249L12.3975 1.85249C12.292 1.74716 12.1491 1.68799 12 1.68799C11.8509 1.68799 11.708 1.74716 11.6025 1.85249L7.8525 5.60249C7.79724 5.65399 7.75291 5.71609 7.72216 5.78509C7.69142 5.85409 7.67489 5.92857 7.67356 6.0041C7.67222 6.07963 7.68612 6.15465 7.71441 6.22469C7.7427 6.29473 7.78481 6.35836 7.83822 6.41177C7.89164 6.46519 7.95526 6.50729 8.0253 6.53559C8.09534 6.56388 8.17036 6.57777 8.24589 6.57644C8.32142 6.5751 8.3959 6.55857 8.4649 6.52783C8.5339 6.49708 8.596 6.45276 8.6475 6.39749Z\"/></svg>",
 "heart": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z\"/></svg>",
-"heart-fill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M240,102c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,228.66,16,172,16,102A62.07,62.07,0,0,1,78,40c20.65,0,38.73,8.88,50,23.89C139.27,48.88,157.35,40,178,40A62.07,62.07,0,0,1,240,102Z\"/></svg>"});
+"heart-fill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M240,102c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,228.66,16,172,16,102A62.07,62.07,0,0,1,78,40c20.65,0,38.73,8.88,50,23.89C139.27,48.88,157.35,40,178,40A62.07,62.07,0,0,1,240,102Z\"/></svg>",
+"flame": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M173.79,51.48a221.25,221.25,0,0,0-41.67-34.34,8,8,0,0,0-8.24,0A221.25,221.25,0,0,0,82.21,51.48C54.59,80.48,40,112.47,40,144a88,88,0,0,0,176,0C216,112.47,201.41,80.48,173.79,51.48ZM96,184c0-27.67,22.53-47.28,32-54.3,9.48,7,32,26.63,32,54.3a32,32,0,0,1-64,0Zm77.27,15.93A47.8,47.8,0,0,0,176,184c0-44-42.09-69.79-43.88-70.86a8,8,0,0,0-8.24,0C122.09,114.21,80,140,80,184a47.8,47.8,0,0,0,2.73,15.93A71.88,71.88,0,0,1,56,144c0-34.41,20.4-63.15,37.52-81.19A216.21,216.21,0,0,1,128,33.54a215.77,215.77,0,0,1,34.48,29.27C193.49,95.5,200,125,200,144A71.88,71.88,0,0,1,173.27,199.93Z\"/></svg>",
+"trophy": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M232,64H208V48a8,8,0,0,0-8-8H56a8,8,0,0,0-8,8V64H24A16,16,0,0,0,8,80V96a40,40,0,0,0,40,40h3.65A80.13,80.13,0,0,0,120,191.61V216H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V191.58c31.94-3.23,58.44-25.64,68.08-55.58H208a40,40,0,0,0,40-40V80A16,16,0,0,0,232,64ZM48,120A24,24,0,0,1,24,96V80H48v32q0,4,.39,8Zm144-8.9c0,35.52-29,64.64-64,64.9a64,64,0,0,1-64-64V56H192ZM232,96a24,24,0,0,1-24,24h-.5a81.81,81.81,0,0,0,.5-8.9V80h24Z\"/></svg>",
+"check-bold": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z\"/></svg>"});
 function ph(name, cls){ return `<span class="ph ${cls||''}">${PH[name]}</span>`; }
 
 /* Resolve all __PH_*__ placeholders in the static markup into real icon
@@ -1814,11 +1947,13 @@ function pulseSaveBtn(btn){
   btn.classList.add('success');
   setTimeout(()=> btn.classList.remove('success'), 550);
 }
-function todayStr(){
-  const d = new Date();
+function dateStr(d){
   const off = d.getTimezoneOffset();
   const local = new Date(d.getTime() - off*60000);
   return local.toISOString().slice(0,10);
+}
+function todayStr(){
+  return dateStr(new Date());
 }
 function fmtDateHuman(iso){
   const [y,m,d] = iso.split('-');
@@ -1913,9 +2048,10 @@ function goRoute(route){
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward);
-  document.getElementById('bottomNav').style.display = (route==='welcome' || planOnboardingActive) ? 'none' : 'flex';
+  document.getElementById('bottomNav').style.display = (route==='welcome' || route==='dashboard' || planOnboardingActive) ? 'none' : 'flex';
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===route));
-  document.body.style.paddingBottom = route==='welcome' ? '0' : '';
+  document.body.style.paddingBottom = (route==='welcome' || route==='dashboard') ? '0' : '';
+  document.querySelector('.topbar').classList.toggle('hidden', route==='dashboard');
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
   if(route==='gym'){ document.getElementById('gymDate').value = document.getElementById('gymDate').value || todayStr(); updateGymDateLabel(); renderGymGrid(); }
@@ -1923,6 +2059,7 @@ function goRoute(route){
   if(route==='history'){ renderCalendar(); }
   if(route==='stats'){ renderGymChecklist(); renderGymChart(); renderRunCharts(); updateStatsDateLabel(); }
   if(route==='plans'){ renderPlansList(); }
+  if(route==='dashboard'){ renderDashboard(); }
   commitViewTransition();
   window.scrollTo(0,0);
 }
@@ -2748,7 +2885,8 @@ function saveWorkout(){
 /* ============================================================
    TRAINING PLANS — entry point is the topbar pill (next to feedback),
    which also doubles as the "currently starred plan" indicator.
-   Triple-tapping the logo still works too as a leftover shortcut.
+   (The old triple-tap-logo shortcut into Plans was repurposed —
+   it now opens the hidden Dashboard preview, see initSecretPlansGesture.)
    ============================================================ */
 const LS_TRAINING_PLANS = "fitlog_training_plans_v1";
 const LS_STARRED_PLAN = "fitlog_starred_plan_v1";
@@ -3359,6 +3497,101 @@ function updateTodayPlanBanner(){
     ? exercises.map(e=>e.name).join(' · ')
     : t('planRestDay','Dzień odpoczynku');
 }
+
+/* ============================================================
+   DASHBOARD — hidden preview (see initSecretPlansGesture below).
+   Pulls real numbers from the existing workouts/runs/plan data —
+   nothing here is placeholder/fake.
+   ============================================================ */
+function dashboardWeekDates(){
+  const d = new Date(todayStr()+'T00:00:00');
+  const mondayOffset = (d.getDay()+6)%7;
+  const start = new Date(d); start.setDate(d.getDate()-mondayOffset);
+  const out = [];
+  for(let i=0;i<7;i++){ const dd=new Date(start); dd.setDate(start.getDate()+i); out.push(dateStr(dd)); }
+  return out;
+}
+function dashboardAllSets(){
+  const out = [];
+  workouts.forEach(w=>{
+    w.exercises.forEach(ex=>{
+      ex.sets.forEach(s=>{
+        if(s.weight>0 && s.reps>0) out.push({date:w.date, name:ex.name, weight:s.weight, reps:s.reps});
+      });
+    });
+  });
+  return out;
+}
+function plTreningWord(n){
+  const mod10=n%10, mod100=n%100;
+  if(n===1) return 'trening';
+  if(mod10>=2 && mod10<=4 && !(mod100>=12 && mod100<=14)) return 'treningi';
+  return 'treningów';
+}
+function renderDashboard(){
+  const weekDates = dashboardWeekDates();
+  const todayIso = todayStr();
+  const todayKey = dayKeyFromDate(todayIso);
+
+  document.getElementById('dashHi').textContent = profileName ? `Cześć ${profileName}` : 'Cześć';
+
+  const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
+  const todayExNames = plan ? (plan.schedule[todayKey]||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name)) : [];
+  document.getElementById('dashHeadline').textContent = todayExNames.length
+    ? `Dziś ${plan.name}. Dasz radę!`
+    : 'Dziś odpoczynek. Dobrze go wykorzystaj.';
+
+  const allSets = dashboardAllSets();
+  const weekSets = allSets.filter(s=>weekDates.includes(s.date));
+  const weekKg = weekSets.reduce((sum,s)=>sum+s.weight*s.reps,0);
+  const weekRuns = runs.filter(r=>weekDates.includes(r.date));
+  const weekKm = weekRuns.reduce((sum,r)=>sum+r.distance,0);
+  const weekWorkoutCount = workouts.filter(w=>weekDates.includes(w.date)).length;
+  const sessionCount = weekWorkoutCount + weekRuns.length;
+  const weekMin = weekRuns.reduce((sum,r)=>sum+r.time,0);
+
+  document.getElementById('dashKg').innerHTML = `${Math.round(weekKg).toLocaleString('pl-PL')} <small>kg</small>`;
+  document.getElementById('dashKm').innerHTML = `${(Math.round(weekKm*10)/10).toString().replace('.',',')} <small>km</small>`;
+  document.getElementById('dashSessions').textContent = `${sessionCount} ${plTreningWord(sessionCount)}`;
+  document.getElementById('dashMinutes').textContent = `${Math.round(weekMin)} min aktywności`;
+
+  document.getElementById('dashPlanName').textContent = plan ? plan.name : 'Brak wybranego planu';
+  if(plan){
+    const uniqueNames = new Set();
+    PLAN_DAYS.forEach(d=> (plan.schedule[d]||[]).forEach(e=>{ if(!BOOKEND_EX_NAMES.has(e.name)) uniqueNames.add(e.name); }));
+    document.getElementById('dashPlanCount').textContent = planExCountText(uniqueNames.size);
+  } else {
+    document.getElementById('dashPlanCount').textContent = '';
+  }
+
+  let pr = null;
+  allSets.forEach(s=>{ if(!pr || s.weight>pr.weight) pr = s; });
+  document.getElementById('dashPrNum').innerHTML = pr ? `${pr.weight} <span style="font-size:14px;">kg</span>` : '—';
+  document.getElementById('dashPrName').textContent = pr ? pr.name : '';
+
+  const trendDays = [];
+  for(let i=13;i>=0;i--){ const dd=new Date(todayIso+'T00:00:00'); dd.setDate(dd.getDate()-i); trendDays.push(dateStr(dd)); }
+  const trendVol = trendDays.map(d=> allSets.filter(s=>s.date===d).reduce((sum,s)=>sum+s.weight*s.reps,0));
+  const maxVol = Math.max(1, ...trendVol);
+  document.getElementById('dashTrend').innerHTML = trendVol.map(v=>{
+    const h = Math.max(3, Math.round(v/maxVol*27));
+    const op = v ? (0.35 + (v/maxVol)*0.65) : 0.15;
+    return `<span style="height:${h}px;opacity:${op.toFixed(2)}"></span>`;
+  }).join('');
+
+  const scheduledDays = weekDates.filter(d=> plan && (plan.schedule[dayKeyFromDate(d)]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
+  const doneDays = scheduledDays.filter(d=> workouts.some(w=>w.date===d));
+  document.getElementById('dashWeekCount').textContent = `${doneDays.length} / ${scheduledDays.length} dni zaliczone`;
+  document.getElementById('dashWeekDays').innerHTML = weekDates.map(d=>{
+    const isDone = doneDays.includes(d);
+    const isToday = d===todayIso;
+    return `<div class="dash-week-day${isDone?' done':''}${isToday?' today':''}">
+      <span>${isDone?ph('check-bold'):''}</span>
+      <em>${planDayLabel(dayKeyFromDate(d))}</em>
+    </div>`;
+  }).join('');
+}
+
 (function initSecretPlansGesture(){
   const logo = document.querySelector('.brand-mark');
   if(!logo) return;
@@ -3369,8 +3602,7 @@ function updateTodayPlanBanner(){
     clearTimeout(tapTimer);
     if(taps >= 3){
       taps = 0;
-      renderPlansList();
-      goRoute('plans');
+      goRoute('dashboard');
       return;
     }
     tapTimer = setTimeout(()=>{ taps = 0; }, 600);
