@@ -1509,7 +1509,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.5.4";
+const APP_VERSION = "4.5.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.5.0": {
@@ -3464,22 +3464,26 @@ function toggleHistExpand(key){
   histExpanded[key] = !histExpanded[key];
   renderHistDetail();
 }
-function histRightHtml(dateHuman, exp, key, shareId){
-  return `<div class="hist-right"><span class="ph hist-share-btn" onclick="event.stopPropagation();shareHistCard('${key}','${shareId}')" title="${t('shareIconTitle','Udostępnij')}">${PH.share}</span><span class="hist-date">${dateHuman}</span>${exp?`<span class="hist-close" onclick="event.stopPropagation();toggleHistExpand('${key}')">${ph('x')}</span>`:''}</div>`;
+function histRightHtml(dateHuman, exp, kind, key, shareId){
+  return `<div class="hist-right"><span class="ph hist-share-btn" onclick="event.stopPropagation();shareHistCard('${kind}','${shareId}')" title="${t('shareIconTitle','Udostępnij')}">${PH.share}</span><span class="hist-date">${dateHuman}</span>${exp?`<span class="hist-close" onclick="event.stopPropagation();toggleHistExpand('${key}')">${ph('x')}</span>`:''}</div>`;
 }
 function renderHistDetail(){
   const wrap = document.getElementById('histDetail');
   if(!selectedHistDate){ wrap.innerHTML = `<div class="hist-empty">${t('histEmptyPick','Wybierz dzień, żeby zobaczyć szczegóły.')}</div>`; return; }
-  const w = workouts.find(w=>w.date===selectedHistDate);
-  const r = runs.find(r=>r.date===selectedHistDate);
-  if(!w && !r){ wrap.innerHTML = `<div class="hist-empty">${t('histEmptyNone', `Brak zapisanej aktywności — ${fmtDate(selectedHistDate)}`, fmtDate(selectedHistDate))}</div>`; return; }
+  // a day can hold more than one saved workout/run (e.g. a session logged in
+  // two parts) — the calendar's multi-log dot and the stats charts already
+  // account for every entry, so this has to show all of them too, not just
+  // the first match, or logged data silently "disappears" from History.
+  const dayWorkouts = workouts.filter(w=>w.date===selectedHistDate);
+  const dayRuns = runs.filter(r=>r.date===selectedHistDate);
+  if(!dayWorkouts.length && !dayRuns.length){ wrap.innerHTML = `<div class="hist-empty">${t('histEmptyNone', `Brak zapisanej aktywności — ${fmtDate(selectedHistDate)}`, fmtDate(selectedHistDate))}</div>`; return; }
   let html = '';
-  if(w){
+  dayWorkouts.forEach(w=>{
     const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
-    const exp = !!histExpanded.workout;
+    const exp = !!histExpanded[w.id];
     html += `
-      <div class="hist-card${exp?'':' collapsed'}"${exp?'':` onclick="toggleHistExpand('workout')"`}>
-        <div class="lbl-row"><div class="l">${ph('barbell')}<span>${t('histWorkoutLabel','TRENING')}</span></div>${histRightHtml(fmtDateHuman(w.date), exp, 'workout', w.id)}</div>
+      <div class="hist-card${exp?'':' collapsed'}"${exp?'':` onclick="toggleHistExpand('${w.id}')"`}>
+        <div class="lbl-row"><div class="l">${ph('barbell')}<span>${t('histWorkoutLabel','TRENING')}</span></div>${histRightHtml(fmtDateHuman(w.date), exp, 'workout', w.id, w.id)}</div>
         <div class="vol">${t('histWorkoutVol', `${w.exercises.length} ${plExercisesWord(w.exercises.length)} · objętość ${Math.round(totalVol)} kg`, w.exercises.length, Math.round(totalVol))}</div>
         ${exp?`<div class="hist-ex-list">
           ${w.exercises.map(e=>`
@@ -3489,13 +3493,13 @@ function renderHistDetail(){
             </div>`).join('')}
         </div>`:''}
       </div>`;
-  }
-  if(r){
+  });
+  dayRuns.forEach(r=>{
     const min = Math.floor(r.pace), sec = Math.round((r.pace-min)*60);
-    const exp = !!histExpanded.run;
+    const exp = !!histExpanded[r.id];
     html += `
-      <div class="hist-card${exp?'':' collapsed'}"${exp?'':` onclick="toggleHistExpand('run')"`}>
-        <div class="lbl-row"><div class="l">${ph('sneaker-move')}<span>${t('histRunLabel','BIEGANIE')}</span></div>${histRightHtml(fmtDateHuman(r.date), exp, 'run', r.id)}</div>
+      <div class="hist-card${exp?'':' collapsed'}"${exp?'':` onclick="toggleHistExpand('${r.id}')"`}>
+        <div class="lbl-row"><div class="l">${ph('sneaker-move')}<span>${t('histRunLabel','BIEGANIE')}</span></div>${histRightHtml(fmtDateHuman(r.date), exp, 'run', r.id, r.id)}</div>
         <div class="vol">${runTypeLabel(r.type)}</div>
         ${exp?`<div class="run-stat-tiles">
           <div class="run-stat-tile orange"><div class="v">${r.distance}</div></div>
@@ -3505,7 +3509,7 @@ function renderHistDetail(){
         <div class="run-stat-labels"><div>${t('histKilometers','Kilometry')}</div><div>${t('histMinutes','Minuty')}</div><div>${t('paceMinKm','Tempo (min/km)')}</div></div>
         ${r.notes?`<div class="hist-ex-item" style="margin-top:12px;"><div class="st">${r.notes}</div></div>`:''}`:''}
       </div>`;
-  }
+  });
   wrap.innerHTML = html;
 }
 
