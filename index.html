@@ -259,6 +259,7 @@ button{font-family:inherit;}
 .ex-popup-box .ex-name{font-size:14px;font-weight:600;letter-spacing:.42px;text-transform:uppercase;padding-right:24px;}
 .ex-popup-box .ex-meta{font-size:10px;color:#5b5555;margin-top:4px;}
 .ex-popup-box .popup-add-btn{display:block;width:100%;margin-top:18px;background:var(--orange);border:none;border-radius:12px;padding:16px;color:#fff;font-size:14px;font-weight:700;letter-spacing:.42px;text-align:center;cursor:pointer;text-transform:uppercase;font-family:inherit;}
+.ex-popup-box .popup-warn{margin-top:14px;color:var(--orange);font-size:12px;font-weight:600;line-height:1.4;text-align:center;}
 .tip-box{background:var(--tip);border-radius:12px;padding:12px 24px;margin-top:12px;font-size:10px;line-height:1.5;text-align:center;}
 .set-rows{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
 .set-row{display:flex;align-items:center;gap:15px;}
@@ -1005,6 +1006,7 @@ const T_EN = {
   saveAddToSession: 'Save and add to session',
   addToWorkout: 'Add to workout',
   saveChanges: 'Save',
+  popupNoValues: "Fields are empty — the numbers in the background are just a suggestion from your last workout. Type them in to add this exercise.",
   saveWorkout: 'Save workout',
   shareWorkout: 'Share workout',
   planWeekLabel: 'Plan week',
@@ -1514,7 +1516,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.6.2";
+const APP_VERSION = "4.6.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.6.0": {
@@ -2173,6 +2175,10 @@ function renderGymFavFilterRow(){
 // missed entirely. popupExercise is a draft copy; nothing touches
 // sessionExercises until "Dodaj do treningu" confirms it.
 let popupExercise = null;
+// The weight/reps placeholders show last session's numbers as ghost text —
+// easy to mistake for already-filled values, so confirming with genuinely
+// empty fields shows this warning instead of silently doing nothing.
+let popupShowWarning = false;
 
 function lastSessionsFor(exerciseName){
   return workouts
@@ -2510,16 +2516,24 @@ function openExercisePopup(ex){
   popupExercise = already
     ? {...already, setValues: already.setValues.map(s=>({...s}))}
     : {...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''};
+  popupShowWarning = false;
   renderExercisePopup();
   document.getElementById('exercisePopupOverlay').classList.remove('hidden');
 }
 function closeExercisePopup(){
   document.getElementById('exercisePopupOverlay').classList.add('hidden');
   popupExercise = null;
+  popupShowWarning = false;
 }
 function popupSetLive(idx, field, val){
   if(!popupExercise) return;
   popupExercise.setValues[idx][field] = val;
+  if(popupShowWarning){
+    // dismiss reactively without a full re-render, so the field being typed into keeps focus/cursor
+    popupShowWarning = false;
+    const warnEl = document.querySelector('.popup-warn');
+    if(warnEl) warnEl.remove();
+  }
 }
 function popupRemoveSetRow(idx){
   if(!popupExercise || popupExercise.sets<=1) return;
@@ -2538,8 +2552,16 @@ function confirmExercisePopup(){
   const idx = sessionExercises.findIndex(e=>e.name===popupExercise.name);
   const hasData = popupExercise.setValues.some(s=>s.weight!=='' || s.reps!=='');
   if(!hasData){
-    // nothing filled in — don't leave an empty stub (or drop it if it was already there)
-    if(idx!==-1) sessionExercises.splice(idx,1);
+    if(idx!==-1){
+      // was already tracked and the user cleared it out on purpose — drop it
+      sessionExercises.splice(idx,1);
+    } else {
+      // fields only ever showed last session's numbers as placeholder text —
+      // easy to mistake for already-filled-in. Don't silently no-op; say why.
+      popupShowWarning = true;
+      renderExercisePopup();
+      return;
+    }
   } else if(idx===-1){
     sessionExercises.push(popupExercise);
   } else {
@@ -2578,6 +2600,7 @@ function renderExercisePopup(){
     <div class="ex-meta">${t('exMeta', `${groupLabel(ex.group)} · ${ex.sets} serie x ${ex.repLow}-${ex.repHigh} powt. · przerwa ${ex.rest}`, groupLabel(ex.group), ex.sets, ex.repLow, ex.repHigh, ex.rest)}</div>
     <div class="tip-box">${sugg.text}</div>
     <div class="set-rows">${rowsHtml}</div>
+    ${popupShowWarning ? `<div class="popup-warn">${t('popupNoValues','Pola są puste — liczby w tle to tylko podpowiedź z ostatniego treningu. Wpisz je, żeby dodać ćwiczenie.')}</div>` : ''}
     <button type="button" class="popup-add-btn" onclick="confirmExercisePopup()">${btnLabel}</button>
   `;
 }
