@@ -75,6 +75,11 @@ body{
   min-height:100vh;
   padding-bottom:env(safe-area-inset-bottom);
 }
+/* Dashboard preview: locked to a single non-scrolling screen for now
+   (standard iPhone viewport only — other sizes come later). Toggled on
+   <html> because whichever of html/body is the browser's "scrolling
+   element" varies — overflow:hidden has to hit both to be reliable. */
+html.dashboard-lock, html.dashboard-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
 button{font-family:inherit;}
 .app{max-width:440px;margin:0 auto;position:relative;min-height:100vh;padding-bottom:110px;}
 
@@ -2051,6 +2056,7 @@ function goRoute(route){
   const navActiveRoute = route==='dashboard' ? 'welcome' : route;
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===navActiveRoute));
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
+  document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
   document.querySelector('.topbar').classList.toggle('hidden', route==='dashboard');
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
