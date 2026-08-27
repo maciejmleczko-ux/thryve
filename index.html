@@ -88,18 +88,22 @@ html.gymv2-bg,html.gymv2-bg body{overscroll-behavior-y:none;}
    later). Toggled on <html> because whichever of html/body is the
    browser's "scrolling element" varies — overflow:hidden has to hit
    both to be reliable.
-   overflow-y:auto (not hidden) + overscroll-behavior left at its default
-   (not "none") is deliberate: a long plan name can still push content a
-   bit past the viewport, and Maciej explicitly wants that handled as a
-   native iOS rubber-band pull that snaps back — not a real, persisting
-   scroll offset. auto+default-overscroll is what gives that: nothing
-   happens when content fits (the common case), and when it doesn't, a
-   drag gives the natural elastic bounce/settle instead of a hard stop.
-   body.dashboard-bg below is the other half of this — the light
-   background needs to extend under any bounce/overscroll, or that gap
-   shows the app's normal dark body color instead of feeling like a
-   continuation of the screen (same technique as .gymv2-bg above). */
-html.dashboard-lock, html.dashboard-lock body{overflow-x:hidden;overflow-y:auto;height:100dvh;touch-action:pan-y;}
+   Base state is fully rigid (overflow:hidden, touch-action:none) — zero
+   scroll capability, zero touch give, when content fits (the common
+   case). renderDashboard() measures the real content height after
+   rendering and adds .dashboard-scrollable only when it actually
+   overflows the viewport (e.g. a long plan name); that variant switches
+   to overflow-y:auto + touch-action:pan-y + default overscroll-behavior,
+   which is what a genuine drag needs to (a) reach the rest of the
+   content and (b) get the native iOS rubber-band bounce/settle at the
+   edges rather than a hard stop. So: no scroll at all when nothing needs
+   it, real (bounce-y) scroll only when something does.
+   body.dashboard-bg is the other half of this — the light background
+   needs to extend under any bounce/overscroll, or that gap shows the
+   app's normal dark body color instead of feeling like a continuation
+   of the screen (same technique as .gymv2-bg above). */
+html.dashboard-lock, html.dashboard-lock body{overflow:hidden;height:100dvh;touch-action:none;}
+html.dashboard-lock.dashboard-scrollable, html.dashboard-lock.dashboard-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}
 body.dashboard-bg{background:#eceaf1;}
 /* Same technique, reused for modals — background stays put while a popup is open. */
 html.modal-lock, html.modal-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
@@ -2013,7 +2017,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 38;
+const DASH_BUILD = 39;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4325,6 +4329,21 @@ function renderDashboard(){
       document.getElementById('dashWeekDays').style.setProperty('--day-base', (delayMs + 550) + 'ms');
     }
   });
+
+  // Only grant scroll/touch-drag capability when content genuinely
+  // doesn't fit — see the dashboard-lock/.dashboard-scrollable CSS for
+  // the full reasoning. Deliberately NOT comparing body.scrollHeight to
+  // clientHeight: .app carries a permanent padding-bottom:110px (shared
+  // bottom-nav clearance for every route), which alone makes scrollHeight
+  // read taller than the viewport even when the dashboard's own content
+  // is nowhere near overflowing — that would make this check always true.
+  // Instead compare the actual bottom edge of the last real card against
+  // the floating nav's top edge — the literal condition we're trying to
+  // avoid (content clipped behind the nav).
+  const lastCard = document.querySelector('.dash-week-card');
+  const nav = document.getElementById('bottomNav');
+  const needsScroll = !!(lastCard && nav && lastCard.getBoundingClientRect().bottom > nav.getBoundingClientRect().top);
+  document.documentElement.classList.toggle('dashboard-scrollable', needsScroll);
 }
 
 /* ============================================================
