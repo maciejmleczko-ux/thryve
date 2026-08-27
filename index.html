@@ -2000,7 +2000,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 32;
+const DASH_BUILD = 33;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4245,9 +4245,16 @@ function renderDashboard(){
   const weekKg = weekSets.reduce((sum,s)=>sum+s.weight*s.reps,0);
   const weekRuns = runs.filter(r=>weekDates.includes(r.date));
   const weekKm = weekRuns.reduce((sum,r)=>sum+r.distance,0);
-  const weekWorkoutCount = workouts.filter(w=>weekDates.includes(w.date)).length;
-  const sessionCount = weekWorkoutCount + weekRuns.length;
-  const weekMin = weekRuns.reduce((sum,r)=>sum+r.time,0);
+  const weekWorkouts = workouts.filter(w=>weekDates.includes(w.date));
+  const sessionCount = weekWorkouts.length + weekRuns.length;
+  // "min aktywności" used to only count running time — GYM workouts have
+  // real measured durations now (workout.durationMin, added build 27-28),
+  // so fold those in too. Older saved workouts (before that feature
+  // shipped) have no durationMin — || 0 just excludes them from the
+  // minutes total rather than producing NaN.
+  const weekGymMin = weekWorkouts.reduce((sum,w)=>sum+(w.durationMin||0),0);
+  const weekRunMin = weekRuns.reduce((sum,r)=>sum+r.time,0);
+  const weekMin = weekGymMin + weekRunMin;
 
   animateDashNumber(document.getElementById('dashKg'), weekKg, 0, '<small>kg</small>');
   animateDashNumber(document.getElementById('dashKm'), weekKm, 1, '<small>km</small>');
