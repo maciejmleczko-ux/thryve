@@ -153,6 +153,11 @@ button{font-family:inherit;}
 .nav-item .ph{width:27px;height:27px;color:var(--light);}
 .nav-item.active{background:var(--orange);}
 .nav-item.active .ph{color:#fff;}
+/* Dashboard preview skin — same size/behavior as .bottom-nav above, color only. */
+.bottom-nav.bottom-nav-light{background:rgba(253,251,255,.75);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
+.bottom-nav.bottom-nav-light .nav-item .ph{color:#96959b;}
+.bottom-nav.bottom-nav-light .nav-item.active{background:#f30;}
+.bottom-nav.bottom-nav-light .nav-item.active .ph{color:#fff;}
 
 /* ---------- app footer (version + copyright, welcome screen only) ---------- */
 .app-footer{position:fixed;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;
@@ -549,12 +554,6 @@ button{font-family:inherit;}
 .dash-week-day.done span:first-child .ph{width:14px;height:14px;color:#2642a4;}
 .dash-week-day.today span:first-child{border-color:#fff;}
 .dash-week-day em{font-style:normal;font-size:11px;color:rgba(255,255,255,.85);}
-
-.dash-nav{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:calc(100% - 20px);max-width:355px;height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-radius:999px;background:rgba(253,251,255,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid #fff;box-shadow:0 8px 24px rgba(0,0,0,.08);}
-.dash-nav button{background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;}
-.dash-nav .ph{width:26px;height:26px;color:#96959b;}
-.dash-nav button.active{background:#f30;}
-.dash-nav button.active .ph{color:#fff;}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -670,14 +669,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <p class="dash-week-count" id="dashWeekCount"></p>
         </div>
         <div class="dash-week-days" id="dashWeekDays"></div>
-      </div>
-
-      <div class="dash-nav" id="dashNav">
-        <button type="button" class="active" onclick="goRoute('welcome')"><span class="ph" data-ph="house"></span></button>
-        <button type="button" onclick="goRoute('gym')"><span class="ph" data-ph="barbell"></span></button>
-        <button type="button" onclick="goRoute('running')"><span class="ph" data-ph="sneaker-move"></span></button>
-        <button type="button" onclick="goRoute('history')"><span class="ph" data-ph="calendar-dots"></span></button>
-        <button type="button" onclick="goRoute('stats')"><span class="ph" data-ph="chart-line-up"></span></button>
       </div>
     </div>
   </section>
@@ -2055,9 +2046,11 @@ function goRoute(route){
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward);
-  document.getElementById('bottomNav').style.display = (route==='welcome' || route==='dashboard' || planOnboardingActive) ? 'none' : 'flex';
-  document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===route));
-  document.body.style.paddingBottom = (route==='welcome' || route==='dashboard') ? '0' : '';
+  document.getElementById('bottomNav').style.display = (route==='welcome' || planOnboardingActive) ? 'none' : 'flex';
+  document.getElementById('bottomNav').classList.toggle('bottom-nav-light', route==='dashboard');
+  const navActiveRoute = route==='dashboard' ? 'welcome' : route;
+  document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===navActiveRoute));
+  document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.querySelector('.topbar').classList.toggle('hidden', route==='dashboard');
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
