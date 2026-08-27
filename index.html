@@ -1973,7 +1973,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 25;
+const DASH_BUILD = 26;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -1990,6 +1990,35 @@ const DASH_CONGRATS_PL = [
   'Zrobione, i już się nie cofnie. Dobra robota.',
   'Trening skończony, wymówki zostaw na jutro.',
   'Ciało już wie, że robisz to na serio. Szacunek.',
+];
+/* Headline for a day with a scheduled workout the user hasn't done yet —
+   {plan} gets replaced with plan.name. Same idea as DASH_CONGRATS_PL,
+   a bit of the same edge allowed, just forward-looking instead of
+   congratulatory. */
+const DASH_PLAN_DAY_PL = [
+  'Dziś {plan}. Dasz radę!',
+  '{plan} czeka. Nikt tego za ciebie nie zrobi.',
+  'Na dziś: {plan}. Chodźmy.',
+  '{plan} na dziś. Godzinka teraz, reszta dnia twoja.',
+  'Bez dyskusji, dziś {plan}.',
+  '{plan}. Zrób to, zanim znajdziesz wymówkę.',
+  '{plan} czeka na start. Wchodzimy.',
+  'Czeka na ciebie {plan}. Idziemy, krok po kroku.',
+  '{plan} na dziś. Później sam sobie podziękujesz.',
+  'Dziś kolej na {plan}. Bez marudzenia.',
+];
+/* Headline for a rest day / no workout scheduled — general, no plan
+   reference. Calmer tone than the other two pools on purpose, it's a
+   rest day, nothing to push here. */
+const DASH_REST_DAY_PL = [
+  'Dziś odpoczynek. Dobrze go wykorzystaj.',
+  'Regeneracja to też trening. Dziś odpuszczasz mięśniom.',
+  'Wolne od planu. Ciało samo ci powie, kiedy będzie gotowe na więcej.',
+  'Dziś nic nie musisz. Jutro znów się zbierzesz.',
+  'Ten odpoczynek jest zaplanowany, nie przypadkowy.',
+  'Dziś luz. Postęp lubi też ciszę.',
+  'Przerwa też się liczy do planu.',
+  'Dziś odpoczynek. Jutro wracasz mocniejszy.',
 ];
 const CHANGELOG = {
   "4.7.0": {
@@ -4094,8 +4123,8 @@ function renderDashboard(){
   document.getElementById('dashHeadline').textContent = trainedToday
     ? DASH_CONGRATS_PL[Math.floor(Math.random()*DASH_CONGRATS_PL.length)]
     : todayExNames.length
-      ? `Dziś ${plan.name}. Dasz radę!`
-      : 'Dziś odpoczynek. Dobrze go wykorzystaj.';
+      ? DASH_PLAN_DAY_PL[Math.floor(Math.random()*DASH_PLAN_DAY_PL.length)].replace('{plan}', plan.name)
+      : DASH_REST_DAY_PL[Math.floor(Math.random()*DASH_REST_DAY_PL.length)];
 
   const allSets = dashboardAllSets();
   const weekSets = allSets.filter(s=>weekDates.includes(s.date));
