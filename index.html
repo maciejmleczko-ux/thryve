@@ -495,11 +495,17 @@ button{font-family:inherit;}
    only via the triple-tap-logo gesture until the rest of the app
    is migrated to this design.
    ============================================================ */
-#view-dashboard{background:#eceaf1;min-height:100vh;font-family:'Geist','Inter',-apple-system,sans-serif;}
-.dash-root{position:relative;display:flex;flex-direction:column;gap:8px;padding:calc(20px + env(safe-area-inset-top,0px)) 8px 110px;}
-.dash-header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
-.dash-chat-btn{flex-shrink:0;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.dash-chat-btn .ph{width:24px;height:24px;color:#343941;}
+#view-dashboard{
+  min-height:100vh;font-family:'Geist','Inter',-apple-system,sans-serif;
+  background:
+    radial-gradient(120% 55% at 55% 14%, rgba(247,190,110,.55) 0%, rgba(247,190,110,0) 55%),
+    radial-gradient(90% 45% at 88% 28%, rgba(244,190,205,.4) 0%, rgba(244,190,205,0) 60%),
+    radial-gradient(100% 55% at 8% 78%, rgba(244,190,205,.32) 0%, rgba(244,190,205,0) 60%),
+    #eceaf1;
+}
+.dash-root{position:relative;display:flex;flex-direction:column;gap:8px;padding:calc(56px + env(safe-area-inset-top,0px)) 8px 110px;}
+.dash-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:8px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.dash-chat-btn .ph{width:24px;height:24px;color:#f30;}
 .dash-header{width:75%;}
 .dash-hi{margin:0 0 4px;font-size:16px;font-weight:400;color:#343941;}
 .dash-headline{margin:0;font-size:28px;line-height:1.15;font-weight:600;color:#343941;letter-spacing:-.02em;}
@@ -615,12 +621,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <!-- ===================== DASHBOARD (hidden preview, triple-tap logo) ===================== -->
   <section class="view" id="view-dashboard">
     <div class="dash-root">
-      <div class="dash-header-row">
-        <div class="dash-header">
-          <p class="dash-hi" id="dashHi"></p>
-          <h1 class="dash-headline" id="dashHeadline"></h1>
-        </div>
-        <button type="button" class="dash-chat-btn" onclick="openFeedback()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
+      <button type="button" class="dash-chat-btn" onclick="openFeedback()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
+
+      <div class="dash-header">
+        <p class="dash-hi" id="dashHi"></p>
+        <h1 class="dash-headline" id="dashHeadline"></h1>
       </div>
 
       <div class="dash-hero">
