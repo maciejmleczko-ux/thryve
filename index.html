@@ -701,14 +701,18 @@ button{font-family:inherit;}
    above, which stay exactly as they are for production GYM. */
 .exv2-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);animation:exv2BackdropIn .22s ease-out;}
 .exv2-overlay.exv2-closing{animation:exv2BackdropOut .2s ease-in forwards;}
-.exv2-popup-stack{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:355px;font-family:'Geist','Inter',-apple-system,sans-serif;animation:exv2SlideUp .28s cubic-bezier(.22,1,.36,1);}
+.exv2-popup-stack{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:355px;font-family:'Geist','Inter',-apple-system,sans-serif;animation:exv2SlideUp .28s cubic-bezier(.22,1,.36,1);}
 .exv2-closing .exv2-popup-stack{animation:exv2SlideDown .2s ease-in forwards;}
 @keyframes exv2BackdropIn{from{opacity:0;}to{opacity:1;}}
 @keyframes exv2BackdropOut{from{opacity:1;}to{opacity:0;}}
 @keyframes exv2SlideUp{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
 @keyframes exv2SlideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(24px);}}
-.exv2-card{display:flex;flex-direction:column;gap:24px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 140px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
-.exv2-header-group{display:flex;flex-direction:column;gap:8px;}
+/* Tightened padding/gaps vs the original Figma spacing (was 18/24/16/16/8) —
+   with 4-5 series logged the card was forcing a scroll almost every time,
+   which defeated the point of a quick-entry popup. Trimmed whitespace only,
+   core touch targets (inputs, buttons) untouched. */
+.exv2-card{display:flex;flex-direction:column;gap:16px;background:#f5f1fb;border-radius:16px;padding:14px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 115px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
+.exv2-header-group{display:flex;flex-direction:column;gap:6px;}
 .exv2-title-block{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;}
 .exv2-pill{display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 8px;border-radius:47px;background:#a4bdff;}
 .exv2-pill span{font-size:8px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:#0e267b;white-space:nowrap;}
@@ -721,12 +725,12 @@ button{font-family:inherit;}
 .exv2-stat .ph{width:16px;height:16px;display:block;flex-shrink:0;color:#ff6343;}
 .exv2-stat .ph svg{display:block;width:100%;height:100%;}
 .exv2-stat span{font-size:14px;color:#2c2727;white-space:nowrap;}
-.exv2-tip{background:#000;border-radius:11px;padding:9px 17px;text-align:left;}
-.exv2-tip .lbl{display:block;font-size:12px;font-weight:700;letter-spacing:.24px;color:#f30;margin-bottom:9px;}
+.exv2-tip{background:#000;border-radius:11px;padding:7px 14px;text-align:left;}
+.exv2-tip .lbl{display:block;font-size:12px;font-weight:700;letter-spacing:.24px;color:#f30;margin-bottom:6px;}
 .exv2-tip .txt{font-size:12px;color:#fdfbff;line-height:1.4;}
-.exv2-series-section{display:flex;flex-direction:column;gap:16px;}
+.exv2-series-section{display:flex;flex-direction:column;gap:10px;}
 .exv2-series-list{display:flex;flex-direction:column;gap:4px;}
-.exv2-series-card{background:#fff;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box;}
+.exv2-series-card{background:#fff;border-radius:24px;padding:11px 16px;display:flex;flex-direction:column;gap:4px;box-sizing:border-box;}
 .exv2-series-label{font-size:14px;letter-spacing:.56px;text-transform:uppercase;color:#2c2727;}
 .exv2-series-fields{display:flex;gap:12px;}
 .exv2-field{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
@@ -1973,7 +1977,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 28;
+const DASH_BUILD = 29;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
