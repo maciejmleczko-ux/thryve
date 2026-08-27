@@ -594,27 +594,31 @@ button{font-family:inherit;}
    it has far more content than fits one iPhone screen.
    ============================================================ */
 #view-gym-v2{min-height:100vh;font-family:'Geist','Inter',-apple-system,sans-serif;background:#dd2b17;}
-.gymv2-panel{background:#f5f1fb;border-radius:0 0 26px 26px;padding:calc(50px + env(safe-area-inset-top,0px)) 10px 130px;min-height:100vh;position:relative;}
+.gymv2-panel{background:#f5f1fb;border-radius:0 0 26px 26px;padding:calc(50px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
 .gymv2-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
 .gymv2-chat-btn:active{transform:scale(.9);}
-.gymv2-chat-btn .ph{width:24px;height:24px;color:#2c2727;}
-.gymv2-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;}
-.gymv2-header .ph{width:40px;height:40px;color:#343941;}
+.gymv2-chat-btn .ph{width:24px;height:24px;color:#f30;}
+.gymv2-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.gymv2-header .ph{width:40px;height:40px;color:#f30;}
 .gymv2-header h1{margin:0;font-size:28px;font-weight:400;color:#343941;letter-spacing:-.02em;}
 
-.gymv2-plan-card{background:#3b63cb;border-radius:16px;padding:16px;color:#fff;margin-bottom:14px;}
-.gymv2-plan-date{margin:0 0 12px;font-size:10px;color:#d8e0f5;}
-.gymv2-plan-name{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:.035em;text-transform:uppercase;line-height:1.1;}
-.gymv2-plan-desc{margin:0 0 22px;font-size:12px;line-height:1.4;}
+.gymv2-plan-card{background:#3b63cb;border-radius:16px;padding:16px;color:#fff;margin-bottom:20px;display:flex;flex-direction:column;gap:16px;}
+.gymv2-plan-eyebrow{margin:0;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.8);}
+.gymv2-plan-body{display:flex;flex-direction:column;}
+.gymv2-plan-date{margin:0;font-size:10px;color:#d8e0f5;}
+.gymv2-plan-content{display:flex;flex-direction:column;gap:30px;}
+.gymv2-plan-name-block{display:flex;flex-direction:column;gap:12px;}
+.gymv2-plan-name{margin:0;font-size:22px;font-weight:500;letter-spacing:.035em;text-transform:uppercase;line-height:1.1;}
+.gymv2-plan-desc{margin:0;font-size:12px;line-height:1.4;}
 .gymv2-plan-stats{display:flex;gap:16px;flex-wrap:wrap;}
 .gymv2-plan-stat{display:flex;align-items:center;gap:12px;}
 .gymv2-plan-stat .ph{width:16px;height:16px;color:#fff;flex-shrink:0;}
 .gymv2-plan-stat span{font-size:14px;}
-.gymv2-no-plan{background:#fff;border-radius:16px;padding:20px 16px;text-align:center;color:#343941;margin-bottom:14px;}
+.gymv2-no-plan{background:#fff;border-radius:16px;padding:20px 16px;text-align:center;color:#343941;margin-bottom:20px;}
 .gymv2-no-plan p{margin:0 0 12px;font-size:14px;}
 .gymv2-no-plan .add-pill{margin:0 auto;}
 
-.gymv2-section-head{display:flex;align-items:center;justify-content:space-between;margin:20px 0 12px;}
+.gymv2-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;}
 .gymv2-section-head p{margin:0;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#2c2727;}
 .gymv2-edit-plan{background:#f30;border:none;border-radius:999px;padding:6px 20px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:transform .12s ease;}
 .gymv2-edit-plan:active{transform:scale(.95);}
@@ -641,7 +645,8 @@ button{font-family:inherit;}
 .gymv2-done-row-actions{display:flex;align-items:center;gap:11px;}
 .gymv2-done-row-actions .ph{width:24px;height:24px;color:#96959b;cursor:pointer;}
 
-.gymv2-save{display:flex;align-items:center;justify-content:center;gap:24px;background:#fff;border:none;border-radius:999px;height:49px;width:100%;max-width:275px;margin:24px auto 0;cursor:pointer;transition:transform .12s ease;}
+.gymv2-save-wrap{padding:20px 10px calc(120px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;}
+.gymv2-save{display:flex;align-items:center;justify-content:center;gap:24px;background:#fff;border:none;border-radius:999px;height:49px;width:100%;max-width:275px;cursor:pointer;transition:transform .12s ease;}
 .gymv2-save:active{transform:scale(.97);}
 .gymv2-save-badge{width:30px;height:30px;border-radius:50%;border:1px solid #f30;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .gymv2-save-badge .ph{width:20px;height:20px;color:#f30;}
@@ -772,8 +777,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </section>
 
   <!-- ===================== GYM v2 (hidden preview, see Dashboard) ===================== -->
-  <section class="view" id="view-gym-v2">
-    <div class="gymv2-panel gymv2-root">
+  <section class="view gymv2-root" id="view-gym-v2">
+    <div class="gymv2-panel">
       <button type="button" class="gymv2-chat-btn" onclick="openFeedback()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
 
       <div class="gymv2-header">
@@ -782,13 +787,20 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <div class="gymv2-plan-card">
-        <p class="gymv2-plan-date" id="gymV2Date"></p>
-        <p class="gymv2-plan-name" id="gymV2PlanName"></p>
-        <p class="gymv2-plan-desc" id="gymV2PlanDesc"></p>
-        <div class="gymv2-plan-stats">
-          <div class="gymv2-plan-stat"><span class="ph" data-ph="barbell"></span><span id="gymV2Count"></span></div>
-          <div class="gymv2-plan-stat"><span class="ph" data-ph="clock-countdown"></span><span id="gymV2Duration"></span></div>
-          <div class="gymv2-plan-stat"><span class="ph" data-ph="chart-line"></span><span id="gymV2Difficulty"></span></div>
+        <p class="gymv2-plan-eyebrow">Twój plan</p>
+        <div class="gymv2-plan-body">
+          <p class="gymv2-plan-date" id="gymV2Date"></p>
+          <div class="gymv2-plan-content">
+            <div class="gymv2-plan-name-block">
+              <p class="gymv2-plan-name" id="gymV2PlanName"></p>
+              <p class="gymv2-plan-desc" id="gymV2PlanDesc"></p>
+            </div>
+            <div class="gymv2-plan-stats">
+              <div class="gymv2-plan-stat"><span class="ph" data-ph="barbell"></span><span id="gymV2Count"></span></div>
+              <div class="gymv2-plan-stat"><span class="ph" data-ph="clock-countdown"></span><span id="gymV2Duration"></span></div>
+              <div class="gymv2-plan-stat"><span class="ph" data-ph="chart-line"></span><span id="gymV2Difficulty"></span></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -805,7 +817,9 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
       <p class="gymv2-done-head hidden" id="gymDoneV2Section">Ćwiczenia zrobione</p>
       <div class="gymv2-done-list" id="gymDoneV2"></div>
+    </div>
 
+    <div class="gymv2-save-wrap">
       <button type="button" class="gymv2-save" onclick="saveWorkout()">
         <span class="gymv2-save-badge"><span class="ph" data-ph="dash-check"></span></span>
         <span class="lbl">Zapisz trening</span>
@@ -1800,7 +1814,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 6;
+const DASH_BUILD = 7;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
