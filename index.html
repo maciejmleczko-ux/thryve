@@ -4298,7 +4298,16 @@ if(screen.orientation && screen.orientation.lock){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      // Browsers only re-check sw.js for changes on their own schedule
+      // (often throttled to ~once/day, worse for installed PWAs) — force
+      // a check on every load and whenever the app is reopened, so a new
+      // deploy shows up on next launch instead of possibly a day later.
+      reg.update().catch(()=>{});
+      document.addEventListener('visibilitychange', ()=>{
+        if(document.visibilityState === 'visible') reg.update().catch(()=>{});
+      });
+    }).catch(()=>{});
   });
   let swRefreshed = false;
   navigator.serviceWorker.addEventListener('controllerchange', ()=>{
