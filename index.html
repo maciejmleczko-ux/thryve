@@ -1973,7 +1973,24 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 24;
+const DASH_BUILD = 25;
+/* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
+   has already trained today (see renderDashboard()) — one is picked at
+   random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
+   per Maciej's request. Not localized (T_EN) — the whole Dashboard
+   preview is Polish-only for now, same as the rest of its copy. */
+const DASH_CONGRATS_PL = [
+  'Trening odhaczony. Kanapa może poczekać.',
+  'Zrobione. Głos w głowie, który szeptał „może jutro”, dziś przegrał.',
+  'Brawo, dziś nie oszukałeś samego siebie.',
+  'Trening z głowy. Jutro sobie za to podziękujesz.',
+  'Zasunięte. Możesz się teraz śmiało obrażać na schody.',
+  'Kolejny trening na koncie. Progres sam się nie zrobi.',
+  'Zaliczone. Teraz leniuchowanie masz w pełni zasłużone.',
+  'Zrobione, i już się nie cofnie. Dobra robota.',
+  'Trening skończony, wymówki zostaw na jutro.',
+  'Ciało już wie, że robisz to na serio. Szacunek.',
+];
 const CHANGELOG = {
   "4.7.0": {
     pl: [
@@ -4073,9 +4090,12 @@ function renderDashboard(){
 
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   const todayExNames = plan ? (plan.schedule[todayKey]||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name)) : [];
-  document.getElementById('dashHeadline').textContent = todayExNames.length
-    ? `Dziś ${plan.name}. Dasz radę!`
-    : 'Dziś odpoczynek. Dobrze go wykorzystaj.';
+  const trainedToday = workouts.some(w=>w.date===todayIso) || runs.some(r=>r.date===todayIso);
+  document.getElementById('dashHeadline').textContent = trainedToday
+    ? DASH_CONGRATS_PL[Math.floor(Math.random()*DASH_CONGRATS_PL.length)]
+    : todayExNames.length
+      ? `Dziś ${plan.name}. Dasz radę!`
+      : 'Dziś odpoczynek. Dobrze go wykorzystaj.';
 
   const allSets = dashboardAllSets();
   const weekSets = allSets.filter(s=>weekDates.includes(s.date));
