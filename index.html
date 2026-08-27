@@ -748,6 +748,25 @@ button{font-family:inherit;}
 .exv2-warn{color:#f30;font-size:12px;font-weight:600;line-height:1.4;text-align:center;}
 .exv2-submit{border:none;border-radius:999px;height:49px;width:100%;max-width:275px;background:#f30;color:#fff;font-size:16px;font-weight:500;letter-spacing:.64px;font-family:inherit;cursor:pointer;text-align:center;text-transform:uppercase;flex-shrink:0;}
 .exv2-submit:active{transform:scale(.97);}
+/* Internal reveal, on top of the popup's own exv2SlideUp entrance — header
+   and tip fade/rise in first, then each series card cascades in one after
+   another (renderExercisePopupV2(animate) sets the per-card delay inline
+   since it depends on how many sets the exercise has), controls/submit
+   last. All delays start after the .28s popup slide-up so this doesn't
+   fight that motion. Gated behind the .exv2-anim-in modifier class, only
+   added when animate=true (a genuine openExercisePopupV2() open) — the
+   same box.innerHTML also gets rebuilt on every add/remove-set click
+   inside an already-open popup, and replaying the entrance there would
+   make already-entered values flash out and back in. */
+@media (prefers-reduced-motion: no-preference){
+  @keyframes exv2FadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .exv2-anim-in.exv2-header-group{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.28s;}
+  .exv2-anim-in.exv2-tip{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.32s;}
+  .exv2-anim-in.exv2-series-controls,.exv2-anim-in.exv2-submit{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;} /* delay set inline, depends on set count */
+
+  @keyframes exv2CardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .exv2-anim-in.exv2-series-card{animation:exv2CardIn .35s cubic-bezier(.16,1,.3,1) both;} /* delay set inline per card */
+}
 
 .gymv2-root .ph{display:block;}
 .gymv2-root .ph svg{display:block;width:100%;height:100%;}
@@ -1981,7 +2000,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 31;
+const DASH_BUILD = 32;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3271,7 +3290,7 @@ function openExercisePopupV2(ex){
     ? {...already, setValues: already.setValues.map(s=>({...s}))}
     : {...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''};
   popupShowWarning = false;
-  renderExercisePopupV2();
+  renderExercisePopupV2(true);
   const overlay = document.getElementById('exercisePopupOverlayV2');
   overlay.classList.remove('exv2-closing');
   overlay.classList.remove('hidden');
@@ -3331,19 +3350,25 @@ function confirmExercisePopupV2(){
   renderGymGrid();
   renderExercisePanels();
 }
-function renderExercisePopupV2(){
+function renderExercisePopupV2(animate){
   const box = document.getElementById('exercisePopupBoxV2');
   if(!popupExercise){ box.innerHTML = ''; return; }
   const ex = popupExercise;
   const history = lastSessionsFor(ex.name);
   const sugg = buildSuggestion(ex, history);
   const lastSets = history[0] ? history[0].sets : [];
+  const animCls = animate ? ' exv2-anim-in' : '';
+  // Reveal timing: series cards cascade in one after another, starting
+  // once the popup's own .28s slide-up has landed; controls/submit are
+  // computed from the actual set count so they always land right after
+  // the last card instead of guessing a fixed delay.
+  const CARD_BASE_DELAY = 340, CARD_STEP = 45;
   let seriesHtml = '';
   for(let s=0;s<ex.sets;s++){
     const lastW = lastSets[s] ? lastSets[s].weight : '';
     const lastR = lastSets[s] ? lastSets[s].reps : '';
     seriesHtml += `
-      <div class="exv2-series-card">
+      <div class="exv2-series-card${animCls}" style="animation-delay:${CARD_BASE_DELAY + s*CARD_STEP}ms">
         <div class="exv2-series-label">${t('seriesLabel', `Seria ${s+1}`, s+1)}</div>
         <div class="exv2-series-fields">
           <div class="exv2-field">
@@ -3359,9 +3384,11 @@ function renderExercisePopupV2(){
   }
   const isEdit = sessionExercises.some(e=>e.name===ex.name);
   const btnLabel = isEdit ? t('saveChanges','Zapisz') : t('addToWorkout','Dodaj do treningu');
+  const controlsDelay = CARD_BASE_DELAY + ex.sets*CARD_STEP + 30;
+  const submitDelay = controlsDelay + 60;
   box.innerHTML = `
     <div class="exv2-card">
-      <div class="exv2-header-group">
+      <div class="exv2-header-group${animCls}">
         <div class="exv2-title-block">
           <span class="exv2-pill"><span>${groupLabel(ex.group)}</span></span>
           <div class="exv2-title-row">
@@ -3375,17 +3402,17 @@ function renderExercisePopupV2(){
           <div class="exv2-stat">${ph('clock-countdown')}<span>${ex.rest}</span></div>
         </div>
       </div>
-      <div class="exv2-tip"><span class="lbl">${t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><span class="txt">${sugg.text}</span></div>
+      <div class="exv2-tip${animCls}"><span class="lbl">${t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><span class="txt">${sugg.text}</span></div>
       <div class="exv2-series-section">
         <div class="exv2-series-list">${seriesHtml}</div>
-        <div class="exv2-series-controls">
+        <div class="exv2-series-controls${animCls}" style="animation-delay:${controlsDelay}ms">
           <button type="button" class="exv2-btn-outline" ${ex.sets<=1?'disabled':''} onclick="popupRemoveSetRowV2()">${t('removeSeries','Usuń serię')}</button>
           <button type="button" class="exv2-btn-fill" onclick="popupAddSetRowV2()">${t('addSeries','Dodaj serię')}</button>
         </div>
       </div>
       ${popupShowWarning ? `<div class="exv2-warn">${t('popupNoValues','Pola są puste — liczby w tle to tylko podpowiedź z ostatniego treningu. Wpisz je, żeby dodać ćwiczenie.')}</div>` : ''}
     </div>
-    <button type="button" class="exv2-submit" onclick="confirmExercisePopupV2()">${btnLabel}</button>
+    <button type="button" class="exv2-submit${animCls}" style="animation-delay:${submitDelay}ms" onclick="confirmExercisePopupV2()">${btnLabel}</button>
   `;
 }
 
