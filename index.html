@@ -587,10 +587,11 @@ button{font-family:inherit;}
 /* ---- subtle motion: staggered reveal on entry, bars grow in, checks pop ---- */
 @media (prefers-reduced-motion: no-preference){
   @keyframes dashRise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-  .dash-chat-btn,.dash-header,.dash-hero,.dash-grid2,.dash-week-card{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
-  .dash-hero{animation-delay:.06s;}
-  .dash-grid2{animation-delay:.12s;}
-  .dash-week-card{animation-delay:.18s;}
+  .dash-chat-btn,.dash-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
+  /* Each "tile" card fades in on its own — renderDashboard() sets a slightly
+     randomized animation-delay per element so the stagger feels alive
+     instead of a mechanically identical sequence every time. */
+  .dash-hero,.dash-plan-card,.dash-mini-card,.dash-week-card{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
 
   @keyframes dashBarGrow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
   .dash-trend span{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 18ms + .2s);}
@@ -1949,7 +1950,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 19;
+const DASH_BUILD = 20;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
@@ -4104,6 +4105,13 @@ function renderDashboard(){
       <em>${planDayLabel(dayKeyFromDate(d))}</em>
     </div>`;
   }).join('');
+
+  // Re-roll the fade-in stagger every time the dashboard is (re)entered —
+  // a small base step per tile keeps the order top-to-bottom, and the
+  // random jitter on top stops it from feeling like a fixed animation.
+  document.querySelectorAll('#view-dashboard .dash-hero, #view-dashboard .dash-plan-card, #view-dashboard .dash-mini-card, #view-dashboard .dash-week-card').forEach((el, i)=>{
+    el.style.animationDelay = Math.round(i * 55 + Math.random() * 70) + 'ms';
+  });
 }
 
 /* ============================================================
