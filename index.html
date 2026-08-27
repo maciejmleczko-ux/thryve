@@ -664,9 +664,12 @@ button{font-family:inherit;}
 .gymv2-save-wrap{padding:20px 10px 0;display:flex;justify-content:center;}
 .gymv2-save{display:flex;align-items:center;justify-content:center;gap:24px;background:#fff;border:none;border-radius:999px;height:49px;width:100%;max-width:275px;cursor:pointer;transition:transform .12s ease;}
 .gymv2-save:active{transform:scale(.97);}
-.gymv2-save-badge{width:30px;height:30px;border-radius:50%;border:1px solid #f30;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.gymv2-save-badge .ph{width:20px;height:20px;color:#f30;}
+.gymv2-save-badge{width:30px;height:30px;border-radius:50%;border:1px solid #f30;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s ease,border-color .2s ease;}
+.gymv2-save-badge .ph{width:20px;height:20px;color:#f30;transition:color .2s ease;}
 .gymv2-save span.lbl{font-size:16px;font-weight:500;letter-spacing:.04em;color:#343941;}
+.gymv2-save.gymv2-save-success .gymv2-save-badge{background:#3ecf8e;border-color:#3ecf8e;animation:gymv2SaveBadgePop .5s ease;}
+.gymv2-save.gymv2-save-success .gymv2-save-badge .ph{color:#fff;}
+@keyframes gymv2SaveBadgePop{0%{transform:scale(1);}40%{transform:scale(1.3);}100%{transform:scale(1);}}
 
 .gymv2-root .ph{display:block;}
 .gymv2-root .ph svg{display:block;width:100%;height:100%;}
@@ -836,7 +839,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
 
     <div class="gymv2-save-wrap">
-      <button type="button" class="gymv2-save" onclick="saveWorkout()">
+      <button type="button" class="gymv2-save" onclick="saveWorkoutV2()">
         <span class="gymv2-save-badge"><span class="ph" data-ph="dash-check"></span></span>
         <span class="lbl">Zapisz trening</span>
       </button>
@@ -1885,7 +1888,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 14;
+const DASH_BUILD = 15;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
@@ -3154,6 +3157,18 @@ function saveWorkout(){
   closeExercisePopup();
   renderGymGrid();
   renderExercisePanels();
+  return true;
+}
+/* GYM v2 save button: plays the green-fill/white-tick badge animation, then
+   hands off to Dashboard once it's had a moment to register. Wraps the
+   shared saveWorkout() rather than duplicating its validation/persist
+   logic — production GYM's save button is untouched. */
+function saveWorkoutV2(){
+  const ok = saveWorkout();
+  if(!ok) return;
+  const btn = document.querySelector('#view-gym-v2 .gymv2-save');
+  if(btn) btn.classList.add('gymv2-save-success');
+  setTimeout(()=> goRoute('dashboard'), 650);
 }
 
 /* ============================================================
