@@ -714,6 +714,64 @@ button{font-family:inherit;}
   .gymv2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;}
 }
 
+/* ============================================================
+   PLANS v2 — third screen of the "v3" preview (Figma node 116:2502).
+   Browsing/creating/importing only — tapping a card, "+", or the import
+   button hands off to the existing (not yet redesigned) plan editor /
+   import-code modal, same pieces the old #view-plans screen already
+   uses (openPlanEditor/openImportPlanCodeModal/sharePlan/
+   toggleStarredPlan) — this screen is only a new list view on top of
+   that same data. */
+#view-plans-v2{min-height:100vh;font-family:'Geist','Inter',-apple-system,sans-serif;background:#f5f1fb;}
+.plansv2-root .ph{display:block;}
+.plansv2-root .ph svg{display:block;width:100%;height:100%;}
+.plansv2-panel{padding:calc(50px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
+.plansv2-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
+.plansv2-chat-btn:active{transform:scale(.9);}
+.plansv2-chat-btn .ph{width:24px;height:24px;color:#f30;}
+.plansv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.plansv2-header-title{display:flex;align-items:center;gap:16px;}
+.plansv2-header-title .ph{width:40px;height:40px;color:#f30;}
+.plansv2-header-title h1{margin:0;font-size:30.654px;font-weight:400;color:#343941;letter-spacing:-.02em;}
+.plansv2-close{width:24px;height:24px;color:#343941;cursor:pointer;flex-shrink:0;}
+.plansv2-actions{display:flex;gap:10px;width:100%;margin-bottom:24px;}
+.plansv2-btn-outline{flex:1;border:1px solid #ff6343;border-radius:69px;padding:12px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s ease;}
+.plansv2-btn-outline .ph{width:24px;height:24px;color:#ff6343;}
+.plansv2-btn-fill{flex:1;border:none;border-radius:74px;padding:12px;background:#ff6343;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s ease;}
+.plansv2-btn-fill .ph{width:24px;height:24px;color:#fff;}
+.plansv2-btn-outline:active,.plansv2-btn-fill:active{transform:scale(.95);}
+.plansv2-section-label{margin:0 2px 12px;font-size:14px;letter-spacing:.56px;text-transform:uppercase;color:#2c2727;}
+.plansv2-list{display:flex;flex-direction:column;gap:4px;margin-bottom:24px;}
+.plansv2-list:last-of-type{margin-bottom:0;}
+.plansv2-card{border-radius:16px;padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;transition:transform .12s ease;}
+.plansv2-card:active{transform:scale(.98);}
+.plansv2-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
+.plansv2-card-name{margin:0;font-size:16px;font-weight:500;line-height:1.1;letter-spacing:.64px;text-transform:uppercase;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.plansv2-card-stats{display:flex;gap:16px;flex-wrap:wrap;}
+.plansv2-stat{display:flex;align-items:center;gap:4px;}
+.plansv2-stat .ph{width:16px;height:16px;color:#fff;flex-shrink:0;}
+.plansv2-stat span{font-size:10px;color:#fff;white-space:nowrap;}
+.plansv2-card-actions{display:flex;align-items:center;gap:12px;flex-shrink:0;margin-left:12px;}
+.plansv2-card-export{cursor:pointer;flex-shrink:0;display:flex;}
+.plansv2-card-export .ph{width:24px;height:24px;color:#fff;}
+.plansv2-card-star{cursor:pointer;flex-shrink:0;display:flex;}
+.plansv2-card-star .ph{width:24px;height:24px;color:#fff;}
+.plansv2-card-star.active{width:20px;height:20px;border-radius:10px;background:#fff;align-items:center;justify-content:center;}
+.plansv2-card-star.active .ph{width:13.333px;height:13.333px;color:#2c2727;}
+.plansv2-hidden{display:none;}
+/* Entrance motion — same idiom as GYM v2/Dashboard: header fades/rises
+   in, the action-button row follows as a "tile", then each plan card
+   cascades in one after another. Gated behind .plansv2-anim-in (added
+   only by renderPlansListV2(true) on a real screen visit — see the
+   fuller explanation on .gymv2-anim-in above) so re-rendering the list
+   after starring/sharing a plan mid-browse doesn't replay the whole
+   entrance. */
+@media (prefers-reduced-motion: no-preference){
+  .plansv2-chat-btn,.plansv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
+  .plansv2-actions{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.08s;}
+  .plansv2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;}
+}
+
 /* GYM v2 set-logging popup (node 112:1872) — separate from .ex-popup-box/.set-row
    above, which stay exactly as they are for production GYM. */
 .exv2-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);animation:exv2BackdropIn .22s ease-out;}
@@ -939,7 +997,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
       <div class="gymv2-no-plan hidden" id="gymV2NoPlan">
         <p>Nie masz jeszcze wygwiazdkowanego planu.</p>
-        <button type="button" class="add-pill" onclick="goRoute('plans')">+<span>Stwórz lub wybierz plan</span></button>
+        <button type="button" class="add-pill" onclick="goRoute('plans-v2')">+<span>Stwórz lub wybierz plan</span></button>
       </div>
 
       <div class="gymv2-section-head">
@@ -957,6 +1015,37 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <span class="gymv2-save-badge"><span class="ph" data-ph="dash-check"></span></span>
         <span class="lbl">Zapisz trening</span>
       </button>
+    </div>
+  </section>
+
+  <!-- ===================== PLANS v2 (hidden preview, node 116:2502) =====================
+       Browsing only — tapping a card or "+"/import still hands off to the
+       existing #view-planEditor / import-code modal, neither of which has
+       a v3 redesign yet. Reuses trainingPlans/starredPlanId/toggleStarredPlan/
+       sharePlan/openPlanEditor/openImportPlanCodeModal wholesale, same as
+       GYM v2 reuses the real GYM screen's data. -->
+  <section class="view plansv2-root" id="view-plans-v2">
+    <div class="plansv2-panel">
+      <button type="button" class="plansv2-chat-btn" onclick="openFeedback()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
+
+      <div class="plansv2-header">
+        <div class="plansv2-header-title">
+          <span class="ph" data-ph="barbell"></span>
+          <h1>PLANS</h1>
+        </div>
+        <span class="ph plansv2-close" data-ph="x" onclick="goRoute('gym-v2')"></span>
+      </div>
+
+      <div class="plansv2-actions">
+        <button type="button" class="plansv2-btn-outline" onclick="openImportPlanCodeModal()" title="Importuj plan"><span class="ph" data-ph="download-simple"></span></button>
+        <button type="button" class="plansv2-btn-fill" onclick="openPlanEditor(null)" title="Dodaj plan"><span class="ph" data-ph="plus-icon"></span></button>
+      </div>
+
+      <p class="plansv2-section-label">PLANY AUTOMATYCZNE</p>
+      <div class="plansv2-list" id="plansV2AutoList"></div>
+
+      <p class="plansv2-section-label" id="plansV2CustomLabel">TWOJE PLANY</p>
+      <div class="plansv2-list" id="plansV2CustomList"></div>
     </div>
   </section>
 
@@ -2017,7 +2106,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 41;
+const DASH_BUILD = 42;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -2459,7 +2548,7 @@ function commitViewTransition(){
    real production route unchanged. See [[project_thryve_roadmap]]. */
 let previewMode = false;
 const PREVIEW_ROUTES = { gym: 'gym-v2' };
-const V3_ROUTE_ALIAS = { dashboard: 'welcome', 'gym-v2': 'gym' }; // which real nav icon a v3 route should light up
+const V3_ROUTE_ALIAS = { dashboard: 'welcome', 'gym-v2': 'gym', 'plans-v2': 'gym' }; // which real nav icon a v3 route should light up
 function navTap(route){
   if(route === 'welcome') previewMode = false; // tapping home always exits back to production
   const target = (previewMode && PREVIEW_ROUTES[route]) ? PREVIEW_ROUTES[route] : route;
@@ -2472,7 +2561,7 @@ function goRoute(route){
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward);
-  const isV3 = route==='dashboard' || route==='gym-v2';
+  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2';
   document.getElementById('bottomNav').style.display = (route==='welcome' || planOnboardingActive) ? 'none' : 'flex';
   document.getElementById('bottomNav').classList.toggle('bottom-nav-light', isV3);
   const navActiveRoute = V3_ROUTE_ALIAS[route] || route;
@@ -2492,6 +2581,7 @@ function goRoute(route){
   if(route==='plans'){ renderPlansList(); }
   if(route==='dashboard'){ renderDashboard(); }
   if(route==='gym-v2'){ previewMode = true; renderGymV2(); }
+  if(route==='plans-v2'){ previewMode = true; renderPlansListV2(true); }
   commitViewTransition();
   window.scrollTo(0,0);
 }
@@ -3797,6 +3887,71 @@ function renderPlansList(){
         </div>
       </div>`;
   }).join('');
+  renderPlansListV2();
+}
+
+/* ============================================================
+   PLANS v2 — third screen of the "v3" preview (Figma node 116:2502).
+   Same trainingPlans/starredPlanId/toggleStarredPlan/sharePlan/
+   openPlanEditor/openImportPlanCodeModal as the real Plans screen
+   above — tail-called from renderPlansList() so any change made via
+   the old screen (or elsewhere) keeps this one in sync automatically,
+   same pattern as renderGymGridV2()/renderGymDoneV2().
+   ============================================================ */
+const PLANSV2_AUTO_COLORS = ['#3b63cb', '#2642a4', '#708fe1'];
+const PLANSV2_CUSTOM_COLORS = ['#cd1200', '#f30', '#ff6343'];
+/* Duration/difficulty are placeholder estimates — same idea as GYM v2's
+   plan-card stats (~5 min/exercise; no real per-workout duration or a
+   real difficulty rating exist in the data model yet). Difficulty here
+   is just an exercise-count threshold so the list shows some variety
+   instead of "Średni" on every card — replace with real data once
+   that exists, same note as GYM v2's placeholder. */
+function planDifficultyPlaceholder(exCount){
+  if(exCount < 8) return t('planDifficultyEasy','Łatwy');
+  if(exCount > 16) return t('planDifficultyHard','Trudny');
+  return t('planDifficultyMedium','Średni');
+}
+function buildPlanCardV2(p, color, animate, i){
+  const starred = starredPlanId === p.id;
+  const exCount = planTotalExercises(p);
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'plansv2-card';
+  card.style.background = color;
+  card.onclick = ()=> openPlanEditor(p.id);
+  card.innerHTML = `
+    <div class="plansv2-card-info">
+      <p class="plansv2-card-name">${p.name}</p>
+      <div class="plansv2-card-stats">
+        <div class="plansv2-stat">${ph('barbell')}<span>${planExCountText(exCount)}</span></div>
+        <div class="plansv2-stat">${ph('clock-countdown')}<span>~${Math.max(15, exCount*5)} min</span></div>
+        <div class="plansv2-stat">${ph('chart-line')}<span>${planDifficultyPlaceholder(exCount)}</span></div>
+      </div>
+    </div>
+    <div class="plansv2-card-actions">
+      <span class="plansv2-card-export" onclick="event.stopPropagation();sharePlan(trainingPlans.find(x=>x.id==='${p.id}'))" title="${t('sharePlanTitle','Udostępnij plan')}">${ph('export')}</span>
+      <span class="plansv2-card-star${starred?' active':''}" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'dash-check':'check-circle')}</span>
+    </div>
+  `;
+  if(animate){
+    card.classList.add('plansv2-anim-in');
+    card.style.animationDelay = Math.round(180 + i*45) + 'ms';
+  }
+  return card;
+}
+function renderPlansListV2(animate){
+  const autoWrap = document.getElementById('plansV2AutoList');
+  const customWrap = document.getElementById('plansV2CustomList');
+  const customLabel = document.getElementById('plansV2CustomLabel');
+  if(!autoWrap || !customWrap) return;
+  autoWrap.innerHTML = '';
+  customWrap.innerHTML = '';
+  const autoPlans = trainingPlans.filter(p=>p.builtin);
+  const customPlans = trainingPlans.filter(p=>!p.builtin);
+  autoPlans.forEach((p,i)=> autoWrap.appendChild(buildPlanCardV2(p, PLANSV2_AUTO_COLORS[i%3], animate, i)));
+  customPlans.forEach((p,i)=> customWrap.appendChild(buildPlanCardV2(p, PLANSV2_CUSTOM_COLORS[i%3], animate, autoPlans.length+i)));
+  customLabel.classList.toggle('plansv2-hidden', !customPlans.length);
+  customWrap.classList.toggle('plansv2-hidden', !customPlans.length);
 }
 let editingPlan = null; // working copy: {id, name, builtin, schedule:{mon:[],...}, activeDay}
 function openPlanEditor(id){
