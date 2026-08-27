@@ -550,7 +550,7 @@ button{font-family:inherit;}
 .dash-mini-col{display:flex;flex-direction:column;gap:8px;}
 .dash-mini-card{background:#fdfbff;border-radius:16px;padding:12px 14px;}
 .dash-mini-label{margin:0 0 6px;font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:rgba(52,57,65,.6);}
-.dash-mini-row{display:flex;align-items:center;justify-content:space-between;}
+.dash-mini-row{display:flex;align-items:flex-end;justify-content:space-between;}
 .dash-mini-num{margin:0;font-size:24px;font-weight:400;color:#343941;}
 .dash-mini-row .ph{width:39px;height:31px;color:#f30;}
 .dash-mini-sub{margin:2px 0 0;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#96959b;}
@@ -684,10 +684,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <div class="dash-mini-card">
             <p class="dash-mini-label">Nowy rekord</p>
             <div class="dash-mini-row">
-              <p class="dash-mini-num" id="dashPrNum">—</p>
+              <div>
+                <p class="dash-mini-num" id="dashPrNum">—</p>
+                <p class="dash-mini-sub" id="dashPrName"></p>
+              </div>
               <span class="ph" data-ph="trophy"></span>
             </div>
-            <p class="dash-mini-sub" id="dashPrName"></p>
           </div>
           <div class="dash-mini-card">
             <p class="dash-mini-label">Trend objętości</p>
@@ -1688,7 +1690,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 4;
+const DASH_BUILD = 5;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
