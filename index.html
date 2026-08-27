@@ -684,6 +684,19 @@ button{font-family:inherit;}
 .gymv2-save.gymv2-save-success .gymv2-save-badge .ph{color:#fff;}
 @keyframes gymv2SaveBadgePop{0%{transform:scale(1);}40%{transform:scale(1.3);}100%{transform:scale(1);}}
 
+/* Entrance motion — same idiom as the Dashboard: header fades/rises in,
+   the plan card follows as one "tile", then exercise tiles and done-list
+   rows cascade in one after another (reusing dashRise/dashTileRise/dashDayIn
+   from the Dashboard's own rules above). The .gymv2-anim-in modifier class
+   (added only by renderGymV2() on a real screen visit, not on every grid
+   rebuild from logging a set — see renderGymGridV2()/renderGymDoneV2())
+   keeps this from replaying on every in-session tile/list refresh. */
+@media (prefers-reduced-motion: no-preference){
+  .gymv2-chat-btn,.gymv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
+  .gymv2-plan-card,.gymv2-no-plan{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.08s;}
+  .gymv2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;}
+}
+
 /* GYM v2 set-logging popup (node 112:1872) — separate from .ex-popup-box/.set-row
    above, which stay exactly as they are for production GYM. */
 .exv2-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);animation:exv2BackdropIn .22s ease-out;}
@@ -1960,7 +1973,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 23;
+const DASH_BUILD = 24;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
@@ -4166,10 +4179,10 @@ function renderGymV2(){
     card.classList.add('hidden');
     noPlan.classList.remove('hidden');
   }
-  renderGymGridV2();
-  renderGymDoneV2();
+  renderGymGridV2(true);
+  renderGymDoneV2(true);
 }
-function renderGymGridV2(){
+function renderGymGridV2(animate){
   const grid = document.getElementById('gymGridV2');
   if(!grid) return;
   grid.innerHTML = '';
@@ -4199,8 +4212,17 @@ function renderGymGridV2(){
   addBtn.innerHTML = `${ph('plus-icon')}<span>${t('addNew','Dodaj ćwiczenie')}</span>`;
   addBtn.onclick = toggleNewExerciseForm;
   grid.appendChild(addBtn);
+
+  if(animate){
+    // Fade + slide up, one tile after another — capped stagger so a long
+    // exercise list doesn't drag the reveal out forever.
+    Array.from(grid.children).forEach((el, i)=>{
+      el.classList.add('gymv2-anim-in');
+      el.style.animationDelay = Math.round(260 + Math.min(i,12) * 38 + Math.random() * 30) + 'ms';
+    });
+  }
 }
-function renderGymDoneV2(){
+function renderGymDoneV2(animate){
   const area = document.getElementById('gymDoneV2');
   if(!area) return;
   area.innerHTML = '';
@@ -4220,6 +4242,13 @@ function renderGymDoneV2(){
     `;
     area.appendChild(row);
   });
+
+  if(animate){
+    Array.from(area.children).forEach((el, i)=>{
+      el.classList.add('gymv2-anim-in');
+      el.style.animationDelay = Math.round(120 + Math.min(i,10) * 45 + Math.random() * 25) + 'ms';
+    });
+  }
 }
 
 (function initSecretPlansGesture(){
