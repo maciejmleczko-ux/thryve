@@ -1973,7 +1973,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 27;
+const DASH_BUILD = 28;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -2684,43 +2684,71 @@ let extraGymTiles = []; // exercises picked via "Wybierz inne ćwiczenie" for to
    using (save time − first tap) as the raw duration, which overcounts any
    idle stretch between finishing the last set and actually pressing save
    (chatting at the gym, walking to the locker room, forgetting to save for
-   a while), we track the LAST tile tap too and measure first-tap → last-tap.
-   That's a more direct measure of the actual active session, no threshold
-   or flat "subtract ~5-10 min" guess needed — it falls out naturally.
+   a while), we track gymSessionActiveEndAt — the end of the last CONTINUOUS
+   block of taps — and measure first-tap → that. No threshold-and-subtract
+   guess needed, it falls out of the gap logic below:
+     - taps ≤30 min apart keep extending the active window (normal rest
+       between sets, chatting, whatever — still "mid-workout")
+     - a tap 30 min–4h after the last one (e.g. remembered to save at home,
+       tapped something to double-check a number first) does NOT extend the
+       window — the eventual duration freezes at the real gym time, exactly
+       as if they'd hit save without touching anything
+     - a tap >4h after the last one is treated as a genuinely new session
+       (leftover timing from something abandoned hours/days ago, app never
+       reloaded) and restarts the clock from now, instead of polluting a
+       fresh workout's duration with ancient data
    Persisted to localStorage so closing/reopening the app mid-workout
    doesn't lose the start time. Reset after a successful save. */
 const LS_GYM_SESSION_TIMING = "fitlog_gym_session_timing_v1";
-let gymSessionStartAt = null;        // ms epoch, first tile tap since last save
-let gymSessionLastActivityAt = null; // ms epoch, most recent tile tap
+const GYM_SESSION_ACTIVE_GAP_MIN = 30;  // taps this close together = still one continuous block
+const GYM_SESSION_STALE_GAP_MIN = 240;  // beyond this, leftover timing counts as abandoned
+let gymSessionStartAt = null;     // ms epoch, first tile tap since last save (or since the last stale reset)
+let gymSessionActiveEndAt = null; // ms epoch, end of the last continuous active block
 function loadGymSessionTiming(){
   try{
     const obj = JSON.parse(localStorage.getItem(LS_GYM_SESSION_TIMING));
-    if(obj && obj.start){ gymSessionStartAt = obj.start; gymSessionLastActivityAt = obj.last || obj.start; }
+    if(obj && obj.start){ gymSessionStartAt = obj.start; gymSessionActiveEndAt = obj.activeEnd || obj.start; }
   }catch(e){}
 }
 function saveGymSessionTiming(){
   try{
-    if(gymSessionStartAt) localStorage.setItem(LS_GYM_SESSION_TIMING, JSON.stringify({start: gymSessionStartAt, last: gymSessionLastActivityAt}));
+    if(gymSessionStartAt) localStorage.setItem(LS_GYM_SESSION_TIMING, JSON.stringify({start: gymSessionStartAt, activeEnd: gymSessionActiveEndAt}));
     else localStorage.removeItem(LS_GYM_SESSION_TIMING);
   }catch(e){}
 }
 function markGymActivity(){
   const now = Date.now();
-  if(!gymSessionStartAt) gymSessionStartAt = now;
-  gymSessionLastActivityAt = now;
+  if(!gymSessionStartAt){
+    gymSessionStartAt = now;
+    gymSessionActiveEndAt = now;
+  } else {
+    const gapMin = (now - gymSessionActiveEndAt) / 60000;
+    if(gapMin > GYM_SESSION_STALE_GAP_MIN){
+      gymSessionStartAt = now;
+      gymSessionActiveEndAt = now;
+    } else if(gapMin <= GYM_SESSION_ACTIVE_GAP_MIN){
+      gymSessionActiveEndAt = now;
+    }
+    // else: 30min–4h gap — leave gymSessionActiveEndAt frozen, see comment above
+  }
   saveGymSessionTiming();
 }
-// Sanity-capped: floor of 1 min so a single quick tap+save doesn't read as
-// "0 min", ceiling of 4h so a session left open for days (app never closed,
-// timing never reset) doesn't produce an absurd number.
+// Works both as the live "elapsed so far" figure (called while still
+// training — ticks with real time as long as the last tap was recent) and
+// as the final value at save time (freezes at the real active window if
+// there's been a gap since the last tap). Sanity-capped: floor of 1 min so
+// a single quick tap+save doesn't read as "0 min", ceiling of 4h.
 function computeGymSessionDurationMin(){
-  if(!gymSessionStartAt || !gymSessionLastActivityAt) return null;
-  const min = Math.round((gymSessionLastActivityAt - gymSessionStartAt) / 60000);
+  if(!gymSessionStartAt || !gymSessionActiveEndAt) return null;
+  const now = Date.now();
+  const gapMin = (now - gymSessionActiveEndAt) / 60000;
+  const end = gapMin <= GYM_SESSION_ACTIVE_GAP_MIN ? now : gymSessionActiveEndAt;
+  const min = Math.round((end - gymSessionStartAt) / 60000);
   return Math.min(240, Math.max(1, min));
 }
 function resetGymSessionTiming(){
   gymSessionStartAt = null;
-  gymSessionLastActivityAt = null;
+  gymSessionActiveEndAt = null;
   saveGymSessionTiming();
 }
 loadGymSessionTiming();
@@ -4275,7 +4303,7 @@ function renderGymV2(){
     // tap today), falling back to the old rough guess before that —
     // see markGymActivity()/computeGymSessionDurationMin() above.
     document.getElementById('gymV2Duration').textContent = gymSessionStartAt
-      ? `${Math.max(1, Math.round((Date.now()-gymSessionStartAt)/60000))} min`
+      ? `${computeGymSessionDurationMin()} min`
       : `~${Math.max(15, todayEx.length*5)} min`;
     document.getElementById('gymV2Difficulty').textContent = t('gymV2Difficulty','Średni');
     card.classList.remove('hidden');
