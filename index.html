@@ -596,6 +596,13 @@ button{font-family:inherit;}
   @keyframes dashTileRise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
   .dash-hero,.dash-plan-card,.dash-mini-card,.dash-week-card{animation:dashTileRise .8s cubic-bezier(.16,1,.3,1) both;}
 
+  /* Weekly-progress day circles fade in one after another, timed to start
+     only once the .dash-week-card itself has mostly finished revealing —
+     renderDashboard() sets --day-base on #dashWeekDays to the card's own
+     (randomized) delay + a buffer, and --i on each circle for the stagger. */
+  @keyframes dashDayIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .dash-week-day{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--day-base,650ms) + var(--i,0) * 70ms);}
+
   @keyframes dashBarGrow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
   .dash-trend span{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 18ms + .2s);}
 
@@ -1953,7 +1960,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 21;
+const DASH_BUILD = 22;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
@@ -4099,11 +4106,11 @@ function renderDashboard(){
   const trainedDays = weekDates.filter(d=> workouts.some(w=>w.date===d) || runs.some(r=>r.date===d));
   const doneScheduledCount = scheduledDays.filter(d=>trainedDays.includes(d)).length;
   document.getElementById('dashWeekCount').textContent = `${doneScheduledCount} / ${scheduledDays.length} dni zaliczone`;
-  document.getElementById('dashWeekDays').innerHTML = weekDates.map(d=>{
+  document.getElementById('dashWeekDays').innerHTML = weekDates.map((d,i)=>{
     const isDone = trainedDays.includes(d);
     const isToday = d===todayIso;
     const stateClass = isToday ? 'today' : isDone ? 'done' : (d<todayIso ? 'past' : 'future');
-    return `<div class="dash-week-day ${stateClass}">
+    return `<div class="dash-week-day ${stateClass}" style="--i:${i}">
       <span>${isDone?ph('dash-check'):''}</span>
       <em>${planDayLabel(dayKeyFromDate(d))}</em>
     </div>`;
@@ -4113,7 +4120,13 @@ function renderDashboard(){
   // a small base step per tile keeps the order top-to-bottom, and the
   // random jitter on top stops it from feeling like a fixed animation.
   document.querySelectorAll('#view-dashboard .dash-hero, #view-dashboard .dash-plan-card, #view-dashboard .dash-mini-card, #view-dashboard .dash-week-card').forEach((el, i)=>{
-    el.style.animationDelay = Math.round(i * 80 + Math.random() * 100) + 'ms';
+    const delayMs = Math.round(i * 80 + Math.random() * 100);
+    el.style.animationDelay = delayMs + 'ms';
+    if(el.classList.contains('dash-week-card')){
+      // Let the little day-progress circles start their own one-by-one
+      // reveal only once this card has mostly finished appearing.
+      document.getElementById('dashWeekDays').style.setProperty('--day-base', (delayMs + 550) + 'ms');
+    }
   });
 }
 
