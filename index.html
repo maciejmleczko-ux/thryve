@@ -87,7 +87,15 @@ html.gymv2-bg,html.gymv2-bg body{overscroll-behavior-y:none;}
    (standard iPhone viewport only — other sizes come later). Toggled on
    <html> because whichever of html/body is the browser's "scrolling
    element" varies — overflow:hidden has to hit both to be reliable. */
-html.dashboard-lock, html.dashboard-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
+/* overflow-y:auto (not hidden) is deliberate here — the dashboard is
+   designed to fit one screen with no scroll, but a long plan name (2 lines
+   instead of 1) can push content past the viewport, and with a hard
+   overflow:hidden that content was just permanently invisible behind the
+   bottom nav with no way to reach it. Auto is a no-op when everything
+   fits (nothing to scroll, looks identical) and only kicks in as a safety
+   net when it doesn't. touch-action:pan-y lets a real scroll gesture
+   through when there's actually something to scroll. */
+html.dashboard-lock, html.dashboard-lock body{overflow-x:hidden;overflow-y:auto;height:100dvh;touch-action:pan-y;overscroll-behavior:none;}
 /* Same technique, reused for modals — background stays put while a popup is open. */
 html.modal-lock, html.modal-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
 button{font-family:inherit;}
@@ -555,7 +563,7 @@ button{font-family:inherit;}
 .dash-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
 .dash-plan-card{background:#3b63cb;border-radius:16px;padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:14px;cursor:pointer;transition:transform .12s ease;}
 .dash-plan-card:active{transform:scale(.97);}
-.dash-plan-name{margin:0 0 4px;font-size:22px;font-weight:500;line-height:1.1;letter-spacing:.02em;text-transform:uppercase;}
+.dash-plan-name{margin:0 0 4px;font-size:22px;font-weight:500;line-height:1.1;letter-spacing:.02em;text-transform:uppercase;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .dash-plan-count{margin:0;font-size:14px;font-weight:300;color:rgba(255,255,255,.85);}
 .dash-mini-col{display:flex;flex-direction:column;gap:8px;}
 .dash-mini-card{background:#fdfbff;border-radius:16px;padding:12px 14px;}
@@ -2000,7 +2008,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 33;
+const DASH_BUILD = 34;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
