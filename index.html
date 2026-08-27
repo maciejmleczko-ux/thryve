@@ -514,7 +514,8 @@ button{font-family:inherit;}
     #eceaf1;
 }
 .dash-root{position:relative;padding:calc(56px + env(safe-area-inset-top,0px)) 10px 110px;}
-.dash-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.dash-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
+.dash-chat-btn:active{transform:scale(.9);}
 .dash-chat-btn .ph{width:24px;height:24px;color:#f30;}
 .dash-header{width:75%;margin-bottom:26px;}
 .dash-hi{margin:0 0 6px;font-size:16px;font-weight:400;color:#343941;}
@@ -536,7 +537,8 @@ button{font-family:inherit;}
 .dash-badge.fill .ph{width:16px;height:16px;}
 
 .dash-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-.dash-plan-card{background:#3b63cb;border-radius:16px;padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:14px;cursor:pointer;}
+.dash-plan-card{background:#3b63cb;border-radius:16px;padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:14px;cursor:pointer;transition:transform .12s ease;}
+.dash-plan-card:active{transform:scale(.97);}
 .dash-plan-name{margin:0 0 4px;font-size:20px;font-weight:500;line-height:1.1;letter-spacing:.02em;text-transform:uppercase;}
 .dash-plan-count{margin:0;font-size:14px;font-weight:300;color:rgba(255,255,255,.85);}
 .dash-mini-col{display:flex;flex-direction:column;gap:8px;}
@@ -547,7 +549,7 @@ button{font-family:inherit;}
 .dash-mini-row .ph{width:39px;height:31px;color:#f30;}
 .dash-mini-sub{margin:2px 0 0;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#96959b;}
 .dash-trend{display:flex;align-items:flex-end;gap:2px;height:27px;}
-.dash-trend span{flex:1;min-width:3px;border-radius:3px;background:#f30;}
+.dash-trend span{flex:1;min-width:3px;border-radius:3px;background:#f30;transform-origin:bottom;}
 
 .dash-week-card{background:#2642a4;border-radius:16px;padding:16px;color:#fff;}
 .dash-week-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
@@ -559,6 +561,21 @@ button{font-family:inherit;}
 .dash-week-day.done span:first-child .ph{width:14px;height:14px;color:#2642a4;}
 .dash-week-day.today span:first-child{border-color:#fff;}
 .dash-week-day em{font-style:normal;font-size:11px;color:rgba(255,255,255,.85);}
+
+/* ---- subtle motion: staggered reveal on entry, bars grow in, checks pop ---- */
+@media (prefers-reduced-motion: no-preference){
+  @keyframes dashRise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .dash-chat-btn,.dash-header,.dash-hero,.dash-grid2,.dash-week-card{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
+  .dash-hero{animation-delay:.06s;}
+  .dash-grid2{animation-delay:.12s;}
+  .dash-week-card{animation-delay:.18s;}
+
+  @keyframes dashBarGrow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+  .dash-trend span{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 18ms + .2s);}
+
+  @keyframes dashCheckPop{from{transform:scale(.3);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .dash-week-day.done span:first-child .ph{animation:dashCheckPop .3s cubic-bezier(.34,1.56,.64,1) both;animation-delay:.5s;}
+}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -3536,6 +3553,21 @@ function plTreningWord(n){
   if(mod10>=2 && mod10<=4 && !(mod100>=12 && mod100<=14)) return 'treningi';
   return 'treningów';
 }
+function formatDashNum(v, decimals){
+  return decimals===0 ? Math.round(v).toLocaleString('pl-PL') : (Math.round(v*10)/10).toString().replace('.', ',');
+}
+function animateDashNumber(el, target, decimals, suffixHtml){
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduceMotion || !target){ el.innerHTML = `${formatDashNum(target, decimals)} ${suffixHtml}`; return; }
+  const duration = 700, start = performance.now();
+  function frame(now){
+    const p = Math.min(1, (now-start)/duration);
+    const eased = 1 - Math.pow(1-p, 3);
+    el.innerHTML = `${formatDashNum(target*eased, decimals)} ${suffixHtml}`;
+    if(p<1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
 function renderDashboard(){
   const weekDates = dashboardWeekDates();
   const todayIso = todayStr();
@@ -3558,8 +3590,8 @@ function renderDashboard(){
   const sessionCount = weekWorkoutCount + weekRuns.length;
   const weekMin = weekRuns.reduce((sum,r)=>sum+r.time,0);
 
-  document.getElementById('dashKg').innerHTML = `${Math.round(weekKg).toLocaleString('pl-PL')} <small>kg</small>`;
-  document.getElementById('dashKm').innerHTML = `${(Math.round(weekKm*10)/10).toString().replace('.',',')} <small>km</small>`;
+  animateDashNumber(document.getElementById('dashKg'), weekKg, 0, '<small>kg</small>');
+  animateDashNumber(document.getElementById('dashKm'), weekKm, 1, '<small>km</small>');
   document.getElementById('dashSessions').textContent = `${sessionCount} ${plTreningWord(sessionCount)}`;
   document.getElementById('dashMinutes').textContent = `${Math.round(weekMin)} min aktywności`;
 
@@ -3581,10 +3613,10 @@ function renderDashboard(){
   for(let i=13;i>=0;i--){ const dd=new Date(todayIso+'T00:00:00'); dd.setDate(dd.getDate()-i); trendDays.push(dateStr(dd)); }
   const trendVol = trendDays.map(d=> allSets.filter(s=>s.date===d).reduce((sum,s)=>sum+s.weight*s.reps,0));
   const maxVol = Math.max(1, ...trendVol);
-  document.getElementById('dashTrend').innerHTML = trendVol.map(v=>{
+  document.getElementById('dashTrend').innerHTML = trendVol.map((v,i)=>{
     const h = Math.max(3, Math.round(v/maxVol*27));
     const op = v ? (0.35 + (v/maxVol)*0.65) : 0.15;
-    return `<span style="height:${h}px;opacity:${op.toFixed(2)}"></span>`;
+    return `<span style="height:${h}px;opacity:${op.toFixed(2)};--i:${i}"></span>`;
   }).join('');
 
   const scheduledDays = weekDates.filter(d=> plan && (plan.schedule[dayKeyFromDate(d)]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
