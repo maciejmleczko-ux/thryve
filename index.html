@@ -552,6 +552,7 @@ button{font-family:inherit;}
 .dash-trend span{flex:1;min-width:3px;border-radius:3px;background:#f30;transform-origin:bottom;}
 
 .dash-week-card{background:#2642a4;border-radius:16px;padding:16px;color:#fff;}
+.dash-build-label{position:absolute;top:calc(60px + env(safe-area-inset-top,0px));right:10px;font-size:9px;font-weight:500;color:rgba(52,57,65,.35);}
 .dash-week-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .dash-week-count{margin:0;font-size:12px;font-weight:700;}
 .dash-week-days{display:flex;justify-content:space-between;}
@@ -642,6 +643,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <section class="view" id="view-dashboard">
     <div class="dash-root">
       <button type="button" class="dash-chat-btn" onclick="openFeedback()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
+      <p class="dash-build-label" id="dashBuildLabel"></p>
 
       <div class="dash-header">
         <p class="dash-hi" id="dashHi"></p>
@@ -1673,6 +1675,10 @@ function skipOnboarding(){
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
 const APP_VERSION = "4.7.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
+/* Separate counter for the hidden Dashboard preview only — bump by 1
+   on every commit that touches it, so a small on-screen label makes
+   it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
+const DASH_BUILD = 1;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
@@ -3572,6 +3578,7 @@ function renderDashboard(){
   const todayIso = todayStr();
   const todayKey = dayKeyFromDate(todayIso);
 
+  document.getElementById('dashBuildLabel').textContent = 'dashboard build ' + DASH_BUILD;
   document.getElementById('dashHi').textContent = profileName ? `Cześć ${profileName}` : 'Cześć';
 
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
