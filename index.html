@@ -88,6 +88,8 @@ html.gymv2-bg,html.gymv2-bg body{overscroll-behavior-y:none;}
    <html> because whichever of html/body is the browser's "scrolling
    element" varies — overflow:hidden has to hit both to be reliable. */
 html.dashboard-lock, html.dashboard-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
+/* Same technique, reused for modals — background stays put while a popup is open. */
+html.modal-lock, html.modal-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
 button{font-family:inherit;}
 .app{max-width:440px;margin:0 auto;position:relative;min-height:100vh;padding-bottom:110px;}
 
@@ -675,7 +677,7 @@ button{font-family:inherit;}
    above, which stay exactly as they are for production GYM. */
 .exv2-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
 .exv2-popup-stack{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:355px;font-family:'Geist','Inter',-apple-system,sans-serif;}
-.exv2-card{display:flex;flex-direction:column;gap:24px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 140px);overflow-y:auto;}
+.exv2-card{display:flex;flex-direction:column;gap:24px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 140px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
 .exv2-header-group{display:flex;flex-direction:column;gap:8px;}
 .exv2-title-block{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;}
 .exv2-pill{display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 8px;border-radius:47px;background:#a4bdff;}
@@ -1941,7 +1943,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 17;
+const DASH_BUILD = 18;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
@@ -3108,9 +3110,11 @@ function openExercisePopupV2(ex){
   popupShowWarning = false;
   renderExercisePopupV2();
   document.getElementById('exercisePopupOverlayV2').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
 }
 function closeExercisePopupV2(){
   document.getElementById('exercisePopupOverlayV2').classList.add('hidden');
+  document.documentElement.classList.remove('modal-lock');
   popupExercise = null;
   popupShowWarning = false;
 }
