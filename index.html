@@ -640,7 +640,8 @@ button{font-family:inherit;}
 .gymv2-header .ph{width:40px;height:40px;color:#f30;}
 .gymv2-header h1{margin:0;font-size:30.654px;font-weight:400;color:#343941;letter-spacing:-.02em;}
 
-.gymv2-plan-card{background:#3b63cb;border-radius:16px;padding:16px;color:#fff;margin-bottom:24px;display:flex;flex-direction:column;gap:16px;}
+.gymv2-plan-card{background:#3b63cb;border-radius:16px;padding:16px;color:#fff;margin-bottom:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:transform .12s ease;}
+.gymv2-plan-card:active{transform:scale(.98);}
 .gymv2-plan-card.hidden{display:none;}
 .gymv2-plan-eyebrow{margin:0;font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.8);}
 .gymv2-plan-body{display:flex;flex-direction:column;}
@@ -977,7 +978,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <h1>GYM</h1>
       </div>
 
-      <div class="gymv2-plan-card">
+      <div class="gymv2-plan-card" onclick="goRoute('plans-v2')">
         <p class="gymv2-plan-eyebrow">Twój plan</p>
         <div class="gymv2-plan-body">
           <p class="gymv2-plan-date" id="gymV2Date"></p>
@@ -2106,7 +2107,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 42;
+const DASH_BUILD = 43;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
