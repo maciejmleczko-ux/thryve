@@ -729,9 +729,14 @@ button{font-family:inherit;}
 .exv2-tip .txt{font-size:12px;color:#fdfbff;line-height:1.4;}
 .exv2-series-section{display:flex;flex-direction:column;gap:16px;}
 .exv2-series-list{display:flex;flex-direction:column;gap:4px;}
-.exv2-series-card{background:#fff;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box;}
-.exv2-series-label{font-size:14px;letter-spacing:.56px;text-transform:uppercase;color:#2c2727;}
-.exv2-series-fields{display:flex;gap:12px;}
+/* Series-card layout per updated Figma (node 122:4121): "Seria X" moved
+   beside the fields instead of stacked above them — one row instead of
+   two, bottom-aligned so the label sits level with the input boxes, not
+   the tiny field-labels above them. This is the redesign Maciej made
+   specifically to kill the popup's scroll problem at 4-5 series. */
+.exv2-series-card{background:#fff;border-radius:16px;padding:10px 16px;display:flex;align-items:flex-end;gap:12px;box-sizing:border-box;}
+.exv2-series-label{font-size:14px;letter-spacing:.56px;text-transform:uppercase;color:#2c2727;width:76px;flex-shrink:0;}
+.exv2-series-fields{display:flex;gap:12px;flex:1;min-width:0;}
 .exv2-field{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
 .exv2-field label{font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#96959b;}
 .exv2-field input{background:#fff;border:1px solid #c7c6cb;border-radius:12px;padding:8px 12px;font-size:16px;font-weight:500;color:#343941;font-family:inherit;width:100%;box-sizing:border-box;}
@@ -1976,7 +1981,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 30;
+const DASH_BUILD = 31;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
