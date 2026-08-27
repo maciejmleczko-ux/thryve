@@ -83,19 +83,24 @@ body{
    of the screen instead of a cut-off strip. */
 body.gymv2-bg{background:#dd2b17;}
 html.gymv2-bg,html.gymv2-bg body{overscroll-behavior-y:none;}
-/* Dashboard preview: locked to a single non-scrolling screen for now
-   (standard iPhone viewport only — other sizes come later). Toggled on
-   <html> because whichever of html/body is the browser's "scrolling
-   element" varies — overflow:hidden has to hit both to be reliable. */
-/* overflow-y:auto (not hidden) is deliberate here — the dashboard is
-   designed to fit one screen with no scroll, but a long plan name (2 lines
-   instead of 1) can push content past the viewport, and with a hard
-   overflow:hidden that content was just permanently invisible behind the
-   bottom nav with no way to reach it. Auto is a no-op when everything
-   fits (nothing to scroll, looks identical) and only kicks in as a safety
-   net when it doesn't. touch-action:pan-y lets a real scroll gesture
-   through when there's actually something to scroll. */
-html.dashboard-lock, html.dashboard-lock body{overflow-x:hidden;overflow-y:auto;height:100dvh;touch-action:pan-y;overscroll-behavior:none;}
+/* Dashboard preview: designed to read as a single fixed screen, not a
+   scrolling page (standard iPhone viewport only — other sizes come
+   later). Toggled on <html> because whichever of html/body is the
+   browser's "scrolling element" varies — overflow:hidden has to hit
+   both to be reliable.
+   overflow-y:auto (not hidden) + overscroll-behavior left at its default
+   (not "none") is deliberate: a long plan name can still push content a
+   bit past the viewport, and Maciej explicitly wants that handled as a
+   native iOS rubber-band pull that snaps back — not a real, persisting
+   scroll offset. auto+default-overscroll is what gives that: nothing
+   happens when content fits (the common case), and when it doesn't, a
+   drag gives the natural elastic bounce/settle instead of a hard stop.
+   body.dashboard-bg below is the other half of this — the light
+   background needs to extend under any bounce/overscroll, or that gap
+   shows the app's normal dark body color instead of feeling like a
+   continuation of the screen (same technique as .gymv2-bg above). */
+html.dashboard-lock, html.dashboard-lock body{overflow-x:hidden;overflow-y:auto;height:100dvh;touch-action:pan-y;}
+body.dashboard-bg{background:#eceaf1;}
 /* Same technique, reused for modals — background stays put while a popup is open. */
 html.modal-lock, html.modal-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
 button{font-family:inherit;}
@@ -2008,7 +2013,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 37;
+const DASH_BUILD = 38;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -2470,6 +2475,7 @@ function goRoute(route){
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===navActiveRoute));
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
+  document.body.classList.toggle('dashboard-bg', route==='dashboard');
   document.body.classList.toggle('gymv2-bg', route==='gym-v2');
   document.documentElement.classList.toggle('gymv2-bg', route==='gym-v2');
   document.querySelector('.topbar').classList.toggle('hidden', isV3);
