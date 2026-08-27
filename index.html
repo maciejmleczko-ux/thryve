@@ -82,6 +82,7 @@ body{
    only while this route is active so that gap reads as a continuation
    of the screen instead of a cut-off strip. */
 body.gymv2-bg{background:#dd2b17;}
+html.gymv2-bg,html.gymv2-bg body{overscroll-behavior-y:none;}
 /* Dashboard preview: locked to a single non-scrolling screen for now
    (standard iPhone viewport only — other sizes come later). Toggled on
    <html> because whichever of html/body is the browser's "scrolling
@@ -1824,7 +1825,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 11;
+const DASH_BUILD = 12;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
@@ -2241,6 +2242,7 @@ function goRoute(route){
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
   document.body.classList.toggle('gymv2-bg', route==='gym-v2');
+  document.documentElement.classList.toggle('gymv2-bg', route==='gym-v2');
   document.querySelector('.topbar').classList.toggle('hidden', isV3);
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
