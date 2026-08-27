@@ -675,8 +675,14 @@ button{font-family:inherit;}
 
 /* GYM v2 set-logging popup (node 112:1872) — separate from .ex-popup-box/.set-row
    above, which stay exactly as they are for production GYM. */
-.exv2-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
-.exv2-popup-stack{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:355px;font-family:'Geist','Inter',-apple-system,sans-serif;}
+.exv2-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);animation:exv2BackdropIn .22s ease-out;}
+.exv2-overlay.exv2-closing{animation:exv2BackdropOut .2s ease-in forwards;}
+.exv2-popup-stack{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:355px;font-family:'Geist','Inter',-apple-system,sans-serif;animation:exv2SlideUp .28s cubic-bezier(.22,1,.36,1);}
+.exv2-closing .exv2-popup-stack{animation:exv2SlideDown .2s ease-in forwards;}
+@keyframes exv2BackdropIn{from{opacity:0;}to{opacity:1;}}
+@keyframes exv2BackdropOut{from{opacity:1;}to{opacity:0;}}
+@keyframes exv2SlideUp{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
+@keyframes exv2SlideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(24px);}}
 .exv2-card{display:flex;flex-direction:column;gap:24px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 140px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
 .exv2-header-group{display:flex;flex-direction:column;gap:8px;}
 .exv2-title-block{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;}
@@ -1943,7 +1949,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 18;
+const DASH_BUILD = 19;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
@@ -3102,19 +3108,29 @@ function onTileTapV2(ex){
   }
   openExercisePopupV2(ex);
 }
+let exv2CloseTimer = null; // pending hide from a close animation still playing, see closeExercisePopupV2()
 function openExercisePopupV2(ex){
+  if(exv2CloseTimer){ clearTimeout(exv2CloseTimer); exv2CloseTimer = null; } // reopening mid-close-animation — cut it short
   const already = sessionExercises.find(e=>e.name===ex.name);
   popupExercise = already
     ? {...already, setValues: already.setValues.map(s=>({...s}))}
     : {...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''};
   popupShowWarning = false;
   renderExercisePopupV2();
-  document.getElementById('exercisePopupOverlayV2').classList.remove('hidden');
+  const overlay = document.getElementById('exercisePopupOverlayV2');
+  overlay.classList.remove('exv2-closing');
+  overlay.classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');
 }
 function closeExercisePopupV2(){
-  document.getElementById('exercisePopupOverlayV2').classList.add('hidden');
-  document.documentElement.classList.remove('modal-lock');
+  const overlay = document.getElementById('exercisePopupOverlayV2');
+  overlay.classList.add('exv2-closing'); // plays the slide-down/fade-out, see .exv2-closing CSS
+  exv2CloseTimer = setTimeout(()=>{
+    overlay.classList.add('hidden');
+    overlay.classList.remove('exv2-closing');
+    document.documentElement.classList.remove('modal-lock');
+    exv2CloseTimer = null;
+  }, 220);
   popupExercise = null;
   popupShowWarning = false;
 }
