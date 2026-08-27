@@ -75,6 +75,13 @@ body{
   min-height:100vh;
   padding-bottom:env(safe-area-inset-bottom);
 }
+/* GYM v2: .app's shared 110px bottom clearance (reserved for the
+   floating nav on every route) is transparent and shows body's own
+   background through it — invisible on the app's usual dark theme,
+   but a visible dark stripe under GYM v2's red screen. Paint body red
+   only while this route is active so that gap reads as a continuation
+   of the screen instead of a cut-off strip. */
+body.gymv2-bg{background:#dd2b17;}
 /* Dashboard preview: locked to a single non-scrolling screen for now
    (standard iPhone viewport only — other sizes come later). Toggled on
    <html> because whichever of html/body is the browser's "scrolling
@@ -1817,7 +1824,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 10;
+const DASH_BUILD = 11;
 const CHANGELOG = {
   "4.7.0": {
     pl: [
@@ -2233,6 +2240,7 @@ function goRoute(route){
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===navActiveRoute));
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
+  document.body.classList.toggle('gymv2-bg', route==='gym-v2');
   document.querySelector('.topbar').classList.toggle('hidden', isV3);
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
