@@ -785,10 +785,11 @@ button{font-family:inherit;}
 .plansv2-card-actions{display:flex;align-items:center;gap:12px;flex-shrink:0;margin-left:12px;}
 .plansv2-card-export{cursor:pointer;flex-shrink:0;display:flex;}
 .plansv2-card-export .ph{width:24px;height:24px;color:#fff;}
+/* plan-star-on/off carry their own circle chrome + colors baked in
+   (not currentColor) — no extra badge/background styling needed here,
+   unlike the old dash-check/check-circle pairing. */
 .plansv2-card-star{cursor:pointer;flex-shrink:0;display:flex;}
-.plansv2-card-star .ph{width:24px;height:24px;color:#fff;}
-.plansv2-card-star.active{width:20px;height:20px;border-radius:10px;background:#fff;align-items:center;justify-content:center;}
-.plansv2-card-star.active .ph{width:13.333px;height:13.333px;color:#2c2727;}
+.plansv2-card-star .ph{width:20px;height:20px;}
 .plansv2-hidden{display:none;}
 /* Entrance motion — same idiom as GYM v2/Dashboard: header fades/rises
    in, the action-button row follows as a "tile", then each plan card
@@ -1766,6 +1767,14 @@ const PH = {
 "chat-dots": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 146 146\" fill=\"none\"><path d=\"M122.933 28.4567H22.7655C20.6523 28.4567 18.6256 29.2962 17.1313 30.7905C15.6371 32.2847 14.7976 34.3114 14.7976 36.4246V127.486C14.7894 129.005 15.2193 130.495 16.036 131.775C16.8526 133.056 18.0212 134.075 19.4019 134.708C20.456 135.197 21.6036 135.452 22.7655 135.454C24.6426 135.455 26.4586 134.787 27.8877 133.57L27.9218 133.542L46.8 117.242H122.933C125.046 117.242 127.073 116.402 128.567 114.908C130.062 113.414 130.901 111.387 130.901 109.274V36.4246C130.901 34.3114 130.062 32.2847 128.567 30.7905C127.073 29.2962 125.046 28.4567 122.933 28.4567ZM124.071 109.274C124.071 109.576 123.951 109.865 123.738 110.079C123.525 110.292 123.235 110.412 122.933 110.412H45.5309C44.7116 110.412 43.9198 110.707 43.2999 111.243L23.4826 128.357C23.3164 128.492 23.1157 128.577 22.9033 128.603C22.6909 128.629 22.4755 128.594 22.2818 128.503C22.0881 128.413 21.924 128.269 21.8082 128.089C21.6924 127.909 21.6297 127.7 21.6272 127.486V36.4246C21.6272 36.1227 21.7471 35.8332 21.9606 35.6197C22.1741 35.4063 22.4636 35.2863 22.7655 35.2863H122.933C123.235 35.2863 123.525 35.4063 123.738 35.6197C123.951 35.8332 124.071 36.1227 124.071 36.4246V109.274ZM94.4764 63.7431C94.4764 64.6487 94.1167 65.5173 93.4763 66.1577C92.8359 66.7981 91.9673 67.1579 91.0616 67.1579H54.637C53.7314 67.1579 52.8628 66.7981 52.2224 66.1577C51.582 65.5173 51.2222 64.6487 51.2222 63.7431C51.2222 62.8374 51.582 61.9688 52.2224 61.3284C52.8628 60.688 53.7314 60.3283 54.637 60.3283H91.0616C91.9673 60.3283 92.8359 60.688 93.4763 61.3284C94.1167 61.9688 94.4764 62.8374 94.4764 63.7431ZM94.4764 81.9554C94.4764 82.861 94.1167 83.7296 93.4763 84.37C92.8359 85.0104 91.9673 85.3702 91.0616 85.3702H54.637C53.7314 85.3702 52.8628 85.0104 52.2224 84.37C51.582 83.7296 51.2222 82.861 51.2222 81.9554C51.2222 81.0497 51.582 80.1811 52.2224 79.5407C52.8628 78.9003 53.7314 78.5406 54.637 78.5406H91.0616C91.9673 78.5406 92.8359 78.9003 93.4763 79.5407C94.1167 80.1811 94.4764 81.0497 94.4764 81.9554Z\" fill=\"currentColor\"/></svg>"
 };
 Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>",
+/* Plan-star toggle (Plans v2) — both states share the exact same
+   checkmark path so the glyph itself never visually "jumps" when
+   toggling; only the surrounding circle (filled vs outline) and the
+   checkmark's own color change. Maciej's own icons (self-contained,
+   colors baked in — not currentColor), replacing the old dash-check/
+   check-circle pairing that used two differently-shaped glyphs. */
+"plan-star-on": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"none\"><rect width=\"20\" height=\"20\" rx=\"10\" fill=\"white\"/><path d=\"M15.4422 7.52551L8.7755 14.1922C8.71743 14.2504 8.64844 14.2967 8.57247 14.3282C8.4965 14.3598 8.41505 14.376 8.33279 14.376C8.25053 14.376 8.16908 14.3598 8.09311 14.3282C8.01714 14.2967 7.94815 14.2504 7.89008 14.1922L4.97341 11.2755C4.91528 11.2174 4.86916 11.1484 4.8377 11.0724C4.80623 10.9964 4.79004 10.915 4.79004 10.8328C4.79004 10.7506 4.80623 10.6692 4.8377 10.5932C4.86916 10.5173 4.91528 10.4482 4.97341 10.3901C5.03155 10.332 5.10057 10.2858 5.17653 10.2544C5.25249 10.2229 5.3339 10.2067 5.41612 10.2067C5.49834 10.2067 5.57976 10.2229 5.65572 10.2544C5.73168 10.2858 5.80069 10.332 5.85883 10.3901L8.33331 12.8646L14.5578 6.64114C14.6752 6.52373 14.8344 6.45776 15.0005 6.45776C15.1665 6.45776 15.3258 6.52373 15.4432 6.64114C15.5606 6.75855 15.6266 6.9178 15.6266 7.08385C15.6266 7.2499 15.5606 7.40914 15.4432 7.52656L15.4422 7.52551Z\" fill=\"#2642A4\"/></svg>",
+"plan-star-off": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"none\"><rect x=\"0.75\" y=\"0.75\" width=\"18.5\" height=\"18.5\" rx=\"9.25\" stroke=\"white\" stroke-width=\"1.5\"/><path d=\"M15.4422 7.52551L8.7755 14.1922C8.71743 14.2504 8.64844 14.2967 8.57247 14.3282C8.4965 14.3598 8.41505 14.376 8.33279 14.376C8.25053 14.376 8.16908 14.3598 8.09311 14.3282C8.01714 14.2967 7.94815 14.2504 7.89008 14.1922L4.97341 11.2755C4.91528 11.2174 4.86916 11.1484 4.8377 11.0724C4.80623 10.9964 4.79004 10.915 4.79004 10.8328C4.79004 10.7506 4.80623 10.6692 4.8377 10.5932C4.86916 10.5173 4.91528 10.4482 4.97341 10.3901C5.03155 10.332 5.10057 10.2858 5.17653 10.2544C5.25249 10.2229 5.3339 10.2067 5.41612 10.2067C5.49834 10.2067 5.57976 10.2229 5.65572 10.2544C5.73168 10.2858 5.80069 10.332 5.85883 10.3901L8.33331 12.8646L14.5578 6.64114C14.6752 6.52373 14.8344 6.45776 15.0005 6.45776C15.1665 6.45776 15.3258 6.52373 15.4432 6.64114C15.5606 6.75855 15.6266 6.9178 15.6266 7.08385C15.6266 7.2499 15.5606 7.40914 15.4432 7.52656L15.4422 7.52551Z\" fill=\"white\"/></svg>",
 "star": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M239.18,97.26A16.38,16.38,0,0,0,224.92,86l-59-4.76L143.14,26.15a16.36,16.36,0,0,0-30.27,0L90.11,81.23,31.08,86a16.46,16.46,0,0,0-9.37,28.86l45,38.83L53,211.75a16.38,16.38,0,0,0,24.5,17.82L128,198.49l50.53,31.08A16.4,16.4,0,0,0,203,211.75l-13.76-58.07,45-38.83A16.43,16.43,0,0,0,239.18,97.26Zm-15.34,5.47-48.7,42a8,8,0,0,0-2.56,7.91l14.88,62.8a.37.37,0,0,1-.17.48c-.18.14-.23.11-.38,0l-54.72-33.65a8,8,0,0,0-8.38,0L69.09,215.94c-.15.09-.19.12-.38,0a.37.37,0,0,1-.17-.48l14.88-62.8a8,8,0,0,0-2.56-7.91l-48.7-42c-.12-.1-.23-.19-.13-.5s.18-.27.33-.29l63.92-5.16A8,8,0,0,0,103,91.86l24.62-59.61c.08-.17.11-.25.35-.25s.27.08.35.25L153,91.86a8,8,0,0,0,6.75,4.92l63.92,5.16c.15,0,.24,0,.33.29S224,102.63,223.84,102.73Z\"/></svg>",
 "star-fill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z\"/></svg>",
 "check-circle": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z\"/></svg>",
@@ -2137,7 +2146,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 51;
+const DASH_BUILD = 52;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4106,7 +4115,7 @@ function buildPlanCardV2(p, isCustom, animate, i){
     </div>
     <div class="plansv2-card-actions">
       <span class="plansv2-card-export" onclick="event.stopPropagation();sharePlan(trainingPlans.find(x=>x.id==='${p.id}'))" title="${t('sharePlanTitle','Udostępnij plan')}">${ph('export')}</span>
-      <span class="plansv2-card-star${starred?' active':''}" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'dash-check':'check-circle')}</span>
+      <span class="plansv2-card-star${starred?' active':''}" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'plan-star-on':'plan-star-off')}</span>
     </div>
   `;
   if(animate){
