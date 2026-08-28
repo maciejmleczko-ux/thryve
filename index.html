@@ -790,7 +790,28 @@ button{font-family:inherit;}
    unlike the old dash-check/check-circle pairing. */
 .plansv2-card-star{cursor:pointer;flex-shrink:0;display:flex;}
 .plansv2-card-star .ph{width:20px;height:20px;}
+.plansv2-card-customize{cursor:pointer;flex-shrink:0;display:flex;}
+.plansv2-card-customize .ph{width:24px;height:24px;color:#fff;}
 .plansv2-hidden{display:none;}
+/* "Dostosuj plan" modal — reuses the shared .onboard-overlay for the
+   fixed/backdrop/centering behavior, only the inner card is v3-styled
+   (matches .exv2-card's lavender-card language) rather than the old
+   .onboard-box look. */
+.plansv2-customize-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
+.plansv2-customize-card{background:#f5f1fb;border-radius:16px;padding:24px 18px;width:100%;max-width:355px;box-sizing:border-box;font-family:'Geist','Inter',-apple-system,sans-serif;max-height:calc(100dvh - 40px);overflow-y:auto;}
+.plansv2-customize-eyebrow{margin:0 0 4px;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#96959b;}
+.plansv2-customize-name{margin:0 0 20px;font-size:22px;font-weight:600;letter-spacing:.88px;text-transform:uppercase;color:#2c2727;line-height:1.15;}
+.plansv2-customize-section{margin-bottom:18px;}
+.plansv2-customize-label{margin:0 0 8px;font-size:12px;font-weight:600;color:#2c2727;}
+.plansv2-choice-row{display:flex;gap:8px;flex-wrap:wrap;}
+.plansv2-choice-chip{border:1px solid #ff6343;border-radius:999px;padding:8px 14px;background:#fff;font-size:13px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
+.plansv2-choice-chip:active{transform:scale(.95);}
+.plansv2-choice-chip.active{background:#ff6343;color:#fff;}
+.plansv2-customize-hint{margin:4px 0 20px;font-size:11px;line-height:1.4;color:#96959b;}
+.plansv2-customize-actions{display:flex;gap:10px;}
+.plansv2-customize-cancel{flex:1;border:1px solid #ff6343;border-radius:69px;padding:12px;background:none;font-size:14px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
+.plansv2-customize-apply{flex:1;border:none;border-radius:74px;padding:12px;background:#ff6343;font-size:14px;font-weight:500;color:#fff;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
+.plansv2-customize-cancel:active,.plansv2-customize-apply:active{transform:scale(.97);}
 /* Entrance motion — same idiom as GYM v2/Dashboard: header fades/rises
    in, the action-button row follows as a "tile", then each plan card
    cascades in one after another. Gated behind .plansv2-anim-in (added
@@ -1080,6 +1101,44 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="plansv2-list" id="plansV2CustomList"></div>
     </div>
   </section>
+
+  <!-- "Dostosuj plan" — goal/difficulty/equipment for a Fullbody automatic
+       plan (Plans v2 only). See PLANSV2_CUSTOMIZABLE_IDS / generatePlanScheduleV2. -->
+  <div class="onboard-overlay hidden plansv2-customize-overlay" id="planCustomizeOverlay" onclick="if(event.target===this) closePlanCustomizeV2()">
+    <div class="plansv2-customize-card">
+      <p class="plansv2-customize-eyebrow">DOSTOSUJ PLAN</p>
+      <h2 class="plansv2-customize-name" id="planCustomizeTitle"></h2>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Cel treningowy</p>
+        <div class="plansv2-choice-row">
+          <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="strength" onclick="pickPlanCustomizeChipV2(this)">Siła</button>
+          <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="mass" onclick="pickPlanCustomizeChipV2(this)">Masa</button>
+          <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="endurance" onclick="pickPlanCustomizeChipV2(this)">Wytrzymałość</button>
+        </div>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Trudność</p>
+        <div class="plansv2-choice-row">
+          <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="easy" onclick="pickPlanCustomizeChipV2(this)">Łatwy</button>
+          <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="medium" onclick="pickPlanCustomizeChipV2(this)">Średni</button>
+          <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="hard" onclick="pickPlanCustomizeChipV2(this)">Trudny</button>
+        </div>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Sprzęt</p>
+        <div class="plansv2-choice-row">
+          <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="maszyny" onclick="pickPlanCustomizeChipV2(this)">Maszyny</button>
+          <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="hantle" onclick="pickPlanCustomizeChipV2(this)">Wolne ciężary</button>
+          <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="mix" onclick="pickPlanCustomizeChipV2(this)">Miks</button>
+        </div>
+      </div>
+      <p class="plansv2-customize-hint">Nadpisze obecną listę ćwiczeń w tym planie zgodnie z wybranymi opcjami — możesz ją potem jeszcze ręcznie doedytować.</p>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-cancel" onclick="closePlanCustomizeV2()">Anuluj</button>
+        <button type="button" class="plansv2-customize-apply" onclick="applyPlanCustomizeV2()">Zastosuj</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ===================== GYM ===================== -->
   <section class="view" id="view-gym">
@@ -1775,6 +1834,12 @@ Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\
    check-circle pairing that used two differently-shaped glyphs. */
 "plan-star-on": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"none\"><rect width=\"20\" height=\"20\" rx=\"10\" fill=\"white\"/><path d=\"M15.4422 7.52551L8.7755 14.1922C8.71743 14.2504 8.64844 14.2967 8.57247 14.3282C8.4965 14.3598 8.41505 14.376 8.33279 14.376C8.25053 14.376 8.16908 14.3598 8.09311 14.3282C8.01714 14.2967 7.94815 14.2504 7.89008 14.1922L4.97341 11.2755C4.91528 11.2174 4.86916 11.1484 4.8377 11.0724C4.80623 10.9964 4.79004 10.915 4.79004 10.8328C4.79004 10.7506 4.80623 10.6692 4.8377 10.5932C4.86916 10.5173 4.91528 10.4482 4.97341 10.3901C5.03155 10.332 5.10057 10.2858 5.17653 10.2544C5.25249 10.2229 5.3339 10.2067 5.41612 10.2067C5.49834 10.2067 5.57976 10.2229 5.65572 10.2544C5.73168 10.2858 5.80069 10.332 5.85883 10.3901L8.33331 12.8646L14.5578 6.64114C14.6752 6.52373 14.8344 6.45776 15.0005 6.45776C15.1665 6.45776 15.3258 6.52373 15.4432 6.64114C15.5606 6.75855 15.6266 6.9178 15.6266 7.08385C15.6266 7.2499 15.5606 7.40914 15.4432 7.52656L15.4422 7.52551Z\" fill=\"#2642A4\"/></svg>",
 "plan-star-off": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"none\"><rect x=\"0.75\" y=\"0.75\" width=\"18.5\" height=\"18.5\" rx=\"9.25\" stroke=\"white\" stroke-width=\"1.5\"/><path d=\"M15.4422 7.52551L8.7755 14.1922C8.71743 14.2504 8.64844 14.2967 8.57247 14.3282C8.4965 14.3598 8.41505 14.376 8.33279 14.376C8.25053 14.376 8.16908 14.3598 8.09311 14.3282C8.01714 14.2967 7.94815 14.2504 7.89008 14.1922L4.97341 11.2755C4.91528 11.2174 4.86916 11.1484 4.8377 11.0724C4.80623 10.9964 4.79004 10.915 4.79004 10.8328C4.79004 10.7506 4.80623 10.6692 4.8377 10.5932C4.86916 10.5173 4.91528 10.4482 4.97341 10.3901C5.03155 10.332 5.10057 10.2858 5.17653 10.2544C5.25249 10.2229 5.3339 10.2067 5.41612 10.2067C5.49834 10.2067 5.57976 10.2229 5.65572 10.2544C5.73168 10.2858 5.80069 10.332 5.85883 10.3901L8.33331 12.8646L14.5578 6.64114C14.6752 6.52373 14.8344 6.45776 15.0005 6.45776C15.1665 6.45776 15.3258 6.52373 15.4432 6.64114C15.5606 6.75855 15.6266 6.9178 15.6266 7.08385C15.6266 7.2499 15.5606 7.40914 15.4432 7.52656L15.4422 7.52551Z\" fill=\"white\"/></svg>",
+/* Simple hand-built "sliders/adjust" glyph for the new "Dostosuj plan"
+   action — not sourced from Figma (this is a net-new v3 feature, no
+   design file entry for it), kept to plain primitives (lines + circle
+   handles) precisely so it renders predictably without needing an
+   external icon asset. */
+"sliders": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"none\"><line x1=\"32\" y1=\"72\" x2=\"224\" y2=\"72\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\"/><circle cx=\"104\" cy=\"72\" r=\"22\" fill=\"currentColor\"/><line x1=\"32\" y1=\"184\" x2=\"224\" y2=\"184\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\"/><circle cx=\"160\" cy=\"184\" r=\"22\" fill=\"currentColor\"/></svg>",
 "star": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M239.18,97.26A16.38,16.38,0,0,0,224.92,86l-59-4.76L143.14,26.15a16.36,16.36,0,0,0-30.27,0L90.11,81.23,31.08,86a16.46,16.46,0,0,0-9.37,28.86l45,38.83L53,211.75a16.38,16.38,0,0,0,24.5,17.82L128,198.49l50.53,31.08A16.4,16.4,0,0,0,203,211.75l-13.76-58.07,45-38.83A16.43,16.43,0,0,0,239.18,97.26Zm-15.34,5.47-48.7,42a8,8,0,0,0-2.56,7.91l14.88,62.8a.37.37,0,0,1-.17.48c-.18.14-.23.11-.38,0l-54.72-33.65a8,8,0,0,0-8.38,0L69.09,215.94c-.15.09-.19.12-.38,0a.37.37,0,0,1-.17-.48l14.88-62.8a8,8,0,0,0-2.56-7.91l-48.7-42c-.12-.1-.23-.19-.13-.5s.18-.27.33-.29l63.92-5.16A8,8,0,0,0,103,91.86l24.62-59.61c.08-.17.11-.25.35-.25s.27.08.35.25L153,91.86a8,8,0,0,0,6.75,4.92l63.92,5.16c.15,0,.24,0,.33.29S224,102.63,223.84,102.73Z\"/></svg>",
 "star-fill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z\"/></svg>",
 "check-circle": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z\"/></svg>",
@@ -2146,7 +2211,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 52;
+const DASH_BUILD = 53;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3917,6 +3982,125 @@ function planAvgExercisesPerDay(p){
   const days = planActiveDays(p);
   return days.length ? Math.round(planTotalExercises(p) / days.length) : 0;
 }
+/* ============================================================
+   "Dostosuj plan" — customize an automatic Fullbody plan by training
+   goal / difficulty / equipment (Plans v2, Maciej's request 2026-08-29).
+   Mutates the SAME plan object (same id/name/builtin:true) rather than
+   creating a new one — the app already tolerates a user-edited builtin
+   plan (loadTrainingPlans() keeps whatever's saved under a builtin id
+   instead of resetting it), same mechanism the manual plan editor
+   already relies on.
+   Scoped to the two Fullbody plans (plan_a/plan_b) for now — the
+   algorithm below picks a round-robin spread across muscle groups for
+   a single repeating full-body day, which is the right shape for
+   Fullbody but would wreck a split routine's structure (PPL, Upper/
+   Lower train different muscles on different days on purpose). Extending
+   "customizable" to those needs a split-aware generator, not this one —
+   noted as follow-up scope, not attempted here.
+   ============================================================ */
+const PLANSV2_CUSTOMIZABLE_IDS = new Set(['plan_a', 'plan_b']);
+// Sets/rep-range/rest per goal — standard, uncontroversial baseline
+// splits (low reps+heavy+long rest for strength; moderate reps/rest for
+// hypertrophy; high reps+short rest for endurance). These feed directly
+// into buildSuggestion()'s existing progression logic (line ~2976) —
+// nothing about that function needed to change, it already suggests
+// "go up" / "hold" / "go down" purely from whatever repLow/repHigh a
+// plan's exercises carry.
+const PLANSV2_GOAL_PARAMS = {
+  strength: {sets:4, repLow:4, repHigh:6, rest:'150s'},
+  mass:     {sets:3, repLow:8, repHigh:12, rest:'75s'},
+  endurance:{sets:3, repLow:15, repHigh:20, rest:'40s'},
+};
+const PLANSV2_GOAL_LABEL = {strength:'Siła', mass:'Masa', endurance:'Wytrzymałość'};
+// Target number of real exercises (bookends excluded) per difficulty.
+const PLANSV2_DIFFICULTY_COUNT = {easy:6, medium:8, hard:11};
+const PLANSV2_DIFFICULTY_LABEL_CUSTOMIZE = {easy:'Łatwy', medium:'Średni', hard:'Trudny'};
+// Round-robin priority: biggest compound groups first, isolated arm
+// work and core last — so a low target count (easy) still covers every
+// major muscle group once, and only the higher counts add isolation
+// work on a second pass. Matched against the real `group` strings in
+// the exercise library by prefix, not exact match (many groups carry a
+// parenthetical, e.g. "Nogi (uda, pośladki)").
+const PLANSV2_MUSCLE_BUCKETS = [
+  {label:'Nogi', match: g => /^(Nogi|Uda|Pośladki|Łydki)/.test(g)},
+  {label:'Plecy', match: g => /^Plecy/.test(g)},
+  {label:'Klatka piersiowa', match: g => /^Klatka piersiowa/.test(g)},
+  {label:'Barki', match: g => /^Barki/.test(g)},
+  {label:'Brzuch', match: g => /^Brzuch/.test(g)},
+  {label:'Biceps', match: g => g==='Biceps'},
+  {label:'Triceps', match: g => g==='Triceps'},
+];
+function planv2MatchesEquipment(ex, equipment){
+  return equipment==='mix' || ex.equipment===equipment;
+}
+// The actual selection: cycle through the muscle-group buckets in
+// priority order, taking one not-yet-picked, equipment-matching
+// exercise per bucket per lap, until the target count is hit (or the
+// whole filtered library runs out — 50-ish exercises across ~7 buckets
+// means that's only a real risk at hard+a narrow equipment filter).
+function planv2PickExercises(count, equipment){
+  const pool = getExerciseLibrary().filter(ex=>!BOOKEND_EX_NAMES.has(ex.name) && planv2MatchesEquipment(ex, equipment));
+  const used = new Set();
+  const picked = [];
+  let guard = 0; // laps guard — bails instead of spinning forever if every bucket is exhausted
+  while(picked.length < count && guard < count + PLANSV2_MUSCLE_BUCKETS.length){
+    let addedThisLap = false;
+    for(const bucket of PLANSV2_MUSCLE_BUCKETS){
+      if(picked.length >= count) break;
+      const next = pool.find(ex=>!used.has(ex.name) && bucket.match(ex.group));
+      if(next){ used.add(next.name); picked.push(next); addedThisLap = true; }
+    }
+    guard++;
+    if(!addedThisLap) break; // every bucket exhausted under this equipment filter
+  }
+  return picked;
+}
+function generatePlanScheduleV2(goal, difficulty, equipment){
+  const params = PLANSV2_GOAL_PARAMS[goal];
+  const count = PLANSV2_DIFFICULTY_COUNT[difficulty];
+  const exercises = planv2PickExercises(count, equipment).map(ex=>({
+    name: ex.name, group: ex.group, icon: ex.icon,
+    sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest,
+  }));
+  const schedule = scheduleOnDays(['mon','wed','fri'], exercises); // same 3x/week cadence as the hand-built Fullbody 1/2
+  ensureWarmupStretch(schedule);
+  return schedule;
+}
+let planv2CustomizeTargetId = null;
+function openPlanCustomizeV2(id){
+  const plan = trainingPlans.find(p=>p.id===id);
+  if(!plan) return;
+  planv2CustomizeTargetId = id;
+  const saved = plan.customizationV2 || {goal:'mass', difficulty:'medium', equipment:'mix'};
+  document.getElementById('planCustomizeTitle').textContent = plan.name;
+  document.querySelectorAll('#planCustomizeOverlay .plansv2-choice-chip').forEach(chip=>{
+    chip.classList.toggle('active', chip.dataset.value===saved[chip.dataset.group]);
+  });
+  document.getElementById('planCustomizeOverlay').classList.remove('hidden');
+}
+function closePlanCustomizeV2(){
+  document.getElementById('planCustomizeOverlay').classList.add('hidden');
+  planv2CustomizeTargetId = null;
+}
+function pickPlanCustomizeChipV2(el){
+  const group = el.dataset.group;
+  document.querySelectorAll(`#planCustomizeOverlay .plansv2-choice-chip[data-group="${group}"]`).forEach(c=> c.classList.remove('active'));
+  el.classList.add('active');
+}
+function applyPlanCustomizeV2(){
+  const id = planv2CustomizeTargetId;
+  const plan = trainingPlans.find(p=>p.id===id);
+  if(!plan) return;
+  const active = (group)=> document.querySelector(`#planCustomizeOverlay .plansv2-choice-chip[data-group="${group}"].active`)?.dataset.value;
+  const goal = active('goal') || 'mass', difficulty = active('difficulty') || 'medium', equipment = active('equipment') || 'mix';
+  plan.schedule = generatePlanScheduleV2(goal, difficulty, equipment);
+  plan.customizationV2 = {goal, difficulty, equipment};
+  saveTrainingPlansList();
+  closePlanCustomizeV2();
+  toast(t('planCustomized','Plan dostosowany'));
+  updateTodayPlanBanner();
+  renderPlansList(); // tail-calls renderPlansListV2(), keeps both screens in sync
+}
 function updatePlanPillLabel(){
   const label = document.getElementById('planPillLabel');
   if(!label) return;
@@ -4096,7 +4280,14 @@ function attachPlanSwipeV2(wrap, cardBtn, planId){
 function buildPlanCardV2(p, isCustom, animate, i){
   const starred = starredPlanId === p.id;
   const exCount = planAvgExercisesPerDay(p);
-  const diffKey = planDifficultyKey(exCount);
+  // A customized plan already carries the real difficulty the user
+  // picked (it's what drove generatePlanScheduleV2's exercise count in
+  // the first place) — trust that directly instead of re-deriving it
+  // from exCount, whose thresholds are tuned for the hand-built plans
+  // and disagree with PLANSV2_DIFFICULTY_COUNT (e.g. "Trudny" generates
+  // exactly 11 exercises, which planDifficultyKey's >16 threshold would
+  // otherwise mislabel as "Średni").
+  const diffKey = p.customizationV2 ? p.customizationV2.difficulty : planDifficultyKey(exCount);
   const color = (isCustom ? PLANSV2_CUSTOM_COLOR_BY_DIFFICULTY : PLANSV2_AUTO_COLOR_BY_DIFFICULTY)[diffKey];
   const wrap = document.createElement('div');
   wrap.className = 'plansv2-card-wrap';
@@ -4114,6 +4305,7 @@ function buildPlanCardV2(p, isCustom, animate, i){
       </div>
     </div>
     <div class="plansv2-card-actions">
+      ${PLANSV2_CUSTOMIZABLE_IDS.has(p.id) ? `<span class="plansv2-card-customize" onclick="event.stopPropagation();openPlanCustomizeV2('${p.id}')" title="${t('planCustomizeTitle','Dostosuj plan')}">${ph('sliders')}</span>` : ''}
       <span class="plansv2-card-export" onclick="event.stopPropagation();sharePlan(trainingPlans.find(x=>x.id==='${p.id}'))" title="${t('sharePlanTitle','Udostępnij plan')}">${ph('export')}</span>
       <span class="plansv2-card-star${starred?' active':''}" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'plan-star-on':'plan-star-off')}</span>
     </div>
