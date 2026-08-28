@@ -769,8 +769,8 @@ button{font-family:inherit;}
    .plansv2-card-wrap clips and hosts the red delete action behind the
    card itself, which JS slides left via transform:translateX. */
 .plansv2-card-wrap{position:relative;overflow:hidden;border-radius:16px;touch-action:pan-y;}
-.plansv2-card-delete{position:absolute;inset:0;border-radius:16px;background:#c00;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding-right:24px;color:#fff;font-weight:600;font-size:14px;cursor:pointer;}
-.plansv2-card-delete .ph{width:20px;height:20px;}
+.plansv2-card-delete{position:absolute;inset:0;border-radius:16px;background:#c00;display:flex;align-items:center;justify-content:flex-end;padding-right:28px;color:#fff;cursor:pointer;}
+.plansv2-card-delete .ph{width:32px;height:32px;}
 .plansv2-card{border-radius:16px;padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform .12s ease;touch-action:pan-y;}
 .plansv2-card:active{transform:scale(.98);}
 .plansv2-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
@@ -2134,7 +2134,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 49;
+const DASH_BUILD = 50;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3708,6 +3708,17 @@ function saveWorkoutV2(){
    ============================================================ */
 const LS_TRAINING_PLANS = "fitlog_training_plans_v1";
 const LS_STARRED_PLAN = "fitlog_starred_plan_v1";
+/* Builtin plans the user has deliberately deleted. Needed because
+   loadTrainingPlans() re-adds any missing default on every load (so new
+   defaults shipped in an update appear for existing users) — without
+   this list, deleting a builtin plan would silently undo itself on the
+   next app open. */
+const LS_DELETED_BUILTIN_PLANS = "fitlog_deleted_builtin_plans_v1";
+function loadDeletedBuiltinPlans(){
+  try{ return new Set(JSON.parse(localStorage.getItem(LS_DELETED_BUILTIN_PLANS)) || []); }catch(e){ return new Set(); }
+}
+let deletedBuiltinPlans = loadDeletedBuiltinPlans();
+function saveDeletedBuiltinPlans(){ localStorage.setItem(LS_DELETED_BUILTIN_PLANS, JSON.stringify([...deletedBuiltinPlans])); }
 const PLAN_DAYS = ['mon','tue','wed','thu','fri','sat','sun'];
 function planDayLabel(d){
   const pl = {mon:'Pn',tue:'Wt',wed:'Śr',thu:'Cz',fri:'Pt',sat:'So',sun:'Nd'};
@@ -3843,7 +3854,10 @@ function loadTrainingPlans(){
         const plans = parsed.map(migratePlan);
         renameDefaultPlanIfUntouched(plans, 'plan_a', 'Trening A', 'Fullbody workout 1', ['mon','wed','fri'], GYM_PLAN.A);
         renameDefaultPlanIfUntouched(plans, 'plan_b', 'Trening B', 'Fullbody workout 2', ['mon','wed','fri'], GYM_PLAN.B);
-        defaultTrainingPlans().forEach(dp=>{ if(!plans.some(p=>p.id===dp.id)) plans.push(dp); });
+        defaultTrainingPlans().forEach(dp=>{
+          if(deletedBuiltinPlans.has(dp.id)) return; // user deleted this one on purpose — don't resurrect it
+          if(!plans.some(p=>p.id===dp.id)) plans.push(dp);
+        });
         return plans;
       }
     }
@@ -3974,6 +3988,7 @@ function deletePlanV2(id){
   if(!plan) return;
   if(!confirm(t('planDeleteConfirmV2', `Na pewno usunąć plan „${plan.name}"?`, plan.name))) return;
   trainingPlans = trainingPlans.filter(p=>p.id!==id);
+  if(plan.builtin){ deletedBuiltinPlans.add(id); saveDeletedBuiltinPlans(); } // otherwise loadTrainingPlans() re-adds it next launch
   if(starredPlanId===id){ starredPlanId=null; localStorage.removeItem(LS_STARRED_PLAN); }
   saveTrainingPlansList();
   toast(t('planDeleted','Plan usunięty'));
@@ -4069,16 +4084,16 @@ function buildPlanCardV2(p, isCustom, animate, i){
     wrap.style.animationDelay = Math.round(180 + i*45) + 'ms';
   }
   wrap.appendChild(card);
-  if(isCustom){
-    const del = document.createElement('div');
-    del.className = 'plansv2-card-delete';
-    del.innerHTML = `${ph('trash')}<span>${t('planDelete','Usuń plan')}</span>`;
-    del.onclick = ()=> deletePlanV2(p.id);
-    wrap.insertBefore(del, card);
-    attachPlanSwipeV2(wrap, card, p.id);
-  } else {
-    card.onclick = ()=> openPlanEditor(p.id);
-  }
+  // Swipe-to-delete on every plan, builtin ones included (Maciej asked
+  // for this explicitly) — deletePlanV2() records deleted builtins in
+  // deletedBuiltinPlans so loadTrainingPlans() doesn't resurrect them.
+  const del = document.createElement('div');
+  del.className = 'plansv2-card-delete';
+  del.innerHTML = ph('trash');
+  del.title = t('planDelete','Usuń plan');
+  del.onclick = ()=> deletePlanV2(p.id);
+  wrap.insertBefore(del, card);
+  attachPlanSwipeV2(wrap, card, p.id);
   return wrap;
 }
 function renderPlansListV2(animate){
