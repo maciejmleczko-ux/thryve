@@ -280,6 +280,8 @@ button{font-family:inherit;}
 .plan-editor-day-label{font-size:11px;color:#5b5555;margin-top:6px;font-weight:600;}
 .copy-days-btn{margin-top:8px;background:none;border:none;color:var(--orange);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline;}
 .copy-days-btn.hidden{display:none;}
+.plan-editor-fork-hint{font-size:11px;color:#5b5555;margin:6px 0 0;line-height:1.4;}
+.plan-editor-fork-hint.hidden{display:none;}
 .plan-ex-group{background:var(--light-2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;}
 .plan-ex-group:last-child{margin-bottom:0;}
 .plan-ex-group-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
@@ -1333,6 +1335,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="field">
           <label data-i18n="planNameLabel">Nazwa planu</label>
           <input type="text" id="planNameInput" data-i18n-ph="planNamePh" placeholder="np. Full Body A" autocomplete="off">
+          <p class="plan-editor-fork-hint hidden" id="planEditorForkHint" data-i18n="planEditorForkHint">Zmiany zapiszesz jako swoją kopię tego planu — oryginał zostaje bez zmian.</p>
         </div>
         <div class="field" style="margin-top:14px;">
           <label data-i18n="planDaysLabel">Dni tygodnia</label>
@@ -1736,6 +1739,7 @@ const T_EN = {
   planCreateNew: 'Create my training plan',
   planNameLabel: 'Plan name',
   planNamePh: 'e.g. Full Body A',
+  planEditorForkHint: "Your changes save as your own copy of this plan — the original stays as it was.",
   planDaysLabel: 'Days of the week',
   planExercisesLabel: 'Exercises',
   planDelete: 'Delete plan',
@@ -2221,7 +2225,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 56;
+const DASH_BUILD = 57;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4036,11 +4040,13 @@ function planAvgExercisesPerDay(p){
 /* ============================================================
    "Dostosuj plan" — customize an automatic Fullbody plan by training
    goal / difficulty / equipment (Plans v2, Maciej's request 2026-08-29).
-   Mutates the SAME plan object (same id/name/builtin:true) rather than
-   creating a new one — the app already tolerates a user-edited builtin
-   plan (loadTrainingPlans() keeps whatever's saved under a builtin id
-   instead of resetting it), same mechanism the manual plan editor
-   already relies on.
+   Forks into the user's own plan on first use rather than mutating the
+   automatic template in place (Maciej, 2026-08-29 — same rule as the
+   manual plan editor, see savePlanEditor()): the automatic plan is left
+   completely untouched, still selectable fresh, and the customized
+   result lands in "Twoje plany". Re-running "Dostosuj" on a plan that's
+   ALREADY the result of a fork (has customizationV2) updates it in
+   place instead of forking again — see applyPlanCustomizeV2().
    Scoped to the Fullbody plan (plan_a) for now — the algorithm below
    picks a round-robin spread across muscle groups for a single
    repeating full-body day, which is the right shape for Fullbody but
@@ -4054,6 +4060,16 @@ function planAvgExercisesPerDay(p){
    can still customize it, same generator, same rules.
    ============================================================ */
 const PLANSV2_CUSTOMIZABLE_IDS = new Set(['plan_a', 'plan_b']);
+// Which plans get the "Dostosuj" (sliders) icon on their card: the
+// original automatic templates, or any of the user's own plans that
+// were themselves produced by a previous "Dostosuj" run (safe to
+// regenerate again — that's how their content was built in the first
+// place). Deliberately excludes a fork made by hand-editing exercises
+// one by one in the plan editor — regenerating would silently wipe
+// hand-picked choices the generator knows nothing about.
+function planIsDostosujable(p){
+  return PLANSV2_CUSTOMIZABLE_IDS.has(p.id) || !!p.customizationV2;
+}
 // Sets/rep-range/rest per goal — standard, uncontroversial baseline
 // splits (low reps+heavy+long rest for strength; moderate reps/rest for
 // hypertrophy; high reps+short rest for endurance). These feed directly
@@ -4165,9 +4181,22 @@ function applyPlanCustomizeV2(){
   const active = (group)=> document.querySelector(`#planCustomizeOverlay .plansv2-choice-chip[data-group="${group}"].active`)?.dataset.value;
   const goal = active('goal') || 'mass', difficulty = active('difficulty') || 'medium', equipment = active('equipment') || 'mix';
   const frequency = Number(active('frequency')) || 3;
-  plan.schedule = generatePlanScheduleV2(goal, difficulty, equipment, frequency);
-  plan.customizationV2 = {goal, difficulty, equipment, frequency};
-  plan.customized = true; // same protection flag savePlanEditor() sets — see renameDefaultPlanIfUntouched()
+  const schedule = generatePlanScheduleV2(goal, difficulty, equipment, frequency);
+  const customizationV2 = {goal, difficulty, equipment, frequency};
+  if(plan.builtin){
+    // First customization of an automatic plan forks it, same rule as
+    // the manual editor (savePlanEditor()) — the automatic template
+    // stays untouched, this becomes the user's own plan, and takes over
+    // the star if the automatic plan was the active one.
+    const newId = 'plan_' + Date.now();
+    trainingPlans.push({id:newId, name: plan.name, builtin:false, schedule, customizationV2});
+    if(starredPlanId === plan.id){ starredPlanId = newId; localStorage.setItem(LS_STARRED_PLAN, newId); }
+  } else {
+    // Already the user's own plan (a previous fork) — further
+    // "Dostosuj" runs refine it in place instead of forking again.
+    plan.schedule = schedule;
+    plan.customizationV2 = customizationV2;
+  }
   saveTrainingPlansList();
   closePlanCustomizeV2();
   toast(t('planCustomized','Plan dostosowany'));
@@ -4378,7 +4407,7 @@ function buildPlanCardV2(p, isCustom, animate, i){
       </div>
     </div>
     <div class="plansv2-card-actions">
-      ${PLANSV2_CUSTOMIZABLE_IDS.has(p.id) ? `<span class="plansv2-card-customize" onclick="event.stopPropagation();openPlanCustomizeV2('${p.id}')" title="${t('planCustomizeTitle','Dostosuj plan')}">${ph('sliders')}</span>` : ''}
+      ${planIsDostosujable(p) ? `<span class="plansv2-card-customize" onclick="event.stopPropagation();openPlanCustomizeV2('${p.id}')" title="${t('planCustomizeTitle','Dostosuj plan')}">${ph('sliders')}</span>` : ''}
       <span class="plansv2-card-export" onclick="event.stopPropagation();sharePlan(trainingPlans.find(x=>x.id==='${p.id}'))" title="${t('sharePlanTitle','Udostępnij plan')}">${ph('export')}</span>
       <span class="plansv2-card-star${starred?' active':''}" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'plan-star-on':'plan-star-off')}</span>
     </div>
@@ -4440,6 +4469,10 @@ function openPlanEditor(id){
   document.getElementById('planEditorTitle').textContent = existing ? existing.name : t('planNewTitle','NOWY PLAN');
   document.getElementById('planNameInput').value = editingPlan.name;
   document.getElementById('planDeleteBtn').style.display = (existing && !existing.builtin) ? 'block' : 'none';
+  // Editing an automatic plan forks it on save (see savePlanEditor()) —
+  // flag that up front so a second "Fullbody workout" card in "Twoje
+  // plany" isn't a surprise later.
+  document.getElementById('planEditorForkHint').classList.toggle('hidden', !editingPlan.builtin);
   planEditorEquipmentFilter = 'all';
   renderPlanEquipFilterRow();
   renderPlanDayRow();
@@ -4548,13 +4581,25 @@ function savePlanEditor(){
   let savedId;
   if(editingPlan.id){
     const idx = trainingPlans.findIndex(p=>p.id===editingPlan.id);
-    // `customized: true` permanently protects a builtin plan's schedule
-    // from renameDefaultPlanIfUntouched() (see its comment) — the moment
-    // a user saves ANY hand-edit here (swap/add/remove an exercise,
-    // change a day), a future app update can never reset it back to the
-    // hardcoded default again, even if the plan's name never changes.
-    trainingPlans[idx] = {...trainingPlans[idx], name: editingPlan.name, schedule: editingPlan.schedule, customized: true};
-    savedId = editingPlan.id;
+    const original = trainingPlans[idx];
+    if(original.builtin){
+      // First edit of an automatic plan forks it into the user's own
+      // plan instead of mutating the shared template in place — the
+      // automatic plan (still at trainingPlans[idx]) is left completely
+      // untouched, still selectable fresh from "Plany automatyczne".
+      // If the automatic plan was the active (starred) one, the fork
+      // takes over that spot too — otherwise today's plan banner would
+      // keep showing the old, un-edited version, and the edit would
+      // look like it silently did nothing. Confirmed with Maciej
+      // (2026-08-29). See PLANSV2_CUSTOMIZABLE_IDS / planIsDostosujable()
+      // for the equivalent fork done by "Dostosuj plan".
+      savedId = 'plan_' + Date.now();
+      trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, schedule: editingPlan.schedule});
+      if(starredPlanId === original.id){ starredPlanId = savedId; localStorage.setItem(LS_STARRED_PLAN, savedId); }
+    } else {
+      trainingPlans[idx] = {...original, name: editingPlan.name, schedule: editingPlan.schedule};
+      savedId = editingPlan.id;
+    }
   } else {
     savedId = 'plan_'+Date.now();
     trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, schedule: editingPlan.schedule});
