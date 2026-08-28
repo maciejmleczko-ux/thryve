@@ -105,6 +105,27 @@ html.gymv2-bg,html.gymv2-bg body{overscroll-behavior-y:none;}
 html.dashboard-lock, html.dashboard-lock body{overflow:hidden;height:100dvh;touch-action:none;}
 html.dashboard-lock.dashboard-scrollable, html.dashboard-lock.dashboard-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}
 body.dashboard-bg{background:#eceaf1;}
+/* PLANS v2 — same "fixed screen, real scroll only when actually needed"
+   recipe as Dashboard above. STANDING RULE: every new v3 screen gets
+   this same 3-part treatment (see [[feedback_thryve_animation_vocabulary]]):
+     1. html.<screen>-lock, html.<screen>-lock body{overflow:hidden;
+        height:100dvh;touch-action:none;} — rigid by default.
+     2. html.<screen>-lock.<screen>-scrollable (+ body) switches to
+        overflow-y:auto;touch-action:pan-y; (default overscroll-behavior,
+        not "none", so the native iOS rubber-band bounce/settle still
+        plays) — added by that screen's render function only when its
+        real content actually overflows (measure the last real element's
+        bottom against #bottomNav's top, exactly like renderPlansListV2()
+        does below — never body.scrollHeight vs clientHeight, which is
+        always inflated ~110px by .app's shared bottom-nav padding
+        regardless of route).
+     3. body.<screen>-bg{background:<that screen's own light tone>} —
+        toggled alongside <screen>-lock in goRoute() — so any bounce/
+        overscroll reveals that screen's own color, not the app's dark
+        default (#2c2727) bleeding through. */
+html.plansv2-lock, html.plansv2-lock body{overflow:hidden;height:100dvh;touch-action:none;}
+html.plansv2-lock.plansv2-scrollable, html.plansv2-lock.plansv2-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}
+body.plansv2-bg{background:#f5f1fb;}
 /* Same technique, reused for modals — background stays put while a popup is open. */
 html.modal-lock, html.modal-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
 button{font-family:inherit;}
@@ -2107,7 +2128,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 45;
+const DASH_BUILD = 46;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -2570,6 +2591,8 @@ function goRoute(route){
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
   document.body.classList.toggle('dashboard-bg', route==='dashboard');
+  document.documentElement.classList.toggle('plansv2-lock', route==='plans-v2');
+  document.body.classList.toggle('plansv2-bg', route==='plans-v2');
   document.body.classList.toggle('gymv2-bg', route==='gym-v2');
   document.documentElement.classList.toggle('gymv2-bg', route==='gym-v2');
   document.querySelector('.topbar').classList.toggle('hidden', isV3);
@@ -3962,6 +3985,16 @@ function renderPlansListV2(animate){
   customPlans.forEach((p,i)=> customWrap.appendChild(buildPlanCardV2(p, true, animate, autoPlans.length+i)));
   customLabel.classList.toggle('plansv2-hidden', !customPlans.length);
   customWrap.classList.toggle('plansv2-hidden', !customPlans.length);
+
+  // Only grant scroll/touch-drag capability when the list genuinely
+  // doesn't fit — same technique as renderDashboard(), see the
+  // "STANDING RULE" comment on .plansv2-lock's CSS for why this checks
+  // the last card's actual position instead of body.scrollHeight.
+  const cards = document.querySelectorAll('#view-plans-v2 .plansv2-card');
+  const lastCard = cards[cards.length-1];
+  const nav = document.getElementById('bottomNav');
+  const needsScroll = !!(lastCard && nav && lastCard.getBoundingClientRect().bottom > nav.getBoundingClientRect().top);
+  document.documentElement.classList.toggle('plansv2-scrollable', needsScroll);
 }
 let editingPlan = null; // working copy: {id, name, builtin, schedule:{mon:[],...}, activeDay}
 function openPlanEditor(id){
