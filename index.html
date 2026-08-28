@@ -2221,7 +2221,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 55;
+const DASH_BUILD = 56;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3937,9 +3937,22 @@ function migratePlan(p){
   ensureWarmupStretch(plan.schedule); // retroactively adds bookends to plans saved before this feature existed
   return plan;
 }
+// Resets a builtin plan's schedule to a fresh hardcoded default — ONLY
+// safe for a plan the user has genuinely never touched. Guarded by two
+// independent signals so a future app update can never silently wipe
+// someone's hand-edited exercises: the name must still be the exact
+// pre-migration default (renaming is the traditional signal), AND the
+// plan must not carry `customized` (set by savePlanEditor() the moment
+// a user saves any change to a builtin plan's exercises — swap, add,
+// remove, whatever) or `customizationV2` (set by "Dostosuj plan").
+// Maciej raised this concern directly (2026-08-29): worried a future
+// update could reset someone's manually-tweaked automatic plan back to
+// factory defaults. This is the fix — every call site (present and
+// future) inherits the guard automatically, nothing to remember per call.
 function renameDefaultPlanIfUntouched(plans, id, oldName, newName, newDays, exercises){
   const idx = plans.findIndex(p=>p.id===id);
   if(idx===-1 || plans[idx].name !== oldName) return; // missing, or user already renamed it — leave it alone
+  if(plans[idx].customized || plans[idx].customizationV2) return; // user hand-edited or "Dostosuj"-customized this plan — never touch it automatically
   plans[idx] = {...plans[idx], name:newName, schedule: scheduleOnDays(newDays, exercises)};
 }
 function loadTrainingPlans(){
@@ -4154,6 +4167,7 @@ function applyPlanCustomizeV2(){
   const frequency = Number(active('frequency')) || 3;
   plan.schedule = generatePlanScheduleV2(goal, difficulty, equipment, frequency);
   plan.customizationV2 = {goal, difficulty, equipment, frequency};
+  plan.customized = true; // same protection flag savePlanEditor() sets — see renameDefaultPlanIfUntouched()
   saveTrainingPlansList();
   closePlanCustomizeV2();
   toast(t('planCustomized','Plan dostosowany'));
@@ -4534,7 +4548,12 @@ function savePlanEditor(){
   let savedId;
   if(editingPlan.id){
     const idx = trainingPlans.findIndex(p=>p.id===editingPlan.id);
-    trainingPlans[idx] = {...trainingPlans[idx], name: editingPlan.name, schedule: editingPlan.schedule};
+    // `customized: true` permanently protects a builtin plan's schedule
+    // from renameDefaultPlanIfUntouched() (see its comment) — the moment
+    // a user saves ANY hand-edit here (swap/add/remove an exercise,
+    // change a day), a future app update can never reset it back to the
+    // hardcoded default again, even if the plan's name never changes.
+    trainingPlans[idx] = {...trainingPlans[idx], name: editingPlan.name, schedule: editingPlan.schedule, customized: true};
     savedId = editingPlan.id;
   } else {
     savedId = 'plan_'+Date.now();
