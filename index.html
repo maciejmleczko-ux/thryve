@@ -2107,7 +2107,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 43;
+const DASH_BUILD = 44;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3899,22 +3899,31 @@ function renderPlansList(){
    the old screen (or elsewhere) keeps this one in sync automatically,
    same pattern as renderGymGridV2()/renderGymDoneV2().
    ============================================================ */
-const PLANSV2_AUTO_COLORS = ['#3b63cb', '#2642a4', '#708fe1'];
-const PLANSV2_CUSTOM_COLORS = ['#cd1200', '#f30', '#ff6343'];
+/* Card color is keyed by difficulty, not list position — confirmed with
+   Maciej: darkest = Trudny, mid = Średni, lightest = Łatwy, same rule
+   for both the builtin (blue) and custom/imported (red) palettes. */
+const PLANSV2_AUTO_COLOR_BY_DIFFICULTY = {easy:'#708fe1', medium:'#3b63cb', hard:'#2642a4'};
+const PLANSV2_CUSTOM_COLOR_BY_DIFFICULTY = {easy:'#ff6343', medium:'#f30', hard:'#cd1200'};
 /* Duration/difficulty are placeholder estimates — same idea as GYM v2's
    plan-card stats (~5 min/exercise; no real per-workout duration or a
    real difficulty rating exist in the data model yet). Difficulty here
-   is just an exercise-count threshold so the list shows some variety
-   instead of "Średni" on every card — replace with real data once
+   is just an exercise-count threshold — replace with real data once
    that exists, same note as GYM v2's placeholder. */
-function planDifficultyPlaceholder(exCount){
-  if(exCount < 8) return t('planDifficultyEasy','Łatwy');
-  if(exCount > 16) return t('planDifficultyHard','Trudny');
+function planDifficultyKey(exCount){
+  if(exCount < 8) return 'easy';
+  if(exCount > 16) return 'hard';
+  return 'medium';
+}
+function planDifficultyLabel(key){
+  if(key==='easy') return t('planDifficultyEasy','Łatwy');
+  if(key==='hard') return t('planDifficultyHard','Trudny');
   return t('planDifficultyMedium','Średni');
 }
-function buildPlanCardV2(p, color, animate, i){
+function buildPlanCardV2(p, isCustom, animate, i){
   const starred = starredPlanId === p.id;
   const exCount = planTotalExercises(p);
+  const diffKey = planDifficultyKey(exCount);
+  const color = (isCustom ? PLANSV2_CUSTOM_COLOR_BY_DIFFICULTY : PLANSV2_AUTO_COLOR_BY_DIFFICULTY)[diffKey];
   const card = document.createElement('button');
   card.type = 'button';
   card.className = 'plansv2-card';
@@ -3926,7 +3935,7 @@ function buildPlanCardV2(p, color, animate, i){
       <div class="plansv2-card-stats">
         <div class="plansv2-stat">${ph('barbell')}<span>${planExCountText(exCount)}</span></div>
         <div class="plansv2-stat">${ph('clock-countdown')}<span>~${Math.max(15, exCount*5)} min</span></div>
-        <div class="plansv2-stat">${ph('chart-line')}<span>${planDifficultyPlaceholder(exCount)}</span></div>
+        <div class="plansv2-stat">${ph('chart-line')}<span>${planDifficultyLabel(diffKey)}</span></div>
       </div>
     </div>
     <div class="plansv2-card-actions">
@@ -3949,8 +3958,8 @@ function renderPlansListV2(animate){
   customWrap.innerHTML = '';
   const autoPlans = trainingPlans.filter(p=>p.builtin);
   const customPlans = trainingPlans.filter(p=>!p.builtin);
-  autoPlans.forEach((p,i)=> autoWrap.appendChild(buildPlanCardV2(p, PLANSV2_AUTO_COLORS[i%3], animate, i)));
-  customPlans.forEach((p,i)=> customWrap.appendChild(buildPlanCardV2(p, PLANSV2_CUSTOM_COLORS[i%3], animate, autoPlans.length+i)));
+  autoPlans.forEach((p,i)=> autoWrap.appendChild(buildPlanCardV2(p, false, animate, i)));
+  customPlans.forEach((p,i)=> customWrap.appendChild(buildPlanCardV2(p, true, animate, autoPlans.length+i)));
   customLabel.classList.toggle('plansv2-hidden', !customPlans.length);
   customWrap.classList.toggle('plansv2-hidden', !customPlans.length);
 }
