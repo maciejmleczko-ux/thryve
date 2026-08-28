@@ -770,7 +770,10 @@ button{font-family:inherit;}
    card itself, which JS slides left via transform:translateX. */
 .plansv2-card-wrap{position:relative;overflow:hidden;border-radius:16px;touch-action:pan-y;}
 .plansv2-card-delete{position:absolute;inset:0;border-radius:16px;background:#c00;display:flex;align-items:center;justify-content:flex-end;padding-right:28px;color:#fff;cursor:pointer;}
-.plansv2-card-delete .ph{width:32px;height:32px;}
+.plansv2-card-delete .ph{width:32px;height:32px;transition:transform .15s ease;}
+/* Past the full-swipe threshold: bump the icon so it's obvious that
+   releasing now deletes, rather than just snapping open to the reveal. */
+.plansv2-card-wrap.plansv2-will-delete .plansv2-card-delete .ph{transform:scale(1.35);}
 .plansv2-card{border-radius:16px;padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform .12s ease;touch-action:pan-y;}
 .plansv2-card:active{transform:scale(.98);}
 .plansv2-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
@@ -2134,7 +2137,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 50;
+const DASH_BUILD = 51;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3970,23 +3973,30 @@ function planDifficultyLabel(key){
   if(key==='hard') return t('planDifficultyHard','Trudny');
   return t('planDifficultyMedium','Średni');
 }
-/* Swipe-to-delete — Maciej confirmed: reveal on swipe, then still ask
-   before actually deleting (an irreversible action), reusing the plain
-   confirm() dialog since that's the only confirm pattern already in
-   the codebase (see submitBackup's import-mode prompt). Only wired for
-   custom/imported plans — mirrors the plan editor's own rule
-   (#planDeleteBtn hidden for builtin plans, deleteCurrentPlan() has no
-   equivalent to un-delete a default plan). Only one card open at a time. */
+/* Swipe-to-delete, two-stage like iOS Mail: a short swipe snaps open to
+   reveal the trash action (tap it to delete); dragging all the way past
+   PLANSV2_SWIPE_DELETE_RATIO of the card's width and releasing deletes
+   outright without the intermediate tap. Either path still confirms
+   first — deletion is irreversible and Maciej explicitly asked for a
+   confirmation step — reusing the plain confirm() dialog since that's
+   the only confirm pattern already in this codebase (see submitBackup's
+   import-mode prompt). Wired for every plan including builtins; see
+   deletedBuiltinPlans for why those need extra persistence.
+   Only one card can sit open at a time. */
 const PLANSV2_SWIPE_REVEAL = 88;
+const PLANSV2_SWIPE_DELETE_RATIO = 0.45; // drag past this share of the card's width and release = delete outright
 let plansv2OpenSwipe = null; // {cardBtn, close()} of the currently-revealed card, if any
 function closePlansv2Swipe(){
   if(plansv2OpenSwipe){ plansv2OpenSwipe.close(); plansv2OpenSwipe = null; }
 }
-function deletePlanV2(id){
+function confirmPlanDeleteV2(plan){
+  return confirm(t('planDeleteConfirmV2', `Na pewno usunąć plan „${plan.name}"?`, plan.name));
+}
+// The actual mutation, no confirm — callers own that (and the full-swipe
+// path also owns its slide-out animation, running this once it finishes).
+function performPlanDeleteV2(id){
   const plan = trainingPlans.find(p=>p.id===id);
-  closePlansv2Swipe();
   if(!plan) return;
-  if(!confirm(t('planDeleteConfirmV2', `Na pewno usunąć plan „${plan.name}"?`, plan.name))) return;
   trainingPlans = trainingPlans.filter(p=>p.id!==id);
   if(plan.builtin){ deletedBuiltinPlans.add(id); saveDeletedBuiltinPlans(); } // otherwise loadTrainingPlans() re-adds it next launch
   if(starredPlanId===id){ starredPlanId=null; localStorage.removeItem(LS_STARRED_PLAN); }
@@ -3995,6 +4005,13 @@ function deletePlanV2(id){
   updateTodayPlanBanner();
   updatePlanPillLabel();
   renderPlansList(); // tail-calls renderPlansListV2(), keeps both screens in sync
+}
+function deletePlanV2(id){
+  const plan = trainingPlans.find(p=>p.id===id);
+  closePlansv2Swipe();
+  if(!plan) return;
+  if(!confirmPlanDeleteV2(plan)) return;
+  performPlanDeleteV2(id);
 }
 function attachPlanSwipeV2(wrap, cardBtn, planId){
   let startX = 0, startY = 0, baseX = 0, dragging = false, axis = null, justDragged = false;
@@ -4017,8 +4034,20 @@ function attachPlanSwipeV2(wrap, cardBtn, planId){
     if(axis!=='x') return;
     if(ev && ev.cancelable) ev.preventDefault();
     justDragged = true;
-    const dragX = Math.min(0, Math.max(-PLANSV2_SWIPE_REVEAL - 24, baseX + dx));
+    // Drag the full width of the card — a swipe all the way across
+    // deletes outright (iOS Mail's full-swipe), so it must not stop at
+    // the reveal width the way it did before.
+    const dragX = Math.min(0, Math.max(-wrap.offsetWidth, baseX + dx));
     setX(dragX, false);
+    wrap.classList.toggle('plansv2-will-delete', dragX < -wrap.offsetWidth * PLANSV2_SWIPE_DELETE_RATIO);
+  }
+  function fullSwipeDelete(){
+    const plan = trainingPlans.find(p=>p.id===planId);
+    if(!plan){ closeThis(); return; }
+    if(!confirmPlanDeleteV2(plan)){ wrap.classList.remove('plansv2-will-delete'); closeThis(); return; }
+    if(plansv2OpenSwipe && plansv2OpenSwipe.cardBtn===cardBtn) plansv2OpenSwipe = null;
+    setX(-wrap.offsetWidth, true); // finish the slide-out, then drop the row
+    setTimeout(()=> performPlanDeleteV2(planId), 200);
   }
   function onEnd(){
     if(!dragging) return;
@@ -4026,7 +4055,8 @@ function attachPlanSwipeV2(wrap, cardBtn, planId){
     if(axis!=='x') return;
     const m = /translateX\((-?[\d.]+)px\)/.exec(cardBtn.style.transform);
     const x = m ? parseFloat(m[1]) : 0;
-    if(x < -PLANSV2_SWIPE_REVEAL/2) openThis(); else closeThis();
+    if(x < -wrap.offsetWidth * PLANSV2_SWIPE_DELETE_RATIO) fullSwipeDelete();
+    else { wrap.classList.remove('plansv2-will-delete'); if(x < -PLANSV2_SWIPE_REVEAL/2) openThis(); else closeThis(); }
     setTimeout(()=>{ justDragged = false; }, 0); // let the resulting click event (if any) see this first
   }
 
