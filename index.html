@@ -807,6 +807,7 @@ button{font-family:inherit;}
 .plansv2-choice-chip{border:1px solid #ff6343;border-radius:999px;padding:8px 14px;background:#fff;font-size:13px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
 .plansv2-choice-chip:active{transform:scale(.95);}
 .plansv2-choice-chip.active{background:#ff6343;color:#fff;}
+.plansv2-customize-freq-hint{margin:8px 0 0;font-size:11px;line-height:1.4;color:#96959b;}
 .plansv2-customize-hint{margin:4px 0 20px;font-size:11px;line-height:1.4;color:#96959b;}
 .plansv2-customize-actions{display:flex;gap:10px;}
 .plansv2-customize-cancel{flex:1;border:1px solid #ff6343;border-radius:69px;padding:12px;background:none;font-size:14px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
@@ -1131,6 +1132,15 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="hantle" onclick="pickPlanCustomizeChipV2(this)">Wolne ciężary</button>
           <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="mix" onclick="pickPlanCustomizeChipV2(this)">Miks</button>
         </div>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Dni w tygodniu</p>
+        <div class="plansv2-choice-row">
+          <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="2" onclick="pickPlanCustomizeChipV2(this)">2x</button>
+          <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="3" onclick="pickPlanCustomizeChipV2(this)">3x</button>
+          <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="4" onclick="pickPlanCustomizeChipV2(this)">4x</button>
+        </div>
+        <p class="plansv2-customize-freq-hint">Każda sesja to nadal cały trening — zmienia się tylko to, ile razy w tygodniu go powtarzasz.</p>
       </div>
       <p class="plansv2-customize-hint">Nadpisze obecną listę ćwiczeń w tym planie zgodnie z wybranymi opcjami — możesz ją potem jeszcze ręcznie doedytować.</p>
       <div class="plansv2-customize-actions">
@@ -2211,7 +2221,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 53;
+const DASH_BUILD = 54;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4015,6 +4025,20 @@ const PLANSV2_GOAL_LABEL = {strength:'Siła', mass:'Masa', endurance:'Wytrzymał
 // Target number of real exercises (bookends excluded) per difficulty.
 const PLANSV2_DIFFICULTY_COUNT = {easy:6, medium:8, hard:11};
 const PLANSV2_DIFFICULTY_LABEL_CUSTOMIZE = {easy:'Łatwy', medium:'Średni', hard:'Trudny'};
+// Weekly frequency — this stays a genuine fullbody plan (every session
+// still hits the whole body, same exercise list every time), only the
+// number of sessions/week changes. Day picks are spaced for recovery,
+// not just evenly divided across the week: 2x leaves a full 3 rest days
+// between sessions (Mon/Thu); 4x accepts two closer pairs (Mon/Tue,
+// Thu/Fri) rather than stacking sessions with zero rest day anywhere,
+// which is the standard template for a 4x/week fullbody split. Confirmed
+// with Maciej (2026-08-29): stays fullbody, no per-day muscle-group
+// split — that's a separate, not-yet-built plan type.
+const PLANSV2_FREQUENCY_DAYS = {
+  2: ['mon','thu'],
+  3: ['mon','wed','fri'],
+  4: ['mon','tue','thu','fri'],
+};
 // Round-robin priority: biggest compound groups first, isolated arm
 // work and core last — so a low target count (easy) still covers every
 // major muscle group once, and only the higher counts add isolation
@@ -4055,14 +4079,15 @@ function planv2PickExercises(count, equipment){
   }
   return picked;
 }
-function generatePlanScheduleV2(goal, difficulty, equipment){
+function generatePlanScheduleV2(goal, difficulty, equipment, frequency){
   const params = PLANSV2_GOAL_PARAMS[goal];
   const count = PLANSV2_DIFFICULTY_COUNT[difficulty];
+  const days = PLANSV2_FREQUENCY_DAYS[frequency] || PLANSV2_FREQUENCY_DAYS[3];
   const exercises = planv2PickExercises(count, equipment).map(ex=>({
     name: ex.name, group: ex.group, icon: ex.icon,
     sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest,
   }));
-  const schedule = scheduleOnDays(['mon','wed','fri'], exercises); // same 3x/week cadence as the hand-built Fullbody 1/2
+  const schedule = scheduleOnDays(days, exercises); // same full exercise list every session — still genuinely fullbody, only the day count changes
   ensureWarmupStretch(schedule);
   return schedule;
 }
@@ -4071,10 +4096,11 @@ function openPlanCustomizeV2(id){
   const plan = trainingPlans.find(p=>p.id===id);
   if(!plan) return;
   planv2CustomizeTargetId = id;
-  const saved = plan.customizationV2 || {goal:'mass', difficulty:'medium', equipment:'mix'};
+  const saved = plan.customizationV2 || {goal:'mass', difficulty:'medium', equipment:'mix', frequency:3};
   document.getElementById('planCustomizeTitle').textContent = plan.name;
   document.querySelectorAll('#planCustomizeOverlay .plansv2-choice-chip').forEach(chip=>{
-    chip.classList.toggle('active', chip.dataset.value===saved[chip.dataset.group]);
+    const savedVal = chip.dataset.group==='frequency' ? String(saved.frequency||3) : saved[chip.dataset.group];
+    chip.classList.toggle('active', chip.dataset.value===savedVal);
   });
   document.getElementById('planCustomizeOverlay').classList.remove('hidden');
 }
@@ -4093,8 +4119,9 @@ function applyPlanCustomizeV2(){
   if(!plan) return;
   const active = (group)=> document.querySelector(`#planCustomizeOverlay .plansv2-choice-chip[data-group="${group}"].active`)?.dataset.value;
   const goal = active('goal') || 'mass', difficulty = active('difficulty') || 'medium', equipment = active('equipment') || 'mix';
-  plan.schedule = generatePlanScheduleV2(goal, difficulty, equipment);
-  plan.customizationV2 = {goal, difficulty, equipment};
+  const frequency = Number(active('frequency')) || 3;
+  plan.schedule = generatePlanScheduleV2(goal, difficulty, equipment, frequency);
+  plan.customizationV2 = {goal, difficulty, equipment, frequency};
   saveTrainingPlansList();
   closePlanCustomizeV2();
   toast(t('planCustomized','Plan dostosowany'));
