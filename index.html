@@ -2128,7 +2128,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 46;
+const DASH_BUILD = 47;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3877,6 +3877,14 @@ function planTotalExercises(p){
   // excludes the auto-managed warm-up/stretch bookends — this counts real exercises only
   return PLAN_DAYS.reduce((sum,d)=>sum+(p.schedule[d]||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name)).length,0);
 }
+// Per-session average, not the whole week's total — matches what GYM v2's
+// own plan card already shows for today specifically (todayEx.length), so
+// a 3-day/week plan reads as "7 ćwiczeń" (one day's worth) instead of "21"
+// (the whole week), which is what a single-session preview should say.
+function planAvgExercisesPerDay(p){
+  const days = planActiveDays(p);
+  return days.length ? Math.round(planTotalExercises(p) / days.length) : 0;
+}
 function updatePlanPillLabel(){
   const label = document.getElementById('planPillLabel');
   if(!label) return;
@@ -3944,7 +3952,7 @@ function planDifficultyLabel(key){
 }
 function buildPlanCardV2(p, isCustom, animate, i){
   const starred = starredPlanId === p.id;
-  const exCount = planTotalExercises(p);
+  const exCount = planAvgExercisesPerDay(p);
   const diffKey = planDifficultyKey(exCount);
   const color = (isCustom ? PLANSV2_CUSTOM_COLOR_BY_DIFFICULTY : PLANSV2_AUTO_COLOR_BY_DIFFICULTY)[diffKey];
   const card = document.createElement('button');
