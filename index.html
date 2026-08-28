@@ -765,7 +765,13 @@ button{font-family:inherit;}
 .plansv2-section-label{margin:0 2px 12px;font-size:14px;letter-spacing:.56px;text-transform:uppercase;color:#2c2727;}
 .plansv2-list{display:flex;flex-direction:column;gap:4px;margin-bottom:24px;}
 .plansv2-list:last-of-type{margin-bottom:0;}
-.plansv2-card{border-radius:16px;padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;transition:transform .12s ease;}
+/* Swipe-to-delete (custom/imported plans only — see attachPlanSwipeV2()):
+   .plansv2-card-wrap clips and hosts the red delete action behind the
+   card itself, which JS slides left via transform:translateX. */
+.plansv2-card-wrap{position:relative;overflow:hidden;border-radius:16px;touch-action:pan-y;}
+.plansv2-card-delete{position:absolute;inset:0;border-radius:16px;background:#c00;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding-right:24px;color:#fff;font-weight:600;font-size:14px;cursor:pointer;}
+.plansv2-card-delete .ph{width:20px;height:20px;}
+.plansv2-card{border-radius:16px;padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform .12s ease;}
 .plansv2-card:active{transform:scale(.98);}
 .plansv2-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
 .plansv2-card-name{margin:0;font-size:16px;font-weight:500;line-height:1.1;letter-spacing:.64px;text-transform:uppercase;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -2128,7 +2134,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 47;
+const DASH_BUILD = 48;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3950,16 +3956,83 @@ function planDifficultyLabel(key){
   if(key==='hard') return t('planDifficultyHard','Trudny');
   return t('planDifficultyMedium','Średni');
 }
+/* Swipe-to-delete — Maciej confirmed: reveal on swipe, then still ask
+   before actually deleting (an irreversible action), reusing the plain
+   confirm() dialog since that's the only confirm pattern already in
+   the codebase (see submitBackup's import-mode prompt). Only wired for
+   custom/imported plans — mirrors the plan editor's own rule
+   (#planDeleteBtn hidden for builtin plans, deleteCurrentPlan() has no
+   equivalent to un-delete a default plan). Only one card open at a time. */
+const PLANSV2_SWIPE_REVEAL = 88;
+let plansv2OpenSwipe = null; // {cardBtn, close()} of the currently-revealed card, if any
+function closePlansv2Swipe(){
+  if(plansv2OpenSwipe){ plansv2OpenSwipe.close(); plansv2OpenSwipe = null; }
+}
+function deletePlanV2(id){
+  const plan = trainingPlans.find(p=>p.id===id);
+  closePlansv2Swipe();
+  if(!plan) return;
+  if(!confirm(t('planDeleteConfirmV2', `Na pewno usunąć plan „${plan.name}"?`, plan.name))) return;
+  trainingPlans = trainingPlans.filter(p=>p.id!==id);
+  if(starredPlanId===id){ starredPlanId=null; localStorage.removeItem(LS_STARRED_PLAN); }
+  saveTrainingPlansList();
+  toast(t('planDeleted','Plan usunięty'));
+  updateTodayPlanBanner();
+  updatePlanPillLabel();
+  renderPlansList(); // tail-calls renderPlansListV2(), keeps both screens in sync
+}
+function attachPlanSwipeV2(wrap, cardBtn, planId){
+  let startX = 0, startY = 0, baseX = 0, dragging = false, axis = null, justDragged = false;
+  const setX = (x, animate)=>{ cardBtn.style.transition = animate ? 'transform .2s ease' : 'none'; cardBtn.style.transform = `translateX(${x}px)`; };
+  const isOpen = ()=> cardBtn.style.transform === `translateX(${-PLANSV2_SWIPE_REVEAL}px)`;
+  const openThis = ()=>{ closePlansv2Swipe(); setX(-PLANSV2_SWIPE_REVEAL, true); plansv2OpenSwipe = {cardBtn, close: ()=> setX(0, true)}; };
+  const closeThis = ()=>{ setX(0, true); if(plansv2OpenSwipe && plansv2OpenSwipe.cardBtn===cardBtn) plansv2OpenSwipe = null; };
+  wrap.addEventListener('pointerdown', (e)=>{
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    startX = e.clientX; startY = e.clientY; baseX = isOpen() ? -PLANSV2_SWIPE_REVEAL : 0; dragging = true; axis = null;
+  });
+  wrap.addEventListener('pointermove', (e)=>{
+    if(!dragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if(axis===null){
+      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      if(axis==='y'){ dragging = false; return; } // vertical drag — let the page scroll, not us
+    }
+    if(axis!=='x') return;
+    e.preventDefault();
+    justDragged = true;
+    const x = Math.min(0, Math.max(-PLANSV2_SWIPE_REVEAL - 24, baseX + dx));
+    setX(x, false);
+  });
+  function endDrag(){
+    if(!dragging) return;
+    dragging = false;
+    if(axis!=='x') return;
+    const m = /translateX\((-?[\d.]+)px\)/.exec(cardBtn.style.transform);
+    const x = m ? parseFloat(m[1]) : 0;
+    if(x < -PLANSV2_SWIPE_REVEAL/2) openThis(); else closeThis();
+    setTimeout(()=>{ justDragged = false; }, 0); // let the resulting click event (if any) see this first
+  }
+  wrap.addEventListener('pointerup', endDrag);
+  wrap.addEventListener('pointercancel', endDrag);
+  cardBtn.addEventListener('click', (e)=>{
+    if(justDragged) return;
+    if(isOpen()){ e.preventDefault(); e.stopPropagation(); closeThis(); return; } // tap elsewhere closes the reveal, doesn't open the editor
+    openPlanEditor(planId);
+  });
+}
 function buildPlanCardV2(p, isCustom, animate, i){
   const starred = starredPlanId === p.id;
   const exCount = planAvgExercisesPerDay(p);
   const diffKey = planDifficultyKey(exCount);
   const color = (isCustom ? PLANSV2_CUSTOM_COLOR_BY_DIFFICULTY : PLANSV2_AUTO_COLOR_BY_DIFFICULTY)[diffKey];
+  const wrap = document.createElement('div');
+  wrap.className = 'plansv2-card-wrap';
   const card = document.createElement('button');
   card.type = 'button';
   card.className = 'plansv2-card';
   card.style.background = color;
-  card.onclick = ()=> openPlanEditor(p.id);
   card.innerHTML = `
     <div class="plansv2-card-info">
       <p class="plansv2-card-name">${p.name}</p>
@@ -3975,10 +4048,21 @@ function buildPlanCardV2(p, isCustom, animate, i){
     </div>
   `;
   if(animate){
-    card.classList.add('plansv2-anim-in');
-    card.style.animationDelay = Math.round(180 + i*45) + 'ms';
+    wrap.classList.add('plansv2-anim-in');
+    wrap.style.animationDelay = Math.round(180 + i*45) + 'ms';
   }
-  return card;
+  wrap.appendChild(card);
+  if(isCustom){
+    const del = document.createElement('div');
+    del.className = 'plansv2-card-delete';
+    del.innerHTML = `${ph('trash')}<span>${t('planDelete','Usuń plan')}</span>`;
+    del.onclick = ()=> deletePlanV2(p.id);
+    wrap.insertBefore(del, card);
+    attachPlanSwipeV2(wrap, card, p.id);
+  } else {
+    card.onclick = ()=> openPlanEditor(p.id);
+  }
+  return wrap;
 }
 function renderPlansListV2(animate){
   const autoWrap = document.getElementById('plansV2AutoList');
