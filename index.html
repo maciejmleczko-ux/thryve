@@ -2221,7 +2221,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 54;
+const DASH_BUILD = 55;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3875,8 +3875,18 @@ function defaultTrainingPlans(){
   const upperB = defEx('Incline Chest','Seated Row','Dumbbell Lateral Raise','Barbell Curl','Overhead Triceps');
   const lowerB = defEx('Barbell Back Squat','Hack Squat Machine','Dumbbell Walking Lunge','Back Extension');
   const plans = [
-    {id:'plan_a', name:'Fullbody workout 1', builtin:true, schedule: scheduleOnDays(['mon','wed','fri'], GYM_PLAN.A)},
-    {id:'plan_b', name:'Fullbody workout 2', builtin:true, schedule: scheduleOnDays(['mon','wed','fri'], GYM_PLAN.B)},
+    // Used to be two separate Fullbody plans (plan_a short/machines-only,
+    // plan_b longer/mixed-equipment) — now that "Dostosuj plan" lets a
+    // user tune exactly that spectrum (Trudność/Sprzęt) on demand, a
+    // second hardcoded variant is redundant clutter rather than a real
+    // choice. Confirmed with Maciej (2026-08-29): consolidate to one
+    // default. plan_b's definition (GYM_PLAN.B) stays alive purely for
+    // legacy installs that already have it saved — see the
+    // renameDefaultPlanIfUntouched() call below, and loadTrainingPlans()
+    // only ever adds a default plan that's still missing, so an existing
+    // user's saved plan_b is untouched by this, only fresh installs stop
+    // getting a second card.
+    {id:'plan_a', name:'Fullbody workout', builtin:true, schedule: scheduleOnDays(['mon','wed','fri'], GYM_PLAN.A)},
     {id:'plan_ppl', name:'Push / Pull / Legs', builtin:true, schedule: {
       ...emptySchedule(), mon: pushDay, wed: pullDay, fri: legsDay,
     }},
@@ -3939,8 +3949,26 @@ function loadTrainingPlans(){
       const parsed = JSON.parse(raw);
       if(Array.isArray(parsed) && parsed.length){
         const plans = parsed.map(migratePlan);
-        renameDefaultPlanIfUntouched(plans, 'plan_a', 'Trening A', 'Fullbody workout 1', ['mon','wed','fri'], GYM_PLAN.A);
+        renameDefaultPlanIfUntouched(plans, 'plan_a', 'Trening A', 'Fullbody workout', ['mon','wed','fri'], GYM_PLAN.A);
+        // plan_b is no longer a fresh default (see defaultTrainingPlans()) —
+        // this line only still fixes the name for a legacy install that has
+        // an untouched plan_b sitting around from before that name existed.
         renameDefaultPlanIfUntouched(plans, 'plan_b', 'Trening B', 'Fullbody workout 2', ['mon','wed','fri'], GYM_PLAN.B);
+        // Anyone already on a live "Fullbody workout 1"-named plan_a (that
+        // name has been in production for a while) gets it renamed to the
+        // consolidated single name too — but as a PURE rename, never via
+        // renameDefaultPlanIfUntouched, which also resets the schedule.
+        // That reset is safe above only because nothing that old could
+        // have gone through "Dostosuj" first (customization is newer than
+        // the "Trening A"/"Trening B" eras); it is NOT safe here, since a
+        // real user could already have customized their plan_a (schedule
+        // changed, name untouched) before updating to this consolidation.
+        {
+          const planAIdx = plans.findIndex(p=>p.id==='plan_a');
+          if(planAIdx!==-1 && plans[planAIdx].name==='Fullbody workout 1'){
+            plans[planAIdx] = {...plans[planAIdx], name:'Fullbody workout'};
+          }
+        }
         defaultTrainingPlans().forEach(dp=>{
           if(deletedBuiltinPlans.has(dp.id)) return; // user deleted this one on purpose — don't resurrect it
           if(!plans.some(p=>p.id===dp.id)) plans.push(dp);
@@ -4000,13 +4028,17 @@ function planAvgExercisesPerDay(p){
    plan (loadTrainingPlans() keeps whatever's saved under a builtin id
    instead of resetting it), same mechanism the manual plan editor
    already relies on.
-   Scoped to the two Fullbody plans (plan_a/plan_b) for now — the
-   algorithm below picks a round-robin spread across muscle groups for
-   a single repeating full-body day, which is the right shape for
-   Fullbody but would wreck a split routine's structure (PPL, Upper/
-   Lower train different muscles on different days on purpose). Extending
+   Scoped to the Fullbody plan (plan_a) for now — the algorithm below
+   picks a round-robin spread across muscle groups for a single
+   repeating full-body day, which is the right shape for Fullbody but
+   would wreck a split routine's structure (PPL, Upper/Lower train
+   different muscles on different days on purpose). Extending
    "customizable" to those needs a split-aware generator, not this one —
    noted as follow-up scope, not attempted here.
+   plan_b stays listed too, even though defaultTrainingPlans() no longer
+   hands it to fresh installs (see the Fullbody-1/2 consolidation note
+   there, 2026-08-29) — a legacy install that already has plan_b saved
+   can still customize it, same generator, same rules.
    ============================================================ */
 const PLANSV2_CUSTOMIZABLE_IDS = new Set(['plan_a', 'plan_b']);
 // Sets/rep-range/rest per goal — standard, uncontroversial baseline
