@@ -771,7 +771,7 @@ button{font-family:inherit;}
 .plansv2-card-wrap{position:relative;overflow:hidden;border-radius:16px;touch-action:pan-y;}
 .plansv2-card-delete{position:absolute;inset:0;border-radius:16px;background:#c00;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding-right:24px;color:#fff;font-weight:600;font-size:14px;cursor:pointer;}
 .plansv2-card-delete .ph{width:20px;height:20px;}
-.plansv2-card{border-radius:16px;padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform .12s ease;}
+.plansv2-card{border-radius:16px;padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform .12s ease;touch-action:pan-y;}
 .plansv2-card:active{transform:scale(.98);}
 .plansv2-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
 .plansv2-card-name{margin:0;font-size:16px;font-weight:500;line-height:1.1;letter-spacing:.64px;text-transform:uppercase;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -2134,7 +2134,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 48;
+const DASH_BUILD = 49;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3987,25 +3987,25 @@ function attachPlanSwipeV2(wrap, cardBtn, planId){
   const isOpen = ()=> cardBtn.style.transform === `translateX(${-PLANSV2_SWIPE_REVEAL}px)`;
   const openThis = ()=>{ closePlansv2Swipe(); setX(-PLANSV2_SWIPE_REVEAL, true); plansv2OpenSwipe = {cardBtn, close: ()=> setX(0, true)}; };
   const closeThis = ()=>{ setX(0, true); if(plansv2OpenSwipe && plansv2OpenSwipe.cardBtn===cardBtn) plansv2OpenSwipe = null; };
-  wrap.addEventListener('pointerdown', (e)=>{
-    if(e.pointerType==='mouse' && e.button!==0) return;
-    startX = e.clientX; startY = e.clientY; baseX = isOpen() ? -PLANSV2_SWIPE_REVEAL : 0; dragging = true; axis = null;
-  });
-  wrap.addEventListener('pointermove', (e)=>{
+
+  function onStart(x, y){
+    startX = x; startY = y; baseX = isOpen() ? -PLANSV2_SWIPE_REVEAL : 0; dragging = true; axis = null; justDragged = false;
+  }
+  function onMove(x, y, ev){
     if(!dragging) return;
-    const dx = e.clientX - startX, dy = e.clientY - startY;
+    const dx = x - startX, dy = y - startY;
     if(axis===null){
       if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
       if(axis==='y'){ dragging = false; return; } // vertical drag — let the page scroll, not us
     }
     if(axis!=='x') return;
-    e.preventDefault();
+    if(ev && ev.cancelable) ev.preventDefault();
     justDragged = true;
-    const x = Math.min(0, Math.max(-PLANSV2_SWIPE_REVEAL - 24, baseX + dx));
-    setX(x, false);
-  });
-  function endDrag(){
+    const dragX = Math.min(0, Math.max(-PLANSV2_SWIPE_REVEAL - 24, baseX + dx));
+    setX(dragX, false);
+  }
+  function onEnd(){
     if(!dragging) return;
     dragging = false;
     if(axis!=='x') return;
@@ -4014,8 +4014,25 @@ function attachPlanSwipeV2(wrap, cardBtn, planId){
     if(x < -PLANSV2_SWIPE_REVEAL/2) openThis(); else closeThis();
     setTimeout(()=>{ justDragged = false; }, 0); // let the resulting click event (if any) see this first
   }
-  wrap.addEventListener('pointerup', endDrag);
-  wrap.addEventListener('pointercancel', endDrag);
+
+  // Touch events are the reliable path on iOS Safari for a list-row
+  // swipe like this — Pointer Events alone were unreliable there (the
+  // build 48 version used only pointerdown/move/up and didn't work on
+  // Maciej's phone). touchmove MUST be registered non-passive or
+  // preventDefault() is silently ignored and the page scrolls/rubber-
+  // bands sideways underneath the gesture instead of the card sliding.
+  wrap.addEventListener('touchstart', (e)=>{ const t=e.touches[0]; onStart(t.clientX, t.clientY); }, {passive:true});
+  wrap.addEventListener('touchmove', (e)=>{ const t=e.touches[0]; onMove(t.clientX, t.clientY, e); }, {passive:false});
+  wrap.addEventListener('touchend', onEnd);
+  wrap.addEventListener('touchcancel', onEnd);
+  // Pointer events cover mouse/trackpad (desktop testing) — skip touch
+  // pointerType here since touchstart/move/end above already handle it,
+  // avoids double-handling the same gesture on browsers that fire both.
+  wrap.addEventListener('pointerdown', (e)=>{ if(e.pointerType==='touch') return; onStart(e.clientX, e.clientY); });
+  wrap.addEventListener('pointermove', (e)=>{ if(e.pointerType==='touch') return; onMove(e.clientX, e.clientY, e); });
+  wrap.addEventListener('pointerup', (e)=>{ if(e.pointerType==='touch') return; onEnd(); });
+  wrap.addEventListener('pointercancel', (e)=>{ if(e.pointerType==='touch') return; onEnd(); });
+
   cardBtn.addEventListener('click', (e)=>{
     if(justDragged) return;
     if(isOpen()){ e.preventDefault(); e.stopPropagation(); closeThis(); return; } // tap elsewhere closes the reveal, doesn't open the editor
