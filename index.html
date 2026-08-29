@@ -1394,6 +1394,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <div class="plan-day-row" id="planDayRow"></div>
           <div class="plan-editor-day-label" data-i18n="planDayHint">Wybierz dzień i przypisz mu ćwiczenia</div>
           <button type="button" class="copy-days-btn hidden" id="copyDaysBtn" onclick="openCopyDaysModal()" data-i18n="copyDaysBtn">Kopiuj do innych dni</button>
+          <button type="button" class="copy-days-btn hidden" id="clearDaysBtn" onclick="openClearDaysModal()" data-i18n="clearDaysBtn" style="margin-left:14px;">Usuń z dni</button>
         </div>
         <div class="field" style="margin-top:14px;">
           <label><span data-i18n="planExercisesLabel">Ćwiczenia</span> — <span id="planEditorDayName"></span> (<span id="planExCount">0</span>)</label>
@@ -1586,6 +1587,26 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<!-- Reverse of "Kopiuj do innych dni" — Maciej pointed out (2026-08-29)
+     the editor could only ever ADD days (assign exercises, or copy a
+     day's list onto others), never remove several at once: going from
+     e.g. 6 training days down to 2 meant manually opening each of the
+     4 unwanted days and un-tapping every exercise one by one. Lists
+     every day that currently has real exercises (including the active
+     one — clearing the day you're looking at is just as valid a case
+     as clearing others) and wipes whichever ones get picked. -->
+<div class="onboard-overlay hidden" id="clearDaysOverlay" onclick="if(event.target===this) closeClearDaysModal()">
+  <div class="onboard-box new-ex-form">
+    <h3 data-i18n="clearDaysTitle">Usuń z dni</h3>
+    <p id="clearDaysHint" data-i18n="clearDaysHint">Wybierz dni, które mają zostać wyczyszczone z ćwiczeń.</p>
+    <div class="plan-day-row" id="clearDaysRow"></div>
+    <div class="btns" style="margin-top:16px;">
+      <button type="button" class="cancel" onclick="closeClearDaysModal()" data-i18n="cancel">Anuluj</button>
+      <button type="button" class="save" onclick="confirmClearDays()" data-i18n="clearDaysConfirm">Usuń</button>
+    </div>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden" id="newExerciseOverlay" onclick="if(event.target===this) toggleNewExerciseForm()">
   <div class="onboard-box new-ex-form" id="newExerciseForm">
     <h3 data-i18n="newExerciseTitle">Dodaj własne ćwiczenie</h3>
@@ -1655,6 +1676,12 @@ const T_EN = {
   copyDaysHint: (day) => `Pick which days should get the same exercises as ${day}.`,
   copyDaysConfirm: 'Copy',
   copyDaysDone: n => `Copied to ${n} day${n===1?'':'s'}`,
+  clearDaysBtn: 'Remove from days',
+  clearDaysTitle: 'Remove from days',
+  clearDaysHint: 'Pick which days should have their exercises cleared.',
+  clearDaysConfirm: 'Remove',
+  clearDaysDone: n => `Cleared ${n} day${n===1?'':'s'}`,
+  clearDaysEmpty: "No day has any exercises yet",
   favFilterAll: 'All',
   favFilterFavorites: 'Favorites',
   skipPlanOnboarding: "Skip for now, I'll decide later",
@@ -2277,7 +2304,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 65;
+const DASH_BUILD = 66;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4589,6 +4616,8 @@ function renderPlanDayRow(){
   if(nameEl) nameEl.textContent = planDayLabel(editingPlan.activeDay);
   const copyBtn = document.getElementById('copyDaysBtn');
   if(copyBtn) copyBtn.classList.toggle('hidden', editingPlan.schedule[editingPlan.activeDay].length === 0);
+  const clearBtn = document.getElementById('clearDaysBtn');
+  if(clearBtn) clearBtn.classList.toggle('hidden', daysWithExercises().length === 0);
 }
 function selectPlanEditorDay(d){
   editingPlan.activeDay = d;
@@ -4669,6 +4698,49 @@ function confirmCopyToDays(){
   closeCopyDaysModal();
   renderPlanDayRow();
   toast(t('copyDaysDone', `Skopiowano do ${count} ${count===1?'dnia':'dni'}`, count));
+}
+// Reverse of the copy-days flow above — Maciej (2026-08-29): the editor
+// could only ever add training days (assign exercises, or copy one
+// day's list onto others), never remove several at once. Going from
+// e.g. 6 training days down to 2 meant opening each of the 4 unwanted
+// days individually and un-tapping every exercise one by one. Lists
+// every day that currently has real exercises (including the active
+// one — clearing the day you're looking at is just as valid as
+// clearing others) and empties whichever ones get picked.
+let clearDaysSelected = new Set();
+function daysWithExercises(){
+  return PLAN_DAYS.filter(d=> (editingPlan.schedule[d]||[]).length > 0);
+}
+function openClearDaysModal(){
+  if(!daysWithExercises().length){ toast(t('clearDaysEmpty','Żaden dzień nie ma jeszcze ćwiczeń')); return; }
+  clearDaysSelected = new Set();
+  renderClearDaysRow();
+  document.getElementById('clearDaysOverlay').classList.remove('hidden');
+}
+function closeClearDaysModal(){
+  document.getElementById('clearDaysOverlay').classList.add('hidden');
+}
+function toggleClearDay(d){
+  if(clearDaysSelected.has(d)) clearDaysSelected.delete(d);
+  else clearDaysSelected.add(d);
+  renderClearDaysRow();
+}
+function renderClearDaysRow(){
+  const row = document.getElementById('clearDaysRow');
+  row.innerHTML = daysWithExercises().map(d=>{
+    const active = clearDaysSelected.has(d);
+    return `<button type="button" class="plan-day-chip${active?' active':''}" onclick="toggleClearDay('${d}')">${planDayLabel(d)}</button>`;
+  }).join('');
+}
+function confirmClearDays(){
+  const count = clearDaysSelected.size;
+  if(!count){ closeClearDaysModal(); return; }
+  clearDaysSelected.forEach(d=>{ editingPlan.schedule[d] = []; });
+  clearDaysSelected = new Set();
+  closeClearDaysModal();
+  renderPlanDayRow();
+  renderPlanEditorGrid();
+  toast(t('clearDaysDone', `Wyczyszczono ${count} ${count===1?'dzień':'dni'}`, count));
 }
 function savePlanEditor(){
   const name = document.getElementById('planNameInput').value.trim();
