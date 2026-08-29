@@ -767,15 +767,22 @@ button{font-family:inherit;}
 .plansv2-section-label{margin:0 2px 12px;font-size:14px;letter-spacing:.56px;text-transform:uppercase;color:#2c2727;}
 .plansv2-list{display:flex;flex-direction:column;gap:4px;margin-bottom:24px;}
 .plansv2-list:last-of-type{margin-bottom:0;}
-/* Swipe-to-delete (custom/imported plans only — see attachPlanSwipeV2()):
-   .plansv2-card-wrap clips and hosts the red delete action behind the
-   card itself, which JS slides left via transform:translateX. */
+/* Swipe-to-delete / swipe-to-share (every plan, see attachPlanSwipeV2()):
+   .plansv2-card-wrap clips and hosts two full-bleed action layers behind
+   the card itself — red delete (revealed sliding left) and yellow share
+   (revealed sliding right) — which JS slides via transform:translateX.
+   Both layers sit at inset:0 (so the revealed color always fills clean
+   edge-to-edge, not just a same-width sliver); only one is opacity:1 at
+   a time, toggled by attachPlanSwipeV2() from the live drag direction. */
 .plansv2-card-wrap{position:relative;overflow:hidden;border-radius:16px;touch-action:pan-y;}
-.plansv2-card-delete{position:absolute;inset:0;border-radius:16px;background:#c00;display:flex;align-items:center;justify-content:flex-end;padding-right:28px;color:#fff;cursor:pointer;}
+.plansv2-card-delete{position:absolute;inset:0;border-radius:16px;background:#c00;display:flex;align-items:center;justify-content:flex-end;padding-right:28px;color:#fff;cursor:pointer;opacity:0;}
 .plansv2-card-delete .ph{width:32px;height:32px;transition:transform .15s ease;}
 /* Past the full-swipe threshold: bump the icon so it's obvious that
    releasing now deletes, rather than just snapping open to the reveal. */
 .plansv2-card-wrap.plansv2-will-delete .plansv2-card-delete .ph{transform:scale(1.35);}
+.plansv2-card-share{position:absolute;inset:0;border-radius:16px;background:#f5b942;display:flex;align-items:center;justify-content:flex-start;padding-left:28px;color:#2c2727;cursor:pointer;opacity:0;}
+.plansv2-card-share .ph{width:32px;height:32px;transition:transform .15s ease;}
+.plansv2-card-wrap.plansv2-will-share .plansv2-card-share .ph{transform:scale(1.35);}
 .plansv2-card{border-radius:16px;padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform .12s ease;touch-action:pan-y;}
 .plansv2-card:active{transform:scale(.98);}
 .plansv2-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
@@ -2270,7 +2277,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 58;
+const DASH_BUILD = 59;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4325,18 +4332,22 @@ function planDifficultyLabel(key){
   if(key==='hard') return t('planDifficultyHard','Trudny');
   return t('planDifficultyMedium','Średni');
 }
-/* Swipe-to-delete, two-stage like iOS Mail: a short swipe snaps open to
-   reveal the trash action (tap it to delete); dragging all the way past
-   PLANSV2_SWIPE_DELETE_RATIO of the card's width and releasing deletes
-   outright without the intermediate tap. Either path still confirms
-   first — deletion is irreversible and Maciej explicitly asked for a
+/* Swipe left = delete, swipe right = share, both two-stage like iOS
+   Mail: a short swipe snaps open to reveal the action (tap it to fire);
+   dragging all the way past PLANSV2_SWIPE_ACTION_RATIO of the card's
+   width and releasing fires outright without the intermediate tap.
+   Delete confirms first — irreversible, Maciej explicitly asked for a
    confirmation step — reusing the plain confirm() dialog since that's
    the only confirm pattern already in this codebase (see submitBackup's
-   import-mode prompt). Wired for every plan including builtins; see
-   deletedBuiltinPlans for why those need extra persistence.
-   Only one card can sit open at a time. */
+   import-mode prompt). Share needs no confirm (not destructive) — it
+   just fires sharePlan() and snaps the card back closed, never slides
+   it away like delete does. Wired for every plan including builtins;
+   see deletedBuiltinPlans for why those need extra persistence for
+   delete specifically. Only one card can sit open (either direction)
+   at a time. Maciej, 2026-08-29: swipe-right-to-share, yellow instead
+   of reusing delete's red, same share icon as the card's own row. */
 const PLANSV2_SWIPE_REVEAL = 88;
-const PLANSV2_SWIPE_DELETE_RATIO = 0.45; // drag past this share of the card's width and release = delete outright
+const PLANSV2_SWIPE_ACTION_RATIO = 0.45; // drag past this share of the card's width and release = fire the full action outright
 let plansv2OpenSwipe = null; // {cardBtn, close()} of the currently-revealed card, if any
 function closePlansv2Swipe(){
   if(plansv2OpenSwipe){ plansv2OpenSwipe.close(); plansv2OpenSwipe = null; }
@@ -4365,15 +4376,24 @@ function deletePlanV2(id){
   if(!confirmPlanDeleteV2(plan)) return;
   performPlanDeleteV2(id);
 }
-function attachPlanSwipeV2(wrap, cardBtn, planId){
+function attachPlanSwipeV2(wrap, cardBtn, planId, delEl, shareEl){
   let startX = 0, startY = 0, baseX = 0, dragging = false, axis = null, justDragged = false;
+  let openSide = null; // 'left' (delete revealed) | 'right' (share revealed) | null
   const setX = (x, animate)=>{ cardBtn.style.transition = animate ? 'transform .2s ease' : 'none'; cardBtn.style.transform = `translateX(${x}px)`; };
-  const isOpen = ()=> cardBtn.style.transform === `translateX(${-PLANSV2_SWIPE_REVEAL}px)`;
-  const openThis = ()=>{ closePlansv2Swipe(); setX(-PLANSV2_SWIPE_REVEAL, true); plansv2OpenSwipe = {cardBtn, close: ()=> setX(0, true)}; };
-  const closeThis = ()=>{ setX(0, true); if(plansv2OpenSwipe && plansv2OpenSwipe.cardBtn===cardBtn) plansv2OpenSwipe = null; };
+  // Which reveal layer is visible tracks the live drag direction (mid-
+  // drag) or the snapped-open side — never both, they fully overlap
+  // (inset:0) so only one can show through the sliver the card exposes.
+  const updateLayers = (dragX)=>{
+    delEl.style.opacity = dragX < 0 ? '1' : '0';
+    shareEl.style.opacity = dragX > 0 ? '1' : '0';
+  };
+  const isOpen = ()=> openSide !== null;
+  const openLeft = ()=>{ closePlansv2Swipe(); setX(-PLANSV2_SWIPE_REVEAL, true); updateLayers(-1); openSide='left'; plansv2OpenSwipe = {cardBtn, close: closeThis}; };
+  const openRight = ()=>{ closePlansv2Swipe(); setX(PLANSV2_SWIPE_REVEAL, true); updateLayers(1); openSide='right'; plansv2OpenSwipe = {cardBtn, close: closeThis}; };
+  const closeThis = ()=>{ setX(0, true); updateLayers(0); openSide=null; if(plansv2OpenSwipe && plansv2OpenSwipe.cardBtn===cardBtn) plansv2OpenSwipe = null; };
 
   function onStart(x, y){
-    startX = x; startY = y; baseX = isOpen() ? -PLANSV2_SWIPE_REVEAL : 0; dragging = true; axis = null; justDragged = false;
+    startX = x; startY = y; baseX = openSide==='left' ? -PLANSV2_SWIPE_REVEAL : openSide==='right' ? PLANSV2_SWIPE_REVEAL : 0; dragging = true; axis = null; justDragged = false;
   }
   function onMove(x, y, ev){
     if(!dragging) return;
@@ -4386,12 +4406,14 @@ function attachPlanSwipeV2(wrap, cardBtn, planId){
     if(axis!=='x') return;
     if(ev && ev.cancelable) ev.preventDefault();
     justDragged = true;
-    // Drag the full width of the card — a swipe all the way across
-    // deletes outright (iOS Mail's full-swipe), so it must not stop at
-    // the reveal width the way it did before.
-    const dragX = Math.min(0, Math.max(-wrap.offsetWidth, baseX + dx));
+    // Drag the full width of the card either direction — a swipe all
+    // the way across fires the full action outright (iOS Mail's
+    // full-swipe), so it must not stop at the reveal width.
+    const dragX = Math.min(wrap.offsetWidth, Math.max(-wrap.offsetWidth, baseX + dx));
     setX(dragX, false);
-    wrap.classList.toggle('plansv2-will-delete', dragX < -wrap.offsetWidth * PLANSV2_SWIPE_DELETE_RATIO);
+    updateLayers(dragX);
+    wrap.classList.toggle('plansv2-will-delete', dragX < -wrap.offsetWidth * PLANSV2_SWIPE_ACTION_RATIO);
+    wrap.classList.toggle('plansv2-will-share', dragX > wrap.offsetWidth * PLANSV2_SWIPE_ACTION_RATIO);
   }
   function fullSwipeDelete(){
     const plan = trainingPlans.find(p=>p.id===planId);
@@ -4401,14 +4423,25 @@ function attachPlanSwipeV2(wrap, cardBtn, planId){
     setX(-wrap.offsetWidth, true); // finish the slide-out, then drop the row
     setTimeout(()=> performPlanDeleteV2(planId), 200);
   }
+  // Share isn't destructive — no confirm, and the card isn't going
+  // anywhere, so this snaps back closed instead of sliding away.
+  function fullSwipeShare(){
+    const plan = trainingPlans.find(p=>p.id===planId);
+    wrap.classList.remove('plansv2-will-share');
+    if(plan) sharePlan(plan);
+    closeThis();
+  }
   function onEnd(){
     if(!dragging) return;
     dragging = false;
     if(axis!=='x') return;
     const m = /translateX\((-?[\d.]+)px\)/.exec(cardBtn.style.transform);
     const x = m ? parseFloat(m[1]) : 0;
-    if(x < -wrap.offsetWidth * PLANSV2_SWIPE_DELETE_RATIO) fullSwipeDelete();
-    else { wrap.classList.remove('plansv2-will-delete'); if(x < -PLANSV2_SWIPE_REVEAL/2) openThis(); else closeThis(); }
+    if(x < -wrap.offsetWidth * PLANSV2_SWIPE_ACTION_RATIO) fullSwipeDelete();
+    else if(x > wrap.offsetWidth * PLANSV2_SWIPE_ACTION_RATIO) fullSwipeShare();
+    else if(x < -PLANSV2_SWIPE_REVEAL/2){ wrap.classList.remove('plansv2-will-delete'); openLeft(); }
+    else if(x > PLANSV2_SWIPE_REVEAL/2){ wrap.classList.remove('plansv2-will-share'); openRight(); }
+    else { wrap.classList.remove('plansv2-will-delete'); wrap.classList.remove('plansv2-will-share'); closeThis(); }
     setTimeout(()=>{ justDragged = false; }, 0); // let the resulting click event (if any) see this first
   }
 
@@ -4474,16 +4507,24 @@ function buildPlanCardV2(p, isCustom, animate, i){
     wrap.style.animationDelay = Math.round(180 + i*45) + 'ms';
   }
   wrap.appendChild(card);
-  // Swipe-to-delete on every plan, builtin ones included (Maciej asked
-  // for this explicitly) — deletePlanV2() records deleted builtins in
-  // deletedBuiltinPlans so loadTrainingPlans() doesn't resurrect them.
+  // Swipe-to-delete / swipe-to-share on every plan, builtin ones
+  // included (Maciej asked for delete on builtins explicitly) —
+  // deletePlanV2() records deleted builtins in deletedBuiltinPlans so
+  // loadTrainingPlans() doesn't resurrect them. Sharing a builtin plan
+  // works fine as-is (sharePlan() just reads its current schedule).
   const del = document.createElement('div');
   del.className = 'plansv2-card-delete';
   del.innerHTML = ph('trash');
   del.title = t('planDelete','Usuń plan');
   del.onclick = ()=> deletePlanV2(p.id);
   wrap.insertBefore(del, card);
-  attachPlanSwipeV2(wrap, card, p.id);
+  const share = document.createElement('div');
+  share.className = 'plansv2-card-share';
+  share.innerHTML = ph('export'); // same icon as the card's own share button
+  share.title = t('sharePlanTitle','Udostępnij plan');
+  share.onclick = ()=>{ closePlansv2Swipe(); sharePlan(trainingPlans.find(x=>x.id===p.id)); };
+  wrap.insertBefore(share, card);
+  attachPlanSwipeV2(wrap, card, p.id, del, share);
   return wrap;
 }
 function renderPlansListV2(animate){
