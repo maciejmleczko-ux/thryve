@@ -1417,7 +1417,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <button type="button" class="copy-days-btn hidden" id="daySelectModeBtn" onclick="toggleDaySelectMode()" data-i18n="daySelectModeBtn">Zaznacz dni</button>
           <div class="day-select-bar hidden" id="daySelectBar">
             <span class="day-select-count" id="daySelectCount"></span>
-            <button type="button" class="day-select-action hidden" id="daySelectCopyBtn" onclick="confirmDaySelectCopy()" data-i18n="daySelectCopyBtn">Kopiuj tu</button>
+            <button type="button" class="day-select-action hidden" id="daySelectCopyBtn" onclick="confirmDaySelectCopy()" data-i18n="daySelectCopyBtn">Kopiuj dni</button>
             <button type="button" class="day-select-action danger hidden" id="daySelectClearBtn" onclick="confirmDaySelectClear()" data-i18n="daySelectClearBtn">Wyczyść</button>
             <button type="button" class="day-select-exit" onclick="exitDaySelectMode()" aria-label="Zamknij">✕</button>
           </div>
@@ -1667,7 +1667,7 @@ const T_EN = {
   planOnboardingIntro: "Before you start, pick a ready-made plan or build your own — you'll see it right away in GYM.",
   daySelectModeBtn: 'Select days',
   daySelectCount: n => `${n} day${n===1?'':'s'} selected`,
-  daySelectCopyBtn: (day) => `Copy ${day} here`,
+  daySelectCopyBtn: 'Copy days',
   daySelectClearBtn: n => `Clear (${n})`,
   daySelectClearConfirm: n => `Clear all exercises from ${n} day${n===1?'':'s'}? This can't be undone.`,
   daySelectCopyDone: n => `Copied to ${n} day${n===1?'':'s'}`,
@@ -2295,7 +2295,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 69;
+const DASH_BUILD = 70;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3886,18 +3886,6 @@ function planDayLabel(d){
   const en = {mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',fri:'Fri',sat:'Sat',sun:'Sun'};
   return (LANG==='en' ? en : pl)[d];
 }
-// Full day name, accusative case — for "Kopiuj [dzień] tu" specifically.
-// planDayLabel()'s short chip abbreviation ("So") reads fine standalone
-// on the day-row chip but is just wrong grammar dropped into a
-// sentence like "Kopiuj So tu" — Polish needs the accusative case of
-// the full name there, and for the feminine days (Środa/Sobota/
-// Niedziela) that's a different word from the nominative, not just a
-// longer spelling of the short form (Sobota -> Sobotę). Maciej caught
-// this on "Kopiuj So tu" (2026-08-29).
-function planDayLabelAccusative(d){
-  const acc = {mon:'Poniedziałek', tue:'Wtorek', wed:'Środę', thu:'Czwartek', fri:'Piątek', sat:'Sobotę', sun:'Niedzielę'};
-  return acc[d];
-}
 function dayKeyFromDate(iso){
   const map = ['sun','mon','tue','wed','thu','fri','sat'];
   return map[new Date(iso+'T00:00:00').getDay()];
@@ -4707,7 +4695,7 @@ function renderPlanDayRow(){
   const copyBtn = document.getElementById('daySelectCopyBtn');
   if(copyBtn){
     copyBtn.classList.toggle('hidden', !(sourceHasEx && copyTargets.length>0));
-    copyBtn.textContent = t('daySelectCopyBtn', `Kopiuj ${planDayLabelAccusative(daySelectSource)} tu`, planDayLabel(daySelectSource));
+    copyBtn.textContent = t('daySelectCopyBtn', 'Kopiuj dni');
   }
   const clearTargets = [...daySelected].filter(d=> (editingPlan.schedule[d]||[]).length>0);
   const clearBtn = document.getElementById('daySelectClearBtn');
