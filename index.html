@@ -674,9 +674,6 @@ button{font-family:inherit;}
 .gymv2-plan-name{margin:0;font-size:22px;font-weight:500;letter-spacing:.035em;text-transform:uppercase;line-height:1.1;}
 .gymv2-plan-desc{margin:0;font-size:12px;line-height:1.4;}
 .gymv2-plan-stats{display:flex;gap:16px;flex-wrap:wrap;}
-.gymv2-plan-stats.hidden{display:none;}
-.gymv2-rest-caption{margin:-4px 0 12px;font-size:12px;line-height:1.4;color:#5b5555;}
-.gymv2-rest-caption.hidden{display:none;}
 .gymv2-plan-stat{display:flex;align-items:center;gap:12px;}
 .gymv2-plan-stat .ph{width:16px;height:16px;color:#fff;flex-shrink:0;}
 .gymv2-plan-stat span{font-size:14px;}
@@ -1099,8 +1096,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <p>Ćwiczenia w planie</p>
         <button type="button" class="gymv2-edit-plan" onclick="openPlanEditor(starredPlanId)">Edytuj plan</button>
       </div>
-      <p class="gymv2-rest-caption hidden" id="gymV2RestCaption" data-i18n="gymV2RestCaption">Dziś zaplanowany odpoczynek — plan wraca w kolejnym dniu treningowym.</p>
-      <button type="button" class="add-pill hidden" id="gymV2TrainAnywayBtn" onclick="trainAnywayV2()">+<span data-i18n="gymV2TrainAnyway">Trenuj dziś mimo to</span></button>
       <div class="gymv2-grid" id="gymGridV2"></div>
 
       <p class="gymv2-done-head hidden" id="gymDoneV2Section">Ćwiczenia zrobione</p>
@@ -1684,10 +1679,6 @@ const T_EN = {
   planWeekLabel: 'Plan week',
   gymV2PlanDesc: "Today's workout.",
   gymV2Difficulty: 'Medium',
-  gymV2RestCaption: "Today's a rest day — your plan picks back up on its next training day.",
-  gymV2TrainAnyway: "Train anyway today",
-  trainAnywayEmpty: "This plan doesn't have any exercises to copy yet",
-  trainAnywayDone: "Added today's workout to the plan",
   sessionTypeLabel: 'Session type',
   distanceKm: 'Distance (km)',
   timeMin: 'Time (min)',
@@ -2286,7 +2277,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 61;
+const DASH_BUILD = 62;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -5144,11 +5135,15 @@ function renderDashboard(){
    from yet. Difficulty now reads the plan's real customizationV2 when
    it has one (2026-08-29 fix, same as buildPlanCardV2 on Plans v2),
    no longer hardcoded to "Średni".
-   A day with nothing scheduled is a genuine rest day (a plan trained
-   fewer than 7x/week has them by design), not an empty/broken plan —
-   shown as "Dzień odpoczynku" instead of a nonsensical "0 ćwiczeń"
-   stat row. Maciej hit this exact confusion on a real rest day
-   (2026-08-29) right after starring a plan he'd customized to 3x/week.
+   A day with nothing scheduled shows the plan's exercises anyway — see
+   todayPlanExerciseNamesV2() — rather than a "Dzień odpoczynku" gate.
+   Maciej was explicit about this (2026-08-29): whether to train on an
+   off day is the user's own call, not something the app should message
+   about or ask to confirm first — no banner text change, no button,
+   the grid should just be there exactly like on a scheduled day. An
+   earlier version of this (build 60-61) added a rest-day message plus
+   a "Trenuj dziś mimo to" confirm button; both are gone now in favor
+   of just always showing a full, ready grid.
    ============================================================ */
 const GYMV2_DAY_NAMES_PL = ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
 function renderGymV2(){
@@ -5159,61 +5154,45 @@ function renderGymV2(){
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   const card = document.querySelector('.gymv2-plan-card');
   const noPlan = document.getElementById('gymV2NoPlan');
-  const restCaption = document.getElementById('gymV2RestCaption');
   if(plan){
-    const todayEx = (plan.schedule[dayKeyFromDate(iso)]||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name));
-    const isRestDay = todayEx.length === 0;
+    const todayEx = (todayPlanExerciseNamesV2()||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name));
     document.getElementById('gymV2PlanName').textContent = plan.name;
-    document.getElementById('gymV2PlanDesc').textContent = isRestDay
-      ? t('planRestDay','Dzień odpoczynku')
-      : t('gymV2PlanDesc','Twój trening na dziś.');
-    document.querySelector('.gymv2-plan-stats').classList.toggle('hidden', isRestDay);
-    restCaption.classList.toggle('hidden', !isRestDay);
-    document.getElementById('gymV2TrainAnywayBtn').classList.toggle('hidden', !isRestDay);
-    if(!isRestDay){
-      document.getElementById('gymV2Count').textContent = planExCountText(todayEx.length);
-      // Real elapsed time once the session has actually started (first tile
-      // tap today), falling back to the old rough guess before that —
-      // see markGymActivity()/computeGymSessionDurationMin() above.
-      document.getElementById('gymV2Duration').textContent = gymSessionStartAt
-        ? `${computeGymSessionDurationMin()} min`
-        : `~${Math.max(15, todayEx.length*5)} min`;
-      const diffKey = plan.customizationV2 ? plan.customizationV2.difficulty : planDifficultyKey(planAvgExercisesPerDay(plan));
-      document.getElementById('gymV2Difficulty').textContent = planDifficultyLabel(diffKey);
-    }
+    document.getElementById('gymV2PlanDesc').textContent = t('gymV2PlanDesc','Twój trening na dziś.');
+    document.getElementById('gymV2Count').textContent = planExCountText(todayEx.length);
+    // Real elapsed time once the session has actually started (first tile
+    // tap today), falling back to the old rough guess before that —
+    // see markGymActivity()/computeGymSessionDurationMin() above.
+    document.getElementById('gymV2Duration').textContent = gymSessionStartAt
+      ? `${computeGymSessionDurationMin()} min`
+      : `~${Math.max(15, todayEx.length*5)} min`;
+    const diffKey = plan.customizationV2 ? plan.customizationV2.difficulty : planDifficultyKey(planAvgExercisesPerDay(plan));
+    document.getElementById('gymV2Difficulty').textContent = planDifficultyLabel(diffKey);
     card.classList.remove('hidden');
     noPlan.classList.add('hidden');
   } else {
     card.classList.add('hidden');
     noPlan.classList.remove('hidden');
-    restCaption.classList.add('hidden');
-    document.getElementById('gymV2TrainAnywayBtn').classList.add('hidden');
   }
   renderGymGridV2(true);
   renderGymDoneV2(true);
 }
-// "Trenuj dziś mimo to" — full flexibility on a rest day (Maciej,
-// 2026-08-29): once you've customized a plan yourself, you should be
-// able to add an extra training session on a day it wasn't originally
-// scheduled for, instead of being stuck manually re-picking every
-// exercise one by one from scratch. Copies whichever day already has
-// real exercises (any day works for a genuine fullbody plan, since
-// they're all identical by construction — see generatePlanScheduleV2())
-// onto today's day key and saves it as a REAL, permanent addition to
-// the plan's schedule — same effect as using "Kopiuj do innych dni" in
-// the manual editor — so today becomes a real training day going
-// forward too (a real 4th/5th/6th session/week), not just a one-off.
-function trainAnywayV2(){
-  const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
-  if(!plan) return;
-  const templateDay = PLAN_DAYS.find(d=> (plan.schedule[d]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
-  if(!templateDay){ toast(t('trainAnywayEmpty','Ten plan nie ma jeszcze żadnych ćwiczeń do skopiowania')); return; }
-  const todayKey = dayKeyFromDate(todayStr());
-  plan.schedule[todayKey] = plan.schedule[templateDay].map(e=>({...e}));
-  ensureWarmupStretch(plan.schedule);
-  saveTrainingPlansList();
-  toast(t('trainAnywayDone','Dodano dzisiejszy trening do planu'));
-  renderGymV2();
+// GYM v2's own version of todayPlanExerciseNames() (kept separate from
+// the shared one used by the real GYM screen — same dual-build
+// principle as every other V2 function here, see project notes).
+// Falls back to whichever day already has real exercises when today's
+// own slot is empty, so the grid always has something to train instead
+// of gating behind a rest-day message. Deliberately NOT persisted to
+// plan.schedule — purely a display fallback, so just looking at GYM v2
+// on an off day never silently changes the plan's actual weekly
+// structure; only "Dostosuj"/the manual editor do that on purpose.
+function todayPlanExerciseNamesV2(){
+  if(!starredPlanId) return null;
+  const plan = trainingPlans.find(p=>p.id===starredPlanId);
+  if(!plan) return null;
+  const todayList = plan.schedule[dayKeyFromDate(todayStr())];
+  if(todayList && todayList.some(e=>!BOOKEND_EX_NAMES.has(e.name))) return todayList;
+  const fallbackDay = PLAN_DAYS.find(d=> (plan.schedule[d]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
+  return fallbackDay ? plan.schedule[fallbackDay] : null;
 }
 function renderGymGridV2(animate){
   const grid = document.getElementById('gymGridV2');
@@ -5221,7 +5200,7 @@ function renderGymGridV2(animate){
   grid.innerHTML = '';
   const fullLib = orderedExerciseLibrary();
   const byName = new Map(fullLib.map(ex=>[ex.name, ex]));
-  const planEx = todayPlanExerciseNames() || [];
+  const planEx = todayPlanExerciseNamesV2() || [];
   const shown = new Set(planEx.map(e=>e.name));
   const lib = planEx.map(e=> byName.get(e.name) || e);
   extraGymTiles.forEach(ex=>{
