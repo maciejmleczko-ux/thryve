@@ -795,22 +795,51 @@ button{font-family:inherit;}
 .plansv2-card-customize{cursor:pointer;flex-shrink:0;display:flex;}
 .plansv2-card-customize .ph{width:24px;height:24px;color:#fff;}
 .plansv2-hidden{display:none;}
-/* "Dostosuj plan" modal — reuses the shared .onboard-overlay for the
-   fixed/backdrop/centering behavior, only the inner card is v3-styled
-   (matches .exv2-card's lavender-card language) rather than the old
-   .onboard-box look. */
+/* "Dostosuj plan" modal — rebuilt (2026-08-29) to share the exact same
+   visual DNA as the exercise-logging popup (.exv2-* — see its CSS block
+   above, this mirrors it structurally: overlay/backdrop, popup-stack +
+   card, slide-up/down + fade timing, pill/title-row header, muted
+   field-label typography) so the two popups read as one consistent
+   component language instead of two different-looking ones. Confirmed
+   with Maciej (2026-08-29): colors, spacing, fonts should match exv2. */
 .plansv2-customize-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
-.plansv2-customize-card{background:#f5f1fb;border-radius:16px;padding:24px 18px;width:100%;max-width:355px;box-sizing:border-box;font-family:'Geist','Inter',-apple-system,sans-serif;max-height:calc(100dvh - 40px);overflow-y:auto;}
-.plansv2-customize-eyebrow{margin:0 0 4px;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#96959b;}
-.plansv2-customize-name{margin:0 0 20px;font-size:22px;font-weight:600;letter-spacing:.88px;text-transform:uppercase;color:#2c2727;line-height:1.15;}
-.plansv2-customize-section{margin-bottom:18px;}
-.plansv2-customize-label{margin:0 0 8px;font-size:12px;font-weight:600;color:#2c2727;}
+.plansv2-customize-stack{display:flex;flex-direction:column;align-items:center;width:100%;max-width:355px;font-family:'Geist','Inter',-apple-system,sans-serif;}
+/* Entrance/exit motion, gated behind prefers-reduced-motion like every
+   other animation added this session — exv2's own version of this
+   predates that convention and isn't gated (see feedback_thryve_
+   animation_vocabulary), that's not license to skip it here. Without
+   the animation property applying (reduced-motion case), the overlay/
+   stack simply render at their normal opacity:1/transform:none resting
+   state — no flash, no motion, just instantly there. */
+@media (prefers-reduced-motion: no-preference){
+  .plansv2-customize-overlay{animation:plansv2CustomizeBackdropIn .22s ease-out;}
+  .plansv2-customize-overlay.plansv2-customize-closing{animation:plansv2CustomizeBackdropOut .2s ease-in forwards;}
+  .plansv2-customize-stack{animation:plansv2CustomizeSlideUp .28s cubic-bezier(.22,1,.36,1);}
+  .plansv2-customize-closing .plansv2-customize-stack{animation:plansv2CustomizeSlideDown .2s ease-in forwards;}
+  @keyframes plansv2CustomizeBackdropIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes plansv2CustomizeBackdropOut{from{opacity:1;}to{opacity:0;}}
+  @keyframes plansv2CustomizeSlideUp{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes plansv2CustomizeSlideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(24px);}}
+}
+.plansv2-customize-card{display:flex;flex-direction:column;gap:24px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 120px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
+.plansv2-customize-header-group{display:flex;flex-direction:column;gap:8px;}
+.plansv2-customize-title-block{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;}
+.plansv2-customize-pill{display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 8px;border-radius:47px;background:#a4bdff;}
+.plansv2-customize-pill span{font-size:8px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:#0e267b;white-space:nowrap;}
+.plansv2-customize-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;width:100%;}
+.plansv2-customize-name{margin:0;font-size:22px;font-weight:600;letter-spacing:.88px;text-transform:uppercase;color:#2c2727;line-height:1.15;}
+.plansv2-customize-close{width:24px;height:24px;flex-shrink:0;color:#2c2727;cursor:pointer;}
+.plansv2-customize-close .ph{display:block;width:100%;height:100%;}
+.plansv2-customize-close .ph svg{display:block;width:100%;height:100%;}
+.plansv2-customize-options{display:flex;flex-direction:column;gap:16px;}
+.plansv2-customize-section{display:flex;flex-direction:column;gap:8px;}
+.plansv2-customize-label{margin:0;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#96959b;}
 .plansv2-choice-row{display:flex;gap:8px;flex-wrap:wrap;}
 .plansv2-choice-chip{border:1px solid #ff6343;border-radius:999px;padding:8px 14px;background:#fff;font-size:13px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
 .plansv2-choice-chip:active{transform:scale(.95);}
 .plansv2-choice-chip.active{background:#ff6343;color:#fff;}
-.plansv2-customize-freq-hint{margin:8px 0 0;font-size:11px;line-height:1.4;color:#96959b;}
-.plansv2-customize-hint{margin:4px 0 20px;font-size:11px;line-height:1.4;color:#96959b;}
+.plansv2-customize-freq-hint{margin:0;font-size:11px;line-height:1.4;color:#96959b;}
+.plansv2-customize-hint{margin:0;font-size:11px;line-height:1.4;color:#96959b;}
 .plansv2-customize-actions{display:flex;gap:10px;}
 .plansv2-customize-cancel{flex:1;border:1px solid #ff6343;border-radius:69px;padding:12px;background:none;font-size:14px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
 .plansv2-customize-apply{flex:1;border:none;border-radius:74px;padding:12px;background:#ff6343;font-size:14px;font-weight:500;color:#fff;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
@@ -1106,48 +1135,64 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </section>
 
   <!-- "Dostosuj plan" — goal/difficulty/equipment for a Fullbody automatic
-       plan (Plans v2 only). See PLANSV2_CUSTOMIZABLE_IDS / generatePlanScheduleV2. -->
+       plan (Plans v2 only). See PLANSV2_CUSTOMIZABLE_IDS / generatePlanScheduleV2.
+       Visually rebuilt (2026-08-29) to share the exact same DNA as the
+       exercise-logging popup (exv2-*, see its CSS block for the reference
+       this mirrors): overlay/backdrop blur, popup-stack + card structure,
+       slide-up/down + fade in/out timing, pill/title-row header, and the
+       same muted-caption typography for field labels. -->
   <div class="onboard-overlay hidden plansv2-customize-overlay" id="planCustomizeOverlay" onclick="if(event.target===this) closePlanCustomizeV2()">
-    <div class="plansv2-customize-card">
-      <p class="plansv2-customize-eyebrow">DOSTOSUJ PLAN</p>
-      <h2 class="plansv2-customize-name" id="planCustomizeTitle"></h2>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Cel treningowy</p>
-        <div class="plansv2-choice-row">
-          <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="strength" onclick="pickPlanCustomizeChipV2(this)">Siła</button>
-          <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="mass" onclick="pickPlanCustomizeChipV2(this)">Masa</button>
-          <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="endurance" onclick="pickPlanCustomizeChipV2(this)">Wytrzymałość</button>
+    <div class="plansv2-customize-stack">
+      <div class="plansv2-customize-card">
+        <div class="plansv2-customize-header-group">
+          <div class="plansv2-customize-title-block">
+            <span class="plansv2-customize-pill"><span>DOSTOSUJ PLAN</span></span>
+            <div class="plansv2-customize-title-row">
+              <h2 class="plansv2-customize-name" id="planCustomizeTitle"></h2>
+              <span class="plansv2-customize-close" onclick="closePlanCustomizeV2()"><span class="ph" data-ph="x"></span></span>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Trudność</p>
-        <div class="plansv2-choice-row">
-          <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="easy" onclick="pickPlanCustomizeChipV2(this)">Łatwy</button>
-          <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="medium" onclick="pickPlanCustomizeChipV2(this)">Średni</button>
-          <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="hard" onclick="pickPlanCustomizeChipV2(this)">Trudny</button>
+        <div class="plansv2-customize-options">
+          <div class="plansv2-customize-section">
+            <p class="plansv2-customize-label">Cel treningowy</p>
+            <div class="plansv2-choice-row">
+              <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="strength" onclick="pickPlanCustomizeChipV2(this)">Siła</button>
+              <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="mass" onclick="pickPlanCustomizeChipV2(this)">Masa</button>
+              <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="endurance" onclick="pickPlanCustomizeChipV2(this)">Wytrzymałość</button>
+            </div>
+          </div>
+          <div class="plansv2-customize-section">
+            <p class="plansv2-customize-label">Trudność</p>
+            <div class="plansv2-choice-row">
+              <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="easy" onclick="pickPlanCustomizeChipV2(this)">Łatwy</button>
+              <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="medium" onclick="pickPlanCustomizeChipV2(this)">Średni</button>
+              <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="hard" onclick="pickPlanCustomizeChipV2(this)">Trudny</button>
+            </div>
+          </div>
+          <div class="plansv2-customize-section">
+            <p class="plansv2-customize-label">Sprzęt</p>
+            <div class="plansv2-choice-row">
+              <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="maszyny" onclick="pickPlanCustomizeChipV2(this)">Maszyny</button>
+              <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="hantle" onclick="pickPlanCustomizeChipV2(this)">Wolne ciężary</button>
+              <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="mix" onclick="pickPlanCustomizeChipV2(this)">Miks</button>
+            </div>
+          </div>
+          <div class="plansv2-customize-section">
+            <p class="plansv2-customize-label">Dni w tygodniu</p>
+            <div class="plansv2-choice-row">
+              <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="2" onclick="pickPlanCustomizeChipV2(this)">2x</button>
+              <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="3" onclick="pickPlanCustomizeChipV2(this)">3x</button>
+              <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="4" onclick="pickPlanCustomizeChipV2(this)">4x</button>
+            </div>
+            <p class="plansv2-customize-freq-hint">Każda sesja to nadal cały trening — zmienia się tylko to, ile razy w tygodniu go powtarzasz.</p>
+          </div>
         </div>
-      </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Sprzęt</p>
-        <div class="plansv2-choice-row">
-          <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="maszyny" onclick="pickPlanCustomizeChipV2(this)">Maszyny</button>
-          <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="hantle" onclick="pickPlanCustomizeChipV2(this)">Wolne ciężary</button>
-          <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="mix" onclick="pickPlanCustomizeChipV2(this)">Miks</button>
+        <p class="plansv2-customize-hint">Nadpisze obecną listę ćwiczeń w tym planie zgodnie z wybranymi opcjami — możesz ją potem jeszcze ręcznie doedytować.</p>
+        <div class="plansv2-customize-actions">
+          <button type="button" class="plansv2-customize-cancel" onclick="closePlanCustomizeV2()">Anuluj</button>
+          <button type="button" class="plansv2-customize-apply" onclick="applyPlanCustomizeV2()">Zastosuj</button>
         </div>
-      </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Dni w tygodniu</p>
-        <div class="plansv2-choice-row">
-          <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="2" onclick="pickPlanCustomizeChipV2(this)">2x</button>
-          <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="3" onclick="pickPlanCustomizeChipV2(this)">3x</button>
-          <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="4" onclick="pickPlanCustomizeChipV2(this)">4x</button>
-        </div>
-        <p class="plansv2-customize-freq-hint">Każda sesja to nadal cały trening — zmienia się tylko to, ile razy w tygodniu go powtarzasz.</p>
-      </div>
-      <p class="plansv2-customize-hint">Nadpisze obecną listę ćwiczeń w tym planie zgodnie z wybranymi opcjami — możesz ją potem jeszcze ręcznie doedytować.</p>
-      <div class="plansv2-customize-actions">
-        <button type="button" class="plansv2-customize-cancel" onclick="closePlanCustomizeV2()">Anuluj</button>
-        <button type="button" class="plansv2-customize-apply" onclick="applyPlanCustomizeV2()">Zastosuj</button>
       </div>
     </div>
   </div>
@@ -2225,7 +2270,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 57;
+const DASH_BUILD = 58;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4153,9 +4198,11 @@ function generatePlanScheduleV2(goal, difficulty, equipment, frequency){
   return schedule;
 }
 let planv2CustomizeTargetId = null;
+let plansv2CustomizeCloseTimer = null; // mirrors exv2CloseTimer — lets a reopen mid-close-animation cut the close short instead of fighting it
 function openPlanCustomizeV2(id){
   const plan = trainingPlans.find(p=>p.id===id);
   if(!plan) return;
+  if(plansv2CustomizeCloseTimer){ clearTimeout(plansv2CustomizeCloseTimer); plansv2CustomizeCloseTimer = null; }
   planv2CustomizeTargetId = id;
   const saved = plan.customizationV2 || {goal:'mass', difficulty:'medium', equipment:'mix', frequency:3};
   document.getElementById('planCustomizeTitle').textContent = plan.name;
@@ -4163,10 +4210,20 @@ function openPlanCustomizeV2(id){
     const savedVal = chip.dataset.group==='frequency' ? String(saved.frequency||3) : saved[chip.dataset.group];
     chip.classList.toggle('active', chip.dataset.value===savedVal);
   });
-  document.getElementById('planCustomizeOverlay').classList.remove('hidden');
+  const overlay = document.getElementById('planCustomizeOverlay');
+  overlay.classList.remove('plansv2-customize-closing');
+  overlay.classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock'); // same full lock every other modal in the app uses while open
 }
 function closePlanCustomizeV2(){
-  document.getElementById('planCustomizeOverlay').classList.add('hidden');
+  const overlay = document.getElementById('planCustomizeOverlay');
+  overlay.classList.add('plansv2-customize-closing'); // plays the slide-down/fade-out, see .plansv2-customize-closing CSS
+  plansv2CustomizeCloseTimer = setTimeout(()=>{
+    overlay.classList.add('hidden');
+    overlay.classList.remove('plansv2-customize-closing');
+    document.documentElement.classList.remove('modal-lock');
+    plansv2CustomizeCloseTimer = null;
+  }, 220);
   planv2CustomizeTargetId = null;
 }
 function pickPlanCustomizeChipV2(el){
