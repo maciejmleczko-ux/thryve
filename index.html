@@ -277,9 +277,30 @@ button{font-family:inherit;}
 .plan-day-chip.active{background:var(--orange);border-color:var(--orange);color:#fff;}
 .plan-day-chip.has-ex::after{content:'';position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--orange);}
 .plan-day-chip.active.has-ex::after{background:#fff;}
+/* Selection-mode marker for a day picked for a bulk action (copy target
+   or clear target) — separate visual channel from .active (which, in
+   selection mode, marks the copy SOURCE day instead of "currently open
+   for editing"). Bottom-right so it never collides with .has-ex's dot
+   at top-right. */
+.plan-day-chip.picked{box-shadow:inset 0 0 0 2px #2c2727;}
+.plan-day-chip.picked::before{content:'✓';position:absolute;bottom:1px;right:4px;font-size:9px;font-weight:900;line-height:1;color:#2c2727;}
+.plan-day-chip.active.picked::before{color:#fff;}
 .plan-editor-day-label{font-size:11px;color:#5b5555;margin-top:6px;font-weight:600;}
 .copy-days-btn{margin-top:8px;background:none;border:none;color:var(--orange);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline;}
 .copy-days-btn.hidden{display:none;}
+/* Bulk-action bar shown while day-selection mode is active (Maciej,
+   2026-08-29) — replaces the old two separate "Kopiuj do innych dni" /
+   "Usuń z dni" modals with one inline flow: tap "Zaznacz dni", tap the
+   day chips you want, then whichever action(s) actually apply to that
+   selection show up here. */
+.day-select-bar{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.day-select-bar.hidden{display:none;}
+.day-select-count{font-size:11px;color:#5b5555;font-weight:600;margin-right:auto;}
+.day-select-action{border:1px solid var(--orange);border-radius:999px;padding:7px 14px;background:none;color:var(--orange);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+.day-select-action.hidden{display:none;}
+.day-select-action:active{transform:scale(.96);}
+.day-select-action.danger{border-color:#c00;color:#c00;}
+.day-select-exit{border:none;background:none;color:#5b5555;font-size:15px;cursor:pointer;padding:4px 6px;line-height:1;font-family:inherit;}
 .plan-editor-fork-hint{font-size:11px;color:#5b5555;margin:6px 0 0;line-height:1.4;}
 .plan-editor-fork-hint.hidden{display:none;}
 .plan-ex-group{background:var(--light-2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;}
@@ -1392,9 +1413,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="field" style="margin-top:14px;">
           <label data-i18n="planDaysLabel">Dni tygodnia</label>
           <div class="plan-day-row" id="planDayRow"></div>
-          <div class="plan-editor-day-label" data-i18n="planDayHint">Wybierz dzień i przypisz mu ćwiczenia</div>
-          <button type="button" class="copy-days-btn hidden" id="copyDaysBtn" onclick="openCopyDaysModal()" data-i18n="copyDaysBtn">Kopiuj do innych dni</button>
-          <button type="button" class="copy-days-btn hidden" id="clearDaysBtn" onclick="openClearDaysModal()" data-i18n="clearDaysBtn" style="margin-left:14px;">Usuń z dni</button>
+          <div class="plan-editor-day-label" id="planDayHintText" data-i18n="planDayHint">Wybierz dzień i przypisz mu ćwiczenia</div>
+          <button type="button" class="copy-days-btn hidden" id="daySelectModeBtn" onclick="toggleDaySelectMode()" data-i18n="daySelectModeBtn">Zaznacz dni</button>
+          <div class="day-select-bar hidden" id="daySelectBar">
+            <span class="day-select-count" id="daySelectCount"></span>
+            <button type="button" class="day-select-action hidden" id="daySelectCopyBtn" onclick="confirmDaySelectCopy()" data-i18n="daySelectCopyBtn">Kopiuj tu</button>
+            <button type="button" class="day-select-action danger hidden" id="daySelectClearBtn" onclick="confirmDaySelectClear()" data-i18n="daySelectClearBtn">Wyczyść</button>
+            <button type="button" class="day-select-exit" onclick="exitDaySelectMode()" aria-label="Zamknij">✕</button>
+          </div>
         </div>
         <div class="field" style="margin-top:14px;">
           <label><span data-i18n="planExercisesLabel">Ćwiczenia</span> — <span id="planEditorDayName"></span> (<span id="planExCount">0</span>)</label>
@@ -1575,38 +1601,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<div class="onboard-overlay hidden" id="copyDaysOverlay" onclick="if(event.target===this) closeCopyDaysModal()">
-  <div class="onboard-box new-ex-form">
-    <h3 data-i18n="copyDaysTitle">Kopiuj do innych dni</h3>
-    <p id="copyDaysHint"></p>
-    <div class="plan-day-row" id="copyDaysRow"></div>
-    <div class="btns" style="margin-top:16px;">
-      <button type="button" class="cancel" onclick="closeCopyDaysModal()" data-i18n="cancel">Anuluj</button>
-      <button type="button" class="save" onclick="confirmCopyToDays()" data-i18n="copyDaysConfirm">Kopiuj</button>
-    </div>
-  </div>
-</div>
-
-<!-- Reverse of "Kopiuj do innych dni" — Maciej pointed out (2026-08-29)
-     the editor could only ever ADD days (assign exercises, or copy a
-     day's list onto others), never remove several at once: going from
-     e.g. 6 training days down to 2 meant manually opening each of the
-     4 unwanted days and un-tapping every exercise one by one. Lists
-     every day that currently has real exercises (including the active
-     one — clearing the day you're looking at is just as valid a case
-     as clearing others) and wipes whichever ones get picked. -->
-<div class="onboard-overlay hidden" id="clearDaysOverlay" onclick="if(event.target===this) closeClearDaysModal()">
-  <div class="onboard-box new-ex-form">
-    <h3 data-i18n="clearDaysTitle">Usuń z dni</h3>
-    <p id="clearDaysHint" data-i18n="clearDaysHint">Wybierz dni, które mają zostać wyczyszczone z ćwiczeń.</p>
-    <div class="plan-day-row" id="clearDaysRow"></div>
-    <div class="btns" style="margin-top:16px;">
-      <button type="button" class="cancel" onclick="closeClearDaysModal()" data-i18n="cancel">Anuluj</button>
-      <button type="button" class="save" onclick="confirmClearDays()" data-i18n="clearDaysConfirm">Usuń</button>
-    </div>
-  </div>
-</div>
-
 <div class="onboard-overlay hidden" id="newExerciseOverlay" onclick="if(event.target===this) toggleNewExerciseForm()">
   <div class="onboard-box new-ex-form" id="newExerciseForm">
     <h3 data-i18n="newExerciseTitle">Dodaj własne ćwiczenie</h3>
@@ -1671,17 +1665,13 @@ document.documentElement.lang = LANG;
 const T_EN = {
   planPill: 'Training plans',
   planOnboardingIntro: "Before you start, pick a ready-made plan or build your own — you'll see it right away in GYM.",
-  copyDaysBtn: 'Copy to other days',
-  copyDaysTitle: 'Copy to other days',
-  copyDaysHint: (day) => `Pick which days should get the same exercises as ${day}.`,
-  copyDaysConfirm: 'Copy',
-  copyDaysDone: n => `Copied to ${n} day${n===1?'':'s'}`,
-  clearDaysBtn: 'Remove from days',
-  clearDaysTitle: 'Remove from days',
-  clearDaysHint: 'Pick which days should have their exercises cleared.',
-  clearDaysConfirm: 'Remove',
-  clearDaysDone: n => `Cleared ${n} day${n===1?'':'s'}`,
-  clearDaysEmpty: "No day has any exercises yet",
+  daySelectModeBtn: 'Select days',
+  daySelectCount: n => `${n} day${n===1?'':'s'} selected`,
+  daySelectCopyBtn: (day) => `Copy ${day} here`,
+  daySelectClearBtn: n => `Clear (${n})`,
+  daySelectClearConfirm: n => `Clear all exercises from ${n} day${n===1?'':'s'}? This can't be undone.`,
+  daySelectCopyDone: n => `Copied to ${n} day${n===1?'':'s'}`,
+  daySelectClearDone: n => `Cleared ${n} day${n===1?'':'s'}`,
   favFilterAll: 'All',
   favFilterFavorites: 'Favorites',
   skipPlanOnboarding: "Skip for now, I'll decide later",
@@ -1833,6 +1823,7 @@ const T_EN = {
   planDeleted: 'Plan deleted',
   planNoPlans: 'No plans yet.',
   planDayHint: 'Pick a day and assign exercises to it',
+  planDaySelectHint: 'Select the days you want to change.',
   planRestDay: 'Rest day',
   pickFromLibrary: 'Pick another exercise',
   pickFromLibraryTitle: 'Pick an exercise',
@@ -2304,7 +2295,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 66;
+const DASH_BUILD = 67;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4604,20 +4595,102 @@ function openPlanEditor(id){
   renderPlanEditorGrid();
   goRoute('planEditor');
 }
+// Day-selection mode (Maciej, 2026-08-29) — replaces the old two
+// separate "Kopiuj do innych dni" / "Usuń z dni" modals with one
+// inline flow: tap "Zaznacz dni", tap the day chips to select them,
+// then whichever action(s) actually apply to that selection appear in
+// the bar below. Copy source is fixed to whatever day was open when
+// selection mode was entered (daySelectSource) — matches the old
+// copy-days behavior (copy FROM the currently active day). Clearing
+// has no "source" concept; any selected day with real exercises is a
+// valid clear target, including the source day itself.
+let daySelectMode = false;
+let daySelectSource = null;
+let daySelected = new Set();
+function daysWithExercises(){
+  return PLAN_DAYS.filter(d=> (editingPlan.schedule[d]||[]).length > 0);
+}
+function toggleDaySelectMode(){
+  if(daySelectMode){ exitDaySelectMode(); return; }
+  daySelectMode = true;
+  daySelectSource = editingPlan.activeDay;
+  daySelected = new Set();
+  renderPlanDayRow();
+}
+function exitDaySelectMode(){
+  daySelectMode = false;
+  daySelectSource = null;
+  daySelected = new Set();
+  renderPlanDayRow();
+}
+function toggleDaySelected(d){
+  if(daySelected.has(d)) daySelected.delete(d);
+  else daySelected.add(d);
+  renderPlanDayRow();
+}
+function confirmDaySelectCopy(){
+  const targets = [...daySelected].filter(d=>d!==daySelectSource);
+  const sourceExercises = editingPlan.schedule[daySelectSource];
+  if(!targets.length || !sourceExercises.length) return;
+  targets.forEach(d=>{ editingPlan.schedule[d] = sourceExercises.map(e=>({...e})); });
+  toast(t('daySelectCopyDone', `Skopiowano do ${targets.length} ${targets.length===1?'dnia':'dni'}`, targets.length));
+  exitDaySelectMode();
+  renderPlanEditorGrid();
+}
+function confirmDaySelectClear(){
+  const targets = [...daySelected].filter(d=> (editingPlan.schedule[d]||[]).length > 0);
+  if(!targets.length) return;
+  // Irreversible bulk-delete of real exercise data — same bar as
+  // deletePlanV2's confirm(), which exists for exactly this reason.
+  const dayNames = targets.map(planDayLabel).join(', ');
+  if(!confirm(t('daySelectClearConfirm', `Wyczyścić wszystkie ćwiczenia z ${targets.length} ${targets.length===1?'dnia':'dni'} (${dayNames})? Tego nie da się cofnąć.`, targets.length))) return;
+  targets.forEach(d=>{ editingPlan.schedule[d] = []; });
+  toast(t('daySelectClearDone', `Wyczyszczono ${targets.length} ${targets.length===1?'dzień':'dni'}`, targets.length));
+  exitDaySelectMode();
+  renderPlanEditorGrid();
+}
 function renderPlanDayRow(){
   const row = document.getElementById('planDayRow');
   row.innerHTML = PLAN_DAYS.map(d=>{
     const cls = ['plan-day-chip'];
-    if(d===editingPlan.activeDay) cls.push('active');
+    const isSourceOrActive = daySelectMode ? d===daySelectSource : d===editingPlan.activeDay;
+    if(isSourceOrActive) cls.push('active');
     if((editingPlan.schedule[d]||[]).length>0) cls.push('has-ex');
-    return `<button type="button" class="${cls.join(' ')}" onclick="selectPlanEditorDay('${d}')">${planDayLabel(d)}</button>`;
+    if(daySelectMode && daySelected.has(d)) cls.push('picked');
+    const handler = daySelectMode ? `toggleDaySelected('${d}')` : `selectPlanEditorDay('${d}')`;
+    return `<button type="button" class="${cls.join(' ')}" onclick="${handler}">${planDayLabel(d)}</button>`;
   }).join('');
   const nameEl = document.getElementById('planEditorDayName');
   if(nameEl) nameEl.textContent = planDayLabel(editingPlan.activeDay);
-  const copyBtn = document.getElementById('copyDaysBtn');
-  if(copyBtn) copyBtn.classList.toggle('hidden', editingPlan.schedule[editingPlan.activeDay].length === 0);
-  const clearBtn = document.getElementById('clearDaysBtn');
-  if(clearBtn) clearBtn.classList.toggle('hidden', daysWithExercises().length === 0);
+
+  const hintEl = document.getElementById('planDayHintText');
+  const modeBtn = document.getElementById('daySelectModeBtn');
+  const bar = document.getElementById('daySelectBar');
+  if(!daySelectMode){
+    if(hintEl) hintEl.textContent = t('planDayHint','Wybierz dzień i przypisz mu ćwiczenia');
+    if(modeBtn){ modeBtn.classList.toggle('hidden', daysWithExercises().length===0); modeBtn.textContent = t('daySelectModeBtn','Zaznacz dni'); }
+    if(bar) bar.classList.add('hidden');
+    return;
+  }
+  if(modeBtn) modeBtn.classList.add('hidden');
+  if(hintEl) hintEl.textContent = t('planDaySelectHint','Zaznacz dni, które chcesz zmienić.');
+  if(bar) bar.classList.remove('hidden');
+  const count = daySelected.size;
+  const countEl = document.getElementById('daySelectCount');
+  if(countEl) countEl.textContent = count ? t('daySelectCount', `${count} ${count===1?'dzień':'dni'} zaznaczon${count===1?'y':'e'}`, count) : '';
+  const copyTargets = [...daySelected].filter(d=>d!==daySelectSource);
+  const sourceHasEx = (editingPlan.schedule[daySelectSource]||[]).length > 0;
+  const copyBtn = document.getElementById('daySelectCopyBtn');
+  if(copyBtn){
+    copyBtn.classList.toggle('hidden', !(sourceHasEx && copyTargets.length>0));
+    copyBtn.textContent = t('daySelectCopyBtn', `Kopiuj ${planDayLabel(daySelectSource)} tu`, planDayLabel(daySelectSource));
+  }
+  const clearTargets = [...daySelected].filter(d=> (editingPlan.schedule[d]||[]).length>0);
+  const clearBtn = document.getElementById('daySelectClearBtn');
+  if(clearBtn){
+    clearBtn.classList.toggle('hidden', clearTargets.length===0);
+    clearBtn.textContent = t('daySelectClearBtn', `Wyczyść (${clearTargets.length})`, clearTargets.length);
+  }
 }
 function selectPlanEditorDay(d){
   editingPlan.activeDay = d;
@@ -4663,84 +4736,6 @@ function togglePlanExercise(ex){
   else dayExercises.splice(idx,1);
   renderPlanDayRow();
   renderPlanEditorGrid();
-}
-let copyDaysSelected = new Set();
-function openCopyDaysModal(){
-  const sourceDay = editingPlan.activeDay;
-  if(!editingPlan.schedule[sourceDay].length) return;
-  copyDaysSelected = new Set();
-  document.getElementById('copyDaysHint').textContent = t('copyDaysHint', `Wybierz dni, które mają dostać te same ćwiczenia co ${planDayLabel(sourceDay)}.`, planDayLabel(sourceDay));
-  renderCopyDaysRow();
-  document.getElementById('copyDaysOverlay').classList.remove('hidden');
-}
-function closeCopyDaysModal(){
-  document.getElementById('copyDaysOverlay').classList.add('hidden');
-}
-function toggleCopyDay(d){
-  if(copyDaysSelected.has(d)) copyDaysSelected.delete(d);
-  else copyDaysSelected.add(d);
-  renderCopyDaysRow();
-}
-function renderCopyDaysRow(){
-  const row = document.getElementById('copyDaysRow');
-  const sourceDay = editingPlan.activeDay;
-  row.innerHTML = PLAN_DAYS.filter(d=>d!==sourceDay).map(d=>{
-    const active = copyDaysSelected.has(d);
-    return `<button type="button" class="plan-day-chip${active?' active':''}" onclick="toggleCopyDay('${d}')">${planDayLabel(d)}</button>`;
-  }).join('');
-}
-function confirmCopyToDays(){
-  const count = copyDaysSelected.size;
-  if(!count){ closeCopyDaysModal(); return; }
-  const sourceExercises = editingPlan.schedule[editingPlan.activeDay];
-  copyDaysSelected.forEach(d=>{ editingPlan.schedule[d] = sourceExercises.map(e=>({...e})); });
-  copyDaysSelected = new Set();
-  closeCopyDaysModal();
-  renderPlanDayRow();
-  toast(t('copyDaysDone', `Skopiowano do ${count} ${count===1?'dnia':'dni'}`, count));
-}
-// Reverse of the copy-days flow above — Maciej (2026-08-29): the editor
-// could only ever add training days (assign exercises, or copy one
-// day's list onto others), never remove several at once. Going from
-// e.g. 6 training days down to 2 meant opening each of the 4 unwanted
-// days individually and un-tapping every exercise one by one. Lists
-// every day that currently has real exercises (including the active
-// one — clearing the day you're looking at is just as valid as
-// clearing others) and empties whichever ones get picked.
-let clearDaysSelected = new Set();
-function daysWithExercises(){
-  return PLAN_DAYS.filter(d=> (editingPlan.schedule[d]||[]).length > 0);
-}
-function openClearDaysModal(){
-  if(!daysWithExercises().length){ toast(t('clearDaysEmpty','Żaden dzień nie ma jeszcze ćwiczeń')); return; }
-  clearDaysSelected = new Set();
-  renderClearDaysRow();
-  document.getElementById('clearDaysOverlay').classList.remove('hidden');
-}
-function closeClearDaysModal(){
-  document.getElementById('clearDaysOverlay').classList.add('hidden');
-}
-function toggleClearDay(d){
-  if(clearDaysSelected.has(d)) clearDaysSelected.delete(d);
-  else clearDaysSelected.add(d);
-  renderClearDaysRow();
-}
-function renderClearDaysRow(){
-  const row = document.getElementById('clearDaysRow');
-  row.innerHTML = daysWithExercises().map(d=>{
-    const active = clearDaysSelected.has(d);
-    return `<button type="button" class="plan-day-chip${active?' active':''}" onclick="toggleClearDay('${d}')">${planDayLabel(d)}</button>`;
-  }).join('');
-}
-function confirmClearDays(){
-  const count = clearDaysSelected.size;
-  if(!count){ closeClearDaysModal(); return; }
-  clearDaysSelected.forEach(d=>{ editingPlan.schedule[d] = []; });
-  clearDaysSelected = new Set();
-  closeClearDaysModal();
-  renderPlanDayRow();
-  renderPlanEditorGrid();
-  toast(t('clearDaysDone', `Wyczyszczono ${count} ${count===1?'dzień':'dni'}`, count));
 }
 function savePlanEditor(){
   const name = document.getElementById('planNameInput').value.trim();
