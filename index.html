@@ -674,6 +674,9 @@ button{font-family:inherit;}
 .gymv2-plan-name{margin:0;font-size:22px;font-weight:500;letter-spacing:.035em;text-transform:uppercase;line-height:1.1;}
 .gymv2-plan-desc{margin:0;font-size:12px;line-height:1.4;}
 .gymv2-plan-stats{display:flex;gap:16px;flex-wrap:wrap;}
+.gymv2-plan-stats.hidden{display:none;}
+.gymv2-rest-caption{margin:-4px 0 12px;font-size:12px;line-height:1.4;color:#5b5555;}
+.gymv2-rest-caption.hidden{display:none;}
 .gymv2-plan-stat{display:flex;align-items:center;gap:12px;}
 .gymv2-plan-stat .ph{width:16px;height:16px;color:#fff;flex-shrink:0;}
 .gymv2-plan-stat span{font-size:14px;}
@@ -1096,6 +1099,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <p>Ćwiczenia w planie</p>
         <button type="button" class="gymv2-edit-plan" onclick="openPlanEditor(starredPlanId)">Edytuj plan</button>
       </div>
+      <p class="gymv2-rest-caption hidden" id="gymV2RestCaption" data-i18n="gymV2RestCaption">Dziś zaplanowany odpoczynek — plan wraca w kolejnym dniu treningowym. Możesz mimo to dodać ćwiczenie ręcznie.</p>
       <div class="gymv2-grid" id="gymGridV2"></div>
 
       <p class="gymv2-done-head hidden" id="gymDoneV2Section">Ćwiczenia zrobione</p>
@@ -1679,6 +1683,7 @@ const T_EN = {
   planWeekLabel: 'Plan week',
   gymV2PlanDesc: "Today's workout.",
   gymV2Difficulty: 'Medium',
+  gymV2RestCaption: "Today's a rest day — your plan picks back up on its next training day. You can still add an exercise by hand if you want.",
   sessionTypeLabel: 'Session type',
   distanceKm: 'Distance (km)',
   timeMin: 'Time (min)',
@@ -2277,7 +2282,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 59;
+const DASH_BUILD = 60;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -5129,10 +5134,17 @@ function renderDashboard(){
    renderGymGrid()/renderExercisePanels() so every existing action
    (log a set, delete, add custom exercise, save) keeps both screens in
    sync automatically, whichever one is actually visible.
-   Duration/difficulty on the plan card are a placeholder estimate
-   (~5 min/exercise, difficulty always "Średni") — there's no real
-   workout-duration tracking yet; Maciej plans to add that later, at
-   which point this should read the real number instead of guessing.
+   Duration is still a placeholder estimate (~5 min/exercise) until the
+   session actually starts, real elapsed time takes over from there
+   (computeGymSessionDurationMin()) — no full duration history to guess
+   from yet. Difficulty now reads the plan's real customizationV2 when
+   it has one (2026-08-29 fix, same as buildPlanCardV2 on Plans v2),
+   no longer hardcoded to "Średni".
+   A day with nothing scheduled is a genuine rest day (a plan trained
+   fewer than 7x/week has them by design), not an empty/broken plan —
+   shown as "Dzień odpoczynku" instead of a nonsensical "0 ćwiczeń"
+   stat row. Maciej hit this exact confusion on a real rest day
+   (2026-08-29) right after starring a plan he'd customized to 3x/week.
    ============================================================ */
 const GYMV2_DAY_NAMES_PL = ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
 function renderGymV2(){
@@ -5143,23 +5155,33 @@ function renderGymV2(){
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   const card = document.querySelector('.gymv2-plan-card');
   const noPlan = document.getElementById('gymV2NoPlan');
+  const restCaption = document.getElementById('gymV2RestCaption');
   if(plan){
     const todayEx = (plan.schedule[dayKeyFromDate(iso)]||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name));
+    const isRestDay = todayEx.length === 0;
     document.getElementById('gymV2PlanName').textContent = plan.name;
-    document.getElementById('gymV2PlanDesc').textContent = t('gymV2PlanDesc','Twój trening na dziś.');
-    document.getElementById('gymV2Count').textContent = planExCountText(todayEx.length);
-    // Real elapsed time once the session has actually started (first tile
-    // tap today), falling back to the old rough guess before that —
-    // see markGymActivity()/computeGymSessionDurationMin() above.
-    document.getElementById('gymV2Duration').textContent = gymSessionStartAt
-      ? `${computeGymSessionDurationMin()} min`
-      : `~${Math.max(15, todayEx.length*5)} min`;
-    document.getElementById('gymV2Difficulty').textContent = t('gymV2Difficulty','Średni');
+    document.getElementById('gymV2PlanDesc').textContent = isRestDay
+      ? t('planRestDay','Dzień odpoczynku')
+      : t('gymV2PlanDesc','Twój trening na dziś.');
+    document.querySelector('.gymv2-plan-stats').classList.toggle('hidden', isRestDay);
+    restCaption.classList.toggle('hidden', !isRestDay);
+    if(!isRestDay){
+      document.getElementById('gymV2Count').textContent = planExCountText(todayEx.length);
+      // Real elapsed time once the session has actually started (first tile
+      // tap today), falling back to the old rough guess before that —
+      // see markGymActivity()/computeGymSessionDurationMin() above.
+      document.getElementById('gymV2Duration').textContent = gymSessionStartAt
+        ? `${computeGymSessionDurationMin()} min`
+        : `~${Math.max(15, todayEx.length*5)} min`;
+      const diffKey = plan.customizationV2 ? plan.customizationV2.difficulty : planDifficultyKey(planAvgExercisesPerDay(plan));
+      document.getElementById('gymV2Difficulty').textContent = planDifficultyLabel(diffKey);
+    }
     card.classList.remove('hidden');
     noPlan.classList.add('hidden');
   } else {
     card.classList.add('hidden');
     noPlan.classList.remove('hidden');
+    restCaption.classList.add('hidden');
   }
   renderGymGridV2(true);
   renderGymDoneV2(true);
