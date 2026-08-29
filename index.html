@@ -2295,7 +2295,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 67;
+const DASH_BUILD = 68;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4613,7 +4613,19 @@ function daysWithExercises(){
 function toggleDaySelectMode(){
   if(daySelectMode){ exitDaySelectMode(); return; }
   daySelectMode = true;
-  daySelectSource = editingPlan.activeDay;
+  // Source defaults to whichever day is open for editing IF it
+  // actually has exercises — but that's not reliable across a fresh
+  // editor visit, since openPlanEditor() always defaults activeDay to
+  // TODAY's day of week, which can easily land on an empty day even
+  // when the plan has exactly one real training day somewhere else.
+  // Fall back to the first day (week order) that has real exercises,
+  // so re-entering selection mode later always finds something to
+  // copy from. Maciej, 2026-08-29: hit this exactly — cleared down to
+  // a single training day, came back another day, and the auto-picked
+  // source silently pointed at an empty day instead of the real one.
+  daySelectSource = (editingPlan.schedule[editingPlan.activeDay]||[]).length > 0
+    ? editingPlan.activeDay
+    : (daysWithExercises()[0] || editingPlan.activeDay);
   daySelected = new Set();
   renderPlanDayRow();
 }
