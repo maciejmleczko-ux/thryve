@@ -815,9 +815,12 @@ button{font-family:inherit;}
 .plansv2-card-actions{display:flex;align-items:center;gap:12px;flex-shrink:0;margin-left:12px;}
 .plansv2-card-export{cursor:pointer;flex-shrink:0;display:flex;}
 .plansv2-card-export .ph{width:24px;height:24px;color:#fff;}
-/* plan-star-on/off carry their own circle chrome + colors baked in
-   (not currentColor) — no extra badge/background styling needed here,
-   unlike the old dash-check/check-circle pairing. */
+/* plan-star-on's checkmark uses currentColor (2026-08-29 — Maciej
+   pointed out the checkmark stayed navy blue even on a red/orange
+   "Twoje plany" card) so buildPlanCardV2() can set it inline to match
+   that specific card's own background color; the white circle behind
+   it and plan-star-off's white ring/checkmark are unaffected, still
+   baked into the SVG. */
 .plansv2-card-star{cursor:pointer;flex-shrink:0;display:flex;}
 .plansv2-card-star .ph{width:20px;height:20px;}
 .plansv2-card-customize{cursor:pointer;flex-shrink:0;display:flex;}
@@ -1916,7 +1919,7 @@ Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\
    checkmark's own color change. Maciej's own icons (self-contained,
    colors baked in — not currentColor), replacing the old dash-check/
    check-circle pairing that used two differently-shaped glyphs. */
-"plan-star-on": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"none\"><rect width=\"20\" height=\"20\" rx=\"10\" fill=\"white\"/><path d=\"M15.4422 7.52551L8.7755 14.1922C8.71743 14.2504 8.64844 14.2967 8.57247 14.3282C8.4965 14.3598 8.41505 14.376 8.33279 14.376C8.25053 14.376 8.16908 14.3598 8.09311 14.3282C8.01714 14.2967 7.94815 14.2504 7.89008 14.1922L4.97341 11.2755C4.91528 11.2174 4.86916 11.1484 4.8377 11.0724C4.80623 10.9964 4.79004 10.915 4.79004 10.8328C4.79004 10.7506 4.80623 10.6692 4.8377 10.5932C4.86916 10.5173 4.91528 10.4482 4.97341 10.3901C5.03155 10.332 5.10057 10.2858 5.17653 10.2544C5.25249 10.2229 5.3339 10.2067 5.41612 10.2067C5.49834 10.2067 5.57976 10.2229 5.65572 10.2544C5.73168 10.2858 5.80069 10.332 5.85883 10.3901L8.33331 12.8646L14.5578 6.64114C14.6752 6.52373 14.8344 6.45776 15.0005 6.45776C15.1665 6.45776 15.3258 6.52373 15.4432 6.64114C15.5606 6.75855 15.6266 6.9178 15.6266 7.08385C15.6266 7.2499 15.5606 7.40914 15.4432 7.52656L15.4422 7.52551Z\" fill=\"#2642A4\"/></svg>",
+"plan-star-on": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"none\"><rect width=\"20\" height=\"20\" rx=\"10\" fill=\"white\"/><path d=\"M15.4422 7.52551L8.7755 14.1922C8.71743 14.2504 8.64844 14.2967 8.57247 14.3282C8.4965 14.3598 8.41505 14.376 8.33279 14.376C8.25053 14.376 8.16908 14.3598 8.09311 14.3282C8.01714 14.2967 7.94815 14.2504 7.89008 14.1922L4.97341 11.2755C4.91528 11.2174 4.86916 11.1484 4.8377 11.0724C4.80623 10.9964 4.79004 10.915 4.79004 10.8328C4.79004 10.7506 4.80623 10.6692 4.8377 10.5932C4.86916 10.5173 4.91528 10.4482 4.97341 10.3901C5.03155 10.332 5.10057 10.2858 5.17653 10.2544C5.25249 10.2229 5.3339 10.2067 5.41612 10.2067C5.49834 10.2067 5.57976 10.2229 5.65572 10.2544C5.73168 10.2858 5.80069 10.332 5.85883 10.3901L8.33331 12.8646L14.5578 6.64114C14.6752 6.52373 14.8344 6.45776 15.0005 6.45776C15.1665 6.45776 15.3258 6.52373 15.4432 6.64114C15.5606 6.75855 15.6266 6.9178 15.6266 7.08385C15.6266 7.2499 15.5606 7.40914 15.4432 7.52656L15.4422 7.52551Z\" fill=\"currentColor\"/></svg>",
 "plan-star-off": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"none\"><rect x=\"0.75\" y=\"0.75\" width=\"18.5\" height=\"18.5\" rx=\"9.25\" stroke=\"white\" stroke-width=\"1.5\"/><path d=\"M15.4422 7.52551L8.7755 14.1922C8.71743 14.2504 8.64844 14.2967 8.57247 14.3282C8.4965 14.3598 8.41505 14.376 8.33279 14.376C8.25053 14.376 8.16908 14.3598 8.09311 14.3282C8.01714 14.2967 7.94815 14.2504 7.89008 14.1922L4.97341 11.2755C4.91528 11.2174 4.86916 11.1484 4.8377 11.0724C4.80623 10.9964 4.79004 10.915 4.79004 10.8328C4.79004 10.7506 4.80623 10.6692 4.8377 10.5932C4.86916 10.5173 4.91528 10.4482 4.97341 10.3901C5.03155 10.332 5.10057 10.2858 5.17653 10.2544C5.25249 10.2229 5.3339 10.2067 5.41612 10.2067C5.49834 10.2067 5.57976 10.2229 5.65572 10.2544C5.73168 10.2858 5.80069 10.332 5.85883 10.3901L8.33331 12.8646L14.5578 6.64114C14.6752 6.52373 14.8344 6.45776 15.0005 6.45776C15.1665 6.45776 15.3258 6.52373 15.4432 6.64114C15.5606 6.75855 15.6266 6.9178 15.6266 7.08385C15.6266 7.2499 15.5606 7.40914 15.4432 7.52656L15.4422 7.52551Z\" fill=\"white\"/></svg>",
 /* Simple hand-built "sliders/adjust" glyph for the new "Dostosuj plan"
    action — not sourced from Figma (this is a net-new v3 feature, no
@@ -2295,7 +2298,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 70;
+const DASH_BUILD = 71;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4517,7 +4520,7 @@ function buildPlanCardV2(p, isCustom, animate, i){
     <div class="plansv2-card-actions">
       ${planIsDostosujable(p) ? `<span class="plansv2-card-customize" onclick="event.stopPropagation();openPlanCustomizeV2('${p.id}')" title="${t('planCustomizeTitle','Dostosuj plan')}">${ph('sliders')}</span>` : ''}
       <span class="plansv2-card-export" onclick="event.stopPropagation();sharePlan(trainingPlans.find(x=>x.id==='${p.id}'))" title="${t('sharePlanTitle','Udostępnij plan')}">${ph('export')}</span>
-      <span class="plansv2-card-star${starred?' active':''}" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'plan-star-on':'plan-star-off')}</span>
+      <span class="plansv2-card-star${starred?' active':''}" style="color:${color};" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'plan-star-on':'plan-star-off')}</span>
     </div>
   `;
   if(animate){
