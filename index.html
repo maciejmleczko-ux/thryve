@@ -869,6 +869,25 @@ button{font-family:inherit;}
 .plansv2-choice-chip{border:1px solid #ff6343;border-radius:999px;padding:8px 14px;background:#fff;font-size:13px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
 .plansv2-choice-chip:active{transform:scale(.95);}
 .plansv2-choice-chip.active{background:#ff6343;color:#fff;}
+/* Trudność/Dni w tygodniu are genuine ordered scales — a slider reads
+   correctly there. Cel treningowy/Sprzęt stay chips on purpose: three
+   unordered categories on a slider would falsely imply they sit along
+   one continuous line. Maciej, 2026-08-29. Native <input type=range>
+   rather than a hand-rolled drag component — touch dragging on a real
+   range input is solid on iOS Safari for free, unlike custom touch-
+   gesture code (see the swipe-to-delete saga earlier this build). Fill
+   percentage is computed in JS and pushed in as --pct since neither
+   Chrome nor Safari support a native filled-track pseudo-element the
+   way Firefox's ::-moz-range-progress does. */
+.plansv2-slider-wrap{padding:2px 4px 0;}
+.plansv2-slider-input{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;background:linear-gradient(to right,#ff6343 0%,#ff6343 var(--pct,50%),#e7e2f2 var(--pct,50%),#e7e2f2 100%);outline:none;margin:0;display:block;}
+.plansv2-slider-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid #ff6343;box-shadow:0 1px 4px rgba(44,39,39,.25);cursor:pointer;}
+.plansv2-slider-input::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid #ff6343;box-shadow:0 1px 4px rgba(44,39,39,.25);cursor:pointer;}
+.plansv2-slider-input::-moz-range-track{height:6px;border-radius:999px;background:#e7e2f2;}
+.plansv2-slider-input::-moz-range-progress{height:6px;border-radius:999px;background:#ff6343;}
+.plansv2-slider-ticks{display:flex;justify-content:space-between;margin-top:10px;}
+.plansv2-slider-ticks span{font-size:11px;font-weight:500;color:#96959b;transition:color .15s ease,font-weight .15s ease;}
+.plansv2-slider-ticks span.active{color:#ff6343;font-weight:700;}
 .plansv2-customize-freq-hint{margin:0;font-size:11px;line-height:1.4;color:#96959b;}
 .plansv2-customize-hint{margin:0;font-size:11px;line-height:1.4;color:#96959b;}
 .plansv2-customize-actions{display:flex;gap:10px;}
@@ -1195,10 +1214,13 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           </div>
           <div class="plansv2-customize-section">
             <p class="plansv2-customize-label">Trudność</p>
-            <div class="plansv2-choice-row">
-              <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="easy" onclick="pickPlanCustomizeChipV2(this)">Łatwy</button>
-              <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="medium" onclick="pickPlanCustomizeChipV2(this)">Średni</button>
-              <button type="button" class="plansv2-choice-chip" data-group="difficulty" data-value="hard" onclick="pickPlanCustomizeChipV2(this)">Trudny</button>
+            <div class="plansv2-slider-wrap">
+              <input type="range" class="plansv2-slider-input" id="planCustomizeDifficultySlider" min="0" max="2" step="1" value="1" oninput="onPlanCustomizeSliderInput(this,'difficulty')">
+              <div class="plansv2-slider-ticks" id="planCustomizeDifficultyTicks">
+                <span data-i="0">Łatwy</span>
+                <span data-i="1">Średni</span>
+                <span data-i="2">Trudny</span>
+              </div>
             </div>
           </div>
           <div class="plansv2-customize-section">
@@ -1211,10 +1233,13 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           </div>
           <div class="plansv2-customize-section">
             <p class="plansv2-customize-label">Dni w tygodniu</p>
-            <div class="plansv2-choice-row">
-              <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="2" onclick="pickPlanCustomizeChipV2(this)">2x</button>
-              <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="3" onclick="pickPlanCustomizeChipV2(this)">3x</button>
-              <button type="button" class="plansv2-choice-chip" data-group="frequency" data-value="4" onclick="pickPlanCustomizeChipV2(this)">4x</button>
+            <div class="plansv2-slider-wrap">
+              <input type="range" class="plansv2-slider-input" id="planCustomizeFrequencySlider" min="0" max="2" step="1" value="1" oninput="onPlanCustomizeSliderInput(this,'frequency')">
+              <div class="plansv2-slider-ticks" id="planCustomizeFrequencyTicks">
+                <span data-i="0">2x</span>
+                <span data-i="1">3x</span>
+                <span data-i="2">4x</span>
+              </div>
             </div>
             <p class="plansv2-customize-freq-hint">Każda sesja to nadal cały trening — zmienia się tylko to, ile razy w tygodniu go powtarzasz.</p>
           </div>
@@ -2298,7 +2323,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 71;
+const DASH_BUILD = 72;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4159,6 +4184,12 @@ const PLANSV2_GOAL_LABEL = {strength:'Siła', mass:'Masa', endurance:'Wytrzymał
 // Target number of real exercises (bookends excluded) per difficulty.
 const PLANSV2_DIFFICULTY_COUNT = {easy:6, medium:8, hard:11};
 const PLANSV2_DIFFICULTY_LABEL_CUSTOMIZE = {easy:'Łatwy', medium:'Średni', hard:'Trudny'};
+// Slider position (0/1/2) <-> logical value, for the two ordered-scale
+// fields in "Dostosuj" (Trudność, Dni w tygodniu) — see the slider CSS
+// comment for why these two specifically became sliders and Cel
+// treningowy/Sprzęt stayed chips (2026-08-29).
+const PLANSV2_DIFFICULTY_SLIDER = ['easy','medium','hard'];
+const PLANSV2_FREQUENCY_SLIDER = [2,3,4];
 // Weekly frequency — this stays a genuine fullbody plan (every session
 // still hits the whole body, same exercise list every time), only the
 // number of sessions/week changes. Day picks are spaced for recovery,
@@ -4235,13 +4266,37 @@ function openPlanCustomizeV2(id){
   const saved = plan.customizationV2 || {goal:'mass', difficulty:'medium', equipment:'mix', frequency:3};
   document.getElementById('planCustomizeTitle').textContent = plan.name;
   document.querySelectorAll('#planCustomizeOverlay .plansv2-choice-chip').forEach(chip=>{
-    const savedVal = chip.dataset.group==='frequency' ? String(saved.frequency||3) : saved[chip.dataset.group];
-    chip.classList.toggle('active', chip.dataset.value===savedVal);
+    chip.classList.toggle('active', chip.dataset.value===saved[chip.dataset.group]);
   });
+  const diffSlider = document.getElementById('planCustomizeDifficultySlider');
+  const diffIdx = PLANSV2_DIFFICULTY_SLIDER.indexOf(saved.difficulty);
+  diffSlider.value = diffIdx===-1 ? 1 : diffIdx;
+  updatePlanCustomizeSliderVisual(diffSlider, 'difficulty');
+  const freqSlider = document.getElementById('planCustomizeFrequencySlider');
+  const freqIdx = PLANSV2_FREQUENCY_SLIDER.indexOf(saved.frequency);
+  freqSlider.value = freqIdx===-1 ? 1 : freqIdx;
+  updatePlanCustomizeSliderVisual(freqSlider, 'frequency');
   const overlay = document.getElementById('planCustomizeOverlay');
   overlay.classList.remove('plansv2-customize-closing');
   overlay.classList.remove('hidden');
   document.documentElement.classList.add('modal-lock'); // same full lock every other modal in the app uses while open
+}
+// Recomputes the filled-track percentage (--pct, read by the gradient
+// in .plansv2-slider-input's background — neither Chrome nor Safari
+// support a native filled-progress pseudo-element the way Firefox's
+// ::-moz-range-progress does) and bolds whichever tick label matches
+// the slider's current position. Called on every drag/tap (oninput)
+// and once up front when the modal opens, so pre-filled sliders don't
+// sit unstyled until the user first touches them.
+function updatePlanCustomizeSliderVisual(input, group){
+  const min = Number(input.min), max = Number(input.max), val = Number(input.value);
+  const pct = ((val-min)/(max-min))*100;
+  input.style.setProperty('--pct', pct+'%');
+  const ticks = document.getElementById(group==='difficulty' ? 'planCustomizeDifficultyTicks' : 'planCustomizeFrequencyTicks');
+  if(ticks) ticks.querySelectorAll('span').forEach(s=> s.classList.toggle('active', Number(s.dataset.i)===val));
+}
+function onPlanCustomizeSliderInput(input, group){
+  updatePlanCustomizeSliderVisual(input, group);
 }
 function closePlanCustomizeV2(){
   const overlay = document.getElementById('planCustomizeOverlay');
@@ -4264,8 +4319,9 @@ function applyPlanCustomizeV2(){
   const plan = trainingPlans.find(p=>p.id===id);
   if(!plan) return;
   const active = (group)=> document.querySelector(`#planCustomizeOverlay .plansv2-choice-chip[data-group="${group}"].active`)?.dataset.value;
-  const goal = active('goal') || 'mass', difficulty = active('difficulty') || 'medium', equipment = active('equipment') || 'mix';
-  const frequency = Number(active('frequency')) || 3;
+  const goal = active('goal') || 'mass', equipment = active('equipment') || 'mix';
+  const difficulty = PLANSV2_DIFFICULTY_SLIDER[Number(document.getElementById('planCustomizeDifficultySlider').value)] || 'medium';
+  const frequency = PLANSV2_FREQUENCY_SLIDER[Number(document.getElementById('planCustomizeFrequencySlider').value)] || 3;
   const schedule = generatePlanScheduleV2(goal, difficulty, equipment, frequency);
   const customizationV2 = {goal, difficulty, equipment, frequency};
   if(plan.builtin){
