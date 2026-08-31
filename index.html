@@ -977,6 +977,11 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .pev2-equip-chip.active{background:#f30;border-color:#f30;color:#fdfbff;}
 .pev2-groups{display:flex;flex-direction:column;gap:8px;}
 .pev2-section{border:1px solid #c7c6cb;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:12px;}
+/* Collapsed section = white pill (Figma node 160:2855, the "NOGI"
+   section shown collapsed) — expanded ones stay borderless-white too,
+   but the border is enough to read there; collapsed on its own without
+   any fill just showed the lilac page bleeding through. */
+.pev2-section.collapsed{background:#fff;}
 .pev2-section-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
 .pev2-section-heading{display:flex;align-items:center;gap:8px;}
 .pev2-section-num{background:#ff6343;border-radius:6px;padding:4px 8px;font-size:14px;letter-spacing:.56px;text-transform:uppercase;color:#fff;}
@@ -2503,7 +2508,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 80;
+const DASH_BUILD = 81;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -5232,7 +5237,7 @@ function renderPlanEditorGridV2(){
     num++;
     const collapsed = planEditorV2Collapsed.has(b.key);
     const section = document.createElement('div');
-    section.className = 'pev2-section';
+    section.className = 'pev2-section' + (collapsed ? ' collapsed' : '');
     const header = document.createElement('div');
     header.className = 'pev2-section-header';
     header.innerHTML = `
@@ -5274,11 +5279,25 @@ function renderPlanEditorGridV2(){
 // screen (equip filter, accordion collapse) don't need that second
 // pass — the view is already active by then.
 function refreshPlanEditorV2Scroll(){
-  const container = document.getElementById('planEditorGridV2');
-  const lastSection = container ? container.lastElementChild : null;
-  const nav = document.getElementById('bottomNav');
-  const needsScroll = !!(lastSection && nav && lastSection.getBoundingClientRect().bottom > nav.getBoundingClientRect().top - 150);
+  // scrollHeight vs innerHeight, not a getBoundingClientRect() bottom —
+  // the old bounding-rect check measured lastSection's position AFTER
+  // whatever scroll offset was already applied, so collapsing a lower
+  // section while scrolled down could read as "fits now" from the
+  // scrolled vantage point while the page was still locked mid-scroll
+  // with no way back to the top (Maciej, 2026-08-31: "jak są zwinięte
+  // od ostatniej partii przestaje działać scroll"). scrollHeight is the
+  // natural (unscrolled) content height, so this is scroll-position
+  // independent — and .pev2-panel's own 190px bottom padding already
+  // covers the fixed FAB/nav clearance, no extra fudge factor needed.
+  const needsScroll = document.body.scrollHeight > window.innerHeight + 2;
   document.documentElement.classList.toggle('plansv2-scrollable', needsScroll);
+  if(!needsScroll){
+    // Locking back to overflow:hidden freezes whatever scrollTop was
+    // last set — reset it, or content stays stuck offset with no way
+    // to scroll back to see what's now above the fold.
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
 }
 function togglePlanExercise(ex){
   const dayExercises = editingPlan.schedule[editingPlan.activeDay];
