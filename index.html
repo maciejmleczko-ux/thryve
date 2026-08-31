@@ -1992,6 +1992,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
         <span class="ph newex-v2-close" data-ph="x" onclick="closeExercisePickerV2()"></span>
       </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Wybierz swój sprzęt</p>
+        <div class="pev2-equip-row" id="pickExerciseEquipRowV2"></div>
+      </div>
       <div class="pev2-groups" id="pickExerciseGridV2"></div>
       <div class="plansv2-customize-actions">
         <button type="button" class="plansv2-customize-apply" id="pickExerciseAddBtnV2" onclick="confirmExercisePickerV2()" disabled>DODAJ</button>
@@ -2717,7 +2721,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 95;
+const DASH_BUILD = 96;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4324,22 +4328,34 @@ function saveNewExerciseV2(){
 }
 
 /* v3 "Wybierz inne ćwiczenie" (#pickExerciseOverlayV2) — opened from
-   GYM v2's own search tile (Figma node 174:6236). Mirrors the old
-   #pickExerciseOverlay's multi-select-then-confirm flow
-   (pickerSelected/togglePickerExercise()/confirmExercisePicker() above)
-   exactly, just painting into the v3 overlay and grouping the library
-   by muscle (muscleGroupBucket()/PLAN_EX_GROUPS, same as plan editor
-   v2) instead of one flat grid. Selecting a tile here reuses
-   buildExerciseTileV2()'s 'selected' state (orange border + check) —
-   same visual language as "assigned to today" elsewhere, repurposed
-   here as "will be added". Confirming pushes into extraGymTiles, same
-   as the old flow, so it shows up in GYM v2's own grid immediately. */
+   GYM v2's own search tile. Rebuilt to match Figma node 175:8606,
+   2026-09-02 (Maciej: "użyj tego popupu"): an equipment filter row
+   (PLAN_EQUIP_FILTERS, same chips as plan editor v2's own) above a
+   full numbered/collapsible accordion — same .pev2-section/-header/
+   -num shell as plan editor v2's muscle-group sections, not the plain
+   label this had before. Still mirrors the old #pickExerciseOverlay's
+   multi-select-then-confirm flow (pickerSelected/togglePickerExercise()/
+   confirmExercisePicker() above) exactly. Selecting a tile reuses
+   buildExerciseTileV2()'s 'selected' state (orange border + check,
+   same v3 pictograms as everywhere else — verified live against
+   orderedExerciseLibrary(): all 47 exercises resolve a v3 icon, none
+   fall back to the generic barbell placeholder). Confirming pushes
+   into extraGymTiles, same as the old flow, so it shows up in GYM v2's
+   own grid immediately. Entrance animation matches plan editor v2's
+   accordion exactly: .pev2-anim-in/dashDayIn stagger on a fresh open
+   only (renderExercisePickerGridV2(true) from openExercisePickerV2()),
+   not on every filter/select/collapse re-render. */
 let pickerSelectedV2 = new Set();
+let pickExerciseEquipFilterV2 = 'all';
+let pickExerciseV2Collapsed = new Set();
 let pickExerciseV2CloseTimer = null;
 function openExercisePickerV2(){
   if(pickExerciseV2CloseTimer){ clearTimeout(pickExerciseV2CloseTimer); pickExerciseV2CloseTimer = null; }
   pickerSelectedV2 = new Set();
-  renderExercisePickerGridV2();
+  pickExerciseEquipFilterV2 = 'all';
+  pickExerciseV2Collapsed = new Set();
+  renderPickExerciseEquipRowV2();
+  renderExercisePickerGridV2(true);
   const overlay = document.getElementById('pickExerciseOverlayV2');
   overlay.classList.remove('plansv2-customize-closing');
   overlay.classList.remove('hidden');
@@ -4355,17 +4371,37 @@ function closeExercisePickerV2(){
     pickExerciseV2CloseTimer = null;
   }, 220);
 }
+function setPickExerciseEquipFilterV2(key){
+  pickExerciseEquipFilterV2 = key;
+  renderPickExerciseEquipRowV2();
+  renderExercisePickerGridV2();
+}
+function renderPickExerciseEquipRowV2(){
+  const row = document.getElementById('pickExerciseEquipRowV2');
+  if(!row) return;
+  row.innerHTML = PLAN_EQUIP_FILTERS.map(f=>
+    `<button type="button" class="pev2-equip-chip${pickExerciseEquipFilterV2===f.key?' active':''}" onclick="setPickExerciseEquipFilterV2('${f.key}')">${LANG==='en'?f.en:f.pl}</button>`
+  ).join('');
+}
+function togglePickExerciseV2Section(key){
+  if(pickExerciseV2Collapsed.has(key)) pickExerciseV2Collapsed.delete(key);
+  else pickExerciseV2Collapsed.add(key);
+  renderExercisePickerGridV2();
+}
 function togglePickerExerciseV2(ex){
   if(pickerSelectedV2.has(ex.name)) pickerSelectedV2.delete(ex.name);
   else pickerSelectedV2.add(ex.name);
   renderExercisePickerGridV2();
 }
-function renderExercisePickerGridV2(){
+function renderExercisePickerGridV2(animate){
   const container = document.getElementById('pickExerciseGridV2');
   if(!container) return;
   const planEx = todayPlanExerciseNames() || [];
   const alreadyVisible = new Set([...planEx.map(e=>e.name), ...extraGymTiles.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
-  const lib = orderedExerciseLibrary().filter(ex=>!alreadyVisible.has(ex.name));
+  let lib = orderedExerciseLibrary().filter(ex=>!alreadyVisible.has(ex.name));
+  if(pickExerciseEquipFilterV2 !== 'all'){
+    lib = lib.filter(ex => !ex.equipment || ex.equipment === pickExerciseEquipFilterV2);
+  }
   const buckets = new Map();
   lib.forEach(ex=>{
     const b = muscleGroupBucket(ex.group);
@@ -4373,22 +4409,38 @@ function renderExercisePickerGridV2(){
     buckets.get(b.key).push(ex);
   });
   container.innerHTML = '';
+  let num = 0;
   PLAN_EX_GROUPS.forEach(b=>{
     const list = buckets.get(b.key);
     if(!list || !list.length) return;
-    const label = document.createElement('p');
-    label.className = 'plansv2-customize-label';
-    label.textContent = LANG==='en' ? b.en : b.pl;
-    container.appendChild(label);
-    const grid = document.createElement('div');
-    grid.className = 'gymv2-grid';
-    list.forEach(ex=>{
-      const tile = buildExerciseTileV2(ex, pickerSelectedV2.has(ex.name) ? 'selected' : 'plain');
-      tile.classList.add('gymv2-tile');
-      tile.onclick = ()=> togglePickerExerciseV2(ex);
-      grid.appendChild(tile);
-    });
-    container.appendChild(grid);
+    num++;
+    const collapsed = pickExerciseV2Collapsed.has(b.key);
+    const section = document.createElement('div');
+    section.className = 'pev2-section' + (collapsed ? ' collapsed' : '') + (animate ? ' pev2-anim-in' : '');
+    if(animate) section.style.setProperty('--i', num - 1);
+    const header = document.createElement('div');
+    header.className = 'pev2-section-header';
+    header.innerHTML = `
+      <div class="pev2-section-heading">
+        <span class="pev2-section-num">${String(num).padStart(2,'0')}</span>
+        <span class="pev2-section-name">${LANG==='en' ? b.en : b.pl}</span>
+      </div>
+      ${ph('caret-down', collapsed ? 'collapsed' : '')}
+    `;
+    header.onclick = ()=> togglePickExerciseV2Section(b.key);
+    section.appendChild(header);
+    if(!collapsed){
+      const grid = document.createElement('div');
+      grid.className = 'gymv2-grid';
+      list.forEach(ex=>{
+        const tile = buildExerciseTileV2(ex, pickerSelectedV2.has(ex.name) ? 'selected' : 'plain');
+        tile.classList.add('gymv2-tile');
+        tile.onclick = ()=> togglePickerExerciseV2(ex);
+        grid.appendChild(tile);
+      });
+      section.appendChild(grid);
+    }
+    container.appendChild(section);
   });
   const addBtn = document.getElementById('pickExerciseAddBtnV2');
   addBtn.disabled = pickerSelectedV2.size === 0;
