@@ -242,6 +242,15 @@ button{font-family:inherit;}
 .ex-tile.custom-tile .ph{width:24px;height:24px;color:var(--orange);}
 .ex-tile.custom-tile .t{font-size:9px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;padding:0 3px;line-height:1.15;}
 .ex-tile.custom-tile.added{filter:grayscale(1);opacity:.5;}
+/* Per-section "add your own exercise" tile in the old grouped exercise
+   grid (renderGroupedExerciseGrid) — Maciej's own design, dashed
+   border + plus baked into the SVG, appended once at the end of every
+   muscle-group section (KLATKA, PLECY, ...) so a user missing an
+   exercise from the library can add it without leaving that section.
+   Compound selector (not just .ex-tile-add) so it reliably beats
+   .ex-tile's own border/background regardless of rule order. */
+.ex-tile.ex-tile-add{background:transparent;border:none;}
+.ex-tile.ex-tile-add svg{width:100%;height:100%;display:block;}
 
 .add-pill{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);
   color:#fff;border:none;border-radius:999px;padding:14px 20px;margin-top:16px;font-size:12px;
@@ -1648,7 +1657,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
     <div class="btns">
       <button type="button" class="cancel" onclick="toggleNewExerciseForm()" data-i18n="cancel">Anuluj</button>
-      <button type="button" class="save" onclick="saveNewExercise()" data-i18n="saveAddToSession">Zapisz i dodaj do sesji</button>
+      <button type="button" class="save" id="newExSaveBtn" onclick="saveNewExercise()" data-i18n="saveAddToSession">Zapisz i dodaj do sesji</button>
     </div>
     </form>
   </div>
@@ -1716,6 +1725,8 @@ const T_EN = {
   repsToLabel: 'Reps to',
   cancel: 'Cancel',
   saveAddToSession: 'Save and add to session',
+  saveAddToPlan: 'Save and add to plan',
+  exerciseAddedToPlan: 'Added the new exercise to the library and to the plan',
   addToWorkout: 'Add to workout',
   saveChanges: 'Save',
   popupNoValues: "Fields are empty — the numbers in the background are just a suggestion from your last workout. Type them in to add this exercise.",
@@ -1888,7 +1899,32 @@ function muscleGroupBucket(group){
   const g = (group || '').toLowerCase();
   return PLAN_EX_GROUPS.find(b => b.match.some(k => g.includes(k))) || PLAN_EX_GROUPS[PLAN_EX_GROUPS.length-1];
 }
-function renderGroupedExerciseGrid(container, exercises, stateFn, clickFn, tileFn){
+// Raw SVG for the per-section "add your own exercise" tile — Maciej's
+// own design (dashed border + plus baked directly into the artwork),
+// used verbatim rather than re-approximated with ph()/CSS. See
+// buildAddCustomExerciseTile()/renderGroupedExerciseGrid().
+const EX_TILE_ADD_SVG = `<svg width="116" height="108" viewBox="0 0 116 108" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.5" y="0.5" width="114.667" height="106.211" rx="15.5" stroke="#F6F4F4" stroke-dasharray="6 4"/>
+<rect x="0.5" y="0.5" width="114.667" height="106.211" rx="15.5" stroke="#CD1200" stroke-dasharray="6 4"/>
+<path d="M40.8483 88.3025V81.2025H43.2083C44.3416 81.2025 45.2116 81.5125 45.8183 82.1325C46.4316 82.7458 46.7383 83.6225 46.7383 84.7625C46.7383 85.8958 46.4383 86.7692 45.8383 87.3825C45.2383 87.9958 44.3816 88.3025 43.2683 88.3025H40.8483ZM42.1483 87.1725H43.2083C43.9483 87.1725 44.4983 86.9725 44.8583 86.5725C45.2183 86.1725 45.3983 85.5692 45.3983 84.7625C45.3983 83.9425 45.2183 83.3325 44.8583 82.9325C44.4983 82.5325 43.9483 82.3325 43.2083 82.3325H42.1483V87.1725ZM51.3774 88.4625C50.6774 88.4625 50.0741 88.3158 49.5674 88.0225C49.0607 87.7225 48.6707 87.2958 48.3974 86.7425C48.1307 86.1892 47.9974 85.5292 47.9974 84.7625C47.9974 83.9958 48.1307 83.3358 48.3974 82.7825C48.6707 82.2225 49.0607 81.7925 49.5674 81.4925C50.0741 81.1925 50.6774 81.0425 51.3774 81.0425C52.0907 81.0425 52.6974 81.1925 53.1974 81.4925C53.7041 81.7925 54.0907 82.2225 54.3574 82.7825C54.6307 83.3358 54.7674 83.9958 54.7674 84.7625C54.7674 85.5292 54.6307 86.1892 54.3574 86.7425C54.0907 87.2958 53.7041 87.7225 53.1974 88.0225C52.6974 88.3158 52.0907 88.4625 51.3774 88.4625ZM51.3774 87.3325C51.8107 87.3325 52.1774 87.2325 52.4774 87.0325C52.7841 86.8258 53.0174 86.5325 53.1774 86.1525C53.3441 85.7658 53.4274 85.3025 53.4274 84.7625C53.4274 84.2225 53.3441 83.7592 53.1774 83.3725C53.0174 82.9858 52.7841 82.6892 52.4774 82.4825C52.1774 82.2758 51.8107 82.1725 51.3774 82.1725C50.9574 82.1725 50.5941 82.2758 50.2874 82.4825C49.9807 82.6892 49.7441 82.9858 49.5774 83.3725C49.4174 83.7592 49.3374 84.2225 49.3374 84.7625C49.3374 85.3025 49.4174 85.7658 49.5774 86.1525C49.7441 86.5325 49.9807 86.8258 50.2874 87.0325C50.5941 87.2325 50.9574 87.3325 51.3774 87.3325ZM56.2381 88.3025V81.2025H58.5981C59.7314 81.2025 60.6014 81.5125 61.2081 82.1325C61.8214 82.7458 62.1281 83.6225 62.1281 84.7625C62.1281 85.8958 61.8281 86.7692 61.2281 87.3825C60.6281 87.9958 59.7714 88.3025 58.6581 88.3025H56.2381ZM57.5381 87.1725H58.5981C59.3381 87.1725 59.8881 86.9725 60.2481 86.5725C60.6081 86.1725 60.7881 85.5692 60.7881 84.7625C60.7881 83.9425 60.6081 83.3325 60.2481 82.9325C59.8881 82.5325 59.3381 82.3325 58.5981 82.3325H57.5381V87.1725ZM62.7664 88.3025L65.3264 81.2025H66.9164L69.4764 88.3025H68.1164L67.5264 86.6225H64.7164L64.1264 88.3025H62.7664ZM65.0964 85.5125H67.1464L66.1264 82.5125L65.0964 85.5125ZM72.823 88.4625C72.3097 88.4625 71.8664 88.3525 71.493 88.1325C71.1197 87.9058 70.833 87.5958 70.633 87.2025C70.4397 86.8025 70.3397 86.3492 70.333 85.8425L71.643 85.7725C71.6564 86.2925 71.763 86.6825 71.963 86.9425C72.1697 87.2025 72.4564 87.3325 72.823 87.3325C73.1964 87.3325 73.4864 87.2025 73.693 86.9425C73.8997 86.6758 74.003 86.2858 74.003 85.7725V81.2025H75.303V85.7725C75.303 86.3192 75.1997 86.7958 74.993 87.2025C74.7864 87.6025 74.4964 87.9125 74.123 88.1325C73.7564 88.3525 73.323 88.4625 72.823 88.4625ZM32.9876 98.4625C32.3409 98.4625 31.7709 98.3158 31.2776 98.0225C30.7843 97.7225 30.3976 97.2992 30.1176 96.7525C29.8376 96.1992 29.6976 95.5358 29.6976 94.7625C29.6976 94.0025 29.8343 93.3458 30.1076 92.7925C30.3809 92.2325 30.7643 91.8025 31.2576 91.5025C31.7509 91.1958 32.3309 91.0425 32.9976 91.0425C33.9043 91.0425 34.6076 91.2692 35.1076 91.7225C35.6076 92.1692 35.9343 92.7958 36.0876 93.6025L34.7276 93.6725C34.6409 93.2058 34.4543 92.8392 34.1676 92.5725C33.8809 92.3058 33.4909 92.1725 32.9976 92.1725C32.5976 92.1725 32.2509 92.2792 31.9576 92.4925C31.6643 92.7058 31.4376 93.0058 31.2776 93.3925C31.1176 93.7792 31.0376 94.2358 31.0376 94.7625C31.0376 95.2958 31.1176 95.7558 31.2776 96.1425C31.4443 96.5225 31.6743 96.8158 31.9676 97.0225C32.2609 97.2292 32.6009 97.3325 32.9876 97.3325C33.5143 97.3325 33.9209 97.1892 34.2076 96.9025C34.5009 96.6092 34.6876 96.2092 34.7676 95.7025L36.1276 95.7725C36.0343 96.3258 35.8543 96.8058 35.5876 97.2125C35.3209 97.6125 34.9676 97.9225 34.5276 98.1425C34.0943 98.3558 33.5809 98.4625 32.9876 98.4625ZM32.4076 90.6025L33.0176 89.2025H34.3076L33.4076 90.6025H32.4076ZM38.9395 98.3025L37.0395 91.2025H38.4095L39.7095 96.5025L41.0195 91.2025H42.2295L43.5395 96.5025L44.8295 91.2025H46.2095L44.3095 98.3025H42.8695L41.6295 93.4425L40.3895 98.3025H38.9395ZM47.5277 98.3025V91.2025H48.8277V98.3025H47.5277ZM53.5919 98.4625C52.9452 98.4625 52.3752 98.3158 51.8819 98.0225C51.3886 97.7225 51.0019 97.2992 50.7219 96.7525C50.4419 96.1992 50.3019 95.5358 50.3019 94.7625C50.3019 94.0025 50.4386 93.3458 50.7119 92.7925C50.9852 92.2325 51.3686 91.8025 51.8619 91.5025C52.3552 91.1958 52.9352 91.0425 53.6019 91.0425C54.5086 91.0425 55.2119 91.2692 55.7119 91.7225C56.2119 92.1692 56.5386 92.7958 56.6919 93.6025L55.3319 93.6725C55.2452 93.2058 55.0586 92.8392 54.7719 92.5725C54.4852 92.3058 54.0952 92.1725 53.6019 92.1725C53.2019 92.1725 52.8552 92.2792 52.5619 92.4925C52.2686 92.7058 52.0419 93.0058 51.8819 93.3925C51.7219 93.7792 51.6419 94.2358 51.6419 94.7625C51.6419 95.2958 51.7219 95.7558 51.8819 96.1425C52.0486 96.5225 52.2786 96.8158 52.5719 97.0225C52.8652 97.2292 53.2052 97.3325 53.5919 97.3325C54.1186 97.3325 54.5252 97.1892 54.8119 96.9025C55.1052 96.6092 55.2919 96.2092 55.3719 95.7025L56.7319 95.7725C56.6386 96.3258 56.4586 96.8058 56.1919 97.2125C55.9252 97.6125 55.5719 97.9225 55.1319 98.1425C54.6986 98.3558 54.1852 98.4625 53.5919 98.4625ZM57.7782 98.3025V97.1825L61.3082 92.3325H57.9282V91.2025H62.8882V92.3225L59.3282 97.1725H63.0082V98.3025H57.7782ZM64.4309 98.3025V91.2025H69.2109V92.3325H65.7309V94.1825H69.0909V95.3025H65.7309V97.1725H69.2909V98.3025H64.4309ZM70.9149 98.3025V91.2025H72.4349L75.4949 96.5425V91.2025H76.7949V98.3025H75.2349L72.2149 93.1125V98.3025H70.9149ZM78.6391 98.3025V91.2025H79.9391V98.3025H78.6391ZM81.7832 98.3025V91.2025H86.5632V92.3325H83.0832V94.1825H86.4432V95.3025H83.0832V97.1725H86.6432V98.3025H81.7832Z" fill="#FF3300"/>
+<path d="M75.6929 39.9468C75.6929 40.2576 75.5694 40.5557 75.3496 40.7754C75.1299 40.9952 74.8318 41.1187 74.521 41.1187H58.5054V57.1343C58.5054 57.4451 58.3819 57.7431 58.1621 57.9629C57.9424 58.1827 57.6443 58.3062 57.3335 58.3062C57.0227 58.3062 56.7246 58.1827 56.5049 57.9629C56.2851 57.7431 56.1616 57.4451 56.1616 57.1343V41.1187H40.146C39.8352 41.1187 39.5371 40.9952 39.3174 40.7754C39.0976 40.5557 38.9741 40.2576 38.9741 39.9468C38.9741 39.636 39.0976 39.3379 39.3174 39.1181C39.5371 38.8984 39.8352 38.7749 40.146 38.7749H56.1616V22.7593C56.1616 22.4485 56.2851 22.1504 56.5049 21.9306C56.7246 21.7109 57.0227 21.5874 57.3335 21.5874C57.6443 21.5874 57.9424 21.7109 58.1621 21.9306C58.3819 22.1504 58.5054 22.4485 58.5054 22.7593V38.7749H74.521C74.8318 38.7749 75.1299 38.8984 75.3496 39.1181C75.5694 39.3379 75.6929 39.636 75.6929 39.9468Z" fill="#FF7458"/>
+</svg>`;
+// Per-section "add your own exercise" tile — Maciej's own design
+// (2026-08-29), used verbatim as EX_TILE_ADD_SVG. Opens the existing
+// custom-exercise form (newExerciseOverlay/saveNewExercise(), already
+// used by GYM's standalone "Dodaj nowe" button) pre-filled with this
+// section's muscle group and tagged with which flow should receive the
+// finished exercise — see toggleNewExerciseForm()/saveNewExercise().
+function buildAddCustomExerciseTile(context, prefillGroup){
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'ex-tile ex-tile-add';
+  btn.title = t('addNew','Dodaj ćwiczenie');
+  btn.innerHTML = EX_TILE_ADD_SVG;
+  btn.onclick = (e)=>{ e.stopPropagation(); toggleNewExerciseForm(prefillGroup, context); };
+  return btn;
+}
+function renderGroupedExerciseGrid(container, exercises, stateFn, clickFn, tileFn, addContext){
   container.innerHTML = '';
   const buckets = new Map();
   exercises.forEach(ex=>{
@@ -1912,6 +1948,7 @@ function renderGroupedExerciseGrid(container, exercises, stateFn, clickFn, tileF
       if(!tileFn) btn.onclick = ()=> clickFn(ex);
       grid.appendChild(btn);
     });
+    if(addContext) grid.appendChild(buildAddCustomExerciseTile(addContext, LANG==='en' ? b.en : b.pl));
     section.appendChild(grid);
     container.appendChild(section);
   });
@@ -2323,7 +2360,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 73;
+const DASH_BUILD = 74;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3295,7 +3332,7 @@ function renderGymGrid(){
       heart.onclick = (e)=>{ e.stopPropagation(); toggleFavoriteExercise(ex.name); };
       btn.appendChild(heart);
       return btn;
-    });
+    }, 'gym');
   }
   const pickBtn = document.getElementById('pickFromLibraryBtn');
   if(pickBtn) pickBtn.classList.toggle('hidden', !gymGridFiltered);
@@ -3790,18 +3827,30 @@ function renderExercisePanels(){
   renderGymDoneV2();
 }
 
-function toggleNewExerciseForm(){
+// Which flow saveNewExercise() should hand the finished exercise off
+// to — 'gym' (default, matches the form's original single entry point,
+// GYM's standalone "Dodaj nowe" button) adds it to today's session via
+// onTileTap(); 'planEditor' (the new per-section + tiles inside the
+// plan editor's grid) adds it to the currently open day instead via
+// togglePlanExercise(). Set by toggleNewExerciseForm()'s caller.
+let newExerciseContext = 'gym';
+function toggleNewExerciseForm(prefillGroup, context){
   const overlay = document.getElementById('newExerciseOverlay');
   const willShow = overlay.classList.contains('hidden');
   overlay.classList.toggle('hidden', !willShow);
   if(willShow){
+    newExerciseContext = context || 'gym';
     document.getElementById('newExTitle').value = '';
-    document.getElementById('newExGroup').value = '';
+    document.getElementById('newExGroup').value = prefillGroup || '';
     document.getElementById('newExSets').value = '';
     document.getElementById('newExRepLow').value = '';
     document.getElementById('newExRepHigh').value = '';
     suggestedExerciseIcon = null;
     document.getElementById('iconSuggestBox').classList.add('hidden');
+    const saveBtn = document.getElementById('newExSaveBtn');
+    if(saveBtn) saveBtn.textContent = newExerciseContext==='planEditor'
+      ? t('saveAddToPlan','Zapisz i dodaj do planu')
+      : t('saveAddToSession','Zapisz i dodaj do sesji');
   }
 }
 function saveNewExercise(){
@@ -3821,7 +3870,13 @@ function saveNewExercise(){
   customExercises.push(newEx);
   saveCustomExercises(customExercises);
   trackEvent('/event/add-custom-exercise', 'Dodano własne ćwiczenie');
+  const wasPlanEditor = newExerciseContext === 'planEditor';
   toggleNewExerciseForm();
+  if(wasPlanEditor){
+    togglePlanExercise({...newEx, day:'Własne'});
+    toast(t('exerciseAddedToPlan','Dodano nowe ćwiczenie do listy i do planu'));
+    return;
+  }
   onTileTap({...newEx, day:'Własne'});
   toast(t('exerciseAdded','Dodano nowe ćwiczenie do listy i do sesji'));
 }
@@ -4797,7 +4852,8 @@ function renderPlanEditorGrid(){
   document.getElementById('planExCount').textContent = dayExercises.length;
   renderGroupedExerciseGrid(container, lib,
     ex => dayExercises.some(e=>e.name===ex.name) ? 'selected' : 'plain',
-    ex => togglePlanExercise(ex)
+    ex => togglePlanExercise(ex),
+    null, 'planEditor'
   );
 }
 function togglePlanExercise(ex){
