@@ -960,10 +960,6 @@ body.pev2-bg{background:#dd2b17;}
 .pev2-card{background:#f5f1fb;border-radius:0 0 26px 26px;overflow:hidden;margin-bottom:70px;}
 .pev2-panel{padding-bottom:28px;}
 .pev2-body{display:flex;flex-direction:column;gap:24px;}
-.pev2-name-row{display:flex;align-items:center;justify-content:space-between;margin:0 0 9px;}
-.pev2-name-row .plansv2-section-label{margin:0;}
-.pev2-save-pill{flex-shrink:0;border:none;border-radius:999px;background:#f30;color:#fff;padding:6px 20px;font-size:12px;font-weight:500;letter-spacing:.48px;cursor:pointer;font-family:inherit;transition:transform .12s ease;}
-.pev2-save-pill:active{transform:scale(.95);}
 .pev2-name-input{width:100%;box-sizing:border-box;background:#fdfbff;border:1px solid rgba(0,0,0,.05);border-radius:12px;padding:11px 20px;font-size:14px;font-weight:500;color:#343941;font-family:inherit;}
 .pev2-name-input::placeholder{color:#96959b;font-weight:500;}
 .pev2-fork-hint{margin:8px 2px 0;font-size:12px;line-height:1.5;color:#2c2727;}
@@ -1025,6 +1021,25 @@ body.pev2-bg{background:#dd2b17;}
   .plansv2-chat-btn,.plansv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
   .plansv2-actions{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.08s;}
   .plansv2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;}
+}
+
+/* Plan editor v2's own entrance (Maciej, 2026-08-31: "Dodaj jeszcze
+   animacje do tego ekranu zgodnie z animacją na innych ekranach") —
+   header/chat-btn already inherit dashRise for free from
+   .plansv2-header/.plansv2-chat-btn above (same classes, reused
+   verbatim). The three static fields (name/days/equipment) rise in as
+   their own staggered tiles, then each muscle-group section cascades
+   in — gated behind .pev2-anim-in (added only by openPlanEditorV2()'s
+   renderPlanEditorGridV2(true) on a real screen visit — see
+   planEditorRepaintGrid()) so collapsing a section, switching the
+   equipment filter, or toggling an exercise mid-session doesn't replay
+   the whole entrance. */
+@media (prefers-reduced-motion: no-preference){
+  .pev2-anim-tile{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;}
+  .pev2-anim-tile-1{animation-delay:.08s;}
+  .pev2-anim-tile-2{animation-delay:.14s;}
+  .pev2-anim-tile-3{animation-delay:.2s;}
+  .pev2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.26s + var(--i,0) * 60ms);}
 }
 
 /* GYM v2 set-logging popup (node 112:1872) — separate from .ex-popup-box/.set-row
@@ -1610,16 +1625,13 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <div class="pev2-body">
-        <div>
-          <div class="pev2-name-row">
-            <p class="plansv2-section-label">NAZWA PLANU</p>
-            <button type="button" class="pev2-save-pill" onclick="savePlanEditor()">ZAPISZ PLAN</button>
-          </div>
+        <div class="pev2-anim-tile pev2-anim-tile-1">
+          <p class="plansv2-section-label">NAZWA PLANU</p>
           <input type="text" class="pev2-name-input" id="planNameInputV2" oninput="editingPlan.name=this.value" placeholder="np. Full Body A" autocomplete="off">
           <p class="pev2-fork-hint hidden" id="planEditorV2ForkHint" data-i18n="planEditorForkHint">Zmiany zapiszesz jako swoją kopię tego planu — oryginał zostaje bez zmian.</p>
         </div>
 
-        <div>
+        <div class="pev2-anim-tile pev2-anim-tile-2">
           <p class="plansv2-section-label">DNI TYGODNIA</p>
           <div class="pev2-day-row" id="planDayRowV2"></div>
           <div class="pev2-day-hint-row">
@@ -1634,7 +1646,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           </div>
         </div>
 
-        <div>
+        <div class="pev2-anim-tile pev2-anim-tile-3">
           <p class="plansv2-section-label">WYBIERZ SWÓJ SPRZĘT</p>
           <div class="pev2-equip-row" id="planEquipFilterRowV2"></div>
         </div>
@@ -2535,7 +2547,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 86;
+const DASH_BUILD = 87;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -5013,7 +5025,7 @@ function openPlanEditorV2(id){
   planEditorV2Collapsed = new Set(); // every muscle-group section starts expanded on a fresh visit
   renderPlanEquipFilterRowV2();
   renderPlanDayRowV2();
-  renderPlanEditorGridV2();
+  renderPlanEditorGridV2(true);
   goRoute('plan-editor-v2');
 }
 // Day-selection mode (Maciej, 2026-08-29) — replaces the old two
@@ -5245,7 +5257,7 @@ function togglePlanEditorV2Section(key){
 // collapsible accordion cards instead of the old editor's flat always-
 // open sections, and buildExerciseTileV2()'s icon+label tile (state
 // 'selected') instead of buildExerciseTile()'s flat baked image.
-function renderPlanEditorGridV2(){
+function renderPlanEditorGridV2(animate){
   const container = document.getElementById('planEditorGridV2');
   if(!container) return;
   let lib = orderedExerciseLibrary();
@@ -5267,7 +5279,8 @@ function renderPlanEditorGridV2(){
     num++;
     const collapsed = planEditorV2Collapsed.has(b.key);
     const section = document.createElement('div');
-    section.className = 'pev2-section' + (collapsed ? ' collapsed' : '');
+    section.className = 'pev2-section' + (collapsed ? ' collapsed' : '') + (animate ? ' pev2-anim-in' : '');
+    if(animate) section.style.setProperty('--i', num - 1);
     const header = document.createElement('div');
     header.className = 'pev2-section-header';
     header.innerHTML = `
