@@ -859,47 +859,63 @@ button{font-family:inherit;}
   @keyframes plansv2CustomizeSlideUp{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
   @keyframes plansv2CustomizeSlideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(24px);}}
 }
-.plansv2-customize-card{display:flex;flex-direction:column;gap:24px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 120px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
-.plansv2-customize-header-group{display:flex;flex-direction:column;gap:8px;}
-.plansv2-customize-title-block{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;}
-.plansv2-customize-pill{display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 8px;border-radius:47px;background:#a4bdff;}
-.plansv2-customize-pill span{font-size:8px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:#0e267b;white-space:nowrap;}
-.plansv2-customize-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;width:100%;}
-.plansv2-customize-name{margin:0;font-size:22px;font-weight:600;letter-spacing:.88px;text-transform:uppercase;color:#2c2727;line-height:1.15;}
-.plansv2-customize-close{width:24px;height:24px;flex-shrink:0;color:#2c2727;cursor:pointer;}
-.plansv2-customize-close .ph{display:block;width:100%;height:100%;}
-.plansv2-customize-close .ph svg{display:block;width:100%;height:100%;}
+.plansv2-customize-card{display:flex;flex-direction:column;gap:20px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 120px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
+/* Rebuilt to match Figma node 153:701 (2026-08-29) — app-level
+   topbar (barbell + PLANS + X, same pattern as .plansv2-header on the
+   real Plans v2 screen, just sized for the narrower modal) instead of
+   the previous "DOSTOSUJ PLAN" pill; the plan being edited now gets
+   its own hero card below instead. */
+.plansv2-customize-topbar{display:flex;align-items:center;justify-content:space-between;}
+.plansv2-customize-topbar-title{display:flex;align-items:center;gap:10px;}
+.plansv2-customize-topbar-title .ph{width:28px;height:28px;color:#f30;}
+.plansv2-customize-topbar-title h1{margin:0;font-size:22px;font-weight:400;color:#343941;letter-spacing:-.02em;}
+.plansv2-customize-close{width:24px;height:24px;flex-shrink:0;color:#343941;cursor:pointer;}
+.plansv2-customize-close.ph{display:block;}
+.plansv2-customize-close svg{display:block;width:100%;height:100%;}
+/* Hero card's background is a live preview of the difficulty-based
+   color the plan card will actually end up with once "Zastosuj" runs
+   (always the custom/red palette — Dostosuj always forks or updates a
+   fork, see applyPlanCustomizeV2()), recomputed on every difficulty
+   slider move by updatePlanCustomizeSliderVisual(). */
+.plansv2-customize-hero{background:#3b63cb;border-radius:12px;padding:18px;box-shadow:0 8px 12px rgba(38,66,164,.11);display:flex;flex-direction:column;gap:8px;transition:background .15s ease;}
+.plansv2-customize-hero-eyebrow{margin:0;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.8);}
+.plansv2-customize-hero-name{margin:0;font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.1;text-transform:uppercase;color:#fff;}
 .plansv2-customize-options{display:flex;flex-direction:column;gap:16px;}
 .plansv2-customize-section{display:flex;flex-direction:column;gap:8px;}
-.plansv2-customize-label{margin:0;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#96959b;}
-.plansv2-choice-row{display:flex;gap:8px;flex-wrap:wrap;}
-.plansv2-choice-chip{border:1px solid #ff6343;border-radius:999px;padding:8px 14px;background:#fff;font-size:13px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
+.plansv2-customize-label{margin:0;font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:#2c2727;}
+/* Trudność/Dni w tygodniu get their own boxed card in the Figma design
+   — visually groups the slider + its supporting text apart from the
+   flat chip sections. */
+.plansv2-customize-boxed{background:#fdfbff;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;}
+.plansv2-customize-dni-header{display:flex;align-items:center;justify-content:space-between;}
+.plansv2-customize-dni-value{margin:0;font-size:13px;font-weight:700;color:#f30;}
+.plansv2-customize-divider{height:1px;background:rgba(0,0,0,.08);width:100%;}
+.plansv2-choice-row{display:flex;gap:7px;flex-wrap:wrap;}
+.plansv2-choice-chip{border:1px solid rgba(0,0,0,.05);border-radius:12px;padding:11px 10px;background:#fdfbff;font-size:12px;font-weight:600;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;flex:1;text-align:center;}
 .plansv2-choice-chip:active{transform:scale(.95);}
-.plansv2-choice-chip.active{background:#ff6343;color:#fff;}
+.plansv2-choice-chip.active{background:#f30;border-color:#f30;color:#fff;}
 /* Trudność/Dni w tygodniu are genuine ordered scales — a slider reads
    correctly there. Cel treningowy/Sprzęt stay chips on purpose: three
    unordered categories on a slider would falsely imply they sit along
    one continuous line. Maciej, 2026-08-29. Native <input type=range>
    rather than a hand-rolled drag component — touch dragging on a real
    range input is solid on iOS Safari for free, unlike custom touch-
-   gesture code (see the swipe-to-delete saga earlier this build). Fill
-   percentage is computed in JS and pushed in as --pct since neither
-   Chrome nor Safari support a native filled-track pseudo-element the
-   way Firefox's ::-moz-range-progress does. */
+   gesture code (see the swipe-to-delete saga earlier this build). No
+   filled/progress portion on the track (Figma's own slider doesn't
+   have one either, just a flat track + the thumb sitting at the
+   value) — the active tick label is what communicates the value. */
 .plansv2-slider-wrap{padding:2px 4px 0;}
-.plansv2-slider-input{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;background:linear-gradient(to right,#ff6343 0%,#ff6343 var(--pct,50%),#e7e2f2 var(--pct,50%),#e7e2f2 100%);outline:none;margin:0;display:block;}
-.plansv2-slider-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid #ff6343;box-shadow:0 1px 4px rgba(44,39,39,.25);cursor:pointer;}
-.plansv2-slider-input::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid #ff6343;box-shadow:0 1px 4px rgba(44,39,39,.25);cursor:pointer;}
-.plansv2-slider-input::-moz-range-track{height:6px;border-radius:999px;background:#e7e2f2;}
-.plansv2-slider-input::-moz-range-progress{height:6px;border-radius:999px;background:#ff6343;}
+.plansv2-slider-input{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;background:#c7c6cb;outline:none;margin:0;display:block;}
+.plansv2-slider-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid #f30;box-shadow:0 1px 4px rgba(44,39,39,.25);cursor:pointer;}
+.plansv2-slider-input::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid #f30;box-shadow:0 1px 4px rgba(44,39,39,.25);cursor:pointer;}
+.plansv2-slider-input::-moz-range-track{height:6px;border-radius:999px;background:#c7c6cb;}
 .plansv2-slider-ticks{display:flex;justify-content:space-between;margin-top:10px;}
 .plansv2-slider-ticks span{font-size:11px;font-weight:500;color:#96959b;transition:color .15s ease,font-weight .15s ease;}
-.plansv2-slider-ticks span.active{color:#ff6343;font-weight:700;}
-.plansv2-customize-freq-hint{margin:0;font-size:11px;line-height:1.4;color:#96959b;}
-.plansv2-customize-hint{margin:0;font-size:11px;line-height:1.4;color:#96959b;}
+.plansv2-slider-ticks span.active{color:#f30;font-weight:700;}
+.plansv2-customize-freq-hint{margin:0;font-size:12px;line-height:1.5;color:#2c2727;}
 .plansv2-customize-actions{display:flex;gap:10px;}
-.plansv2-customize-cancel{flex:1;border:1px solid #ff6343;border-radius:69px;padding:12px;background:none;font-size:14px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
-.plansv2-customize-apply{flex:1;border:none;border-radius:74px;padding:12px;background:#ff6343;font-size:14px;font-weight:500;color:#fff;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
+.plansv2-customize-cancel{flex:1;border:1px solid #ff6343;border-radius:69px;padding:12px;background:none;font-size:14px;font-weight:600;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
+.plansv2-customize-apply{flex:1;border:none;border-radius:74px;padding:12px;background:#ff6343;font-size:14px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active{transform:scale(.97);}
 /* Entrance motion — same idiom as GYM v2/Dashboard: header fades/rises
    in, the action-button row follows as a "tile", then each plan card
@@ -1201,14 +1217,16 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <div class="onboard-overlay hidden plansv2-customize-overlay" id="planCustomizeOverlay" onclick="if(event.target===this) closePlanCustomizeV2()">
     <div class="plansv2-customize-stack">
       <div class="plansv2-customize-card">
-        <div class="plansv2-customize-header-group">
-          <div class="plansv2-customize-title-block">
-            <span class="plansv2-customize-pill"><span>DOSTOSUJ PLAN</span></span>
-            <div class="plansv2-customize-title-row">
-              <h2 class="plansv2-customize-name" id="planCustomizeTitle"></h2>
-              <span class="plansv2-customize-close" onclick="closePlanCustomizeV2()"><span class="ph" data-ph="x"></span></span>
-            </div>
+        <div class="plansv2-customize-topbar">
+          <div class="plansv2-customize-topbar-title">
+            <span class="ph" data-ph="barbell"></span>
+            <h1>PLANS</h1>
           </div>
+          <span class="ph plansv2-customize-close" data-ph="x" onclick="closePlanCustomizeV2()"></span>
+        </div>
+        <div class="plansv2-customize-hero" id="planCustomizeHero">
+          <p class="plansv2-customize-hero-eyebrow">Modyfikujesz</p>
+          <p class="plansv2-customize-hero-name" id="planCustomizeTitle"></p>
         </div>
         <div class="plansv2-customize-options">
           <div class="plansv2-customize-section">
@@ -1219,7 +1237,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
               <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="endurance" onclick="pickPlanCustomizeChipV2(this)">Wytrzymałość</button>
             </div>
           </div>
-          <div class="plansv2-customize-section">
+          <div class="plansv2-customize-boxed">
             <p class="plansv2-customize-label">Trudność</p>
             <div class="plansv2-slider-wrap">
               <input type="range" class="plansv2-slider-input" id="planCustomizeDifficultySlider" min="0" max="2" step="1" value="1" oninput="onPlanCustomizeSliderInput(this,'difficulty')">
@@ -1234,12 +1252,15 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
             <p class="plansv2-customize-label">Sprzęt</p>
             <div class="plansv2-choice-row">
               <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="maszyny" onclick="pickPlanCustomizeChipV2(this)">Maszyny</button>
-              <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="hantle" onclick="pickPlanCustomizeChipV2(this)">Wolne ciężary</button>
+              <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="hantle" onclick="pickPlanCustomizeChipV2(this)">Wolne</button>
               <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="mix" onclick="pickPlanCustomizeChipV2(this)">Miks</button>
             </div>
           </div>
-          <div class="plansv2-customize-section">
-            <p class="plansv2-customize-label">Dni w tygodniu</p>
+          <div class="plansv2-customize-boxed">
+            <div class="plansv2-customize-dni-header">
+              <p class="plansv2-customize-label">Dni w tygodniu</p>
+              <p class="plansv2-customize-dni-value" id="planCustomizeFrequencyValue"></p>
+            </div>
             <div class="plansv2-slider-wrap">
               <input type="range" class="plansv2-slider-input" id="planCustomizeFrequencySlider" min="0" max="2" step="1" value="1" oninput="onPlanCustomizeSliderInput(this,'frequency')">
               <div class="plansv2-slider-ticks" id="planCustomizeFrequencyTicks">
@@ -1248,10 +1269,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
                 <span data-i="2">4x</span>
               </div>
             </div>
+            <div class="plansv2-customize-divider"></div>
             <p class="plansv2-customize-freq-hint">Każda sesja to nadal cały trening — zmienia się tylko to, ile razy w tygodniu go powtarzasz.</p>
           </div>
         </div>
-        <p class="plansv2-customize-hint">Nadpisze obecną listę ćwiczeń w tym planie zgodnie z wybranymi opcjami — możesz ją potem jeszcze ręcznie doedytować.</p>
         <div class="plansv2-customize-actions">
           <button type="button" class="plansv2-customize-cancel" onclick="closePlanCustomizeV2()">Anuluj</button>
           <button type="button" class="plansv2-customize-apply" onclick="applyPlanCustomizeV2()">Zastosuj</button>
@@ -2358,7 +2379,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 76;
+const DASH_BUILD = 77;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4334,19 +4355,30 @@ function openPlanCustomizeV2(id){
   overlay.classList.remove('hidden');
   document.documentElement.classList.add('modal-lock'); // same full lock every other modal in the app uses while open
 }
-// Recomputes the filled-track percentage (--pct, read by the gradient
-// in .plansv2-slider-input's background — neither Chrome nor Safari
-// support a native filled-progress pseudo-element the way Firefox's
-// ::-moz-range-progress does) and bolds whichever tick label matches
-// the slider's current position. Called on every drag/tap (oninput)
-// and once up front when the modal opens, so pre-filled sliders don't
-// sit unstyled until the user first touches them.
+// Bolds whichever tick label matches the slider's current position
+// (Figma's own slider has no filled/progress track segment — just a
+// flat gray track + the thumb sitting at the value point, so the bold
+// orange tick label is the only value indicator, see the CSS comment
+// on .plansv2-slider-input). Called on every drag/tap (oninput) and
+// once up front when the modal opens, so a pre-filled slider doesn't
+// sit with the wrong tick bolded until the user first touches it.
+// The difficulty slider additionally live-previews the hero card's
+// color (always the custom/red palette — see the CSS comment on
+// .plansv2-customize-hero) and the frequency slider updates the
+// "Nx w tygodniu" readout next to its own label.
 function updatePlanCustomizeSliderVisual(input, group){
   const min = Number(input.min), max = Number(input.max), val = Number(input.value);
-  const pct = ((val-min)/(max-min))*100;
-  input.style.setProperty('--pct', pct+'%');
   const ticks = document.getElementById(group==='difficulty' ? 'planCustomizeDifficultyTicks' : 'planCustomizeFrequencyTicks');
   if(ticks) ticks.querySelectorAll('span').forEach(s=> s.classList.toggle('active', Number(s.dataset.i)===val));
+  if(group==='difficulty'){
+    const diffKey = PLANSV2_DIFFICULTY_SLIDER[val] || 'medium';
+    const hero = document.getElementById('planCustomizeHero');
+    if(hero) hero.style.background = PLANSV2_CUSTOM_COLOR_BY_DIFFICULTY[diffKey];
+  } else if(group==='frequency'){
+    const freqVal = PLANSV2_FREQUENCY_SLIDER[val] || 3;
+    const valueEl = document.getElementById('planCustomizeFrequencyValue');
+    if(valueEl) valueEl.textContent = `${freqVal}x w tygodniu`;
+  }
 }
 function onPlanCustomizeSliderInput(input, group){
   updatePlanCustomizeSliderVisual(input, group);
