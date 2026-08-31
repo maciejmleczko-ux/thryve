@@ -972,10 +972,11 @@ body.pev2-bg{background:#dd2b17;}
 .pev2-day-chip.has-ex::after{content:'';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:#f30;}
 .pev2-day-chip.active.has-ex::after{background:#fff;}
 .pev2-day-chip.picked{box-shadow:inset 0 0 0 2px #2c2727;}
-.pev2-day-chip.picked::before{content:'✓';position:absolute;top:2px;right:5px;font-size:9px;font-weight:900;line-height:1;color:#2c2727;}
-.pev2-day-chip.active.picked::before{color:#fff;}
-.pev2-day-hint{margin:6px 2px 0;font-size:10px;font-weight:500;color:#96959b;}
-.pev2-select-mode-btn{margin-top:10px;border:none;border-radius:999px;background:#ff6343;color:#fff;padding:6px 20px;font-size:12px;font-weight:500;letter-spacing:.48px;cursor:pointer;font-family:inherit;}
+/* Maciej, 2026-08-31: "wystarczy sama czarna ramka bez tego znaku
+   ptaszka" — the ring alone is enough, dropped the corner checkmark. */
+.pev2-day-hint-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;}
+.pev2-day-hint{flex:1;margin:0;font-size:10px;font-weight:500;color:#96959b;}
+.pev2-select-mode-btn{flex-shrink:0;border:none;border-radius:999px;background:#ff6343;color:#fff;padding:6px 20px;font-size:12px;font-weight:500;letter-spacing:.48px;cursor:pointer;font-family:inherit;}
 .pev2-select-mode-btn.hidden{display:none;}
 /* Contained as one card, not loose floating pieces — before any day is
    picked, count/copy/clear are all empty/hidden and only the exit X is
@@ -1618,8 +1619,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div>
           <p class="plansv2-section-label">DNI TYGODNIA</p>
           <div class="pev2-day-row" id="planDayRowV2"></div>
-          <p class="pev2-day-hint" id="planDayHintTextV2">Wybierz dzień tygodnia i przypisz mu ćwiczenia</p>
-          <button type="button" class="pev2-select-mode-btn hidden" id="daySelectModeBtnV2" onclick="toggleDaySelectMode()">Zaznacz dni</button>
+          <div class="pev2-day-hint-row">
+            <p class="pev2-day-hint" id="planDayHintTextV2">Wybierz dzień tygodnia i przypisz mu ćwiczenia</p>
+            <button type="button" class="pev2-select-mode-btn hidden" id="daySelectModeBtnV2" onclick="toggleDaySelectMode()">Zaznacz dni</button>
+          </div>
           <div class="pev2-select-bar hidden" id="daySelectBarV2">
             <span class="pev2-select-count" id="daySelectCountV2"></span>
             <button type="button" class="pev2-select-action hidden" id="daySelectCopyBtnV2" onclick="confirmDaySelectCopy()">Kopiuj dni</button>
@@ -2529,7 +2532,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 84;
+const DASH_BUILD = 85;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
