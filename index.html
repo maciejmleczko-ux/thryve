@@ -949,12 +949,15 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    "kończy się szare jest czerwona apla na której finalnie znajdzie się
    button"). */
 body.pev2-bg{background:#dd2b17;}
-/* 140px is the minimum that keeps the fixed "ZAPISZ PLAN" button
-   (bottom:118px, ~47px tall) from overlapping the card's own last row
-   at full scroll — 190px (build 82) left a noticeably bigger red gap
-   than that actually requires (Maciej, 2026-08-31: "za duża
-   przestrzeń ta czerwona"). */
-.pev2-card{background:#f5f1fb;border-radius:0 0 26px 26px;overflow:hidden;margin-bottom:140px;}
+/* Reserved red gap below the card, for the fixed "ZAPISZ PLAN" button
+   to float on without overlapping the card's own last row at full
+   scroll. Went 190px (build 82) -> 140px (build 83, still "za duża
+   przestrzeń") -> 70px (build 86, Maciej: "nadal duża" even at 140) —
+   at 70px the button (bottom:118px) still clears the card by ~14px at
+   full scroll (measured live, not just estimated from the button's own
+   box). If this needs to go lower still, the button's own `bottom`
+   offset is the next lever, not just this margin. */
+.pev2-card{background:#f5f1fb;border-radius:0 0 26px 26px;overflow:hidden;margin-bottom:70px;}
 .pev2-panel{padding-bottom:28px;}
 .pev2-body{display:flex;flex-direction:column;gap:24px;}
 .pev2-name-row{display:flex;align-items:center;justify-content:space-between;margin:0 0 9px;}
@@ -2532,7 +2535,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 85;
+const DASH_BUILD = 86;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
