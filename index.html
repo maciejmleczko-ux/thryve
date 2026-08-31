@@ -996,11 +996,11 @@ body.pev2-bg{background:#dd2b17;}
 .pev2-equip-chip.active{background:#f30;border-color:#f30;color:#fdfbff;}
 .pev2-groups{display:flex;flex-direction:column;gap:8px;}
 .pev2-section{border:1px solid #c7c6cb;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:12px;}
-/* Collapsed section = white pill (Figma node 160:2855, the "NOGI"
-   section shown collapsed) — expanded ones stay borderless-white too,
-   but the border is enough to read there; collapsed on its own without
-   any fill just showed the lilac page bleeding through. */
-.pev2-section.collapsed{background:#fff;}
+/* Collapsed section = plain white pill, no border (Figma node
+   160:2855, the "NOGI" section shown collapsed — border-less there,
+   unlike the bordered expanded card). Maciej, 2026-08-31: "belka ze
+   zwinięta partią mięśni bez stroke". */
+.pev2-section.collapsed{background:#fff;border-color:transparent;}
 .pev2-section-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
 .pev2-section-heading{display:flex;align-items:center;gap:8px;}
 .pev2-section-num{background:#ff6343;border-radius:6px;padding:4px 8px;font-size:14px;letter-spacing:.56px;text-transform:uppercase;color:#fff;}
@@ -2547,7 +2547,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 87;
+const DASH_BUILD = 88;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
