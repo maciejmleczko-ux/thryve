@@ -935,6 +935,18 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .plansv2-customize-apply{flex:1;border:none;border-radius:74px;padding:12px;background:#ff6343;font-size:14px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active{transform:scale(.97);}
 
+/* "Dodaj własne ćwiczenie" v2 (#newExerciseOverlayV2) — sits inside the
+   exact same .plansv2-customize-* shell as "Dostosuj plan" above, this
+   is just the handful of pieces unique to this form (3-across
+   sets/reps row, icon-suggestion chip). */
+.newex-v2-row3{display:flex;gap:10px;}
+.newex-v2-row3 .plansv2-customize-section{flex:1;min-width:0;}
+.newex-v2-row3 .pev2-name-input{padding:11px 12px;text-align:center;}
+.newex-v2-icon-suggest{display:flex;align-items:center;gap:10px;background:#fdfbff;border:1px solid rgba(0,0,0,.05);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:500;color:#343941;}
+.newex-v2-icon-suggest.hidden{display:none;}
+.newex-v2-icon-suggest-glyph{width:32px;height:32px;flex-shrink:0;color:#f30;}
+.newex-v2-icon-suggest-glyph svg{width:100%;height:100%;display:block;}
+
 /* ===================== PLAN EDITOR v2 (Figma node 155:1086,
    "06. PLAN - SET UP") — the v3-styled replacement for #view-planEditor.
    Reuses editingPlan/togglePlanExercise/day-select-mode/PLAN_EX_GROUPS/
@@ -1847,6 +1859,59 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<!-- v3-styled "Dodaj własne ćwiczenie" — reached from GYM v2 and plan
+     editor v2's dashed add-tiles (see buildAddCustomExerciseTile()/
+     openNewExerciseFormV2()). Reuses the exact same overlay/backdrop/
+     slide-up shell as "Dostosuj plan" (.plansv2-customize-overlay/
+     -stack/-card — same classes, not a copy) so it reads as the same
+     component language rather than a new one-off. Old GYM/old plan
+     editor keep #newExerciseOverlay above untouched. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="newExerciseOverlayV2" onclick="if(event.target===this) closeNewExerciseFormV2()">
+  <div class="plansv2-customize-stack">
+    <div class="plansv2-customize-card">
+      <div class="plansv2-customize-topbar">
+        <div class="plansv2-customize-topbar-title">
+          <span class="ph" data-ph="plus-icon"></span>
+          <h1>ĆWICZENIE</h1>
+        </div>
+        <span class="ph plansv2-customize-close" data-ph="x" onclick="closeNewExerciseFormV2()"></span>
+      </div>
+      <form autocomplete="off" onsubmit="return false;" class="plansv2-customize-options">
+        <div class="plansv2-customize-section">
+          <p class="plansv2-customize-label">Nazwa ćwiczenia</p>
+          <input type="text" class="pev2-name-input" id="newExTitleV2" placeholder="np. Wykroki z hantlami" oninput="updateExerciseIconSuggestionV2()" autocomplete="off">
+        </div>
+        <div class="newex-v2-icon-suggest hidden" id="iconSuggestBoxV2">
+          <span class="newex-v2-icon-suggest-glyph" id="iconSuggestImgV2"></span>
+          <span>Sugerowana ikonka</span>
+        </div>
+        <div class="plansv2-customize-section">
+          <p class="plansv2-customize-label">Grupa mięśniowa</p>
+          <input type="text" class="pev2-name-input" id="newExGroupV2" placeholder="np. Nogi" autocomplete="off">
+        </div>
+        <div class="newex-v2-row3">
+          <div class="plansv2-customize-section">
+            <p class="plansv2-customize-label">Serie</p>
+            <input type="number" class="pev2-name-input" id="newExSetsV2" placeholder="3" min="1">
+          </div>
+          <div class="plansv2-customize-section">
+            <p class="plansv2-customize-label">Powt. od</p>
+            <input type="number" class="pev2-name-input" id="newExRepLowV2" placeholder="8" min="1">
+          </div>
+          <div class="plansv2-customize-section">
+            <p class="plansv2-customize-label">Powt. do</p>
+            <input type="number" class="pev2-name-input" id="newExRepHighV2" placeholder="12" min="1">
+          </div>
+        </div>
+        <div class="plansv2-customize-actions">
+          <button type="button" class="plansv2-customize-cancel" onclick="closeNewExerciseFormV2()">Anuluj</button>
+          <button type="button" class="plansv2-customize-apply" id="newExSaveBtnV2" onclick="saveNewExerciseV2()">Zapisz i dodaj do sesji</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden" id="exercisePopupOverlay" onclick="if(event.target===this) closeExercisePopup()">
   <div class="onboard-box ex-popup-box" id="exercisePopupBox"></div>
 </div>
@@ -2094,18 +2159,25 @@ const EX_TILE_ADD_SVG = `<svg width="116" height="108" viewBox="0 0 116 108" fil
 <path d="M75.6929 39.9468C75.6929 40.2576 75.5694 40.5557 75.3496 40.7754C75.1299 40.9952 74.8318 41.1187 74.521 41.1187H58.5054V57.1343C58.5054 57.4451 58.3819 57.7431 58.1621 57.9629C57.9424 58.1827 57.6443 58.3062 57.3335 58.3062C57.0227 58.3062 56.7246 58.1827 56.5049 57.9629C56.2851 57.7431 56.1616 57.4451 56.1616 57.1343V41.1187H40.146C39.8352 41.1187 39.5371 40.9952 39.3174 40.7754C39.0976 40.5557 38.9741 40.2576 38.9741 39.9468C38.9741 39.636 39.0976 39.3379 39.3174 39.1181C39.5371 38.8984 39.8352 38.7749 40.146 38.7749H56.1616V22.7593C56.1616 22.4485 56.2851 22.1504 56.5049 21.9306C56.7246 21.7109 57.0227 21.5874 57.3335 21.5874C57.6443 21.5874 57.9424 21.7109 58.1621 21.9306C58.3819 22.1504 58.5054 22.4485 58.5054 22.7593V38.7749H74.521C74.8318 38.7749 75.1299 38.8984 75.3496 39.1181C75.5694 39.3379 75.6929 39.636 75.6929 39.9468Z" fill="#FF7458"/>
 </svg>`;
 // Per-section "add your own exercise" tile — Maciej's own design
-// (2026-08-29), used verbatim as EX_TILE_ADD_SVG. Opens the existing
-// custom-exercise form (newExerciseOverlay/saveNewExercise(), already
-// used by GYM's standalone "Dodaj nowe" button) pre-filled with this
-// section's muscle group and tagged with which flow should receive the
-// finished exercise — see toggleNewExerciseForm()/saveNewExercise().
+// (2026-08-29), used verbatim as EX_TILE_ADD_SVG. Opens a custom-
+// exercise form pre-filled with this section's muscle group, tagged
+// with which flow should receive the finished exercise — see
+// toggleNewExerciseForm()/saveNewExercise() for the old form,
+// openNewExerciseFormV2()/saveNewExerciseV2() for the v3 one. This
+// tile is shared by the old plan editor AND plan editor v2 (both pass
+// context 'planEditor'), so which popup it should open depends on
+// which screen is actually active, not on the context string alone.
 function buildAddCustomExerciseTile(context, prefillGroup){
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'ex-tile ex-tile-add';
   btn.title = t('addNew','Dodaj ćwiczenie');
   btn.innerHTML = EX_TILE_ADD_SVG;
-  btn.onclick = (e)=>{ e.stopPropagation(); toggleNewExerciseForm(prefillGroup, context); };
+  btn.onclick = (e)=>{
+    e.stopPropagation();
+    if(currentRoute==='plan-editor-v2') openNewExerciseFormV2(prefillGroup, context);
+    else toggleNewExerciseForm(prefillGroup, context);
+  };
   return btn;
 }
 function renderGroupedExerciseGrid(container, exercises, stateFn, clickFn, tileFn, addContext){
@@ -2544,7 +2616,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 89;
+const DASH_BUILD = 90;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4077,6 +4149,89 @@ function saveNewExercise(){
     return;
   }
   onTileTap({...newEx, day:'Własne'});
+  toast(t('exerciseAdded','Dodano nowe ćwiczenie do listy i do sesji'));
+}
+
+/* v3 "Dodaj własne ćwiczenie" (#newExerciseOverlayV2) — reached from
+   GYM v2 and plan editor v2's dashed add-tiles (buildAddCustomExerciseTile()),
+   and GYM v2's own standalone add-tile. Mirrors
+   toggleNewExerciseForm()/saveNewExercise() above field-for-field, but:
+   routes a 'gym' context to onTileTapV2() instead of onTileTap() (so it
+   opens the v3 set-logging popup, not the old one), and uses the
+   open/close-with-animation pattern from openPlanCustomizeV2()/
+   closePlanCustomizeV2() rather than a plain hidden-class toggle. Kept
+   as its own function pair rather than parameterizing the old one —
+   same reasoning as every other old/v2 split this session (GYM v2's
+   own render functions, the two plan editors): the old flow stays
+   completely untouched. */
+let newExerciseContextV2 = 'gym';
+let newExerciseV2CloseTimer = null;
+let suggestedExerciseIconV2 = null;
+function openNewExerciseFormV2(prefillGroup, context){
+  if(newExerciseV2CloseTimer){ clearTimeout(newExerciseV2CloseTimer); newExerciseV2CloseTimer = null; }
+  newExerciseContextV2 = context || 'gym';
+  document.getElementById('newExTitleV2').value = '';
+  document.getElementById('newExGroupV2').value = prefillGroup || '';
+  document.getElementById('newExSetsV2').value = '';
+  document.getElementById('newExRepLowV2').value = '';
+  document.getElementById('newExRepHighV2').value = '';
+  suggestedExerciseIconV2 = null;
+  document.getElementById('iconSuggestBoxV2').classList.add('hidden');
+  const saveBtn = document.getElementById('newExSaveBtnV2');
+  if(saveBtn) saveBtn.textContent = newExerciseContextV2==='planEditor'
+    ? t('saveAddToPlan','Zapisz i dodaj do planu')
+    : t('saveAddToSession','Zapisz i dodaj do sesji');
+  const overlay = document.getElementById('newExerciseOverlayV2');
+  overlay.classList.remove('plansv2-customize-closing');
+  overlay.classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+}
+function closeNewExerciseFormV2(){
+  const overlay = document.getElementById('newExerciseOverlayV2');
+  overlay.classList.add('plansv2-customize-closing'); // plays the slide-down/fade-out, see .plansv2-customize-closing CSS
+  newExerciseV2CloseTimer = setTimeout(()=>{
+    overlay.classList.add('hidden');
+    overlay.classList.remove('plansv2-customize-closing');
+    document.documentElement.classList.remove('modal-lock');
+    newExerciseV2CloseTimer = null;
+  }, 220);
+}
+function updateExerciseIconSuggestionV2(){
+  const name = document.getElementById('newExTitleV2').value;
+  suggestedExerciseIconV2 = suggestIconForName(name);
+  const box = document.getElementById('iconSuggestBoxV2');
+  if(suggestedExerciseIconV2){
+    document.getElementById('iconSuggestImgV2').innerHTML = iconSvgV3(suggestedExerciseIconV2);
+    box.classList.remove('hidden');
+  } else {
+    box.classList.add('hidden');
+  }
+}
+function saveNewExerciseV2(){
+  const name = document.getElementById('newExTitleV2').value.trim();
+  if(!name){ toast(t('enterExerciseName','Podaj nazwę ćwiczenia')); return; }
+  const existing = getExerciseLibrary().find(e => e.name.toLowerCase() === name.toLowerCase());
+  if(existing){
+    toast(t('exerciseExists','Takie ćwiczenie już istnieje — wybierz je z siatki'));
+    closeNewExerciseFormV2();
+    return;
+  }
+  const group = document.getElementById('newExGroupV2').value.trim() || t('customGroupFallback','Własne');
+  const sets = Math.max(1, parseInt(document.getElementById('newExSetsV2').value) || 3);
+  let repLow = Math.max(1, parseInt(document.getElementById('newExRepLowV2').value) || 8);
+  let repHigh = Math.max(repLow, parseInt(document.getElementById('newExRepHighV2').value) || 12);
+  const newEx = {name, group, sets, repLow, repHigh, rest:t('asNeeded',"wg uznania"), icon: suggestedExerciseIconV2 || null};
+  customExercises.push(newEx);
+  saveCustomExercises(customExercises);
+  trackEvent('/event/add-custom-exercise', 'Dodano własne ćwiczenie');
+  const wasPlanEditor = newExerciseContextV2 === 'planEditor';
+  closeNewExerciseFormV2();
+  if(wasPlanEditor){
+    togglePlanExercise({...newEx, day:'Własne'});
+    toast(t('exerciseAddedToPlan','Dodano nowe ćwiczenie do listy i do planu'));
+    return;
+  }
+  onTileTapV2({...newEx, day:'Własne'});
   toast(t('exerciseAdded','Dodano nowe ćwiczenie do listy i do sesji'));
 }
 
@@ -5885,7 +6040,13 @@ function renderGymGridV2(animate){
   addBtn.type = 'button';
   addBtn.className = 'gymv2-add-tile';
   addBtn.innerHTML = `${ph('plus-icon')}<span>${t('addNew','Dodaj ćwiczenie')}</span>`;
-  addBtn.onclick = toggleNewExerciseForm;
+  // Was a bare `toggleNewExerciseForm` reference — as an onclick handler
+  // that passes the click Event itself as prefillGroup, which
+  // toggleNewExerciseForm() happily stringified into the group field
+  // ("[object PointerEvent]"). Also opened the OLD form + OLD
+  // exercise-set popup on top of this v3 screen. Fixed to call the v3
+  // popup with no prefill (Maciej, 2026-09-01).
+  addBtn.onclick = ()=> openNewExerciseFormV2(null, 'gym');
   grid.appendChild(addBtn);
 
   if(animate){
