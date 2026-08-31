@@ -940,9 +940,17 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    Reuses editingPlan/togglePlanExercise/day-select-mode/PLAN_EX_GROUPS/
    muscleGroupBucket/buildAddCustomExerciseTile wholesale (see
    openPlanEditorV2() and friends near savePlanEditor()); this block is
-   purely the new visual skin. Same lilac page treatment as Plans v2
-   (.plansv2-bg/.plansv2-lock, shared — see goRoute()). */
-.pev2-panel{padding-bottom:190px;} /* room for the two fixed CTAs below the last accordion section */
+   purely the new visual skin. Shares Plans v2's scroll-lock mechanics
+   (.plansv2-lock, see goRoute()) but NOT its flat lilac background —
+   per Figma (node 155:1087/bg-[#dd2b17]) the page itself is red, with
+   the lilac card wrapping just the real content and ending in rounded
+   bottom corners partway down, so the floating "ZAPISZ PLAN" button
+   and the bottom nav sit on bare red below it (Maciej, 2026-08-31:
+   "kończy się szare jest czerwona apla na której finalnie znajdzie się
+   button"). */
+body.pev2-bg{background:#dd2b17;}
+.pev2-card{background:#f5f1fb;border-radius:0 0 26px 26px;overflow:hidden;margin-bottom:190px;}
+.pev2-panel{padding-bottom:28px;}
 .pev2-body{display:flex;flex-direction:column;gap:24px;}
 .pev2-name-row{display:flex;align-items:center;justify-content:space-between;margin:0 0 9px;}
 .pev2-name-row .plansv2-section-label{margin:0;}
@@ -1574,6 +1582,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
        openPlanEditor(). Same lilac page treatment as Plans v2
        (.plansv2-bg/.plansv2-lock, shared — see goRoute()). -->
   <section class="view plansv2-root" id="view-plan-editor-v2">
+    <div class="pev2-card">
     <div class="plansv2-panel pev2-panel">
       <button type="button" class="plansv2-chat-btn" onclick="openFeedback()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
 
@@ -1615,9 +1624,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
         <div class="pev2-groups" id="planEditorGridV2"></div>
       </div>
-
-      <button type="button" class="pev2-save-fab" onclick="savePlanEditor()">ZAPISZ PLAN</button>
     </div>
+    </div>
+
+    <button type="button" class="pev2-save-fab" onclick="savePlanEditor()">ZAPISZ PLAN</button>
   </section>
 
   </div>
@@ -2508,7 +2518,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 81;
+const DASH_BUILD = 82;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -2971,11 +2981,14 @@ function goRoute(route){
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
   document.body.classList.toggle('dashboard-bg', route==='dashboard');
-  // Plan editor v2 shares Plans v2's exact lilac fixed-screen treatment
-  // (same background, same scroll-only-when-needed lock) — it's the
-  // same "Plans" flow, just one screen deeper.
+  // Plan editor v2 shares Plans v2's scroll-lock mechanics (same
+  // scroll-only-when-needed treatment — it's the same "Plans" flow,
+  // just one screen deeper) but has its own red page background
+  // (.pev2-bg) instead of Plans v2's flat lilac (.plansv2-bg) — see the
+  // comment on .pev2-card's CSS.
   document.documentElement.classList.toggle('plansv2-lock', route==='plans-v2' || route==='plan-editor-v2');
-  document.body.classList.toggle('plansv2-bg', route==='plans-v2' || route==='plan-editor-v2');
+  document.body.classList.toggle('plansv2-bg', route==='plans-v2');
+  document.body.classList.toggle('pev2-bg', route==='plan-editor-v2');
   document.body.classList.toggle('gymv2-bg', route==='gym-v2');
   document.documentElement.classList.toggle('gymv2-bg', route==='gym-v2');
   document.querySelector('.topbar').classList.toggle('hidden', isV3);
