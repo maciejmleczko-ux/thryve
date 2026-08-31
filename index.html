@@ -822,8 +822,6 @@ button{font-family:inherit;}
 .plansv2-stat .ph{width:16px;height:16px;color:#fff;flex-shrink:0;}
 .plansv2-stat span{font-size:10px;color:#fff;white-space:nowrap;}
 .plansv2-card-actions{display:flex;align-items:center;gap:12px;flex-shrink:0;margin-left:12px;}
-.plansv2-card-export{cursor:pointer;flex-shrink:0;display:flex;}
-.plansv2-card-export .ph{width:24px;height:24px;color:#fff;}
 /* plan-star-on's checkmark uses currentColor (2026-08-29 — Maciej
    pointed out the checkmark stayed navy blue even on a red/orange
    "Twoje plany" card) so buildPlanCardV2() can set it inline to match
@@ -2360,7 +2358,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 75;
+const DASH_BUILD = 76;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4630,7 +4628,6 @@ function buildPlanCardV2(p, isCustom, animate, i){
     </div>
     <div class="plansv2-card-actions">
       ${planIsDostosujable(p) ? `<span class="plansv2-card-customize" onclick="event.stopPropagation();openPlanCustomizeV2('${p.id}')" title="${t('planCustomizeTitle','Dostosuj plan')}">${ph('sliders')}</span>` : ''}
-      <span class="plansv2-card-export" onclick="event.stopPropagation();sharePlan(trainingPlans.find(x=>x.id==='${p.id}'))" title="${t('sharePlanTitle','Udostępnij plan')}">${ph('export')}</span>
       <span class="plansv2-card-star${starred?' active':''}" style="color:${color};" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph(starred?'plan-star-on':'plan-star-off')}</span>
     </div>
   `;
