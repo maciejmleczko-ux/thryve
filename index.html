@@ -884,6 +884,19 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .plansv2-customize-close{width:24px;height:24px;flex-shrink:0;color:#343941;cursor:pointer;}
 .plansv2-customize-close.ph{display:block;}
 .plansv2-customize-close svg{display:block;width:100%;height:100%;}
+/* The raw PH icon strings carry their own width/height HTML attributes
+   (e.g. plus-icon is 50x50), which size the <svg> itself regardless of
+   its wrapping .ph span's CSS size unless something forces it to fill
+   that span — every other v3 root scope has its own "<root> .ph
+   svg{width:100%;height:100%}" rule for exactly this (see .plansv2-root
+   .ph svg etc.), but .plansv2-customize-stack lives outside any of
+   those roots (it's a top-level overlay, not nested in a .view), so it
+   never got one — left the topbar's title icon rendering at its native
+   50x50 inside a 40x40 box, overlapping the title text next to it
+   (Maciej, 2026-09-01: "Plus i napisz Ćwiczenia - się rozjechał").
+   One rule here covers every icon in both this modal and "Dodaj własne
+   ćwiczenie" v2, which shares this same .plansv2-customize-stack shell. */
+.plansv2-customize-stack .ph svg{display:block;width:100%;height:100%;}
 /* Hero card's background is a live preview of the difficulty-based
    color the plan card will actually end up with once "Zastosuj" runs
    (always the custom/red palette — Dostosuj always forks or updates a
@@ -945,8 +958,12 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .newex-v2-topbar-title h1{margin:0;font-size:20px;font-weight:400;color:#343941;letter-spacing:.04em;}
 .newex-v2-close{width:40px;height:40px;flex-shrink:0;color:#343941;cursor:pointer;}
 .newex-v2-close svg{display:block;width:100%;height:100%;}
-.newex-v2-field-input{width:100%;box-sizing:border-box;background:#fdfbff;border:1px solid #c7c6cb;border-radius:12px;padding:11px 20px;font-size:14px;font-weight:500;letter-spacing:.04em;color:#343941;font-family:inherit;}
-.newex-v2-field-input::placeholder{color:#96959b;font-weight:500;}
+/* Maciej, 2026-09-01: "Napisy zrob prosze wszystko duzymi literami" —
+   matches Figma's own example content ("FULLBODY WORKOUT" in the name
+   field). text-transform is purely visual, doesn't touch the actual
+   typed/stored value's case. */
+.newex-v2-field-input{width:100%;box-sizing:border-box;background:#fdfbff;border:1px solid #c7c6cb;border-radius:12px;padding:11px 20px;font-size:14px;font-weight:500;letter-spacing:.04em;color:#343941;font-family:inherit;text-transform:uppercase;}
+.newex-v2-field-input::placeholder{color:#96959b;font-weight:500;text-transform:none;}
 .newex-v2-select-wrap{position:relative;}
 .newex-v2-select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:48px;}
 .newex-v2-select-caret{position:absolute;top:50%;right:16px;transform:translateY(-50%);width:24px;height:24px;color:#343941;pointer-events:none;}
@@ -955,7 +972,11 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .newex-v2-bento{width:100%;box-sizing:border-box;background:#fff;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:12px;}
 .newex-v2-bento-row{display:flex;align-items:center;justify-content:space-between;}
 .newex-v2-bento-label{margin:0;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#96959b;}
-.newex-v2-bento-value{width:86px;height:37px;box-sizing:border-box;background:#fff;border:1px solid #c7c6cb;border-radius:8px;text-align:center;font-size:16px;font-weight:500;color:#343941;font-family:inherit;}
+.newex-v2-bento-value{width:86px;height:37px;box-sizing:border-box;background:#fff;border:1px solid #c7c6cb;border-radius:8px;text-align:center;font-size:16px;font-weight:500;color:#343941;font-family:inherit;-moz-appearance:textfield;}
+/* Maciej, 2026-09-01: "nie chce miec tych strzalek przy cyfrach" — hide
+   the native number-input spinner. */
+.newex-v2-bento-value::-webkit-outer-spin-button,
+.newex-v2-bento-value::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 
 /* ===================== PLAN EDITOR v2 (Figma node 155:1086,
    "06. PLAN - SET UP") — the v3-styled replacement for #view-planEditor.
@@ -1912,7 +1933,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
               <option value="Biceps">Biceps</option>
               <option value="Triceps">Triceps</option>
               <option value="Brzuch">Brzuch</option>
-              <option value="Własne">Własne</option>
             </select>
             <span class="ph newex-v2-select-caret" data-ph="caret-down"></span>
           </div>
@@ -1932,8 +1952,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           </div>
         </div>
         <div class="plansv2-customize-actions">
-          <button type="button" class="plansv2-customize-cancel" onclick="closeNewExerciseFormV2()">Anuluj</button>
-          <button type="button" class="plansv2-customize-apply" id="newExSaveBtnV2" onclick="saveNewExerciseV2()">Dodaj</button>
+          <button type="button" class="plansv2-customize-cancel" onclick="closeNewExerciseFormV2()">ANULUJ</button>
+          <button type="button" class="plansv2-customize-apply" id="newExSaveBtnV2" onclick="saveNewExerciseV2()">DODAJ</button>
         </div>
       </form>
     </div>
@@ -2644,7 +2664,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 91;
+const DASH_BUILD = 92;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
