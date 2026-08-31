@@ -935,17 +935,27 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .plansv2-customize-apply{flex:1;border:none;border-radius:74px;padding:12px;background:#ff6343;font-size:14px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active{transform:scale(.97);}
 
-/* "Dodaj własne ćwiczenie" v2 (#newExerciseOverlayV2) — sits inside the
-   exact same .plansv2-customize-* shell as "Dostosuj plan" above, this
-   is just the handful of pieces unique to this form (3-across
-   sets/reps row, icon-suggestion chip). */
-.newex-v2-row3{display:flex;gap:10px;}
-.newex-v2-row3 .plansv2-customize-section{flex:1;min-width:0;}
-.newex-v2-row3 .pev2-name-input{padding:11px 12px;text-align:center;}
-.newex-v2-icon-suggest{display:flex;align-items:center;gap:10px;background:#fdfbff;border:1px solid rgba(0,0,0,.05);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:500;color:#343941;}
-.newex-v2-icon-suggest.hidden{display:none;}
-.newex-v2-icon-suggest-glyph{width:32px;height:32px;flex-shrink:0;color:#f30;}
-.newex-v2-icon-suggest-glyph svg{width:100%;height:100%;display:block;}
+/* "Dodaj własne ćwiczenie" v2 (#newExerciseOverlayV2, Figma node
+   171:3546, Maciej's own design — 2026-09-01) — sits inside the exact
+   same .plansv2-customize-* shell as "Dostosuj plan" above; this is
+   the handful of pieces unique to this form. */
+.newex-v2-topbar{display:flex;align-items:center;justify-content:space-between;}
+.newex-v2-topbar-title{display:flex;align-items:center;gap:11px;}
+.newex-v2-topbar-title .ph{width:40px;height:40px;color:#f30;}
+.newex-v2-topbar-title h1{margin:0;font-size:20px;font-weight:400;color:#343941;letter-spacing:.04em;}
+.newex-v2-close{width:40px;height:40px;flex-shrink:0;color:#343941;cursor:pointer;}
+.newex-v2-close svg{display:block;width:100%;height:100%;}
+.newex-v2-field-input{width:100%;box-sizing:border-box;background:#fdfbff;border:1px solid #c7c6cb;border-radius:12px;padding:11px 20px;font-size:14px;font-weight:500;letter-spacing:.04em;color:#343941;font-family:inherit;}
+.newex-v2-field-input::placeholder{color:#96959b;font-weight:500;}
+.newex-v2-select-wrap{position:relative;}
+.newex-v2-select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:48px;}
+.newex-v2-select-caret{position:absolute;top:50%;right:16px;transform:translateY(-50%);width:24px;height:24px;color:#343941;pointer-events:none;}
+/* Pure white (not the #fdfbff every other card uses) — matches Figma's
+   own "bento-series-container" treatment for this one card. */
+.newex-v2-bento{width:100%;box-sizing:border-box;background:#fff;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:12px;}
+.newex-v2-bento-row{display:flex;align-items:center;justify-content:space-between;}
+.newex-v2-bento-label{margin:0;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#96959b;}
+.newex-v2-bento-value{width:86px;height:37px;box-sizing:border-box;background:#fff;border:1px solid #c7c6cb;border-radius:8px;text-align:center;font-size:16px;font-weight:500;color:#343941;font-family:inherit;}
 
 /* ===================== PLAN EDITOR v2 (Figma node 155:1086,
    "06. PLAN - SET UP") — the v3-styled replacement for #view-planEditor.
@@ -1866,46 +1876,64 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
      -stack/-card — same classes, not a copy) so it reads as the same
      component language rather than a new one-off. Old GYM/old plan
      editor keep #newExerciseOverlay above untouched. -->
+<!-- Rebuilt to match Figma node 171:3546 (2026-09-01, Maciej's own
+     design pass — his "no zle to wyglada, zaprojektuje sam" on the
+     first version). Grupa mięśniowa is now a real <select> populated
+     from PLAN_EX_GROUPS (Maciej: "chcialbym aby czesc grupa miesniowa
+     byla rozwijanym menu z naszymi partiami ktore mamy w planach
+     treningowych") instead of a free-text field — its option values
+     are PLAN_EX_GROUPS' own pl labels, so muscleGroupBucket() buckets
+     a new exercise into the right accordion section by construction,
+     no typo-matching required. Icon-suggestion feature from the first
+     version dropped — not part of this design. -->
 <div class="onboard-overlay hidden plansv2-customize-overlay" id="newExerciseOverlayV2" onclick="if(event.target===this) closeNewExerciseFormV2()">
   <div class="plansv2-customize-stack">
     <div class="plansv2-customize-card">
-      <div class="plansv2-customize-topbar">
-        <div class="plansv2-customize-topbar-title">
+      <div class="newex-v2-topbar">
+        <div class="newex-v2-topbar-title">
           <span class="ph" data-ph="plus-icon"></span>
           <h1>ĆWICZENIE</h1>
         </div>
-        <span class="ph plansv2-customize-close" data-ph="x" onclick="closeNewExerciseFormV2()"></span>
+        <span class="ph newex-v2-close" data-ph="x" onclick="closeNewExerciseFormV2()"></span>
       </div>
       <form autocomplete="off" onsubmit="return false;" class="plansv2-customize-options">
         <div class="plansv2-customize-section">
           <p class="plansv2-customize-label">Nazwa ćwiczenia</p>
-          <input type="text" class="pev2-name-input" id="newExTitleV2" placeholder="np. Wykroki z hantlami" oninput="updateExerciseIconSuggestionV2()" autocomplete="off">
-        </div>
-        <div class="newex-v2-icon-suggest hidden" id="iconSuggestBoxV2">
-          <span class="newex-v2-icon-suggest-glyph" id="iconSuggestImgV2"></span>
-          <span>Sugerowana ikonka</span>
+          <input type="text" class="newex-v2-field-input" id="newExTitleV2" placeholder="np. Wykroki z hantlami" autocomplete="off">
         </div>
         <div class="plansv2-customize-section">
           <p class="plansv2-customize-label">Grupa mięśniowa</p>
-          <input type="text" class="pev2-name-input" id="newExGroupV2" placeholder="np. Nogi" autocomplete="off">
+          <div class="newex-v2-select-wrap">
+            <select class="newex-v2-field-input newex-v2-select" id="newExGroupV2">
+              <option value="Klatka">Klatka</option>
+              <option value="Plecy">Plecy</option>
+              <option value="Nogi">Nogi</option>
+              <option value="Barki">Barki</option>
+              <option value="Biceps">Biceps</option>
+              <option value="Triceps">Triceps</option>
+              <option value="Brzuch">Brzuch</option>
+              <option value="Własne">Własne</option>
+            </select>
+            <span class="ph newex-v2-select-caret" data-ph="caret-down"></span>
+          </div>
         </div>
-        <div class="newex-v2-row3">
-          <div class="plansv2-customize-section">
-            <p class="plansv2-customize-label">Serie</p>
-            <input type="number" class="pev2-name-input" id="newExSetsV2" placeholder="3" min="1">
+        <div class="newex-v2-bento">
+          <div class="newex-v2-bento-row">
+            <p class="newex-v2-bento-label">Serie</p>
+            <input type="number" class="newex-v2-bento-value" id="newExSetsV2" value="3" min="1">
           </div>
-          <div class="plansv2-customize-section">
-            <p class="plansv2-customize-label">Powt. od</p>
-            <input type="number" class="pev2-name-input" id="newExRepLowV2" placeholder="8" min="1">
+          <div class="newex-v2-bento-row">
+            <p class="newex-v2-bento-label">Powtórzenia od</p>
+            <input type="number" class="newex-v2-bento-value" id="newExRepLowV2" value="8" min="1">
           </div>
-          <div class="plansv2-customize-section">
-            <p class="plansv2-customize-label">Powt. do</p>
-            <input type="number" class="pev2-name-input" id="newExRepHighV2" placeholder="12" min="1">
+          <div class="newex-v2-bento-row">
+            <p class="newex-v2-bento-label">Powtórzenia do</p>
+            <input type="number" class="newex-v2-bento-value" id="newExRepHighV2" value="12" min="1">
           </div>
         </div>
         <div class="plansv2-customize-actions">
           <button type="button" class="plansv2-customize-cancel" onclick="closeNewExerciseFormV2()">Anuluj</button>
-          <button type="button" class="plansv2-customize-apply" id="newExSaveBtnV2" onclick="saveNewExerciseV2()">Zapisz i dodaj do sesji</button>
+          <button type="button" class="plansv2-customize-apply" id="newExSaveBtnV2" onclick="saveNewExerciseV2()">Dodaj</button>
         </div>
       </form>
     </div>
@@ -2616,7 +2644,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 90;
+const DASH_BUILD = 91;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4166,21 +4194,19 @@ function saveNewExercise(){
    completely untouched. */
 let newExerciseContextV2 = 'gym';
 let newExerciseV2CloseTimer = null;
-let suggestedExerciseIconV2 = null;
 function openNewExerciseFormV2(prefillGroup, context){
   if(newExerciseV2CloseTimer){ clearTimeout(newExerciseV2CloseTimer); newExerciseV2CloseTimer = null; }
   newExerciseContextV2 = context || 'gym';
   document.getElementById('newExTitleV2').value = '';
-  document.getElementById('newExGroupV2').value = prefillGroup || '';
-  document.getElementById('newExSetsV2').value = '';
-  document.getElementById('newExRepLowV2').value = '';
-  document.getElementById('newExRepHighV2').value = '';
-  suggestedExerciseIconV2 = null;
-  document.getElementById('iconSuggestBoxV2').classList.add('hidden');
-  const saveBtn = document.getElementById('newExSaveBtnV2');
-  if(saveBtn) saveBtn.textContent = newExerciseContextV2==='planEditor'
-    ? t('saveAddToPlan','Zapisz i dodaj do planu')
-    : t('saveAddToSession','Zapisz i dodaj do sesji');
+  // prefillGroup comes from PLAN_EX_GROUPS' own pl label (see
+  // buildAddCustomExerciseTile()), which is exactly the <option> value
+  // set — a direct match, no fallback needed. Falls back to the
+  // select's own first option (Klatka) when opened with no prefill
+  // (GYM v2's standalone add-tile).
+  if(prefillGroup) document.getElementById('newExGroupV2').value = prefillGroup;
+  document.getElementById('newExSetsV2').value = '3';
+  document.getElementById('newExRepLowV2').value = '8';
+  document.getElementById('newExRepHighV2').value = '12';
   const overlay = document.getElementById('newExerciseOverlayV2');
   overlay.classList.remove('plansv2-customize-closing');
   overlay.classList.remove('hidden');
@@ -4196,17 +4222,6 @@ function closeNewExerciseFormV2(){
     newExerciseV2CloseTimer = null;
   }, 220);
 }
-function updateExerciseIconSuggestionV2(){
-  const name = document.getElementById('newExTitleV2').value;
-  suggestedExerciseIconV2 = suggestIconForName(name);
-  const box = document.getElementById('iconSuggestBoxV2');
-  if(suggestedExerciseIconV2){
-    document.getElementById('iconSuggestImgV2').innerHTML = iconSvgV3(suggestedExerciseIconV2);
-    box.classList.remove('hidden');
-  } else {
-    box.classList.add('hidden');
-  }
-}
 function saveNewExerciseV2(){
   const name = document.getElementById('newExTitleV2').value.trim();
   if(!name){ toast(t('enterExerciseName','Podaj nazwę ćwiczenia')); return; }
@@ -4216,11 +4231,11 @@ function saveNewExerciseV2(){
     closeNewExerciseFormV2();
     return;
   }
-  const group = document.getElementById('newExGroupV2').value.trim() || t('customGroupFallback','Własne');
+  const group = document.getElementById('newExGroupV2').value;
   const sets = Math.max(1, parseInt(document.getElementById('newExSetsV2').value) || 3);
   let repLow = Math.max(1, parseInt(document.getElementById('newExRepLowV2').value) || 8);
   let repHigh = Math.max(repLow, parseInt(document.getElementById('newExRepHighV2').value) || 12);
-  const newEx = {name, group, sets, repLow, repHigh, rest:t('asNeeded',"wg uznania"), icon: suggestedExerciseIconV2 || null};
+  const newEx = {name, group, sets, repLow, repHigh, rest:t('asNeeded',"wg uznania"), icon: null};
   customExercises.push(newEx);
   saveCustomExercises(customExercises);
   trackEvent('/event/add-custom-exercise', 'Dodano własne ćwiczenie');
