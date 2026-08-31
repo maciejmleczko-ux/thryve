@@ -735,6 +735,13 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .gymv2-tile img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;}
 .gymv2-tile.custom-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#fff;}
 .gymv2-tile.custom-tile .ph{width:24px;height:24px;color:#f30;}
+/* "Wybierz inne ćwiczenie" (Figma node 174:6236) — sits right before
+   the "Dodaj ćwiczenie" tile, same tile shape but a thin neutral
+   border + dark magnifying-glass icon (vs. the add-tile's dashed
+   orange border + plus) so the two read as distinct actions: pick
+   from our library vs. add something brand new. */
+.gymv2-tile.gymv2-search-tile{border:1.414px solid #e5e7eb;}
+.gymv2-tile.gymv2-search-tile .gymv2-tile-icon .ph{color:#343941;}
 .gymv2-tile-icon{width:100%;height:70px;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box;}
 .gymv2-tile-icon svg{width:100%;height:100%;display:block;}
 .gymv2-tile-label{font-size:10px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;text-align:center;color:#2c2727;line-height:1.15;padding:0 6px;}
@@ -946,6 +953,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .plansv2-customize-actions{display:flex;gap:10px;}
 .plansv2-customize-cancel{flex:1;border:1px solid #ff6343;border-radius:69px;padding:12px;background:none;font-size:14px;font-weight:600;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
 .plansv2-customize-apply{flex:1;border:none;border-radius:74px;padding:12px;background:#ff6343;font-size:14px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
+.plansv2-customize-apply:disabled{opacity:.4;cursor:not-allowed;}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active{transform:scale(.97);}
 
 /* "Dodaj własne ćwiczenie" v2 (#newExerciseOverlayV2, Figma node
@@ -1960,6 +1968,32 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<!-- v3 "Wybierz inne ćwiczenie" — opened from GYM v2's own search tile
+     (Figma node 174:6236, entry-point tile only; the picker screen
+     itself has no Figma spec, built from established v3 patterns —
+     openExercisePickerV2()). Mirrors the old #pickExerciseOverlay's
+     multi-select-then-confirm flow (togglePickerExercise()/
+     confirmExercisePicker()) field-for-field, just v3-styled and
+     grouped by muscle instead of a flat grid. Old GYM keeps its own
+     picker untouched. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="pickExerciseOverlayV2" onclick="if(event.target===this) closeExercisePickerV2()">
+  <div class="plansv2-customize-stack">
+    <div class="plansv2-customize-card">
+      <div class="newex-v2-topbar">
+        <div class="newex-v2-topbar-title">
+          <span class="ph" data-ph="magnifying-glass"></span>
+          <h1>ĆWICZENIE</h1>
+        </div>
+        <span class="ph newex-v2-close" data-ph="x" onclick="closeExercisePickerV2()"></span>
+      </div>
+      <div class="pev2-groups" id="pickExerciseGridV2"></div>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-apply" id="pickExerciseAddBtnV2" onclick="confirmExercisePickerV2()" disabled>DODAJ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden" id="exercisePopupOverlay" onclick="if(event.target===this) closeExercisePopup()">
   <div class="onboard-box ex-popup-box" id="exercisePopupBox"></div>
 </div>
@@ -2278,6 +2312,7 @@ const PH = {
 "share": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><line x1=\"56\" y1=\"128\" x2=\"196\" y2=\"64\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\"/><line x1=\"56\" y1=\"128\" x2=\"196\" y2=\"192\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\"/><circle cx=\"56\" cy=\"128\" r=\"28\"/><circle cx=\"196\" cy=\"64\" r=\"28\"/><circle cx=\"196\" cy=\"192\" r=\"28\"/></svg>",
 "chat-dots": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 146 146\" fill=\"none\"><path d=\"M122.933 28.4567H22.7655C20.6523 28.4567 18.6256 29.2962 17.1313 30.7905C15.6371 32.2847 14.7976 34.3114 14.7976 36.4246V127.486C14.7894 129.005 15.2193 130.495 16.036 131.775C16.8526 133.056 18.0212 134.075 19.4019 134.708C20.456 135.197 21.6036 135.452 22.7655 135.454C24.6426 135.455 26.4586 134.787 27.8877 133.57L27.9218 133.542L46.8 117.242H122.933C125.046 117.242 127.073 116.402 128.567 114.908C130.062 113.414 130.901 111.387 130.901 109.274V36.4246C130.901 34.3114 130.062 32.2847 128.567 30.7905C127.073 29.2962 125.046 28.4567 122.933 28.4567ZM124.071 109.274C124.071 109.576 123.951 109.865 123.738 110.079C123.525 110.292 123.235 110.412 122.933 110.412H45.5309C44.7116 110.412 43.9198 110.707 43.2999 111.243L23.4826 128.357C23.3164 128.492 23.1157 128.577 22.9033 128.603C22.6909 128.629 22.4755 128.594 22.2818 128.503C22.0881 128.413 21.924 128.269 21.8082 128.089C21.6924 127.909 21.6297 127.7 21.6272 127.486V36.4246C21.6272 36.1227 21.7471 35.8332 21.9606 35.6197C22.1741 35.4063 22.4636 35.2863 22.7655 35.2863H122.933C123.235 35.2863 123.525 35.4063 123.738 35.6197C123.951 35.8332 124.071 36.1227 124.071 36.4246V109.274ZM94.4764 63.7431C94.4764 64.6487 94.1167 65.5173 93.4763 66.1577C92.8359 66.7981 91.9673 67.1579 91.0616 67.1579H54.637C53.7314 67.1579 52.8628 66.7981 52.2224 66.1577C51.582 65.5173 51.2222 64.6487 51.2222 63.7431C51.2222 62.8374 51.582 61.9688 52.2224 61.3284C52.8628 60.688 53.7314 60.3283 54.637 60.3283H91.0616C91.9673 60.3283 92.8359 60.688 93.4763 61.3284C94.1167 61.9688 94.4764 62.8374 94.4764 63.7431ZM94.4764 81.9554C94.4764 82.861 94.1167 83.7296 93.4763 84.37C92.8359 85.0104 91.9673 85.3702 91.0616 85.3702H54.637C53.7314 85.3702 52.8628 85.0104 52.2224 84.37C51.582 83.7296 51.2222 82.861 51.2222 81.9554C51.2222 81.0497 51.582 80.1811 52.2224 79.5407C52.8628 78.9003 53.7314 78.5406 54.637 78.5406H91.0616C91.9673 78.5406 92.8359 78.9003 93.4763 79.5407C94.1167 80.1811 94.4764 81.0497 94.4764 81.9554Z\" fill=\"currentColor\"/></svg>"
 };
+Object.assign(PH, {"magnifying-glass": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.32l50.06,50.06a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z\"/></svg>"});
 Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>",
 /* Plan-star toggle (Plans v2) — both states share the exact same
    checkmark path so the glyph itself never visually "jumps" when
@@ -2664,7 +2699,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 92;
+const DASH_BUILD = 93;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4268,6 +4303,91 @@ function saveNewExerciseV2(){
   }
   onTileTapV2({...newEx, day:'Własne'});
   toast(t('exerciseAdded','Dodano nowe ćwiczenie do listy i do sesji'));
+}
+
+/* v3 "Wybierz inne ćwiczenie" (#pickExerciseOverlayV2) — opened from
+   GYM v2's own search tile (Figma node 174:6236). Mirrors the old
+   #pickExerciseOverlay's multi-select-then-confirm flow
+   (pickerSelected/togglePickerExercise()/confirmExercisePicker() above)
+   exactly, just painting into the v3 overlay and grouping the library
+   by muscle (muscleGroupBucket()/PLAN_EX_GROUPS, same as plan editor
+   v2) instead of one flat grid. Selecting a tile here reuses
+   buildExerciseTileV2()'s 'selected' state (orange border + check) —
+   same visual language as "assigned to today" elsewhere, repurposed
+   here as "will be added". Confirming pushes into extraGymTiles, same
+   as the old flow, so it shows up in GYM v2's own grid immediately. */
+let pickerSelectedV2 = new Set();
+let pickExerciseV2CloseTimer = null;
+function openExercisePickerV2(){
+  if(pickExerciseV2CloseTimer){ clearTimeout(pickExerciseV2CloseTimer); pickExerciseV2CloseTimer = null; }
+  pickerSelectedV2 = new Set();
+  renderExercisePickerGridV2();
+  const overlay = document.getElementById('pickExerciseOverlayV2');
+  overlay.classList.remove('plansv2-customize-closing');
+  overlay.classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+}
+function closeExercisePickerV2(){
+  const overlay = document.getElementById('pickExerciseOverlayV2');
+  overlay.classList.add('plansv2-customize-closing');
+  pickExerciseV2CloseTimer = setTimeout(()=>{
+    overlay.classList.add('hidden');
+    overlay.classList.remove('plansv2-customize-closing');
+    document.documentElement.classList.remove('modal-lock');
+    pickExerciseV2CloseTimer = null;
+  }, 220);
+}
+function togglePickerExerciseV2(ex){
+  if(pickerSelectedV2.has(ex.name)) pickerSelectedV2.delete(ex.name);
+  else pickerSelectedV2.add(ex.name);
+  renderExercisePickerGridV2();
+}
+function renderExercisePickerGridV2(){
+  const container = document.getElementById('pickExerciseGridV2');
+  if(!container) return;
+  const planEx = todayPlanExerciseNames() || [];
+  const alreadyVisible = new Set([...planEx.map(e=>e.name), ...extraGymTiles.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
+  const lib = orderedExerciseLibrary().filter(ex=>!alreadyVisible.has(ex.name));
+  const buckets = new Map();
+  lib.forEach(ex=>{
+    const b = muscleGroupBucket(ex.group);
+    if(!buckets.has(b.key)) buckets.set(b.key, []);
+    buckets.get(b.key).push(ex);
+  });
+  container.innerHTML = '';
+  PLAN_EX_GROUPS.forEach(b=>{
+    const list = buckets.get(b.key);
+    if(!list || !list.length) return;
+    const label = document.createElement('p');
+    label.className = 'plansv2-customize-label';
+    label.textContent = LANG==='en' ? b.en : b.pl;
+    container.appendChild(label);
+    const grid = document.createElement('div');
+    grid.className = 'gymv2-grid';
+    list.forEach(ex=>{
+      const tile = buildExerciseTileV2(ex, pickerSelectedV2.has(ex.name) ? 'selected' : 'plain');
+      tile.classList.add('gymv2-tile');
+      tile.onclick = ()=> togglePickerExerciseV2(ex);
+      grid.appendChild(tile);
+    });
+    container.appendChild(grid);
+  });
+  const addBtn = document.getElementById('pickExerciseAddBtnV2');
+  addBtn.disabled = pickerSelectedV2.size === 0;
+  addBtn.textContent = pickerSelectedV2.size ? `DODAJ (${pickerSelectedV2.size})` : 'DODAJ';
+}
+function confirmExercisePickerV2(){
+  if(!pickerSelectedV2.size) return;
+  const byName = new Map(orderedExerciseLibrary().map(ex=>[ex.name, ex]));
+  pickerSelectedV2.forEach(name=>{
+    const ex = byName.get(name);
+    if(ex && !extraGymTiles.some(e=>e.name===name) && !sessionExercises.some(e=>e.name===name)){
+      extraGymTiles.push({...ex});
+    }
+  });
+  pickerSelectedV2 = new Set();
+  closeExercisePickerV2();
+  renderGymGridV2();
 }
 
 function classifySession(exNames){
@@ -6071,6 +6191,13 @@ function renderGymGridV2(animate){
     btn.onclick = ()=> onTileTapV2(ex);
     grid.appendChild(btn);
   });
+  const searchBtn = document.createElement('button');
+  searchBtn.type = 'button';
+  searchBtn.className = 'gymv2-tile custom-tile gymv2-search-tile';
+  searchBtn.innerHTML = `<span class="gymv2-tile-icon">${ph('magnifying-glass')}</span><span class="gymv2-tile-label">Wybierz inne ćwiczenie</span>`;
+  searchBtn.onclick = openExercisePickerV2;
+  grid.appendChild(searchBtn);
+
   const addBtn = document.createElement('button');
   addBtn.type = 'button';
   addBtn.className = 'gymv2-add-tile';
