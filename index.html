@@ -949,7 +949,12 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    "kończy się szare jest czerwona apla na której finalnie znajdzie się
    button"). */
 body.pev2-bg{background:#dd2b17;}
-.pev2-card{background:#f5f1fb;border-radius:0 0 26px 26px;overflow:hidden;margin-bottom:190px;}
+/* 140px is the minimum that keeps the fixed "ZAPISZ PLAN" button
+   (bottom:118px, ~47px tall) from overlapping the card's own last row
+   at full scroll — 190px (build 82) left a noticeably bigger red gap
+   than that actually requires (Maciej, 2026-08-31: "za duża
+   przestrzeń ta czerwona"). */
+.pev2-card{background:#f5f1fb;border-radius:0 0 26px 26px;overflow:hidden;margin-bottom:140px;}
 .pev2-panel{padding-bottom:28px;}
 .pev2-body{display:flex;flex-direction:column;gap:24px;}
 .pev2-name-row{display:flex;align-items:center;justify-content:space-between;margin:0 0 9px;}
@@ -2518,7 +2523,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 82;
+const DASH_BUILD = 83;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
