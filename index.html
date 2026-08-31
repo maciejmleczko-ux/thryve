@@ -887,6 +887,7 @@ button{font-family:inherit;}
    — visually groups the slider + its supporting text apart from the
    flat chip sections. */
 .plansv2-customize-boxed{background:#fdfbff;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;}
+.plansv2-customize-boxed.hidden{display:none;}
 .plansv2-customize-dni-header{display:flex;align-items:center;justify-content:space-between;}
 .plansv2-customize-dni-value{margin:0;font-size:13px;font-weight:700;color:#f30;}
 .plansv2-customize-divider{height:1px;background:rgba(0,0,0,.08);width:100%;}
@@ -1256,7 +1257,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
               <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="mix" onclick="pickPlanCustomizeChipV2(this)">Miks</button>
             </div>
           </div>
-          <div class="plansv2-customize-boxed">
+          <div class="plansv2-customize-boxed" id="planCustomizeDniSection">
             <div class="plansv2-customize-dni-header">
               <p class="plansv2-customize-label">Dni w tygodniu</p>
               <p class="plansv2-customize-dni-value" id="planCustomizeFrequencyValue"></p>
@@ -2379,7 +2380,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 78;
+const DASH_BUILD = 79;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4219,19 +4220,53 @@ function planAvgExercisesPerDay(p){
    result lands in "Twoje plany". Re-running "Dostosuj" on a plan that's
    ALREADY the result of a fork (has customizationV2) updates it in
    place instead of forking again — see applyPlanCustomizeV2().
-   Scoped to the Fullbody plan (plan_a) for now — the algorithm below
-   picks a round-robin spread across muscle groups for a single
-   repeating full-body day, which is the right shape for Fullbody but
-   would wreck a split routine's structure (PPL, Upper/Lower train
-   different muscles on different days on purpose). Extending
-   "customizable" to those needs a split-aware generator, not this one —
-   noted as follow-up scope, not attempted here.
+   Originally scoped to just the Fullbody plan (plan_a/plan_b) — the
+   round-robin generator picked from every muscle bucket and copied the
+   SAME list onto every active day, which is right for Fullbody but
+   would wreck a split routine (PPL, Upper/Lower train different
+   muscles on different days on purpose). Extended to PPL/Upper-Lower
+   too (2026-08-29, Maciej's own reasoning: goal and difficulty are
+   still meaningful for a split — a "wytrzymałość" push day just wants
+   more reps, same as a fullbody one) via generateSplitPlanScheduleV2()
+   — it reuses the exact same goal/difficulty params and per-day
+   exercise count, just picks from a role-specific bucket subset
+   (push/pull/legs/upper/lower, see PLANSV2_SPLIT_ROLE_LABELS) instead
+   of the full round-robin, and never touches which days are active —
+   a split's day-to-role structure is what makes it a split, so
+   "Dni w tygodniu" is hidden entirely for these (see openPlanCustomizeV2()).
    plan_b stays listed too, even though defaultTrainingPlans() no longer
    hands it to fresh installs (see the Fullbody-1/2 consolidation note
    there, 2026-08-29) — a legacy install that already has plan_b saved
    can still customize it, same generator, same rules.
    ============================================================ */
-const PLANSV2_CUSTOMIZABLE_IDS = new Set(['plan_a', 'plan_b']);
+const PLANSV2_CUSTOMIZABLE_IDS = new Set(['plan_a', 'plan_b', 'plan_ppl', 'plan_ul']);
+// Which muscle buckets (from PLANSV2_MUSCLE_BUCKETS below) belong to
+// each split "role" — mirrors the hand-authored pushDay/pullDay/
+// legsDay/upperA-B/lowerA-B definitions in defaultTrainingPlans().
+const PLANSV2_SPLIT_ROLE_LABELS = {
+  push: ['Klatka piersiowa','Barki','Triceps'],
+  pull: ['Plecy','Biceps'],
+  legs: ['Nogi'],
+  upper: ['Klatka piersiowa','Plecy','Barki','Biceps','Triceps'],
+  lower: ['Nogi'],
+};
+// Which day plays which role, per split plan id — matches
+// defaultTrainingPlans()'s own day assignment for plan_ppl/plan_ul
+// exactly, so "Dostosuj" regenerates content into the same day
+// structure the plan already has, never adding/removing/moving days.
+const PLANSV2_SPLIT_DAY_ROLES = {
+  plan_ppl: {mon:'push', wed:'pull', fri:'legs'},
+  plan_ul: {mon:'upper', tue:'lower', thu:'upper', fri:'lower'},
+};
+// Which split-day-role map applies to a plan — true for the builtin
+// split itself, or for any fork of it (customizationV2.splitOf records
+// which one it was forked from, set by applyPlanCustomizeV2()). Returns
+// null for a fullbody plan or a plan with no split lineage at all.
+function planv2SplitRoleId(plan){
+  if(PLANSV2_SPLIT_DAY_ROLES[plan.id]) return plan.id;
+  if(plan.customizationV2 && plan.customizationV2.splitOf && PLANSV2_SPLIT_DAY_ROLES[plan.customizationV2.splitOf]) return plan.customizationV2.splitOf;
+  return null;
+}
 // Which plans get the "Dostosuj" (sliders) icon on their card: the
 // original automatic templates, or any of the user's own plans that
 // were themselves produced by a previous "Dostosuj" run (safe to
@@ -4296,19 +4331,22 @@ const PLANSV2_MUSCLE_BUCKETS = [
 function planv2MatchesEquipment(ex, equipment){
   return equipment==='mix' || ex.equipment===equipment;
 }
-// The actual selection: cycle through the muscle-group buckets in
+// The actual selection: cycle through the given muscle buckets in
 // priority order, taking one not-yet-picked, equipment-matching
 // exercise per bucket per lap, until the target count is hit (or the
 // whole filtered library runs out — 50-ish exercises across ~7 buckets
 // means that's only a real risk at hard+a narrow equipment filter).
-function planv2PickExercises(count, equipment){
+// buckets defaults to the full set (fullbody); a split day passes a
+// role-specific subset instead (see planv2PickExercisesForRole()).
+function planv2PickExercises(count, equipment, buckets){
+  buckets = buckets || PLANSV2_MUSCLE_BUCKETS;
   const pool = getExerciseLibrary().filter(ex=>!BOOKEND_EX_NAMES.has(ex.name) && planv2MatchesEquipment(ex, equipment));
   const used = new Set();
   const picked = [];
   let guard = 0; // laps guard — bails instead of spinning forever if every bucket is exhausted
-  while(picked.length < count && guard < count + PLANSV2_MUSCLE_BUCKETS.length){
+  while(picked.length < count && guard < count + buckets.length){
     let addedThisLap = false;
-    for(const bucket of PLANSV2_MUSCLE_BUCKETS){
+    for(const bucket of buckets){
       if(picked.length >= count) break;
       const next = pool.find(ex=>!used.has(ex.name) && bucket.match(ex.group));
       if(next){ used.add(next.name); picked.push(next); addedThisLap = true; }
@@ -4317,6 +4355,11 @@ function planv2PickExercises(count, equipment){
     if(!addedThisLap) break; // every bucket exhausted under this equipment filter
   }
   return picked;
+}
+function planv2PickExercisesForRole(count, equipment, role){
+  const labels = PLANSV2_SPLIT_ROLE_LABELS[role] || [];
+  const buckets = PLANSV2_MUSCLE_BUCKETS.filter(b=> labels.includes(b.label));
+  return planv2PickExercises(count, equipment, buckets);
 }
 function generatePlanScheduleV2(goal, difficulty, equipment, frequency){
   const params = PLANSV2_GOAL_PARAMS[goal];
@@ -4327,6 +4370,29 @@ function generatePlanScheduleV2(goal, difficulty, equipment, frequency){
     sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest,
   }));
   const schedule = scheduleOnDays(days, exercises); // same full exercise list every session — still genuinely fullbody, only the day count changes
+  ensureWarmupStretch(schedule);
+  return schedule;
+}
+// Split counterpart to generatePlanScheduleV2() — same goal/difficulty
+// params, but picks exercises per day from that day's own role bucket
+// (see PLANSV2_SPLIT_DAY_ROLES/PLANSV2_SPLIT_ROLE_LABELS) instead of
+// the full round-robin, and never adds, removes, or reassigns days —
+// a split's day-to-muscle-group structure is what makes it a split,
+// so this only ever regenerates the exercises WITHIN the days the plan
+// already has.
+function generateSplitPlanScheduleV2(splitId, goal, difficulty, equipment){
+  const dayRoles = PLANSV2_SPLIT_DAY_ROLES[splitId];
+  if(!dayRoles) return null;
+  const params = PLANSV2_GOAL_PARAMS[goal];
+  const count = PLANSV2_DIFFICULTY_COUNT[difficulty];
+  const schedule = emptySchedule();
+  Object.keys(dayRoles).forEach(day=>{
+    const exercises = planv2PickExercisesForRole(count, equipment, dayRoles[day]).map(ex=>({
+      name: ex.name, group: ex.group, icon: ex.icon,
+      sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest,
+    }));
+    schedule[day] = exercises;
+  });
   ensureWarmupStretch(schedule);
   return schedule;
 }
@@ -4346,6 +4412,12 @@ function openPlanCustomizeV2(id){
   const diffIdx = PLANSV2_DIFFICULTY_SLIDER.indexOf(saved.difficulty);
   diffSlider.value = diffIdx===-1 ? 1 : diffIdx;
   updatePlanCustomizeSliderVisual(diffSlider, 'difficulty');
+  // A split plan's days are fixed to their role (push/pull/legs,
+  // upper/lower) — "Dni w tygodniu" doesn't apply, see
+  // PLANSV2_SPLIT_DAY_ROLES, so hide it entirely rather than showing a
+  // control that would silently do nothing on Zastosuj.
+  const isSplit = !!planv2SplitRoleId(plan);
+  document.getElementById('planCustomizeDniSection').classList.toggle('hidden', isSplit);
   const freqSlider = document.getElementById('planCustomizeFrequencySlider');
   const freqIdx = PLANSV2_FREQUENCY_SLIDER.indexOf(saved.frequency);
   freqSlider.value = freqIdx===-1 ? 1 : freqIdx;
@@ -4406,9 +4478,16 @@ function applyPlanCustomizeV2(){
   const active = (group)=> document.querySelector(`#planCustomizeOverlay .plansv2-choice-chip[data-group="${group}"].active`)?.dataset.value;
   const goal = active('goal') || 'mass', equipment = active('equipment') || 'mix';
   const difficulty = PLANSV2_DIFFICULTY_SLIDER[Number(document.getElementById('planCustomizeDifficultySlider').value)] || 'medium';
-  const frequency = PLANSV2_FREQUENCY_SLIDER[Number(document.getElementById('planCustomizeFrequencySlider').value)] || 3;
-  const schedule = generatePlanScheduleV2(goal, difficulty, equipment, frequency);
-  const customizationV2 = {goal, difficulty, equipment, frequency};
+  const splitId = planv2SplitRoleId(plan);
+  let schedule, customizationV2;
+  if(splitId){
+    schedule = generateSplitPlanScheduleV2(splitId, goal, difficulty, equipment);
+    customizationV2 = {goal, difficulty, equipment, splitOf: splitId};
+  } else {
+    const frequency = PLANSV2_FREQUENCY_SLIDER[Number(document.getElementById('planCustomizeFrequencySlider').value)] || 3;
+    schedule = generatePlanScheduleV2(goal, difficulty, equipment, frequency);
+    customizationV2 = {goal, difficulty, equipment, frequency};
+  }
   if(plan.builtin){
     // First customization of an automatic plan forks it, same rule as
     // the manual editor (savePlanEditor()) — the automatic template
