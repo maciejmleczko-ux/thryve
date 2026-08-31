@@ -977,7 +977,13 @@ body.pev2-bg{background:#dd2b17;}
 .pev2-day-hint{margin:6px 2px 0;font-size:10px;font-weight:500;color:#96959b;}
 .pev2-select-mode-btn{margin-top:10px;border:none;border-radius:999px;background:#ff6343;color:#fff;padding:6px 20px;font-size:12px;font-weight:500;letter-spacing:.48px;cursor:pointer;font-family:inherit;}
 .pev2-select-mode-btn.hidden{display:none;}
-.pev2-select-bar{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+/* Contained as one card, not loose floating pieces — before any day is
+   picked, count/copy/clear are all empty/hidden and only the exit X is
+   left, which read as a stray, orphaned icon with nothing around it
+   (Maciej, 2026-08-31: "coś dziwnie działa i wyświetla się ta opcja").
+   The card boundary keeps it reading as one intentional toolbar in
+   every state. */
+.pev2-select-bar{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;background:#fdfbff;border:1px solid rgba(0,0,0,.05);border-radius:12px;padding:10px 14px;}
 .pev2-select-bar.hidden{display:none;}
 .pev2-select-count{font-size:11px;color:#5b5555;font-weight:600;margin-right:auto;}
 .pev2-select-action{border:1px solid #f30;border-radius:999px;padding:7px 14px;background:none;color:#f30;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
@@ -2523,7 +2529,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 83;
+const DASH_BUILD = 84;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
