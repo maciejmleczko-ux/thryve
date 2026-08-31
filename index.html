@@ -171,9 +171,16 @@ button{font-family:inherit;}
 .header-row.on-panel .section-label .ph{color:var(--orange);}
 .header-row.on-panel .section-label span{color:var(--text-dark);}
 
-/* ---------- ambient background glow (whole app, behind every screen) ---------- */
+/* ---------- ambient background glow (behind every OLD/dark screen) ----------
+   Tuned for the dark app background it was designed against — on any v3
+   screen's light lilac/pale background it just reads as an unwanted warm
+   haze (most visible wherever that screen's own content is sparse, e.g.
+   plan editor v2's roomier field spacing — Maciej, 2026-08-31). Hidden
+   whenever a v3 screen is active, matching how .topbar is already hidden
+   for the same routes (see goRoute()'s isV3). */
 .app-glow{position:fixed;top:-260px;left:-100px;width:640px;height:640px;border-radius:50%;
   background:radial-gradient(circle, rgba(241,90,35,.55), rgba(44,39,39,0) 65%);pointer-events:none;z-index:-1;will-change:transform;}
+html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow{display:none;}
 @media (prefers-reduced-motion: no-preference){
   .app-glow{animation:glowDrift 24s ease-in-out infinite;}
   @keyframes glowDrift{
@@ -718,8 +725,13 @@ button{font-family:inherit;}
 .gymv2-edit-plan:active{transform:scale(.95);}
 
 .gymv2-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
-.gymv2-tile{border-radius:16px;overflow:hidden;background:#fff;aspect-ratio:115.667/107.211;padding:0;border:none;cursor:pointer;transition:transform .12s ease;}
+.gymv2-tile{position:relative;border-radius:16px;overflow:hidden;background:#fff;aspect-ratio:115.667/107.211;padding:0;border:none;cursor:pointer;transition:transform .12s ease;}
 .gymv2-tile:active{transform:scale(.95);}
+/* "Assigned to the active plan day" state — plan editor v2 only, see
+   buildExerciseTileV2()'s 'selected' state. */
+.gymv2-tile.gymv2-tile-selected{border:2px solid #f30;}
+.gymv2-tile-check{position:absolute;top:6px;right:6px;width:18px;height:18px;z-index:1;}
+.gymv2-tile-check svg{display:block;width:100%;height:100%;}
 .gymv2-tile img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;}
 .gymv2-tile.custom-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#fff;}
 .gymv2-tile.custom-tile .ph{width:24px;height:24px;color:#f30;}
@@ -867,8 +879,8 @@ button{font-family:inherit;}
    its own hero card below instead. */
 .plansv2-customize-topbar{display:flex;align-items:center;justify-content:space-between;}
 .plansv2-customize-topbar-title{display:flex;align-items:center;gap:10px;}
-.plansv2-customize-topbar-title .ph{width:28px;height:28px;color:#f30;}
-.plansv2-customize-topbar-title h1{margin:0;font-size:22px;font-weight:400;color:#343941;letter-spacing:-.02em;}
+.plansv2-customize-topbar-title .ph{width:40px;height:40px;color:#f30;}
+.plansv2-customize-topbar-title h1{margin:0;font-size:30.654px;font-weight:400;color:#343941;letter-spacing:-.02em;}
 .plansv2-customize-close{width:24px;height:24px;flex-shrink:0;color:#343941;cursor:pointer;}
 .plansv2-customize-close.ph{display:block;}
 .plansv2-customize-close svg{display:block;width:100%;height:100%;}
@@ -882,7 +894,11 @@ button{font-family:inherit;}
 .plansv2-customize-hero-name{margin:0;font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.1;text-transform:uppercase;color:#fff;}
 .plansv2-customize-options{display:flex;flex-direction:column;gap:16px;}
 .plansv2-customize-section{display:flex;flex-direction:column;gap:8px;}
-.plansv2-customize-label{margin:0;font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:#2c2727;}
+/* 14px/0.56px kerning/#2c2727, no bold — matches .plansv2-section-label
+   on the real Plans v2 screen and the fresh type pass in the "06. PLAN
+   - SET UP" Figma file (node 155:1086); this modal had drifted to an
+   older, smaller 12px/600/1.2px token before that unification. */
+.plansv2-customize-label{margin:0;font-size:14px;font-weight:400;letter-spacing:.56px;text-transform:uppercase;color:#2c2727;}
 /* Trudność/Dni w tygodniu get their own boxed card in the Figma design
    — visually groups the slider + its supporting text apart from the
    flat chip sections. */
@@ -918,6 +934,58 @@ button{font-family:inherit;}
 .plansv2-customize-cancel{flex:1;border:1px solid #ff6343;border-radius:69px;padding:12px;background:none;font-size:14px;font-weight:600;color:#343941;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
 .plansv2-customize-apply{flex:1;border:none;border-radius:74px;padding:12px;background:#ff6343;font-size:14px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active{transform:scale(.97);}
+
+/* ===================== PLAN EDITOR v2 (Figma node 155:1086,
+   "06. PLAN - SET UP") — the v3-styled replacement for #view-planEditor.
+   Reuses editingPlan/togglePlanExercise/day-select-mode/PLAN_EX_GROUPS/
+   muscleGroupBucket/buildAddCustomExerciseTile wholesale (see
+   openPlanEditorV2() and friends near savePlanEditor()); this block is
+   purely the new visual skin. Same lilac page treatment as Plans v2
+   (.plansv2-bg/.plansv2-lock, shared — see goRoute()). */
+.pev2-panel{padding-bottom:190px;} /* room for the two fixed CTAs below the last accordion section */
+.pev2-body{display:flex;flex-direction:column;gap:24px;}
+.pev2-name-row{display:flex;align-items:center;justify-content:space-between;margin:0 0 9px;}
+.pev2-name-row .plansv2-section-label{margin:0;}
+.pev2-save-pill{flex-shrink:0;border:none;border-radius:999px;background:#f30;color:#fff;padding:6px 20px;font-size:12px;font-weight:500;letter-spacing:.48px;cursor:pointer;font-family:inherit;transition:transform .12s ease;}
+.pev2-save-pill:active{transform:scale(.95);}
+.pev2-name-input{width:100%;box-sizing:border-box;background:#fdfbff;border:1px solid rgba(0,0,0,.05);border-radius:12px;padding:11px 20px;font-size:14px;font-weight:500;color:#343941;font-family:inherit;}
+.pev2-name-input::placeholder{color:#96959b;font-weight:500;}
+.pev2-fork-hint{margin:8px 2px 0;font-size:12px;line-height:1.5;color:#2c2727;}
+.pev2-fork-hint.hidden{display:none;}
+.pev2-day-row{display:flex;gap:4px;}
+.pev2-day-chip{position:relative;flex:1;min-width:0;text-align:center;background:#fdfbff;border:1px solid rgba(0,0,0,.05);border-radius:12px;padding:11px 0 15px;font-size:12px;font-weight:500;color:#343941;cursor:pointer;font-family:inherit;transition:transform .12s ease;}
+.pev2-day-chip:active{transform:scale(.95);}
+.pev2-day-chip.active{background:#f30;border-color:#f30;color:#fff;}
+.pev2-day-chip.has-ex::after{content:'';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:#f30;}
+.pev2-day-chip.active.has-ex::after{background:#fff;}
+.pev2-day-chip.picked{box-shadow:inset 0 0 0 2px #2c2727;}
+.pev2-day-chip.picked::before{content:'✓';position:absolute;top:2px;right:5px;font-size:9px;font-weight:900;line-height:1;color:#2c2727;}
+.pev2-day-chip.active.picked::before{color:#fff;}
+.pev2-day-hint{margin:6px 2px 0;font-size:10px;font-weight:500;color:#96959b;}
+.pev2-select-mode-btn{margin-top:10px;border:none;border-radius:999px;background:#ff6343;color:#fff;padding:6px 20px;font-size:12px;font-weight:500;letter-spacing:.48px;cursor:pointer;font-family:inherit;}
+.pev2-select-mode-btn.hidden{display:none;}
+.pev2-select-bar{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.pev2-select-bar.hidden{display:none;}
+.pev2-select-count{font-size:11px;color:#5b5555;font-weight:600;margin-right:auto;}
+.pev2-select-action{border:1px solid #f30;border-radius:999px;padding:7px 14px;background:none;color:#f30;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+.pev2-select-action.hidden{display:none;}
+.pev2-select-action.danger{border-color:#c00;color:#c00;}
+.pev2-select-exit{border:none;background:none;color:#5b5555;font-size:15px;cursor:pointer;padding:4px 6px;line-height:1;font-family:inherit;}
+.pev2-equip-row{display:flex;gap:4px;flex-wrap:wrap;}
+.pev2-equip-chip{flex:none;background:#fdfbff;border:1px solid rgba(0,0,0,.05);border-radius:12px;padding:11px 16px;font-size:12px;font-weight:500;color:#343941;cursor:pointer;font-family:inherit;transition:transform .12s ease;}
+.pev2-equip-chip:active{transform:scale(.95);}
+.pev2-equip-chip.active{background:#f30;border-color:#f30;color:#fdfbff;}
+.pev2-groups{display:flex;flex-direction:column;gap:8px;}
+.pev2-section{border:1px solid #c7c6cb;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:12px;}
+.pev2-section-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.pev2-section-heading{display:flex;align-items:center;gap:8px;}
+.pev2-section-num{background:#ff6343;border-radius:6px;padding:4px 8px;font-size:14px;letter-spacing:.56px;text-transform:uppercase;color:#fff;}
+.pev2-section-name{font-size:14px;letter-spacing:.56px;text-transform:uppercase;color:#2c2727;}
+.pev2-section-header .ph{width:24px;height:24px;color:#343941;transition:transform .2s ease;flex-shrink:0;}
+.pev2-section-header .ph.collapsed{transform:rotate(-90deg);}
+.pev2-save-fab{position:fixed;left:50%;bottom:118px;transform:translateX(-50%);width:calc(100% - 40px);max-width:217px;background:#fff;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:500;letter-spacing:.64px;color:#343941;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,.12);transition:transform .12s ease;z-index:15;}
+.pev2-save-fab:active{transform:translateX(-50%) scale(.97);}
+
 /* Entrance motion — same idiom as GYM v2/Dashboard: header fades/rises
    in, the action-button row follows as a "tile", then each plan card
    cascades in one after another. Gated behind .plansv2-anim-in (added
@@ -1178,11 +1246,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </section>
 
   <!-- ===================== PLANS v2 (hidden preview, node 116:2502) =====================
-       Browsing only — tapping a card or "+"/import still hands off to the
-       existing #view-planEditor / import-code modal, neither of which has
-       a v3 redesign yet. Reuses trainingPlans/starredPlanId/toggleStarredPlan/
-       sharePlan/openPlanEditor/openImportPlanCodeModal wholesale, same as
-       GYM v2 reuses the real GYM screen's data. -->
+       Tapping a card or "+" opens #view-plan-editor-v2 (node 155:1086,
+       see openPlanEditorV2()); import still hands off to the existing
+       import-code modal, which has no v3 redesign yet. Reuses
+       trainingPlans/starredPlanId/toggleStarredPlan/sharePlan/
+       openImportPlanCodeModal wholesale, same as GYM v2 reuses the real
+       GYM screen's data. -->
   <section class="view plansv2-root" id="view-plans-v2">
     <div class="plansv2-panel">
       <button type="button" class="plansv2-chat-btn" onclick="openFeedback()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
@@ -1197,7 +1266,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
       <div class="plansv2-actions">
         <button type="button" class="plansv2-btn-outline" onclick="openImportPlanCodeModal()" title="Importuj plan"><span class="ph" data-ph="download-simple"></span></button>
-        <button type="button" class="plansv2-btn-fill" onclick="openPlanEditor(null)" title="Dodaj plan"><span class="ph" data-ph="plus-icon"></span></button>
+        <button type="button" class="plansv2-btn-fill" onclick="openPlanEditorV2(null)" title="Dodaj plan"><span class="ph" data-ph="plus-icon"></span></button>
       </div>
 
       <p class="plansv2-section-label">PLANY AUTOMATYCZNE</p>
@@ -1464,7 +1533,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="panel-inner">
         <div class="field">
           <label data-i18n="planNameLabel">Nazwa planu</label>
-          <input type="text" id="planNameInput" data-i18n-ph="planNamePh" placeholder="np. Full Body A" autocomplete="off">
+          <input type="text" id="planNameInput" data-i18n-ph="planNamePh" placeholder="np. Full Body A" autocomplete="off" oninput="editingPlan.name=this.value">
           <p class="plan-editor-fork-hint hidden" id="planEditorForkHint" data-i18n="planEditorForkHint">Zmiany zapiszesz jako swoją kopię tego planu — oryginał zostaje bez zmian.</p>
         </div>
         <div class="field" style="margin-top:14px;">
@@ -1489,6 +1558,60 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <button class="save" onclick="savePlanEditor()" data-i18n="planSave" style="flex:1;border:none;border-radius:999px;padding:13px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;background:var(--orange);color:#fff;">Zapisz plan</button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ===================== PLAN EDITOR v2 (hidden preview, Figma node
+       155:1086, "06. PLAN - SET UP") — v3-styled replacement for
+       #view-planEditor. Reached from Plans v2 (card tap / "+" button),
+       reuses the exact same editingPlan/savePlanEditor/togglePlanExercise/
+       day-select-mode machinery, see openPlanEditorV2() near
+       openPlanEditor(). Same lilac page treatment as Plans v2
+       (.plansv2-bg/.plansv2-lock, shared — see goRoute()). -->
+  <section class="view plansv2-root" id="view-plan-editor-v2">
+    <div class="plansv2-panel pev2-panel">
+      <button type="button" class="plansv2-chat-btn" onclick="openFeedback()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
+
+      <div class="plansv2-header">
+        <div class="plansv2-header-title">
+          <span class="ph" data-ph="barbell"></span>
+          <h1>PLANS</h1>
+        </div>
+        <span class="ph plansv2-close" data-ph="x" onclick="goRoute('plans-v2')"></span>
+      </div>
+
+      <div class="pev2-body">
+        <div>
+          <div class="pev2-name-row">
+            <p class="plansv2-section-label">NAZWA PLANU</p>
+            <button type="button" class="pev2-save-pill" onclick="savePlanEditor()">ZAPISZ PLAN</button>
+          </div>
+          <input type="text" class="pev2-name-input" id="planNameInputV2" oninput="editingPlan.name=this.value" placeholder="np. Full Body A" autocomplete="off">
+          <p class="pev2-fork-hint hidden" id="planEditorV2ForkHint" data-i18n="planEditorForkHint">Zmiany zapiszesz jako swoją kopię tego planu — oryginał zostaje bez zmian.</p>
+        </div>
+
+        <div>
+          <p class="plansv2-section-label">DNI TYGODNIA</p>
+          <div class="pev2-day-row" id="planDayRowV2"></div>
+          <p class="pev2-day-hint" id="planDayHintTextV2">Wybierz dzień tygodnia i przypisz mu ćwiczenia</p>
+          <button type="button" class="pev2-select-mode-btn hidden" id="daySelectModeBtnV2" onclick="toggleDaySelectMode()">Zaznacz dni</button>
+          <div class="pev2-select-bar hidden" id="daySelectBarV2">
+            <span class="pev2-select-count" id="daySelectCountV2"></span>
+            <button type="button" class="pev2-select-action hidden" id="daySelectCopyBtnV2" onclick="confirmDaySelectCopy()">Kopiuj dni</button>
+            <button type="button" class="pev2-select-action danger hidden" id="daySelectClearBtnV2" onclick="confirmDaySelectClear()">Wyczyść</button>
+            <button type="button" class="pev2-select-exit" onclick="exitDaySelectMode()" aria-label="Zamknij">✕</button>
+          </div>
+        </div>
+
+        <div>
+          <p class="plansv2-section-label">WYBIERZ SWÓJ SPRZĘT</p>
+          <div class="pev2-equip-row" id="planEquipFilterRowV2"></div>
+        </div>
+
+        <div class="pev2-groups" id="planEditorGridV2"></div>
+      </div>
+
+      <button type="button" class="pev2-save-fab" onclick="savePlanEditor()">ZAPISZ PLAN</button>
     </div>
   </section>
 
@@ -2380,7 +2503,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 79;
+const DASH_BUILD = 80;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -2835,7 +2958,7 @@ function goRoute(route){
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward);
-  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2';
+  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2';
   document.getElementById('bottomNav').style.display = (route==='welcome' || planOnboardingActive) ? 'none' : 'flex';
   document.getElementById('bottomNav').classList.toggle('bottom-nav-light', isV3);
   const navActiveRoute = V3_ROUTE_ALIAS[route] || route;
@@ -2843,8 +2966,11 @@ function goRoute(route){
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
   document.body.classList.toggle('dashboard-bg', route==='dashboard');
-  document.documentElement.classList.toggle('plansv2-lock', route==='plans-v2');
-  document.body.classList.toggle('plansv2-bg', route==='plans-v2');
+  // Plan editor v2 shares Plans v2's exact lilac fixed-screen treatment
+  // (same background, same scroll-only-when-needed lock) — it's the
+  // same "Plans" flow, just one screen deeper.
+  document.documentElement.classList.toggle('plansv2-lock', route==='plans-v2' || route==='plan-editor-v2');
+  document.body.classList.toggle('plansv2-bg', route==='plans-v2' || route==='plan-editor-v2');
   document.body.classList.toggle('gymv2-bg', route==='gym-v2');
   document.documentElement.classList.toggle('gymv2-bg', route==='gym-v2');
   document.querySelector('.topbar').classList.toggle('hidden', isV3);
@@ -2858,6 +2984,7 @@ function goRoute(route){
   if(route==='dashboard'){ renderDashboard(); }
   if(route==='gym-v2'){ previewMode = true; renderGymV2(); }
   if(route==='plans-v2'){ previewMode = true; renderPlansListV2(true); }
+  if(route==='plan-editor-v2'){ previewMode = true; refreshPlanEditorV2Scroll(); }
   commitViewTransition();
   window.scrollTo(0,0);
 }
@@ -3273,7 +3400,11 @@ function buildExerciseTile(ex, state){
 /* GYM v2 tile: real icon (from EXERCISE_ICON_SVG_V3) + separate label below it,
    matching the new Figma tile design — vs. buildExerciseTile()'s single flat
    baked image used by the production GYM screen. Falls back to the generic
-   barbell + name treatment for any exercise without a v3 icon yet. */
+   barbell + name treatment for any exercise without a v3 icon yet.
+   state 'selected' (added 2026-08-31, plan editor v2, node 155:1086) is
+   the "assigned to the currently active day" look — orange border +
+   check badge, same PLAN_EX_CHECK_SVG glyph buildExerciseTile() already
+   uses for the exact same concept in the old editor. */
 function buildExerciseTileV2(ex, state){
   const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
   const svg = slug ? iconSvgV3(slug) : '';
@@ -3281,11 +3412,15 @@ function buildExerciseTileV2(ex, state){
   btn.className = 'ex-tile custom-tile';
   btn.dataset.name = ex.name;
   if(state==='added') btn.classList.add('added');
+  if(state==='selected'){
+    btn.classList.add('gymv2-tile-selected');
+    btn.insertAdjacentHTML('beforeend', `<span class="gymv2-tile-check">${PLAN_EX_CHECK_SVG}</span>`);
+  }
   if(slug==='warmup' || slug==='stretching') btn.classList.add('gymv2-tile-accent');
   if(svg){
-    btn.innerHTML = `<span class="gymv2-tile-icon">${svg}</span><span class="gymv2-tile-label">${ex.name}</span>`;
+    btn.innerHTML += `<span class="gymv2-tile-icon">${svg}</span><span class="gymv2-tile-label">${ex.name}</span>`;
   } else {
-    btn.innerHTML = `${ph('barbell')}<span class="t">${ex.name}</span>`;
+    btn.innerHTML += `${ph('barbell')}<span class="t">${ex.name}</span>`;
   }
   return btn;
 }
@@ -4707,7 +4842,7 @@ function attachPlanSwipeV2(wrap, cardBtn, planId, delEl, shareEl){
   cardBtn.addEventListener('click', (e)=>{
     if(justDragged) return;
     if(isOpen()){ e.preventDefault(); e.stopPropagation(); closeThis(); return; } // tap elsewhere closes the reveal, doesn't open the editor
-    openPlanEditor(planId);
+    openPlanEditorV2(planId);
   });
 }
 function buildPlanCardV2(p, isCustom, animate, i){
@@ -4817,6 +4952,35 @@ function openPlanEditor(id){
   renderPlanEditorGrid();
   goRoute('planEditor');
 }
+// v3-styled replacement for openPlanEditor() above (Figma node
+// 155:1086, "06. PLAN - SET UP") — reached from Plans v2 instead of the
+// old Plans list. Sets up the exact same editingPlan working copy;
+// only the DOM it paints into differs (planDayRowV2/planEditorGridV2/
+// planEquipFilterRowV2 instead of the old view's ids) — see
+// planEditorRepaintDayRow()/planEditorRepaintGrid()/
+// planEditorRepaintEquipRow() for how the shared day-select-mode/
+// equip-filter/toggle-exercise logic below picks the right one.
+function openPlanEditorV2(id){
+  const existing = id ? trainingPlans.find(p=>p.id===id) : null;
+  const schedule = emptySchedule();
+  if(existing) PLAN_DAYS.forEach(d=>{ schedule[d] = (existing.schedule[d]||[]).map(e=>({...e})); });
+  stripWarmupStretch(schedule);
+  editingPlan = {
+    id: existing ? existing.id : null,
+    name: existing ? existing.name : '',
+    builtin: existing ? !!existing.builtin : false,
+    schedule,
+    activeDay: dayKeyFromDate(todayStr()),
+  };
+  document.getElementById('planNameInputV2').value = editingPlan.name;
+  document.getElementById('planEditorV2ForkHint').classList.toggle('hidden', !editingPlan.builtin);
+  planEditorEquipmentFilter = 'all';
+  planEditorV2Collapsed = new Set(); // every muscle-group section starts expanded on a fresh visit
+  renderPlanEquipFilterRowV2();
+  renderPlanDayRowV2();
+  renderPlanEditorGridV2();
+  goRoute('plan-editor-v2');
+}
 // Day-selection mode (Maciej, 2026-08-29) — replaces the old two
 // separate "Kopiuj do innych dni" / "Usuń z dni" modals with one
 // inline flow: tap "Zaznacz dni", tap the day chips to select them,
@@ -4829,6 +4993,17 @@ function openPlanEditor(id){
 let daySelectMode = false;
 let daySelectSource = null;
 let daySelected = new Set();
+// Both plan editors (old #view-planEditor and the new v3
+// #view-plan-editor-v2) share every bit of state/logic on this page —
+// day-select-mode, the equipment filter, toggling an exercise in/out
+// of a day — only the actual paint functions differ (new markup, new
+// ids). These three dispatchers are the single seam: route to the v2
+// painter while route==='plan-editor-v2', the old one otherwise, so
+// none of the shared logic below needs to know or care which screen
+// is actually open.
+function planEditorRepaintDayRow(){ (currentRoute==='plan-editor-v2' ? renderPlanDayRowV2 : renderPlanDayRow)(); }
+function planEditorRepaintGrid(){ (currentRoute==='plan-editor-v2' ? renderPlanEditorGridV2 : renderPlanEditorGrid)(); }
+function planEditorRepaintEquipRow(){ (currentRoute==='plan-editor-v2' ? renderPlanEquipFilterRowV2 : renderPlanEquipFilterRow)(); }
 function daysWithExercises(){
   return PLAN_DAYS.filter(d=> (editingPlan.schedule[d]||[]).length > 0);
 }
@@ -4849,18 +5024,18 @@ function toggleDaySelectMode(){
     ? editingPlan.activeDay
     : (daysWithExercises()[0] || editingPlan.activeDay);
   daySelected = new Set();
-  renderPlanDayRow();
+  planEditorRepaintDayRow();
 }
 function exitDaySelectMode(){
   daySelectMode = false;
   daySelectSource = null;
   daySelected = new Set();
-  renderPlanDayRow();
+  planEditorRepaintDayRow();
 }
 function toggleDaySelected(d){
   if(daySelected.has(d)) daySelected.delete(d);
   else daySelected.add(d);
-  renderPlanDayRow();
+  planEditorRepaintDayRow();
 }
 function confirmDaySelectCopy(){
   const targets = [...daySelected].filter(d=>d!==daySelectSource);
@@ -4869,7 +5044,7 @@ function confirmDaySelectCopy(){
   targets.forEach(d=>{ editingPlan.schedule[d] = sourceExercises.map(e=>({...e})); });
   toast(t('daySelectCopyDone', `Skopiowano do ${targets.length} ${targets.length===1?'dnia':'dni'}`, targets.length));
   exitDaySelectMode();
-  renderPlanEditorGrid();
+  planEditorRepaintGrid();
 }
 function confirmDaySelectClear(){
   const targets = [...daySelected].filter(d=> (editingPlan.schedule[d]||[]).length > 0);
@@ -4881,7 +5056,7 @@ function confirmDaySelectClear(){
   targets.forEach(d=>{ editingPlan.schedule[d] = []; });
   toast(t('daySelectClearDone', `Wyczyszczono ${targets.length} ${targets.length===1?'dzień':'dni'}`, targets.length));
   exitDaySelectMode();
-  renderPlanEditorGrid();
+  planEditorRepaintGrid();
 }
 function renderPlanDayRow(){
   const row = document.getElementById('planDayRow');
@@ -4926,10 +5101,58 @@ function renderPlanDayRow(){
     clearBtn.textContent = t('daySelectClearBtn', `Wyczyść (${clearTargets.length})`, clearTargets.length);
   }
 }
+// v2 paint counterpart to renderPlanDayRow() above — same PLAN_DAYS/
+// daySelectMode/daySelectSource/daySelected state, new markup ids
+// (planDayRowV2 etc., see #view-plan-editor-v2). Kept as a fully
+// separate function rather than parameterizing the old one, matching
+// how GYM v2 (renderGymV2) already sits next to the real GYM screen's
+// own render function in this codebase.
+function renderPlanDayRowV2(){
+  const row = document.getElementById('planDayRowV2');
+  if(!row) return;
+  row.innerHTML = PLAN_DAYS.map(d=>{
+    const cls = ['pev2-day-chip'];
+    const isSourceOrActive = daySelectMode ? d===daySelectSource : d===editingPlan.activeDay;
+    if(isSourceOrActive) cls.push('active');
+    if((editingPlan.schedule[d]||[]).length>0) cls.push('has-ex');
+    if(daySelectMode && daySelected.has(d)) cls.push('picked');
+    const handler = daySelectMode ? `toggleDaySelected('${d}')` : `selectPlanEditorDay('${d}')`;
+    return `<button type="button" class="${cls.join(' ')}" onclick="${handler}">${planDayLabel(d)}</button>`;
+  }).join('');
+
+  const hintEl = document.getElementById('planDayHintTextV2');
+  const modeBtn = document.getElementById('daySelectModeBtnV2');
+  const bar = document.getElementById('daySelectBarV2');
+  if(!daySelectMode){
+    if(hintEl) hintEl.textContent = t('planDayHint','Wybierz dzień tygodnia i przypisz mu ćwiczenia');
+    if(modeBtn){ modeBtn.classList.toggle('hidden', daysWithExercises().length===0); modeBtn.textContent = t('daySelectModeBtn','Zaznacz dni'); }
+    if(bar) bar.classList.add('hidden');
+    return;
+  }
+  if(modeBtn) modeBtn.classList.add('hidden');
+  if(hintEl) hintEl.textContent = t('planDaySelectHint','Zaznacz dni, które chcesz zmienić.');
+  if(bar) bar.classList.remove('hidden');
+  const count = daySelected.size;
+  const countEl = document.getElementById('daySelectCountV2');
+  if(countEl) countEl.textContent = count ? t('daySelectCount', `${count} ${count===1?'dzień':'dni'} zaznaczon${count===1?'y':'e'}`, count) : '';
+  const copyTargets = [...daySelected].filter(d=>d!==daySelectSource);
+  const sourceHasEx = (editingPlan.schedule[daySelectSource]||[]).length > 0;
+  const copyBtn = document.getElementById('daySelectCopyBtnV2');
+  if(copyBtn){
+    copyBtn.classList.toggle('hidden', !(sourceHasEx && copyTargets.length>0));
+    copyBtn.textContent = t('daySelectCopyBtn', 'Kopiuj dni');
+  }
+  const clearTargets = [...daySelected].filter(d=> (editingPlan.schedule[d]||[]).length>0);
+  const clearBtn = document.getElementById('daySelectClearBtnV2');
+  if(clearBtn){
+    clearBtn.classList.toggle('hidden', clearTargets.length===0);
+    clearBtn.textContent = t('daySelectClearBtn', `Wyczyść (${clearTargets.length})`, clearTargets.length);
+  }
+}
 function selectPlanEditorDay(d){
   editingPlan.activeDay = d;
-  renderPlanDayRow();
-  renderPlanEditorGrid();
+  planEditorRepaintDayRow();
+  planEditorRepaintGrid();
 }
 const PLAN_EQUIP_FILTERS = [
   {key:'all', pl:'Wszystkie', en:'All'},
@@ -4940,14 +5163,21 @@ const PLAN_EQUIP_FILTERS = [
 let planEditorEquipmentFilter = 'all';
 function setPlanEquipFilter(key){
   planEditorEquipmentFilter = key;
-  renderPlanEquipFilterRow();
-  renderPlanEditorGrid();
+  planEditorRepaintEquipRow();
+  planEditorRepaintGrid();
 }
 function renderPlanEquipFilterRow(){
   const row = document.getElementById('planEquipFilterRow');
   if(!row) return;
   row.innerHTML = PLAN_EQUIP_FILTERS.map(f=>
     `<button type="button" class="equip-filter-chip${planEditorEquipmentFilter===f.key?' active':''}" onclick="setPlanEquipFilter('${f.key}')">${LANG==='en'?f.en:f.pl}</button>`
+  ).join('');
+}
+function renderPlanEquipFilterRowV2(){
+  const row = document.getElementById('planEquipFilterRowV2');
+  if(!row) return;
+  row.innerHTML = PLAN_EQUIP_FILTERS.map(f=>
+    `<button type="button" class="pev2-equip-chip${planEditorEquipmentFilter===f.key?' active':''}" onclick="setPlanEquipFilter('${f.key}')">${LANG==='en'?f.en:f.pl}</button>`
   ).join('');
 }
 function renderPlanEditorGrid(){
@@ -4964,16 +5194,102 @@ function renderPlanEditorGrid(){
     null, 'planEditor'
   );
 }
+// Which PLAN_EX_GROUPS section headers are collapsed, in the v2 plan
+// editor's accordion (Figma node 155:1086 shows sections as
+// individually collapsible cards). Reset to empty (everything
+// expanded) on every openPlanEditorV2() visit.
+let planEditorV2Collapsed = new Set();
+function togglePlanEditorV2Section(key){
+  if(planEditorV2Collapsed.has(key)) planEditorV2Collapsed.delete(key);
+  else planEditorV2Collapsed.add(key);
+  renderPlanEditorGridV2();
+}
+// v2 paint counterpart to renderPlanEditorGrid() — same grouping
+// (PLAN_EX_GROUPS/muscleGroupBucket) and the same real exercise
+// library/equipment filter, but Figma's numbered, individually-
+// collapsible accordion cards instead of the old editor's flat always-
+// open sections, and buildExerciseTileV2()'s icon+label tile (state
+// 'selected') instead of buildExerciseTile()'s flat baked image.
+function renderPlanEditorGridV2(){
+  const container = document.getElementById('planEditorGridV2');
+  if(!container) return;
+  let lib = orderedExerciseLibrary();
+  if(planEditorEquipmentFilter !== 'all'){
+    lib = lib.filter(ex => !ex.equipment || ex.equipment === planEditorEquipmentFilter);
+  }
+  const dayExercises = editingPlan.schedule[editingPlan.activeDay];
+  const buckets = new Map();
+  lib.forEach(ex=>{
+    const b = muscleGroupBucket(ex.group);
+    if(!buckets.has(b.key)) buckets.set(b.key, []);
+    buckets.get(b.key).push(ex);
+  });
+  container.innerHTML = '';
+  let num = 0;
+  PLAN_EX_GROUPS.forEach(b=>{
+    const list = buckets.get(b.key);
+    if(!list || !list.length) return;
+    num++;
+    const collapsed = planEditorV2Collapsed.has(b.key);
+    const section = document.createElement('div');
+    section.className = 'pev2-section';
+    const header = document.createElement('div');
+    header.className = 'pev2-section-header';
+    header.innerHTML = `
+      <div class="pev2-section-heading">
+        <span class="pev2-section-num">${String(num).padStart(2,'0')}</span>
+        <span class="pev2-section-name">${LANG==='en' ? b.en : b.pl}</span>
+      </div>
+      ${ph('caret-down', collapsed ? 'collapsed' : '')}
+    `;
+    header.onclick = ()=> togglePlanEditorV2Section(b.key);
+    section.appendChild(header);
+    if(!collapsed){
+      const grid = document.createElement('div');
+      grid.className = 'gymv2-grid';
+      list.forEach(ex=>{
+        const selected = dayExercises.some(e=>e.name===ex.name);
+        const tile = buildExerciseTileV2(ex, selected ? 'selected' : 'plain');
+        tile.classList.add('gymv2-tile');
+        tile.onclick = ()=> togglePlanExercise(ex);
+        grid.appendChild(tile);
+      });
+      grid.appendChild(buildAddCustomExerciseTile('planEditor', LANG==='en' ? b.en : b.pl));
+      section.appendChild(grid);
+    }
+    container.appendChild(section);
+  });
+  refreshPlanEditorV2Scroll();
+}
+// Same "only grant scroll when content genuinely overflows" technique as
+// renderPlansListV2() — see the STANDING RULE comment on .plansv2-lock's
+// CSS. Shares that class with Plans v2 since this screen reuses the
+// exact same lilac fixed-screen treatment. Split out from
+// renderPlanEditorGridV2() and re-run once more from goRoute() itself
+// (after the view actually goes .active) — openPlanEditorV2() renders
+// into #view-plan-editor-v2 BEFORE goRoute() activates it, and a
+// display:none subtree measures as a zero-size rect, so the very first
+// measurement on a fresh visit needs a second pass once the view is
+// actually laid out. Re-renders that happen while already on this
+// screen (equip filter, accordion collapse) don't need that second
+// pass — the view is already active by then.
+function refreshPlanEditorV2Scroll(){
+  const container = document.getElementById('planEditorGridV2');
+  const lastSection = container ? container.lastElementChild : null;
+  const nav = document.getElementById('bottomNav');
+  const needsScroll = !!(lastSection && nav && lastSection.getBoundingClientRect().bottom > nav.getBoundingClientRect().top - 150);
+  document.documentElement.classList.toggle('plansv2-scrollable', needsScroll);
+}
 function togglePlanExercise(ex){
   const dayExercises = editingPlan.schedule[editingPlan.activeDay];
   const idx = dayExercises.findIndex(e=>e.name===ex.name);
   if(idx===-1) dayExercises.push({...ex});
   else dayExercises.splice(idx,1);
-  renderPlanDayRow();
-  renderPlanEditorGrid();
+  planEditorRepaintDayRow();
+  planEditorRepaintGrid();
 }
 function savePlanEditor(){
-  const name = document.getElementById('planNameInput').value.trim();
+  const name = (editingPlan.name || '').trim();
   if(!name){ toast(t('planNameRequired','Podaj nazwę planu')); return; }
   if(!planTotalExercises(editingPlan)){ toast(t('planNeedsExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
   editingPlan.name = name;
@@ -5011,7 +5327,7 @@ function savePlanEditor(){
   if(planOnboardingActive && starredPlanId !== savedId){
     toggleStarredPlan(savedId); // stars it and, since we're mid plan-onboarding, carries the user onward
   } else {
-    goRoute('plans');
+    goRoute(currentRoute==='plan-editor-v2' ? 'plans-v2' : 'plans');
   }
 }
 function deleteCurrentPlan(){
