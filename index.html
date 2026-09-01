@@ -211,6 +211,17 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
   padding:15px 19px;z-index:20;}
 .nav-item{background:none;border:none;display:flex;align-items:center;justify-content:center;width:55px;height:55px;border-radius:50%;cursor:pointer;flex-shrink:0;}
 .nav-item .ph{width:27px;height:27px;color:var(--light);}
+/* Without this, an icon's own <svg> (no width/height attrs, sized only
+   by its viewBox's aspect ratio) renders at .ph's width but a HEIGHT
+   derived from its own intrinsic ratio, not clamped to .ph's box — a
+   square viewBox (256x256, every other nav icon) coincidentally comes
+   out right by accident, but clipboard-text's non-square 21.5x26.5
+   viewBox rendered 27px wide by 33px tall, visibly overflowing its
+   circle ("ikona planu sie rozjechala jakby byla wieksza"). #bottomNav
+   sits outside every existing "root" scope that already has this fix
+   (.dash-root/.plansv2-root/.gymv2-root .ph svg) — same recurring bug,
+   just a spot those scoped rules never reached. */
+#bottomNav .ph svg{display:block;width:100%;height:100%;}
 .nav-item.active{background:var(--orange);}
 .nav-item.active .ph{color:#fff;}
 /* v3-only nav (Figma node 107:457, "menu" arm of the new Dashboard).
@@ -2896,7 +2907,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 109;
+const DASH_BUILD = 110;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
