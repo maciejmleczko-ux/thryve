@@ -732,7 +732,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-trend span{flex:1;min-width:3px;border-radius:3px;background:#f30;transform-origin:bottom;}
 
 .dash-week-card{background:#2642a4;border-radius:16px;padding:16px;color:#fff;}
-.dash-build-label{position:absolute;top:calc(60px + env(safe-area-inset-top,0px));right:10px;font-size:9px;font-weight:500;color:rgba(52,57,65,.35);}
+.dash-build-label{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);right:12px;z-index:30;font-size:9px;font-weight:500;letter-spacing:.3px;color:rgba(52,57,65,.4);pointer-events:none;}
 .dash-week-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .dash-week-count{margin:0;font-size:12px;font-weight:700;}
 .dash-week-days{display:flex;justify-content:space-between;}
@@ -3301,10 +3301,6 @@ function skipOnboarding(){
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
 const APP_VERSION = "4.8.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
-/* Separate counter for the hidden Dashboard preview only — bump by 1
-   on every commit that touches it, so a small on-screen label makes
-   it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 131;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -6829,7 +6825,7 @@ function renderDashboard(){
   const todayIso = todayStr();
   const todayKey = dayKeyFromDate(todayIso);
 
-  document.getElementById('dashBuildLabel').textContent = 'dashboard build ' + DASH_BUILD;
+  document.getElementById('dashBuildLabel').textContent = 'Mekkio v' + APP_VERSION;
   document.getElementById('dashHi').textContent = profileName ? `Cześć ${profileName}` : 'Cześć';
 
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
