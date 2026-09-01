@@ -3196,7 +3196,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 118;
+const DASH_BUILD = 119;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -7430,6 +7430,40 @@ function statsV2ExerciseMonthlySeries(name, rangeMonths){
   }
   return { points: rangeMonths ? points.slice(-rangeMonths) : points, prMonths };
 }
+// Maciej: "dodac 1 miesiac - ale niech to jest nie np tylko sierpien -
+// czy wrzesien tylko od dnia 1 - miesiac (czyli teoretycznie 30 punktow)
+// do wykresu" — the "1m" range needs day-level points over a real
+// rolling 30-day window, not a calendar-month bucket like the other
+// ranges use. One point per day actually trained in that window
+// (running all-time-best weight, same semantic as the monthly series —
+// "PROGRES CIĘŻARU" always plots the record's trajectory, not raw
+// per-session swings), so a month with 4 sessions shows 4 points, not
+// 30 flat ones. Reuses the monthly series' `key`-based prMonths/PR-tag
+// plumbing downstream by keying points on the date string instead of a
+// month string — same shape, callers don't need to branch.
+function statsV2ExerciseDailySeries(name){
+  const sets = statsV2ExerciseSets(name);
+  if(!sets.length) return { points: [], prMonths: new Set() };
+  const today = new Date(todayStr()+'T00:00:00');
+  const windowStart = dateStr(new Date(today.getFullYear(), today.getMonth(), today.getDate()-29));
+  const dailyBest = new Map();
+  sets.forEach(s=>{
+    if(s.date < windowStart) return;
+    if(!dailyBest.has(s.date) || s.weight > dailyBest.get(s.date)) dailyBest.set(s.date, s.weight);
+  });
+  const days = [...dailyBest.keys()].sort();
+  // Running best carries in from before the window so day one of the
+  // chart reflects real history instead of pretending the record reset.
+  let runningBest = 0;
+  sets.filter(s=>s.date<windowStart).forEach(s=>{ if(s.weight>runningBest) runningBest = s.weight; });
+  const prMonths = new Set();
+  const points = days.map(d=>{
+    const w = dailyBest.get(d);
+    if(w > runningBest){ runningBest = w; prMonths.add(d); }
+    return { key: d, date: d, weight: runningBest };
+  });
+  return { points, prMonths };
+}
 // one row per day this exercise was logged (a session), most recent
 // first, flagged if that session's top set was a genuine all-time PR
 function statsV2ExerciseSessions(name){
@@ -7567,7 +7601,7 @@ function renderStatsV2Detail(name){
   const rec = statsV2ExerciseRecord(name);
   if(!rec) return renderStatsV2ExerciseRow(name) + `<div class="statsv2-empty">Brak zapisanych serii dla tego ćwiczenia.</div>`;
 
-  const series = statsV2ExerciseMonthlySeries(name, statsV2Range);
+  const series = statsV2Range === 1 ? statsV2ExerciseDailySeries(name) : statsV2ExerciseMonthlySeries(name, statsV2Range);
   const pts = series.points;
   const maxW = Math.max(1, ...pts.map(p=>p.weight));
   // Bug (Maciej: "AB CRUNCH - mam 5 sesji a progres ciezaru sie nie
@@ -7608,7 +7642,7 @@ function renderStatsV2Detail(name){
       </div>`;
   }).join('');
 
-  const ranges = [[3,'3m'],[6,'6m'],[12,'1r'],[0,'Cały czas']];
+  const ranges = [[1,'1m'],[3,'3m'],[6,'6m'],[12,'1r'],[0,'Cały czas']];
 
   // Maciej: "czerwona apla z aktualny rekord - strzalka w gore pokazuje
   // progres - ta sama w dol pokazuje regres - brak ten sam ciezar". Reuses
@@ -7657,7 +7691,7 @@ function renderStatsV2Detail(name){
             ${chartPts.map((p,i)=> i===chartPts.length-1 ? `<circle cx="${p.x}" cy="${p.y}" r="6.5" fill="#ffc542"/>` : (series.prMonths.has(p.key)?`<circle cx="${p.x}" cy="${p.y}" r="4" fill="#221b17" stroke="#ff8a3d" stroke-width="2"/>`:'')).join('')}
           </svg>
         </div>
-        <div class="statsv2-detail-wave-labels">${dLabels.map(p=>`<span>${MONTH_ABBR_PL[p.month-1]}</span>`).join('')}</div>
+        <div class="statsv2-detail-wave-labels">${dLabels.map(p=> p.month ? `<span>${MONTH_ABBR_PL[p.month-1]}</span>` : `<span>${new Date(p.date+'T00:00:00').getDate()}.${String(new Date(p.date+'T00:00:00').getMonth()+1).padStart(2,'0')}</span>`).join('')}</div>
       </div>
 
       <div class="statsv2-log-card statsv2-anim-card" style="--i:2">
