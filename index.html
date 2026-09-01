@@ -1491,6 +1491,11 @@ body.pev2-bg{background:#dd2b17;}
 .statsv2-ytd-labels span{font-size:12px;color:#fff;letter-spacing:.48px;}
 
 .statsv2-ex-section{margin-top:8px;}
+/* Overview only: this section follows the YTD card there (detail mode
+   has it right after the header instead, where the header's own 20px
+   margin-bottom already sets the gap — this override only applies when
+   .statsv2-ex-section follows .statsv2-cards, i.e. the overview case). */
+.statsv2-cards + .statsv2-ex-section{margin-top:24px;}
 .statsv2-ex-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .statsv2-ex-head p{margin:0;font-size:14px;color:#2c2727;letter-spacing:.56px;text-transform:uppercase;}
 .statsv2-ex-all-btn{background:#f30;border:none;border-radius:999px;padding:6px 20px;font-size:12px;font-weight:500;color:#fff;letter-spacing:.48px;font-family:inherit;cursor:pointer;}
@@ -1518,7 +1523,7 @@ body.pev2-bg{background:#dd2b17;}
 
 .statsv2-detail-chart-card{background:#fdfbff;border-radius:16px;padding:16px;box-sizing:border-box;}
 .statsv2-detail-chart-eyebrow{margin:0 0 10px;font-size:11px;color:rgba(52,57,65,.8);letter-spacing:1.1px;text-transform:uppercase;}
-.statsv2-range-row{display:flex;gap:7px;margin-bottom:16px;}
+.statsv2-range-row{display:flex;gap:7px;margin-bottom:24px;}
 .statsv2-range-chip{flex-shrink:0;width:52px;border:1px solid #f30;background:#fdfbff;border-radius:12px;padding:11px 4px;font-size:12px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;text-align:center;}
 .statsv2-range-chip.wide{flex:1;width:auto;}
 .statsv2-range-chip.active{background:#f30;color:#fff;}
@@ -3196,7 +3201,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 121;
+const DASH_BUILD = 122;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -7683,7 +7688,7 @@ function renderStatsV2Detail(name){
 
   return `
     ${renderStatsV2ExerciseRow(name)}
-    <div class="statsv2-cards" style="margin-top:8px;">
+    <div class="statsv2-cards" style="margin-top:24px;">
       <div class="statsv2-record-card statsv2-anim-card" style="--i:0">
         <p class="statsv2-record-eyebrow">Aktualny rekord - ${name}</p>
         <div class="statsv2-record-num-row">
