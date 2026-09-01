@@ -126,6 +126,13 @@ body.dashboard-bg{background:#eceaf1;}
 html.plansv2-lock, html.plansv2-lock body{overflow:hidden;height:100dvh;touch-action:none;}
 html.plansv2-lock.plansv2-scrollable, html.plansv2-lock.plansv2-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}
 body.plansv2-bg{background:#f5f1fb;}
+/* Stats v2 + History v2 share Plans v2's flat lilac page background —
+   same technique, same color (Maciej: "tlo w statystykach niech bedzie
+   - F5F1FB"), just missing until now — the base body{background:var(--bg)}
+   dark color was bleeding through the bottom-nav-clearance gap and any
+   overscroll bounce on both screens. */
+body.statsv2-bg{background:#f5f1fb;}
+body.histv2-bg{background:#f5f1fb;}
 /* Same technique, reused for modals — background stays put while a popup is open. */
 html.modal-lock, html.modal-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
 button{font-family:inherit;}
@@ -180,7 +187,7 @@ button{font-family:inherit;}
    for the same routes (see goRoute()'s isV3). */
 .app-glow{position:fixed;top:-260px;left:-100px;width:640px;height:640px;border-radius:50%;
   background:radial-gradient(circle, rgba(241,90,35,.55), rgba(44,39,39,0) 65%);pointer-events:none;z-index:-1;will-change:transform;}
-html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow{display:none;}
+html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow, html.statsv2-bg .app-glow, html.histv2-bg .app-glow{display:none;}
 @media (prefers-reduced-motion: no-preference){
   .app-glow{animation:glowDrift 24s ease-in-out infinite;}
   @keyframes glowDrift{
@@ -1502,6 +1509,7 @@ body.pev2-bg{background:#dd2b17;}
 .statsv2-record-num{flex:1;font-size:40px;color:#fff;font-weight:400;letter-spacing:-.88px;font-variant-numeric:tabular-nums;}
 .statsv2-record-num small{font-size:16px;color:rgba(255,255,255,.8);margin-left:4px;}
 .statsv2-record-arrow{width:40px;height:40px;color:#fff;flex-shrink:0;}
+.statsv2-record-arrow.down{transform:scaleY(-1);}
 .statsv2-record-delta{margin:8px 0 16px;font-size:11px;color:#ffb10d;letter-spacing:1.1px;text-transform:uppercase;}
 .statsv2-record-sep{height:1px;background:rgba(255,255,255,.25);margin-bottom:16px;}
 .statsv2-record-stats{display:flex;gap:28px;}
@@ -3188,7 +3196,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 117;
+const DASH_BUILD = 118;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3763,6 +3771,12 @@ function goRoute(route){
   document.body.classList.toggle('pev2-bg', route==='plan-editor-v2');
   document.body.classList.toggle('gymv2-bg', route==='gym-v2');
   document.documentElement.classList.toggle('gymv2-bg', route==='gym-v2');
+  // Maciej: "tlo w statystykach niech bedzie - F5F1FB" — same gap existed
+  // identically on History v2, fixed both together.
+  document.body.classList.toggle('statsv2-bg', route==='stats-v2');
+  document.documentElement.classList.toggle('statsv2-bg', route==='stats-v2');
+  document.body.classList.toggle('histv2-bg', route==='history-v2');
+  document.documentElement.classList.toggle('histv2-bg', route==='history-v2');
   document.querySelector('.topbar').classList.toggle('hidden', isV3);
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
@@ -7329,8 +7343,22 @@ function statsV2RecentExerciseNames(){
   });
   return Array.from(lastSeen.entries()).sort((a,b)=> b[1].localeCompare(a[1])).map(([name])=>name);
 }
+// Bug (Maciej, 2026-09-05): "czemu niektore cwiczenia nie maja ikonku
+// nadanej z systemu". EXERCISE_ICON_MAP is only a partial override —
+// buildExerciseTileV2() elsewhere resolves an icon via
+// `EXERCISE_ICON_MAP[ex.name] || ex.icon` because most library
+// exercises carry their own real icon slug directly on the object
+// (e.g. "Cable Curl".icon === "cable_curl"). This function only had
+// the exercise NAME (from dashboardAllSets(), not the full object) and
+// checked EXERCISE_ICON_MAP alone — 32 of the 47 built-in exercises
+// aren't in that map, so most tiles silently fell back to a generic
+// barbell. Fixed by looking the name up in the real library (built-in
+// + custom) first, matching buildExerciseTileV2's exact precedence.
+// Genuinely custom exercises (icon:null, see saveNewExerciseV2()) are
+// the one case that's supposed to fall back to barbell — not a bug.
 function statsV2ExerciseIconSvg(name){
-  const slug = EXERCISE_ICON_MAP[name];
+  const found = getExerciseLibrary().find(e=>e.name===name);
+  const slug = EXERCISE_ICON_MAP[name] || (found && found.icon);
   return slug ? iconSvgV3(slug) : PH.barbell;
 }
 function statsV2Epley(weight, reps){ return weight * (1 + reps/30); }
@@ -7349,16 +7377,32 @@ function statsV2ExerciseRecord(name){
   if(!sets.length) return null;
   let best = sets[0];
   sets.forEach(s=>{ if(s.weight>best.weight) best = s; });
+  // Maciej: "strzalka w gore pokazuje progres - ta sama w dol pokazuje
+  // regres - brak ten sam ciezar" — needs a delta that can actually go
+  // negative. The original formula compared the all-time PR against a
+  // fixed cutoff date, and since a PR can only ever grow, deltaKg could
+  // never be < 0 — the down-arrow case was unreachable no matter what
+  // was logged. Switched to a genuine month-over-month comparison
+  // (this calendar month's best vs the previous one) so progress,
+  // regress, and "same weight" are all real, observable outcomes.
   const today = new Date(todayStr()+'T00:00:00');
-  const lastMonthCutoff = dateStr(new Date(today.getFullYear(), today.getMonth()-1, today.getDate()));
-  let bestLastMonth = 0;
-  sets.filter(s=>s.date<=lastMonthCutoff).forEach(s=>{ if(s.weight>bestLastMonth) bestLastMonth = s.weight; });
+  const thisMonthKey = statsV2MonthKey(todayStr());
+  const prevMonthKey = statsV2MonthKey(dateStr(new Date(today.getFullYear(), today.getMonth()-1, 1)));
+  let bestThisMonth = 0, bestPrevMonth = 0;
+  sets.forEach(s=>{
+    const k = statsV2MonthKey(s.date);
+    if(k===thisMonthKey && s.weight>bestThisMonth) bestThisMonth = s.weight;
+    if(k===prevMonthKey && s.weight>bestPrevMonth) bestPrevMonth = s.weight;
+  });
+  // Not trained yet this month? Fall back to the all-time PR so the
+  // trend line still means something instead of reading as a big drop.
+  const trendNow = bestThisMonth || best.weight;
   return {
     weight: best.weight,
     est1RM: Math.round(statsV2Epley(best.weight, best.reps)),
     totalSets: sets.length,
     lastTrained: statsV2RelativeDate(sets[sets.length-1].date),
-    deltaKg: Math.round(best.weight - bestLastMonth),
+    deltaKg: Math.round(trendNow - bestPrevMonth),
   };
 }
 // running all-time-best weight per month for this exercise, PR-flagged,
@@ -7526,14 +7570,29 @@ function renderStatsV2Detail(name){
   const series = statsV2ExerciseMonthlySeries(name, statsV2Range);
   const pts = series.points;
   const maxW = Math.max(1, ...pts.map(p=>p.weight));
-  const dW = 312, dH = 100, dPad = 6;
+  // Bug (Maciej: "AB CRUNCH - mam 5 sesji a progres ciezaru sie nie
+  // rysuje"): a point at (or near) the highest value in the series —
+  // very often the case, since that's exactly when a PR tag shows up —
+  // rendered with its own .statsv2-pr-tag directly on top of it.
+  // First attempt reserved top headroom in the point layout (dPadTop),
+  // but that alone didn't fix it: the tag's own `top` was computed as
+  // `p.y/(dH+16)*100` — mathematically that puts the tag's bottom edge
+  // (it's anchored via translate(-50%,-100%)) at the SAME y as the
+  // point's own center, just expressed as a % of a taller box, not
+  // actually offset above it. Confirmed via getBoundingClientRect: tag
+  // bottom and dot center landed within 0.2px of each other regardless
+  // of dPadTop's value — the dot's top half stayed hidden under the tag.
+  // Real fix: subtract the dot's own radius plus a real gap from p.y
+  // when placing the tag, in the same coordinate space as the point.
+  const dW = 312, dH = 100, dPadTop = 14, dPadBottom = 8;
   const chartPts = pts.map((p,i)=>({
     ...p,
     x: pts.length>1 ? (i/(pts.length-1))*dW : dW/2,
-    y: dPad + (1 - p.weight/maxW) * (dH - dPad*2),
+    y: dPadTop + (1 - p.weight/maxW) * (dH - dPadTop - dPadBottom),
   }));
   const dPath = statsV2SmoothPath(chartPts);
-  const prPts = chartPts.filter(p=>series.prMonths.has(p.key));
+  const lastKey = chartPts.length ? chartPts[chartPts.length-1].key : null;
+  const prPts = chartPts.filter(p=>series.prMonths.has(p.key)).map(p=>({...p, r: p.key===lastKey?6.5:4}));
   const dLabels = chartPts.filter((_,i)=> pts.length<=6 || i%Math.ceil(pts.length/6)===0 || i===pts.length-1);
 
   const sessions = statsV2ExerciseSessions(name);
@@ -7551,6 +7610,16 @@ function renderStatsV2Detail(name){
 
   const ranges = [[3,'3m'],[6,'6m'],[12,'1r'],[0,'Cały czas']];
 
+  // Maciej: "czerwona apla z aktualny rekord - strzalka w gore pokazuje
+  // progres - ta sama w dol pokazuje regres - brak ten sam ciezar". Reuses
+  // the one arrow-up-right SVG for both directions (a vertical flip turns
+  // "up-right" into "down-right") rather than adding a near-duplicate icon.
+  const deltaArrow = rec.deltaKg > 0
+    ? `<span class="ph statsv2-record-arrow">${PH['arrow-up-right']}</span>`
+    : rec.deltaKg < 0
+      ? `<span class="ph statsv2-record-arrow down">${PH['arrow-up-right']}</span>`
+      : '';
+
   return `
     ${renderStatsV2ExerciseRow(name)}
     <div class="statsv2-cards" style="margin-top:8px;">
@@ -7559,7 +7628,7 @@ function renderStatsV2Detail(name){
         <div class="statsv2-record-num-row">
           ${ph('trophy','statsv2-record-trophy')}
           <span class="statsv2-record-num">${rec.weight}<small>kg</small></span>
-          <span class="ph statsv2-record-arrow">${PH['arrow-up-right']}</span>
+          ${deltaArrow}
         </div>
         <p class="statsv2-record-delta">${rec.deltaKg>=0?'+':''}${rec.deltaKg} kg od zeszłego miesiąca</p>
         <div class="statsv2-record-sep"></div>
@@ -7576,7 +7645,7 @@ function renderStatsV2Detail(name){
           ${ranges.map(([m,label],i)=>`<button type="button" class="statsv2-range-chip${i===ranges.length-1?' wide':''}${statsV2Range===m?' active':''}" onclick="setStatsV2RangeV2(${m})">${label}</button>`).join('')}
         </div>
         <div class="statsv2-detail-wave">
-          ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(p.y/(dH+16)*100).toFixed(1)}%;">PR ${p.weight}kg</div>`).join('')}
+          ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(Math.max(0,p.y-p.r-6)/(dH+16)*100).toFixed(1)}%;">PR ${p.weight}kg</div>`).join('')}
           <svg viewBox="0 0 ${dW} ${dH+16}" preserveAspectRatio="none">
             <defs>
               <linearGradient id="statsV2DetailGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -7613,6 +7682,22 @@ function renderStatsV2(animate){
   // "hidden" was applied — confirmed via screenshot after the class-based
   // toggle reported hidden:true in the DOM.
   document.getElementById('statsV2CloseBtn').style.display = selectedStatsExerciseV2 ? '' : 'none';
+  // Maciej: "po kliknieciu w cwiczenei skacze dziwnie - niech aktywne
+  // cwiczenie jest zawsze jako srodkowy kafelek". body.innerHTML above
+  // destroys and recreates .statsv2-ex-row on every single render (range-
+  // chip clicks, bar-page nav, tile taps alike), which resets its
+  // scrollLeft to 0 regardless — so without this, any tile past the first
+  // couple silently snapped back to the row's left edge on every
+  // interaction. Re-centering here (instant, not smooth — it's re-applied
+  // on every render, an animated scroll on each range-chip click would be
+  // distracting) keeps the active tile in the middle at all times.
+  statsV2CenterActiveTile();
+}
+function statsV2CenterActiveTile(){
+  const row = document.querySelector('.statsv2-ex-row');
+  const tile = row && row.querySelector('.statsv2-ex-tile.active');
+  if(!row || !tile) return;
+  row.scrollLeft = Math.max(0, tile.offsetLeft - (row.clientWidth - tile.clientWidth) / 2);
 }
 function selectStatsExerciseV2(name){
   selectedStatsExerciseV2 = (selectedStatsExerciseV2===name) ? null : name;
