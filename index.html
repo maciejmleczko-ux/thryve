@@ -672,12 +672,12 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .icon-suggest span{font-size:12px;font-weight:700;color:var(--text-dark);opacity:.75;}
 
 /* ============================================================
-   DASHBOARD — hidden preview of the new Figma "v3" redesign.
-   Scoped entirely under .dash-* / #view-dashboard: its own font
-   (Geist) and color set, deliberately not touching the app-wide
-   --bg/--card/--orange tokens used everywhere else yet. Reachable
-   only via the triple-tap-logo gesture until the rest of the app
-   is migrated to this design.
+   DASHBOARD — home screen of the Figma "v3" ("Mekkio") redesign,
+   now the app's main layout (the app boots straight here; see the
+   previewMode note near the router). Scoped entirely under
+   .dash-* / #view-dashboard: its own font (Geist) and color set,
+   deliberately not touching the app-wide --bg/--card/--orange
+   tokens the old (now dead-code) screens still use.
    ============================================================ */
 #view-dashboard{
   min-height:100vh;font-family:'Geist','Inter',-apple-system,sans-serif;
@@ -1667,7 +1667,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <div class="view-stack" id="viewStack">
 
   <!-- ===================== WELCOME ===================== -->
-  <section class="view active view-welcome" id="view-welcome">
+  <section class="view view-welcome" id="view-welcome">
     <div class="welcome-greeting" id="welcomeGreeting"></div>
     <div class="welcome-headline">Ready for<br>Today's<br>Challenges?</div>
     <div class="welcome-grid">
@@ -1699,8 +1699,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
   </section>
 
-  <!-- ===================== DASHBOARD (hidden preview, triple-tap logo) ===================== -->
-  <section class="view" id="view-dashboard">
+  <!-- ===================== DASHBOARD (v3 "Mekkio" home — the app boots here) ===================== -->
+  <section class="view active" id="view-dashboard">
     <div class="dash-root">
       <button type="button" class="dash-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
       <p class="dash-build-label" id="dashBuildLabel"></p>
@@ -3304,7 +3304,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 130;
+const DASH_BUILD = 131;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3742,7 +3742,7 @@ function fmtDate(iso){
 /* ============================================================
    ROUTER
    ============================================================ */
-let currentRoute = 'welcome';
+let currentRoute = 'dashboard';
 const ROUTE_ORDER = ['welcome', 'gym', 'running', 'history', 'stats'];
 let viewTransitioning = false, viewTransitionCleanup = null;
 let pendingTransition = null;
@@ -3815,11 +3815,16 @@ function commitViewTransition(){
    go to while previewMode is on. Only sections with a built v3 screen
    get an entry here — everything else still falls through to the
    real production route unchanged. See [[project_thryve_roadmap]]. */
-let previewMode = false;
+/* v3 (the "Mekkio" redesign) is now the main layout — previewMode is on
+   from boot and the app never routes back to the old production screens
+   in normal use. The old #view-* screens + NAV_ITEMS_PRODUCTION stay in
+   the file as dead code, to be removed in a later cleanup. The only old
+   screen still reached is #view-plans, and only during a brand-new
+   user's first-plan onboarding (startPlanOnboarding). */
+let previewMode = true;
 const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2', history: 'history-v2', stats: 'stats-v2' };
-const V3_ROUTE_ALIAS = { dashboard: 'welcome', 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats' }; // which real nav icon a v3 route should light up
+const V3_ROUTE_ALIAS = { 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats' }; // which nav icon a v3 route should light up
 function navTap(route){
-  if(route === 'welcome') previewMode = false; // tapping home always exits back to production
   const target = (previewMode && PREVIEW_ROUTES[route]) ? PREVIEW_ROUTES[route] : route;
   goRoute(target);
 }
@@ -3837,7 +3842,7 @@ const NAV_ITEMS_PRODUCTION = [
   {route:'stats', icon:'chart-line-up'},
 ];
 const NAV_ITEMS_V3 = [
-  {route:'welcome', icon:'house'},
+  {route:'dashboard', icon:'house'},
   {route:'plans', icon:'clipboard-text'},
   {route:'gym', icon:'barbell', cls:'nav-item-lg'},
   {route:'history', icon:'calendar-dots'},
@@ -3902,7 +3907,7 @@ function goRoute(route){
   if(route==='history'){ renderCalendar(); }
   if(route==='stats'){ renderGymChecklist(); renderGymChart(); renderRunCharts(); updateStatsDateLabel(); }
   if(route==='plans'){ renderPlansList(); }
-  if(route==='dashboard'){ renderDashboard(); }
+  if(route==='dashboard'){ previewMode = true; renderDashboard(); }
   if(route==='gym-v2'){ previewMode = true; renderGymV2(); }
   if(route==='plans-v2'){ previewMode = true; renderPlansListV2(true); }
   if(route==='plan-editor-v2'){ previewMode = true; refreshPlanEditorV2Scroll(); }
@@ -5484,7 +5489,7 @@ function exitPlanOnboarding(){
   document.getElementById('plansCloseX').classList.remove('hidden');
   document.getElementById('planOnboardingIntro').classList.add('hidden');
   document.getElementById('skipPlanOnboardingBtn').classList.add('hidden');
-  goRoute('welcome');
+  goRoute('dashboard');
 }
 function completePlanOnboardingIfNeeded(){
   if(!planOnboardingActive) return;
@@ -8464,7 +8469,7 @@ updateStatsDateLabel();
 updatePlanPillLabel();
 renderGymGrid();
 renderExercisePanels();
-goRoute('welcome');
+goRoute('dashboard'); // v3 "Mekkio" redesign is now the main layout — boot straight into it
 updateWelcomeGreeting();
 if(!localStorage.getItem(LS_ONBOARD_SEEN)){
   document.getElementById('onboardOverlay').classList.remove('hidden');
