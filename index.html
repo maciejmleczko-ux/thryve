@@ -1412,6 +1412,127 @@ body.pev2-bg{background:#dd2b17;}
 }
 .histv2-root .ph{display:block;}
 .histv2-root .ph svg{display:block;width:100%;height:100%;}
+
+/* ===================== STATS v2 (Figma nodes 182:12264 "11. Statistic"
+   + 183:13393 "11. Statistic - details") — v3-styled replacement for
+   #view-stats. One screen, two render modes (see renderStatsV2() JS):
+   overview (ring/bar/YTD-wave) vs a selected exercise's detail
+   (hero-record/weight-progress-wave/session log) — matches Figma's own
+   structure, only the cards below the shared header+tile-row change.
+   Header aligned to 40px/30.654px like GYM v2/Plans v2/History v2
+   (Figma's own 55.18px/+1.2px reads as the same per-export outlier
+   already corrected on History — [[feedback_...]] n/a, just matching
+   established sibling screens). Two Figma text typos silently
+   corrected when implemented: "EST. IRM" -> "EST. 1RM", "OSTATIO" ->
+   "OSTATNIO". One label corrected for a real inconsistency, not just a
+   typo: the detail screen's per-exercise chart reused the overview's
+   "OBJĘTOŚĆ OD POCZĄTKU ROKU" text verbatim, but what's actually
+   plotted (and what the PR badges/hero "100 kg" tie back to) is
+   running-best WEIGHT over time, not volume — relabeled "PROGRES
+   CIĘŻARU" to match what the chart actually shows. */
+.statsv2-root{background:#f5f1fb;}
+.statsv2-panel{padding:calc(50px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
+.statsv2-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
+.statsv2-chat-btn:active{transform:scale(.9);}
+.statsv2-chat-btn .ph{width:24px;height:24px;color:#f30;}
+.statsv2-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.statsv2-header .ph{width:40px;height:40px;color:#f30;flex-shrink:0;}
+.statsv2-header h1{margin:0;font-size:30.654px;font-weight:400;color:#343941;letter-spacing:-.02em;}
+.statsv2-cards{display:flex;flex-direction:column;gap:8px;}
+
+.statsv2-ring-card{background:#000;border-radius:16px;padding:16px;box-sizing:border-box;height:204px;display:flex;flex-direction:column;justify-content:space-between;}
+.statsv2-ring-eyebrow{margin:0;font-size:11px;color:#ff6343;letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-ring-row{display:flex;align-items:center;justify-content:space-between;}
+.statsv2-ring-wrap{position:relative;width:132px;height:132px;flex-shrink:0;}
+.statsv2-ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg);}
+.statsv2-ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.statsv2-ring-num strong{font-size:30px;font-weight:400;color:#fff;letter-spacing:1.2px;line-height:1;font-variant-numeric:tabular-nums;}
+.statsv2-ring-num small{margin-top:2px;font-size:11px;color:#96959b;letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-ring-legend{display:flex;flex-direction:column;gap:30px;}
+.statsv2-ring-legend-row{display:flex;align-items:center;gap:30px;}
+.statsv2-ring-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;}
+.statsv2-ring-dot.done{background:#f30;}
+.statsv2-ring-dot.left{background:#343941;}
+.statsv2-ring-legend-label{margin:0;font-size:11px;color:#96959b;letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-ring-legend-value{margin:0;font-size:30px;color:#fff;letter-spacing:1.2px;font-weight:400;line-height:1.1;font-variant-numeric:tabular-nums;}
+
+.statsv2-bar-card{background:#fdfbff;border-radius:16px;padding:16px;box-sizing:border-box;}
+.statsv2-bar-eyebrow{margin:0 0 16px;font-size:11px;color:#343941;letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-bar-row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;height:112px;}
+.statsv2-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;min-width:0;}
+.statsv2-bar-col .bar{width:100%;max-width:42px;border-radius:16px;min-height:4px;}
+.statsv2-bar-col span{font-size:12px;color:#343941;letter-spacing:.48px;}
+.statsv2-bar-nav{display:flex;align-items:center;justify-content:center;gap:96px;margin-top:16px;}
+.statsv2-bar-nav .ph{width:16px;height:16px;color:#343941;cursor:pointer;}
+.statsv2-bar-nav .ph.disabled{opacity:.25;cursor:default;pointer-events:none;}
+
+.statsv2-ytd-card{background:#f30;border-radius:16px;padding:16px;box-sizing:border-box;}
+.statsv2-ytd-eyebrow{margin:0;font-size:11px;color:rgba(255,255,255,.8);letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-ytd-num-row{display:flex;align-items:center;gap:20px;margin-top:10px;}
+.statsv2-ytd-num-row .ph{width:36px;height:36px;color:#fff;flex-shrink:0;}
+.statsv2-ytd-num{font-size:40px;color:#fff;font-weight:400;letter-spacing:-.88px;font-variant-numeric:tabular-nums;}
+.statsv2-ytd-num small{font-size:16px;color:rgba(255,255,255,.8);margin-left:4px;}
+.statsv2-ytd-delta{margin:4px 0 0;font-size:11px;color:#ffb10d;letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-ytd-chart{position:relative;height:110px;margin-top:16px;}
+.statsv2-ytd-chart svg{width:100%;height:100%;overflow:visible;}
+.statsv2-ytd-labels{display:flex;justify-content:space-between;margin-top:8px;}
+.statsv2-ytd-labels span{font-size:12px;color:#fff;letter-spacing:.48px;}
+
+.statsv2-ex-section{margin-top:8px;}
+.statsv2-ex-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.statsv2-ex-head p{margin:0;font-size:14px;color:#2c2727;letter-spacing:.56px;text-transform:uppercase;}
+.statsv2-ex-all-btn{background:#f30;border:none;border-radius:999px;padding:6px 20px;font-size:12px;font-weight:500;color:#fff;letter-spacing:.48px;font-family:inherit;cursor:pointer;}
+.statsv2-ex-row{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;}
+.statsv2-ex-row::-webkit-scrollbar{display:none;}
+.statsv2-ex-tile{flex-shrink:0;width:76px;height:70px;border-radius:11px;background:#f6f4f4;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;box-sizing:border-box;cursor:pointer;opacity:.5;transition:opacity .12s ease;}
+.statsv2-ex-tile.active{opacity:1;border-color:#f30;}
+.statsv2-ex-tile .icn{width:32px;height:32px;color:#f30;flex-shrink:0;}
+.statsv2-ex-tile .icn svg{display:block;width:100%;height:100%;}
+.statsv2-ex-tile span{font-size:7px;font-weight:600;color:#2c2727;letter-spacing:.3px;text-transform:uppercase;text-align:center;line-height:1.15;}
+
+.statsv2-record-card{background:#f30;border-radius:16px;padding:16px;box-sizing:border-box;}
+.statsv2-record-eyebrow{margin:0;font-size:11px;color:rgba(255,255,255,.8);letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-record-num-row{display:flex;align-items:center;gap:20px;margin-top:8px;}
+.statsv2-record-num-row .ph{width:36px;height:32px;color:#fff;flex-shrink:0;}
+.statsv2-record-num{flex:1;font-size:40px;color:#fff;font-weight:400;letter-spacing:-.88px;font-variant-numeric:tabular-nums;}
+.statsv2-record-num small{font-size:16px;color:rgba(255,255,255,.8);margin-left:4px;}
+.statsv2-record-arrow{width:40px;height:40px;color:#fff;flex-shrink:0;}
+.statsv2-record-delta{margin:8px 0 16px;font-size:11px;color:#ffb10d;letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-record-sep{height:1px;background:rgba(255,255,255,.25);margin-bottom:16px;}
+.statsv2-record-stats{display:flex;gap:28px;}
+.statsv2-record-stat span{display:block;font-size:10px;color:#fff;letter-spacing:.4px;margin-bottom:4px;}
+.statsv2-record-stat strong{font-size:16px;color:#fff;font-weight:600;}
+
+.statsv2-detail-chart-card{background:#fdfbff;border-radius:16px;padding:16px;box-sizing:border-box;}
+.statsv2-detail-chart-eyebrow{margin:0 0 10px;font-size:11px;color:rgba(52,57,65,.8);letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-range-row{display:flex;gap:7px;margin-bottom:16px;}
+.statsv2-range-chip{flex:1;border:1px solid #f30;background:#fdfbff;border-radius:12px;padding:11px 4px;font-size:12px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;text-align:center;}
+.statsv2-range-chip.active{background:#f30;color:#fff;}
+.statsv2-detail-wave{position:relative;height:120px;margin-top:8px;}
+.statsv2-detail-wave svg{width:100%;height:100%;overflow:visible;}
+.statsv2-detail-wave-labels{display:flex;justify-content:space-between;margin-top:8px;}
+.statsv2-detail-wave-labels span{font-size:12px;color:#343941;letter-spacing:.48px;}
+.statsv2-pr-tag{position:absolute;transform:translate(-50%,-100%);background:#ffb608;color:#2c1500;font-size:9px;font-weight:500;padding:4px 6px;border-radius:6px;white-space:nowrap;pointer-events:none;}
+
+.statsv2-log-card{background:#fdfbff;border-radius:16px;padding:16px;box-sizing:border-box;}
+.statsv2-log-eyebrow{margin:0 0 12px;font-size:11px;color:rgba(52,57,65,.8);letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-log-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #eee;}
+.statsv2-log-row:first-child{border-top:none;padding-top:0;}
+.statsv2-log-date strong{display:block;font-size:14px;color:#343941;font-weight:500;}
+.statsv2-log-date span{font-size:10px;color:#343941;}
+.statsv2-log-sets{display:flex;align-items:center;gap:8px;font-size:12px;color:#343941;letter-spacing:.36px;text-align:right;}
+.statsv2-log-row.is-pr .statsv2-log-sets{color:#f30;font-weight:500;}
+.statsv2-log-trophy{width:16px;height:16px;color:#f30;flex-shrink:0;}
+
+.statsv2-empty{background:#fdfbff;border-radius:16px;padding:24px 18px;font-size:14px;color:#96959b;text-align:center;box-sizing:border-box;}
+
+@media (prefers-reduced-motion: no-preference){
+  .statsv2-chat-btn,.statsv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
+  .statsv2-anim-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.08s + var(--i,0) * 70ms);}
+  .statsv2-anim-tile{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.2s + var(--i,0) * 40ms);}
+}
+.statsv2-root .ph{display:block;}
+.statsv2-root .ph svg{display:block;width:100%;height:100%;}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -1989,6 +2110,25 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
       <p class="histv2-section-label">Twoje treningi</p>
       <div class="histv2-list" id="histDetailV2"></div>
+    </div>
+  </section>
+
+  <!-- ===================== STATS v2 (Figma nodes 182:12264 "11. Statistic" +
+       183:13393 "11. Statistic - details") — v3-styled replacement for
+       #view-stats, only reachable through the v3 preview nav. Production's
+       own Stats screen stays untouched. Body is fully rebuilt by
+       renderStatsV2() (overview vs a selected exercise's detail — see JS),
+       only the header/chat-button here are static. ===================== -->
+  <section class="view statsv2-root" id="view-stats-v2">
+    <div class="statsv2-panel">
+      <button type="button" class="statsv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
+
+      <div class="statsv2-header">
+        <span class="ph" data-ph="chart-line-up"></span>
+        <h1>STATS</h1>
+      </div>
+
+      <div id="statsV2Body"></div>
     </div>
   </section>
 
@@ -2651,6 +2791,7 @@ Object.assign(PH, {"dash-repeat": "<svg xmlns=\"http://www.w3.org/2000/svg\" wid
    preserveAspectRatio scales it down centered, same as any other icon
    with a non-square source. fill hardcoded->currentColor so .nav-item
    CSS drives the color exactly like the other 4 nav icons. */
+Object.assign(PH, {"arrow-up-right": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M204,64V168a8,8,0,0,1-16,0V83.31L69.66,201.66a8,8,0,0,1-11.32-11.32L176.69,72H92a8,8,0,0,1,0-16H196A8,8,0,0,1,204,64Z\"/></svg>"});
 Object.assign(PH, {"clipboard-text": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 21.5 26.5\" fill=\"currentColor\"><path d=\"M15.5 16.75C15.5 16.9489 15.421 17.1397 15.2803 17.2803C15.1397 17.421 14.9489 17.5 14.75 17.5H6.75C6.55109 17.5 6.36032 17.421 6.21967 17.2803C6.07902 17.1397 6 16.9489 6 16.75C6 16.5511 6.07902 16.3603 6.21967 16.2197C6.36032 16.079 6.55109 16 6.75 16H14.75C14.9489 16 15.1397 16.079 15.2803 16.2197C15.421 16.3603 15.5 16.5511 15.5 16.75ZM14.75 12H6.75C6.55109 12 6.36032 12.079 6.21967 12.2197C6.07902 12.3603 6 12.5511 6 12.75C6 12.9489 6.07902 13.1397 6.21967 13.2803C6.36032 13.421 6.55109 13.5 6.75 13.5H14.75C14.9489 13.5 15.1397 13.421 15.2803 13.2803C15.421 13.1397 15.5 12.9489 15.5 12.75C15.5 12.5511 15.421 12.3603 15.2803 12.2197C15.1397 12.079 14.9489 12 14.75 12ZM21.5 3.75002V24.75C21.5 25.2141 21.3156 25.6593 20.9874 25.9875C20.6592 26.3156 20.2141 26.5 19.75 26.5H1.75C1.28587 26.5 0.840752 26.3156 0.512563 25.9875C0.184375 25.6593 0 25.2141 0 24.75V3.75002C0 3.28589 0.184375 2.84077 0.512563 2.51258C0.840752 2.18439 1.28587 2.00002 1.75 2.00002H6.39625C6.935 1.37265 7.60297 0.869121 8.35442 0.52392C9.10587 0.17872 9.92305 0 10.75 0C11.5769 0 12.3941 0.17872 13.1456 0.52392C13.897 0.869121 14.565 1.37265 15.1038 2.00002H19.75C20.2141 2.00002 20.6592 2.18439 20.9874 2.51258C21.3156 2.84077 21.5 3.28589 21.5 3.75002ZM6.5 5.75002V6.00002H15V5.75002C15 4.62285 14.5522 3.54184 13.7552 2.74481C12.9582 1.94779 11.8772 1.50002 10.75 1.50002C9.62283 1.50002 8.54183 1.94779 7.7448 2.74481C6.94777 3.54184 6.5 4.62285 6.5 5.75002ZM20 3.75002C20 3.68371 19.9737 3.62013 19.9268 3.57324C19.8799 3.52636 19.8163 3.50002 19.75 3.50002H16.0413C16.3447 4.21131 16.5007 4.97672 16.5 5.75002V6.75002C16.5 6.94893 16.421 7.1397 16.2803 7.28035C16.1397 7.421 15.9489 7.50002 15.75 7.50002H5.75C5.55109 7.50002 5.36032 7.421 5.21967 7.28035C5.07902 7.1397 5 6.94893 5 6.75002V5.75002C4.99929 4.97672 5.15535 4.21131 5.45875 3.50002H1.75C1.6837 3.50002 1.62011 3.52636 1.57322 3.57324C1.52634 3.62013 1.5 3.68371 1.5 3.75002V24.75C1.5 24.8163 1.52634 24.8799 1.57322 24.9268C1.62011 24.9737 1.6837 25 1.75 25H19.75C19.8163 25 19.8799 24.9737 19.9268 24.9268C19.9737 24.8799 20 24.8163 20 24.75V3.75002Z\"/></svg>"});
 Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>",
 /* Plan-star toggle (Plans v2) — both states share the exact same
@@ -3038,7 +3179,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 114;
+const DASH_BUILD = 115;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3541,8 +3682,8 @@ function commitViewTransition(){
    get an entry here — everything else still falls through to the
    real production route unchanged. See [[project_thryve_roadmap]]. */
 let previewMode = false;
-const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2', history: 'history-v2' };
-const V3_ROUTE_ALIAS = { dashboard: 'welcome', 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history' }; // which real nav icon a v3 route should light up
+const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2', history: 'history-v2', stats: 'stats-v2' };
+const V3_ROUTE_ALIAS = { dashboard: 'welcome', 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats' }; // which real nav icon a v3 route should light up
 function navTap(route){
   if(route === 'welcome') previewMode = false; // tapping home always exits back to production
   const target = (previewMode && PREVIEW_ROUTES[route]) ? PREVIEW_ROUTES[route] : route;
@@ -3587,7 +3728,7 @@ function goRoute(route){
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward);
-  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2' || route==='history-v2';
+  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2' || route==='history-v2' || route==='stats-v2';
   document.getElementById('bottomNav').style.display = (route==='welcome' || planOnboardingActive) ? 'none' : 'flex';
   document.getElementById('bottomNav').classList.toggle('bottom-nav-light', isV3);
   // Only rebuild the button set when the v3-ness actually changes — every
@@ -3626,6 +3767,7 @@ function goRoute(route){
   if(route==='plans-v2'){ previewMode = true; renderPlansListV2(true); }
   if(route==='plan-editor-v2'){ previewMode = true; refreshPlanEditorV2Scroll(); }
   if(route==='history-v2'){ previewMode = true; renderCalendarV2(true); }
+  if(route==='stats-v2'){ previewMode = true; renderStatsV2(true); }
   commitViewTransition();
   window.scrollTo(0,0);
 }
@@ -7109,6 +7251,363 @@ function renderHistDetailV2(animate){
       </div>`;
   });
   wrap.innerHTML = html;
+}
+
+/* ============================================================
+   STATS v2 (Figma nodes 182:12264 "11. Statistic" + 183:13393
+   "11. Statistic - details") — v3-styled replacement for #view-stats.
+   Reuses workouts/dashboardAllSets()/starredPlanId/dashboardWeekDates()/
+   EXERCISE_ICON_MAP/iconSvgV3 wholesale; own state, production's
+   #view-stats stays completely untouched.
+   ============================================================ */
+const MONTH_ABBR_PL = ['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
+const MONTH_GEN_PL = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+let selectedStatsExerciseV2 = null; // null = overview, exercise name = detail
+let statsV2BarPage = 0;             // 0 = most recent 6 months, 1 = the 6 before that, ...
+let statsV2Range = 6;               // months shown in the per-exercise chart: 3/6/12/0(=all)
+
+function statsV2MonthKey(iso){ return iso.slice(0,7); }
+function statsV2MonthlyVolumeMap(){
+  const map = new Map();
+  dashboardAllSets().forEach(s=>{
+    const key = statsV2MonthKey(s.date);
+    map.set(key, (map.get(key)||0) + s.weight*s.reps);
+  });
+  return map;
+}
+function statsV2WeeklyProgress(){
+  const weekDates = dashboardWeekDates();
+  const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
+  const scheduledDays = weekDates.filter(d=> plan && (plan.schedule[dayKeyFromDate(d)]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
+  const trainedDays = weekDates.filter(d=> workouts.some(w=>w.date===d) || runs.some(r=>r.date===d));
+  return { done: scheduledDays.filter(d=>trainedDays.includes(d)).length, total: scheduledDays.length };
+}
+// contiguous 6-calendar-month window ending `pageOffset*6` months before
+// the current month (pageOffset=0 -> most recent 6, including this month)
+function statsV2MonthWindow(pageOffset){
+  const map = statsV2MonthlyVolumeMap();
+  const today = new Date(todayStr()+'T00:00:00');
+  const out = [];
+  for(let i=5;i>=0;i--){
+    const d = new Date(today.getFullYear(), today.getMonth() - pageOffset*6 - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    out.push({key, year:d.getFullYear(), month:d.getMonth()+1, kg: map.get(key)||0});
+  }
+  return out;
+}
+function statsV2EarliestWorkoutDate(){
+  if(!workouts.length) return null;
+  return workouts.reduce((min,w)=> (!min || w.date<min) ? w.date : min, null);
+}
+function statsV2YtdStats(){
+  const map = statsV2MonthlyVolumeMap();
+  const today = new Date(todayStr()+'T00:00:00');
+  const year = today.getFullYear(), curMonth = today.getMonth()+1;
+  const points = [];
+  let cum = 0;
+  for(let m=1;m<=curMonth;m++){
+    cum += map.get(`${year}-${String(m).padStart(2,'0')}`)||0;
+    points.push({month:m, cum});
+  }
+  const thisMonthKg = map.get(`${year}-${String(curMonth).padStart(2,'0')}`)||0;
+  const prevMonthDate = new Date(year, curMonth-2, 1);
+  return { total: Math.round(cum), points, deltaKg: Math.round(thisMonthKg), deltaLabel: `od ${MONTH_GEN_PL[prevMonthDate.getMonth()]}` };
+}
+function statsV2RecentExerciseNames(){
+  const lastSeen = new Map();
+  dashboardAllSets().forEach(s=>{
+    if(!lastSeen.has(s.name) || s.date > lastSeen.get(s.name)) lastSeen.set(s.name, s.date);
+  });
+  return Array.from(lastSeen.entries()).sort((a,b)=> b[1].localeCompare(a[1])).map(([name])=>name);
+}
+function statsV2ExerciseIconSvg(name){
+  const slug = EXERCISE_ICON_MAP[name];
+  return slug ? iconSvgV3(slug) : PH.barbell;
+}
+function statsV2Epley(weight, reps){ return weight * (1 + reps/30); }
+// this exercise's full logged history as {date, weight, reps} rows, oldest first
+function statsV2ExerciseSets(name){
+  return dashboardAllSets().filter(s=>s.name===name).sort((a,b)=> a.date.localeCompare(b.date));
+}
+function statsV2RelativeDate(iso){
+  const days = Math.round((new Date(todayStr()+'T00:00:00') - new Date(iso+'T00:00:00')) / 86400000);
+  if(days<=0) return 'dzisiaj';
+  if(days===1) return 'wczoraj';
+  return `${days} dni temu`;
+}
+function statsV2ExerciseRecord(name){
+  const sets = statsV2ExerciseSets(name);
+  if(!sets.length) return null;
+  let best = sets[0];
+  sets.forEach(s=>{ if(s.weight>best.weight) best = s; });
+  const today = new Date(todayStr()+'T00:00:00');
+  const lastMonthCutoff = dateStr(new Date(today.getFullYear(), today.getMonth()-1, today.getDate()));
+  let bestLastMonth = 0;
+  sets.filter(s=>s.date<=lastMonthCutoff).forEach(s=>{ if(s.weight>bestLastMonth) bestLastMonth = s.weight; });
+  return {
+    weight: best.weight,
+    est1RM: Math.round(statsV2Epley(best.weight, best.reps)),
+    totalSets: sets.length,
+    lastTrained: statsV2RelativeDate(sets[sets.length-1].date),
+    deltaKg: Math.round(best.weight - bestLastMonth),
+  };
+}
+// running all-time-best weight per month for this exercise, PR-flagged,
+// windowed to the last `rangeMonths` (0/falsy = everything)
+function statsV2ExerciseMonthlySeries(name, rangeMonths){
+  const sets = statsV2ExerciseSets(name);
+  if(!sets.length) return { points: [], prMonths: new Set() };
+  const monthlyBest = new Map();
+  sets.forEach(s=>{
+    const key = statsV2MonthKey(s.date);
+    if(!monthlyBest.has(key) || s.weight > monthlyBest.get(key)) monthlyBest.set(key, s.weight);
+  });
+  const first = new Date(sets[0].date+'T00:00:00');
+  const today = new Date(todayStr()+'T00:00:00');
+  const cursor = new Date(first.getFullYear(), first.getMonth(), 1);
+  let runningBest = 0;
+  const prMonths = new Set();
+  const points = [];
+  while(cursor <= today){
+    const key = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}`;
+    const monthMax = monthlyBest.get(key) || 0;
+    if(monthMax > runningBest){ runningBest = monthMax; prMonths.add(key); }
+    points.push({key, year:cursor.getFullYear(), month:cursor.getMonth()+1, weight: runningBest});
+    cursor.setMonth(cursor.getMonth()+1);
+  }
+  return { points: rangeMonths ? points.slice(-rangeMonths) : points, prMonths };
+}
+// one row per day this exercise was logged (a session), most recent
+// first, flagged if that session's top set was a genuine all-time PR
+function statsV2ExerciseSessions(name){
+  const rows = workouts.filter(w=> w.exercises.some(e=>e.name===name))
+    .map(w=>({date:w.date, sets: w.exercises.find(e=>e.name===name).sets}))
+    .sort((a,b)=> a.date.localeCompare(b.date));
+  let runningBest = 0;
+  rows.forEach(r=>{
+    const topWeight = Math.max(0, ...r.sets.map(s=>s.weight||0));
+    r.isPr = topWeight > runningBest;
+    if(topWeight > runningBest) runningBest = topWeight;
+  });
+  return rows.reverse();
+}
+// simple, dependency-free smoothing: cubic bezier per segment with
+// horizontal-midpoint control points — no spline math needed, reads
+// as a clean wave for this many points.
+function statsV2SmoothPath(pts){
+  if(pts.length<2) return '';
+  let d = `M${pts[0].x},${pts[0].y}`;
+  for(let i=1;i<pts.length;i++){
+    const p0 = pts[i-1], p1 = pts[i];
+    const cx = (p0.x+p1.x)/2;
+    d += ` C${cx},${p0.y} ${cx},${p1.y} ${p1.x},${p1.y}`;
+  }
+  return d;
+}
+
+function renderStatsV2ExerciseRow(activeName){
+  const names = statsV2RecentExerciseNames();
+  if(!names.length) return '';
+  const tiles = names.map((name,i)=>`
+    <div class="statsv2-ex-tile statsv2-anim-tile${name===activeName?' active':''}" style="--i:${i}" onclick="selectStatsExerciseV2('${name.replace(/'/g,"\\'")}')">
+      <span class="icn">${statsV2ExerciseIconSvg(name)}</span>
+      <span>${name}</span>
+    </div>`).join('');
+  return `
+    <div class="statsv2-ex-section">
+      <div class="statsv2-ex-head">
+        <p>Progres ćwiczeń</p>
+        ${activeName?'':`<button type="button" class="statsv2-ex-all-btn" onclick="selectStatsExerciseV2('${names[0].replace(/'/g,"\\'")}')">WSZYSTKIE</button>`}
+      </div>
+      <div class="statsv2-ex-row">${tiles}</div>
+    </div>`;
+}
+
+function renderStatsV2Overview(){
+  const week = statsV2WeeklyProgress();
+  const R = 58, C = 2*Math.PI*R;
+  const doneFrac = week.total ? week.done/week.total : 0;
+  const ringOffset = (C*(1-doneFrac)).toFixed(2);
+
+  const window6 = statsV2MonthWindow(statsV2BarPage);
+  const maxKg = Math.max(1, ...window6.map(m=>m.kg));
+  const earliest = statsV2EarliestWorkoutDate();
+  const oldestInWindow = `${window6[0].year}-${String(window6[0].month).padStart(2,'0')}`;
+  const leftDisabled = earliest ? oldestInWindow <= earliest.slice(0,7) : true;
+  const rightDisabled = statsV2BarPage===0;
+  const barsHtml = window6.map((m,i)=>{
+    const h = Math.max(4, Math.round(m.kg/maxKg*112));
+    const vivid = i>=3;
+    const bg = vivid ? 'background:linear-gradient(180deg,#ffbb00,#ff8843 55%,#f30);' : 'background:#f30;opacity:.6;';
+    return `<div class="statsv2-bar-col"><div class="bar" style="height:${h}px;${bg}"></div><span>${MONTH_ABBR_PL[m.month-1]}</span></div>`;
+  }).join('');
+
+  const ytd = statsV2YtdStats();
+  const maxCum = Math.max(1, ...ytd.points.map(p=>p.cum));
+  const wW = 312, wH = 78, wPad = 4;
+  const wavePts = ytd.points.map((p,i)=>({
+    x: ytd.points.length>1 ? (i/(ytd.points.length-1))*wW : wW/2,
+    y: wPad + (1 - p.cum/maxCum) * (wH - wPad*2),
+  }));
+  const wavePath = statsV2SmoothPath(wavePts);
+  const lastPt = wavePts[wavePts.length-1];
+  const ytdLabels = MONTH_ABBR_PL.map((abbr,idx)=> (idx%2===0 && idx+1<=ytd.points.length) ? abbr : null).filter(Boolean);
+
+  return `
+    <div class="statsv2-cards">
+      <div class="statsv2-ring-card statsv2-anim-card" style="--i:0">
+        <p class="statsv2-ring-eyebrow">Postęp tygodniowy</p>
+        <div class="statsv2-ring-row">
+          <div class="statsv2-ring-wrap">
+            <svg viewBox="0 0 132 132">
+              <defs>
+                <linearGradient id="statsV2RingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ff3300"/>
+                  <stop offset="55%" stop-color="#ff8a3d"/>
+                  <stop offset="100%" stop-color="#ffc542"/>
+                </linearGradient>
+              </defs>
+              <circle cx="66" cy="66" r="${R}" fill="none" stroke="#343941" stroke-width="12"/>
+              <circle cx="66" cy="66" r="${R}" fill="none" stroke="url(#statsV2RingGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringOffset}"/>
+            </svg>
+            <div class="statsv2-ring-num"><strong>${week.done}/${week.total}</strong><small>dni</small></div>
+          </div>
+          <div class="statsv2-ring-legend">
+            <div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot done"></span><div><p class="statsv2-ring-legend-label">Zrobione</p><p class="statsv2-ring-legend-value">${week.done} DNI</p></div></div>
+            <div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot left"></span><div><p class="statsv2-ring-legend-label">Zostało</p><p class="statsv2-ring-legend-value">${Math.max(0,week.total-week.done)} DNI</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="statsv2-bar-card statsv2-anim-card" style="--i:1">
+        <p class="statsv2-bar-eyebrow">Objętość - miesiąc po miesiącu</p>
+        <div class="statsv2-bar-row">${barsHtml}</div>
+        <div class="statsv2-bar-nav">
+          <span class="ph${leftDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(90deg)" onclick="statsV2MoveBarPage(1)">${PH['caret-down']}</span>
+          <span class="ph${rightDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="statsV2MoveBarPage(-1)">${PH['caret-down']}</span>
+        </div>
+      </div>
+
+      <div class="statsv2-ytd-card statsv2-anim-card" style="--i:2">
+        <p class="statsv2-ytd-eyebrow">Objętość od początku roku</p>
+        <div class="statsv2-ytd-num-row">${ph('dash-barbell')}<div><span class="statsv2-ytd-num">${ytd.total.toLocaleString('pl-PL')}<small>kg</small></span></div></div>
+        <p class="statsv2-ytd-delta">+ ${ytd.deltaKg.toLocaleString('pl-PL')} kg ${ytd.deltaLabel}</p>
+        <div class="statsv2-ytd-chart">
+          <svg viewBox="0 0 ${wW} ${wH+16}" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="statsV2YtdGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ffe8b0"/>
+                <stop offset="100%" stop-color="#fff"/>
+              </linearGradient>
+            </defs>
+            <path d="${wavePath}" fill="none" stroke="url(#statsV2YtdGrad)" stroke-width="2.5" stroke-linecap="round"/>
+            ${lastPt?`<circle cx="${lastPt.x}" cy="${lastPt.y}" r="6" fill="#ffc542"/>`:''}
+          </svg>
+        </div>
+        <div class="statsv2-ytd-labels">${ytdLabels.map(l=>`<span>${l}</span>`).join('')}</div>
+      </div>
+    </div>
+    ${renderStatsV2ExerciseRow(null)}`;
+}
+
+function renderStatsV2Detail(name){
+  const rec = statsV2ExerciseRecord(name);
+  if(!rec) return renderStatsV2ExerciseRow(name) + `<div class="statsv2-empty">Brak zapisanych serii dla tego ćwiczenia.</div>`;
+
+  const series = statsV2ExerciseMonthlySeries(name, statsV2Range);
+  const pts = series.points;
+  const maxW = Math.max(1, ...pts.map(p=>p.weight));
+  const dW = 312, dH = 100, dPad = 6;
+  const chartPts = pts.map((p,i)=>({
+    ...p,
+    x: pts.length>1 ? (i/(pts.length-1))*dW : dW/2,
+    y: dPad + (1 - p.weight/maxW) * (dH - dPad*2),
+  }));
+  const dPath = statsV2SmoothPath(chartPts);
+  const prPts = chartPts.filter(p=>series.prMonths.has(p.key));
+  const dLabels = chartPts.filter((_,i)=> pts.length<=6 || i%Math.ceil(pts.length/6)===0 || i===pts.length-1);
+
+  const sessions = statsV2ExerciseSessions(name);
+  const sessionRows = sessions.map(r=>{
+    const dateObj = new Date(r.date+'T00:00:00');
+    const dateShort = `${dateObj.getDate()} ${MONTH_GEN_PL[dateObj.getMonth()].slice(0,3)} ${dateObj.getFullYear()}`;
+    const weekday = GYMV2_DAY_NAMES_PL[dateObj.getDay()];
+    const setsStr = r.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ');
+    return `
+      <div class="statsv2-log-row${r.isPr?' is-pr':''}">
+        <div class="statsv2-log-date"><strong>${dateShort}</strong><span>${weekday}</span></div>
+        <div class="statsv2-log-sets">${setsStr}${r.isPr?`<span class="statsv2-log-trophy">${PH.trophy}</span>`:''}</div>
+      </div>`;
+  }).join('');
+
+  const ranges = [[3,'3m'],[6,'6m'],[12,'1r'],[0,'Cały czas']];
+
+  return `
+    ${renderStatsV2ExerciseRow(name)}
+    <div class="statsv2-cards" style="margin-top:8px;">
+      <div class="statsv2-record-card statsv2-anim-card" style="--i:0">
+        <p class="statsv2-record-eyebrow">Aktualny rekord - ${name}</p>
+        <div class="statsv2-record-num-row">
+          ${ph('trophy')}
+          <span class="statsv2-record-num">${rec.weight}<small>kg</small></span>
+          <span class="statsv2-record-arrow">${PH['arrow-up-right']}</span>
+        </div>
+        <p class="statsv2-record-delta">${rec.deltaKg>=0?'+':''}${rec.deltaKg} kg od zeszłego miesiąca</p>
+        <div class="statsv2-record-sep"></div>
+        <div class="statsv2-record-stats">
+          <div class="statsv2-record-stat"><span>EST. 1RM</span><strong>${rec.est1RM} kg</strong></div>
+          <div class="statsv2-record-stat"><span>SERIE OGÓŁEM</span><strong>${rec.totalSets}</strong></div>
+          <div class="statsv2-record-stat"><span>OSTATNIO</span><strong>${rec.lastTrained}</strong></div>
+        </div>
+      </div>
+
+      <div class="statsv2-detail-chart-card statsv2-anim-card" style="--i:1">
+        <p class="statsv2-detail-chart-eyebrow">Progres ciężaru</p>
+        <div class="statsv2-range-row">
+          ${ranges.map(([m,label])=>`<button type="button" class="statsv2-range-chip${statsV2Range===m?' active':''}" onclick="setStatsV2RangeV2(${m})">${label}</button>`).join('')}
+        </div>
+        <div class="statsv2-detail-wave">
+          ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(p.y/(dH+16)*100).toFixed(1)}%;">PR ${p.weight}kg</div>`).join('')}
+          <svg viewBox="0 0 ${dW} ${dH+16}" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="statsV2DetailGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ff8a3d"/>
+                <stop offset="100%" stop-color="#ffc542"/>
+              </linearGradient>
+            </defs>
+            <path d="${dPath}" fill="none" stroke="url(#statsV2DetailGrad)" stroke-width="2.5" stroke-linecap="round"/>
+            ${chartPts.map((p,i)=> i===chartPts.length-1 ? `<circle cx="${p.x}" cy="${p.y}" r="6.5" fill="#ffc542"/>` : (series.prMonths.has(p.key)?`<circle cx="${p.x}" cy="${p.y}" r="4" fill="#221b17" stroke="#ff8a3d" stroke-width="2"/>`:'')).join('')}
+          </svg>
+        </div>
+        <div class="statsv2-detail-wave-labels">${dLabels.map(p=>`<span>${MONTH_ABBR_PL[p.month-1]}</span>`).join('')}</div>
+      </div>
+
+      <div class="statsv2-log-card statsv2-anim-card" style="--i:2">
+        <p class="statsv2-log-eyebrow">Historia serii</p>
+        ${sessionRows || '<div class="statsv2-empty">Brak sesji.</div>'}
+      </div>
+    </div>`;
+}
+
+function renderStatsV2(animate){
+  const body = document.getElementById('statsV2Body');
+  body.innerHTML = selectedStatsExerciseV2 ? renderStatsV2Detail(selectedStatsExerciseV2) : renderStatsV2Overview();
+  if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile').forEach(el=>{
+    el.style.animation = 'none';
+  });
+}
+function selectStatsExerciseV2(name){
+  selectedStatsExerciseV2 = (selectedStatsExerciseV2===name) ? null : name;
+  statsV2Range = 6;
+  renderStatsV2(false);
+}
+function statsV2MoveBarPage(delta){
+  statsV2BarPage = Math.max(0, statsV2BarPage + delta);
+  renderStatsV2(false);
+}
+function setStatsV2RangeV2(months){
+  statsV2Range = months;
+  renderStatsV2(false);
 }
 
 /* ============================================================
