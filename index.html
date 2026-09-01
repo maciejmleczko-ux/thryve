@@ -889,7 +889,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    three reuse this class) rather than the old popups' own padding.
    355px stack max-width + 10px×2 padding = 375px, an exact fit on a
    base iPhone-width viewport. */
-.plansv2-customize-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);padding:10px;}
+.plansv2-customize-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);padding:10px;flex-direction:column;gap:24px;}
 /* max-width was 355px, tuned for an exactly-375px viewport (355 +
    10px×2 padding = 375) — on a real phone wider than that (390/393/
    430pt, the common current iPhone sizes) the card stopped growing at
@@ -1030,22 +1030,28 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    the native number-input spinner. */
 .newex-v2-bento-value::-webkit-outer-spin-button,
 .newex-v2-bento-value::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
-/* #pickExerciseAddBtnV2 ("DODAJ (N)" in the exercise picker) floats
-   outside the lilac card, on the dark backdrop — matches the app's
-   established "primary action floats free of the card" pattern
+/* #pickExerciseAddBtnV2 ("DODAJ (N)" in the exercise picker) sits
+   outside the lilac card entirely, on the dark backdrop — matches the
+   app's established "primary action floats free of the card" pattern
    (.pev2-save-fab/"ZAPISZ PLAN", .gymv2-save/"ZAPISZ TRENING") instead
    of sitting inside .plansv2-customize-actions (Maciej, 2026-09-02:
    "guzik dodaj powinien być poza szarym tłem tak jak mamy to też na
    innych ekranach" — build 101 first applied this to the wrong popup,
    "Dodaj własne ćwiczenie", which Maciej confirmed was already fine
    as designed; this is scoped to the picker's confirm button only).
-   Same sizing as .pev2-save-fab, z-index raised above the modal
-   backdrop (z-index:90 on .onboard-overlay) rather than reusing its
-   15. Class name kept generic (not "pick-exercise-...") since it's
-   just the shared floating-CTA treatment, reusable by any future
-   popup that needs it. */
-.newex-v2-add-fab{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:calc(100% - 40px);max-width:217px;background:#fff;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:500;letter-spacing:.64px;color:#343941;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,.12);transition:transform .12s ease;z-index:95;}
-.newex-v2-add-fab:active{transform:translateX(-50%) scale(.97);}
+   Originally position:fixed pinned to the viewport bottom — on a tall
+   (fully-expanded, many-group) picker the card's own max-height could
+   still reach into that fixed zone, overlapping the button instead of
+   leaving a gap (Maciej, real device: "guzik dodaj powinien być
+   całkiem poza tym boxem szarym między nim a guzikiem w projekcie
+   jest 24px"). Now a normal-flow sibling of .plansv2-customize-stack
+   inside the overlay's own flex column, spaced by the overlay's own
+   gap:24px — matching the Figma spec's 24px exactly, and guaranteed
+   never to overlap the card since it's no longer independently
+   positioned against the viewport. Same width/sizing as
+   .pev2-save-fab. */
+.newex-v2-add-fab{width:100%;max-width:217px;background:#fff;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:500;letter-spacing:.64px;color:#343941;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,.12);transition:transform .12s ease;flex-shrink:0;}
+.newex-v2-add-fab:active{transform:scale(.97);}
 
 /* ===================== PLAN EDITOR v2 (Figma node 155:1086,
    "06. PLAN - SET UP") — the v3-styled replacement for #view-planEditor.
@@ -2774,7 +2780,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 102;
+const DASH_BUILD = 103;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
