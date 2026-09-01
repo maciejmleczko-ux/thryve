@@ -924,6 +924,20 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    env(safe-area-inset-top). Left/right stay fixed at 10px via
    .plansv2-customize-overlay's own padding, unaffected by this. */
 .plansv2-customize-card{display:flex;flex-direction:column;gap:20px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 120px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
+/* Picker-only: reserve the floating .newex-v2-add-fab's own space
+   (24px gap + ~48px button) out of the SAME 120px total budget as the
+   other two popups, instead of letting the card claim the full
+   calc(100dvh - 120px) and pushing the fab+gap over that budget. When
+   a centered flex column's content overflows the viewport, browsers
+   clip/shift from the top rather than splitting the overflow evenly —
+   so letting the group (card+gap+button) grow past that original
+   120px budget re-broke the exact "card touches the status bar" bug
+   build 100 fixed, just via a different path (Maciej, real device
+   screenshot on build 103: "gora popup powinna byc nizej tak jak w
+   innych popupach"). Matching the same total budget as before keeps
+   the top margin identical to the other two (button-less) popups in
+   every state, including fully expanded/overflowing. */
+#pickExerciseOverlayV2 .plansv2-customize-card{max-height:calc(100dvh - 120px - 24px - 48px);}
 /* Rebuilt to match Figma node 153:701 (2026-08-29) — app-level
    topbar (barbell + PLANS + X, same pattern as .plansv2-header on the
    real Plans v2 screen, just sized for the narrower modal) instead of
@@ -2780,7 +2794,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 103;
+const DASH_BUILD = 104;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
