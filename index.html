@@ -3368,7 +3368,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.1";
+const APP_VERSION = "4.10.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5343,10 +5343,8 @@ function saveWorkoutV2(){
 }
 
 /* ============================================================
-   TRAINING PLANS — entry point is the topbar pill (next to feedback),
-   which also doubles as the "currently starred plan" indicator.
-   (The old triple-tap-logo shortcut into Plans was repurposed —
-   it now opens the hidden Dashboard preview, see initSecretPlansGesture.)
+   TRAINING PLANS — reached from the bottom-nav "Plans" tab and the
+   Dashboard / GYM v2 plan cards (all go to #view-plans-v2).
    ============================================================ */
 const LS_TRAINING_PLANS = "fitlog_training_plans_v1";
 const LS_STARRED_PLAN = "fitlog_starred_plan_v1";
@@ -6874,9 +6872,8 @@ function updateTodayPlanBanner(){
 }
 
 /* ============================================================
-   DASHBOARD — hidden preview (see initSecretPlansGesture below).
-   Pulls real numbers from the existing workouts/runs/plan data —
-   nothing here is placeholder/fake.
+   DASHBOARD — the app's home screen. Pulls real numbers from the
+   existing workouts/runs/plan data — nothing here is placeholder/fake.
    ============================================================ */
 function dashboardWeekDates(){
   const d = new Date(todayStr()+'T00:00:00');
@@ -7203,25 +7200,6 @@ function showLoadScreenV2(onDone){
     setTimeout(()=>{ el.classList.remove('visible'); }, 350); // matches .loadv2-root's opacity transition
   }, 1500);
 }
-(function initSecretPlansGesture(){
-  const logo = document.querySelector('.brand-mark');
-  if(!logo) return;
-  logo.style.cursor = 'pointer';
-  let taps = 0, tapTimer = null;
-  logo.addEventListener('click', ()=>{
-    taps++;
-    clearTimeout(tapTimer);
-    if(taps >= 3){
-      taps = 0;
-      showLoadScreenV2(()=>{
-        previewMode = true;
-        goRoute('dashboard');
-      });
-      return;
-    }
-    tapTimer = setTimeout(()=>{ taps = 0; }, 600);
-  });
-})();
 
 /* ============================================================
    RUNNING
