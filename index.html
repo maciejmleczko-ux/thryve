@@ -3196,7 +3196,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 120;
+const DASH_BUILD = 121;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -7314,7 +7314,7 @@ const MONTH_ABBR_PL = ['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PA
 const MONTH_GEN_PL = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
 let selectedStatsExerciseV2 = null; // null = overview, exercise name = detail
 let statsV2BarPage = 0;             // 0 = most recent 6 months, 1 = the 6 before that, ...
-let statsV2Range = 6;               // months shown in the per-exercise chart: 3/6/12/0(=all)
+let statsV2Range = 1;               // range shown in the per-exercise chart: 1(=rolling 30d)/3/6/12/0(=all)
 
 function statsV2MonthKey(iso){ return iso.slice(0,7); }
 function statsV2MonthlyVolumeMap(){
@@ -7762,7 +7762,7 @@ function statsV2CenterActiveTile(){
 }
 function selectStatsExerciseV2(name){
   selectedStatsExerciseV2 = (selectedStatsExerciseV2===name) ? null : name;
-  statsV2Range = 6;
+  statsV2Range = 1;
   renderStatsV2(false);
 }
 function closeStatsDetailV2(){
