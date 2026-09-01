@@ -3038,7 +3038,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 113;
+const DASH_BUILD = 114;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -4329,6 +4329,19 @@ function removeExerciseFromSession(name){
 }
 
 function openExercisePopup(ex){
+  // Bug (Maciej, 2026-09-04): "na dashboardzie pokazuje mi tylko minute
+  // treningu". markGymActivity() only ran from onTileTap()/onTileTapV2()
+  // — the FIRST tap on a fresh grid tile. Every subsequent re-open of an
+  // ALREADY-added exercise (the normal way you log set 2/3/4 between
+  // rests — tapping its bar in "your session"/its row in "done") called
+  // openExercisePopup()/openExercisePopupV2() directly, never touching
+  // activity tracking. So a real 45-minute session froze
+  // gymSessionActiveEndAt at that one first tap; by save time the gap
+  // exceeded GYM_SESSION_ACTIVE_GAP_MIN, computeGymSessionDurationMin()
+  // used the frozen (near-zero) window, and the 1-min floor kicked in.
+  // Marking activity here instead of only at the outer tap handlers
+  // covers every path that opens this popup, current and future.
+  markGymActivity();
   const already = sessionExercises.find(e=>e.name===ex.name);
   popupExercise = already
     ? {...already, setValues: already.setValues.map(s=>({...s}))}
@@ -4444,6 +4457,8 @@ function onTileTapV2(ex){
 }
 let exv2CloseTimer = null; // pending hide from a close animation still playing, see closeExercisePopupV2()
 function openExercisePopupV2(ex){
+  // Same fix as openExercisePopup() above — see comment there.
+  markGymActivity();
   if(exv2CloseTimer){ clearTimeout(exv2CloseTimer); exv2CloseTimer = null; } // reopening mid-close-animation — cut it short
   const already = sessionExercises.find(e=>e.name===ex.name);
   popupExercise = already
