@@ -883,7 +883,13 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    field-label typography) so the two popups read as one consistent
    component language instead of two different-looking ones. Confirmed
    with Maciej (2026-08-29): colors, spacing, fonts should match exv2. */
-.plansv2-customize-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
+/* 10px margin from every edge (Maciej, 2026-09-02) — overrides
+   .onboard-overlay's shared 20px padding, scoped to just the v3
+   popups (Dostosuj plan / Dodaj ćwiczenie / Wyszukaj ćwiczenie, all
+   three reuse this class) rather than the old popups' own padding.
+   355px stack max-width + 10px×2 padding = 375px, an exact fit on a
+   base iPhone-width viewport. */
+.plansv2-customize-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);padding:10px;}
 .plansv2-customize-stack{display:flex;flex-direction:column;align-items:center;width:100%;max-width:355px;font-family:'Geist','Inter',-apple-system,sans-serif;}
 /* Entrance/exit motion, gated behind prefers-reduced-motion like every
    other animation added this session — exv2's own version of this
@@ -902,7 +908,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
   @keyframes plansv2CustomizeSlideUp{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
   @keyframes plansv2CustomizeSlideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(24px);}}
 }
-.plansv2-customize-card{display:flex;flex-direction:column;gap:20px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 120px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
+.plansv2-customize-card{display:flex;flex-direction:column;gap:20px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 20px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
 /* Rebuilt to match Figma node 153:701 (2026-08-29) — app-level
    topbar (barbell + PLANS + X, same pattern as .plansv2-header on the
    real Plans v2 screen, just sized for the narrower modal) instead of
@@ -2739,7 +2745,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 98;
+const DASH_BUILD = 99;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
