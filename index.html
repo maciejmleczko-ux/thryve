@@ -757,6 +757,15 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .gymv2-tile-icon{width:100%;height:65%;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box;}
 .gymv2-tile-icon svg{width:100%;height:100%;display:block;}
 .gymv2-tile-label{font-size:10px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;text-align:center;color:#2c2727;line-height:1.15;padding:0 6px;}
+/* The picker's tiles are narrower still than plan editor v2's (the
+   .plansv2-customize-card's own 18px padding, stacked on the overlay's
+   inset, eats more width than the full-screen editor's), so even 65%
+   left three-line labels ("STRAIGHT-ARM PULLDOWN") clipped at the
+   tile's bottom edge — Maciej, 2026-09-02: "zmniejsz je jeszcze
+   troche - bo te 3 wiersze sie nie miesci". Scoped to this one modal
+   rather than lowering the shared 65% (which is correctly sized for
+   GYM's own grid and plan editor v2's wider tiles). */
+#pickExerciseOverlayV2 .gymv2-tile-icon{height:50%;}
 .gymv2-tile.gymv2-tile-accent{background:#FF6343;}
 .gymv2-tile.gymv2-tile-accent .gymv2-tile-label{color:#fff;}
 .gymv2-tile.custom-tile .t{font-size:9px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;padding:0 6px;color:#2c2727;}
@@ -2730,7 +2739,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 97;
+const DASH_BUILD = 98;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
