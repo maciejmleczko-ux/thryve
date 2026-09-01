@@ -3309,7 +3309,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.9.0";
+const APP_VERSION = "4.9.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3896,6 +3896,9 @@ function goRoute(route){
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===navActiveRoute));
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
+  // renderDashboard() re-decides .dashboard-scrollable on every entry; make
+  // sure a stale one from a previous visit never lingers while off-dashboard.
+  if(route!=='dashboard') document.documentElement.classList.remove('dashboard-scrollable');
   document.body.classList.toggle('dashboard-bg', route==='dashboard');
   // Plan editor v2 shares Plans v2's scroll-lock mechanics (same
   // scroll-only-when-needed treatment — it's the same "Plans" flow,
@@ -6905,10 +6908,18 @@ function renderDashboard(){
     return `<span style="height:${h}px;opacity:${op.toFixed(2)};--i:${i}"></span>`;
   }).join('');
 
+  // "dni zaliczone" counts every day actually trained this week (gym or run),
+  // not just days the current plan schedules — otherwise editing the plan's
+  // training days (frequency / which weekdays) retroactively drops a workout
+  // you really did, including today's, out of the tally. total is the bigger
+  // of the plan's scheduled days and what you've done, so the ratio can't
+  // exceed 100% but an over-target week still reads honestly. Keep this in
+  // sync with statsV2WeeklyProgress(), which does the same for the Stats ring.
   const scheduledDays = weekDates.filter(d=> plan && (plan.schedule[dayKeyFromDate(d)]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
   const trainedDays = weekDates.filter(d=> workouts.some(w=>w.date===d) || runs.some(r=>r.date===d));
-  const doneScheduledCount = scheduledDays.filter(d=>trainedDays.includes(d)).length;
-  document.getElementById('dashWeekCount').textContent = `${doneScheduledCount} / ${scheduledDays.length} dni zaliczone`;
+  const weekDone = trainedDays.length;
+  const weekTotal = Math.max(scheduledDays.length, weekDone);
+  document.getElementById('dashWeekCount').textContent = `${weekDone} / ${weekTotal} dni zaliczone`;
   document.getElementById('dashWeekDays').innerHTML = weekDates.map((d,i)=>{
     const isDone = trainedDays.includes(d);
     const isToday = d===todayIso;
@@ -6932,19 +6943,18 @@ function renderDashboard(){
     }
   });
 
-  // Only grant scroll/touch-drag capability when content genuinely
-  // doesn't fit — see the dashboard-lock/.dashboard-scrollable CSS for
-  // the full reasoning. Deliberately NOT comparing body.scrollHeight to
-  // clientHeight: .app carries a permanent padding-bottom:110px (shared
-  // bottom-nav clearance for every route), which alone makes scrollHeight
-  // read taller than the viewport even when the dashboard's own content
-  // is nowhere near overflowing — that would make this check always true.
-  // Instead compare the actual bottom edge of the last real card against
-  // the floating nav's top edge — the literal condition we're trying to
-  // avoid (content clipped behind the nav).
-  const lastCard = document.querySelector('.dash-week-card');
-  const nav = document.getElementById('bottomNav');
-  const needsScroll = !!(lastCard && nav && lastCard.getBoundingClientRect().bottom > nav.getBoundingClientRect().top);
+  // Only grant scroll/touch-drag capability when the dashboard genuinely
+  // doesn't fit one screen — see the dashboard-lock/.dashboard-scrollable
+  // CSS for the full reasoning. Measure .dash-root's own content height
+  // (it already carries the 110px bottom-padding nav clearance) against the
+  // viewport, via scrollHeight — a LAYOUT value. The earlier version read
+  // .dash-week-card.getBoundingClientRect().bottom, but during the route
+  // slide-in and the tiles' translateY entrance animation that rect sits
+  // up to ~18px low, which intermittently tripped needsScroll on re-entry
+  // and left the dashboard scrollable even when it fits. scrollHeight
+  // ignores transforms entirely, so the check is stable whenever it runs.
+  const dashRoot = document.querySelector('.dash-root');
+  const needsScroll = !!(dashRoot && dashRoot.scrollHeight > window.innerHeight + 1);
   document.documentElement.classList.toggle('dashboard-scrollable', needsScroll);
 }
 
@@ -7559,11 +7569,16 @@ function statsV2MonthlyVolumeMap(){
   return map;
 }
 function statsV2WeeklyProgress(){
+  // Mirrors the Dashboard's "dni zaliczone" logic — count days actually
+  // trained this week, total = max(plan-scheduled days, trained). Keeps a
+  // real workout in the tally even after its weekday is edited out of the
+  // plan. See renderDashboard() for the full reasoning.
   const weekDates = dashboardWeekDates();
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   const scheduledDays = weekDates.filter(d=> plan && (plan.schedule[dayKeyFromDate(d)]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
   const trainedDays = weekDates.filter(d=> workouts.some(w=>w.date===d) || runs.some(r=>r.date===d));
-  return { done: scheduledDays.filter(d=>trainedDays.includes(d)).length, total: scheduledDays.length };
+  const done = trainedDays.length;
+  return { done, total: Math.max(scheduledDays.length, done) };
 }
 // contiguous 6-calendar-month window ending `pageOffset*6` months before
 // the current month (pageOffset=0 -> most recent 6, including this month)
