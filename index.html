@@ -3210,7 +3210,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 125;
+const DASH_BUILD = 126;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -7262,10 +7262,57 @@ function renderCalendarV2(animate){
   grid.innerHTML = html;
   renderHistDetailV2(animate);
 }
+// Maciej: "jesli zmieniam na miesiac - zaden dzien nie jest zaznaczony -
+// niech wtedy w twoje treningi pojawia sie Podsumowanie miesiaca - na
+// bazie takiego samego designu karty pojedynczego treningu". Navigating
+// the calendar to a month that doesn't contain today leaves
+// selectedHistDateV2 null (see renderCalendarV2) — this used to just
+// show a "pick a day" placeholder; now it shows an aggregate card for
+// the whole visible month instead, reusing .histv2-card's exact look.
+function plTreningWord(n){
+  const mod10 = n % 10, mod100 = n % 100;
+  if(n === 1) return 'trening';
+  if(mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return 'treningi';
+  return 'treningów';
+}
+function plBiegWord(n){
+  const mod10 = n % 10, mod100 = n % 100;
+  if(n === 1) return 'bieg';
+  if(mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return 'biegi';
+  return 'biegów';
+}
+function renderHistMonthSummaryV2(animCls){
+  const {year, month} = calStateV2;
+  const monthPrefix = `${year}-${String(month+1).padStart(2,'0')}`;
+  const monthWorkouts = workouts.filter(w=>w.date.startsWith(monthPrefix));
+  const monthRuns = runs.filter(r=>r.date.startsWith(monthPrefix));
+  if(!monthWorkouts.length && !monthRuns.length){
+    return `<div class="histv2-empty">${t('histEmptyMonth', `Brak zapisanej aktywności — ${MONTH_NAMES[month]} ${year}`, `${MONTH_NAMES[month]} ${year}`)}</div>`;
+  }
+  const totalVol = monthWorkouts.reduce((s,w)=> s + w.exercises.reduce((s2,e)=> s2 + e.sets.reduce((s3,st)=> s3 + st.weight*st.reps, 0), 0), 0);
+  const totalKm = monthRuns.reduce((s,r)=> s + (r.distance||0), 0);
+  const titleParts = [];
+  if(monthWorkouts.length) titleParts.push(`${monthWorkouts.length} ${plTreningWord(monthWorkouts.length)}`);
+  if(monthRuns.length) titleParts.push(`${monthRuns.length} ${plBiegWord(monthRuns.length)}`);
+  const subParts = [];
+  if(totalVol>0) subParts.push(`objętość ${Math.round(totalVol)} kg`);
+  if(totalKm>0) subParts.push(`${totalKm} km biegania`);
+  return `
+    <div class="histv2-card${animCls}" style="--i:0">
+      <div class="histv2-card-head">
+        <div class="histv2-card-kind">${ph('calendar-dots')}<span>PODSUMOWANIE</span></div>
+        <div class="histv2-card-right">
+          <span class="histv2-card-date">${MONTH_NAMES[month]} ${year}</span>
+        </div>
+      </div>
+      <p class="histv2-card-title">${titleParts.join(' · ')}</p>
+      <p class="histv2-card-sub">${subParts.join(' · ')}</p>
+    </div>`;
+}
 function renderHistDetailV2(animate){
   const wrap = document.getElementById('histDetailV2');
   const animCls = animate ? ' histv2-anim-in' : '';
-  if(!selectedHistDateV2){ wrap.innerHTML = `<div class="histv2-empty">${t('histEmptyPick','Wybierz dzień, żeby zobaczyć szczegóły.')}</div>`; return; }
+  if(!selectedHistDateV2){ wrap.innerHTML = renderHistMonthSummaryV2(animCls); return; }
   const dayWorkouts = workouts.filter(w=>w.date===selectedHistDateV2);
   const dayRuns = runs.filter(r=>r.date===selectedHistDateV2);
   if(!dayWorkouts.length && !dayRuns.length){ wrap.innerHTML = `<div class="histv2-empty">${t('histEmptyNone', `Brak zapisanej aktywności — ${fmtDate(selectedHistDateV2)}`, fmtDate(selectedHistDateV2))}</div>`; return; }
