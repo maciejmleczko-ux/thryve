@@ -3201,7 +3201,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 122;
+const DASH_BUILD = 123;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -7767,7 +7767,15 @@ function statsV2CenterActiveTile(){
 }
 function selectStatsExerciseV2(name){
   selectedStatsExerciseV2 = (selectedStatsExerciseV2===name) ? null : name;
-  statsV2Range = 1;
+  // Maciej: "seated row - ma 4 treningi i nie widze linii" — "1m" is a
+  // real rolling 30-day window (see statsV2ExerciseDailySeries), so an
+  // exercise with real history but nothing logged in the last 30 days
+  // opens to a genuinely empty chart by default now that "1m" is the
+  // default range. The monthly-bucket ranges (3m/6m/1r/Cały czas) never
+  // go empty like this — they always walk from the exercise's first
+  // logged month to today, carrying the running best forward — so
+  // falling back to 6m here is a safe, always-populated default.
+  statsV2Range = selectedStatsExerciseV2 && statsV2ExerciseDailySeries(selectedStatsExerciseV2).points.length ? 1 : 6;
   renderStatsV2(false);
 }
 function closeStatsDetailV2(){
