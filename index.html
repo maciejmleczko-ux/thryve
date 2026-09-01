@@ -1175,18 +1175,34 @@ body.pev2-bg{background:#dd2b17;}
 }
 
 /* GYM v2 set-logging popup (node 112:1872) — separate from .ex-popup-box/.set-row
-   above, which stay exactly as they are for production GYM. */
-.exv2-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);animation:exv2BackdropIn .22s ease-out;}
-.exv2-overlay.exv2-closing{animation:exv2BackdropOut .2s ease-in forwards;}
-.exv2-popup-stack{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:355px;font-family:'Geist','Inter',-apple-system,sans-serif;animation:exv2SlideUp .28s cubic-bezier(.22,1,.36,1);}
-.exv2-closing .exv2-popup-stack{animation:exv2SlideDown .2s ease-in forwards;}
-@keyframes exv2BackdropIn{from{opacity:0;}to{opacity:1;}}
-@keyframes exv2BackdropOut{from{opacity:1;}to{opacity:0;}}
-@keyframes exv2SlideUp{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
-@keyframes exv2SlideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(24px);}}
-/* max-height reserve: overlay padding (20px×2) + popup-stack gap (24px) +
-   submit button (49px) = 113px minimum needed outside the card; 120px
-   leaves a small safety margin. */
+   above, which stay exactly as they are for production GYM.
+   Consistency pass (2026-09-03, "sprawdz v2 pod wzgledem spojnosci"):
+   this popup predates the .plansv2-customize-* family and had drifted
+   from it on two points, brought back in line here —
+   - padding was still the base .onboard-overlay 20px (10px on the
+     other three popups since build 99/100's real-device fix), and
+     max-width was still 355px (tuned for an exact 375px viewport,
+     same stale assumption the other three had until build 100) —
+     both would reproduce the exact "sides bigger than 10px on a wider
+     real phone" bug already fixed everywhere else.
+   - its entrance/exit animation was unconditional, not gated behind
+     prefers-reduced-motion like every other popup in this family (and
+     like [[feedback_thryve_animation_vocabulary]] calls for app-wide). */
+.exv2-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);padding:10px;}
+.exv2-popup-stack{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:420px;font-family:'Geist','Inter',-apple-system,sans-serif;}
+@media (prefers-reduced-motion: no-preference){
+  .exv2-overlay{animation:exv2BackdropIn .22s ease-out;}
+  .exv2-overlay.exv2-closing{animation:exv2BackdropOut .2s ease-in forwards;}
+  .exv2-popup-stack{animation:exv2SlideUp .28s cubic-bezier(.22,1,.36,1);}
+  .exv2-closing .exv2-popup-stack{animation:exv2SlideDown .2s ease-in forwards;}
+  @keyframes exv2BackdropIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes exv2BackdropOut{from{opacity:1;}to{opacity:0;}}
+  @keyframes exv2SlideUp{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes exv2SlideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(24px);}}
+}
+/* max-height reserve: overlay padding (10px×2) + popup-stack gap (24px) +
+   submit button (49px) = 93px minimum needed outside the card; 120px
+   leaves a comfortable safety margin. */
 .exv2-card{display:flex;flex-direction:column;gap:24px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 120px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
 .exv2-header-group{display:flex;flex-direction:column;gap:8px;}
 .exv2-title-block{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;}
@@ -2794,7 +2810,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 104;
+const DASH_BUILD = 105;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
