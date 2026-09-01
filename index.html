@@ -1320,6 +1320,89 @@ body.pev2-bg{background:#dd2b17;}
 
 .gymv2-root .ph{display:block;}
 .gymv2-root .ph svg{display:block;width:100%;height:100%;}
+
+/* ===================== HISTORY v2 (Figma node 177:10060, "10. HISOTRY")
+   — v3-styled replacement for #view-history. Reuses workouts/runs/
+   datesWithLogs()/MONTH_NAMES/DOW_LABELS/fmtDateHuman wholesale — own
+   calStateV2/selectedHistDateV2/histExpandedV2 state, same old/v2
+   split as everything else this session; production's #view-history
+   stays completely untouched. No new icons needed — calendar-dots/
+   download-simple/upload-simple/caret-down/x/barbell/sneaker-move are
+   already in PH. The two pill buttons: Figma's layers are both named
+   "DownloadSimple" but the exported SVGs differ — one is a genuine
+   download glyph (arrow into a tray), the other an upload glyph (arrow
+   out of a tray), matching production's existing Export/Import pair
+   exactly, just reusing the already-existing PH icons at their native
+   256 viewBox instead of duplicating new ones at the Figma export's
+   24 viewBox. */
+.histv2-root{background:#f5f1fb;}
+.histv2-panel{padding:calc(50px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
+.histv2-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
+.histv2-chat-btn:active{transform:scale(.9);}
+.histv2-chat-btn .ph{width:24px;height:24px;color:#f30;}
+.histv2-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.histv2-header .ph{width:55px;height:55px;color:#f30;flex-shrink:0;}
+.histv2-header h1{margin:0;font-size:30px;font-weight:400;color:#343941;letter-spacing:1.2px;}
+.histv2-actions{display:flex;gap:10px;margin-bottom:24px;}
+.histv2-btn-outline{flex:1;border:1px solid #ff6343;border-radius:69px;padding:12px;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
+.histv2-btn-outline:active{transform:scale(.96);}
+.histv2-btn-outline .ph{width:24px;height:24px;color:#343941;}
+.histv2-btn-fill{flex:1;border:none;border-radius:69px;padding:12px;background:#ff6343;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
+.histv2-btn-fill:active{transform:scale(.96);}
+.histv2-btn-fill .ph{width:24px;height:24px;color:#fdfbff;}
+
+.histv2-cal-card{background:#3b63cb;border-radius:16px;padding:24px 16px 16px;margin-bottom:24px;box-sizing:border-box;}
+.histv2-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.histv2-cal-nav-month{display:flex;align-items:center;gap:8px;}
+.histv2-cal-nav-month .ph{width:24px;height:24px;color:#fff;cursor:pointer;flex-shrink:0;}
+.histv2-cal-nav-month .ph:active{opacity:.6;}
+.histv2-cal-month-label{font-size:22px;font-weight:500;color:#fff;letter-spacing:.88px;text-transform:uppercase;min-width:88px;text-align:center;}
+.histv2-cal-nav-year{display:flex;align-items:center;gap:8px;}
+.histv2-cal-nav-year .ph{width:16px;height:16px;color:#fff;cursor:pointer;flex-shrink:0;}
+.histv2-cal-nav-year .ph:active{opacity:.6;}
+.histv2-cal-year-label{font-size:14px;font-weight:500;color:#fff;letter-spacing:.56px;}
+.histv2-cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:8px;}
+.histv2-cal-dow{text-align:center;font-size:13px;color:#708fe1;}
+.histv2-cal-days{display:grid;grid-template-columns:repeat(7,1fr);row-gap:6px;}
+.histv2-cal-day{aspect-ratio:1;width:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px;color:#fff;cursor:pointer;border:none;background:none;font-family:inherit;padding:0;}
+.histv2-cal-day.outside{color:rgba(255,255,255,.3);cursor:default;}
+.histv2-cal-day.has-log:not(.selected){border:1px solid rgba(255,255,255,.8);}
+.histv2-cal-day.selected{background:#fff;color:#2c2727;font-weight:600;}
+
+.histv2-section-label{margin:0 0 12px;font-size:14px;color:#2c2727;letter-spacing:.56px;text-transform:uppercase;}
+.histv2-empty{background:#fff;border-radius:16px;padding:24px 18px;font-size:14px;color:#96959b;text-align:center;box-sizing:border-box;}
+.histv2-list{display:flex;flex-direction:column;gap:12px;}
+.histv2-card{background:#fff;border-radius:16px;padding:18px;cursor:pointer;box-sizing:border-box;}
+.histv2-card.expanded{cursor:default;}
+.histv2-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.histv2-card-kind{display:flex;align-items:center;gap:9px;min-width:0;}
+.histv2-card-kind .ph{width:30px;height:30px;color:#f30;flex-shrink:0;}
+.histv2-card-kind span{font-size:16px;color:#343941;letter-spacing:.65px;}
+.histv2-card-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.histv2-card-date{font-size:11px;color:#2c2727;white-space:nowrap;}
+.histv2-card-close{width:24px;height:24px;color:#2c2727;cursor:pointer;flex-shrink:0;}
+.histv2-card-title{margin:20px 0 4px;font-size:22px;font-weight:500;color:#343941;letter-spacing:.88px;text-transform:uppercase;}
+.histv2-card-sub{margin:0;font-size:14px;color:#96959b;letter-spacing:.56px;text-transform:uppercase;}
+.histv2-ex-list{display:flex;flex-direction:column;margin-top:22px;}
+.histv2-ex-item{padding:10px 0;border-top:1px solid #eee;}
+.histv2-ex-item:first-child{border-top:none;padding-top:0;}
+.histv2-ex-name{margin:0 0 2px;font-size:13px;color:#343941;}
+.histv2-ex-sets{margin:0;font-size:11px;color:#96959b;letter-spacing:.33px;}
+.histv2-run-tiles{display:flex;gap:8px;margin-top:16px;}
+.histv2-run-tile{flex:1;background:#f5f1fb;border-radius:12px;padding:12px 8px;text-align:center;box-sizing:border-box;}
+.histv2-run-tile .v{font-size:18px;font-weight:600;color:#343941;}
+.histv2-run-tile .l{margin-top:4px;font-size:10px;color:#96959b;text-transform:uppercase;letter-spacing:.5px;}
+.histv2-run-notes{margin-top:12px;font-size:13px;color:#343941;}
+
+@media (prefers-reduced-motion: no-preference){
+  .histv2-chat-btn,.histv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
+  .histv2-actions{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.08s;}
+  .histv2-cal-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.14s;}
+  .histv2-section-label{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;animation-delay:.2s;}
+  .histv2-anim-in{animation:dashDayIn .45s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.24s + var(--i,0) * 70ms);}
+}
+.histv2-root .ph{display:block;}
+.histv2-root .ph svg{display:block;width:100%;height:100%;}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -1859,6 +1942,45 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
 
     <button type="button" class="pev2-save-fab" onclick="savePlanEditor()">ZAPISZ PLAN</button>
+  </section>
+
+  <!-- ===================== HISTORY v2 (Figma node 177:10060, "10. HISOTRY") —
+       v3-styled replacement for #view-history, only reachable through the v3
+       preview nav. Production's own History screen stays untouched. ===================== -->
+  <section class="view histv2-root" id="view-history-v2">
+    <div class="histv2-panel">
+      <button type="button" class="histv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
+
+      <div class="histv2-header">
+        <span class="ph" data-ph="calendar-dots"></span>
+        <h1>HISTORY</h1>
+      </div>
+
+      <div class="histv2-actions">
+        <button type="button" class="histv2-btn-outline" onclick="exportData()" title="Pobierz kopię zapasową"><span class="ph" data-ph="download-simple"></span></button>
+        <button type="button" class="histv2-btn-fill" onclick="document.getElementById('importFile').click()" title="Importuj kopię zapasową"><span class="ph" data-ph="upload-simple"></span></button>
+      </div>
+
+      <div class="histv2-cal-card">
+        <div class="histv2-cal-head">
+          <div class="histv2-cal-nav-month">
+            <span class="ph" data-ph="caret-down" style="transform:rotate(90deg)" onclick="calMoveMonthV2(-1)"></span>
+            <span class="histv2-cal-month-label" id="histCalMonthLabelV2"></span>
+            <span class="ph" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="calMoveMonthV2(1)"></span>
+          </div>
+          <div class="histv2-cal-nav-year">
+            <span class="ph" data-ph="caret-down" style="transform:rotate(90deg)" onclick="calMoveYearV2(-1)"></span>
+            <span class="histv2-cal-year-label" id="histCalYearLabelV2"></span>
+            <span class="ph" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="calMoveYearV2(1)"></span>
+          </div>
+        </div>
+        <div class="histv2-cal-dow-row" id="histCalDowRowV2"></div>
+        <div class="histv2-cal-days" id="histCalGridV2"></div>
+      </div>
+
+      <p class="histv2-section-label">Twoje treningi</p>
+      <div class="histv2-list" id="histDetailV2"></div>
+    </div>
   </section>
 
   </div>
@@ -2907,7 +3029,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 110;
+const DASH_BUILD = 111;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3410,8 +3532,8 @@ function commitViewTransition(){
    get an entry here — everything else still falls through to the
    real production route unchanged. See [[project_thryve_roadmap]]. */
 let previewMode = false;
-const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2' };
-const V3_ROUTE_ALIAS = { dashboard: 'welcome', 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans' }; // which real nav icon a v3 route should light up
+const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2', history: 'history-v2' };
+const V3_ROUTE_ALIAS = { dashboard: 'welcome', 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history' }; // which real nav icon a v3 route should light up
 function navTap(route){
   if(route === 'welcome') previewMode = false; // tapping home always exits back to production
   const target = (previewMode && PREVIEW_ROUTES[route]) ? PREVIEW_ROUTES[route] : route;
@@ -3456,7 +3578,7 @@ function goRoute(route){
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward);
-  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2';
+  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2' || route==='history-v2';
   document.getElementById('bottomNav').style.display = (route==='welcome' || planOnboardingActive) ? 'none' : 'flex';
   document.getElementById('bottomNav').classList.toggle('bottom-nav-light', isV3);
   // Only rebuild the button set when the v3-ness actually changes — every
@@ -3494,6 +3616,7 @@ function goRoute(route){
   if(route==='gym-v2'){ previewMode = true; renderGymV2(); }
   if(route==='plans-v2'){ previewMode = true; renderPlansListV2(true); }
   if(route==='plan-editor-v2'){ previewMode = true; refreshPlanEditorV2Scroll(); }
+  if(route==='history-v2'){ previewMode = true; renderCalendarV2(true); }
   commitViewTransition();
   window.scrollTo(0,0);
 }
@@ -6822,6 +6945,143 @@ function renderHistDetail(){
         </div>
         <div class="run-stat-labels"><div>${t('histKilometers','Kilometry')}</div><div>${t('histMinutes','Minuty')}</div><div>${t('paceMinKm','Tempo (min/km)')}</div></div>
         ${r.notes?`<div class="hist-ex-item" style="margin-top:12px;"><div class="st">${r.notes}</div></div>`:''}`:''}
+      </div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+/* ============================================================
+   HISTORY v2 (Figma node 177:10060) — same data/model as production's
+   calendar above (workouts/runs/datesWithLogs()/MONTH_NAMES/
+   DOW_LABELS/fmtDateHuman reused wholesale), own state so production's
+   own calState/selectedHistDate/histExpanded stay untouched.
+   Week starts Monday (DOW_LABELS is already Pn-Nd) even though the
+   Figma mock shows Su-first headers — every other calendar/week
+   display in this app (dash-week-days, plan-day-chip, ...) is
+   Monday-first Polish convention, and that Su-Mo-Tu-We-Th-Fr-Sa row
+   reads like an unlocalized component-library default, not a
+   deliberate choice for this one screen.
+   The Figma mock also shows a genuine date-RANGE highlight (days
+   9-13 with distinct start/end/between states) — no such concept
+   exists anywhere in the app's data model (selectedHistDate is a
+   single ISO date), so that's read as showing off the design-system
+   component's full state palette rather than a feature to build here.
+   Kept the real, existing single-day-select behavior: selected day =
+   solid white circle, any OTHER day with logged activity = thin
+   white outline ring (has-log), matching what production's own
+   .cal-day.has-log/.selected already distinguish. ============================================================ */
+let calStateV2 = (()=>{ const d=new Date(); return {year:d.getFullYear(), month:d.getMonth()}; })();
+let selectedHistDateV2 = null;
+let histExpandedV2 = {};
+function calMoveMonthV2(delta){
+  calStateV2.month = (calStateV2.month + delta + 12) % 12;
+  renderCalendarV2();
+}
+function calMoveYearV2(delta){
+  calStateV2.year += delta;
+  renderCalendarV2();
+}
+function toggleHistExpandV2(key){
+  histExpandedV2[key] = !histExpandedV2[key];
+  renderHistDetailV2();
+}
+/* animate defaults to false/undefined on every call here — only the
+   genuine goRoute('history-v2') open passes true. Without this gate,
+   re-rendering on every month/year nav, day-select, or card
+   expand/collapse click would replay .histv2-anim-in's entrance
+   (opacity:0 + animation-delay) each time, which can leave content
+   invisible for the whole delay+duration after a click — caught via
+   screenshot: an expanded card render at histv2-anim-in's *pre-delay*
+   state simply wasn't there yet. Same anti-pattern this app's own
+   Plan Editor v2/picker comments already warn about. */
+function renderCalendarV2(animate){
+  document.getElementById('histCalMonthLabelV2').textContent = MONTH_NAMES[calStateV2.month];
+  document.getElementById('histCalYearLabelV2').textContent = calStateV2.year;
+  const dowRow = document.getElementById('histCalDowRowV2');
+  if(!dowRow.childElementCount){
+    dowRow.innerHTML = DOW_LABELS.map(d=>`<div class="histv2-cal-dow">${d}</div>`).join('');
+  }
+  const {year, month} = calStateV2;
+  const grid = document.getElementById('histCalGridV2');
+  const first = new Date(year, month, 1);
+  const startOffset = first.getDay()===0 ? 6 : first.getDay()-1;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+  const logged = datesWithLogs();
+  if(!selectedHistDateV2){
+    const todaysIso = todayStr();
+    const inMonth = todaysIso.slice(0,7) === `${year}-${String(month+1).padStart(2,'0')}`;
+    selectedHistDateV2 = inMonth ? todaysIso : null;
+  }
+  let html = '';
+  for(let i=0;i<startOffset;i++){
+    html += `<button type="button" class="histv2-cal-day outside" disabled>${prevMonthDays-startOffset+1+i}</button>`;
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cls = ['histv2-cal-day'];
+    if(logged.get(iso)) cls.push('has-log');
+    if(iso===selectedHistDateV2) cls.push('selected');
+    html += `<button type="button" class="${cls.join(' ')}" onclick="selectedHistDateV2='${iso}';histExpandedV2={};renderCalendarV2();">${d}</button>`;
+  }
+  const totalCells = startOffset + daysInMonth;
+  const trailing = (7 - (totalCells % 7)) % 7;
+  for(let i=1;i<=trailing;i++){
+    html += `<button type="button" class="histv2-cal-day outside" disabled>${i}</button>`;
+  }
+  grid.innerHTML = html;
+  renderHistDetailV2(animate);
+}
+function renderHistDetailV2(animate){
+  const wrap = document.getElementById('histDetailV2');
+  const animCls = animate ? ' histv2-anim-in' : '';
+  if(!selectedHistDateV2){ wrap.innerHTML = `<div class="histv2-empty">${t('histEmptyPick','Wybierz dzień, żeby zobaczyć szczegóły.')}</div>`; return; }
+  const dayWorkouts = workouts.filter(w=>w.date===selectedHistDateV2);
+  const dayRuns = runs.filter(r=>r.date===selectedHistDateV2);
+  if(!dayWorkouts.length && !dayRuns.length){ wrap.innerHTML = `<div class="histv2-empty">${t('histEmptyNone', `Brak zapisanej aktywności — ${fmtDate(selectedHistDateV2)}`, fmtDate(selectedHistDateV2))}</div>`; return; }
+  let html = '';
+  dayWorkouts.forEach((w,i)=>{
+    const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
+    const exp = !!histExpandedV2[w.id];
+    html += `
+      <div class="histv2-card${animCls}${exp?' expanded':''}" style="--i:${i}"${exp?'':` onclick="toggleHistExpandV2('${w.id}')"`}>
+        <div class="histv2-card-head">
+          <div class="histv2-card-kind">${ph('barbell')}<span>GYM</span></div>
+          <div class="histv2-card-right">
+            <span class="histv2-card-date">${fmtDateHuman(w.date)}</span>
+            ${exp?`<span class="ph histv2-card-close" data-ph="x" onclick="event.stopPropagation();toggleHistExpandV2('${w.id}')"></span>`:''}
+          </div>
+        </div>
+        <p class="histv2-card-title">${t('histWorkoutVolTitle', `${w.exercises.length} ${plExercisesWord(w.exercises.length)}`, w.exercises.length)}</p>
+        <p class="histv2-card-sub">${t('histWorkoutVolSub', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol))}</p>
+        ${exp?`<div class="histv2-ex-list">
+          ${w.exercises.map(e=>`
+            <div class="histv2-ex-item">
+              <p class="histv2-ex-name">${e.name}</p>
+              <p class="histv2-ex-sets">${e.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ')}</p>
+            </div>`).join('')}
+        </div>`:''}
+      </div>`;
+  });
+  dayRuns.forEach((r,i)=>{
+    const min = Math.floor(r.pace), sec = Math.round((r.pace-min)*60);
+    const exp = !!histExpandedV2[r.id];
+    html += `
+      <div class="histv2-card${animCls}${exp?' expanded':''}" style="--i:${dayWorkouts.length+i}"${exp?'':` onclick="toggleHistExpandV2('${r.id}')"`}>
+        <div class="histv2-card-head">
+          <div class="histv2-card-kind">${ph('sneaker-move')}<span>BIEGANIE</span></div>
+          <div class="histv2-card-right">
+            <span class="histv2-card-date">${fmtDateHuman(r.date)}</span>
+            ${exp?`<span class="ph histv2-card-close" data-ph="x" onclick="event.stopPropagation();toggleHistExpandV2('${r.id}')"></span>`:''}
+          </div>
+        </div>
+        <p class="histv2-card-title">${runTypeLabel(r.type)}</p>
+        ${exp?`<div class="histv2-run-tiles">
+          <div class="histv2-run-tile"><div class="v">${r.distance}</div><div class="l">${t('histKilometers','Kilometry')}</div></div>
+          <div class="histv2-run-tile"><div class="v">${r.time}</div><div class="l">${t('histMinutes','Minuty')}</div></div>
+          <div class="histv2-run-tile"><div class="v">${min}:${sec.toString().padStart(2,'0')}</div><div class="l">${t('paceMinKm','Tempo (min/km)')}</div></div>
+        </div>
+        ${r.notes?`<p class="histv2-run-notes">${r.notes}</p>`:''}`:''}
       </div>`;
   });
   wrap.innerHTML = html;
