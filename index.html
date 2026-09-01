@@ -1803,7 +1803,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
       <div class="gymv2-section-head">
         <p>Ćwiczenia w planie</p>
-        <button type="button" class="gymv2-edit-plan" onclick="openPlanEditor(starredPlanId)">Edytuj plan</button>
+        <button type="button" class="gymv2-edit-plan" onclick="openPlanEditorV2(starredPlanId)">Edytuj plan</button>
       </div>
       <div class="gymv2-grid" id="gymGridV2"></div>
 
@@ -1827,12 +1827,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="plansv2-panel">
       <button type="button" class="plansv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
 
+      <!-- No close X: Plans is a standalone tab reached from the bottom nav,
+           not a modal over GYM. (The plan-editor-v2 header below keeps its X
+           because that one really is a sub-screen you back out of.) -->
       <div class="plansv2-header">
         <div class="plansv2-header-title">
           <span class="ph" data-ph="barbell"></span>
           <h1>PLANS</h1>
         </div>
-        <span class="ph plansv2-close" data-ph="x" onclick="goRoute('gym-v2')"></span>
       </div>
 
       <div class="plansv2-actions">
@@ -2200,8 +2202,9 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <div class="histv2-actions">
-        <button type="button" class="histv2-btn-outline" onclick="exportData()" title="Pobierz kopię zapasową"><span class="ph" data-ph="download-simple"></span></button>
-        <button type="button" class="histv2-btn-fill" onclick="document.getElementById('importFile').click()" title="Importuj kopię zapasową"><span class="ph" data-ph="upload-simple"></span></button>
+        <!-- down arrow = import (pull a backup in), up arrow = export (send a backup out) -->
+        <button type="button" class="histv2-btn-outline" onclick="document.getElementById('importFile').click()" title="Importuj kopię zapasową"><span class="ph" data-ph="download-simple"></span></button>
+        <button type="button" class="histv2-btn-fill" onclick="exportData()" title="Pobierz kopię zapasową"><span class="ph" data-ph="upload-simple"></span></button>
       </div>
 
       <div class="histv2-cal-card">
@@ -3309,7 +3312,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.9.1";
+const APP_VERSION = "4.9.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6727,8 +6730,8 @@ function confirmImportPlan(){
   pendingImportPlan = null;
   document.getElementById('importPlanOverlay').classList.add('hidden');
   toast(t('planImported','Plan zaimportowany'));
-  renderPlansList();
-  goRoute('plans');
+  renderPlansList(); // tail-calls renderPlansListV2()
+  goRoute('plans-v2');
   // On iOS, Safari and an installed ("Add to Home Screen") copy of the app
   // don't reliably share localStorage — a plan imported here in the browser
   // can be invisible from the home-screen icon. Point the user at the
