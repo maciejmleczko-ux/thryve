@@ -231,6 +231,41 @@ button{font-family:inherit;}
   .loadv2-root.visible .loadv2-footer{animation:loadv2Rise .55s cubic-bezier(.16,1,.3,1) both;animation-delay:.42s;}
 }
 @media (prefers-reduced-motion: reduce){ .loadv2-root{transition:none;} }
+
+/* GYM finish screen (Figma node 185:14366, "03. GYM - FINISH") — full-screen
+   celebratory confirmation shown by showGymFinishV2() for 1.5s right after a
+   workout is saved from GYM v2, then it hands off to the Dashboard. Same
+   show/hide mechanics as the load screen above (.visible toggles display,
+   .hiding fades out). Mirrors GYM v2's red-under-lilac panel treatment:
+   #dd2b17 page with an #f5f1fb panel whose 26px bottom corners let a sliver
+   of red through. */
+.gymfin-root{display:none;position:fixed;inset:0;z-index:9500;overflow:hidden;background:#dd2b17;opacity:1;transition:opacity .35s ease;}
+.gymfin-root.visible{display:block;}
+.gymfin-root.hiding{opacity:0;}
+.gymfin-panel{position:absolute;inset:0;background:#f5f1fb;border-radius:0 0 26px 26px;overflow:hidden;}
+.gymfin-fx{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:color-dodge;pointer-events:none;}
+.gymfin-topbar{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 10px;z-index:1;}
+.gymfin-brand{display:flex;align-items:center;gap:16px;}
+.gymfin-brand .ph{width:40px;height:40px;color:#f30;display:block;}
+.gymfin-brand-word{font-size:30.654px;font-weight:400;color:#343941;letter-spacing:-.02em;}
+.gymfin-chat{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.gymfin-chat .ph{width:24px;height:24px;color:#f30;display:block;}
+.gymfin-brand .ph svg, .gymfin-chat .ph svg{display:block;width:100%;height:100%;}
+.gymfin-center{position:absolute;left:0;right:0;top:38%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:18px;padding:0 24px;z-index:1;text-align:center;}
+.gymfin-check{width:68px;height:68px;border-radius:50%;background:#f30;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.gymfin-check svg{width:44px;height:44px;display:block;}
+.gymfin-title{margin:0;font-size:41px;font-weight:500;color:#f30;letter-spacing:1.6px;line-height:1;}
+.gymfin-sub{margin:0;font-size:17.5px;font-weight:400;color:#000;letter-spacing:.7px;}
+@media (prefers-reduced-motion: no-preference){
+  @keyframes gymfinPop{from{opacity:0;transform:scale(.6);}to{opacity:1;transform:scale(1);}}
+  /* The confetti layer is deliberately NOT animated — it's a full-screen
+     mix-blend-mode:color-dodge paint, cheap once but costly to recomposite
+     every frame; a hard cut keeps the 1.5s screen smooth on weak phones. */
+  .gymfin-root.visible .gymfin-check{animation:gymfinPop .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.06s;}
+  .gymfin-root.visible .gymfin-title{animation:loadv2Rise .55s cubic-bezier(.16,1,.3,1) both;animation-delay:.2s;}
+  .gymfin-root.visible .gymfin-sub{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.3s;}
+}
+@media (prefers-reduced-motion: reduce){ .gymfin-root{transition:none;} }
 html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow, html.statsv2-bg .app-glow, html.histv2-bg .app-glow{display:none;}
 @media (prefers-reduced-motion: no-preference){
   .app-glow{animation:glowDrift 24s ease-in-out infinite;}
@@ -1653,6 +1688,27 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <div class="loadv2-footer">
     <p class="loadv2-version" id="loadV2Version">Mekkio</p>
     <p class="loadv2-copyright">© 2026 Maciej Mleczko - www.maciejmleczko.pl</p>
+  </div>
+</div>
+
+<!-- GYM finish screen (Figma node 185:14366, "03. GYM - FINISH") — shown for
+     1.5s after a workout is saved from GYM v2, then goRoute('dashboard').
+     Hidden by default; showGymFinishV2() drives it. -->
+<div id="gymFinishV2" class="gymfin-root">
+  <div class="gymfin-panel">
+    <img class="gymfin-fx" src="gym-finish-fx.svg" alt="" aria-hidden="true">
+    <div class="gymfin-topbar">
+      <div class="gymfin-brand">
+        <span class="ph" data-ph="barbell"></span>
+        <span class="gymfin-brand-word">GYM</span>
+      </div>
+      <span class="gymfin-chat" aria-hidden="true"><span class="ph" data-ph="chat-dots"></span></span>
+    </div>
+    <div class="gymfin-center">
+      <span class="gymfin-check"><svg viewBox="0 0 45.3333 45.3333" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M41.1715 14.2538L18.5048 36.9204C18.3074 37.1186 18.0728 37.2757 17.8145 37.383C17.5562 37.4902 17.2793 37.5455 16.9996 37.5455C16.7199 37.5455 16.443 37.4902 16.1847 37.383C15.9264 37.2757 15.6918 37.1186 15.4944 36.9204L5.57771 27.0038C5.38004 26.8061 5.22324 26.5714 5.11627 26.3132C5.00929 26.0549 4.95423 25.7781 4.95423 25.4986C4.95423 25.219 5.00929 24.9422 5.11627 24.684C5.22324 24.4257 5.38004 24.191 5.57771 23.9934C5.77538 23.7957 6.01004 23.6389 6.2683 23.5319C6.52657 23.4249 6.80337 23.3699 7.08292 23.3699C7.36246 23.3699 7.63927 23.4249 7.89753 23.5319C8.15579 23.6389 8.39046 23.7957 8.58813 23.9934L17.0014 32.4066L38.1646 11.2469C38.5638 10.8477 39.1052 10.6234 39.6698 10.6234C40.2344 10.6234 40.7758 10.8477 41.175 11.2469C41.5742 11.6461 41.7985 12.1875 41.7985 12.7521C41.7985 13.3167 41.5742 13.8581 41.175 14.2573L41.1715 14.2538Z" fill="#fff"/></svg></span>
+      <p class="gymfin-title">GRATULACJE</p>
+      <p class="gymfin-sub">TRENING ZOSTAŁ ZAPISANY</p>
+    </div>
   </div>
 </div>
 
@@ -3312,7 +3368,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.9.2";
+const APP_VERSION = "4.10.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3361,6 +3417,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.10.0": {
+    pl: [
+      {featured:true, icon:'check-circle', badge:'Nowość', title:'Ekran po zapisanym treningu', text:'Zapisujesz trening w GYM i na chwilę pokazuje się ekran „Gratulacje – trening zapisany", zanim wrócisz na ekran główny.'},
+    ],
+    en: [
+      {featured:true, icon:'check-circle', badge:'New', title:'A screen after you save a workout', text:'You save a workout in GYM and a short "Congratulations – workout saved" screen shows up before you land back on the home screen.'},
+    ],
+  },
   "4.9.0": {
     pl: [
       {featured:true, icon:'sketch-logo', badge:'Nowość', title:'Nowy wygląd Mekkio', text:'Cała aplikacja ma nowy wygląd — inne kolory, inna czcionka, przerobiony ekran główny, GYM, plany, historia i statystyki. Przy każdym otwarciu na chwilę pokaże się ekran startowy z logo. Twoje treningi, plany i historia zostają bez zmian.'},
@@ -5253,19 +5317,29 @@ function saveWorkout(){
   renderExercisePanels();
   return true;
 }
-/* GYM v2 save button: hands off to Dashboard once saveWorkout()'s own
-   toast ("Trening zapisany") has had a moment to register — no
-   per-button success animation any more, matching plan editor v2's
-   plain "ZAPISZ PLAN" (see .gymv2-save's CSS). Wraps the shared
-   saveWorkout() rather than duplicating its validation/persist logic —
-   production GYM's save button is untouched.
-   Maciej: "po skonczonym i zapisanym treningu - chcialbym aby pojawil
-   sie [dashboard] na 2 sekundy" — bumped from 650ms so there's a real
-   beat to actually register the save before Dashboard takes over. */
+/* GYM finish screen — full-screen "GRATULACJE / TRENING ZOSTAŁ ZAPISANY"
+   confirmation (Figma node 185:14366). Shown for 1.5s, then onDone() runs.
+   Same show/hide shape as showLoadScreenV2(). */
+function showGymFinishV2(onDone){
+  const el = document.getElementById('gymFinishV2');
+  if(!el){ onDone(); return; }
+  el.classList.remove('hiding');
+  el.classList.add('visible');
+  setTimeout(()=>{
+    el.classList.add('hiding');
+    onDone();
+    setTimeout(()=>{ el.classList.remove('visible','hiding'); }, 350); // matches .gymfin-root's opacity transition
+  }, 1500);
+}
+/* GYM v2 save button: wraps the shared saveWorkout() (production GYM's own
+   button is untouched), then shows the finish screen for 1.5s before
+   handing off to the Dashboard. Maciej: "po skonczonym i zapisanym
+   treningu - chcilabym aby pojawil sie ten ekran i po 1,5 sekundy
+   przeniósł użytkownika do dashboardu". */
 function saveWorkoutV2(){
   const ok = saveWorkout();
   if(!ok) return;
-  setTimeout(()=> goRoute('dashboard'), 2000);
+  showGymFinishV2(()=> goRoute('dashboard'));
 }
 
 /* ============================================================
