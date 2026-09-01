@@ -218,6 +218,18 @@ button{font-family:inherit;}
 .loadv2-footer{position:relative;z-index:1;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));text-align:center;}
 .loadv2-version{margin:0;color:#fff;font-size:11px;font-weight:500;letter-spacing:1.1px;}
 .loadv2-copyright{margin:4px 0 0;color:#fff;font-size:9px;font-weight:300;}
+/* Entrance: logo slides up + fades in when the splash appears, tagline and
+   footer follow on the same staggered rise (reuses the app-wide
+   cubic-bezier(.16,1,.3,1) / translateY vocabulary — see
+   [[feedback_thryve_animation_vocabulary]]). Scoped to .visible so it
+   replays on every launch (the display:none -> flex toggle restarts it);
+   all done well inside the 1.5s the splash is shown. */
+@media (prefers-reduced-motion: no-preference){
+  @keyframes loadv2Rise{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+  .loadv2-root.visible .loadv2-logo{animation:loadv2Rise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.09s;}
+  .loadv2-root.visible .loadv2-tagline{animation:loadv2Rise .6s cubic-bezier(.16,1,.3,1) both;animation-delay:.26s;}
+  .loadv2-root.visible .loadv2-footer{animation:loadv2Rise .55s cubic-bezier(.16,1,.3,1) both;animation-delay:.42s;}
+}
 @media (prefers-reduced-motion: reduce){ .loadv2-root{transition:none;} }
 html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow, html.statsv2-bg .app-glow, html.histv2-bg .app-glow{display:none;}
 @media (prefers-reduced-motion: no-preference){
