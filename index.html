@@ -890,7 +890,16 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    355px stack max-width + 10px×2 padding = 375px, an exact fit on a
    base iPhone-width viewport. */
 .plansv2-customize-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);padding:10px;}
-.plansv2-customize-stack{display:flex;flex-direction:column;align-items:center;width:100%;max-width:355px;font-family:'Geist','Inter',-apple-system,sans-serif;}
+/* max-width was 355px, tuned for an exactly-375px viewport (355 +
+   10px×2 padding = 375) — on a real phone wider than that (390/393/
+   430pt, the common current iPhone sizes) the card stopped growing at
+   355px and centered with extra dead space beyond the 10px padding,
+   so the side margin read as bigger than 10px (Maciej, 2026-09-02:
+   "Boki wydaja mi sie nadal wieksze niz 10px"). 420px matches .app's
+   own 440px max-width minus 10px×2, so on any real phone (all narrower
+   than that) the card now always fills to exactly the padding, and
+   still caps sanely on a wide desktop/tablet test. */
+.plansv2-customize-stack{display:flex;flex-direction:column;align-items:center;width:100%;max-width:420px;font-family:'Geist','Inter',-apple-system,sans-serif;}
 /* Entrance/exit motion, gated behind prefers-reduced-motion like every
    other animation added this session — exv2's own version of this
    predates that convention and isn't gated (see feedback_thryve_
@@ -908,7 +917,13 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
   @keyframes plansv2CustomizeSlideUp{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
   @keyframes plansv2CustomizeSlideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(24px);}}
 }
-.plansv2-customize-card{display:flex;flex-direction:column;gap:20px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 20px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
+/* Reverted to 120px (Maciej, 2026-09-02, real phone: "Od gory zostaw
+   jednak tak jak bylo") — the tighter calc(100dvh - 20px) from build
+   99 let a maxed-out popup reach flush to the very top of the screen,
+   colliding with the status bar/notch since nothing here accounts for
+   env(safe-area-inset-top). Left/right stay fixed at 10px via
+   .plansv2-customize-overlay's own padding, unaffected by this. */
+.plansv2-customize-card{display:flex;flex-direction:column;gap:20px;background:#f5f1fb;border-radius:16px;padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 120px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
 /* Rebuilt to match Figma node 153:701 (2026-08-29) — app-level
    topbar (barbell + PLANS + X, same pattern as .plansv2-header on the
    real Plans v2 screen, just sized for the narrower modal) instead of
@@ -2745,7 +2760,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 99;
+const DASH_BUILD = 100;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
