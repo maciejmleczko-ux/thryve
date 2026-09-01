@@ -241,9 +241,10 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    position:absolute so it doesn't become a phantom first flex item and
    break the row's justify-content:space-between. */
 /* Maciej, 2026-09-04: "tlo powinno miec jednak wieksza transparencje -
-   90%" — 90% transparent = 10% opaque, up from the SVG-literal .51
-   (49% transparent). */
-.bottom-nav.bottom-nav-light{background:rgba(253,251,255,.1);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
+   90%" — first read as 90% see-through (opacity .1), but his follow-up
+   SVG makes the actual meaning explicit: fill-opacity="0.9" — i.e.
+   90% opaque, up from the earlier .51. */
+.bottom-nav.bottom-nav-light{background:rgba(253,251,255,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
 .bottom-nav.bottom-nav-light::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.74) 50.48%,#fff 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
 .bottom-nav.bottom-nav-light .nav-item{width:52px;height:52px;background:rgba(150,149,155,.3);}
 .bottom-nav.bottom-nav-light .nav-item .ph{color:rgba(52,57,65,.77);}
@@ -1343,9 +1344,14 @@ body.pev2-bg{background:#dd2b17;}
 .histv2-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
 .histv2-chat-btn:active{transform:scale(.9);}
 .histv2-chat-btn .ph{width:24px;height:24px;color:#f30;}
+/* Aligned to GYM v2/Plans v2's header exactly (40px icon, 30.654px
+   title, -.02em tracking) — the Figma export's own 55.18px/30px/+1.2px
+   for History read as an outlier from that specific export rather than
+   a deliberate deviation; Maciej confirmed ("sprawdz czy jest taka sama
+   jak np w gym") these three peer screens should match. */
 .histv2-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
-.histv2-header .ph{width:55px;height:55px;color:#f30;flex-shrink:0;}
-.histv2-header h1{margin:0;font-size:30px;font-weight:400;color:#343941;letter-spacing:1.2px;}
+.histv2-header .ph{width:40px;height:40px;color:#f30;flex-shrink:0;}
+.histv2-header h1{margin:0;font-size:30.654px;font-weight:400;color:#343941;letter-spacing:-.02em;}
 .histv2-actions{display:flex;gap:10px;margin-bottom:24px;}
 .histv2-btn-outline{flex:1;border:1px solid #ff6343;border-radius:69px;padding:12px;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
 .histv2-btn-outline:active{transform:scale(.96);}
@@ -3032,7 +3038,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 112;
+const DASH_BUILD = 113;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
