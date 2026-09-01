@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thryve-cache-v3';
+const CACHE_NAME = 'mekkio-cache-v4';
 const URLS_TO_CACHE = ['./', './index.html'];
 
 self.addEventListener('install', (event) => {
