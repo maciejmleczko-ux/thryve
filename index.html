@@ -1484,7 +1484,7 @@ body.pev2-bg{background:#dd2b17;}
 .statsv2-ytd-num-row .ph{width:36px;height:36px;color:#fff;flex-shrink:0;}
 .statsv2-ytd-num{font-size:40px;color:#fff;font-weight:400;letter-spacing:-.88px;font-variant-numeric:tabular-nums;}
 .statsv2-ytd-num small{font-size:16px;color:rgba(255,255,255,.8);margin-left:4px;}
-.statsv2-ytd-delta{margin:4px 0 0;font-size:11px;color:#ffb10d;letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-ytd-delta{margin:4px 0 0;font-size:11px;color:#ffd885;letter-spacing:1.1px;text-transform:uppercase;}
 .statsv2-ytd-chart{position:relative;height:110px;margin-top:16px;}
 .statsv2-ytd-chart svg{width:100%;height:100%;overflow:visible;}
 .statsv2-ytd-labels{display:flex;justify-content:space-between;margin-top:8px;}
@@ -1515,7 +1515,7 @@ body.pev2-bg{background:#dd2b17;}
 .statsv2-record-num small{font-size:16px;color:rgba(255,255,255,.8);margin-left:4px;}
 .statsv2-record-arrow{width:40px;height:40px;color:#fff;flex-shrink:0;}
 .statsv2-record-arrow.down{transform:scaleY(-1);}
-.statsv2-record-delta{margin:8px 0 16px;font-size:11px;color:#ffb10d;letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-record-delta{margin:8px 0 16px;font-size:11px;color:#ffd885;letter-spacing:1.1px;text-transform:uppercase;}
 .statsv2-record-sep{height:1px;background:rgba(255,255,255,.25);margin-bottom:16px;}
 .statsv2-record-stats{display:flex;gap:28px;}
 .statsv2-record-stat span{display:block;font-size:10px;color:#fff;letter-spacing:.4px;margin-bottom:4px;}
@@ -3210,7 +3210,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 126;
+const DASH_BUILD = 127;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -7376,6 +7376,22 @@ const MONTH_GEN_PL = ['stycznia','lutego','marca','kwietnia','maja','czerwca','l
 let selectedStatsExerciseV2 = null; // null = overview, exercise name = detail
 let statsV2BarPage = 0;             // 0 = most recent 6 months, 1 = the 6 before that, ...
 let statsV2Range = 1;               // range shown in the per-exercise chart: 1(=rolling 30d)/3/6/12/0(=all)
+// Maciej (screenshots from a real iPhone): "4 treningu nie rysuje się
+// linia" / "2 treningi i tez nie mam linii" — the PR/current dots (fill
+// colors) rendered fine but the connecting wave line (stroke="url(#...)"
+// referencing a <linearGradient>) was completely invisible on real
+// iOS Safari, never reproduced in this session's Chromium-based
+// browser testing. Root cause: every render recreates a
+// <linearGradient> with the SAME hardcoded id (statsV2DetailGrad/
+// statsV2YtdGrad/statsV2RingGrad) via innerHTML replacement — Safari
+// has a well-known bug where a url(#id) paint reference can stay
+// bound to the PREVIOUS (already-removed) element with that id after
+// an innerHTML swap, instead of re-resolving to the fresh one, leaving
+// the stroke unpainted. Giving each render's gradients a unique id
+// sidesteps the stale-reference bug entirely — Safari can never
+// confuse a fresh id with an old one.
+let statsV2GradSeq = 0;
+function statsV2Uid(){ return 'g' + (statsV2GradSeq++); }
 
 function statsV2MonthKey(iso){ return iso.slice(0,7); }
 function statsV2MonthlyVolumeMap(){
@@ -7599,6 +7615,7 @@ function renderStatsV2ExerciseRow(activeName){
 }
 
 function renderStatsV2Overview(){
+  const ringGradId = statsV2Uid(), ytdGradId = statsV2Uid();
   const week = statsV2WeeklyProgress();
   const R = 58, C = 2*Math.PI*R;
   const doneFrac = week.total ? week.done/week.total : 0;
@@ -7636,14 +7653,14 @@ function renderStatsV2Overview(){
           <div class="statsv2-ring-wrap">
             <svg viewBox="0 0 132 132">
               <defs>
-                <linearGradient id="statsV2RingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient id="${ringGradId}" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#ff3300"/>
                   <stop offset="55%" stop-color="#ff8a3d"/>
                   <stop offset="100%" stop-color="#ffc542"/>
                 </linearGradient>
               </defs>
               <circle cx="66" cy="66" r="${R}" fill="none" stroke="#343941" stroke-width="12"/>
-              <circle cx="66" cy="66" r="${R}" fill="none" stroke="url(#statsV2RingGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringOffset}"/>
+              <circle cx="66" cy="66" r="${R}" fill="none" stroke="url(#${ringGradId})" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringOffset}"/>
             </svg>
             <div class="statsv2-ring-num"><strong>${week.done}/${week.total}</strong><small>dni</small></div>
           </div>
@@ -7670,12 +7687,12 @@ function renderStatsV2Overview(){
         <div class="statsv2-ytd-chart">
           <svg viewBox="0 0 ${wW} ${wH+16}" preserveAspectRatio="none">
             <defs>
-              <linearGradient id="statsV2YtdGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient id="${ytdGradId}" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#ffe8b0"/>
                 <stop offset="100%" stop-color="#fff"/>
               </linearGradient>
             </defs>
-            <path d="${wavePath}" fill="none" stroke="url(#statsV2YtdGrad)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="${wavePath}" fill="none" stroke="url(#${ytdGradId})" stroke-width="2.5" stroke-linecap="round"/>
           </svg>
           ${lastPt?`<div class="statsv2-chart-dot" style="width:12px;height:12px;background:#ffc542;left:${(lastPt.x/wW*100).toFixed(1)}%;top:${(lastPt.y/(wH+16)*100).toFixed(1)}%;"></div>`:''}
         </div>
@@ -7686,6 +7703,7 @@ function renderStatsV2Overview(){
 }
 
 function renderStatsV2Detail(name){
+  const detailGradId = statsV2Uid();
   const rec = statsV2ExerciseRecord(name);
   if(!rec) return renderStatsV2ExerciseRow(name) + `<div class="statsv2-empty">Brak zapisanych serii dla tego ćwiczenia.</div>`;
 
@@ -7770,12 +7788,12 @@ function renderStatsV2Detail(name){
           ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(Math.max(0,p.y-p.r-6)/(dH+16)*100).toFixed(1)}%;">PR ${p.weight}kg</div>`).join('')}
           <svg viewBox="0 0 ${dW} ${dH+16}" preserveAspectRatio="none">
             <defs>
-              <linearGradient id="statsV2DetailGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient id="${detailGradId}" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#ff8a3d"/>
                 <stop offset="100%" stop-color="#ffc542"/>
               </linearGradient>
             </defs>
-            <path d="${dPath}" fill="none" stroke="url(#statsV2DetailGrad)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="${dPath}" fill="none" stroke="url(#${detailGradId})" stroke-width="2.5" stroke-linecap="round"/>
           </svg>
           ${chartPts.map((p,i)=> i===chartPts.length-1
             ? `<div class="statsv2-chart-dot" style="width:13px;height:13px;background:#ffc542;left:${(p.x/dW*100).toFixed(1)}%;top:${(p.y/(dH+16)*100).toFixed(1)}%;"></div>`
