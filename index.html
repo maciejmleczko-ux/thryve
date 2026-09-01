@@ -1532,6 +1532,15 @@ body.pev2-bg{background:#dd2b17;}
 .statsv2-detail-wave-labels{display:flex;justify-content:space-between;margin-top:4px;}
 .statsv2-detail-wave-labels span{font-size:12px;color:#343941;letter-spacing:.48px;}
 .statsv2-pr-tag{position:absolute;transform:translate(-50%,-100%);background:#ffb608;color:#2c1500;font-size:9px;font-weight:500;padding:4px 6px;border-radius:6px;white-space:nowrap;pointer-events:none;}
+/* Maciej: "punkty z PR na wykresach to powinna byc kropka nie owal" —
+   the dots used to be SVG <circle> elements inside an svg stretched
+   with preserveAspectRatio="none" (needed so the wavy line fills the
+   card edge-to-edge). That non-uniform x/y scale turned every circle
+   into a slight ellipse. Same fix as the PR tags: plain HTML circles
+   positioned by percentage on top of the svg instead of inside its
+   distorted coordinate space — a div's border-radius:50% stays a
+   perfect circle regardless of how the svg underneath is stretched. */
+.statsv2-chart-dot{position:absolute;border-radius:50%;transform:translate(-50%,-50%);box-sizing:content-box;pointer-events:none;}
 
 .statsv2-log-card{background:#fdfbff;border-radius:16px;padding:16px;box-sizing:border-box;}
 .statsv2-log-eyebrow{margin:0 0 24px;font-size:11px;color:rgba(52,57,65,.8);letter-spacing:1.1px;text-transform:uppercase;}
@@ -3201,7 +3210,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 124;
+const DASH_BUILD = 125;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -7620,8 +7629,8 @@ function renderStatsV2Overview(){
               </linearGradient>
             </defs>
             <path d="${wavePath}" fill="none" stroke="url(#statsV2YtdGrad)" stroke-width="2.5" stroke-linecap="round"/>
-            ${lastPt?`<circle cx="${lastPt.x}" cy="${lastPt.y}" r="6" fill="#ffc542"/>`:''}
           </svg>
+          ${lastPt?`<div class="statsv2-chart-dot" style="width:12px;height:12px;background:#ffc542;left:${(lastPt.x/wW*100).toFixed(1)}%;top:${(lastPt.y/(wH+16)*100).toFixed(1)}%;"></div>`:''}
         </div>
         <div class="statsv2-ytd-labels">${ytdLabels.map(l=>`<span>${l}</span>`).join('')}</div>
       </div>
@@ -7720,8 +7729,11 @@ function renderStatsV2Detail(name){
               </linearGradient>
             </defs>
             <path d="${dPath}" fill="none" stroke="url(#statsV2DetailGrad)" stroke-width="2.5" stroke-linecap="round"/>
-            ${chartPts.map((p,i)=> i===chartPts.length-1 ? `<circle cx="${p.x}" cy="${p.y}" r="6.5" fill="#ffc542"/>` : (series.prMonths.has(p.key)?`<circle cx="${p.x}" cy="${p.y}" r="4" fill="#221b17" stroke="#ff8a3d" stroke-width="2"/>`:'')).join('')}
           </svg>
+          ${chartPts.map((p,i)=> i===chartPts.length-1
+            ? `<div class="statsv2-chart-dot" style="width:13px;height:13px;background:#ffc542;left:${(p.x/dW*100).toFixed(1)}%;top:${(p.y/(dH+16)*100).toFixed(1)}%;"></div>`
+            : (series.prMonths.has(p.key) ? `<div class="statsv2-chart-dot" style="width:8px;height:8px;background:#221b17;border:2px solid #ff8a3d;left:${(p.x/dW*100).toFixed(1)}%;top:${(p.y/(dH+16)*100).toFixed(1)}%;"></div>` : '')
+          ).join('')}
         </div>
         <div class="statsv2-detail-wave-labels">${dLabels.map(p=> p.month ? `<span>${MONTH_ABBR_PL[p.month-1]}</span>` : `<span>${new Date(p.date+'T00:00:00').getDate()}.${String(new Date(p.date+'T00:00:00').getMonth()+1).padStart(2,'0')}</span>`).join('')}</div>
       </div>
