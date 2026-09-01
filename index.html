@@ -732,7 +732,6 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-trend span{flex:1;min-width:3px;border-radius:3px;background:#f30;transform-origin:bottom;}
 
 .dash-week-card{background:#2642a4;border-radius:16px;padding:16px;color:#fff;}
-.dash-build-label{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);right:12px;z-index:30;font-size:9px;font-weight:500;letter-spacing:.3px;color:rgba(52,57,65,.4);pointer-events:none;}
 .dash-week-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .dash-week-count{margin:0;font-size:12px;font-weight:700;}
 .dash-week-days{display:flex;justify-content:space-between;}
@@ -1627,12 +1626,12 @@ document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
 document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 </script>
 
-<!-- Load screen (Figma node 107:329, "01. Load screen") — Maciej: "niech
-     sie uruchamia za kazdym razem i jest przez 2 sekundy". Only shown on
-     entry into the v3 preview (triple-tap the logo, see
-     initSecretPlansGesture()), never on production's own load — matches
-     this whole v3 effort's own rule of staying fully additive/isolated.
-     Hidden by default (display:none); showLoadScreenV2() drives it. -->
+<!-- Load screen (Figma node 107:329, "01. Load screen"). Shown on every
+     app launch for ~1.5s now that the v3 layout is production (see INIT's
+     showLoadScreenV2 call); carries the app name + version, so the
+     Dashboard no longer needs its own version label. Also still fired by
+     the vestigial triple-tap gesture. Hidden by default (display:none);
+     showLoadScreenV2() drives it. -->
 <div id="loadScreenV2" class="loadv2-root">
   <img class="loadv2-effects" src="" alt="" id="loadV2EffectsImg">
   <div class="loadv2-mid">
@@ -1703,7 +1702,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <section class="view active" id="view-dashboard">
     <div class="dash-root">
       <button type="button" class="dash-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
-      <p class="dash-build-label" id="dashBuildLabel"></p>
 
       <div class="dash-header">
         <p class="dash-hi" id="dashHi"></p>
@@ -6825,7 +6823,6 @@ function renderDashboard(){
   const todayIso = todayStr();
   const todayKey = dayKeyFromDate(todayIso);
 
-  document.getElementById('dashBuildLabel').textContent = 'Mekkio v' + APP_VERSION;
   document.getElementById('dashHi').textContent = profileName ? `Cześć ${profileName}` : 'Cześć';
 
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
@@ -7075,11 +7072,12 @@ function renderGymDoneV2(animate){
   }
 }
 
-// Maciej: "wrzucam load screen ... niech sie uruchamia za kazdym razem
-// i jest przez 2 sekundy" — shown on every triple-tap entry into the v3
-// preview (not on production's real load, which stays untouched like
-// every other v3 addition). Images/logo/version are only populated the
-// first time it's shown, not re-decoded on every single entry.
+// The "Mekkio" load screen (Figma node 107:329). Now that the v3 layout IS
+// production, this runs on every app launch (see INIT) for ~1.5s, carrying
+// the app name + version — which is why the Dashboard no longer shows a
+// version label of its own. Still also fired by the (now vestigial)
+// triple-tap gesture. Images/logo/version are populated only the first
+// time it's shown, not re-decoded on every entry.
 let loadScreenV2Ready = false;
 function showLoadScreenV2(onDone){
   const el = document.getElementById('loadScreenV2');
@@ -7096,7 +7094,7 @@ function showLoadScreenV2(onDone){
     el.classList.add('hiding');
     onDone();
     setTimeout(()=>{ el.classList.remove('visible'); }, 350); // matches .loadv2-root's opacity transition
-  }, 2000);
+  }, 1500);
 }
 (function initSecretPlansGesture(){
   const logo = document.querySelector('.brand-mark');
@@ -8457,6 +8455,7 @@ function renderRunCharts(){
 /* ============================================================
    INIT
    ============================================================ */
+showLoadScreenV2(()=>{}); // production boot splash — the "Mekkio" load screen (name + version) covers every launch for ~1.5s
 updateCalLabels();
 document.getElementById('appVersionLabel').textContent = 'Thryve v' + APP_VERSION;
 updateGymDateLabel();
