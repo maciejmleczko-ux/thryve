@@ -745,7 +745,16 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    .ex-tile.ex-tile-add's EX_TILE_ADD_SVG. */
 .gymv2-tile.gymv2-search-tile{background:transparent;}
 .gymv2-tile.gymv2-search-tile svg{width:100%;height:100%;display:block;}
-.gymv2-tile-icon{width:100%;height:70px;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box;}
+/* height was a fixed 70px — fine on a full-width screen (GYM's own
+   grid, plan editor v2, ~108px-wide tiles) but the exercise picker's
+   tiles sit inside a narrower modal card and shrink to ~90px wide;
+   a fixed 70px zone then eats ~84% of the tile instead of ~65%,
+   crushing the label into wrapping/getting cut off (Maciej,
+   2026-09-02, screenshots: "ikony sa za duze w wyszukiwarce"). 65% is
+   .gymv2-tile's own baked aspect-ratio (115.667/107.211) — i.e. the
+   real, intended icon:label proportion — expressed relatively so it
+   holds regardless of how wide the tile actually renders. */
+.gymv2-tile-icon{width:100%;height:65%;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box;}
 .gymv2-tile-icon svg{width:100%;height:100%;display:block;}
 .gymv2-tile-label{font-size:10px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;text-align:center;color:#2c2727;line-height:1.15;padding:0 6px;}
 .gymv2-tile.gymv2-tile-accent{background:#FF6343;}
@@ -2721,7 +2730,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 96;
+const DASH_BUILD = 97;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
