@@ -213,31 +213,35 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .nav-item .ph{width:27px;height:27px;color:var(--light);}
 .nav-item.active{background:var(--orange);}
 .nav-item.active .ph{color:#fff;}
-/* Dashboard preview skin — same size/behavior as .bottom-nav above, color only. */
-.bottom-nav.bottom-nav-light{background:rgba(253,251,255,.75);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
-.bottom-nav.bottom-nav-light .nav-item .ph{color:#96959b;}
+/* v3-only nav (Figma node 107:457, "menu" arm of the new Dashboard).
+   Rebuilt 2026-09-04 straight from Maciej's exact exported SVG rather
+   than the earlier approximation — pill fill/border, per-item grey
+   pill + dark icon color for every inactive item (not just Plans, as
+   first guessed), and exact 52px/69px sizing all pulled from the SVG's
+   literal coordinates instead of eyeballing proportions. #bottomNav's
+   button set is swapped dynamically per-route (see
+   renderBottomNavForContext()) — production keeps its original
+   5-button markup/sizing untouched, this only ever renders while isV3
+   is true, same old/v2 split as everything else this session.
+   Gradient border: SVG's stroke is a horizontal white→white74%→white
+   linear-gradient on the pill's rounded outline — border-image doesn't
+   respect border-radius, so it's a ::before overlay instead, masked to
+   just the 1px ring (content-box vs border-box, XOR'd). ::before is
+   position:absolute so it doesn't become a phantom first flex item and
+   break the row's justify-content:space-between. */
+.bottom-nav.bottom-nav-light{background:rgba(253,251,255,.51);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
+.bottom-nav.bottom-nav-light::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.74) 50.48%,#fff 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
+.bottom-nav.bottom-nav-light .nav-item{width:52px;height:52px;background:rgba(150,149,155,.3);}
+.bottom-nav.bottom-nav-light .nav-item .ph{color:rgba(52,57,65,.77);}
 .bottom-nav.bottom-nav-light .nav-item.active{background:#f30;}
 .bottom-nav.bottom-nav-light .nav-item.active .ph{color:#fff;}
-/* v3-only nav layout (Figma node 107:457, "menu" arm of the new
-   Dashboard, 2026-09-04): Running dropped, Plans added, GYM promoted
-   to the center slot with extra visual weight. #bottomNav's button set
-   is swapped dynamically per-route (see renderBottomNavForContext()) —
-   production keeps its original 5-button markup untouched, this only
-   ever renders while isV3 is true, same old/v2 split as everything
-   else this session.
-   .nav-item-plans: permanent subtle grey pill (Figma shows this even
-   in the non-active state) — lower specificity than .nav-item.active
-   so the existing orange active-fill still overrides it automatically
-   when Plans is the active tab, no extra override rule needed.
-   .nav-item-lg: GYM's enlarged circle (73px vs the standard 55px,
-   same ~1.33x ratio as Figma's 69px-vs-52px). Negative vertical margin
-   equal to half the size delta keeps its flex-line footprint identical
-   to the other items (55px) so it visually pops above/below the pill
-   without inflating the whole bar's height — this is a permanent size
-   treatment, not tied to .active. */
-.nav-item-plans{background:rgba(150,149,155,.3);}
-.nav-item-lg{width:73px;height:73px;margin-top:-9px;margin-bottom:-9px;}
-.nav-item-lg .ph{width:36px;height:36px;}
+/* GYM's enlarged circle: 69px vs the v3 row's 52px (exact SVG ratio).
+   Negative vertical margin equal to half the size delta keeps its
+   flex-line footprint identical to its 52px siblings, so it visually
+   pops above/below the pill without inflating the whole bar's height —
+   a permanent size treatment, not tied to .active. */
+.bottom-nav.bottom-nav-light .nav-item-lg{width:69px;height:69px;margin-top:-8.5px;margin-bottom:-8.5px;}
+.bottom-nav.bottom-nav-light .nav-item-lg .ph{width:36px;height:36px;}
 
 /* ---------- app footer (version + copyright, welcome screen only) ---------- */
 .app-footer{position:fixed;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;
@@ -2892,7 +2896,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 108;
+const DASH_BUILD = 109;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -3417,7 +3421,7 @@ const NAV_ITEMS_PRODUCTION = [
 ];
 const NAV_ITEMS_V3 = [
   {route:'welcome', icon:'house'},
-  {route:'plans', icon:'clipboard-text', cls:'nav-item-plans'},
+  {route:'plans', icon:'clipboard-text'},
   {route:'gym', icon:'barbell', cls:'nav-item-lg'},
   {route:'history', icon:'calendar-dots'},
   {route:'stats', icon:'chart-line-up'},
