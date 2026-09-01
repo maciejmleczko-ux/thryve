@@ -1435,8 +1435,13 @@ body.pev2-bg{background:#dd2b17;}
 .statsv2-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
 .statsv2-chat-btn:active{transform:scale(.9);}
 .statsv2-chat-btn .ph{width:24px;height:24px;color:#f30;}
-.statsv2-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
-.statsv2-header .ph{width:40px;height:40px;color:#f30;flex-shrink:0;}
+.statsv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.statsv2-header-title{display:flex;align-items:center;gap:16px;}
+.statsv2-header-title .ph{width:40px;height:40px;color:#f30;flex-shrink:0;}
+/* Detail-only close (Figma node 183:13900, size-[30px] — a screen-level
+   "leave this section" affordance, not a modal close, so kept at its
+   own explicit 30px rather than the 24px unified across popups. */
+.statsv2-close-btn{width:30px;height:30px;color:#343941;cursor:pointer;flex-shrink:0;}
 .statsv2-header h1{margin:0;font-size:30.654px;font-weight:400;color:#343941;letter-spacing:-.02em;}
 .statsv2-cards{display:flex;flex-direction:column;gap:8px;}
 
@@ -1486,7 +1491,7 @@ body.pev2-bg{background:#dd2b17;}
 .statsv2-ex-row::-webkit-scrollbar{display:none;}
 .statsv2-ex-tile{flex-shrink:0;width:76px;height:70px;border-radius:11px;background:#f6f4f4;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;box-sizing:border-box;cursor:pointer;opacity:.5;transition:opacity .12s ease;}
 .statsv2-ex-tile.active{opacity:1;border-color:#f30;}
-.statsv2-ex-tile .icn{width:32px;height:32px;color:#f30;flex-shrink:0;}
+.statsv2-ex-tile .icn{width:40px;height:40px;color:#f30;flex-shrink:0;}
 .statsv2-ex-tile .icn svg{display:block;width:100%;height:100%;}
 .statsv2-ex-tile span{font-size:7px;font-weight:600;color:#2c2727;letter-spacing:.3px;text-transform:uppercase;text-align:center;line-height:1.15;}
 
@@ -1506,7 +1511,8 @@ body.pev2-bg{background:#dd2b17;}
 .statsv2-detail-chart-card{background:#fdfbff;border-radius:16px;padding:16px;box-sizing:border-box;}
 .statsv2-detail-chart-eyebrow{margin:0 0 10px;font-size:11px;color:rgba(52,57,65,.8);letter-spacing:1.1px;text-transform:uppercase;}
 .statsv2-range-row{display:flex;gap:7px;margin-bottom:16px;}
-.statsv2-range-chip{flex:1;border:1px solid #f30;background:#fdfbff;border-radius:12px;padding:11px 4px;font-size:12px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;text-align:center;}
+.statsv2-range-chip{flex-shrink:0;width:52px;border:1px solid #f30;background:#fdfbff;border-radius:12px;padding:11px 4px;font-size:12px;font-weight:500;color:#343941;font-family:inherit;cursor:pointer;text-align:center;}
+.statsv2-range-chip.wide{flex:1;width:auto;}
 .statsv2-range-chip.active{background:#f30;color:#fff;}
 .statsv2-detail-wave{position:relative;height:120px;margin-top:8px;}
 .statsv2-detail-wave svg{width:100%;height:100%;overflow:visible;}
@@ -1515,12 +1521,12 @@ body.pev2-bg{background:#dd2b17;}
 .statsv2-pr-tag{position:absolute;transform:translate(-50%,-100%);background:#ffb608;color:#2c1500;font-size:9px;font-weight:500;padding:4px 6px;border-radius:6px;white-space:nowrap;pointer-events:none;}
 
 .statsv2-log-card{background:#fdfbff;border-radius:16px;padding:16px;box-sizing:border-box;}
-.statsv2-log-eyebrow{margin:0 0 12px;font-size:11px;color:rgba(52,57,65,.8);letter-spacing:1.1px;text-transform:uppercase;}
+.statsv2-log-eyebrow{margin:0 0 24px;font-size:11px;color:rgba(52,57,65,.8);letter-spacing:1.1px;text-transform:uppercase;}
 .statsv2-log-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #eee;}
 .statsv2-log-row:first-child{border-top:none;padding-top:0;}
 .statsv2-log-date strong{display:block;font-size:14px;color:#343941;font-weight:500;}
 .statsv2-log-date span{font-size:10px;color:#343941;}
-.statsv2-log-sets{display:flex;align-items:center;gap:8px;font-size:12px;color:#343941;letter-spacing:.36px;text-align:right;}
+.statsv2-log-sets{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:#343941;letter-spacing:.36px;text-align:right;}
 .statsv2-log-row.is-pr .statsv2-log-sets{color:#f30;font-weight:500;}
 .statsv2-log-trophy{width:16px;height:16px;color:#f30;flex-shrink:0;}
 
@@ -2124,8 +2130,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button type="button" class="statsv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
 
       <div class="statsv2-header">
-        <span class="ph" data-ph="chart-line-up"></span>
-        <h1>STATS</h1>
+        <div class="statsv2-header-title">
+          <span class="ph" data-ph="chart-line-up"></span>
+          <h1>STATS</h1>
+        </div>
+        <span class="ph statsv2-close-btn" data-ph="x" id="statsV2CloseBtn" style="display:none" onclick="closeStatsDetailV2()"></span>
       </div>
 
       <div id="statsV2Body"></div>
@@ -3179,7 +3188,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 116;
+const DASH_BUILD = 117;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -7564,7 +7573,7 @@ function renderStatsV2Detail(name){
       <div class="statsv2-detail-chart-card statsv2-anim-card" style="--i:1">
         <p class="statsv2-detail-chart-eyebrow">Progres ciężaru</p>
         <div class="statsv2-range-row">
-          ${ranges.map(([m,label])=>`<button type="button" class="statsv2-range-chip${statsV2Range===m?' active':''}" onclick="setStatsV2RangeV2(${m})">${label}</button>`).join('')}
+          ${ranges.map(([m,label],i)=>`<button type="button" class="statsv2-range-chip${i===ranges.length-1?' wide':''}${statsV2Range===m?' active':''}" onclick="setStatsV2RangeV2(${m})">${label}</button>`).join('')}
         </div>
         <div class="statsv2-detail-wave">
           ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(p.y/(dH+16)*100).toFixed(1)}%;">PR ${p.weight}kg</div>`).join('')}
@@ -7595,10 +7604,23 @@ function renderStatsV2(animate){
   if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile').forEach(el=>{
     el.style.animation = 'none';
   });
+  // Figma node 183:13900 — the X only exists on the detail screen, not
+  // the overview (182:12264 has no such element in its header).
+  // Inline style, not the shared .hidden class: .statsv2-root .ph{display:
+  // block} (needed so every OTHER icon on this screen renders at all) ties
+  // .hidden{display:none} on specificity and wins on source order, so
+  // toggling the class alone left the X visibly on-screen even once
+  // "hidden" was applied — confirmed via screenshot after the class-based
+  // toggle reported hidden:true in the DOM.
+  document.getElementById('statsV2CloseBtn').style.display = selectedStatsExerciseV2 ? '' : 'none';
 }
 function selectStatsExerciseV2(name){
   selectedStatsExerciseV2 = (selectedStatsExerciseV2===name) ? null : name;
   statsV2Range = 6;
+  renderStatsV2(false);
+}
+function closeStatsDetailV2(){
+  selectedStatsExerciseV2 = null;
   renderStatsV2(false);
 }
 function statsV2MoveBarPage(delta){
