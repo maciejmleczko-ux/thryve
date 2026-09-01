@@ -1493,7 +1493,7 @@ body.pev2-bg{background:#dd2b17;}
 .statsv2-record-card{background:#f30;border-radius:16px;padding:16px;box-sizing:border-box;}
 .statsv2-record-eyebrow{margin:0;font-size:11px;color:rgba(255,255,255,.8);letter-spacing:1.1px;text-transform:uppercase;}
 .statsv2-record-num-row{display:flex;align-items:center;gap:20px;margin-top:8px;}
-.statsv2-record-num-row .ph{width:36px;height:32px;color:#fff;flex-shrink:0;}
+.statsv2-record-trophy{width:36px;height:32px;color:#fff;flex-shrink:0;}
 .statsv2-record-num{flex:1;font-size:40px;color:#fff;font-weight:400;letter-spacing:-.88px;font-variant-numeric:tabular-nums;}
 .statsv2-record-num small{font-size:16px;color:rgba(255,255,255,.8);margin-left:4px;}
 .statsv2-record-arrow{width:40px;height:40px;color:#fff;flex-shrink:0;}
@@ -3179,7 +3179,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 115;
+const DASH_BUILD = 116;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
@@ -7536,7 +7536,7 @@ function renderStatsV2Detail(name){
     return `
       <div class="statsv2-log-row${r.isPr?' is-pr':''}">
         <div class="statsv2-log-date"><strong>${dateShort}</strong><span>${weekday}</span></div>
-        <div class="statsv2-log-sets">${setsStr}${r.isPr?`<span class="statsv2-log-trophy">${PH.trophy}</span>`:''}</div>
+        <div class="statsv2-log-sets">${setsStr}${r.isPr?`<span class="ph statsv2-log-trophy">${PH.trophy}</span>`:''}</div>
       </div>`;
   }).join('');
 
@@ -7548,9 +7548,9 @@ function renderStatsV2Detail(name){
       <div class="statsv2-record-card statsv2-anim-card" style="--i:0">
         <p class="statsv2-record-eyebrow">Aktualny rekord - ${name}</p>
         <div class="statsv2-record-num-row">
-          ${ph('trophy')}
+          ${ph('trophy','statsv2-record-trophy')}
           <span class="statsv2-record-num">${rec.weight}<small>kg</small></span>
-          <span class="statsv2-record-arrow">${PH['arrow-up-right']}</span>
+          <span class="ph statsv2-record-arrow">${PH['arrow-up-right']}</span>
         </div>
         <p class="statsv2-record-delta">${rec.deltaKg>=0?'+':''}${rec.deltaKg} kg od zeszłego miesiąca</p>
         <div class="statsv2-record-sep"></div>
