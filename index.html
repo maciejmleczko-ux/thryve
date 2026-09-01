@@ -1030,6 +1030,19 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    the native number-input spinner. */
 .newex-v2-bento-value::-webkit-outer-spin-button,
 .newex-v2-bento-value::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+/* "DODAJ" floats outside the lilac card, on the dark backdrop —
+   matches the app's established "primary action floats free of the
+   card" pattern (.pev2-save-fab/"ZAPISZ PLAN", .gymv2-save/"ZAPISZ
+   TRENING") instead of sitting inside .plansv2-customize-actions with
+   Anuluj (Maciej, 2026-09-02: "guzik dodaj powinien być poza szarym
+   tłem tak jak mamy to też na innych ekranach"). Anuluj stays inside,
+   now alone/full-width — the header's own X already covers "just
+   close this", so keeping Anuluj there reads as the lesser action
+   while Dodaj gets the same visual weight as everywhere else. Same
+   sizing as .pev2-save-fab, z-index raised above the modal backdrop
+   (z-index:90 on .onboard-overlay) rather than reusing its 15. */
+.newex-v2-add-fab{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:calc(100% - 40px);max-width:217px;background:#fff;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:500;letter-spacing:.64px;color:#343941;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,.12);transition:transform .12s ease;z-index:95;}
+.newex-v2-add-fab:active{transform:translateX(-50%) scale(.97);}
 
 /* ===================== PLAN EDITOR v2 (Figma node 155:1086,
    "06. PLAN - SET UP") — the v3-styled replacement for #view-planEditor.
@@ -2006,11 +2019,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
         <div class="plansv2-customize-actions">
           <button type="button" class="plansv2-customize-cancel" onclick="closeNewExerciseFormV2()">ANULUJ</button>
-          <button type="button" class="plansv2-customize-apply" id="newExSaveBtnV2" onclick="saveNewExerciseV2()">DODAJ</button>
         </div>
       </form>
     </div>
   </div>
+  <button type="button" class="newex-v2-add-fab" id="newExSaveBtnV2" onclick="saveNewExerciseV2()">DODAJ</button>
 </div>
 
 <!-- v3 "Wybierz inne ćwiczenie" — opened from GYM v2's own search tile
@@ -2760,7 +2773,7 @@ const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Separate counter for the hidden Dashboard preview only — bump by 1
    on every commit that touches it, so a small on-screen label makes
    it obvious whether a deploy actually landed (unrelated to APP_VERSION). */
-const DASH_BUILD = 100;
+const DASH_BUILD = 101;
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
    random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
