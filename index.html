@@ -1474,7 +1474,12 @@ body.pev2-bg{background:var(--m-red-page);}
 .histv2-section-label{margin:0 0 12px;}
 /* .histv2-empty — see the shared empty-state rule near .gymv2-no-plan */
 .histv2-list{display:flex;flex-direction:column;gap:12px;}
-.histv2-card{background:#fff;border-radius:var(--m-r-md);padding:18px;cursor:pointer;box-sizing:border-box;}
+/* position:relative so the card paints ABOVE the swipe reveal layers
+   (.plansv2-card-delete / -share, position:absolute, appended before it) —
+   without it those opacity:0 layers sit on top and every tap on the card
+   hits the share layer instead of expanding. Same reason .plansv2-card
+   carries position:relative. */
+.histv2-card{background:#fff;border-radius:var(--m-r-md);padding:18px;cursor:pointer;box-sizing:border-box;position:relative;}
 .histv2-card.expanded{cursor:default;}
 .histv2-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .histv2-card-kind{display:flex;align-items:center;gap:9px;min-width:0;}
@@ -3131,7 +3136,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.11.0";
+const APP_VERSION = "4.11.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
