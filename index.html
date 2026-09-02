@@ -3368,7 +3368,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.2";
+const APP_VERSION = "4.10.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6184,15 +6184,29 @@ function renderPlansListV2(animate){
   customLabel.classList.toggle('plansv2-hidden', !customPlans.length);
   customWrap.classList.toggle('plansv2-hidden', !customPlans.length);
 
-  // Only grant scroll/touch-drag capability when the list genuinely
-  // doesn't fit — same technique as renderDashboard(), see the
-  // "STANDING RULE" comment on .plansv2-lock's CSS for why this checks
-  // the last card's actual position instead of body.scrollHeight.
-  const cards = document.querySelectorAll('#view-plans-v2 .plansv2-card');
-  const lastCard = cards[cards.length-1];
+  // Grant scroll only when the list genuinely doesn't fit above the floating
+  // bottom nav. Measure the panel's layout height (scrollHeight) from its top
+  // edge — NOT lastCard.getBoundingClientRect().bottom, which read ~one
+  // card-entrance translateY too low mid-transition and intermittently left
+  // the screen scrollable when it actually fits (same bug fixed for the
+  // Dashboard in 4.9.1). scrollHeight and rect.top (Y) both ignore the route
+  // slide's transforms. .plansv2-panel has no nav clearance of its own, so
+  // compare against the nav's real top edge rather than window.innerHeight.
+  const panel = document.querySelector('#view-plans-v2 .plansv2-panel');
   const nav = document.getElementById('bottomNav');
-  const needsScroll = !!(lastCard && nav && lastCard.getBoundingClientRect().bottom > nav.getBoundingClientRect().top);
+  let needsScroll = false;
+  if(panel && nav){
+    const contentBottom = panel.getBoundingClientRect().top + panel.scrollHeight;
+    needsScroll = contentBottom > nav.getBoundingClientRect().top;
+  }
   document.documentElement.classList.toggle('plansv2-scrollable', needsScroll);
+  if(!needsScroll){
+    // Locking back to overflow:hidden freezes scrollTop — reset it, or the
+    // list can stay stuck offset with no way back to the top (same guard as
+    // refreshPlanEditorV2Scroll()).
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
 }
 let editingPlan = null; // working copy: {id, name, builtin, schedule:{mon:[],...}, activeDay}
 function openPlanEditor(id){
