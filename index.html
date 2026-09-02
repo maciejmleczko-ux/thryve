@@ -764,9 +764,15 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    on top of the explicit width/height attributes on each icon's own svg. */
 .dash-root .ph{display:block;}
 .dash-root .ph svg{display:block;width:100%;height:100%;}
-.dash-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
-.dash-chat-btn:active{transform:scale(.9);}
-.dash-chat-btn .ph{width:24px;height:24px;color:var(--m-orange);}
+/* Chat button — one rule for every v2 screen (audit W5). Was copy-pasted
+   per screen as .dash- / .gymv2- / .plansv2- / .histv2- / .statsv2-chat-btn. */
+.dash-chat-btn, .gymv2-chat-btn, .plansv2-chat-btn, .histv2-chat-btn, .statsv2-chat-btn{
+  position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;
+  width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;
+}
+.dash-chat-btn:active, .gymv2-chat-btn:active, .plansv2-chat-btn:active, .histv2-chat-btn:active, .statsv2-chat-btn:active{transform:scale(.9);}
+.dash-chat-btn .ph, .gymv2-chat-btn .ph, .plansv2-chat-btn .ph, .histv2-chat-btn .ph, .statsv2-chat-btn .ph{width:24px;height:24px;color:var(--m-orange);}
 .dash-header{width:85%;margin-bottom:24px;}
 .dash-hi{margin:0 0 6px;font-size:16px;font-weight:400;color:var(--m-ink);}
 .dash-headline{margin:0;font-size:28px;line-height:1.15;font-weight:600;color:var(--m-ink);letter-spacing:-.02em;}
@@ -836,7 +842,12 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 /* ---- subtle motion: staggered reveal on entry, bars grow in, checks pop ---- */
 @media (prefers-reduced-motion: no-preference){
   @keyframes dashRise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-  .dash-chat-btn,.dash-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
+  /* chat-btn + screen header rise-in, every v2 screen (audit W5 — was 5 copies) */
+  .dash-chat-btn,.dash-header,
+  .gymv2-chat-btn,.gymv2-header,
+  .plansv2-chat-btn,.plansv2-header,
+  .histv2-chat-btn,.histv2-header,
+  .statsv2-chat-btn,.statsv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
   /* Each "tile" card fades in on its own — renderDashboard() sets a slightly
      randomized animation-delay per element so the stagger feels alive
      instead of a mechanically identical sequence every time. Longer travel
@@ -865,12 +876,13 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    ============================================================ */
 #view-gym-v2{min-height:100vh;font-family:'Geist','Inter',-apple-system,sans-serif;background:var(--m-red-page);}
 .gymv2-panel{background:var(--m-panel);border-radius:0 0 26px 26px;padding:calc(50px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
-.gymv2-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
-.gymv2-chat-btn:active{transform:scale(.9);}
-.gymv2-chat-btn .ph{width:24px;height:24px;color:var(--m-orange);}
-.gymv2-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
-.gymv2-header .ph{width:40px;height:40px;color:var(--m-orange);}
-.gymv2-header h1{margin:0;font-size:30.654px;font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
+/* Screen header — one spec for GYM / Plans / History / Stats (audit W5).
+   Plans + Stats wrap the icon+h1 in a .*-header-title (their .*-header is a
+   space-between row); GYM + History put it straight on .*-header. */
+.gymv2-header, .plansv2-header-title, .histv2-header, .statsv2-header-title{display:flex;align-items:center;gap:16px;}
+.gymv2-header .ph, .plansv2-header-title .ph, .histv2-header .ph, .statsv2-header-title .ph{width:40px;height:40px;color:var(--m-orange);flex-shrink:0;}
+.gymv2-header h1, .plansv2-header-title h1, .histv2-header h1, .statsv2-header h1{margin:0;font-size:30.654px;font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
+.gymv2-header, .histv2-header{margin-bottom:20px;}
 
 .gymv2-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:transform .12s ease;}
 .gymv2-plan-card:active{transform:scale(.98);}
@@ -978,9 +990,8 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    rebuild from logging a set — see renderGymGridV2()/renderGymDoneV2())
    keeps this from replaying on every in-session tile/list refresh. */
 @media (prefers-reduced-motion: no-preference){
-  .gymv2-chat-btn,.gymv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
   .gymv2-plan-card,.gymv2-no-plan{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.08s;}
-  .gymv2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;}
+  .gymv2-anim-in, .plansv2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;}
 }
 
 /* ============================================================
@@ -995,13 +1006,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .plansv2-root .ph{display:block;}
 .plansv2-root .ph svg{display:block;width:100%;height:100%;}
 .plansv2-panel{padding:calc(50px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
-.plansv2-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
-.plansv2-chat-btn:active{transform:scale(.9);}
-.plansv2-chat-btn .ph{width:24px;height:24px;color:var(--m-orange);}
 .plansv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
-.plansv2-header-title{display:flex;align-items:center;gap:16px;}
-.plansv2-header-title .ph{width:40px;height:40px;color:var(--m-orange);}
-.plansv2-header-title h1{margin:0;font-size:30.654px;font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
 .plansv2-close{width:24px;height:24px;color:var(--m-ink);cursor:pointer;flex-shrink:0;}
 .plansv2-actions{display:flex;gap:10px;width:100%;margin-bottom:24px;}
 .plansv2-btn-outline{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s ease;}
@@ -1343,9 +1348,7 @@ body.pev2-bg{background:var(--m-red-page);}
    after starring/sharing a plan mid-browse doesn't replay the whole
    entrance. */
 @media (prefers-reduced-motion: no-preference){
-  .plansv2-chat-btn,.plansv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
   .plansv2-actions{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.08s;}
-  .plansv2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;}
 }
 
 /* Plan editor v2's own entrance (Maciej, 2026-08-31: "Dodaj jeszcze
@@ -1473,17 +1476,11 @@ body.pev2-bg{background:var(--m-red-page);}
    24 viewBox. */
 .histv2-root{background:var(--m-panel);}
 .histv2-panel{padding:calc(50px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
-.histv2-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
-.histv2-chat-btn:active{transform:scale(.9);}
-.histv2-chat-btn .ph{width:24px;height:24px;color:var(--m-orange);}
 /* Aligned to GYM v2/Plans v2's header exactly (40px icon, 30.654px
    title, -.02em tracking) — the Figma export's own 55.18px/30px/+1.2px
    for History read as an outlier from that specific export rather than
    a deliberate deviation; Maciej confirmed ("sprawdz czy jest taka sama
    jak np w gym") these three peer screens should match. */
-.histv2-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
-.histv2-header .ph{width:40px;height:40px;color:var(--m-orange);flex-shrink:0;}
-.histv2-header h1{margin:0;font-size:30.654px;font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
 .histv2-actions{display:flex;gap:10px;margin-bottom:24px;}
 .histv2-btn-outline{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
 .histv2-btn-outline:active{transform:scale(.96);}
@@ -1536,7 +1533,6 @@ body.pev2-bg{background:var(--m-red-page);}
 .histv2-run-notes{margin-top:12px;font-size:13px;color:var(--m-ink);}
 
 @media (prefers-reduced-motion: no-preference){
-  .histv2-chat-btn,.histv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
   .histv2-actions{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.08s;}
   .histv2-cal-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.14s;}
   .histv2-section-label{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;animation-delay:.2s;}
@@ -1564,17 +1560,11 @@ body.pev2-bg{background:var(--m-red-page);}
    CIĘŻARU" to match what the chart actually shows. */
 .statsv2-root{background:var(--m-panel);}
 .statsv2-panel{padding:calc(50px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
-.statsv2-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
-.statsv2-chat-btn:active{transform:scale(.9);}
-.statsv2-chat-btn .ph{width:24px;height:24px;color:var(--m-orange);}
 .statsv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.statsv2-header-title{display:flex;align-items:center;gap:16px;}
-.statsv2-header-title .ph{width:40px;height:40px;color:var(--m-orange);flex-shrink:0;}
 /* Detail-only close (Figma node 183:13900, size-[30px] — a screen-level
    "leave this section" affordance, not a modal close, so kept at its
    own explicit 30px rather than the 24px unified across popups. */
 .statsv2-close-btn{width:30px;height:30px;color:var(--m-ink);cursor:pointer;flex-shrink:0;}
-.statsv2-header h1{margin:0;font-size:30.654px;font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
 .statsv2-cards{display:flex;flex-direction:column;gap:8px;}
 
 .statsv2-ring-card{background:#000;border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;height:204px;display:flex;flex-direction:column;justify-content:space-between;}
@@ -1680,7 +1670,6 @@ body.pev2-bg{background:var(--m-red-page);}
 .statsv2-empty{background:var(--m-card);border-radius:var(--m-r-md);padding:24px 18px;font-size:14px;color:var(--m-muted);text-align:center;box-sizing:border-box;}
 
 @media (prefers-reduced-motion: no-preference){
-  .statsv2-chat-btn,.statsv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
   .statsv2-anim-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.08s + var(--i,0) * 70ms);}
   .statsv2-anim-tile{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.2s + var(--i,0) * 40ms);}
   /* Maciej: "slupki animowac" — reuses the exact dashBarGrow keyframe
@@ -3406,7 +3395,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.7";
+const APP_VERSION = "4.10.8";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
