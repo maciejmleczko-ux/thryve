@@ -2499,6 +2499,36 @@ const T_EN = {
   pcV2Apply: 'Apply',
   feedbackSending: 'SENDING...',
   feedbackSendBtn: 'SEND',
+  stV2WeeklyProgress: 'Weekly progress',
+  stV2Days: 'days',
+  stV2DaysUpper: 'DAYS',
+  stV2Done: 'Done',
+  stV2Left: 'Left',
+  stV2VolMonthly: 'Volume — month by month',
+  stV2VolYtd: 'Volume year to date',
+  stV2SinceMonth: m => `since ${m}`,
+  stV2NoSeries: 'No sets logged for this exercise.',
+  stV2NoSessions: 'No sessions.',
+  stV2ExProgress: 'Exercise progress',
+  stV2All: 'ALL',
+  stV2SeriesHistory: 'Set history',
+  stV2Record: 'Record',
+  stV2CurrentRecord: n => `Current record — ${n}`,
+  stV2DeltaSinceLastMonth: 'vs last month',
+  stV2Est1RM: 'EST. 1RM',
+  stV2TotalSets: 'TOTAL SETS',
+  stV2LastTrained: 'LAST',
+  stV2WeightProgress: 'Weight progress',
+  histV2Workout: 'WORKOUT',
+  gymV2Today: "Today's workout.",
+  planDifficultyEasy: 'Easy',
+  planDifficultyMedium: 'Medium',
+  planDifficultyHard: 'Hard',
+  dashNoPlanChosen: 'No plan selected',
+  histEmptyMonth: m => `No activity logged — ${m}`,
+  histWorkoutVolSub: v => `${v} kg volume`,
+  histV2Summary: 'SUMMARY',
+  histV2SummaryVol: v => `${v} kg volume`,
 };
 function t(key, plText, ...args){
   const val = (LANG === 'en' && T_EN[key] !== undefined) ? T_EN[key] : plText;
@@ -2978,7 +3008,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.30";
+const APP_VERSION = "4.10.31";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3329,7 +3359,7 @@ async function submitFeedbackV2(){
   if(!message){ toast(t('feedbackEmpty','Napisz coś zanim wyślesz 🙂')); return; }
   const btn = document.getElementById('feedbackSubmitBtnV2');
   btn.disabled = true;
-  btn.textContent = 'WYSYŁANIE...';
+  btn.textContent = t('feedbackSending','WYSYŁANIE...');
   try{
     const res = await fetch(FEEDBACK_ENDPOINT, {
       method: 'POST',
@@ -3351,7 +3381,7 @@ async function submitFeedbackV2(){
     toast(t('feedbackFailed','Nie udało się wysłać — spróbuj ponownie.'));
   }finally{
     btn.disabled = false;
-    btn.textContent = 'WYŚLIJ';
+    btn.textContent = t('feedbackSendBtn','WYŚLIJ');
   }
 }
 /* one-time migration: old Polish exercise names -> new English names (matching icon tiles) */
@@ -5704,7 +5734,8 @@ function plTreningWord(n){
   return 'treningów';
 }
 function formatDashNum(v, decimals){
-  return decimals===0 ? Math.round(v).toLocaleString('pl-PL') : (Math.round(v*10)/10).toString().replace('.', ',');
+  const loc = LANG==='en' ? 'en-US' : 'pl-PL';
+  return decimals===0 ? Math.round(v).toLocaleString(loc) : (Math.round(v*10)/10).toLocaleString(loc);
 }
 function animateDashNumber(el, target, decimals, suffixHtml){
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -5723,7 +5754,7 @@ function renderDashboard(){
   const todayIso = todayStr();
   const todayKey = dayKeyFromDate(todayIso);
 
-  document.getElementById('dashHi').textContent = profileName ? `Cześć ${profileName}` : 'Cześć';
+  document.getElementById('dashHi').textContent = profileName ? t('dashHi', `Cześć ${profileName}`, profileName) : t('dashHiPlain','Cześć');
 
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   const todayExNames = plan ? (plan.schedule[todayKey]||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name)) : [];
@@ -5758,10 +5789,10 @@ function renderDashboard(){
 
   animateDashNumber(document.getElementById('dashKg'), weekKg, 0, '<small>kg</small>');
   animateDashNumber(document.getElementById('dashReps'), weekReps, 0, '<small>powtórzeń</small>');
-  document.getElementById('dashSessions').textContent = `${sessionCount} ${plTreningWord(sessionCount)}`;
-  document.getElementById('dashMinutes').textContent = `${Math.round(weekMin)} min aktywności`;
+  document.getElementById('dashSessions').textContent = t('dashSessions', `${sessionCount} ${plTreningWord(sessionCount)}`, sessionCount);
+  document.getElementById('dashMinutes').textContent = t('dashMinutesActivity', `${Math.round(weekMin)} min aktywności`, Math.round(weekMin));
 
-  document.getElementById('dashPlanName').textContent = plan ? plan.name : 'Brak wybranego planu';
+  document.getElementById('dashPlanName').textContent = plan ? plan.name : t('dashNoPlanChosen','Brak wybranego planu');
   if(plan){
     const uniqueNames = new Set();
     PLAN_DAYS.forEach(d=> (plan.schedule[d]||[]).forEach(e=>{ if(!BOOKEND_EX_NAMES.has(e.name)) uniqueNames.add(e.name); }));
@@ -5796,7 +5827,7 @@ function renderDashboard(){
   const trainedDays = weekDates.filter(d=> workouts.some(w=>w.date===d) || runs.some(r=>r.date===d));
   const weekDone = trainedDays.length;
   const weekTotal = Math.max(scheduledDays.length, weekDone);
-  document.getElementById('dashWeekCount').textContent = `${weekDone} / ${weekTotal} dni zaliczone`;
+  document.getElementById('dashWeekCount').textContent = t('dashWeekCount', `${weekDone} / ${weekTotal} dni zaliczone`, weekDone, weekTotal);
   document.getElementById('dashWeekDays').innerHTML = weekDates.map((d,i)=>{
     const isDone = trainedDays.includes(d);
     const isToday = d===todayIso;
@@ -5864,7 +5895,9 @@ function renderDashboard(){
    fallback to another day's exercises — are both gone; see git history
    builds 60-63 if the reasoning behind either is ever needed again.)
    ============================================================ */
-const GYMV2_DAY_NAMES_PL = ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
+const GYMV2_DAY_NAMES_PL = LANG==='en'
+  ? ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+  : ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
 function renderGymV2(){
   const iso = todayStr();
   const d = new Date(iso+'T00:00:00');
@@ -5922,7 +5955,7 @@ function renderGymGridV2(animate){
   const searchBtn = document.createElement('button');
   searchBtn.type = 'button';
   searchBtn.className = 'gymv2-tile gymv2-search-tile';
-  searchBtn.title = 'Wybierz inne ćwiczenie';
+  searchBtn.title = t('gymV2PickOther','Wybierz inne ćwiczenie');
   searchBtn.innerHTML = EX_TILE_SEARCH_SVG;
   searchBtn.onclick = openExercisePickerV2;
   grid.appendChild(searchBtn);
@@ -6140,15 +6173,15 @@ function renderHistMonthSummaryV2(animCls){
   const totalVol = monthWorkouts.reduce((s,w)=> s + w.exercises.reduce((s2,e)=> s2 + e.sets.reduce((s3,st)=> s3 + st.weight*st.reps, 0), 0), 0);
   const totalKm = monthRuns.reduce((s,r)=> s + (r.distance||0), 0);
   const titleParts = [];
-  if(monthWorkouts.length) titleParts.push(`${monthWorkouts.length} ${plTreningWord(monthWorkouts.length)}`);
+  if(monthWorkouts.length) titleParts.push(t('dashSessions', `${monthWorkouts.length} ${plTreningWord(monthWorkouts.length)}`, monthWorkouts.length));
   if(monthRuns.length) titleParts.push(`${monthRuns.length} ${plBiegWord(monthRuns.length)}`);
   const subParts = [];
-  if(totalVol>0) subParts.push(`objętość ${Math.round(totalVol)} kg`);
+  if(totalVol>0) subParts.push(t('histV2SummaryVol', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol)));
   if(totalKm>0) subParts.push(`${totalKm} km biegania`);
   return `
     <div class="histv2-card${animCls}" style="--i:0">
       <div class="histv2-card-head">
-        <div class="histv2-card-kind">${ph('calendar-dots')}<span>PODSUMOWANIE</span></div>
+        <div class="histv2-card-kind">${ph('calendar-dots')}<span>${t('histV2Summary','PODSUMOWANIE')}</span></div>
         <div class="histv2-card-right">
           <span class="histv2-card-date">${MONTH_NAMES[month]} ${year}</span>
         </div>
@@ -6194,7 +6227,7 @@ function renderHistDetailV2(animate){
     html += `
       <div class="histv2-card${animCls}${exp?' expanded':''}" style="--i:${dayWorkouts.length+i}"${exp?'':` onclick="toggleHistExpandV2('${r.id}')"`}>
         <div class="histv2-card-head">
-          <div class="histv2-card-kind">${ph('sneaker-move')}<span>BIEGANIE</span></div>
+          <div class="histv2-card-kind">${ph('sneaker-move')}<span>${t('histV2RunLabel','BIEGANIE')}</span></div>
           <div class="histv2-card-right">
             <span class="histv2-card-date">${fmtDateHuman(r.date)}</span>
             ${exp?`<span class="ph histv2-card-close" onclick="event.stopPropagation();toggleHistExpandV2('${r.id}')">${PH.x}</span>`:''}
@@ -6219,8 +6252,14 @@ function renderHistDetailV2(animate){
    wholesale; own state. (The old #view-stats it replaced was deleted
    in the L5 teardown, 4.10.23.)
    ============================================================ */
-const MONTH_ABBR_PL = ['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
-const MONTH_GEN_PL = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+// Locale-aware month lists for the v2 Stats/History screens (kept the
+// _PL suffix in the name for churn's sake — they hold EN when LANG==='en').
+const MONTH_ABBR_PL = LANG==='en'
+  ? ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
+  : ['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
+const MONTH_GEN_PL = LANG==='en'
+  ? ['January','February','March','April','May','June','July','August','September','October','November','December']
+  : ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
 let selectedStatsExerciseV2 = null; // null = overview, exercise name = detail
 let statsV2BarPage = 0;             // 0 = most recent 6 months, 1 = the 6 before that, ...
 let statsV2Range = 1;               // range shown in the per-exercise chart: 1(=rolling 30d)/3/6/12/0(=all)
@@ -6297,7 +6336,7 @@ function statsV2YtdStats(){
   }
   const thisMonthKg = map.get(`${year}-${String(curMonth).padStart(2,'0')}`)||0;
   const prevMonthDate = new Date(year, curMonth-2, 1);
-  return { total: Math.round(cum), points, deltaKg: Math.round(thisMonthKg), deltaLabel: `od ${MONTH_GEN_PL[prevMonthDate.getMonth()]}` };
+  return { total: Math.round(cum), points, deltaKg: Math.round(thisMonthKg), deltaLabel: t('stV2SinceMonth', `od ${MONTH_GEN_PL[prevMonthDate.getMonth()]}`, MONTH_GEN_PL[prevMonthDate.getMonth()]) };
 }
 function statsV2RecentExerciseNames(){
   const lastSeen = new Map();
@@ -6466,8 +6505,8 @@ function renderStatsV2ExerciseRow(activeName){
   return `
     <div class="statsv2-ex-section">
       <div class="statsv2-ex-head">
-        <p>Progres ćwiczeń</p>
-        ${activeName?'':`<button type="button" class="statsv2-ex-all-btn" onclick="selectStatsExerciseV2('${names[0].replace(/'/g,"\\'")}')">WSZYSTKIE</button>`}
+        <p>${t('stV2ExProgress','Progres ćwiczeń')}</p>
+        ${activeName?'':`<button type="button" class="statsv2-ex-all-btn" onclick="selectStatsExerciseV2('${names[0].replace(/'/g,"\\'")}')">${t('stV2All','WSZYSTKIE')}</button>`}
       </div>
       <div class="statsv2-ex-row">${tiles}</div>
     </div>`;
@@ -6507,7 +6546,7 @@ function renderStatsV2Overview(){
   return `
     <div class="statsv2-cards">
       <div class="statsv2-ring-card statsv2-anim-card" style="--i:0">
-        <p class="statsv2-ring-eyebrow">Postęp tygodniowy</p>
+        <p class="statsv2-ring-eyebrow">${t('stV2WeeklyProgress','Postęp tygodniowy')}</p>
         <div class="statsv2-ring-row">
           <div class="statsv2-ring-wrap">
             <svg viewBox="0 0 132 132">
@@ -6521,17 +6560,17 @@ function renderStatsV2Overview(){
               <circle cx="66" cy="66" r="${R}" fill="none" stroke="var(--m-ink)" stroke-width="12"/>
               <circle cx="66" cy="66" r="${R}" fill="none" ${statsV2Stroke(ringGradId,'#ff8a3d')} stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringOffset}"/>
             </svg>
-            <div class="statsv2-ring-num"><strong>${week.done}/${week.total}</strong><small>dni</small></div>
+            <div class="statsv2-ring-num"><strong>${week.done}/${week.total}</strong><small>${t('stV2Days','dni')}</small></div>
           </div>
           <div class="statsv2-ring-legend">
-            <div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot done"></span><div><p class="statsv2-ring-legend-label">Zrobione</p><p class="statsv2-ring-legend-value">${week.done} DNI</p></div></div>
-            <div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot left"></span><div><p class="statsv2-ring-legend-label">Zostało</p><p class="statsv2-ring-legend-value">${Math.max(0,week.total-week.done)} DNI</p></div></div>
+            <div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot done"></span><div><p class="statsv2-ring-legend-label">${t('stV2Done','Zrobione')}</p><p class="statsv2-ring-legend-value">${week.done} ${t('stV2DaysUpper','DNI')}</p></div></div>
+            <div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot left"></span><div><p class="statsv2-ring-legend-label">${t('stV2Left','Zostało')}</p><p class="statsv2-ring-legend-value">${Math.max(0,week.total-week.done)} ${t('stV2DaysUpper','DNI')}</p></div></div>
           </div>
         </div>
       </div>
 
       <div class="statsv2-bar-card statsv2-anim-card" style="--i:1">
-        <p class="statsv2-bar-eyebrow">Objętość - miesiąc po miesiącu</p>
+        <p class="statsv2-bar-eyebrow">${t('stV2VolMonthly','Objętość - miesiąc po miesiącu')}</p>
         <div class="statsv2-bar-row">${barsHtml}</div>
         <div class="statsv2-bar-nav">
           <span class="ph${leftDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(90deg)" onclick="statsV2MoveBarPage(1)">${PH['caret-down']}</span>
@@ -6540,9 +6579,9 @@ function renderStatsV2Overview(){
       </div>
 
       <div class="statsv2-ytd-card statsv2-anim-card" style="--i:2">
-        <p class="statsv2-ytd-eyebrow">Objętość od początku roku</p>
-        <div class="statsv2-ytd-num-row">${ph('dash-barbell')}<div><span class="statsv2-ytd-num">${ytd.total.toLocaleString('pl-PL')}<small>kg</small></span></div></div>
-        <p class="statsv2-ytd-delta">+ ${ytd.deltaKg.toLocaleString('pl-PL')} kg ${ytd.deltaLabel}</p>
+        <p class="statsv2-ytd-eyebrow">${t('stV2VolYtd','Objętość od początku roku')}</p>
+        <div class="statsv2-ytd-num-row">${ph('dash-barbell')}<div><span class="statsv2-ytd-num">${ytd.total.toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></span></div></div>
+        <p class="statsv2-ytd-delta">+ ${ytd.deltaKg.toLocaleString(LANG==='en'?'en-US':'pl-PL')} kg ${ytd.deltaLabel}</p>
         <div class="statsv2-ytd-chart">
           <svg viewBox="0 0 ${wW} ${wH+16}" preserveAspectRatio="none">
             <defs>
@@ -6564,7 +6603,7 @@ function renderStatsV2Overview(){
 function renderStatsV2Detail(name){
   const detailGradId = statsV2Uid();
   const rec = statsV2ExerciseRecord(name);
-  if(!rec) return renderStatsV2ExerciseRow(name) + `<div class="statsv2-empty">Brak zapisanych serii dla tego ćwiczenia.</div>`;
+  if(!rec) return renderStatsV2ExerciseRow(name) + `<div class="statsv2-empty">${t('stV2NoSeries','Brak zapisanych serii dla tego ćwiczenia.')}</div>`;
 
   const series = statsV2Range === 1 ? statsV2ExerciseDailySeries(name) : statsV2ExerciseMonthlySeries(name, statsV2Range);
   const pts = series.points;
@@ -6623,23 +6662,23 @@ function renderStatsV2Detail(name){
     ${renderStatsV2ExerciseRow(name)}
     <div class="statsv2-cards" style="margin-top:24px;">
       <div class="statsv2-record-card statsv2-anim-card" style="--i:0">
-        <p class="statsv2-record-eyebrow">Aktualny rekord - ${name}</p>
+        <p class="statsv2-record-eyebrow">${t('stV2CurrentRecord', `Aktualny rekord - ${name}`, name)}</p>
         <div class="statsv2-record-num-row">
           ${ph('trophy','statsv2-record-trophy')}
           <span class="statsv2-record-num">${rec.weight}<small>kg</small></span>
           ${deltaArrow}
         </div>
-        <p class="statsv2-record-delta">${rec.deltaKg>=0?'+':''}${rec.deltaKg} kg od zeszłego miesiąca</p>
+        <p class="statsv2-record-delta">${rec.deltaKg>=0?'+':''}${rec.deltaKg} kg ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}</p>
         <div class="statsv2-record-sep"></div>
         <div class="statsv2-record-stats">
-          <div class="statsv2-record-stat"><span>EST. 1RM</span><strong>${rec.est1RM} kg</strong></div>
-          <div class="statsv2-record-stat"><span>SERIE OGÓŁEM</span><strong>${rec.totalSets}</strong></div>
-          <div class="statsv2-record-stat"><span>OSTATNIO</span><strong>${rec.lastTrained}</strong></div>
+          <div class="statsv2-record-stat"><span>${t('stV2Est1RM','EST. 1RM')}</span><strong>${rec.est1RM} kg</strong></div>
+          <div class="statsv2-record-stat"><span>${t('stV2TotalSets','SERIE OGÓŁEM')}</span><strong>${rec.totalSets}</strong></div>
+          <div class="statsv2-record-stat"><span>${t('stV2LastTrained','OSTATNIO')}</span><strong>${rec.lastTrained}</strong></div>
         </div>
       </div>
 
       <div class="statsv2-detail-chart-card statsv2-anim-card" style="--i:1">
-        <p class="statsv2-detail-chart-eyebrow">Progres ciężaru</p>
+        <p class="statsv2-detail-chart-eyebrow">${t('stV2WeightProgress','Progres ciężaru')}</p>
         <div class="statsv2-range-row">
           ${ranges.map(([m,label],i)=>`<button type="button" class="statsv2-range-chip${i===ranges.length-1?' wide':''}${statsV2Range===m?' active':''}" onclick="setStatsV2RangeV2(${m})">${label}</button>`).join('')}
         </div>
@@ -6663,8 +6702,8 @@ function renderStatsV2Detail(name){
       </div>
 
       <div class="statsv2-log-card statsv2-anim-card" style="--i:2">
-        <p class="statsv2-log-eyebrow">Historia serii</p>
-        ${sessionRows || '<div class="statsv2-empty">Brak sesji.</div>'}
+        <p class="statsv2-log-eyebrow">${t('stV2SeriesHistory','Historia serii')}</p>
+        ${sessionRows || `<div class="statsv2-empty">${t('stV2NoSessions','Brak sesji.')}</div>`}
       </div>
     </div>`;
 }
