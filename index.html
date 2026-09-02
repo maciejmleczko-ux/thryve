@@ -633,8 +633,14 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
     var(--m-bg);
 }
 /* top padding matches .dash-chat-btn's own `top` (16px + safe area) so the
-   greeting's first line sits level with the feedback circle. */
-.dash-root{position:relative;padding:calc(16px + env(safe-area-inset-top,0px)) 10px 110px;}
+   greeting's first line sits level with the feedback circle.
+   Flex column + min-height:100dvh so that when the content is shorter than
+   the screen the slack collects under the greeting (.dash-hero margin-top:
+   auto) and the last tile stays anchored: padding-bottom 126px = the nav's
+   20px bottom offset + ~82px height + 24px breathing room, so the week
+   card's bottom line sits 24px above the menu. renderDashboard() sizes its
+   scroll check off the natural content height, not this padded box. */
+.dash-root{position:relative;display:flex;flex-direction:column;min-height:100dvh;box-sizing:border-box;padding:calc(16px + env(safe-area-inset-top,0px)) 10px 126px;}
 /* Safari/WebKit can size an inline <svg> with no explicit width/height
    to 0 inside a flex container (spec's "defaults to 100%" isn't applied
    reliably) — force it everywhere in this screen as a CSS-layer backstop,
@@ -654,9 +660,11 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .gymv2-chat-btn, .histv2-chat-btn{margin-left:auto;}
 .dash-chat-btn:active, .gymv2-chat-btn:active, .plansv2-chat-btn:active, .histv2-chat-btn:active, .statsv2-chat-btn:active{transform:scale(.9);}
 .dash-chat-btn .ph, .gymv2-chat-btn .ph, .plansv2-chat-btn .ph, .histv2-chat-btn .ph, .statsv2-chat-btn .ph{width:24px;height:24px;color:var(--m-orange);}
-/* greeting hugs the top (see .dash-root padding) but keeps a generous gap
-   down to the first bento tile — deliberate asymmetry, gives the stack air. */
-.dash-header{width:85%;margin-bottom:28px;}
+/* greeting hugs the top (see .dash-root padding). margin-bottom is the
+   MINIMUM gap to the first tile (used as-is when the dashboard scrolls);
+   when it fits on one screen, .dash-hero's margin-top:auto adds the extra
+   slack here so the stack breathes and the last tile anchors to the menu. */
+.dash-header{width:85%;margin-bottom:36px;}
 .dash-hi{margin:0 0 4px;font-size:var(--m-fs-md);font-weight:400;color:var(--m-ink);}
 .dash-headline{margin:0;font-size:var(--m-fs-2xl);line-height:1.15;font-weight:600;color:var(--m-ink);letter-spacing:-.02em;}
 
@@ -679,7 +687,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 }
 .dash-eyebrow{margin:0;}
 
-.dash-hero{background:var(--m-orange);border-radius:var(--m-r-md);padding:14px;color:#fff;margin-bottom:8px;}
+.dash-hero{background:var(--m-orange);border-radius:var(--m-r-md);padding:14px;color:#fff;margin-top:auto;margin-bottom:8px;}
 .dash-hero-stats{display:flex;flex-direction:column;gap:8px;margin:10px 0 12px;}
 .dash-hero-row{display:flex;align-items:center;gap:16px;}
 .dash-hero-row .ph{width:36px;height:36px;flex-shrink:0;}
@@ -3043,7 +3051,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.39";
+const APP_VERSION = "4.10.40";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5904,17 +5912,27 @@ function renderDashboard(){
 
   // Only grant scroll/touch-drag capability when the dashboard genuinely
   // doesn't fit one screen — see the dashboard-lock/.dashboard-scrollable
-  // CSS for the full reasoning. Measure .dash-root's own content height
-  // (it already carries the 110px bottom-padding nav clearance) against the
-  // viewport, via scrollHeight — a LAYOUT value. The earlier version read
-  // .dash-week-card.getBoundingClientRect().bottom, but during the route
-  // slide-in and the tiles' translateY entrance animation that rect sits
-  // up to ~18px low, which intermittently tripped needsScroll on re-entry
-  // and left the dashboard scrollable even when it fits. scrollHeight
-  // ignores transforms entirely, so the check is stable whenever it runs.
+  // CSS for the full reasoning. .dash-root is now a min-height:100dvh flex
+  // column, so its own scrollHeight/rect is always ~one screen and can't be
+  // the measure. Instead sum the NATURAL content height: each tile's
+  // offsetHeight (transform-immune, unlike getBoundingClientRect during the
+  // entrance animation) + the fixed margins from CSS. .dash-hero's
+  // margin-top is `auto` (the flexible slack that anchors the last tile
+  // when things DO fit) so it's deliberately excluded here — this is the
+  // "if we didn't distribute any slack" height.
   const dashRoot = document.querySelector('.dash-root');
-  const needsScroll = !!(dashRoot && dashRoot.scrollHeight > window.innerHeight + 1);
-  document.documentElement.classList.toggle('dashboard-scrollable', needsScroll);
+  if(dashRoot){
+    const rs = getComputedStyle(dashRoot);
+    const mb = el => el ? (parseFloat(getComputedStyle(el).marginBottom) || 0) : 0;
+    const h = el => el ? el.offsetHeight : 0;
+    const hdr = dashRoot.querySelector('.dash-header');
+    const hero = dashRoot.querySelector('.dash-hero');
+    const grid = dashRoot.querySelector('.dash-grid2');
+    const week = dashRoot.querySelector('.dash-week-card');
+    const contentH = parseFloat(rs.paddingTop) + parseFloat(rs.paddingBottom)
+      + h(hdr) + mb(hdr) + h(hero) + mb(hero) + h(grid) + mb(grid) + h(week);
+    document.documentElement.classList.toggle('dashboard-scrollable', contentH > window.innerHeight + 1);
+  }
 }
 
 /* ============================================================
