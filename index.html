@@ -632,7 +632,9 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
     radial-gradient(100% 55% at 8% 78%, rgba(244,190,205,.32) 0%, rgba(244,190,205,0) 60%),
     var(--m-bg);
 }
-.dash-root{position:relative;padding:calc(36px + env(safe-area-inset-top,0px)) 10px 110px;}
+/* top padding matches .dash-chat-btn's own `top` (16px + safe area) so the
+   greeting's first line sits level with the feedback circle. */
+.dash-root{position:relative;padding:calc(16px + env(safe-area-inset-top,0px)) 10px 110px;}
 /* Safari/WebKit can size an inline <svg> with no explicit width/height
    to 0 inside a flex container (spec's "defaults to 100%" isn't applied
    reliably) — force it everywhere in this screen as a CSS-layer backstop,
@@ -3039,7 +3041,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.37";
+const APP_VERSION = "4.10.38";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
