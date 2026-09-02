@@ -1635,29 +1635,19 @@ body.pev2-bg{background:var(--m-red-page);}
 /* .statsv2-empty — see the shared empty-state rule near .gymv2-no-plan */
 
 @media (prefers-reduced-motion: no-preference){
-  /* Stats-body entrance now plays once, WHEN the element scrolls into view
-     (statsV2RevealOnScroll adds .sv2-in and kicks the draw-in for any
-     ring/line inside it). Until then each bit holds its hidden first frame
-     via animation-play-state:paused + fill-mode both. A non-animated
-     re-render (range chip / tile switch) clears it all with inline
-     animation:none — see renderStatsV2(false). */
-  .statsv2-anim-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 70ms);animation-play-state:paused;}
-  .statsv2-anim-tile{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 40ms);animation-play-state:paused;}
+  /* Card / tile entrances play on screen entry (staggered). Only the SVG
+     line/ring draw-in is deferred until the element scrolls into view —
+     see statsV2SetupDrawReveal(). */
+  .statsv2-anim-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.08s + var(--i,0) * 70ms);}
+  .statsv2-anim-tile{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.2s + var(--i,0) * 40ms);}
   /* "slupki animowac" — dashBarGrow, same keyframe as the Dashboard trend
-     bars. .35s base so the bars start once their card's own rise has
-     mostly landed (this app's "inner stagger waits for the outer
-     entrance" rule). */
-  .statsv2-bar-anim{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.35s + var(--i,0) * 40ms);animation-play-state:paused;}
-  /* "wykresy moglyby sie rysowac" — the wave line draws in via
-     statsV2AnimateDrawPaths() (needs getTotalLength(), not pure CSS). The
-     dots/PR tags fade in near the end of the ~1s draw so they stay in
-     sync with the line reaching them rather than popping early. */
-  .statsv2-chart-dot,.statsv2-pr-tag{animation:statsv2DotIn .3s ease both;animation-delay:.85s;animation-play-state:paused;}
+     bars. .5s base so the bars start once the bar CARD's own rise
+     (--i:1 → .15s delay + .7s) has essentially landed. */
+  .statsv2-bar-anim{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.5s + var(--i,0) * 40ms);}
+  /* dots/PR tags fade in near the end of the ~1s line draw so they stay
+     in sync with the line reaching them rather than popping early. */
+  .statsv2-chart-dot,.statsv2-pr-tag{animation:statsv2DotIn .3s ease both;animation-delay:.85s;}
   @keyframes statsv2DotIn{from{opacity:0;}to{opacity:1;}}
-  .statsv2-anim-card.sv2-in,.statsv2-anim-tile.sv2-in{animation-play-state:running;}
-  .statsv2-anim-card.sv2-in .statsv2-bar-anim,
-  .statsv2-anim-card.sv2-in .statsv2-chart-dot,
-  .statsv2-anim-card.sv2-in .statsv2-pr-tag{animation-play-state:running;}
 }
 .statsv2-root .ph{display:block;}
 .statsv2-root .ph svg{display:block;width:100%;height:100%;}
@@ -3141,7 +3131,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.11.4";
+const APP_VERSION = "4.11.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7070,58 +7060,70 @@ function statsV2AnimateDrawPaths(container){
     }, delay);
   });
 }
-/* Scroll-triggered reveal for the stats body: each card / exercise-tile
-   row plays its entrance once, as it crosses into view, instead of the
-   whole screen animating on load with most of it still below the fold.
-   The observer also fires the draw-in for any ring/line inside a card at
-   the moment that card is revealed. Only set up on an animated render
-   (first entry) — re-renders come through with animate=false. */
+/* The card / tile ENTRANCES run on screen entry via CSS. Only the SVG
+   line/ring DRAW-IN is deferred: each drawing holds hidden until its card
+   scrolls into view, so you actually watch it draw instead of finding it
+   already done below the fold. Only armed on an animated render (first
+   entry); re-renders come through with animate=false. */
 let statsV2RevealObs = null, statsV2RevealScrollFn = null;
 function statsV2TeardownReveal(){
   if(statsV2RevealObs){ statsV2RevealObs.disconnect(); statsV2RevealObs = null; }
   if(statsV2RevealScrollFn){ window.removeEventListener('scroll', statsV2RevealScrollFn); statsV2RevealScrollFn = null; }
 }
-function statsV2RevealOnScroll(body){
+function statsV2HideDrawn(container){
+  container.querySelectorAll('.statsv2-draw-path').forEach(path=>{
+    let len; try{ len = path.getTotalLength(); }catch(e){ return; }
+    if(!len) return;
+    path.style.transition = 'none';
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;   // fully hidden until its card is in view
+  });
+  // the dots / PR tags sit ON the line, so keep them hidden too — draw()
+  // fades them back in near the end of the line reaching them
+  container.querySelectorAll('.statsv2-chart-dot, .statsv2-pr-tag').forEach(d=>{
+    d.style.animation = 'none';
+    d.style.transition = 'none';
+    d.style.opacity = '0';
+  });
+}
+function statsV2SetupDrawReveal(body){
   statsV2TeardownReveal();
-  const targets = [].slice.call(body.querySelectorAll('.statsv2-anim-card, .statsv2-ex-row'));
-  const reveal = (el)=>{
-    if(el.classList.contains('sv2-in')) return;
-    el.classList.add('sv2-in');
-    el.querySelectorAll('.statsv2-anim-tile').forEach(t=> t.classList.add('sv2-in'));
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; // paths keep their markup final state
+  // Hide every drawing up front (synchronously, before paint — no flash),
+  // then draw each one when its card reaches the upper-middle of the screen.
+  statsV2HideDrawn(body);
+  const IN_VIEW = 0.55;
+  const cards = [].slice.call(body.querySelectorAll('.statsv2-ring-card, .statsv2-ytd-card, .statsv2-detail-chart-card'));
+  const draw = (el)=>{
+    if(el.dataset.sv2Drawn) return;
+    el.dataset.sv2Drawn = '1';
     statsV2AnimateDrawPaths(el);
+    el.querySelectorAll('.statsv2-chart-dot, .statsv2-pr-tag').forEach(d=>{
+      d.getBoundingClientRect();
+      d.style.transition = 'opacity .3s ease .7s'; // lands as the ~1s line draw finishes
+      d.style.opacity = '1';
+    });
   };
-  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    targets.forEach(reveal);
-    return;
-  }
-  // A card counts as "in view" once its top has passed this fraction of
-  // the viewport height — 0.6 so a tall card only peeking in at the
-  // bottom (e.g. the YTD chart, which is behind the nav on entry) waits
-  // until it's scrolled properly up before its line draws.
-  const IN_VIEW = 0.6;
-  // Reveal whatever is already on screen right now — don't make the
-  // above-the-fold cards wait on the observer (IntersectionObserver
-  // doesn't deliver while the document is hidden, e.g. a backgrounded
-  // PWA, which would leave them stuck at opacity:0).
   const vh = window.innerHeight || document.documentElement.clientHeight;
   const pending = [];
-  targets.forEach(el=>{
-    if(el.getBoundingClientRect().top < vh * IN_VIEW) reveal(el);
+  cards.forEach(el=>{
+    if(el.getBoundingClientRect().top < vh * IN_VIEW) draw(el);
     else pending.push(el);
   });
   if(!pending.length) return;
   statsV2RevealObs = new IntersectionObserver((entries, obs)=>{
-    entries.forEach(en=>{ if(en.isIntersecting){ reveal(en.target); obs.unobserve(en.target); } });
+    entries.forEach(en=>{ if(en.isIntersecting){ draw(en.target); obs.unobserve(en.target); } });
   }, { rootMargin: '0px 0px ' + Math.round(-(1 - IN_VIEW) * 100) + '% 0px', threshold: 0 });
   pending.forEach(el=> statsV2RevealObs.observe(el));
-  // Fallback for the same hidden-document case: a scroll still reveals
-  // anything that has come into view even if the observer stayed quiet.
+  // Fallback: a scroll still draws anything that has come into view even
+  // if the observer stayed quiet (it doesn't deliver while the document is
+  // hidden — a backgrounded PWA).
   statsV2RevealScrollFn = ()=>{
     const h = window.innerHeight || 0;
     for(let i = pending.length - 1; i >= 0; i--){
       const el = pending[i];
       if(!el.isConnected || el.getBoundingClientRect().top < h * IN_VIEW){
-        if(el.isConnected) reveal(el);
+        if(el.isConnected) draw(el);
         if(statsV2RevealObs) statsV2RevealObs.unobserve(el);
         pending.splice(i, 1);
       }
@@ -7137,7 +7139,7 @@ function renderStatsV2(animate){
   if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile,.statsv2-bar-anim,.statsv2-chart-dot,.statsv2-pr-tag').forEach(el=>{
     el.style.animation = 'none';
   });
-  if(animate) statsV2RevealOnScroll(body);
+  if(animate) statsV2SetupDrawReveal(body);
   // The header back arrow does double duty (see statsV2Back): in the
   // exercise-detail view it steps back to the overview, in the overview it
   // leaves to the Dashboard. Keep its tooltip/label honest about where it
