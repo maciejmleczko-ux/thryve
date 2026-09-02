@@ -1972,39 +1972,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <button class="share-btn hidden" id="gymShareBtn" onclick="shareHistCard('workout', this.dataset.id)">__PH_SHARE__<span data-i18n="shareWorkout">Udostępnij trening</span></button>
   </section>
 
-  <!-- ===================== RUNNING ===================== -->
-  <!-- ===================== HISTORY ===================== -->
-  <section class="view" id="view-history">
-    <div class="header-row on-orange">
-      <div class="section-label">__PH_CALENDAR__<span>HISTORY</span></div>
-      <div class="icon-btn-row">
-        <span class="ph" data-ph="upload-simple" data-i18n-title="importTitle" title="Importuj kopię zapasową" onclick="document.getElementById('importFile').click()"></span>
-        <span class="ph" data-ph="download-simple" data-i18n-title="exportTitle" title="Pobierz kopię zapasową" onclick="exportData()"></span>
-        <input type="file" id="importFile" accept="application/json" style="display:none;" onchange="importData(event)">
-      </div>
-    </div>
-
-    <div class="cal-wrap">
-      <div class="cal-head">
-        <div class="cal-head-group">
-          <span class="cal-nav-btn" onclick="calMoveMonth(-1)">__PH_CARET_LEFT__</span>
-          <span id="calMonthLabel" class="cal-head-label"></span>
-          <span class="cal-nav-btn" onclick="calMoveMonth(1)">__PH_CARET_RIGHT__</span>
-        </div>
-        <div class="cal-head-group">
-          <span class="cal-nav-btn" onclick="calMoveYear(-1)">__PH_CARET_LEFT__</span>
-          <span id="calYearLabel" class="cal-head-label"></span>
-          <span class="cal-nav-btn" onclick="calMoveYear(1)">__PH_CARET_RIGHT__</span>
-        </div>
-      </div>
-      <div class="cal-grid" id="calGrid"></div>
-    </div>
-    <div class="backup-hint" data-i18n="backupHint">Dane są zapisane tylko na tym urządzeniu. Rób kopię zapasową co jakiś czas — ikona pobierania powyżej ↑</div>
-
-    <div class="hist-detail-wrap" id="histDetail"></div>
-  </section>
-
-  <!-- ===================== STATS ===================== -->
   <!-- ===================== PLANS ===================== -->
   <section class="view" id="view-plans">
     <div class="header-row on-panel">
@@ -2182,6 +2149,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </section>
 
   </div>
+
+  <!-- Backup import file input — shared by the History v2 import button
+       (was inside the old #view-history, moved out when that was deleted). -->
+  <input type="file" id="importFile" accept="application/json" style="display:none;" onchange="importData(event)">
 
   <!-- ===================== BOTTOM NAV ===================== -->
   <nav class="bottom-nav" id="bottomNav">
@@ -3246,7 +3217,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.23";
+const APP_VERSION = "4.10.24";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3871,7 +3842,6 @@ function goRoute(route){
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
   if(route==='gym'){ document.getElementById('gymDate').value = document.getElementById('gymDate').value || todayStr(); updateGymDateLabel(); renderGymGrid(); }
-  if(route==='history'){ renderCalendar(); }
   if(route==='plans'){ renderPlansList(); }
   if(route==='dashboard'){ previewMode = true; renderDashboard(); }
   if(route==='gym-v2'){ previewMode = true; renderGymV2(); }
@@ -7098,21 +7068,11 @@ const MONTH_NAMES = LANG==='en'
   ? ['January','February','March','April','May','June','July','August','September','October','November','December']
   : ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
 const DOW_LABELS = LANG==='en' ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] : ['Pn','Wt','Śr','Cz','Pt','So','Nd'];
-let calState = (()=>{ const d=new Date(); return {year:d.getFullYear(), month:d.getMonth()}; })();
-let selectedHistDate = null;
-
-function updateCalLabels(){
-  document.getElementById('calMonthLabel').textContent = MONTH_NAMES[calState.month];
-  document.getElementById('calYearLabel').textContent = calState.year;
-}
-function calMoveMonth(delta){
-  calState.month = (calState.month + delta + 12) % 12;
-  renderCalendar();
-}
-function calMoveYear(delta){
-  calState.year += delta;
-  renderCalendar();
-}
+/* MONTH_NAMES / DOW_LABELS / datesWithLogs() below are shared — History v2
+   (renderCalendarV2) and the date-picker modal use them. The old
+   #view-history calendar (calState / updateCalLabels / calMoveMonth /
+   calMoveYear / renderCalendar / renderHistDetail / histRightHtml /
+   toggleHistExpand) was removed in the L5 teardown. */
 function datesWithLogs(){
   const m = new Map();
   const bump = date => m.set(date, (m.get(date)||0) + 1);
@@ -7120,108 +7080,11 @@ function datesWithLogs(){
   runs.forEach(r=>bump(r.date));
   return m;
 }
-function renderCalendar(){
-  // L5 unwind (step 3 — History): old #view-history is never shown in the
-  // Mekkio layout. History v2 has its own renderCalendarV2(); this v1
-  // calendar has no v2 tail-call by design, so just bail when its screen
-  // isn't up. (Callers that must refresh the live screen — e.g. data
-  // import — go through goRoute(currentRoute) instead.)
-  if(!document.getElementById('view-history')?.classList.contains('active')) return;
-  updateCalLabels();
-  const {year, month} = calState;
-  const grid = document.getElementById('calGrid');
-  grid.innerHTML = '';
-  DOW_LABELS.forEach(d=>{
-    const el = document.createElement('div');
-    el.className = 'cal-dow';
-    el.textContent = d;
-    grid.appendChild(el);
-  });
-  const first = new Date(year, month, 1);
-  let startOffset = first.getDay()===0 ? 6 : first.getDay()-1;
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-  const logged = datesWithLogs();
-  if(!selectedHistDate){
-    const todaysIso = todayStr();
-    const inMonth = todaysIso.slice(0,7) === `${year}-${String(month+1).padStart(2,'0')}`;
-    selectedHistDate = inMonth ? todaysIso : null;
-  }
-  for(let i=0;i<startOffset;i++){
-    const el = document.createElement('div');
-    el.className = 'cal-day empty';
-    grid.appendChild(el);
-  }
-  for(let d=1; d<=daysInMonth; d++){
-    const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const btn = document.createElement('button');
-    btn.className = 'cal-day';
-    btn.textContent = d;
-    if(logged.get(iso)) btn.classList.add('has-log');
-    if(iso===selectedHistDate) btn.classList.add('selected');
-    btn.onclick = ()=>{ selectedHistDate = iso; histExpanded = {}; renderCalendar(); renderHistDetail(); };
-    grid.appendChild(btn);
-  }
-  renderHistDetail();
-}
-let histExpanded = {};
-function toggleHistExpand(key){
-  histExpanded[key] = !histExpanded[key];
-  renderHistDetail();
-}
-function histRightHtml(dateHuman, exp, kind, key, shareId){
-  return `<div class="hist-right"><span class="ph hist-share-btn" onclick="event.stopPropagation();shareHistCard('${kind}','${shareId}')" title="${t('shareIconTitle','Udostępnij')}">${PH.share}</span><span class="hist-date">${dateHuman}</span>${exp?`<span class="hist-close" onclick="event.stopPropagation();toggleHistExpand('${key}')">${ph('x')}</span>`:''}</div>`;
-}
-function renderHistDetail(){
-  const wrap = document.getElementById('histDetail');
-  if(!selectedHistDate){ wrap.innerHTML = `<div class="hist-empty">${t('histEmptyPick','Wybierz dzień, żeby zobaczyć szczegóły.')}</div>`; return; }
-  // a day can hold more than one saved workout/run (e.g. a session logged in
-  // two parts) — the stats charts already account for every entry, so this
-  // has to show all of them too, not just
-  // the first match, or logged data silently "disappears" from History.
-  const dayWorkouts = workouts.filter(w=>w.date===selectedHistDate);
-  const dayRuns = runs.filter(r=>r.date===selectedHistDate);
-  if(!dayWorkouts.length && !dayRuns.length){ wrap.innerHTML = `<div class="hist-empty">${t('histEmptyNone', `Brak zapisanej aktywności — ${fmtDate(selectedHistDate)}`, fmtDate(selectedHistDate))}</div>`; return; }
-  let html = '';
-  dayWorkouts.forEach(w=>{
-    const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
-    const exp = !!histExpanded[w.id];
-    html += `
-      <div class="hist-card${exp?'':' collapsed'}"${exp?'':` onclick="toggleHistExpand('${w.id}')"`}>
-        <div class="lbl-row"><div class="l">${ph('barbell')}<span>${t('histWorkoutLabel','TRENING')}</span></div>${histRightHtml(fmtDateHuman(w.date), exp, 'workout', w.id, w.id)}</div>
-        <div class="vol">${t('histWorkoutVol', `${w.exercises.length} ${plExercisesWord(w.exercises.length)} · objętość ${Math.round(totalVol)} kg`, w.exercises.length, Math.round(totalVol))}</div>
-        ${exp?`<div class="hist-ex-list">
-          ${w.exercises.map(e=>`
-            <div class="hist-ex-item">
-              <div class="nm">${e.name}</div>
-              <div class="st">${e.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ')}</div>
-            </div>`).join('')}
-        </div>`:''}
-      </div>`;
-  });
-  dayRuns.forEach(r=>{
-    const min = Math.floor(r.pace), sec = Math.round((r.pace-min)*60);
-    const exp = !!histExpanded[r.id];
-    html += `
-      <div class="hist-card${exp?'':' collapsed'}"${exp?'':` onclick="toggleHistExpand('${r.id}')"`}>
-        <div class="lbl-row"><div class="l">${ph('sneaker-move')}<span>${t('histRunLabel','BIEGANIE')}</span></div>${histRightHtml(fmtDateHuman(r.date), exp, 'run', r.id, r.id)}</div>
-        <div class="vol">${runTypeLabel(r.type)}</div>
-        ${exp?`<div class="run-stat-tiles">
-          <div class="run-stat-tile orange"><div class="v">${r.distance}</div></div>
-          <div class="run-stat-tile"><div class="v">${r.time}</div></div>
-          <div class="run-stat-tile"><div class="v">${min}:${sec.toString().padStart(2,'0')}</div></div>
-        </div>
-        <div class="run-stat-labels"><div>${t('histKilometers','Kilometry')}</div><div>${t('histMinutes','Minuty')}</div><div>${t('paceMinKm','Tempo (min/km)')}</div></div>
-        ${r.notes?`<div class="hist-ex-item" style="margin-top:12px;"><div class="st">${r.notes}</div></div>`:''}`:''}
-      </div>`;
-  });
-  wrap.innerHTML = html;
-}
-
 /* ============================================================
-   HISTORY v2 (Figma node 177:10060) — same data/model as production's
-   calendar above (workouts/runs/datesWithLogs()/MONTH_NAMES/
-   DOW_LABELS/fmtDateHuman reused wholesale), own state so production's
-   own calState/selectedHistDate/histExpanded stay untouched.
+   HISTORY (Figma node 177:10060). Reuses workouts / runs /
+   datesWithLogs() / MONTH_NAMES / DOW_LABELS / fmtDateHuman.
+   (The old #view-history calendar it replaced was deleted in the L5
+   teardown, 4.10.24.)
    Week starts Monday (DOW_LABELS is already Pn-Nd) even though the
    Figma mock shows Su-first headers — every other calendar/week
    display in this app (dash-week-days, plan-day-chip, ...) is
@@ -8246,7 +8109,6 @@ function importData(evt){
    INIT
    ============================================================ */
 showLoadScreenV2(()=>{}); // production boot splash — the "Mekkio" load screen (name + version) covers every launch for ~1.5s
-updateCalLabels();
 updateGymDateLabel();
 updatePlanPillLabel();
 renderGymGrid();
