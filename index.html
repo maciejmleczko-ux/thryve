@@ -709,7 +709,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .check-box{width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .check-box svg{width:12px;height:12px;display:block;}
 @media (prefers-reduced-motion: no-preference){
-  .check-box svg{animation:checkPop .18s cubic-bezier(.34,1.56,.64,1);}
+  .check-box svg{animation:checkPop .18s cubic-bezier(.16,1,.3,1);}
   @keyframes checkPop{from{transform:scale(.3);opacity:0;}to{transform:scale(1);opacity:1;}}
 }
 .check-item .lbl{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:0.24px;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-dark);}
@@ -915,9 +915,17 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .gymv2-plan-stat{display:flex;align-items:center;gap:12px;}
 .gymv2-plan-stat .ph{width:16px;height:16px;color:#fff;flex-shrink:0;}
 .gymv2-plan-stat span{font-size:var(--m-fs-base);}
-.gymv2-no-plan{background:#fff;border-radius:var(--m-r-md);padding:20px 16px;text-align:center;color:var(--m-ink);margin-bottom:24px;}
+/* Shared empty / no-content state — one treatment across GYM, History,
+   Stats v2. Muted centred card on --m-card; the one actionable variant
+   (.gymv2-no-plan) keeps a CTA pill, emphasis carried by the button. */
+.gymv2-no-plan, .histv2-empty, .statsv2-empty{
+  background:var(--m-card);border-radius:var(--m-r-md);
+  padding:24px 18px;font-size:var(--m-fs-base);color:var(--m-muted);
+  text-align:center;box-sizing:border-box;
+}
+.gymv2-no-plan{margin-bottom:24px;}
 .gymv2-no-plan.hidden{display:none;}
-.gymv2-no-plan p{margin:0 0 12px;font-size:var(--m-fs-base);}
+.gymv2-no-plan p{margin:0 0 12px;}
 .gymv2-no-plan .add-pill{margin:0 auto;}
 
 .gymv2-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;}
@@ -1526,7 +1534,7 @@ body.pev2-bg{background:var(--m-red-page);}
 .histv2-cal-day.selected{background:#fff;color:#2c2727;font-weight:600;}
 
 .histv2-section-label{margin:0 0 12px;}
-.histv2-empty{background:#fff;border-radius:var(--m-r-md);padding:24px 18px;font-size:var(--m-fs-base);color:var(--m-muted);text-align:center;box-sizing:border-box;}
+/* .histv2-empty — see the shared empty-state rule near .gymv2-no-plan */
 .histv2-list{display:flex;flex-direction:column;gap:12px;}
 .histv2-card{background:#fff;border-radius:var(--m-r-md);padding:18px;cursor:pointer;box-sizing:border-box;}
 .histv2-card.expanded{cursor:default;}
@@ -1685,7 +1693,7 @@ body.pev2-bg{background:var(--m-red-page);}
 .statsv2-log-row.is-pr .statsv2-log-sets{color:var(--m-orange);font-weight:500;}
 .statsv2-log-trophy{width:16px;height:16px;color:var(--m-orange);flex-shrink:0;}
 
-.statsv2-empty{background:var(--m-card);border-radius:var(--m-r-md);padding:24px 18px;font-size:var(--m-fs-base);color:var(--m-muted);text-align:center;box-sizing:border-box;}
+/* .statsv2-empty — see the shared empty-state rule near .gymv2-no-plan */
 
 @media (prefers-reduced-motion: no-preference){
   .statsv2-anim-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.08s + var(--i,0) * 70ms);}
@@ -3417,7 +3425,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.14";
+const APP_VERSION = "4.10.15";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
