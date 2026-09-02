@@ -3008,7 +3008,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.31";
+const APP_VERSION = "4.10.32";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6085,7 +6085,9 @@ let calStateV2 = (()=>{ const d=new Date(); return {year:d.getFullYear(), month:
 let selectedHistDateV2 = null;
 let histExpandedV2 = {};
 function calMoveMonthV2(delta){
-  calStateV2.month = (calStateV2.month + delta + 12) % 12;
+  calStateV2.month += delta;
+  if(calStateV2.month > 11){ calStateV2.month = 0; calStateV2.year++; }
+  else if(calStateV2.month < 0){ calStateV2.month = 11; calStateV2.year--; }
   renderCalendarV2();
 }
 function calMoveYearV2(delta){
@@ -6119,10 +6121,18 @@ function renderCalendarV2(animate){
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const prevMonthDays = new Date(year, month, 0).getDate();
   const logged = datesWithLogs();
+  const monthKey = `${year}-${String(month+1).padStart(2,'0')}`;
+  // A day stays selected across month nav only while it's still in the
+  // viewed month; step to any other month and the selection drops so the
+  // "Twoje treningi" panel shows that month's summary instead (Maciej's
+  // ask, see renderHistMonthSummaryV2). On the current month, auto-select
+  // today.
+  if(selectedHistDateV2 && selectedHistDateV2.slice(0,7) !== monthKey){
+    selectedHistDateV2 = null;
+  }
   if(!selectedHistDateV2){
     const todaysIso = todayStr();
-    const inMonth = todaysIso.slice(0,7) === `${year}-${String(month+1).padStart(2,'0')}`;
-    selectedHistDateV2 = inMonth ? todaysIso : null;
+    selectedHistDateV2 = todaysIso.slice(0,7) === monthKey ? todaysIso : null;
   }
   let html = '';
   for(let i=0;i<startOffset;i++){
