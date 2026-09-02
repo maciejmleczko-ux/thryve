@@ -3368,7 +3368,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.3";
+const APP_VERSION = "4.10.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6841,17 +6841,37 @@ let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', (e)=>{
   e.preventDefault();
   deferredInstallPrompt = e;
-  const btn = document.getElementById('installPromptActionBtn');
-  if(btn && !document.getElementById('installPromptOverlay').classList.contains('hidden')){
-    btn.classList.remove('hidden');
+  // If the prompt arrives after checkInstallPrompt() already rendered the
+  // overlay: reveal the native "Zainstaluj teraz" button and drop any
+  // manual "open the browser menu" hint it may have shown in the meantime.
+  if(!document.getElementById('installPromptOverlay').classList.contains('hidden')){
+    document.getElementById('installPromptActionBtn').classList.remove('hidden');
+    document.getElementById('installPromptHowTo').textContent = '';
   }
 });
+// Facebook / Messenger / Instagram / TikTok etc. open links in an in-app
+// WebView that never fires beforeinstallprompt and has no "add to home
+// screen" — a user coming from a shared link there just sees a dead prompt.
+// Detect it so installPromptHowToText() can point them at the real browser.
+function isInAppBrowser(){
+  const ua = navigator.userAgent || '';
+  return /FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|Twitter|TikTok|musical_ly|Snapchat|Pinterest|GSA\/|; wv\)/i.test(ua);
+}
 function installPromptHowToText(){
   const ua = navigator.userAgent;
-  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
   const isMac = /Macintosh/.test(ua) && !isIOS;
+  if(isInAppBrowser()){
+    return isIOS
+      ? t('installPromptHowToInAppIOS','Otworzyłeś link w Messengerze albo innej apce — jej przeglądarka nie instaluje aplikacji. Otwórz stronę w Safari (przycisk z trzema kropkami w rogu → „Otwórz w przeglądarce"), potem Udostępnij → „Dodaj do ekranu głównego".')
+      : t('installPromptHowToInAppAndroid','Otworzyłeś link w Messengerze albo innej apce — jej przeglądarka nie instaluje aplikacji. Otwórz stronę w Chrome (menu z trzema kropkami w rogu → „Otwórz w Chrome") i zainstaluj tam.');
+  }
   if(isIOS) return t('installPromptHowToIOS','Dotknij ikony udostępniania na dole ekranu i wybierz „Dodaj do ekranu głównego".');
   if(isMac) return t('installPromptHowToMac','W pasku menu: Plik → Dodaj do docka.');
+  // Real Android browser but no beforeinstallprompt yet (Firefox, Samsung
+  // Internet, or Chrome before its engagement heuristic fires) — give a
+  // manual route; the listener above clears this if the native prompt lands.
+  if(!deferredInstallPrompt) return t('installPromptHowToAndroid','W menu przeglądarki (trzy kropki w rogu) wybierz „Zainstaluj aplikację" albo „Dodaj do ekranu głównego".');
   return '';
 }
 function checkInstallPrompt(){
