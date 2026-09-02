@@ -1940,38 +1940,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
   </div>
 
-  <!-- ===================== GYM ===================== -->
-  <section class="view" id="view-gym">
-    <div class="gym-top-block">
-      <div class="header-row on-panel">
-        <div class="section-label">__PH_BARBELL__<span>GYM</span></div>
-        <button class="date-pill" id="gymDatePill">
-          <span id="gymDateLabel">—</span>__PH_CARET__
-        </button>
-        <input type="date" id="gymDate" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;">
-      </div>
-
-      <div class="today-plan-banner hidden" id="todayPlanBanner">
-        <div class="today-plan-label" data-i18n="todayPlanLabel">Dzisiejszy plan</div>
-        <div class="today-plan-name" id="todayPlanName"></div>
-        <div class="today-plan-exercises" id="todayPlanExercises"></div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-inner">
-        <div class="fav-filter-row hidden" id="gymFavFilterRow"></div>
-        <div id="gymGrid"></div>
-        <button class="add-pill secondary hidden" id="pickFromLibraryBtn" onclick="openExercisePicker()">__PH_PLUS__<span data-i18n="pickFromLibrary">Wybierz inne ćwiczenie</span></button>
-        <button class="add-pill" id="gymAddNewBtn" onclick="toggleNewExerciseForm()">__PH_PLUS__<span data-i18n="addNew">Dodaj nowe</span></button>
-
-        <div id="exercisePanelArea"></div>
-      </div>
-    </div>
-    <button class="save-btn" id="gymSaveBtn" onclick="saveWorkout()" data-i18n="saveWorkout">Zapisz trening</button>
-    <button class="share-btn hidden" id="gymShareBtn" onclick="shareHistCard('workout', this.dataset.id)">__PH_SHARE__<span data-i18n="shareWorkout">Udostępnij trening</span></button>
-  </section>
-
   <!-- ===================== PLAN EDITOR (Figma node 155:1086,
        "06. PLAN - SET UP") — reached from Plans v2 (card tap / "+"
        button); openPlanEditorV2() / savePlanEditor() / togglePlanExercise
@@ -2111,21 +2079,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <p data-i18n="rotateLockMsg">Obróć telefon z powrotem — Mekkio działa tylko w pionie.</p>
 </div>
 
-<div class="dp-overlay hidden" id="dpOverlay" onclick="if(event.target===this) closeDatePicker()">
-  <div class="dp-box">
-    <div class="cal-wrap">
-      <div class="cal-head">
-        <span class="dp-head-nav" id="dpPrevBtn" onclick="dpMove(-1)">__PH_CARET_LEFT__</span>
-        <select id="dpMonth" onchange="dpRenderFromSelects()"></select>
-        <select id="dpYear" onchange="dpRenderFromSelects()"></select>
-        <span class="dp-head-nav" id="dpNextBtn" onclick="dpMove(1)">__PH_CARET_RIGHT__</span>
-      </div>
-      <div class="cal-grid" id="dpGrid"></div>
-    </div>
-    <div class="dp-actions"><button onclick="closeDatePicker()" data-i18n="close">Zamknij</button></div>
-  </div>
-</div>
-
 <div class="onboard-overlay hidden" id="onboardOverlay">
   <div class="onboard-box">
     <h3 data-i18n="onboardTitle">Cześć! Jak Cię nazywać?</h3>
@@ -2255,38 +2208,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<div class="onboard-overlay hidden" id="newExerciseOverlay" onclick="if(event.target===this) toggleNewExerciseForm()">
-  <div class="onboard-box new-ex-form" id="newExerciseForm">
-    <h3 data-i18n="newExerciseTitle">Dodaj własne ćwiczenie</h3>
-    <form autocomplete="off" onsubmit="return false;">
-    <div class="field"><label data-i18n="exNameLabel">Nazwa ćwiczenia</label><input type="text" id="newExTitle" data-i18n-ph="exNamePh" placeholder="np. Wykroki z hantlami" oninput="updateExerciseIconSuggestion()" autocomplete="off"></div>
-    <div class="icon-suggest hidden" id="iconSuggestBox">
-      <img id="iconSuggestImg" alt="">
-      <span data-i18n="iconSuggestLabel">Sugerowana ikonka</span>
-    </div>
-    <div class="row2">
-      <div class="field" style="flex:1;"><label data-i18n="muscleGroupLabel">Grupa mięśniowa</label><input type="text" id="newExGroup" data-i18n-ph="muscleGroupPh" placeholder="np. Nogi" autocomplete="off"></div>
-      <div class="field" style="width:70px;flex:none;"><label data-i18n="setsLabel">Serie</label><input type="number" id="newExSets" placeholder="3" min="1"></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label data-i18n="repsFromLabel">Powt. od</label><input type="number" id="newExRepLow" placeholder="8" min="1"></div>
-      <div class="field"><label data-i18n="repsToLabel">Powt. do</label><input type="number" id="newExRepHigh" placeholder="12" min="1"></div>
-    </div>
-    <div class="btns">
-      <button type="button" class="cancel" onclick="toggleNewExerciseForm()" data-i18n="cancel">Anuluj</button>
-      <button type="button" class="save" id="newExSaveBtn" onclick="saveNewExercise()" data-i18n="saveAddToSession">Zapisz i dodaj do sesji</button>
-    </div>
-    </form>
-  </div>
-</div>
-
-<!-- v3-styled "Dodaj własne ćwiczenie" — reached from GYM v2 and plan
-     editor v2's dashed add-tiles (see buildAddCustomExerciseTile()/
-     openNewExerciseFormV2()). Reuses the exact same overlay/backdrop/
-     slide-up shell as "Dostosuj plan" (.plansv2-customize-overlay/
-     -stack/-card — same classes, not a copy) so it reads as the same
-     component language rather than a new one-off. Old GYM/old plan
-     editor keep #newExerciseOverlay above untouched. -->
+<!-- "Dodaj własne ćwiczenie" — reached from GYM and plan editor's dashed
+     add-tiles (see buildAddCustomExerciseTile()/openNewExerciseFormV2()).
+     Reuses the "Dostosuj plan" overlay/backdrop/slide-up shell
+     (.plansv2-customize-overlay/-stack/-card — same classes, not a copy). -->
 <!-- Rebuilt to match Figma node 171:3546 (2026-09-01, Maciej's own
      design pass — his "no zle to wyglada, zaprojektuje sam" on the
      first version). Grupa mięśniowa is now a real <select> populated
@@ -2405,12 +2330,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<div class="onboard-overlay hidden" id="exercisePopupOverlay" onclick="if(event.target===this) closeExercisePopup()">
-  <div class="onboard-box ex-popup-box" id="exercisePopupBox"></div>
-</div>
-
-<!-- GYM v2 (v3 redesign) set-logging popup — separate from #exercisePopupOverlay above so
-     production GYM's popup stays untouched; see openExercisePopupV2()/[[project_thryve_roadmap]]. -->
+<!-- GYM set-logging popup — see openExercisePopupV2(). -->
 <div class="onboard-overlay hidden exv2-overlay" id="exercisePopupOverlayV2" onclick="if(event.target===this) closeExercisePopupV2()">
   <div class="exv2-popup-stack" id="exercisePopupBoxV2"></div>
 </div>
@@ -2667,15 +2587,9 @@ const EX_TILE_SEARCH_SVG = `<svg width="116" height="122" viewBox="0 0 116 122" 
 <path d="M77.578 57.8686L67.5429 47.8334C70.4045 44.5425 71.8767 40.269 71.6489 35.9138C71.4212 31.5586 69.5114 27.462 66.3221 24.4875C63.1328 21.513 58.9132 19.8929 54.5527 19.9689C50.1922 20.0448 46.0316 21.8108 42.9478 24.8946C39.864 27.9784 38.098 32.139 38.0221 36.4995C37.9461 40.8599 39.5662 45.0796 42.5407 48.2689C45.5152 51.4582 49.6119 53.368 53.967 53.5957C58.3222 53.8234 62.5957 52.3513 65.8866 49.4897L75.9218 59.5248C76.1439 59.7318 76.4378 59.8445 76.7413 59.8391C77.0449 59.8338 77.3346 59.7108 77.5493 59.4961C77.764 59.2814 77.887 58.9917 77.8924 58.6881C77.8977 58.3845 77.785 58.0907 77.578 57.8686ZM40.4218 36.8217C40.4218 33.9631 41.2694 31.1688 42.8576 28.792C44.4457 26.4152 46.703 24.5627 49.3439 23.4687C51.9849 22.3748 54.8909 22.0886 57.6946 22.6463C60.4982 23.204 63.0735 24.5805 65.0948 26.6018C67.1161 28.6231 68.4926 31.1984 69.0503 34.002C69.608 36.8057 69.3218 39.7117 68.2279 42.3527C67.1339 44.9936 65.2814 47.2509 62.9046 48.839C60.5278 50.4271 57.7335 51.2748 54.8749 51.2748C51.0431 51.2702 47.3696 49.7459 44.6601 47.0364C41.9507 44.327 40.4264 40.6535 40.4218 36.8217Z" fill="var(--m-orange)"/>
 </g>
 </svg>`;
-// Per-section "add your own exercise" tile — Maciej's own design
-// (2026-08-29), used verbatim as EX_TILE_ADD_SVG. Opens a custom-
-// exercise form pre-filled with this section's muscle group, tagged
-// with which flow should receive the finished exercise — see
-// toggleNewExerciseForm()/saveNewExercise() for the old form,
-// openNewExerciseFormV2()/saveNewExerciseV2() for the v3 one. This
-// tile is shared by the old plan editor AND plan editor v2 (both pass
-// context 'planEditor'), so which popup it should open depends on
-// which screen is actually active, not on the context string alone.
+// Per-section "add your own exercise" tile (EX_TILE_ADD_SVG). Opens the
+// v3 custom-exercise form pre-filled with this section's muscle group.
+// Used by renderPlanEditorGridV2().
 function buildAddCustomExerciseTile(context, prefillGroup){
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -2684,39 +2598,9 @@ function buildAddCustomExerciseTile(context, prefillGroup){
   btn.innerHTML = EX_TILE_ADD_SVG;
   btn.onclick = (e)=>{
     e.stopPropagation();
-    if(currentRoute==='plan-editor-v2') openNewExerciseFormV2(prefillGroup, context);
-    else toggleNewExerciseForm(prefillGroup, context);
+    openNewExerciseFormV2(prefillGroup, context);
   };
   return btn;
-}
-function renderGroupedExerciseGrid(container, exercises, stateFn, clickFn, tileFn, addContext){
-  container.innerHTML = '';
-  const buckets = new Map();
-  exercises.forEach(ex=>{
-    const b = muscleGroupBucket(ex.group);
-    if(!buckets.has(b.key)) buckets.set(b.key, []);
-    buckets.get(b.key).push(ex);
-  });
-  PLAN_EX_GROUPS.forEach(b=>{
-    const list = buckets.get(b.key);
-    if(!list || !list.length) return;
-    const section = document.createElement('div');
-    section.className = 'plan-ex-group';
-    const header = document.createElement('div');
-    header.className = 'plan-ex-group-header';
-    header.innerHTML = `${ph('barbell')}<span>${LANG==='en' ? b.en : b.pl}</span>`;
-    section.appendChild(header);
-    const grid = document.createElement('div');
-    grid.className = 'ex-grid';
-    list.forEach(ex=>{
-      const btn = tileFn ? tileFn(ex) : buildExerciseTile(ex, stateFn(ex));
-      if(!tileFn) btn.onclick = ()=> clickFn(ex);
-      grid.appendChild(btn);
-    });
-    if(addContext) grid.appendChild(buildAddCustomExerciseTile(addContext, LANG==='en' ? b.en : b.pl));
-    section.appendChild(grid);
-    container.appendChild(section);
-  });
 }
 function groupLabel(group){ return LANG==='en' ? (GROUP_LABELS_EN[group] || group) : group; }
 const RUN_TYPE_LABELS = {
@@ -3127,7 +3011,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.25";
+const APP_VERSION = "4.10.26";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3749,9 +3633,6 @@ function goRoute(route){
   document.body.classList.toggle('histv2-bg', route==='history-v2');
   document.documentElement.classList.toggle('histv2-bg', route==='history-v2');
   document.querySelector('.topbar').classList.toggle('hidden', isV3);
-  document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
-  document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
-  if(route==='gym'){ document.getElementById('gymDate').value = document.getElementById('gymDate').value || todayStr(); updateGymDateLabel(); renderGymGrid(); }
   if(route==='dashboard'){ previewMode = true; renderDashboard(); }
   if(route==='gym-v2'){ previewMode = true; renderGymV2(); }
   if(route==='plans-v2'){ previewMode = true; renderPlansListV2(true); }
@@ -3802,114 +3683,6 @@ function goRoute(route){
   vv.addEventListener('scroll', sync);
   sync();
 })();
-/* ============================================================
-   GYM — date pill
-   ============================================================ */
-document.getElementById('gymDate').addEventListener('change', updateGymDateLabel);
-document.getElementById('gymDatePill').addEventListener('click', ()=> openDatePicker());
-function updateGymDateLabel(){
-  const v = document.getElementById('gymDate').value || todayStr();
-  document.getElementById('gymDate').value = v;
-  document.getElementById('gymDateLabel').textContent = fmtDateHuman(v);
-  document.getElementById('gymShareBtn').classList.add('hidden');
-  updateTodayPlanBanner();
-  renderGymGrid();
-}
-
-/* ============================================================
-   GYM — date-picker calendar modal
-   ============================================================ */
-let dpState = (()=>{ const d=new Date(); return {year:d.getFullYear(), month:d.getMonth(), selected:null}; })();
-
-function openDatePicker(){
-  const current = document.getElementById('gymDate').value || todayStr();
-  const [y,m] = current.split('-').map(Number);
-  dpState.year = y; dpState.month = m-1; dpState.selected = current;
-  initDpSelects();
-  renderDpCalendar();
-  document.getElementById('dpOverlay').classList.remove('hidden');
-}
-function closeDatePicker(){
-  document.getElementById('dpOverlay').classList.add('hidden');
-}
-function initDpSelects(){
-  const mSel = document.getElementById('dpMonth');
-  const ySel = document.getElementById('dpYear');
-  mSel.innerHTML = MONTH_NAMES.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
-  const thisYear = new Date().getFullYear();
-  const years = new Set([thisYear]);
-  workouts.forEach(w=>years.add(parseInt(w.date.slice(0,4))));
-  runs.forEach(r=>years.add(parseInt(r.date.slice(0,4))));
-  ySel.innerHTML = Array.from(years).sort().map(y=>`<option value="${y}">${y}</option>`).join('');
-  mSel.value = dpState.month;
-  ySel.value = dpState.year;
-}
-function dpRenderFromSelects(){
-  let m = parseInt(document.getElementById('dpMonth').value);
-  let y = parseInt(document.getElementById('dpYear').value);
-  const now = new Date();
-  if(y > now.getFullYear()){ y = now.getFullYear(); }
-  if(y === now.getFullYear() && m > now.getMonth()){ m = now.getMonth(); }
-  dpState.month = m; dpState.year = y;
-  initDpSelects();
-  renderDpCalendar();
-}
-function dpMove(delta){
-  let m = dpState.month + delta;
-  let y = dpState.year;
-  if(m<0){ m=11; y--; }
-  if(m>11){ m=0; y++; }
-  const now = new Date();
-  if(y > now.getFullYear() || (y===now.getFullYear() && m > now.getMonth())) return;
-  dpState.month = m; dpState.year = y;
-  initDpSelects();
-  renderDpCalendar();
-}
-function renderDpCalendar(){
-  const {year, month} = dpState;
-  const grid = document.getElementById('dpGrid');
-  grid.innerHTML = '';
-  DOW_LABELS.forEach(d=>{
-    const el = document.createElement('div');
-    el.className = 'cal-dow';
-    el.textContent = d;
-    grid.appendChild(el);
-  });
-  const first = new Date(year, month, 1);
-  let startOffset = first.getDay()===0 ? 6 : first.getDay()-1;
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-  const todayIso = todayStr();
-  for(let i=0;i<startOffset;i++){
-    const el = document.createElement('div');
-    el.className = 'cal-day empty';
-    grid.appendChild(el);
-  }
-  for(let d=1; d<=daysInMonth; d++){
-    const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const btn = document.createElement('button');
-    btn.className = 'cal-day';
-    btn.textContent = d;
-    const isFuture = iso > todayIso;
-    if(isFuture){
-      btn.classList.add('future');
-      btn.disabled = true;
-    } else {
-      btn.onclick = ()=> selectDpDate(iso);
-    }
-    if(iso===dpState.selected) btn.classList.add('selected');
-    grid.appendChild(btn);
-  }
-  const now = new Date();
-  const atCurrentOrFutureMonth = (year > now.getFullYear()) || (year===now.getFullYear() && month>=now.getMonth());
-  document.getElementById('dpNextBtn').classList.toggle('disabled', atCurrentOrFutureMonth);
-}
-function selectDpDate(iso){
-  dpState.selected = iso;
-  document.getElementById('gymDate').value = iso;
-  updateGymDateLabel();
-  closeDatePicker();
-}
-
 /* ============================================================
    GYM — icon grid + session
    ============================================================ */
@@ -3996,25 +3769,10 @@ function loadFavoriteExercises(){
 }
 function saveFavoriteExercises(){ localStorage.setItem(LS_FAVORITE_EXERCISES, JSON.stringify([...favoriteExercises])); }
 let favoriteExercises = loadFavoriteExercises();
-let gymFavFilter = 'all'; // 'all' | 'favorites'
 function toggleFavoriteExercise(name){
   if(favoriteExercises.has(name)) favoriteExercises.delete(name);
   else favoriteExercises.add(name);
   saveFavoriteExercises();
-  renderGymGrid();
-}
-function setGymFavFilter(key){
-  gymFavFilter = key;
-  renderGymFavFilterRow();
-  renderGymGrid();
-}
-function renderGymFavFilterRow(){
-  const row = document.getElementById('gymFavFilterRow');
-  if(!row) return;
-  row.innerHTML = `
-    <button type="button" class="fav-filter-chip${gymFavFilter==='all'?' active':''}" onclick="setGymFavFilter('all')">${t('favFilterAll','Wszystkie')}</button>
-    <button type="button" class="fav-filter-chip${gymFavFilter==='favorites'?' active':''}" onclick="setGymFavFilter('favorites')">${ph(gymFavFilter==='favorites'?'heart-fill':'heart')}<span>${t('favFilterFavorites','Ulubione')}</span></button>
-  `;
 }
 // Exercise logging happens in a centered popup, not inline in the page flow
 // — with a long grid, an inline panel could scroll out of view and get
@@ -4070,40 +3828,10 @@ function orderedExerciseLibrary(){
 }
 
 const PLAN_EX_CHECK_SVG = `<svg width="365" height="365" viewBox="0 0 365 365" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M327.93 182.5C327.93 211.263 319.4 239.381 303.42 263.296C287.44 287.212 264.727 305.852 238.153 316.86C211.58 327.867 182.339 330.747 154.128 325.135C125.917 319.524 100.004 305.673 79.6656 285.334C59.3269 264.996 45.4761 239.083 39.8646 210.872C34.2532 182.661 37.1332 153.42 48.1404 126.846C59.1477 100.273 77.7877 77.5597 101.704 61.5796C125.619 45.5996 153.737 37.0703 182.5 37.0703C221.056 37.1156 258.021 52.4521 285.284 79.7157C312.548 106.979 327.884 143.944 327.93 182.5Z" fill="#F15A23"/><path d="M248.078 148.282C248.078 146.015 247.179 143.84 245.576 142.236C243.972 140.634 241.798 139.734 239.531 139.734C237.264 139.734 235.09 140.634 233.486 142.236L159.687 216.02L131.514 187.861C129.892 186.35 127.747 185.527 125.531 185.567C123.315 185.606 121.2 186.503 119.633 188.071C118.066 189.638 117.168 191.753 117.129 193.969C117.09 196.185 117.912 198.33 119.423 199.952L153.642 234.171C155.246 235.773 157.42 236.672 159.687 236.672C161.954 236.672 164.129 235.773 165.733 234.171L245.576 154.327C247.179 152.723 248.078 150.549 248.078 148.282Z" fill="white"/></svg>`;
-function buildExerciseTile(ex, state){
-  // state: 'plain' (default, also used for 'picked' — added but not logged, looks the same) |
-  //        'added' (grayed out, already logged in this session) |
-  //        'selected' (orange + checkmark, picker's own in-progress selection)
-  const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
-  const btn = document.createElement('button');
-  btn.className = 'ex-tile';
-  btn.dataset.name = ex.name;
-  if(slug){
-    const img = document.createElement('img');
-    img.src = iconSrc(slug, 'white');
-    img.draggable = false;
-    img.alt = '';
-    if(state==='added'){ img.style.filter = 'grayscale(1)'; img.style.opacity = '.5'; }
-    btn.appendChild(img);
-  } else {
-    btn.classList.add('custom-tile');
-    if(state==='added') btn.classList.add('added');
-    btn.innerHTML = `${ph('barbell')}<span class="t">${ex.name}</span>`;
-  }
-  if(state==='selected'){
-    btn.classList.add('plan-ex-selected');
-    btn.insertAdjacentHTML('beforeend', `<span class="plan-ex-check">${PLAN_EX_CHECK_SVG}</span>`);
-  }
-  return btn;
-}
-/* GYM v2 tile: real icon (from EXERCISE_ICON_SVG_V3) + separate label below it,
-   matching the new Figma tile design — vs. buildExerciseTile()'s single flat
-   baked image used by the production GYM screen. Falls back to the generic
-   barbell + name treatment for any exercise without a v3 icon yet.
-   state 'selected' (added 2026-08-31, plan editor v2, node 155:1086) is
-   the "assigned to the currently active day" look — orange border +
-   check badge, same PLAN_EX_CHECK_SVG glyph buildExerciseTile() already
-   uses for the exact same concept in the old editor. */
+/* GYM/plan-editor tile: real icon (from EXERCISE_ICON_SVG_V3) + separate
+   label below. Falls back to a generic barbell + name for any exercise
+   without a v3 icon yet. state 'selected' = "assigned to the active day"
+   (orange border + PLAN_EX_CHECK_SVG check badge). */
 function buildExerciseTileV2(ex, state){
   const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon;
   const svg = slug ? iconSvgV3(slug) : '';
@@ -4127,390 +3855,20 @@ function todayPlanExerciseNames(){
   if(!starredPlanId) return null;
   const plan = trainingPlans.find(p=>p.id===starredPlanId);
   if(!plan) return null;
-  const iso = document.getElementById('gymDate').value || todayStr();
-  const list = plan.schedule[dayKeyFromDate(iso)];
+  const list = plan.schedule[dayKeyFromDate(todayStr())];
   return (list && list.length) ? list : null;
 }
-let gymGridFiltered = false;
-let gymGridGrouped = false; // true when showing the full library grouped by muscle group (drag-reorder doesn't apply there)
-let gymShowFullLibrary = false; // escape hatch for this visit — bypasses the "build a plan first" prompt below
-function showFullGymLibrary(){
-  gymShowFullLibrary = true;
-  renderGymGrid();
-}
-function renderGymGrid(){
-  // L5 unwind (step 1 — GYM): the old #view-gym is never shown in the
-  // Mekkio layout. Skip rebuilding its invisible DOM; just keep GYM v2
-  // in sync (what the old tail-call did). renderGymGridV2() is fully
-  // self-contained — it reads sessionExercises / extraGymTiles /
-  // todayPlanExerciseNames() directly, not any state this body sets.
-  if(!document.getElementById('view-gym')?.classList.contains('active')){
-    renderGymGridV2();
-    return;
-  }
-  const grid = document.getElementById('gymGrid');
-  const fullLib = orderedExerciseLibrary();
-  const planEx = todayPlanExerciseNames();
-  gymGridFiltered = !!planEx;
-  const showPlanPrompt = !gymGridFiltered && !starredPlanId && !gymShowFullLibrary;
-  gymGridGrouped = !gymGridFiltered && !showPlanPrompt;
-  grid.classList.toggle('ex-grid', gymGridFiltered);
-  if(planEx){
-    grid.innerHTML = '';
-    const byName = new Map(fullLib.map(ex=>[ex.name, ex]));
-    const planNames = new Set(planEx.map(e=>e.name));
-    const lib = planEx.map(e=> byName.get(e.name) || e);
-    const shown = new Set(planNames);
-    extraGymTiles.forEach(ex=>{
-      if(!shown.has(ex.name)){ lib.push(byName.get(ex.name) || ex); shown.add(ex.name); }
-    });
-    sessionExercises.forEach(se=>{
-      if(!shown.has(se.name) && byName.has(se.name)){ lib.push(byName.get(se.name)); shown.add(se.name); }
-    });
-    lib.forEach(ex=>{
-      const inSession = sessionExercises.some(e=>e.name===ex.name);
-      const isExtra = extraGymTiles.some(e=>e.name===ex.name);
-      const state = inSession ? 'added' : (isExtra ? 'picked' : 'plain');
-      const btn = buildExerciseTile(ex, state);
-      btn.onclick = ()=> onTileTap(ex);
-      grid.appendChild(btn);
-    });
-  } else if(showPlanPrompt){
-    grid.innerHTML = `
-      <div class="gym-no-plan-prompt">
-        <h2>${t('gymNoPlanHeadline','Stwórz swój plan treningowy')}</h2>
-        <p>${t('gymNoPlanPrompt','Albo wybierz gotowy — GYM samo pokaże, co dziś zrobić.')}</p>
-        <button type="button" class="add-pill" onclick="goRoute('plans')">+<span>${t('gymNoPlanCta','Stwórz lub wybierz plan')}</span></button>
-        <a href="#" class="gym-no-plan-skip" onclick="event.preventDefault();showFullGymLibrary();">${t('gymShowAllLink','Zobacz wszystkie ćwiczenia')}</a>
-      </div>`;
-  } else {
-    const lib = gymFavFilter === 'favorites' ? fullLib.filter(ex=>favoriteExercises.has(ex.name)) : fullLib;
-    renderGroupedExerciseGrid(grid, lib, null, null, ex=>{
-      const inSession = sessionExercises.some(e=>e.name===ex.name);
-      const btn = buildExerciseTile(ex, inSession ? 'added' : 'plain');
-      btn.onclick = ()=> onTileTap(ex);
-      const heart = document.createElement('span');
-      heart.className = 'ex-tile-fav';
-      heart.innerHTML = ph(favoriteExercises.has(ex.name) ? 'heart-fill' : 'heart');
-      heart.onclick = (e)=>{ e.stopPropagation(); toggleFavoriteExercise(ex.name); };
-      btn.appendChild(heart);
-      return btn;
-    }, 'gym');
-  }
-  const pickBtn = document.getElementById('pickFromLibraryBtn');
-  if(pickBtn) pickBtn.classList.toggle('hidden', !gymGridFiltered);
-  const favRow = document.getElementById('gymFavFilterRow');
-  if(favRow) favRow.classList.toggle('hidden', gymGridFiltered || showPlanPrompt);
-  const addNewBtn = document.getElementById('gymAddNewBtn');
-  if(addNewBtn) addNewBtn.classList.toggle('hidden', showPlanPrompt);
-  const saveBtn = document.getElementById('gymSaveBtn');
-  if(saveBtn) saveBtn.classList.toggle('hidden', showPlanPrompt);
-  renderGymFavFilterRow();
-  renderGymGridV2();
-}
-let pickerSelected = new Set();
-function openExercisePicker(){
-  pickerSelected = new Set();
-  renderExercisePickerGrid();
-  document.getElementById('pickExerciseOverlay').classList.remove('hidden');
-}
-function closeExercisePicker(){
-  document.getElementById('pickExerciseOverlay').classList.add('hidden');
-}
-function togglePickerExercise(ex){
-  if(pickerSelected.has(ex.name)) pickerSelected.delete(ex.name);
-  else pickerSelected.add(ex.name);
-  renderExercisePickerGrid();
-}
-function renderExercisePickerGrid(){
-  const grid = document.getElementById('pickExerciseGrid');
-  grid.innerHTML = '';
-  const planEx = todayPlanExerciseNames() || [];
-  const alreadyVisible = new Set([...planEx.map(e=>e.name), ...extraGymTiles.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
-  orderedExerciseLibrary().forEach(ex=>{
-    if(alreadyVisible.has(ex.name)) return;
-    const btn = buildExerciseTile(ex, pickerSelected.has(ex.name) ? 'selected' : 'plain');
-    btn.onclick = ()=> togglePickerExercise(ex);
-    grid.appendChild(btn);
-  });
-  const addBtn = document.getElementById('pickExerciseAddBtn');
-  addBtn.disabled = pickerSelected.size === 0;
-  document.getElementById('pickExerciseAddLabel').textContent = pickerSelected.size
-    ? t('addSelectedCount', `Dodaj (${pickerSelected.size})`, pickerSelected.size)
-    : t('addSelected', 'Dodaj');
-}
-function confirmExercisePicker(){
-  if(!pickerSelected.size) return;
-  const byName = new Map(orderedExerciseLibrary().map(ex=>[ex.name, ex]));
-  pickerSelected.forEach(name=>{
-    const ex = byName.get(name);
-    if(ex && !extraGymTiles.some(e=>e.name===name) && !sessionExercises.some(e=>e.name===name)){
-      extraGymTiles.push({...ex});
-    }
-  });
-  pickerSelected = new Set();
-  closeExercisePicker();
-  renderGymGrid();
-  renderExercisePanels();
-}
-
-/* ---------- long-press to drag-reorder exercise tiles ----------
-   Listeners live on the stable #gymGrid container (event delegation),
-   NOT on individual tile buttons — moveTileDrag() calls renderGymGrid()
-   mid-drag, which destroys and recreates every tile, including the one
-   under the finger. A listener attached to that now-removed node never
-   sees its touchend, which left tileDrag stuck forever (ghost tile and
-   all future taps frozen) the first time this was tried. */
-let tileDrag = null; // {name, ghost, offsetX, offsetY, lastTarget}
-(function initGymGridDrag(){
-  const grid = document.getElementById('gymGrid');
-  let timer = null, startX = 0, startY = 0, pendingName = null;
-  const cancelTimer = ()=>{ clearTimeout(timer); timer = null; pendingName = null; };
-
-  // belt-and-suspenders: -webkit-touch-callout:none in CSS should already
-  // stop iOS's native "Save Image/Copy" long-press menu on the tile
-  // images, but block the contextmenu event too in case it still fires.
-  grid.addEventListener('contextmenu', e=> e.preventDefault());
-
-  grid.addEventListener('touchstart', (e)=>{
-    if(e.touches.length !== 1 || tileDrag || gymGridGrouped) return;
-    const tile = e.target.closest('.ex-tile');
-    if(!tile) return;
-    const t = e.touches[0];
-    startX = t.clientX; startY = t.clientY;
-    pendingName = tile.dataset.name;
-    timer = setTimeout(()=>{
-      const el = document.querySelector(`#gymGrid .ex-tile[data-name="${CSS.escape(pendingName)}"]`);
-      if(el) beginTileDrag(el, pendingName, startX, startY);
-    }, 350);
-  }, {passive:true});
-
-  grid.addEventListener('touchmove', (e)=>{
-    if(tileDrag){
-      e.preventDefault();
-      const t = e.touches[0];
-      moveTileDrag(t.clientX, t.clientY);
-      return;
-    }
-    if(timer){
-      const t = e.touches[0];
-      if(Math.abs(t.clientX-startX) > 10 || Math.abs(t.clientY-startY) > 10) cancelTimer();
-    }
-  }, {passive:false});
-
-  grid.addEventListener('touchend', (e)=>{
-    cancelTimer();
-    if(tileDrag){
-      e.preventDefault();
-      endTileDrag();
-    }
-  });
-  grid.addEventListener('touchcancel', ()=>{
-    cancelTimer();
-    if(tileDrag) endTileDrag();
-  });
-  // safety net: if a touchend/touchcancel is ever swallowed anyway,
-  // don't let a stuck drag permanently block every future tap.
-  document.addEventListener('touchstart', ()=>{
-    if(tileDrag && tileDrag.startedAt && Date.now() - tileDrag.startedAt > 8000) endTileDrag();
-  }, {capture:true, passive:true});
-})();
-function beginTileDrag(btn, name, x, y){
-  const rect = btn.getBoundingClientRect();
-  const ghost = btn.cloneNode(true);
-  ghost.classList.add('ex-tile-ghost');
-  ghost.style.position = 'fixed';
-  ghost.style.left = rect.left + 'px';
-  ghost.style.top = rect.top + 'px';
-  ghost.style.width = rect.width + 'px';
-  ghost.style.height = rect.height + 'px';
-  ghost.style.zIndex = '200';
-  ghost.style.pointerEvents = 'none';
-  ghost.style.transform = 'scale(1.06)';
-  ghost.style.boxShadow = '0 8px 24px rgba(0,0,0,.35)';
-  document.body.appendChild(ghost);
-  btn.classList.add('ex-tile-placeholder');
-  if(navigator.vibrate) navigator.vibrate(8);
-  tileDrag = {name, ghost, offsetX: x - rect.left, offsetY: y - rect.top, lastTarget: name, startedAt: Date.now()};
-  tileDrag.safetyTimer = setTimeout(()=>{ if(tileDrag) endTileDrag(); }, 15000);
-}
-function moveTileDrag(x, y){
-  if(!tileDrag) return;
-  tileDrag.ghost.style.left = (x - tileDrag.offsetX) + 'px';
-  tileDrag.ghost.style.top = (y - tileDrag.offsetY) + 'px';
-  const under = document.elementFromPoint(x, y);
-  const targetTile = under ? under.closest('.ex-tile') : null;
-  const targetName = targetTile ? targetTile.dataset.name : null;
-  if(targetName && targetName !== tileDrag.name && targetName !== tileDrag.lastTarget){
-    // Move the actual placeholder node via insertBefore instead of a full
-    // renderGymGrid() rebuild — rebuilding every tile (all the base64 <img>s)
-    // on every single crossing was heavy enough to visibly stutter, making
-    // the drag feel like it needed several nudges to "catch up".
-    const grid = document.getElementById('gymGrid');
-    const placeholderEl = grid.querySelector(`.ex-tile[data-name="${CSS.escape(tileDrag.name)}"]`);
-    if(placeholderEl && targetTile){
-      const tiles = [...grid.children];
-      const fromIdx = tiles.indexOf(placeholderEl);
-      const toIdx = tiles.indexOf(targetTile);
-      if(fromIdx < toIdx) grid.insertBefore(placeholderEl, targetTile.nextSibling);
-      else grid.insertBefore(placeholderEl, targetTile);
-      // Only the currently visible tiles (e.g. today's filtered plan list)
-      // get reordered here — merge them back into the full exerciseOrder
-      // instead of replacing it outright, so exercises outside this view
-      // (grouped-grid-only, not shown right now) don't lose their spot.
-      const visibleNames = [...grid.querySelectorAll('.ex-tile')].map(el=>el.dataset.name);
-      const visibleSet = new Set(visibleNames);
-      let insertAt = 0;
-      for(const n of exerciseOrder){ if(visibleSet.has(n)) break; insertAt++; }
-      const rest = exerciseOrder.filter(n=>!visibleSet.has(n));
-      exerciseOrder = [...rest.slice(0, insertAt), ...visibleNames, ...rest.slice(insertAt)];
-      tileDrag.lastTarget = targetName;
-    }
-  }
-}
-function endTileDrag(){
-  if(!tileDrag) return;
-  clearTimeout(tileDrag.safetyTimer);
-  tileDrag.ghost.remove();
-  document.querySelectorAll('.ex-tile-placeholder').forEach(el=>el.classList.remove('ex-tile-placeholder'));
-  tileDrag = null;
-  saveExerciseOrderList(exerciseOrder);
-}
-
-function onTileTap(ex){
-  markGymActivity();
-  if(ex.type === 'checklist'){
-    // simple tap-to-toggle "done" item — no sets/weight/reps, tapping again undoes it
-    const already = sessionExercises.find(e=>e.name===ex.name);
-    if(already) removeExerciseFromSession(ex.name);
-    else { sessionExercises.push({...ex, done:true}); renderGymGrid(); renderExercisePanels(); }
-    return;
-  }
-  openExercisePopup(ex);
-}
-
-function removeExerciseFromSession(name){
-  sessionExercises = sessionExercises.filter(e => e.name !== name);
-  renderGymGrid();
-  renderExercisePanels();
-}
-
-function openExercisePopup(ex){
-  // Bug (Maciej, 2026-09-04): "na dashboardzie pokazuje mi tylko minute
-  // treningu". markGymActivity() only ran from onTileTap()/onTileTapV2()
-  // — the FIRST tap on a fresh grid tile. Every subsequent re-open of an
-  // ALREADY-added exercise (the normal way you log set 2/3/4 between
-  // rests — tapping its bar in "your session"/its row in "done") called
-  // openExercisePopup()/openExercisePopupV2() directly, never touching
-  // activity tracking. So a real 45-minute session froze
-  // gymSessionActiveEndAt at that one first tap; by save time the gap
-  // exceeded GYM_SESSION_ACTIVE_GAP_MIN, computeGymSessionDurationMin()
-  // used the frozen (near-zero) window, and the 1-min floor kicked in.
-  // Marking activity here instead of only at the outer tap handlers
-  // covers every path that opens this popup, current and future.
-  markGymActivity();
-  const already = sessionExercises.find(e=>e.name===ex.name);
-  popupExercise = already
-    ? {...already, setValues: already.setValues.map(s=>({...s}))}
-    : {...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''};
-  popupShowWarning = false;
-  renderExercisePopup();
-  document.getElementById('exercisePopupOverlay').classList.remove('hidden');
-}
-function closeExercisePopup(){
-  document.getElementById('exercisePopupOverlay').classList.add('hidden');
-  popupExercise = null;
-  popupShowWarning = false;
-}
-function popupSetLive(idx, field, val){
-  if(!popupExercise) return;
-  popupExercise.setValues[idx][field] = val;
-  if(popupShowWarning){
-    // dismiss reactively without a full re-render, so the field being typed into keeps focus/cursor
-    popupShowWarning = false;
-    const warnEl = document.querySelector('.popup-warn');
-    if(warnEl) warnEl.remove();
-  }
-}
-function popupRemoveSetRow(idx){
-  if(!popupExercise || popupExercise.sets<=1) return;
-  popupExercise.setValues.splice(idx,1);
-  popupExercise.sets = popupExercise.setValues.length;
-  renderExercisePopup();
-}
-function popupAddSetRow(){
-  if(!popupExercise) return;
-  popupExercise.setValues.push({weight:'', reps:''});
-  popupExercise.sets = popupExercise.setValues.length;
-  renderExercisePopup();
-}
-function confirmExercisePopup(){
-  if(!popupExercise) return;
-  const idx = sessionExercises.findIndex(e=>e.name===popupExercise.name);
-  const hasData = popupExercise.setValues.some(s=>s.weight!=='' || s.reps!=='');
-  if(!hasData){
-    if(idx!==-1){
-      // was already tracked and the user cleared it out on purpose — drop it
-      sessionExercises.splice(idx,1);
-    } else {
-      // fields only ever showed last session's numbers as placeholder text —
-      // easy to mistake for already-filled-in. Don't silently no-op; say why.
-      popupShowWarning = true;
-      renderExercisePopup();
-      return;
-    }
-  } else if(idx===-1){
-    sessionExercises.push(popupExercise);
-  } else {
-    sessionExercises[idx] = popupExercise;
-  }
-  closeExercisePopup();
-  renderGymGrid();
-  renderExercisePanels();
-}
-
-function renderExercisePopup(){
-  const box = document.getElementById('exercisePopupBox');
-  if(!popupExercise){ box.innerHTML = ''; return; }
-  const ex = popupExercise;
-  const history = lastSessionsFor(ex.name);
-  const sugg = buildSuggestion(ex, history);
-  const lastSets = history[0] ? history[0].sets : [];
-  let rowsHtml = '';
-  for(let s=0;s<ex.sets;s++){
-    const lastW = lastSets[s] ? lastSets[s].weight : '';
-    const lastR = lastSets[s] ? lastSets[s].reps : '';
-    const isLast = s === ex.sets-1;
-    rowsHtml += `
-      <div class="set-row">
-        <div class="set-no">S${s+1}</div>
-        <input type="number" step="0.5" min="0" placeholder="${lastW!==''?lastW+' kg':'kg'}" value="${ex.setValues[s].weight}" oninput="popupSetLive(${s},'weight',this.value)">
-        <input type="number" step="1" min="0" placeholder="${lastR!==''?lastR+' '+t('repsUnit','powt.'):t('repsUnit','powt.')}" value="${ex.setValues[s].reps}" oninput="popupSetLive(${s},'reps',this.value)">
-        ${isLast?`<div class="set-steppers">${ex.sets>1?`<button type="button" class="set-step minus" onclick="popupRemoveSetRow(${s})">−</button>`:''}<button type="button" class="set-step plus" onclick="popupAddSetRow()">+</button></div>`:''}
-      </div>`;
-  }
-  const isEdit = sessionExercises.some(e=>e.name===ex.name);
-  const btnLabel = isEdit ? t('saveChanges','Zapisz') : t('addToWorkout','Dodaj do treningu');
-  box.innerHTML = `
-    <span class="close-x" onclick="closeExercisePopup()">${ph('x')}</span>
-    <div class="ex-name">${ex.name}</div>
-    <div class="ex-meta">${t('exMeta', `${groupLabel(ex.group)} · ${ex.sets} serie x ${ex.repLow}-${ex.repHigh} powt. · przerwa ${ex.rest}`, groupLabel(ex.group), ex.sets, ex.repLow, ex.repHigh, ex.rest)}</div>
-    <div class="tip-box">${sugg.text}</div>
-    <div class="set-rows">${rowsHtml}</div>
-    ${popupShowWarning ? `<div class="popup-warn">${t('popupNoValues','Pola są puste — liczby w tle to tylko podpowiedź z ostatniego treningu. Wpisz je, żeby dodać ćwiczenie.')}</div>` : ''}
-    <button type="button" class="popup-add-btn" onclick="confirmExercisePopup()">${btnLabel}</button>
-  `;
-}
+/* Old #view-gym grid + inline set-logging popup were deleted in the L5
+   teardown. Every "session changed, repaint" caller still calls
+   renderGymGrid() / renderExercisePanels(); both are now aliases to the
+   GYM v2 renderers. */
+function renderGymGrid(){ renderGymGridV2(); }
+function renderExercisePanels(){ renderGymDoneV2(); }
 
 /* ============================================================
-   GYM v2 set-logging popup (Figma node 112:1872) — parallel to
-   openExercisePopup()/renderExercisePopup() above, which stay untouched
-   for production GYM. Shares the same popupExercise/popupShowWarning
-   state (only one popup can ever be open at a time) and the same
-   sessionExercises/saveWorkout data layer — only the markup differs:
-   each series is its own card with labelled fields instead of a
-   compact row, and "Usuń serię"/"Dodaj serię" replace the inline +/−
-   steppers.
+   GYM set-logging popup (Figma node 112:1872). popupExercise /
+   popupShowWarning state (one popup open at a time) + the
+   sessionExercises / saveWorkout data layer.
    ============================================================ */
 function onTileTapV2(ex){
   markGymActivity();
@@ -4656,113 +4014,6 @@ function renderExercisePopupV2(animate){
     </div>
     <button type="button" class="exv2-submit${animCls}" style="animation-delay:${submitDelay}ms" onclick="confirmExercisePopupV2()">${btnLabel}</button>
   `;
-}
-
-function renderExercisePanels(){
-  // L5 unwind (step 1 — GYM): old #view-gym never shown — skip its
-  // invisible DOM, just keep GYM v2's "done" list in sync.
-  if(!document.getElementById('view-gym')?.classList.contains('active')){
-    renderGymDoneV2();
-    return;
-  }
-  const area = document.getElementById('exercisePanelArea');
-  area.innerHTML = '';
-
-  sessionExercises.forEach(ex=>{
-    if(ex.type === 'checklist'){
-      const safeName = ex.name.replace(/'/g,"\\'");
-      const bar = document.createElement('div');
-      bar.className = 'ex-bar';
-      bar.innerHTML = `
-        <div class="ex-bar-info">
-          <span class="ex-bar-check">${PH['check-circle']}</span>
-          <div>
-            <div class="nm">${ex.name}</div>
-            <div class="st">${t('checklistDone','zrobione')}</div>
-          </div>
-        </div>
-        <div class="ex-bar-actions">
-          <span class="ex-bar-delete" onclick="event.stopPropagation();removeExerciseFromSession('${safeName}')">${ph('trash')}</span>
-        </div>
-      `;
-      area.appendChild(bar);
-      return;
-    }
-    const validSets = ex.setValues.filter(s=>s.weight!=='' || s.reps!=='');
-    const summary = validSets.length ? validSets.map(s=>`${s.weight||0}kg×${s.reps||0}`).join(' · ') : t('noSetsLogged','brak wpisanych serii');
-    const bar = document.createElement('div');
-    bar.className = 'ex-bar';
-    bar.onclick = ()=> openExercisePopup(ex);
-    bar.innerHTML = `
-      <div class="ex-bar-info">
-        ${validSets.length ? `<span class="ex-bar-check">${PH['check-circle']}</span>` : ''}
-        <div>
-          <div class="nm">${ex.name}</div>
-          <div class="st">${summary}</div>
-        </div>
-      </div>
-      <div class="ex-bar-actions">
-        ${ph('pencil', 'ex-bar-edit')}
-        <span class="ex-bar-delete" onclick="event.stopPropagation();removeExerciseFromSession('${ex.name.replace(/'/g,"\\'")}')">${ph('trash')}</span>
-      </div>
-    `;
-    area.appendChild(bar);
-  });
-  renderGymDoneV2();
-}
-
-// Which flow saveNewExercise() should hand the finished exercise off
-// to — 'gym' (default, matches the form's original single entry point,
-// GYM's standalone "Dodaj nowe" button) adds it to today's session via
-// onTileTap(); 'planEditor' (the new per-section + tiles inside the
-// plan editor's grid) adds it to the currently open day instead via
-// togglePlanExercise(). Set by toggleNewExerciseForm()'s caller.
-let newExerciseContext = 'gym';
-function toggleNewExerciseForm(prefillGroup, context){
-  const overlay = document.getElementById('newExerciseOverlay');
-  const willShow = overlay.classList.contains('hidden');
-  overlay.classList.toggle('hidden', !willShow);
-  if(willShow){
-    newExerciseContext = context || 'gym';
-    document.getElementById('newExTitle').value = '';
-    document.getElementById('newExGroup').value = prefillGroup || '';
-    document.getElementById('newExSets').value = '';
-    document.getElementById('newExRepLow').value = '';
-    document.getElementById('newExRepHigh').value = '';
-    suggestedExerciseIcon = null;
-    document.getElementById('iconSuggestBox').classList.add('hidden');
-    const saveBtn = document.getElementById('newExSaveBtn');
-    if(saveBtn) saveBtn.textContent = newExerciseContext==='planEditor'
-      ? t('saveAddToPlan','Zapisz i dodaj do planu')
-      : t('saveAddToSession','Zapisz i dodaj do sesji');
-  }
-}
-function saveNewExercise(){
-  const name = document.getElementById('newExTitle').value.trim();
-  if(!name){ toast(t('enterExerciseName','Podaj nazwę ćwiczenia')); return; }
-  const existing = getExerciseLibrary().find(e => e.name.toLowerCase() === name.toLowerCase());
-  if(existing){
-    toast(t('exerciseExists','Takie ćwiczenie już istnieje — wybierz je z siatki'));
-    toggleNewExerciseForm();
-    return;
-  }
-  const group = document.getElementById('newExGroup').value.trim() || t('customGroupFallback','Własne');
-  const sets = Math.max(1, parseInt(document.getElementById('newExSets').value) || 3);
-  let repLow = Math.max(1, parseInt(document.getElementById('newExRepLow').value) || 8);
-  let repHigh = Math.max(repLow, parseInt(document.getElementById('newExRepHigh').value) || 12);
-  const newEx = {name, group, sets, repLow, repHigh, rest:t('asNeeded',"wg uznania"), icon: suggestedExerciseIcon || null};
-  customExercises.push(newEx);
-  saveCustomExercises(customExercises);
-  trackEvent('/event/add-custom-exercise', 'Dodano własne ćwiczenie');
-  const wasPlanEditor = newExerciseContext === 'planEditor';
-  toggleNewExerciseForm();
-  if(wasPlanEditor){
-    togglePlanExercise({...newEx, day:'Własne'});
-    toast(t('exerciseAddedToPlan','Dodano nowe ćwiczenie do listy i do planu'));
-    return;
-  }
-  onTileTap({...newEx, day:'Własne'});
-  toast(t('exerciseAdded','Dodano nowe ćwiczenie do listy i do sesji'));
 }
 
 /* v3 "Dodaj własne ćwiczenie" (#newExerciseOverlayV2) — reached from
@@ -4998,7 +4249,7 @@ function saveWorkout(){
   const cls = classifySession(result.map(e=>e.name));
   const workout = {
     id: 'w_' + Date.now(),
-    date: document.getElementById('gymDate').value || todayStr(),
+    date: todayStr(),
     day: cls.label,
     exercises: result,
     durationMin: computeGymSessionDurationMin() // null if no tile was ever tapped this session
@@ -5008,15 +4259,10 @@ function saveWorkout(){
   resetGymSessionTiming();
   trackEvent('/event/save-workout', 'Zapisano trening');
   toast(t('workoutSaved','Trening zapisany'));
-  pulseSaveBtn(document.querySelector('#view-gym .save-btn'));
-  const gymShareBtn = document.getElementById('gymShareBtn');
-  gymShareBtn.dataset.id = workout.id;
-  gymShareBtn.classList.remove('hidden');
   sessionExercises = [];
   extraGymTiles = [];
-  closeExercisePopup();
-  renderGymGrid();
-  renderExercisePanels();
+  renderGymGridV2();
+  renderGymDoneV2();
   return true;
 }
 /* GYM finish screen — full-screen "GRATULACJE / TRENING ZOSTAŁ ZAPISANY"
@@ -7849,7 +7095,7 @@ function importData(evt){
    text field regardless of autocomplete="off" — it seems to key partly
    off recognizing that literal value. A random, never-seen token
    defeats the pattern match more reliably. */
-['newExTitle','newExGroup','onboardNick','feedbackMessage'].forEach(id=>{
+['newExTitleV2','onboardNick','feedbackMessage'].forEach(id=>{
   const el = document.getElementById(id);
   if(el) el.setAttribute('autocomplete', 'off-' + Math.random().toString(36).slice(2));
 });
@@ -7858,10 +7104,7 @@ function importData(evt){
    INIT
    ============================================================ */
 showLoadScreenV2(()=>{}); // production boot splash — the "Mekkio" load screen (name + version) covers every launch for ~1.5s
-updateGymDateLabel();
 updatePlanPillLabel();
-renderGymGrid();
-renderExercisePanels();
 goRoute('dashboard'); // v3 "Mekkio" redesign is now the main layout — boot straight into it
 updateWelcomeGreeting();
 if(!localStorage.getItem(LS_ONBOARD_SEEN)){
