@@ -2499,6 +2499,10 @@ const T_EN = {
   pcV2Apply: 'Apply',
   feedbackSending: 'SENDING...',
   feedbackSendBtn: 'SEND',
+  activityDeleteConfirmV2: 'Delete this entry from your history? This can’t be undone.',
+  activityDelete: 'Delete entry',
+  workoutDeleted: 'Workout deleted',
+  runDeleted: 'Run deleted',
   stV2WeeklyProgress: 'Weekly progress',
   stV2Days: 'days',
   stV2DaysUpper: 'DAYS',
@@ -3008,7 +3012,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.32";
+const APP_VERSION = "4.10.33";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4927,7 +4931,16 @@ function deletePlanV2(id){
   if(!confirmPlanDeleteV2(plan)) return;
   performPlanDeleteV2(id);
 }
-function attachPlanSwipeV2(wrap, cardBtn, planId, delEl, shareEl){
+/* Generic list-row swipe: left reveals/fires a destructive action (with
+   confirm + slide-out), right reveals/fires a non-destructive one (snaps
+   back). Plans and the History v2 cards both use it via attachSwipeRow();
+   the two thin wrappers below pass the per-context callbacks:
+     deleteConfirm() → bool   (existence check + confirm dialog)
+     doDelete()               (the mutation; runs after the slide-out)
+     doShare()                (fires immediately)
+     onTap()                  (plain tap on the card, not mid-swipe/reveal) */
+function attachSwipeRow(wrap, cardBtn, opts){
+  const { delEl, shareEl, deleteConfirm, doDelete, doShare, onTap } = opts;
   let startX = 0, startY = 0, baseX = 0, dragging = false, axis = null, justDragged = false;
   let openSide = null; // 'left' (delete revealed) | 'right' (share revealed) | null
   const setX = (x, animate)=>{ cardBtn.style.transition = animate ? 'transform .2s ease' : 'none'; cardBtn.style.transform = `translateX(${x}px)`; };
@@ -4967,19 +4980,16 @@ function attachPlanSwipeV2(wrap, cardBtn, planId, delEl, shareEl){
     wrap.classList.toggle('plansv2-will-share', dragX > wrap.offsetWidth * PLANSV2_SWIPE_ACTION_RATIO);
   }
   function fullSwipeDelete(){
-    const plan = trainingPlans.find(p=>p.id===planId);
-    if(!plan){ closeThis(); return; }
-    if(!confirmPlanDeleteV2(plan)){ wrap.classList.remove('plansv2-will-delete'); closeThis(); return; }
+    if(!deleteConfirm()){ wrap.classList.remove('plansv2-will-delete'); closeThis(); return; }
     if(plansv2OpenSwipe && plansv2OpenSwipe.cardBtn===cardBtn) plansv2OpenSwipe = null;
     setX(-wrap.offsetWidth, true); // finish the slide-out, then drop the row
-    setTimeout(()=> performPlanDeleteV2(planId), 200);
+    setTimeout(doDelete, 200);
   }
   // Share isn't destructive — no confirm, and the card isn't going
   // anywhere, so this snaps back closed instead of sliding away.
   function fullSwipeShare(){
-    const plan = trainingPlans.find(p=>p.id===planId);
     wrap.classList.remove('plansv2-will-share');
-    if(plan) sharePlan(plan);
+    doShare();
     closeThis();
   }
   function onEnd(){
@@ -5016,8 +5026,18 @@ function attachPlanSwipeV2(wrap, cardBtn, planId, delEl, shareEl){
 
   cardBtn.addEventListener('click', (e)=>{
     if(justDragged) return;
-    if(isOpen()){ e.preventDefault(); e.stopPropagation(); closeThis(); return; } // tap elsewhere closes the reveal, doesn't open the editor
-    openPlanEditorV2(planId);
+    if(isOpen()){ e.preventDefault(); e.stopPropagation(); closeThis(); return; } // tap elsewhere closes the reveal, not the row's own action
+    if(onTap) onTap();
+  });
+}
+/* Plan card swipe — thin wrapper over attachSwipeRow(). */
+function attachPlanSwipeV2(wrap, cardBtn, planId, delEl, shareEl){
+  attachSwipeRow(wrap, cardBtn, {
+    delEl, shareEl,
+    deleteConfirm: ()=>{ const p = trainingPlans.find(x=>x.id===planId); return !!p && confirmPlanDeleteV2(p); },
+    doDelete: ()=> performPlanDeleteV2(planId),
+    doShare: ()=>{ const p = trainingPlans.find(x=>x.id===planId); if(p) sharePlan(p); },
+    onTap: ()=> openPlanEditorV2(planId),
   });
 }
 function buildPlanCardV2(p, isCustom, animate, i){
@@ -6200,6 +6220,102 @@ function renderHistMonthSummaryV2(animCls){
       <p class="histv2-card-sub">${subParts.join(' · ')}</p>
     </div>`;
 }
+/* One saved workout / run in the "Twoje treningi" panel — swipe left to
+   delete (confirm + slide-out), swipe right to share the generated card
+   image (audit U5). Same attachSwipeRow() mechanism as the plan cards. */
+function confirmActivityDeleteV2(){
+  return confirm(t('activityDeleteConfirmV2', 'Usunąć ten wpis z historii? Tego nie da się cofnąć.'));
+}
+function performHistWorkoutDeleteV2(id){
+  workouts = workouts.filter(w=>w.id!==id);
+  saveWorkouts(workouts);
+  delete histExpandedV2[id];
+  toast(t('workoutDeleted','Trening usunięty'));
+  renderCalendarV2(); // repaints the day panel + the calendar's has-log dots
+}
+function performHistRunDeleteV2(id){
+  runs = runs.filter(r=>r.id!==id);
+  saveRuns(runs);
+  delete histExpandedV2[id];
+  toast(t('runDeleted','Bieg usunięty'));
+  renderCalendarV2();
+}
+function histWorkoutCardInner(w){
+  const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
+  const exp = !!histExpandedV2[w.id];
+  return `
+    <div class="histv2-card-head">
+      <div class="histv2-card-kind">${ph('barbell')}<span>GYM</span></div>
+      <div class="histv2-card-right">
+        <span class="histv2-card-date">${fmtDateHuman(w.date)}</span>
+        ${exp?`<span class="ph histv2-card-close" onclick="event.stopPropagation();toggleHistExpandV2('${w.id}')">${PH.x}</span>`:''}
+      </div>
+    </div>
+    <p class="histv2-card-title">${t('histWorkoutVolTitle', `${w.exercises.length} ${plExercisesWord(w.exercises.length)}`, w.exercises.length)}</p>
+    <p class="histv2-card-sub">${t('histWorkoutVolSub', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol))}</p>
+    ${exp?`<div class="histv2-ex-list">
+      ${w.exercises.map(e=>`
+        <div class="histv2-ex-item">
+          <p class="histv2-ex-name">${e.name}</p>
+          <p class="histv2-ex-sets">${e.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ')}</p>
+        </div>`).join('')}
+    </div>`:''}`;
+}
+function histRunCardInner(r){
+  const min = Math.floor(r.pace), sec = Math.round((r.pace-min)*60);
+  const exp = !!histExpandedV2[r.id];
+  return `
+    <div class="histv2-card-head">
+      <div class="histv2-card-kind">${ph('sneaker-move')}<span>${t('histV2RunLabel','BIEGANIE')}</span></div>
+      <div class="histv2-card-right">
+        <span class="histv2-card-date">${fmtDateHuman(r.date)}</span>
+        ${exp?`<span class="ph histv2-card-close" onclick="event.stopPropagation();toggleHistExpandV2('${r.id}')">${PH.x}</span>`:''}
+      </div>
+    </div>
+    <p class="histv2-card-title">${runTypeLabel(r.type)}</p>
+    ${exp?`<div class="histv2-run-tiles">
+      <div class="histv2-run-tile"><div class="v">${r.distance}</div><div class="l">${t('histKilometers','Kilometry')}</div></div>
+      <div class="histv2-run-tile"><div class="v">${r.time}</div><div class="l">${t('histMinutes','Minuty')}</div></div>
+      <div class="histv2-run-tile"><div class="v">${min}:${sec.toString().padStart(2,'0')}</div><div class="l">${t('paceMinKm','Tempo (min/km)')}</div></div>
+    </div>
+    ${r.notes?`<p class="histv2-run-notes">${r.notes}</p>`:''}`:''}`;
+}
+function buildHistCardV2(kind, item, orderIdx, animate){
+  const id = item.id;
+  const exp = !!histExpandedV2[id];
+  const wrap = document.createElement('div');
+  wrap.className = 'plansv2-card-wrap' + (animate ? ' histv2-anim-in' : '');
+  wrap.style.setProperty('--i', orderIdx);
+
+  const del = document.createElement('div');
+  del.className = 'plansv2-card-delete';
+  del.innerHTML = ph('trash');
+  del.title = t('activityDelete','Usuń wpis');
+  const share = document.createElement('div');
+  share.className = 'plansv2-card-share';
+  share.innerHTML = ph('export');
+  share.title = kind==='run' ? t('shareRun','Udostępnij bieg') : t('shareWorkout','Udostępnij trening');
+
+  const card = document.createElement('div');
+  card.className = 'histv2-card' + (exp ? ' expanded' : '');
+  card.innerHTML = kind==='run' ? histRunCardInner(item) : histWorkoutCardInner(item);
+
+  const doDelete = ()=> kind==='run' ? performHistRunDeleteV2(id) : performHistWorkoutDeleteV2(id);
+  del.onclick = ()=>{ closePlansv2Swipe(); if(confirmActivityDeleteV2()) doDelete(); };
+  share.onclick = ()=>{ closePlansv2Swipe(); shareHistCard(kind, id); };
+
+  wrap.appendChild(del);
+  wrap.appendChild(share);
+  wrap.appendChild(card);
+  attachSwipeRow(wrap, card, {
+    delEl: del, shareEl: share,
+    deleteConfirm: confirmActivityDeleteV2,
+    doDelete,
+    doShare: ()=> shareHistCard(kind, id),
+    onTap: exp ? null : ()=> toggleHistExpandV2(id),
+  });
+  return wrap;
+}
 function renderHistDetailV2(animate){
   const wrap = document.getElementById('histDetailV2');
   const animCls = animate ? ' histv2-anim-in' : '';
@@ -6207,52 +6323,10 @@ function renderHistDetailV2(animate){
   const dayWorkouts = workouts.filter(w=>w.date===selectedHistDateV2);
   const dayRuns = runs.filter(r=>r.date===selectedHistDateV2);
   if(!dayWorkouts.length && !dayRuns.length){ wrap.innerHTML = `<div class="histv2-empty">${t('histEmptyNone', `Brak zapisanej aktywności — ${fmtDate(selectedHistDateV2)}`, fmtDate(selectedHistDateV2))}</div>`; return; }
-  let html = '';
-  dayWorkouts.forEach((w,i)=>{
-    const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
-    const exp = !!histExpandedV2[w.id];
-    html += `
-      <div class="histv2-card${animCls}${exp?' expanded':''}" style="--i:${i}"${exp?'':` onclick="toggleHistExpandV2('${w.id}')"`}>
-        <div class="histv2-card-head">
-          <div class="histv2-card-kind">${ph('barbell')}<span>GYM</span></div>
-          <div class="histv2-card-right">
-            <span class="histv2-card-date">${fmtDateHuman(w.date)}</span>
-            ${exp?`<span class="ph histv2-card-close" onclick="event.stopPropagation();toggleHistExpandV2('${w.id}')">${PH.x}</span>`:''}
-          </div>
-        </div>
-        <p class="histv2-card-title">${t('histWorkoutVolTitle', `${w.exercises.length} ${plExercisesWord(w.exercises.length)}`, w.exercises.length)}</p>
-        <p class="histv2-card-sub">${t('histWorkoutVolSub', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol))}</p>
-        ${exp?`<div class="histv2-ex-list">
-          ${w.exercises.map(e=>`
-            <div class="histv2-ex-item">
-              <p class="histv2-ex-name">${e.name}</p>
-              <p class="histv2-ex-sets">${e.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ')}</p>
-            </div>`).join('')}
-        </div>`:''}
-      </div>`;
-  });
-  dayRuns.forEach((r,i)=>{
-    const min = Math.floor(r.pace), sec = Math.round((r.pace-min)*60);
-    const exp = !!histExpandedV2[r.id];
-    html += `
-      <div class="histv2-card${animCls}${exp?' expanded':''}" style="--i:${dayWorkouts.length+i}"${exp?'':` onclick="toggleHistExpandV2('${r.id}')"`}>
-        <div class="histv2-card-head">
-          <div class="histv2-card-kind">${ph('sneaker-move')}<span>${t('histV2RunLabel','BIEGANIE')}</span></div>
-          <div class="histv2-card-right">
-            <span class="histv2-card-date">${fmtDateHuman(r.date)}</span>
-            ${exp?`<span class="ph histv2-card-close" onclick="event.stopPropagation();toggleHistExpandV2('${r.id}')">${PH.x}</span>`:''}
-          </div>
-        </div>
-        <p class="histv2-card-title">${runTypeLabel(r.type)}</p>
-        ${exp?`<div class="histv2-run-tiles">
-          <div class="histv2-run-tile"><div class="v">${r.distance}</div><div class="l">${t('histKilometers','Kilometry')}</div></div>
-          <div class="histv2-run-tile"><div class="v">${r.time}</div><div class="l">${t('histMinutes','Minuty')}</div></div>
-          <div class="histv2-run-tile"><div class="v">${min}:${sec.toString().padStart(2,'0')}</div><div class="l">${t('paceMinKm','Tempo (min/km)')}</div></div>
-        </div>
-        ${r.notes?`<p class="histv2-run-notes">${r.notes}</p>`:''}`:''}
-      </div>`;
-  });
-  wrap.innerHTML = html;
+  closePlansv2Swipe();
+  wrap.innerHTML = '';
+  dayWorkouts.forEach((w,i)=> wrap.appendChild(buildHistCardV2('workout', w, i, animate)));
+  dayRuns.forEach((r,i)=> wrap.appendChild(buildHistCardV2('run', r, dayWorkouts.length+i, animate)));
 }
 
 /* ============================================================
