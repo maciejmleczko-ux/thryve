@@ -314,16 +314,6 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
   }
 }
 
-/* ---------- welcome ---------- */
-.view-welcome{padding-bottom:60px;}
-.welcome-headline{position:relative;z-index:1;padding:0 20px;margin-top:60px;font-size:var(--m-fs-hero);line-height:1.08;font-weight:700;color:#fff;}
-.welcome-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:21px 17px;padding:0 12px;margin-top:49px;}
-.welcome-tile{border:none;border-radius:25px;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:31px;cursor:pointer;color:#fff;}
-.welcome-tile.orange{background:var(--orange);}
-.welcome-tile.gray{background:var(--card);}
-.welcome-tile .ph{width:79px;height:79px;}
-.welcome-tile .lbl{font-size:var(--m-fs-md);letter-spacing:.5px;font-weight:400;}
-
 /* ---------- bottom nav ---------- */
 .bottom-nav{position:fixed;left:0;right:0;bottom:20px;
   width:calc(100% - 40px);max-width:400px;margin:0 auto;
@@ -379,16 +369,6 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    a permanent size treatment, not tied to .active. */
 .bottom-nav.bottom-nav-light .nav-item-lg{width:69px;height:69px;margin-top:-8.5px;margin-bottom:-8.5px;}
 .bottom-nav.bottom-nav-light .nav-item-lg .ph{width:36px;height:36px;}
-
-/* ---------- app footer (version + copyright, welcome screen only) ---------- */
-.app-footer{position:fixed;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;
-  display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
-  padding:0 20px calc(16px + env(safe-area-inset-bottom));z-index:5;pointer-events:none;}
-.app-footer .app-version{font-size:var(--m-fs-2xs);letter-spacing:.3px;font-weight:700;color:var(--light);opacity:.55;}
-.app-footer .app-copyright{margin-top:3px;font-size:var(--m-fs-2xs);color:var(--light);opacity:.4;}
-.app-footer .app-copyright a{color:inherit;text-decoration:underline;pointer-events:auto;}
-.app-footer-feedback{flex-shrink:0;background:none;border:none;padding:6px;margin:0 -6px -8px 0;cursor:pointer;pointer-events:auto;color:var(--light);opacity:.55;}
-.app-footer-feedback .ph{width:28px;height:28px;display:block;}
 
 /* ---------- views ---------- */
 .view-stack{position:relative;overflow-x:hidden;}
@@ -682,9 +662,6 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .wnv2-card-list li{margin-bottom:4px;}
 .wnv2-card-list li:last-child{margin-bottom:0;}
 .wnv2-card-text + .wnv2-card-list{margin-top:8px;}
-.welcome-greeting{display:none;position:relative;z-index:1;padding:0 20px;margin-top:60px;font-size:var(--m-fs-md);font-weight:400;color:#fff;}
-.welcome-greeting.visible{display:block;}
-.welcome-greeting.visible ~ .welcome-headline{margin-top:4px;}
 .backup-hint{padding:0 20px;margin-top:10px;font-size:var(--m-fs-2xs);line-height:1.5;color:rgba(255,255,255,.5);}
 
 /* ---------- stats ---------- */
@@ -1785,39 +1762,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 
   <div class="view-stack" id="viewStack">
-
-  <!-- ===================== WELCOME ===================== -->
-  <section class="view view-welcome" id="view-welcome">
-    <div class="welcome-greeting" id="welcomeGreeting"></div>
-    <div class="welcome-headline">Ready for<br>Today's<br>Challenges?</div>
-    <div class="welcome-grid">
-      <button class="welcome-tile orange" onclick="goRoute('gym')">
-        __PH_BARBELL__
-        <div class="lbl">GYM</div>
-      </button>
-      <button class="welcome-tile orange" onclick="goRoute('running')">
-        __PH_SNEAKER__
-        <div class="lbl">RUNNING</div>
-      </button>
-      <button class="welcome-tile gray" onclick="goRoute('history')">
-        __PH_CALENDAR__
-        <div class="lbl">HISTORY</div>
-      </button>
-      <button class="welcome-tile gray" onclick="goRoute('stats')">
-        __PH_CHART__
-        <div class="lbl">STATS</div>
-      </button>
-    </div>
-
-    <!-- App version — filled in from APP_VERSION (see CHANGELOG comment near it for the MAJOR.MINOR.PATCH convention). -->
-    <div class="app-footer">
-      <div>
-        <div class="app-version" id="appVersionLabel"></div>
-        <div class="app-copyright">© 2026 Maciej Mleczko · <a href="https://www.maciejmleczko.pl" target="_blank" rel="noopener">www.maciejmleczko.pl</a></div>
-      </div>
-      <button type="button" class="app-footer-feedback" onclick="openFeedback()" data-i18n-title="feedbackTitle" title="Podziel się opinią"><span class="ph" data-ph="chat-dots"></span></button>
-    </div>
-  </section>
 
   <!-- ===================== DASHBOARD (v3 "Mekkio" home — the app boots here) ===================== -->
   <section class="view active" id="view-dashboard">
@@ -3425,7 +3369,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.20";
+const APP_VERSION = "4.10.21";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -8636,7 +8580,6 @@ function renderRunCharts(){
    ============================================================ */
 showLoadScreenV2(()=>{}); // production boot splash — the "Mekkio" load screen (name + version) covers every launch for ~1.5s
 updateCalLabels();
-document.getElementById('appVersionLabel').textContent = 'Mekkio v' + APP_VERSION;
 updateGymDateLabel();
 updateRunDateLabel();
 updateStatsDateLabel();
