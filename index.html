@@ -342,10 +342,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    pill + dark icon color for every inactive item (not just Plans, as
    first guessed), and exact 52px/69px sizing all pulled from the SVG's
    literal coordinates instead of eyeballing proportions. #bottomNav's
-   button set is swapped dynamically per-route (see
-   renderBottomNavForContext()) — production keeps its original
-   5-button markup/sizing untouched, this only ever renders while isV3
-   is true, same old/v2 split as everything else this session.
+   buttons are (re)built from NAV_ITEMS_V3 by renderBottomNavForContext().
    Gradient border: SVG's stroke is a horizontal white→white74%→white
    linear-gradient on the pill's rounded outline — border-image doesn't
    respect border-radius, so it's a ::before overlay instead, masked to
@@ -2062,12 +2059,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <input type="file" id="importFile" accept="application/json" style="display:none;" onchange="importData(event)">
 
   <!-- ===================== BOTTOM NAV ===================== -->
+  <!-- Rebuilt from NAV_ITEMS_V3 by renderBottomNavForContext() on the first
+       goRoute(); this static copy just matches it so there's no icon flash. -->
   <nav class="bottom-nav" id="bottomNav">
-    <button class="nav-item" data-route="welcome" onclick="navTap('welcome')">__PH_HOUSE__</button>
-    <button class="nav-item" data-route="gym" onclick="navTap('gym')">__PH_BARBELL__</button>
-    <button class="nav-item" data-route="running" onclick="navTap('running')">__PH_SNEAKER__</button>
-    <button class="nav-item" data-route="history" onclick="navTap('history')">__PH_CALENDAR__</button>
-    <button class="nav-item" data-route="stats" onclick="navTap('stats')">__PH_CHART__</button>
+    <button class="nav-item" data-route="dashboard" onclick="navTap('dashboard')"><span class="ph" data-ph="house"></span></button>
+    <button class="nav-item" data-route="plans" onclick="navTap('plans')"><span class="ph" data-ph="clipboard-text"></span></button>
+    <button class="nav-item nav-item-lg" data-route="gym" onclick="navTap('gym')"><span class="ph" data-ph="barbell"></span></button>
+    <button class="nav-item" data-route="history" onclick="navTap('history')"><span class="ph" data-ph="calendar-dots"></span></button>
+    <button class="nav-item" data-route="stats" onclick="navTap('stats')"><span class="ph" data-ph="chart-line-up"></span></button>
   </nav>
 
 </div>
@@ -3011,7 +3010,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.26";
+const APP_VERSION = "4.10.27";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3467,7 +3466,6 @@ function fmtDate(iso){
    ROUTER
    ============================================================ */
 let currentRoute = 'dashboard';
-const ROUTE_ORDER = ['welcome', 'gym', 'running', 'history', 'stats'];
 /* v2 ("Mekkio") screens in bottom-nav order (dashboard, plans, GYM,
    history, stats) — so goRoute()'s slide direction matches which way you
    moved along the nav. plan-editor-v2 is button-driven, not on the bar. */
@@ -3539,16 +3537,10 @@ function commitViewTransition(){
   const fallbackTimer = setTimeout(cleanup, 450);
   viewTransitionCleanup = cleanup;
 }
-/* v3 preview routes: which route each shared nav icon should actually
-   go to while previewMode is on. Only sections with a built v3 screen
-   get an entry here — everything else still falls through to the
-   real production route unchanged. See [[project_thryve_roadmap]]. */
-/* v3 (the "Mekkio" redesign) is now the main layout — previewMode is on
-   from boot and the app never routes back to the old production screens
-   in normal use. The old #view-* screens + NAV_ITEMS_PRODUCTION stay in
-   the file as dead code, to be removed in a later cleanup. The only old
-   screen still reached is #view-plans, and only during a brand-new
-   user's first-plan onboarding (startPlanOnboarding). */
+/* PREVIEW_ROUTES: navTap() maps a bottom-nav route to its v2 screen
+   (dashboard has no entry — it's already a v2 route). previewMode is a
+   vestigial always-true flag from the old v3-preview era; the L5 teardown
+   removed every old #view-* screen, so there's nothing to fall back to. */
 let previewMode = true;
 const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2', history: 'history-v2', stats: 'stats-v2' };
 const V3_ROUTE_ALIAS = { 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats' }; // which nav icon a v3 route should light up
@@ -3562,13 +3554,6 @@ function navTap(route){
    #bottomNav's innerHTML is rebuilt from one of these on every
    goRoute() call rather than toggling classes on fixed markup, since
    the set of icons itself changes, not just their color/state. */
-const NAV_ITEMS_PRODUCTION = [
-  {route:'welcome', icon:'house'},
-  {route:'gym', icon:'barbell'},
-  {route:'running', icon:'sneaker-move'},
-  {route:'history', icon:'calendar-dots'},
-  {route:'stats', icon:'chart-line-up'},
-];
 const NAV_ITEMS_V3 = [
   {route:'dashboard', icon:'house'},
   {route:'plans', icon:'clipboard-text'},
@@ -3576,10 +3561,9 @@ const NAV_ITEMS_V3 = [
   {route:'history', icon:'calendar-dots'},
   {route:'stats', icon:'chart-line-up'},
 ];
-function renderBottomNavForContext(isV3){
+function renderBottomNavForContext(){
   const nav = document.getElementById('bottomNav');
-  const items = isV3 ? NAV_ITEMS_V3 : NAV_ITEMS_PRODUCTION;
-  nav.innerHTML = items.map(it=>
+  nav.innerHTML = NAV_ITEMS_V3.map(it=>
     `<button class="nav-item${it.cls?' '+it.cls:''}" data-route="${it.route}" onclick="navTap('${it.route}')"><span class="ph" data-ph="${it.icon}"></span></button>`
   ).join('');
   // hydratePhIcons() only ran once at page load against the original
@@ -3589,11 +3573,12 @@ function renderBottomNavForContext(isV3){
   hydratePhIcons();
 }
 function goRoute(route){
+  // Slide direction follows the bottom-nav order (V2_ROUTE_ORDER). Routes
+  // not on the bar (plan-editor-v2) fall through to a neutral forward slide.
   const v2Old = V2_ROUTE_ORDER.indexOf(currentRoute);
   const v2New = V2_ROUTE_ORDER.indexOf(route);
-  const oldIndex = v2Old !== -1 && v2New !== -1 ? v2Old : ROUTE_ORDER.indexOf(currentRoute);
-  const newIndex = v2Old !== -1 && v2New !== -1 ? v2New : ROUTE_ORDER.indexOf(route);
-  const forward = newIndex >= oldIndex;
+  const bothOnBar = v2Old !== -1 && v2New !== -1;
+  const forward = bothOnBar ? v2New >= v2Old : true;
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward);
