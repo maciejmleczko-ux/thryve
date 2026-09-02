@@ -640,12 +640,16 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-root .ph{display:block;}
 .dash-root .ph svg{display:block;width:100%;height:100%;}
 /* Chat button — one rule for every v2 screen (audit W5). Was copy-pasted
-   per screen as .dash- / .gymv2- / .plansv2- / .histv2- / .statsv2-chat-btn. */
+   per screen as .dash- / .gymv2- / .plansv2- / .histv2- / .statsv2-chat-btn.
+   Dashboard keeps it floating top-right; the four subpages (Figma node
+   191:703) now carry it inline as the trailing element of the screen
+   header row, so it sits on one line with the back arrow + title. */
 .dash-chat-btn, .gymv2-chat-btn, .plansv2-chat-btn, .histv2-chat-btn, .statsv2-chat-btn{
-  position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;
   width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;flex-shrink:0;
 }
+.dash-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;}
+.gymv2-chat-btn, .histv2-chat-btn{margin-left:auto;}
 .dash-chat-btn:active, .gymv2-chat-btn:active, .plansv2-chat-btn:active, .histv2-chat-btn:active, .statsv2-chat-btn:active{transform:scale(.9);}
 .dash-chat-btn .ph, .gymv2-chat-btn .ph, .plansv2-chat-btn .ph, .histv2-chat-btn .ph, .statsv2-chat-btn .ph{width:24px;height:24px;color:var(--m-orange);}
 .dash-header{width:85%;margin-bottom:16px;}
@@ -750,14 +754,16 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    it has far more content than fits one iPhone screen.
    ============================================================ */
 #view-gym-v2{min-height:100vh;background:var(--m-red-page);}
-.gymv2-panel{background:var(--m-panel);border-radius:0 0 26px 26px;padding:calc(50px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
+.gymv2-panel{background:var(--m-panel);border-radius:0 0 26px 26px;padding:calc(16px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
 /* Screen header — one spec for GYM / Plans / History / Stats (audit W5).
    Plans + Stats wrap the icon+h1 in a .*-header-title (their .*-header is a
    space-between row); GYM + History put it straight on .*-header.
    Figma node 191:703 shrank the title icon (40->32) + label
    (--m-fs-2xl -> --m-fs-xl) and put a back arrow ahead of them. */
 .gymv2-header, .plansv2-header-title, .histv2-header, .statsv2-header-title{display:flex;align-items:center;gap:12px;}
-.gymv2-header .ph, .plansv2-header-title .ph, .histv2-header .ph, .statsv2-header-title .ph{width:32px;height:32px;color:var(--m-orange);flex-shrink:0;}
+/* direct-child only — the header row also holds the back arrow and the
+   inline chat button, whose own .ph glyphs keep their 24px size. */
+.gymv2-header > .ph, .plansv2-header-title > .ph, .histv2-header > .ph, .statsv2-header-title > .ph{width:32px;height:32px;color:var(--m-orange);flex-shrink:0;}
 .gymv2-header h1, .plansv2-header-title h1, .histv2-header h1, .statsv2-header h1{margin:0;font-size:var(--m-fs-xl);font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
 .gymv2-header, .histv2-header{margin-bottom:20px;}
 /* Back arrow — returns to Dashboard from any of the four v2 tab screens.
@@ -765,7 +771,10 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    reads as navigation chrome rather than part of the title lockup. */
 .v2-hdr-back{background:none;border:none;padding:0;margin:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform .12s ease;}
 .v2-hdr-back:active{transform:scale(.88);}
-.gymv2-header .v2-hdr-back .ph, .plansv2-header-title .v2-hdr-back .ph, .histv2-header .v2-hdr-back .ph, .statsv2-header-title .v2-hdr-back .ph{width:24px;height:24px;color:var(--m-ink);}
+.v2-hdr-back .ph{width:24px;height:24px;color:var(--m-ink);}
+/* right-side control cluster (chat button + a close X) for the two headers
+   that carry both — plan-editor-v2 and Stats detail. */
+.v2-hdr-actions{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
 
 .gymv2-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:transform .12s ease;}
 .gymv2-plan-card:active{transform:scale(.98);}
@@ -897,7 +906,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 #view-plans-v2{min-height:100vh;background:var(--m-panel);}
 .plansv2-root .ph{display:block;}
 .plansv2-root .ph svg{display:block;width:100%;height:100%;}
-.plansv2-panel{padding:calc(50px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
+.plansv2-panel{padding:calc(16px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
 .plansv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
 .plansv2-close{width:24px;height:24px;color:var(--m-ink);cursor:pointer;flex-shrink:0;}
 .plansv2-actions{display:flex;gap:10px;width:100%;margin-bottom:24px;}
@@ -1367,7 +1376,7 @@ body.pev2-bg{background:var(--m-red-page);}
    256 viewBox instead of duplicating new ones at the Figma export's
    24 viewBox. */
 .histv2-root{background:var(--m-panel);}
-.histv2-panel{padding:calc(50px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
+.histv2-panel{padding:calc(16px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
 /* Aligned to GYM v2/Plans v2's header exactly (40px icon, 30.654px
    title, -.02em tracking) — the Figma export's own 55.18px/30px/+1.2px
    for History read as an outlier from that specific export rather than
@@ -1451,7 +1460,7 @@ body.pev2-bg{background:var(--m-red-page);}
    running-best WEIGHT over time, not volume — relabeled "PROGRES
    CIĘŻARU" to match what the chart actually shows. */
 .statsv2-root{background:var(--m-panel);}
-.statsv2-panel{padding:calc(50px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
+.statsv2-panel{padding:calc(16px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
 .statsv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 /* Detail-only close (Figma node 183:13900, size-[30px] — a screen-level
    "leave this section" affordance, not a modal close, so kept at its
@@ -1713,12 +1722,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <!-- ===================== GYM v2 (hidden preview, see Dashboard) ===================== -->
   <section class="view gymv2-root" id="view-gym-v2">
     <div class="gymv2-panel">
-      <button type="button" class="gymv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
-
       <div class="gymv2-header">
         <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
         <span class="ph" data-ph="barbell"></span>
         <h1>GYM</h1>
+        <button type="button" class="gymv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
       </div>
 
       <div class="gymv2-plan-card" onclick="goRoute('plans-v2')">
@@ -1768,8 +1776,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
        GYM screen's data. -->
   <section class="view plansv2-root" id="view-plans-v2">
     <div class="plansv2-panel">
-      <button type="button" class="plansv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
-
       <!-- No close X: Plans is a standalone tab reached from the bottom nav,
            not a modal over GYM. (The plan-editor-v2 header below keeps its X
            because that one really is a sub-screen you back out of.) -->
@@ -1779,6 +1785,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <span class="ph" data-ph="barbell"></span>
           <h1>PLANS</h1>
         </div>
+        <button type="button" class="plansv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
       </div>
 
       <div class="plansv2-actions">
@@ -1876,14 +1883,15 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <section class="view plansv2-root" id="view-plan-editor-v2">
     <div class="pev2-card">
     <div class="plansv2-panel pev2-panel">
-      <button type="button" class="plansv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
-
       <div class="plansv2-header">
         <div class="plansv2-header-title">
           <span class="ph" data-ph="barbell"></span>
           <h1>PLANS</h1>
         </div>
-        <span class="ph plansv2-close" data-ph="x" onclick="goRoute('plans-v2')"></span>
+        <div class="v2-hdr-actions">
+          <button type="button" class="plansv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
+          <span class="ph plansv2-close" data-ph="x" onclick="goRoute('plans-v2')"></span>
+        </div>
       </div>
 
       <div class="pev2-body">
@@ -1926,12 +1934,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
        preview nav. Production's own History screen stays untouched. ===================== -->
   <section class="view histv2-root" id="view-history-v2">
     <div class="histv2-panel">
-      <button type="button" class="histv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
-
       <div class="histv2-header">
         <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
         <span class="ph" data-ph="calendar-dots"></span>
         <h1>HISTORY</h1>
+        <button type="button" class="histv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
       </div>
 
       <div class="histv2-actions">
@@ -1970,15 +1977,16 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
        only the header/chat-button here are static. ===================== -->
   <section class="view statsv2-root" id="view-stats-v2">
     <div class="statsv2-panel">
-      <button type="button" class="statsv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
-
       <div class="statsv2-header">
         <div class="statsv2-header-title">
           <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
           <span class="ph" data-ph="chart-line-up"></span>
           <h1>STATS</h1>
         </div>
-        <span class="ph statsv2-close-btn" data-ph="x" id="statsV2CloseBtn" style="display:none" onclick="closeStatsDetailV2()"></span>
+        <div class="v2-hdr-actions">
+          <button type="button" class="statsv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
+          <span class="ph statsv2-close-btn" data-ph="x" id="statsV2CloseBtn" style="display:none" onclick="closeStatsDetailV2()"></span>
+        </div>
       </div>
 
       <div id="statsV2Body"></div>
@@ -3029,7 +3037,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.34";
+const APP_VERSION = "4.10.35";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
