@@ -3425,7 +3425,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.19";
+const APP_VERSION = "4.10.20";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7385,6 +7385,12 @@ function datesWithLogs(){
   return m;
 }
 function renderCalendar(){
+  // L5 unwind (step 3 — History): old #view-history is never shown in the
+  // Mekkio layout. History v2 has its own renderCalendarV2(); this v1
+  // calendar has no v2 tail-call by design, so just bail when its screen
+  // isn't up. (Callers that must refresh the live screen — e.g. data
+  // import — go through goRoute(currentRoute) instead.)
+  if(!document.getElementById('view-history')?.classList.contains('active')) return;
   updateCalLabels();
   const {year, month} = calState;
   const grid = document.getElementById('calGrid');
@@ -8471,7 +8477,10 @@ function importData(evt){
       saveFavoriteExercises();
       if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId); else localStorage.removeItem(LS_STARRED_PLAN);
       saveExerciseOrderList(exerciseOrder);
-      renderCalendar();
+      // A backup import replaces everything — re-render whatever screen is
+      // currently showing. goRoute() with the same route skips the slide
+      // (oldEl === newEl) and just re-runs that route's render (v2 or old).
+      goRoute(currentRoute);
       toast(t('dataImported','Zaimportowano dane'));
     }catch(err){
       toast(t('fileReadFailed','Nie udało się wczytać pliku'));
