@@ -3425,7 +3425,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.17";
+const APP_VERSION = "4.10.18";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4475,6 +4475,15 @@ function showFullGymLibrary(){
   renderGymGrid();
 }
 function renderGymGrid(){
+  // L5 unwind (step 1 — GYM): the old #view-gym is never shown in the
+  // Mekkio layout. Skip rebuilding its invisible DOM; just keep GYM v2
+  // in sync (what the old tail-call did). renderGymGridV2() is fully
+  // self-contained — it reads sessionExercises / extraGymTiles /
+  // todayPlanExerciseNames() directly, not any state this body sets.
+  if(!document.getElementById('view-gym')?.classList.contains('active')){
+    renderGymGridV2();
+    return;
+  }
   const grid = document.getElementById('gymGrid');
   const fullLib = orderedExerciseLibrary();
   const planEx = todayPlanExerciseNames();
@@ -4986,6 +4995,12 @@ function renderExercisePopupV2(animate){
 }
 
 function renderExercisePanels(){
+  // L5 unwind (step 1 — GYM): old #view-gym never shown — skip its
+  // invisible DOM, just keep GYM v2's "done" list in sync.
+  if(!document.getElementById('view-gym')?.classList.contains('active')){
+    renderGymDoneV2();
+    return;
+  }
   const area = document.getElementById('exercisePanelArea');
   area.innerHTML = '';
 
