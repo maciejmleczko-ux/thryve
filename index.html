@@ -767,11 +767,13 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .gymv2-header h1, .plansv2-header-title h1, .histv2-header h1, .statsv2-header h1{margin:0;font-size:var(--m-fs-xl);font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
 .gymv2-header, .histv2-header{margin-bottom:20px;}
 /* Back arrow — returns to Dashboard from any of the four v2 tab screens.
-   Sits before the title icon; its own 24px glyph (ink, not orange) so it
-   reads as navigation chrome rather than part of the title lockup. */
-.v2-hdr-back{background:none;border:none;padding:0;margin:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform .12s ease;}
+   Sits before the title icon; its own ink glyph (not orange) so it reads
+   as navigation chrome rather than part of the title lockup. 40px hit
+   target for thumbs, nudged left so the 26px glyph lands near the screen
+   edge like a native back control (barely shifts the title). */
+.v2-hdr-back{background:none;border:none;padding:0;margin:0 0 0 -6px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform .12s ease;}
 .v2-hdr-back:active{transform:scale(.88);}
-.v2-hdr-back .ph{width:24px;height:24px;color:var(--m-ink);}
+.v2-hdr-back .ph{width:26px;height:26px;color:var(--m-ink);}
 /* right-side control cluster (chat button + a close X) for the two headers
    that carry both — plan-editor-v2 and Stats detail. */
 .v2-hdr-actions{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
@@ -3037,7 +3039,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.36";
+const APP_VERSION = "4.10.37";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
