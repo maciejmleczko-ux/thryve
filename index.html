@@ -3141,7 +3141,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.11.3";
+const APP_VERSION = "4.11.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7094,6 +7094,11 @@ function statsV2RevealOnScroll(body){
     targets.forEach(reveal);
     return;
   }
+  // A card counts as "in view" once its top has passed this fraction of
+  // the viewport height — 0.6 so a tall card only peeking in at the
+  // bottom (e.g. the YTD chart, which is behind the nav on entry) waits
+  // until it's scrolled properly up before its line draws.
+  const IN_VIEW = 0.6;
   // Reveal whatever is already on screen right now — don't make the
   // above-the-fold cards wait on the observer (IntersectionObserver
   // doesn't deliver while the document is hidden, e.g. a backgrounded
@@ -7101,13 +7106,13 @@ function statsV2RevealOnScroll(body){
   const vh = window.innerHeight || document.documentElement.clientHeight;
   const pending = [];
   targets.forEach(el=>{
-    if(el.getBoundingClientRect().top < vh * 0.9) reveal(el);
+    if(el.getBoundingClientRect().top < vh * IN_VIEW) reveal(el);
     else pending.push(el);
   });
   if(!pending.length) return;
   statsV2RevealObs = new IntersectionObserver((entries, obs)=>{
     entries.forEach(en=>{ if(en.isIntersecting){ reveal(en.target); obs.unobserve(en.target); } });
-  }, { rootMargin: '0px 0px -15% 0px', threshold: 0 });
+  }, { rootMargin: '0px 0px ' + Math.round(-(1 - IN_VIEW) * 100) + '% 0px', threshold: 0 });
   pending.forEach(el=> statsV2RevealObs.observe(el));
   // Fallback for the same hidden-document case: a scroll still reveals
   // anything that has come into view even if the observer stayed quiet.
@@ -7115,7 +7120,7 @@ function statsV2RevealOnScroll(body){
     const h = window.innerHeight || 0;
     for(let i = pending.length - 1; i >= 0; i--){
       const el = pending[i];
-      if(!el.isConnected || el.getBoundingClientRect().top < h * 0.9){
+      if(!el.isConnected || el.getBoundingClientRect().top < h * IN_VIEW){
         if(el.isConnected) reveal(el);
         if(statsV2RevealObs) statsV2RevealObs.unobserve(el);
         pending.splice(i, 1);
