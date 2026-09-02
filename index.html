@@ -269,37 +269,86 @@ button{font-family:inherit;}
 @media (prefers-reduced-motion: reduce){ .loadv2-root{transition:none;} }
 
 /* GYM finish screen (Figma node 185:14366, "03. GYM - FINISH") — full-screen
-   celebratory confirmation shown by showGymFinishV2() for 1.5s right after a
-   workout is saved from GYM v2, then it hands off to the Dashboard. Same
-   show/hide mechanics as the load screen above (.visible toggles display,
-   .hiding fades out). Mirrors GYM v2's red-under-lilac panel treatment:
-   var(--m-red-page) page with an var(--m-panel) panel whose 26px bottom corners let a sliver
-   of red through. */
+   celebratory confirmation shown by showGymFinishV2() right after a workout
+   is saved from GYM v2. Lottie "success" animation + a session summary;
+   dismissed by the CTA (no auto-advance), then it hands off to the Dashboard.
+   Same show/hide mechanics as the load screen above (.visible toggles
+   display, .hiding fades out). Mirrors GYM v2's red-under-lilac panel
+   treatment: var(--m-red-page) page with a var(--m-panel) panel whose 26px
+   bottom corners let a sliver of red through. */
 .gymfin-root{display:none;position:fixed;inset:0;z-index:9500;overflow:hidden;background:var(--m-red-page);opacity:1;transition:opacity .35s ease;}
 .gymfin-root.visible{display:block;}
 .gymfin-root.hiding{opacity:0;}
-.gymfin-panel{position:absolute;inset:0;background:var(--m-panel);border-radius:0 0 26px 26px;overflow:hidden;}
-.gymfin-fx{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:color-dodge;pointer-events:none;}
-.gymfin-topbar{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 10px;z-index:1;}
-.gymfin-brand{display:flex;align-items:center;gap:16px;}
-.gymfin-brand .ph{width:40px;height:40px;color:var(--m-orange);display:block;}
+/* panel is now a flex column: topbar / body (centred) / CTA — the old
+   absolute .gymfin-center + full-screen .gymfin-fx confetti image are gone,
+   replaced by the Lottie "success" animation + a session summary. */
+.gymfin-panel{position:absolute;inset:0;background:var(--m-panel);border-radius:0 0 26px 26px;overflow:hidden;display:flex;flex-direction:column;padding:calc(20px + env(safe-area-inset-top,0px)) 20px 24px;}
+.gymfin-topbar{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.gymfin-brand{display:flex;align-items:center;gap:14px;}
+.gymfin-brand .ph{width:34px;height:34px;color:var(--m-orange);display:block;}
 .gymfin-brand-word{font-size:var(--m-fs-2xl);font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
 .gymfin-chat{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.gymfin-chat .ph{width:24px;height:24px;color:var(--m-orange);display:block;}
+.gymfin-chat .ph{width:22px;height:22px;color:var(--m-orange);display:block;}
 .gymfin-brand .ph svg, .gymfin-chat .ph svg{display:block;width:100%;height:100%;}
-.gymfin-center{position:absolute;left:0;right:0;top:38%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:18px;padding:0 24px;z-index:1;text-align:center;}
-.gymfin-check{width:68px;height:68px;border-radius:50%;background:var(--m-orange);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.gymfin-check svg{width:44px;height:44px;display:block;}
+
+.gymfin-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;min-height:0;}
+.gymfin-anim{width:min(240px,36vh);height:min(240px,36vh);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.gymfin-anim svg{display:block;width:100%;height:100%;}
+.gymfin-anim .gymfin-check{display:none;}
+.gymfin-anim.is-fallback .gymfin-check{display:flex;}
+.gymfin-check{width:88px;height:88px;border-radius:50%;background:var(--m-orange);align-items:center;justify-content:center;flex-shrink:0;}
+.gymfin-check svg{width:52px;height:52px;display:block;}
+.gymfin-heads{display:flex;flex-direction:column;gap:8px;}
 .gymfin-title{margin:0;font-size:var(--m-fs-hero);font-weight:500;color:var(--m-orange);letter-spacing:1.6px;line-height:1;}
 .gymfin-sub{margin:0;font-size:var(--m-fs-md);font-weight:400;color:#000;letter-spacing:.7px;}
+
+/* summary tiles — the four dashboard bento colours */
+.gymfin-stats{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px;}
+.gymfin-stat{border-radius:var(--m-r-sm);padding:14px 13px 13px;text-align:left;}
+.gymfin-stat-k{margin:0 0 5px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.09em;text-transform:uppercase;}
+.gymfin-stat-v{margin:0;font-size:31px;font-weight:600;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.gymfin-stat-v small{font-size:14px;font-weight:400;margin-left:3px;letter-spacing:0;}
+.gymfin-stat--orange{background:var(--m-orange);}
+.gymfin-stat--blue{background:var(--m-plan-mid);}
+.gymfin-stat--navy{background:var(--m-plan-hard);}
+.gymfin-stat--orange,.gymfin-stat--blue,.gymfin-stat--navy{color:#fff;}
+.gymfin-stat--orange .gymfin-stat-k,.gymfin-stat--blue .gymfin-stat-k,.gymfin-stat--navy .gymfin-stat-k{color:rgba(255,255,255,.78);}
+.gymfin-stat--orange .gymfin-stat-v small,.gymfin-stat--blue .gymfin-stat-v small,.gymfin-stat--navy .gymfin-stat-v small{color:rgba(255,255,255,.72);}
+.gymfin-stat--plain{background:var(--m-card);}
+.gymfin-stat--plain .gymfin-stat-k{color:var(--m-muted);}
+.gymfin-stat--plain .gymfin-stat-v{color:var(--m-ink);}
+.gymfin-stat--plain .gymfin-stat-v small{color:var(--m-muted);}
+
+.gymfin-record{width:100%;display:flex;align-items:center;gap:12px;background:var(--m-card);border-radius:var(--m-r-sm);padding:12px 14px;text-align:left;}
+.gymfin-record[hidden]{display:none;}
+.gymfin-record .ph{width:26px;height:26px;color:var(--m-orange);flex-shrink:0;}
+.gymfin-record .ph svg{display:block;width:100%;height:100%;}
+.gymfin-record-k{margin:0;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--m-muted);}
+.gymfin-record-v{margin:1px 0 0;font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);}
+
+.gymfin-cta{width:100%;flex-shrink:0;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;padding:16px;font-family:inherit;font-size:var(--m-fs-base);font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:4px;transition:transform .12s ease;}
+.gymfin-cta:active{transform:scale(.97);}
+
+@media (max-height:640px){
+  .gymfin-anim{width:150px;height:150px;}
+  .gymfin-body{gap:11px;}
+  .gymfin-title{font-size:var(--m-fs-2xl);}
+}
+
 @media (prefers-reduced-motion: no-preference){
   @keyframes gymfinPop{from{opacity:0;transform:scale(.6);}to{opacity:1;transform:scale(1);}}
-  /* The confetti layer is deliberately NOT animated — it's a full-screen
-     mix-blend-mode:color-dodge paint, cheap once but costly to recomposite
-     every frame; a hard cut keeps the 1.5s screen smooth on weak phones. */
-  .gymfin-root.visible .gymfin-check{animation:gymfinPop .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.06s;}
-  .gymfin-root.visible .gymfin-title{animation:loadv2Rise .55s cubic-bezier(.16,1,.3,1) both;animation-delay:.2s;}
-  .gymfin-root.visible .gymfin-sub{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.3s;}
+  /* Lottie (loaded on demand, sped up ×1.6) plays the check + confetti once
+     and holds the last frame. The summary then rises in staggered — same
+     loadv2Rise keyframe + curve as the load screen / dashboard tiles. */
+  .gymfin-root.visible .gymfin-anim.is-fallback .gymfin-check{animation:gymfinPop .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.06s;}
+  .gymfin-root.anim-in .gymfin-heads{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.14s;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(1){animation-delay:.28s;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(2){animation-delay:.36s;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(3){animation-delay:.44s;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(4){animation-delay:.52s;}
+  .gymfin-root.anim-in .gymfin-record:not([hidden]){animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.6s;}
+  .gymfin-root.anim-in .gymfin-cta{animation:loadv2Rise .45s cubic-bezier(.16,1,.3,1) both;animation-delay:.7s;}
 }
 @media (prefers-reduced-motion: reduce){ .gymfin-root{transition:none;} }
 html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow, html.statsv2-bg .app-glow, html.histv2-bg .app-glow{display:none;}
@@ -1629,12 +1678,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<!-- GYM finish screen (Figma node 185:14366, "03. GYM - FINISH") — shown for
-     1.5s after a workout is saved from GYM v2, then goRoute('dashboard').
-     Hidden by default; showGymFinishV2() drives it. -->
+<!-- GYM finish screen (Figma node 185:14366, "03. GYM - FINISH") — shown after
+     a workout is saved from GYM v2: Lottie "success" animation + a summary of
+     the session, dismissed by the button (no auto-advance). showGymFinishV2()
+     drives it; gym-finish-fx.svg is no longer used. -->
 <div id="gymFinishV2" class="gymfin-root">
   <div class="gymfin-panel">
-    <img class="gymfin-fx" src="gym-finish-fx.svg" alt="" aria-hidden="true">
     <div class="gymfin-topbar">
       <div class="gymfin-brand">
         <span class="ph" data-ph="barbell"></span>
@@ -1642,11 +1691,34 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
       <span class="gymfin-chat" aria-hidden="true"><span class="ph" data-ph="chat-dots"></span></span>
     </div>
-    <div class="gymfin-center">
-      <span class="gymfin-check"><svg viewBox="0 0 45.3333 45.3333" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M41.1715 14.2538L18.5048 36.9204C18.3074 37.1186 18.0728 37.2757 17.8145 37.383C17.5562 37.4902 17.2793 37.5455 16.9996 37.5455C16.7199 37.5455 16.443 37.4902 16.1847 37.383C15.9264 37.2757 15.6918 37.1186 15.4944 36.9204L5.57771 27.0038C5.38004 26.8061 5.22324 26.5714 5.11627 26.3132C5.00929 26.0549 4.95423 25.7781 4.95423 25.4986C4.95423 25.219 5.00929 24.9422 5.11627 24.684C5.22324 24.4257 5.38004 24.191 5.57771 23.9934C5.77538 23.7957 6.01004 23.6389 6.2683 23.5319C6.52657 23.4249 6.80337 23.3699 7.08292 23.3699C7.36246 23.3699 7.63927 23.4249 7.89753 23.5319C8.15579 23.6389 8.39046 23.7957 8.58813 23.9934L17.0014 32.4066L38.1646 11.2469C38.5638 10.8477 39.1052 10.6234 39.6698 10.6234C40.2344 10.6234 40.7758 10.8477 41.175 11.2469C41.5742 11.6461 41.7985 12.1875 41.7985 12.7521C41.7985 13.3167 41.5742 13.8581 41.175 14.2573L41.1715 14.2538Z" fill="#fff"/></svg></span>
-      <p class="gymfin-title">GRATULACJE</p>
-      <p class="gymfin-sub">TRENING ZOSTAŁ ZAPISANY</p>
+
+    <div class="gymfin-body">
+      <div class="gymfin-anim" id="gymFinAnim">
+        <span class="gymfin-check"><svg viewBox="0 0 45.3333 45.3333" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M41.1715 14.2538L18.5048 36.9204C18.3074 37.1186 18.0728 37.2757 17.8145 37.383C17.5562 37.4902 17.2793 37.5455 16.9996 37.5455C16.7199 37.5455 16.443 37.4902 16.1847 37.383C15.9264 37.2757 15.6918 37.1186 15.4944 36.9204L5.57771 27.0038C5.38004 26.8061 5.22324 26.5714 5.11627 26.3132C5.00929 26.0549 4.95423 25.7781 4.95423 25.4986C4.95423 25.219 5.00929 24.9422 5.11627 24.684C5.22324 24.4257 5.38004 24.191 5.57771 23.9934C5.77538 23.7957 6.01004 23.6389 6.2683 23.5319C6.52657 23.4249 6.80337 23.3699 7.08292 23.3699C7.36246 23.3699 7.63927 23.4249 7.89753 23.5319C8.15579 23.6389 8.39046 23.7957 8.58813 23.9934L17.0014 32.4066L38.1646 11.2469C38.5638 10.8477 39.1052 10.6234 39.6698 10.6234C40.2344 10.6234 40.7758 10.8477 41.175 11.2469C41.5742 11.6461 41.7985 12.1875 41.7985 12.7521C41.7985 13.3167 41.5742 13.8581 41.175 14.2573L41.1715 14.2538Z" fill="#fff"/></svg></span>
+      </div>
+
+      <div class="gymfin-heads">
+        <p class="gymfin-title" data-i18n="gymFinTitle">GRATULACJE</p>
+        <p class="gymfin-sub" data-i18n="gymFinSub">TRENING ZOSTAŁ ZAPISANY</p>
+      </div>
+
+      <div class="gymfin-stats">
+        <div class="gymfin-stat gymfin-stat--blue"><p class="gymfin-stat-k" data-i18n="gymFinTime">Czas</p><p class="gymfin-stat-v" id="gymFinTimeV">—</p></div>
+        <div class="gymfin-stat gymfin-stat--orange"><p class="gymfin-stat-k" data-i18n="gymFinVolume">Objętość</p><p class="gymfin-stat-v" id="gymFinVolV">0</p></div>
+        <div class="gymfin-stat gymfin-stat--navy"><p class="gymfin-stat-k" data-i18n="gymFinExercises">Ćwiczenia</p><p class="gymfin-stat-v" id="gymFinExV">0</p></div>
+        <div class="gymfin-stat gymfin-stat--plain"><p class="gymfin-stat-k" data-i18n="gymFinReps">Powtórzenia</p><p class="gymfin-stat-v" id="gymFinRepsV">0</p></div>
+      </div>
+
+      <div class="gymfin-record" id="gymFinRecord" hidden>
+        <span class="ph" data-ph="trophy"></span>
+        <div>
+          <p class="gymfin-record-k" data-i18n="gymFinRecordLabel">Nowy rekord</p>
+          <p class="gymfin-record-v" id="gymFinRecordText"></p>
+        </div>
+      </div>
     </div>
+
+    <button type="button" class="gymfin-cta" id="gymFinCta" data-i18n="gymFinCta">Gotowe</button>
   </div>
 </div>
 
@@ -2377,6 +2449,14 @@ const T_EN = {
   whatsnewClose: 'Great, close',
   whatsnewFeaturedBadge: 'New',
   navBack: 'Back',
+  gymFinTitle: 'GOOD JOB',
+  gymFinSub: 'WORKOUT SAVED',
+  gymFinTime: 'Time',
+  gymFinVolume: 'Volume',
+  gymFinExercises: 'Exercises',
+  gymFinReps: 'Reps',
+  gymFinRecordLabel: 'New record',
+  gymFinCta: 'Done',
   statsV2BackToOverview: 'All stats',
   feedbackTitle: 'Share feedback',
   feedbackBody: 'Report a bug or drop an idea — we read every submission.',
@@ -3051,7 +3131,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.40";
+const APP_VERSION = "4.11.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4291,29 +4371,126 @@ function saveWorkout(){
   renderGymDoneV2();
   return true;
 }
-/* GYM finish screen — full-screen "GRATULACJE / TRENING ZOSTAŁ ZAPISANY"
-   confirmation (Figma node 185:14366). Shown for 1.5s, then onDone() runs.
-   Same show/hide shape as showLoadScreenV2(). */
-function showGymFinishV2(onDone){
+/* GYM finish screen (Figma node 185:14366) — Lottie "success" animation over
+   a session summary, dismissed by the button (no auto-advance). lottie-web +
+   success.json are vendored locally and loaded the first time this runs, so
+   app boot stays lean; if either fails to load, the static orange check is
+   the fallback. */
+let gymFinLottieLibP = null, gymFinLottieData = null, gymFinAnim = null;
+function gymFinLoadLottie(){
+  if(window.lottie) return Promise.resolve(window.lottie);
+  if(!gymFinLottieLibP){
+    gymFinLottieLibP = new Promise((res, rej)=>{
+      const s = document.createElement('script');
+      s.src = './lottie.min.js'; s.async = true;
+      s.onload = ()=> res(window.lottie);
+      s.onerror = ()=> rej(new Error('lottie load failed'));
+      document.head.appendChild(s);
+    }).catch(err=>{ gymFinLottieLibP = null; throw err; });
+  }
+  return gymFinLottieLibP;
+}
+function gymFinLoadData(){
+  if(gymFinLottieData) return Promise.resolve(gymFinLottieData);
+  return fetch('./success.json').then(r=>{ if(!r.ok) throw new Error('success.json ' + r.status); return r.json(); })
+    .then(d=> (gymFinLottieData = d));
+}
+function fmtGymWeight(w){
+  const s = (Math.round(w * 100) / 100).toString();
+  return LANG === 'en' ? s : s.replace('.', ',');
+}
+let gymFinDismissT = null;
+function showGymFinishV2(summary, onDone){
   const el = document.getElementById('gymFinishV2');
   if(!el){ onDone(); return; }
-  el.classList.remove('hiding');
+  summary = summary || {};
+  clearTimeout(gymFinDismissT); // a prior dismiss's cleanup must not clobber this show
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const timeEl = document.getElementById('gymFinTimeV');
+  const volEl  = document.getElementById('gymFinVolV');
+  const exEl   = document.getElementById('gymFinExV');
+  const repsEl = document.getElementById('gymFinRepsV');
+  timeEl.textContent = summary.durationMin ? '0' : '—';
+  volEl.textContent = '0'; exEl.textContent = '0'; repsEl.textContent = '0';
+
+  const recEl = document.getElementById('gymFinRecord');
+  if(summary.record){
+    document.getElementById('gymFinRecordText').textContent =
+      summary.record.name + ' — ' + fmtGymWeight(summary.record.weight) + ' kg';
+    recEl.hidden = false;
+  } else {
+    recEl.hidden = true;
+  }
+
+  el.classList.remove('hiding', 'anim-in');
   el.classList.add('visible');
-  setTimeout(()=>{
+
+  // count-up + staggered reveal ride in together, just after the check pops
+  const startFill = ()=>{
+    if(summary.durationMin) animateDashNumber(timeEl, summary.durationMin, 0, '<small>min</small>');
+    animateDashNumber(volEl, summary.volume || 0, 0, '<small>kg</small>');
+    animateDashNumber(exEl, summary.exercises || 0, 0, '');
+    animateDashNumber(repsEl, summary.reps || 0, 0, '');
+  };
+  if(reduce){ startFill(); }
+  else { requestAnimationFrame(()=> el.classList.add('anim-in')); setTimeout(startFill, 340); }
+
+  const animBox = document.getElementById('gymFinAnim');
+  animBox.classList.remove('is-fallback');
+  if(gymFinAnim){ try{ gymFinAnim.destroy(); }catch(e){} gymFinAnim = null; }
+  Promise.all([gymFinLoadLottie(), gymFinLoadData()]).then(([lot, data])=>{
+    if(!el.classList.contains('visible')) return;   // already dismissed
+    gymFinAnim = lot.loadAnimation({ container: animBox, renderer: 'svg', loop: false, autoplay: false, animationData: data });
+    gymFinAnim.setSpeed(1.6);
+    gymFinAnim.addEventListener('DOMLoaded', ()=>{
+      if(reduce) gymFinAnim.goToAndStop(gymFinAnim.totalFrames - 1, true);
+      else gymFinAnim.goToAndPlay(0, true);
+    });
+  }).catch(()=>{ animBox.classList.add('is-fallback'); });
+
+  document.getElementById('gymFinCta').onclick = ()=>{
     el.classList.add('hiding');
     onDone();
-    setTimeout(()=>{ el.classList.remove('visible','hiding'); }, 350); // matches .gymfin-root's opacity transition
-  }, 1500);
+    gymFinDismissT = setTimeout(()=>{
+      el.classList.remove('visible', 'hiding', 'anim-in');
+      if(gymFinAnim){ try{ gymFinAnim.destroy(); }catch(e){} gymFinAnim = null; }
+    }, 350); // matches .gymfin-root's opacity transition
+  };
 }
 /* GYM v2 save button: wraps the shared saveWorkout() (production GYM's own
-   button is untouched), then shows the finish screen for 1.5s before
-   handing off to the Dashboard. Maciej: "po skonczonym i zapisanym
-   treningu - chcilabym aby pojawil sie ten ekran i po 1,5 sekundy
-   przeniósł użytkownika do dashboardu". */
+   button is untouched), then shows the finish screen with a summary of the
+   session. The PR check reads history BEFORE saveWorkout() pushes. */
 function saveWorkoutV2(){
+  // best-ever weight per exercise, from history so far
+  const priorBest = {};
+  workouts.forEach(w=> w.exercises.forEach(ex=> ex.sets.forEach(s=>{
+    if(s.weight > 0) priorBest[ex.name] = Math.max(priorBest[ex.name] || 0, s.weight);
+  })));
+
   const ok = saveWorkout();
   if(!ok) return;
-  showGymFinishV2(()=> goRoute('dashboard'));
+
+  const w = workouts[workouts.length - 1];
+  let volume = 0, reps = 0, pr = null;
+  w.exercises.forEach(ex=>{
+    const hadHistory = priorBest[ex.name] !== undefined;
+    const prev = priorBest[ex.name] || 0;
+    ex.sets.forEach(s=>{
+      volume += s.weight * s.reps;
+      reps += s.reps;
+      if(hadHistory && s.weight > prev && (!pr || s.weight > pr.weight)) pr = { name: ex.name, weight: s.weight };
+    });
+  });
+  const exCount = w.exercises.filter(ex=> ex.sets.some(s=> s.weight > 0 || s.reps > 0)).length;
+
+  showGymFinishV2({
+    durationMin: w.durationMin,
+    volume: Math.round(volume),
+    exercises: exCount,
+    reps: reps,
+    record: pr
+  }, ()=> goRoute('dashboard'));
 }
 
 /* ============================================================
