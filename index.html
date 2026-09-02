@@ -3131,7 +3131,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.11.5";
+const APP_VERSION = "4.11.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7132,14 +7132,19 @@ function statsV2SetupDrawReveal(body){
   };
   window.addEventListener('scroll', statsV2RevealScrollFn, { passive: true });
 }
-function renderStatsV2(animate){
+/* animate  — the card / tile entrance animations (screen entry only).
+   drawLines — arm the line/ring scroll draw-in; defaults to `animate` but
+   can be requested on its own, e.g. opening an exercise's detail (no card
+   re-slide, but its progress line should still draw). */
+function renderStatsV2(animate, drawLines){
+  if(drawLines === undefined) drawLines = animate;
   const body = document.getElementById('statsV2Body');
   statsV2TeardownReveal();
   body.innerHTML = selectedStatsExerciseV2 ? renderStatsV2Detail(selectedStatsExerciseV2) : renderStatsV2Overview();
   if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile,.statsv2-bar-anim,.statsv2-chart-dot,.statsv2-pr-tag').forEach(el=>{
     el.style.animation = 'none';
   });
-  if(animate) statsV2SetupDrawReveal(body);
+  if(drawLines) statsV2SetupDrawReveal(body);
   // The header back arrow does double duty (see statsV2Back): in the
   // exercise-detail view it steps back to the overview, in the overview it
   // leaves to the Dashboard. Keep its tooltip/label honest about where it
@@ -7176,7 +7181,10 @@ function selectStatsExerciseV2(name){
   // logged month to today, carrying the running best forward — so
   // falling back to 6m here is a safe, always-populated default.
   statsV2Range = selectedStatsExerciseV2 && statsV2ExerciseDailySeries(selectedStatsExerciseV2).points.length ? 1 : 6;
-  renderStatsV2(false);
+  // opening a detail: no card re-slide, but let its progress line draw in
+  // (scroll-gated, same as the overview's YTD line). Toggling back to the
+  // overview is a plain instant re-render.
+  renderStatsV2(false, !!selectedStatsExerciseV2);
 }
 function closeStatsDetailV2(){
   selectedStatsExerciseV2 = null;
