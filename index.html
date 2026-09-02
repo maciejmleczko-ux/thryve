@@ -1462,10 +1462,6 @@ body.pev2-bg{background:var(--m-red-page);}
 .statsv2-root{background:var(--m-panel);}
 .statsv2-panel{padding:calc(16px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
 .statsv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-/* Detail-only close (Figma node 183:13900, size-[30px] — a screen-level
-   "leave this section" affordance, not a modal close, so kept at its
-   own explicit 30px rather than the 24px unified across popups. */
-.statsv2-close-btn{width:30px;height:30px;color:var(--m-ink);cursor:pointer;flex-shrink:0;}
 .statsv2-cards{display:flex;flex-direction:column;gap:8px;}
 
 .statsv2-ring-card{background:#000;border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;height:204px;display:flex;flex-direction:column;justify-content:space-between;}
@@ -1979,14 +1975,17 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="statsv2-panel">
       <div class="statsv2-header">
         <div class="statsv2-header-title">
-          <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
+          <!-- Context-aware back: from the exercise-detail view it returns
+               to the stats overview (closeStatsDetailV2), from the overview
+               it leaves to the Dashboard. See statsV2Back(). Replaced the
+               separate detail-only X (Maciej: "statystyki szczegółowe -
+               można usunąć X a strzałka będzie kierować do statystyk
+               głównych"). -->
+          <button type="button" class="v2-hdr-back" id="statsV2BackBtn" onclick="statsV2Back()" title="Wstecz" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
           <span class="ph" data-ph="chart-line-up"></span>
           <h1>STATS</h1>
         </div>
-        <div class="v2-hdr-actions">
-          <button type="button" class="statsv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
-          <span class="ph statsv2-close-btn" data-ph="x" id="statsV2CloseBtn" style="display:none" onclick="closeStatsDetailV2()"></span>
-        </div>
+        <button type="button" class="statsv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
       </div>
 
       <div id="statsV2Body"></div>
@@ -2364,6 +2363,7 @@ const T_EN = {
   whatsnewClose: 'Great, close',
   whatsnewFeaturedBadge: 'New',
   navBack: 'Back',
+  statsV2BackToOverview: 'All stats',
   feedbackTitle: 'Share feedback',
   feedbackBody: 'Report a bug or drop an idea — we read every submission.',
   feedbackBug: 'Bug',
@@ -3037,7 +3037,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.35";
+const APP_VERSION = "4.10.36";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6853,15 +6853,14 @@ function renderStatsV2(animate){
     el.style.animation = 'none';
   });
   if(animate) statsV2AnimateDrawPaths(body);
-  // Figma node 183:13900 — the X only exists on the detail screen, not
-  // the overview (182:12264 has no such element in its header).
-  // Inline style, not the shared .hidden class: .statsv2-root .ph{display:
-  // block} (needed so every OTHER icon on this screen renders at all) ties
-  // .hidden{display:none} on specificity and wins on source order, so
-  // toggling the class alone left the X visibly on-screen even once
-  // "hidden" was applied — confirmed via screenshot after the class-based
-  // toggle reported hidden:true in the DOM.
-  document.getElementById('statsV2CloseBtn').style.display = selectedStatsExerciseV2 ? '' : 'none';
+  // The header back arrow does double duty (see statsV2Back): in the
+  // exercise-detail view it steps back to the overview, in the overview it
+  // leaves to the Dashboard. Keep its tooltip/label honest about where it
+  // will go right now.
+  const backBtn = document.getElementById('statsV2BackBtn');
+  const backLabel = selectedStatsExerciseV2 ? t('statsV2BackToOverview','Statystyki główne') : t('navBack','Wstecz');
+  backBtn.title = backLabel;
+  backBtn.setAttribute('aria-label', backLabel);
   // Maciej: "po kliknieciu w cwiczenei skacze dziwnie - niech aktywne
   // cwiczenie jest zawsze jako srodkowy kafelek". body.innerHTML above
   // destroys and recreates .statsv2-ex-row on every single render (range-
@@ -6895,6 +6894,13 @@ function selectStatsExerciseV2(name){
 function closeStatsDetailV2(){
   selectedStatsExerciseV2 = null;
   renderStatsV2(false);
+}
+/* Header back arrow. In the exercise-detail view it drops back to the
+   stats overview; from the overview itself there's nothing above it in
+   this section, so it leaves to the Dashboard like the other v2 tabs. */
+function statsV2Back(){
+  if(selectedStatsExerciseV2) closeStatsDetailV2();
+  else goRoute('dashboard');
 }
 function statsV2MoveBarPage(delta){
   statsV2BarPage = Math.max(0, statsV2BarPage + delta);
