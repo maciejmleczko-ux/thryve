@@ -1972,72 +1972,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <button class="share-btn hidden" id="gymShareBtn" onclick="shareHistCard('workout', this.dataset.id)">__PH_SHARE__<span data-i18n="shareWorkout">Udostępnij trening</span></button>
   </section>
 
-  <!-- ===================== PLANS ===================== -->
-  <section class="view" id="view-plans">
-    <div class="header-row on-panel">
-      <div class="section-label"><span class="ph" data-ph="barbell"></span><span>PLANS</span></div>
-      <span class="ph" data-ph="x" id="plansCloseX" style="cursor:pointer;width:20px;height:20px;color:var(--text-dark);" onclick="goRoute('gym')"></span>
-    </div>
-    <div class="panel">
-      <div class="panel-inner">
-        <div class="onboard-note hidden" id="planOnboardingIntro" data-i18n="planOnboardingIntro">Zanim zaczniesz, wybierz gotowy plan albo stwórz własny — zobaczysz go od razu w GYM.</div>
-        <button type="button" class="copy-days-btn hidden" id="skipPlanOnboardingBtn" onclick="skipPlanOnboarding()" data-i18n="skipPlanOnboarding" style="margin-top:-6px;margin-bottom:14px;display:block;">Pomiń na razie, zdecyduję później</button>
-        <div class="plan-actions-row">
-          <button class="add-pill" onclick="openPlanEditor(null)">__PH_PLUS__<span data-i18n="planCreateNew">Stwórz mój plan treningowy</span></button>
-          <button class="add-pill secondary" onclick="openImportPlanCodeModal()">__PH_PLUS__<span data-i18n="planImportBtn">Importuj plan treningowy</span></button>
-        </div>
-        <div id="plansList"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== PLAN EDITOR ===================== -->
-  <section class="view" id="view-planEditor">
-    <div class="header-row on-panel">
-      <div class="section-label"><span class="ph" data-ph="pencil"></span><span id="planEditorTitle">NOWY PLAN</span></div>
-      <div class="icon-btn-row">
-        <span class="ph" data-ph="x" style="cursor:pointer;width:20px;height:20px;color:var(--text-dark);" onclick="goRoute('plans')"></span>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-inner">
-        <div class="field">
-          <label data-i18n="planNameLabel">Nazwa planu</label>
-          <input type="text" id="planNameInput" data-i18n-ph="planNamePh" placeholder="np. Full Body A" autocomplete="off" oninput="editingPlan.name=this.value">
-          <p class="plan-editor-fork-hint hidden" id="planEditorForkHint" data-i18n="planEditorForkHint">Zmiany zapiszesz jako swoją kopię tego planu — oryginał zostaje bez zmian.</p>
-        </div>
-        <div class="field" style="margin-top:14px;">
-          <label data-i18n="planDaysLabel">Dni tygodnia</label>
-          <div class="plan-day-row" id="planDayRow"></div>
-          <div class="plan-editor-day-label" id="planDayHintText" data-i18n="planDayHint">Wybierz dzień i przypisz mu ćwiczenia</div>
-          <button type="button" class="copy-days-btn hidden" id="daySelectModeBtn" onclick="toggleDaySelectMode()" data-i18n="daySelectModeBtn">Zaznacz dni</button>
-          <div class="day-select-bar hidden" id="daySelectBar">
-            <span class="day-select-count" id="daySelectCount"></span>
-            <button type="button" class="day-select-action hidden" id="daySelectCopyBtn" onclick="confirmDaySelectCopy()" data-i18n="daySelectCopyBtn">Kopiuj dni</button>
-            <button type="button" class="day-select-action danger hidden" id="daySelectClearBtn" onclick="confirmDaySelectClear()" data-i18n="daySelectClearBtn">Wyczyść</button>
-            <button type="button" class="day-select-exit" onclick="exitDaySelectMode()" aria-label="Zamknij">✕</button>
-          </div>
-        </div>
-        <div class="field" style="margin-top:14px;">
-          <label><span data-i18n="planExercisesLabel">Ćwiczenia</span> — <span id="planEditorDayName"></span> (<span id="planExCount">0</span>)</label>
-          <div class="equip-filter-row" id="planEquipFilterRow"></div>
-          <div id="planEditorGrid" style="margin-top:8px;"></div>
-        </div>
-        <div class="btns" style="margin-top:16px;display:flex;gap:10px;">
-          <button class="cancel" id="planDeleteBtn" onclick="deleteCurrentPlan()" data-i18n="planDelete" style="flex:1;border:none;border-radius:var(--m-r-pill);padding:13px;font-weight:700;font-size:var(--m-fs-sm);cursor:pointer;font-family:inherit;background:var(--light-2);color:var(--text-dark);">Usuń plan</button>
-          <button class="save" onclick="savePlanEditor()" data-i18n="planSave" style="flex:1;border:none;border-radius:var(--m-r-pill);padding:13px;font-weight:700;font-size:var(--m-fs-sm);cursor:pointer;font-family:inherit;background:var(--orange);color:#fff;">Zapisz plan</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== PLAN EDITOR v2 (hidden preview, Figma node
-       155:1086, "06. PLAN - SET UP") — v3-styled replacement for
-       #view-planEditor. Reached from Plans v2 (card tap / "+" button),
-       reuses the exact same editingPlan/savePlanEditor/togglePlanExercise/
-       day-select-mode machinery, see openPlanEditorV2() near
-       openPlanEditor(). Same lilac page treatment as Plans v2
-       (.plansv2-bg/.plansv2-lock, shared — see goRoute()). -->
+  <!-- ===================== PLAN EDITOR (Figma node 155:1086,
+       "06. PLAN - SET UP") — reached from Plans v2 (card tap / "+"
+       button); openPlanEditorV2() / savePlanEditor() / togglePlanExercise
+       / day-select-mode. Shares Plans v2's lilac page treatment
+       (.plansv2-bg / .plansv2-lock — see goRoute()). -->
   <section class="view plansv2-root" id="view-plan-editor-v2">
     <div class="pev2-card">
     <div class="plansv2-panel pev2-panel">
@@ -2170,18 +2109,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <div class="rotate-lock-overlay">
   <div class="rotate-lock-icon"></div>
   <p data-i18n="rotateLockMsg">Obróć telefon z powrotem — Mekkio działa tylko w pionie.</p>
-</div>
-
-<div class="plan-modal" id="planModal">
-  <div class="plan-modal-inner">
-    <h3 data-i18n="planWorkoutA">Trening A</h3>
-    <table id="planTableA"></table>
-    <h3 data-i18n="planWorkoutB">Trening B</h3>
-    <table id="planTableB"></table>
-    <h3 data-i18n="planRunPlan">Plan biegowy</h3>
-    <table id="planTableRun"></table>
-    <button class="plan-modal-close" onclick="closePlanModal()" data-i18n="close">Zamknij</button>
-  </div>
 </div>
 
 <div class="dp-overlay hidden" id="dpOverlay" onclick="if(event.target===this) closeDatePicker()">
@@ -3151,23 +3078,6 @@ function getExerciseLibrary(){
   return [...BUILTIN_EXERCISES, ...customExercises.map(e => ({...e, day:'Własne'}))];
 }
 
-const RUN_PLAN = [
-  {week:1, tue:{pl:"Marszobieg: 5x (3 min bieg / 2 min marsz) ≈ 25 min", en:"Run/walk: 5x (3 min run / 2 min walk) ≈ 25 min"}, sat:{pl:"Marszobieg: 6x (3 min bieg / 2 min marsz) ≈ 30 min", en:"Run/walk: 6x (3 min run / 2 min walk) ≈ 30 min"}},
-  {week:2, tue:{pl:"Marszobieg: 5x (4 min bieg / 2 min marsz) ≈ 30 min", en:"Run/walk: 5x (4 min run / 2 min walk) ≈ 30 min"}, sat:{pl:"Marszobieg: 5x (5 min bieg / 2 min marsz) ≈ 35 min", en:"Run/walk: 5x (5 min run / 2 min walk) ≈ 35 min"}},
-  {week:3, tue:{pl:"Marszobieg: 4x (6 min bieg / 2 min marsz) ≈ 32 min", en:"Run/walk: 4x (6 min run / 2 min walk) ≈ 32 min"}, sat:{pl:"Bieg ciągły 3 km (marsz jeśli potrzeba)", en:"Continuous run 3 km (walk if needed)"}},
-  {week:4, tue:{pl:"Bieg ciągły 3 km", en:"Continuous run 3 km"}, sat:{pl:"Bieg ciągły 4 km", en:"Continuous run 4 km"}},
-  {week:5, tue:{pl:"Bieg ciągły 4 km", en:"Continuous run 4 km"}, sat:{pl:"Bieg ciągły 5 km", en:"Continuous run 5 km"}},
-  {week:6, tue:{pl:"Bieg ciągły 4 km (+ przyspieszenia na koniec)", en:"Continuous run 4 km (+ strides at the end)"}, sat:{pl:"Bieg ciągły 6 km", en:"Continuous run 6 km"}},
-  {week:7, tue:{pl:"Bieg ciągły 5 km spokojnie", en:"Continuous run 5 km, easy pace"}, sat:{pl:"Bieg ciągły 7 km", en:"Continuous run 7 km"}},
-  {week:8, tue:{pl:"Bieg ciągły 5 km (fartlek)", en:"Continuous run 5 km (fartlek)"}, sat:{pl:"Bieg ciągły 8 km", en:"Continuous run 8 km"}},
-  {week:9, tue:{pl:"Bieg ciągły 5-6 km spokojnie", en:"Continuous run 5-6 km, easy pace"}, sat:{pl:"Bieg ciągły 8 km (tydzień lżejszy)", en:"Continuous run 8 km (easier week)"}},
-  {week:10, tue:{pl:"Bieg ciągły 6 km", en:"Continuous run 6 km"}, sat:{pl:"Bieg ciągły 9 km", en:"Continuous run 9 km"}},
-  {week:11, tue:{pl:"Bieg ciągły 5 km lekko", en:"Continuous run 5 km, light effort"}, sat:{pl:"Bieg PRÓBNY 10 km — Twój cel!", en:"TIME TRIAL 10 km — your goal!"}},
-  {week:12, tue:{pl:"Bieg regeneracyjny 4 km", en:"Recovery run 4 km"}, sat:{pl:"Bieg 10 km w docelowym tempie / start", en:"10 km run at goal pace / race day"}},
-  {week:"Utrzymanie", tue:{pl:"Bieg 5-8 km w spokojnym tempie", en:"5-8 km run at an easy pace"}, sat:{pl:"Bieg 6-10 km w spokojnym tempie", en:"6-10 km run at an easy pace"}},
-];
-function rpText(field){ return field[LANG] || field.pl; }
-
 /* ============================================================
    STORAGE (reused)
    ============================================================ */
@@ -3217,7 +3127,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.24";
+const APP_VERSION = "4.10.25";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3804,7 +3714,7 @@ function goRoute(route){
   trackEvent('/' + route, route);
   beginViewTransition(route, forward);
   const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2' || route==='history-v2' || route==='stats-v2';
-  document.getElementById('bottomNav').style.display = (route==='welcome' || planOnboardingActive) ? 'none' : 'flex';
+  document.getElementById('bottomNav').style.display = 'flex';
   document.getElementById('bottomNav').classList.toggle('bottom-nav-light', isV3);
   // Only rebuild the button set when the v3-ness actually changes — every
   // goRoute() call within the same context (e.g. gym-v2 -> plans-v2, both
@@ -3842,7 +3752,6 @@ function goRoute(route){
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
   if(route==='gym'){ document.getElementById('gymDate').value = document.getElementById('gymDate').value || todayStr(); updateGymDateLabel(); renderGymGrid(); }
-  if(route==='plans'){ renderPlansList(); }
   if(route==='dashboard'){ previewMode = true; renderDashboard(); }
   if(route==='gym-v2'){ previewMode = true; renderGymV2(); }
   if(route==='plans-v2'){ previewMode = true; renderPlansListV2(true); }
@@ -3893,26 +3802,6 @@ function goRoute(route){
   vv.addEventListener('scroll', sync);
   sync();
 })();
-/* ============================================================
-   PLAN MODAL
-   ============================================================ */
-function openPlanModal(){
-  renderPlanTables();
-  document.getElementById('planModal').classList.add('open');
-}
-function closePlanModal(){ document.getElementById('planModal').classList.remove('open'); }
-function renderPlanTables(){
-  const fill = (tbl, list)=>{
-    tbl.innerHTML = `<tr><th>${t('planExercise','Ćwiczenie')}</th><th>${t('setsLabel','Serie')}</th><th>${t('planReps','Powt.')}</th></tr>` +
-      list.map(e=>`<tr><td>${e.name}</td><td>${e.sets}</td><td>${e.repLow}-${e.repHigh}</td></tr>`).join('');
-  };
-  fill(document.getElementById('planTableA'), GYM_PLAN.A);
-  fill(document.getElementById('planTableB'), GYM_PLAN.B);
-  const tblR = document.getElementById('planTableRun');
-  tblR.innerHTML = `<tr><th>${t('planWeekShort','Tydz.')}</th><th>${t('planTue','Wt')}</th><th>${t('planSat','Sob')}</th></tr>` +
-    RUN_PLAN.map(w=>`<tr><td>${typeof w.week==='number'?w.week:t('maintenanceLabel',w.week)}</td><td>${rpText(w.tue)}</td><td>${rpText(w.sat)}</td></tr>`).join('');
-}
-
 /* ============================================================
    GYM — date pill
    ============================================================ */
@@ -5391,25 +5280,20 @@ let starredPlanId = localStorage.getItem(LS_STARRED_PLAN) || null;
 let planOnboardingActive = false; // true while a brand-new user is being forced to pick/create their first plan
 function exitPlanOnboarding(){
   planOnboardingActive = false;
-  document.getElementById('plansCloseX').classList.remove('hidden');
-  document.getElementById('planOnboardingIntro').classList.add('hidden');
-  document.getElementById('skipPlanOnboardingBtn').classList.add('hidden');
   goRoute('dashboard');
 }
 function completePlanOnboardingIfNeeded(){
   if(!planOnboardingActive) return;
   exitPlanOnboarding();
 }
-function skipPlanOnboarding(){
-  exitPlanOnboarding();
-}
+// U1 (L5 teardown): a brand-new user with no starred plan lands on
+// Plans v2 (was the old #view-plans with an intro note + skip button).
+// planOnboardingActive stays set until they star a plan
+// (completePlanOnboardingIfNeeded, from toggleStarredPlan) or create one
+// in the editor (savePlanEditor auto-stars it) — then back to dashboard.
 function startPlanOnboarding(){
   planOnboardingActive = true;
-  document.getElementById('plansCloseX').classList.add('hidden');
-  document.getElementById('planOnboardingIntro').classList.remove('hidden');
-  document.getElementById('skipPlanOnboardingBtn').classList.remove('hidden');
-  renderPlansList();
-  goRoute('plans');
+  goRoute('plans-v2');
 }
 function planActiveDays(p){
   return PLAN_DAYS.filter(d=>(p.schedule[d]||[]).length>0);
@@ -5739,43 +5623,16 @@ function toggleStarredPlan(id){
   updatePlanPillLabel();
   if(starredPlanId) completePlanOnboardingIfNeeded();
 }
-function renderPlansList(){
-  // L5 unwind (step 2 — Plans): old #view-plans is never shown in the
-  // Mekkio layout. Skip rebuilding its invisible DOM; just keep Plans v2
-  // in sync (what the old tail-call did). renderPlansListV2() is fully
-  // self-contained — it reads trainingPlans directly.
-  if(!document.getElementById('view-plans')?.classList.contains('active')){
-    renderPlansListV2();
-    return;
-  }
-  const wrap = document.getElementById('plansList');
-  if(!trainingPlans.length){ wrap.innerHTML = `<div class="hist-empty" style="padding:0;">${t('planNoPlans','Brak planów.')}</div>`; return; }
-  wrap.innerHTML = trainingPlans.map(p=>{
-    const starred = starredPlanId === p.id;
-    const activeDays = planActiveDays(p);
-    const daysTxt = activeDays.length ? activeDays.map(planDayLabel).join(', ') : t('planNoDays','Brak przypisanych dni');
-    return `
-      <div class="plan-card">
-        <div class="plan-card-body" onclick="openPlanEditor('${p.id}')">
-          <div class="plan-card-name">${p.name}</div>
-          <div class="plan-card-meta">${daysTxt} · ${planExCountText(planTotalExercises(p))}</div>
-        </div>
-        <div class="plan-card-actions">
-          <span class="plan-card-export" onclick="event.stopPropagation();sharePlan(trainingPlans.find(x=>x.id==='${p.id}'))" title="${t('sharePlanTitle','Udostępnij plan')}">${ph('export')}</span>
-          <span class="plan-card-star${starred?' active':''}" onclick="event.stopPropagation();toggleStarredPlan('${p.id}')">${ph('check-circle')}</span>
-        </div>
-      </div>`;
-  }).join('');
-  renderPlansListV2();
-}
+/* Every "plans changed, repaint" caller still calls renderPlansList();
+   the old #view-plans it painted was deleted in the L5 teardown, so this
+   is now just an alias to the v2 renderer. */
+function renderPlansList(){ renderPlansListV2(); }
 
 /* ============================================================
-   PLANS v2 — third screen of the "v3" preview (Figma node 116:2502).
-   Same trainingPlans/starredPlanId/toggleStarredPlan/sharePlan/
-   openPlanEditor/openImportPlanCodeModal as the real Plans screen
-   above — tail-called from renderPlansList() so any change made via
-   the old screen (or elsewhere) keeps this one in sync automatically,
-   same pattern as renderGymGridV2()/renderGymDoneV2().
+   PLANS (Figma node 116:2502). Same trainingPlans / starredPlanId /
+   toggleStarredPlan / sharePlan / openPlanEditorV2 / openImportPlanCodeModal.
+   (The old #view-plans list it replaced was deleted in the L5 teardown,
+   4.10.25.)
    ============================================================ */
 /* Card color is keyed by difficulty, not list position — confirmed with
    Maciej: darkest = Trudny, mid = Średni, lightest = Łatwy, same rule
@@ -6030,39 +5887,11 @@ function renderPlansListV2(animate){
   }
 }
 let editingPlan = null; // working copy: {id, name, builtin, schedule:{mon:[],...}, activeDay}
-function openPlanEditor(id){
-  const existing = id ? trainingPlans.find(p=>p.id===id) : null;
-  const schedule = emptySchedule();
-  if(existing) PLAN_DAYS.forEach(d=>{ schedule[d] = (existing.schedule[d]||[]).map(e=>({...e})); });
-  stripWarmupStretch(schedule); // re-added at save time — kept out of the editor so the exercise count/grid only reflect real exercises
-  editingPlan = {
-    id: existing ? existing.id : null,
-    name: existing ? existing.name : '',
-    builtin: existing ? !!existing.builtin : false,
-    schedule,
-    activeDay: dayKeyFromDate(todayStr()),
-  };
-  document.getElementById('planEditorTitle').textContent = existing ? existing.name : t('planNewTitle','NOWY PLAN');
-  document.getElementById('planNameInput').value = editingPlan.name;
-  document.getElementById('planDeleteBtn').style.display = (existing && !existing.builtin) ? 'block' : 'none';
-  // Editing an automatic plan forks it on save (see savePlanEditor()) —
-  // flag that up front so a second "Fullbody workout" card in "Twoje
-  // plany" isn't a surprise later.
-  document.getElementById('planEditorForkHint').classList.toggle('hidden', !editingPlan.builtin);
-  planEditorEquipmentFilter = 'all';
-  renderPlanEquipFilterRow();
-  renderPlanDayRow();
-  renderPlanEditorGrid();
-  goRoute('planEditor');
-}
-// v3-styled replacement for openPlanEditor() above (Figma node
-// 155:1086, "06. PLAN - SET UP") — reached from Plans v2 instead of the
-// old Plans list. Sets up the exact same editingPlan working copy;
-// only the DOM it paints into differs (planDayRowV2/planEditorGridV2/
-// planEquipFilterRowV2 instead of the old view's ids) — see
-// planEditorRepaintDayRow()/planEditorRepaintGrid()/
-// planEditorRepaintEquipRow() for how the shared day-select-mode/
-// equip-filter/toggle-exercise logic below picks the right one.
+// The old openPlanEditor() (painting into #view-planEditor) was removed in
+// the L5 teardown. openPlanEditorV2() below is the only plan editor now;
+// the shared day-select-mode / equip-filter / toggle-exercise logic that
+// follows always paints the v2 ids.
+// (Figma node 155:1086, "06. PLAN - SET UP") — reached from Plans v2.
 function openPlanEditorV2(id){
   const existing = id ? trainingPlans.find(p=>p.id===id) : null;
   const schedule = emptySchedule();
@@ -6104,9 +5933,9 @@ let daySelected = new Set();
 // painter while route==='plan-editor-v2', the old one otherwise, so
 // none of the shared logic below needs to know or care which screen
 // is actually open.
-function planEditorRepaintDayRow(){ (currentRoute==='plan-editor-v2' ? renderPlanDayRowV2 : renderPlanDayRow)(); }
-function planEditorRepaintGrid(){ (currentRoute==='plan-editor-v2' ? renderPlanEditorGridV2 : renderPlanEditorGrid)(); }
-function planEditorRepaintEquipRow(){ (currentRoute==='plan-editor-v2' ? renderPlanEquipFilterRowV2 : renderPlanEquipFilterRow)(); }
+function planEditorRepaintDayRow(){ renderPlanDayRowV2(); }
+function planEditorRepaintGrid(){ renderPlanEditorGridV2(); }
+function planEditorRepaintEquipRow(){ renderPlanEquipFilterRowV2(); }
 function daysWithExercises(){
   return PLAN_DAYS.filter(d=> (editingPlan.schedule[d]||[]).length > 0);
 }
@@ -6161,55 +5990,6 @@ function confirmDaySelectClear(){
   exitDaySelectMode();
   planEditorRepaintGrid();
 }
-function renderPlanDayRow(){
-  const row = document.getElementById('planDayRow');
-  row.innerHTML = PLAN_DAYS.map(d=>{
-    const cls = ['plan-day-chip'];
-    const isSourceOrActive = daySelectMode ? d===daySelectSource : d===editingPlan.activeDay;
-    if(isSourceOrActive) cls.push('active');
-    if((editingPlan.schedule[d]||[]).length>0) cls.push('has-ex');
-    if(daySelectMode && daySelected.has(d)) cls.push('picked');
-    const handler = daySelectMode ? `toggleDaySelected('${d}')` : `selectPlanEditorDay('${d}')`;
-    return `<button type="button" class="${cls.join(' ')}" onclick="${handler}">${planDayLabel(d)}</button>`;
-  }).join('');
-  const nameEl = document.getElementById('planEditorDayName');
-  if(nameEl) nameEl.textContent = planDayLabel(editingPlan.activeDay);
-
-  const hintEl = document.getElementById('planDayHintText');
-  const modeBtn = document.getElementById('daySelectModeBtn');
-  const bar = document.getElementById('daySelectBar');
-  if(!daySelectMode){
-    if(hintEl) hintEl.textContent = t('planDayHint','Wybierz dzień i przypisz mu ćwiczenia');
-    if(modeBtn){ modeBtn.classList.toggle('hidden', daysWithExercises().length===0); modeBtn.textContent = t('daySelectModeBtn','Zaznacz dni'); }
-    if(bar) bar.classList.add('hidden');
-    return;
-  }
-  if(modeBtn) modeBtn.classList.add('hidden');
-  if(hintEl) hintEl.textContent = t('planDaySelectHint','Zaznacz dni, które chcesz zmienić.');
-  if(bar) bar.classList.remove('hidden');
-  const count = daySelected.size;
-  const countEl = document.getElementById('daySelectCount');
-  if(countEl) countEl.textContent = count ? t('daySelectCount', `${count} ${count===1?'dzień':'dni'} zaznaczon${count===1?'y':'e'}`, count) : '';
-  const copyTargets = [...daySelected].filter(d=>d!==daySelectSource);
-  const sourceHasEx = (editingPlan.schedule[daySelectSource]||[]).length > 0;
-  const copyBtn = document.getElementById('daySelectCopyBtn');
-  if(copyBtn){
-    copyBtn.classList.toggle('hidden', !(sourceHasEx && copyTargets.length>0));
-    copyBtn.textContent = t('daySelectCopyBtn', 'Kopiuj dni');
-  }
-  const clearTargets = [...daySelected].filter(d=> (editingPlan.schedule[d]||[]).length>0);
-  const clearBtn = document.getElementById('daySelectClearBtn');
-  if(clearBtn){
-    clearBtn.classList.toggle('hidden', clearTargets.length===0);
-    clearBtn.textContent = t('daySelectClearBtn', `Wyczyść (${clearTargets.length})`, clearTargets.length);
-  }
-}
-// v2 paint counterpart to renderPlanDayRow() above — same PLAN_DAYS/
-// daySelectMode/daySelectSource/daySelected state, new markup ids
-// (planDayRowV2 etc., see #view-plan-editor-v2). Kept as a fully
-// separate function rather than parameterizing the old one, matching
-// how GYM v2 (renderGymV2) already sits next to the real GYM screen's
-// own render function in this codebase.
 function renderPlanDayRowV2(){
   const row = document.getElementById('planDayRowV2');
   if(!row) return;
@@ -6269,33 +6049,12 @@ function setPlanEquipFilter(key){
   planEditorRepaintEquipRow();
   planEditorRepaintGrid();
 }
-function renderPlanEquipFilterRow(){
-  const row = document.getElementById('planEquipFilterRow');
-  if(!row) return;
-  row.innerHTML = PLAN_EQUIP_FILTERS.map(f=>
-    `<button type="button" class="equip-filter-chip${planEditorEquipmentFilter===f.key?' active':''}" onclick="setPlanEquipFilter('${f.key}')">${LANG==='en'?f.en:f.pl}</button>`
-  ).join('');
-}
 function renderPlanEquipFilterRowV2(){
   const row = document.getElementById('planEquipFilterRowV2');
   if(!row) return;
   row.innerHTML = PLAN_EQUIP_FILTERS.map(f=>
     `<button type="button" class="pev2-equip-chip${planEditorEquipmentFilter===f.key?' active':''}" onclick="setPlanEquipFilter('${f.key}')">${LANG==='en'?f.en:f.pl}</button>`
   ).join('');
-}
-function renderPlanEditorGrid(){
-  const container = document.getElementById('planEditorGrid');
-  let lib = orderedExerciseLibrary();
-  if(planEditorEquipmentFilter !== 'all'){
-    lib = lib.filter(ex => !ex.equipment || ex.equipment === planEditorEquipmentFilter);
-  }
-  const dayExercises = editingPlan.schedule[editingPlan.activeDay];
-  document.getElementById('planExCount').textContent = dayExercises.length;
-  renderGroupedExerciseGrid(container, lib,
-    ex => dayExercises.some(e=>e.name===ex.name) ? 'selected' : 'plain',
-    ex => togglePlanExercise(ex),
-    null, 'planEditor'
-  );
 }
 // Which PLAN_EX_GROUPS section headers are collapsed, in the v2 plan
 // editor's accordion (Figma node 155:1086 shows sections as
@@ -6445,18 +6204,8 @@ function savePlanEditor(){
   if(planOnboardingActive && starredPlanId !== savedId){
     toggleStarredPlan(savedId); // stars it and, since we're mid plan-onboarding, carries the user onward
   } else {
-    goRoute(currentRoute==='plan-editor-v2' ? 'plans-v2' : 'plans');
+    goRoute('plans-v2');
   }
-}
-function deleteCurrentPlan(){
-  if(!editingPlan || !editingPlan.id) return;
-  trainingPlans = trainingPlans.filter(p=>p.id!==editingPlan.id);
-  if(starredPlanId===editingPlan.id){ starredPlanId=null; localStorage.removeItem(LS_STARRED_PLAN); }
-  saveTrainingPlansList();
-  toast(t('planDeleted','Plan usunięty'));
-  goRoute('plans');
-  updateTodayPlanBanner();
-  updatePlanPillLabel();
 }
 
 /* ---------- share a plan as a link (no backend — the plan itself lives in the URL) ---------- */
