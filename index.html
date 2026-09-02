@@ -3136,7 +3136,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.11.1";
+const APP_VERSION = "4.11.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6881,7 +6881,7 @@ function renderStatsV2Overview(){
                 </linearGradient>
               </defs>
               <circle cx="66" cy="66" r="${R}" fill="none" stroke="var(--m-ink)" stroke-width="12"/>
-              <circle cx="66" cy="66" r="${R}" fill="none" ${statsV2Stroke(ringGradId,'#ff8a3d')} stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringOffset}"/>
+              <circle class="statsv2-draw-path" data-draw-to="${ringOffset}" data-draw-delay="260" cx="66" cy="66" r="${R}" fill="none" ${statsV2Stroke(ringGradId,'#ff8a3d')} stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringOffset}"/>
             </svg>
             <div class="statsv2-ring-num"><strong>${week.done}/${week.total}</strong><small>${t('stV2Days','dni')}</small></div>
           </div>
@@ -7050,14 +7050,19 @@ function statsV2AnimateDrawPaths(container){
     let len;
     try{ len = path.getTotalLength(); }catch(e){ return; }
     if(!len) return;
+    // Lines draw to full (offset 0); the weekly-progress ring is a partial
+    // arc, so it draws from empty to its real dashoffset (data-draw-to).
+    // data-draw-delay lets the ring hold until its card has risen in.
+    const drawTo = path.dataset.drawTo != null ? parseFloat(path.dataset.drawTo) : 0;
+    const delay = path.dataset.drawDelay != null ? parseInt(path.dataset.drawDelay, 10) : 20;
     path.style.transition = 'none';
     path.style.strokeDasharray = len;
     path.style.strokeDashoffset = len;
     path.getBoundingClientRect(); // force reflow so the transition below actually animates
     setTimeout(()=>{
       path.style.transition = 'stroke-dashoffset 1s cubic-bezier(.16,1,.3,1)';
-      path.style.strokeDashoffset = '0';
-    }, 20);
+      path.style.strokeDashoffset = drawTo;
+    }, delay);
   });
 }
 function renderStatsV2(animate){
