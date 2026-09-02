@@ -3425,7 +3425,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.16";
+const APP_VERSION = "4.10.17";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3882,6 +3882,10 @@ function fmtDate(iso){
    ============================================================ */
 let currentRoute = 'dashboard';
 const ROUTE_ORDER = ['welcome', 'gym', 'running', 'history', 'stats'];
+/* v2 ("Mekkio") screens in bottom-nav order (dashboard, plans, GYM,
+   history, stats) — so goRoute()'s slide direction matches which way you
+   moved along the nav. plan-editor-v2 is button-driven, not on the bar. */
+const V2_ROUTE_ORDER = ['dashboard', 'plans-v2', 'gym-v2', 'history-v2', 'stats-v2'];
 let viewTransitioning = false, viewTransitionCleanup = null;
 let pendingTransition = null;
 function beginViewTransition(newRoute, forward){
@@ -3999,8 +4003,10 @@ function renderBottomNavForContext(isV3){
   hydratePhIcons();
 }
 function goRoute(route){
-  const oldIndex = ROUTE_ORDER.indexOf(currentRoute);
-  const newIndex = ROUTE_ORDER.indexOf(route);
+  const v2Old = V2_ROUTE_ORDER.indexOf(currentRoute);
+  const v2New = V2_ROUTE_ORDER.indexOf(route);
+  const oldIndex = v2Old !== -1 && v2New !== -1 ? v2Old : ROUTE_ORDER.indexOf(currentRoute);
+  const newIndex = v2Old !== -1 && v2New !== -1 ? v2New : ROUTE_ORDER.indexOf(route);
   const forward = newIndex >= oldIndex;
   currentRoute = route;
   trackEvent('/' + route, route);
