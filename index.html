@@ -3425,7 +3425,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.18";
+const APP_VERSION = "4.10.19";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5965,6 +5965,14 @@ function toggleStarredPlan(id){
   if(starredPlanId) completePlanOnboardingIfNeeded();
 }
 function renderPlansList(){
+  // L5 unwind (step 2 — Plans): old #view-plans is never shown in the
+  // Mekkio layout. Skip rebuilding its invisible DOM; just keep Plans v2
+  // in sync (what the old tail-call did). renderPlansListV2() is fully
+  // self-contained — it reads trainingPlans directly.
+  if(!document.getElementById('view-plans')?.classList.contains('active')){
+    renderPlansListV2();
+    return;
+  }
   const wrap = document.getElementById('plansList');
   if(!trainingPlans.length){ wrap.innerHTML = `<div class="hist-empty" style="padding:0;">${t('planNoPlans','Brak planów.')}</div>`; return; }
   wrap.innerHTML = trainingPlans.map(p=>{
