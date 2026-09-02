@@ -664,43 +664,6 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .wnv2-card-text + .wnv2-card-list{margin-top:8px;}
 .backup-hint{padding:0 20px;margin-top:10px;font-size:var(--m-fs-2xs);line-height:1.5;color:rgba(255,255,255,.5);}
 
-/* ---------- stats ---------- */
-.stats-card{background:var(--light);border-radius:var(--m-r-sm);margin:12px;padding:20px;color:var(--text-dark);}
-.header-row + .stats-card{margin-top:24px;}
-.stats-card-inner{background:none;border-radius:0;margin:0;padding:0;}
-.stats-mini-label{display:flex;align-items:center;gap:11px;margin-bottom:19px;font-size:var(--m-fs-md);font-weight:600;letter-spacing:.48px;}
-.stats-mini-label .ph{width:32px;height:32px;color:var(--orange);}
-.stats-title{font-size:var(--m-fs-lg);font-weight:700;}
-.stats-sub{font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:normal;text-transform:none;margin-top:4px;color:var(--text-dark);}
-.stats-section-label{font-size:var(--m-fs-2xs);font-weight:400;text-transform:none;margin-top:20px;color:var(--text-dark);}
-.check-toggle-row{display:flex;gap:8px;margin-top:30px;}
-.check-toggle-row button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:var(--m-r-pill);
-  height:31px;padding:6px;font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.1px;text-transform:uppercase;font-family:inherit;cursor:pointer;}
-.check-toggle-row button svg{width:12px;height:12px;flex-shrink:0;}
-.check-toggle-row .check-toggle-all{background:var(--orange);color:#fff;}
-.check-toggle-row .check-toggle-none{background:var(--orange-pill);color:var(--text-dark);}
-.check-cols{display:flex;gap:8px;margin-top:23px;}
-.check-col{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;}
-.check-item{display:flex;align-items:center;gap:6px;padding:0 4px;border-radius:6px;cursor:pointer;height:22px;}
-.check-item input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}
-.check-box{width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.check-box svg{width:12px;height:12px;display:block;}
-@media (prefers-reduced-motion: no-preference){
-  .check-box svg{animation:checkPop .18s cubic-bezier(.16,1,.3,1);}
-  @keyframes checkPop{from{transform:scale(.3);opacity:0;}to{transform:scale(1);opacity:1;}}
-}
-.check-item .lbl{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:0.24px;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-dark);}
-.chart-wrap{margin-top:12px;}
-.stat-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;}
-.stat-tile{border-radius:10px;padding:14px;text-align:center;}
-.stat-tile .num{font-size:var(--m-fs-xl);font-weight:700;color:#fff;}
-.stat-tile .lbl{font-size:var(--m-fs-2xs);letter-spacing:.3px;text-transform:uppercase;margin-top:4px;}
-.stat-tile.orange{background:var(--orange);}
-.stat-tile.orange .lbl{color:var(--orange-pill);}
-.stat-tile.gray{background:var(--card);}
-.stat-tile.gray .num{color:#fff;}
-.stat-tile.gray .lbl{color:#e5e5e5;}
-
 /* ---------- misc ---------- */
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:#fff;color:var(--text-dark);
   padding:10px 18px;border-radius:10px;font-size:var(--m-fs-sm);font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:50;}
@@ -2042,43 +2005,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </section>
 
   <!-- ===================== STATS ===================== -->
-  <section class="view" id="view-stats">
-    <div class="header-row">
-      <div class="section-label">__PH_CHART__<span>STATS</span></div>
-      <div class="date-nav" id="statsDateNav">
-        <span class="date-nav-btn" id="statsPrevBtn">__PH_CARET_LEFT__</span>
-        <span id="statsDateLabel">—</span>
-        <span class="date-nav-btn" id="statsNextBtn">__PH_CARET_RIGHT__</span>
-      </div>
-    </div>
-
-    <div class="stats-card">
-      <div class="stats-card-inner">
-        <div class="stats-mini-label">__PH_BARBELL__<span>GYM</span></div>
-        <div class="stats-title" data-i18n="weightProgress">Progres ciężaru</div>
-        <div class="stats-sub" data-i18n="exercisesCheckHint">Ćwiczenia (zaznacz / odznacz)</div>
-        <div class="check-toggle-row">
-          <button class="check-toggle-all" onclick="setAllGymChecks(true)"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2L4.6 8.7L10 3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="selectAll">ZAZNACZ WSZYSTKIE</span></button>
-          <button class="check-toggle-none" onclick="setAllGymChecks(false)"><svg viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/></svg><span data-i18n="deselectAll">ODZNACZ WSZYSTKIE</span></button>
-        </div>
-        <div class="check-cols" id="gymExerciseChecks"><div class="check-col" id="gymExerciseChecksLeft"></div><div class="check-col" id="gymExerciseChecksRight"></div></div>
-        <div class="chart-wrap"><canvas id="gymChart" height="200"></canvas></div>
-      </div>
-    </div>
-
-    <div class="stats-card">
-      <div class="stats-card-inner">
-        <div class="stats-mini-label">__PH_SNEAKER__<span>RUNNING</span></div>
-        <div class="stats-title" data-i18n="runningTitle">Bieganie</div>
-        <div class="stat-tiles" id="runStats"></div>
-        <div class="stats-section-label" data-i18n="distanceLabel">Dystans</div>
-        <div class="chart-wrap"><canvas id="runDistChart" height="180"></canvas></div>
-        <div class="stats-section-label" data-i18n="paceMinKm">Tempo (min/km)</div>
-        <div class="chart-wrap"><canvas id="runPaceChart" height="180"></canvas></div>
-      </div>
-    </div>
-  </section>
-
   <!-- ===================== PLANS ===================== -->
   <section class="view" id="view-plans">
     <div class="header-row on-panel">
@@ -3320,7 +3246,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.22";
+const APP_VERSION = "4.10.23";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3946,7 +3872,6 @@ function goRoute(route){
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
   if(route==='gym'){ document.getElementById('gymDate').value = document.getElementById('gymDate').value || todayStr(); updateGymDateLabel(); renderGymGrid(); }
   if(route==='history'){ renderCalendar(); }
-  if(route==='stats'){ renderGymChecklist(); renderGymChart(); renderRunCharts(); updateStatsDateLabel(); }
   if(route==='plans'){ renderPlansList(); }
   if(route==='dashboard'){ previewMode = true; renderDashboard(); }
   if(route==='gym-v2'){ previewMode = true; renderGymV2(); }
@@ -7477,11 +7402,11 @@ function renderHistDetailV2(animate){
 }
 
 /* ============================================================
-   STATS v2 (Figma nodes 182:12264 "11. Statistic" + 183:13393
-   "11. Statistic - details") — v3-styled replacement for #view-stats.
-   Reuses workouts/dashboardAllSets()/starredPlanId/dashboardWeekDates()/
-   EXERCISE_ICON_MAP/iconSvgV3 wholesale; own state, production's
-   #view-stats stays completely untouched.
+   STATS (Figma nodes 182:12264 "11. Statistic" + 183:13393
+   "11. Statistic - details"). Reuses workouts/dashboardAllSets()/
+   starredPlanId/dashboardWeekDates()/EXERCISE_ICON_MAP/iconSvgV3
+   wholesale; own state. (The old #view-stats it replaced was deleted
+   in the L5 teardown, 4.10.23.)
    ============================================================ */
 const MONTH_ABBR_PL = ['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
 const MONTH_GEN_PL = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
@@ -8301,137 +8226,12 @@ function importData(evt){
   reader.readAsText(file);
 }
 
-/* ============================================================
-   STATS
-   ============================================================ */
-let gymChartInstance = null, runDistChartInstance = null, runPaceChartInstance = null;
-/* pastel palette — one distinct color per exercise (16), evenly spread across the hue wheel */
-const CHART_COLORS = ['#e36d6d','#de8854','#e3c66d','#cdde54','#a8e36d','#65de54','#6de38b','#54deaa','#6de3e3','#54aade','#6d8be3','#6554de','#a86de3','#cd54de','#e36dc6','#de5488'];
-function hexToRgba(hex, a){
-  const h = hex.replace('#','');
-  const r = parseInt(h.length===3?h[0]+h[0]:h.slice(0,2),16);
-  const g = parseInt(h.length===3?h[1]+h[1]:h.slice(2,4),16);
-  const b = parseInt(h.length===3?h[2]+h[2]:h.slice(4,6),16);
-  return `rgba(${r},${g},${b},${a})`;
-}
-let statsPeriod = (()=>{ const d=new Date(); return {year:d.getFullYear(), month:d.getMonth()}; })();
-
-function updateStatsDateLabel(){
-  document.getElementById('statsDateLabel').textContent = MONTH_NAMES[statsPeriod.month] + ' ' + statsPeriod.year;
-}
-function statsMove(delta){
-  statsPeriod.month += delta;
-  if(statsPeriod.month>11){ statsPeriod.month=0; statsPeriod.year++; }
-  else if(statsPeriod.month<0){ statsPeriod.month=11; statsPeriod.year--; }
-  updateStatsDateLabel();
-  renderGymChart();
-  renderRunCharts();
-}
-document.getElementById('statsPrevBtn').addEventListener('click', ()=> statsMove(-1));
-document.getElementById('statsNextBtn').addEventListener('click', ()=> statsMove(1));
-
-function inStatsPeriod(iso){
-  return iso.slice(0,7) === `${statsPeriod.year}-${String(statsPeriod.month+1).padStart(2,'0')}`;
-}
-
-function loggedExerciseNames(){
-  const names = new Set();
-  workouts.forEach(w=> w.exercises.forEach(e=>names.add(e.name)));
-  return Array.from(names);
-}
-function exerciseColor(name){
-  const names = loggedExerciseNames();
-  const idx = names.indexOf(name);
-  return CHART_COLORS[(idx>=0?idx:0) % CHART_COLORS.length];
-}
-function renderGymChecklist(){
-  const wrap = document.getElementById('gymExerciseChecks');
-  const left = document.getElementById('gymExerciseChecksLeft');
-  const right = document.getElementById('gymExerciseChecksRight');
-  const names = loggedExerciseNames();
-  const prevStates = {};
-  wrap.querySelectorAll('input[type=checkbox]').forEach(cb=>{ prevStates[cb.dataset.name] = cb.checked; });
-  if(!names.length){
-    left.innerHTML = `<div class="hist-empty" style="color:#5b5555;padding:8px 0;">${t('noWorkoutsYet','Brak jeszcze zapisanych treningów.')}</div>`;
-    right.innerHTML = '';
-    return;
-  }
-  const half = Math.ceil(names.length/2);
-  const cols = [names.slice(0,half), names.slice(half)];
-  const targets = [left, right];
-  cols.forEach((colNames, ci)=>{
-    targets[ci].innerHTML = colNames.map((name)=>{
-      const idx = names.indexOf(name);
-      const color = CHART_COLORS[idx % CHART_COLORS.length];
-      const checked = prevStates.hasOwnProperty(name) ? prevStates[name] : true;
-      const box = checked
-        ? `<svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2L4.6 8.7L10 3" stroke="${color}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-        : `<span style="display:block;width:12px;height:12px;border-radius:3px;border:1px solid ${color};opacity:.67;"></span>`;
-      return `
-        <label class="check-item" style="background:${hexToRgba(color,0.45)};">
-          <input type="checkbox" data-name="${name.replace(/"/g,'&quot;')}" ${checked?'checked':''} onchange="renderGymChecklist();renderGymChart();">
-          <span class="check-box">${box}</span>
-          <span class="lbl">${name}</span>
-        </label>`;
-    }).join('');
-  });
-}
-function setAllGymChecks(state){
-  document.querySelectorAll('#gymExerciseChecks input[type=checkbox]').forEach(cb=> cb.checked = state);
-  renderGymChecklist();
-  renderGymChart();
-}
-function renderGymChart(){
-  const checks = [...document.querySelectorAll('#gymExerciseChecks input[type=checkbox]')];
-  const selectedNames = checks.filter(c=>c.checked).map(c=>c.dataset.name);
-  const periodWorkouts = workouts.filter(w=>inStatsPeriod(w.date));
-  const allDatesSet = new Set();
-  periodWorkouts.forEach(w=>{ if(w.exercises.some(e=> selectedNames.includes(e.name))) allDatesSet.add(w.date); });
-  const allDates = Array.from(allDatesSet).sort();
-  const datasets = selectedNames.map(name=>{
-    const color = exerciseColor(name);
-    const dataMap = {};
-    periodWorkouts.filter(w=> w.exercises.some(e=>e.name===name)).forEach(w=>{
-      const ex = w.exercises.find(e=>e.name===name);
-      const top = Math.max(0, ...ex.sets.map(s=>s.weight||0));
-      dataMap[w.date] = top;
-    });
-    return { label:name, data: allDates.map(d=> dataMap.hasOwnProperty(d)?dataMap[d]:null),
-      borderColor:color, backgroundColor:color+'26', spanGaps:true, tension:.25, pointRadius:4, pointBackgroundColor:color };
-  });
-  const ctx = document.getElementById('gymChart').getContext('2d');
-  if(gymChartInstance) gymChartInstance.destroy();
-  gymChartInstance = new Chart(ctx, { type:'line', data:{labels: allDates.map(fmtDate), datasets},
-    options:{ responsive:true, plugins:{legend:{display:false}},
-      scales:{ x:{ticks:{color:'#8a8a8a'},grid:{color:'#e5e5e5'}}, y:{ticks:{color:'#8a8a8a'},grid:{color:'#e5e5e5'},title:{display:true,text:'kg',color:'#8a8a8a'}} } } });
-}
-function renderRunCharts(){
-  const sorted = [...runs].filter(r=>inStatsPeriod(r.date)).sort((a,b)=> a.date.localeCompare(b.date));
-  const labels = sorted.map(r=>fmtDate(r.date));
-  const statBox = document.getElementById('runStats');
-  if(sorted.length){
-    const longest = Math.max(...sorted.map(r=>r.distance));
-    const total = sorted.reduce((s,r)=>s+r.distance,0);
-    const bestPace = Math.min(...sorted.map(r=>r.pace));
-    const bMin = Math.floor(bestPace), bSec = Math.round((bestPace-bMin)*60);
-    statBox.innerHTML = `
-      <div class="stat-tile orange"><div class="num">${longest.toFixed(1)} km</div><div class="lbl">${t('longestRun','Najdłuższy bieg')}</div></div>
-      <div class="stat-tile orange"><div class="num">${total.toFixed(1)} km</div><div class="lbl">${t('totalDistance','Łączny dystans')}</div></div>
-      <div class="stat-tile gray"><div class="num">${sorted.length}</div><div class="lbl">${t('numberOfRuns','Liczba biegów')}</div></div>
-      <div class="stat-tile gray"><div class="num">${bMin}:${bSec.toString().padStart(2,'0')}</div><div class="lbl">${t('bestPace','Najlepsze tempo')}</div></div>`;
-  } else {
-    statBox.innerHTML = `<div class="hist-empty" style="grid-column:1/-1;color:#5b5555;">${t('noRunsThisMonth','Brak biegów w tym miesiącu')}</div>`;
-  }
-  const ctx1 = document.getElementById('runDistChart').getContext('2d');
-  if(runDistChartInstance) runDistChartInstance.destroy();
-  runDistChartInstance = new Chart(ctx1, { type:'bar', data:{labels, datasets:[{label:t('distanceKm','Dystans (km)'), data:sorted.map(r=>r.distance), backgroundColor:'#f15a23'}]},
-    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#8a8a8a'},grid:{display:false}}, y:{ticks:{color:'#8a8a8a'},grid:{color:'#e5e5e5'}} } } });
-  const ctx2 = document.getElementById('runPaceChart').getContext('2d');
-  if(runPaceChartInstance) runPaceChartInstance.destroy();
-  runPaceChartInstance = new Chart(ctx2, { type:'line', data:{labels, datasets:[{label:t('paceMinKm','Tempo'), data:sorted.map(r=>+r.pace.toFixed(2)),
-    borderColor:'#f5b942', backgroundColor:'rgba(245,185,66,.15)', tension:.25, fill:true, pointRadius:4, pointBackgroundColor:'#f5b942'}]},
-    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#8a8a8a'},grid:{color:'#e5e5e5'}}, y:{ticks:{color:'#8a8a8a'},grid:{color:'#e5e5e5'}} } } });
-}
+/* Old #view-stats (GYM weight-progress checklist + Chart.js line/bar/pace
+   charts + run stat tiles) removed in the L5 teardown — Stats v2
+   (renderStatsV2) is the only stats screen. Nothing here was shared:
+   CHART_COLORS / hexToRgba / statsPeriod / inStatsPeriod /
+   loggedExerciseNames / exerciseColor / the chart instances all lived
+   and died inside that block. */
 
 /* Safari's WKWebView "AutoFill Contact" heuristic can trigger on a
    text field regardless of autocomplete="off" — it seems to key partly
@@ -8448,7 +8248,6 @@ function renderRunCharts(){
 showLoadScreenV2(()=>{}); // production boot splash — the "Mekkio" load screen (name + version) covers every launch for ~1.5s
 updateCalLabels();
 updateGymDateLabel();
-updateStatsDateLabel();
 updatePlanPillLabel();
 renderGymGrid();
 renderExercisePanels();
