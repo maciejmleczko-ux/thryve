@@ -2010,55 +2010,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </section>
 
   <!-- ===================== RUNNING ===================== -->
-  <section class="view" id="view-running">
-    <div class="header-row on-panel">
-      <div class="section-label">__PH_SNEAKER__<span>RUNNING</span></div>
-      <button class="date-pill" id="runDatePill">
-        <span id="runDateLabel">—</span>__PH_CARET__
-      </button>
-      <input type="date" id="runDate" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;">
-    </div>
-
-    <div class="panel">
-      <div class="panel-inner">
-        <div class="field-row" style="padding:0;margin-top:0;">
-          <div class="field">
-            <label data-i18n="planWeekLabel">Tydzień planu</label>
-            <select id="runWeek" onchange="updateRunHint()"></select>
-          </div>
-          <div class="field">
-            <label data-i18n="sessionTypeLabel">Typ sesji</label>
-            <select id="runType">
-              <option value="Marszobieg" data-i18n="runTypeRunWalk">Marszobieg</option>
-              <option value="Bieg ciągły" data-i18n="runTypeContinuous">Bieg ciągły</option>
-              <option value="Bieg długi" data-i18n="runTypeLong">Bieg długi</option>
-              <option value="Bieg regeneracyjny" data-i18n="runTypeRecovery">Bieg regeneracyjny</option>
-              <option value="Bieg próbny/start" data-i18n="runTypeTrial">Bieg próbny/start</option>
-            </select>
-          </div>
-        </div>
-        <div class="week-progress" id="weekProgress"></div>
-        <div class="tip-box run-tip" id="runHint" style="margin:12px 0 0;"></div>
-        <div class="run-stat-tiles">
-          <div class="run-stat-tile"><input type="number" id="runDistance" step="0.1" min="0" placeholder="0.0"></div>
-          <div class="run-stat-tile"><input type="number" id="runTime" step="1" min="0" placeholder="0"></div>
-          <div class="run-stat-tile"><input type="text" id="runPaceDisplay" disabled placeholder="—"></div>
-        </div>
-        <div class="run-stat-labels">
-          <div data-i18n="distanceKm">Dystans (km)</div>
-          <div data-i18n="timeMin">Czas (min)</div>
-          <div data-i18n="paceMinKm">Tempo (min/km)</div>
-        </div>
-        <div class="field" style="padding:0;margin-top:14px;">
-          <label data-i18n="notesLabel">Uwagi</label>
-          <input type="text" id="runNotes" data-i18n-ph="optionalPh" placeholder="opcjonalnie" autocomplete="off">
-        </div>
-      </div>
-    </div>
-    <button class="save-btn" onclick="saveRun()" data-i18n="saveWorkout">Zapisz trening</button>
-    <button class="share-btn hidden" id="runShareBtn" onclick="shareHistCard('run', this.dataset.id)">__PH_SHARE__<span data-i18n="shareRun">Udostępnij bieg</span></button>
-  </section>
-
   <!-- ===================== HISTORY ===================== -->
   <section class="view" id="view-history">
     <div class="header-row on-orange">
@@ -3369,7 +3320,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.21";
+const APP_VERSION = "4.10.22";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3994,7 +3945,6 @@ function goRoute(route){
   document.querySelector('.topbar').classList.toggle('topbar-light', route==='gym' || route==='running' || route==='plans' || route==='planEditor');
   document.querySelector('.topbar').classList.toggle('topbar-orange', route==='history');
   if(route==='gym'){ document.getElementById('gymDate').value = document.getElementById('gymDate').value || todayStr(); updateGymDateLabel(); renderGymGrid(); }
-  if(route==='running'){ document.getElementById('runDate').value = document.getElementById('runDate').value || todayStr(); updateRunDateLabel(); }
   if(route==='history'){ renderCalendar(); }
   if(route==='stats'){ renderGymChecklist(); renderGymChart(); renderRunCharts(); updateStatsDateLabel(); }
   if(route==='plans'){ renderPlansList(); }
@@ -4072,7 +4022,7 @@ function renderPlanTables(){
    GYM — date pill
    ============================================================ */
 document.getElementById('gymDate').addEventListener('change', updateGymDateLabel);
-document.getElementById('gymDatePill').addEventListener('click', ()=> openDatePicker('gym'));
+document.getElementById('gymDatePill').addEventListener('click', ()=> openDatePicker());
 function updateGymDateLabel(){
   const v = document.getElementById('gymDate').value || todayStr();
   document.getElementById('gymDate').value = v;
@@ -4082,25 +4032,13 @@ function updateGymDateLabel(){
   renderGymGrid();
 }
 
-document.getElementById('runDate').addEventListener('change', updateRunDateLabel);
-document.getElementById('runDatePill').addEventListener('click', ()=> openDatePicker('run'));
-function updateRunDateLabel(){
-  const v = document.getElementById('runDate').value || todayStr();
-  document.getElementById('runDate').value = v;
-  document.getElementById('runDateLabel').textContent = fmtDateHuman(v);
-  document.getElementById('runShareBtn').classList.add('hidden');
-}
-
 /* ============================================================
-   GYM/RUNNING — shared date-picker calendar modal
+   GYM — date-picker calendar modal
    ============================================================ */
-let dpTarget = null; // 'gym' | 'run'
 let dpState = (()=>{ const d=new Date(); return {year:d.getFullYear(), month:d.getMonth(), selected:null}; })();
 
-function openDatePicker(target){
-  dpTarget = target;
-  const inputId = target==='gym' ? 'gymDate' : 'runDate';
-  const current = document.getElementById(inputId).value || todayStr();
+function openDatePicker(){
+  const current = document.getElementById('gymDate').value || todayStr();
   const [y,m] = current.split('-').map(Number);
   dpState.year = y; dpState.month = m-1; dpState.selected = current;
   initDpSelects();
@@ -4109,7 +4047,6 @@ function openDatePicker(target){
 }
 function closeDatePicker(){
   document.getElementById('dpOverlay').classList.add('hidden');
-  dpTarget = null;
 }
 function initDpSelects(){
   const mSel = document.getElementById('dpMonth');
@@ -4184,9 +4121,8 @@ function renderDpCalendar(){
 }
 function selectDpDate(iso){
   dpState.selected = iso;
-  const inputId = dpTarget==='gym' ? 'gymDate' : 'runDate';
-  document.getElementById(inputId).value = iso;
-  if(dpTarget==='gym') updateGymDateLabel(); else updateRunDateLabel();
+  document.getElementById('gymDate').value = iso;
+  updateGymDateLabel();
   closeDatePicker();
 }
 
@@ -7225,79 +7161,10 @@ function showLoadScreenV2(onDone){
   }, 1500);
 }
 
-/* ============================================================
-   RUNNING
-   ============================================================ */
-const runWeekSelect = document.getElementById('runWeek');
-RUN_PLAN.forEach(w=>{
-  const opt = document.createElement('option');
-  opt.value = w.week;
-  opt.textContent = (typeof w.week === 'number' ? t('weekLabel', 'Tydzień ' + w.week, w.week) : t('maintenanceLabel', w.week));
-  runWeekSelect.appendChild(opt);
-});
-const RUN_PLAN_TOTAL_WEEKS = RUN_PLAN.filter(w=>typeof w.week==='number').length;
-function renderWeekProgress(){
-  const wk = runWeekSelect.value;
-  const wkNum = parseInt(wk);
-  const done = isNaN(wkNum) ? RUN_PLAN_TOTAL_WEEKS : wkNum;
-  const wrap = document.getElementById('weekProgress');
-  wrap.innerHTML = '';
-  for(let i=1;i<=RUN_PLAN_TOTAL_WEEKS;i++){
-    const dot = document.createElement('div');
-    dot.className = 'dot' + (i<=done ? ' done' : '');
-    wrap.appendChild(dot);
-  }
-}
-function updateRunHint(){
-  const wk = runWeekSelect.value;
-  const plan = RUN_PLAN.find(w => String(w.week) === String(wk));
-  const hint = document.getElementById('runHint');
-  if(plan){
-    hint.innerHTML = `<b>${t('tuesdayLabel','Wtorek:')}</b> ${rpText(plan.tue)}<br><b>${t('saturdayLabel','Sobota:')}</b> ${rpText(plan.sat)}`;
-  } else { hint.textContent = ''; }
-  renderWeekProgress();
-}
-updateRunHint();
-function updatePaceDisplay(){
-  const dist = parseFloat(document.getElementById('runDistance').value);
-  const time = parseFloat(document.getElementById('runTime').value);
-  const out = document.getElementById('runPaceDisplay');
-  if(dist>0 && time>0){
-    const pace = time/dist;
-    const min = Math.floor(pace);
-    const sec = Math.round((pace-min)*60);
-    out.value = `${min}:${sec.toString().padStart(2,'0')}`;
-  } else { out.value = ''; }
-}
-document.getElementById('runDistance').addEventListener('input', updatePaceDisplay);
-document.getElementById('runTime').addEventListener('input', updatePaceDisplay);
-function saveRun(){
-  const dist = parseFloat(document.getElementById('runDistance').value) || 0;
-  const time = parseFloat(document.getElementById('runTime').value) || 0;
-  if(dist<=0 || time<=0){ toast(t('enterDistanceTime','Podaj dystans i czas biegu')); return; }
-  const run = {
-    id: 'r_' + Date.now(),
-    date: document.getElementById('runDate').value || todayStr(),
-    week: runWeekSelect.value,
-    type: document.getElementById('runType').value,
-    distance: dist,
-    time: time,
-    pace: time/dist,
-    notes: document.getElementById('runNotes').value || ''
-  };
-  runs.push(run);
-  saveRuns(runs);
-  trackEvent('/event/save-run', 'Zapisano bieg');
-  toast(t('runSaved','Bieg zapisany'));
-  pulseSaveBtn(document.querySelector('#view-running .save-btn'));
-  const runShareBtn = document.getElementById('runShareBtn');
-  runShareBtn.dataset.id = run.id;
-  runShareBtn.classList.remove('hidden');
-  document.getElementById('runDistance').value = '';
-  document.getElementById('runTime').value = '';
-  document.getElementById('runNotes').value = '';
-  updatePaceDisplay();
-}
+/* Running entry (#view-running + saveRun/updatePaceDisplay/run-week plan
+   UI) removed in the L5 teardown — Running is a hidden feature. `runs[]`,
+   loadRuns/saveRuns and runTypeLabel() stay: History v2 / Stats v2 still
+   read and display any runs a user logged before it was hidden. */
 
 /* ============================================================
    HISTORY — calendar
@@ -8570,7 +8437,7 @@ function renderRunCharts(){
    text field regardless of autocomplete="off" — it seems to key partly
    off recognizing that literal value. A random, never-seen token
    defeats the pattern match more reliably. */
-['newExTitle','newExGroup','onboardNick','runNotes','feedbackMessage'].forEach(id=>{
+['newExTitle','newExGroup','onboardNick','feedbackMessage'].forEach(id=>{
   const el = document.getElementById(id);
   if(el) el.setAttribute('autocomplete', 'off-' + Math.random().toString(36).slice(2));
 });
@@ -8581,7 +8448,6 @@ function renderRunCharts(){
 showLoadScreenV2(()=>{}); // production boot splash — the "Mekkio" load screen (name + version) covers every launch for ~1.5s
 updateCalLabels();
 updateGymDateLabel();
-updateRunDateLabel();
 updateStatsDateLabel();
 updatePlanPillLabel();
 renderGymGrid();
