@@ -753,11 +753,19 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .gymv2-panel{background:var(--m-panel);border-radius:0 0 26px 26px;padding:calc(50px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
 /* Screen header — one spec for GYM / Plans / History / Stats (audit W5).
    Plans + Stats wrap the icon+h1 in a .*-header-title (their .*-header is a
-   space-between row); GYM + History put it straight on .*-header. */
-.gymv2-header, .plansv2-header-title, .histv2-header, .statsv2-header-title{display:flex;align-items:center;gap:16px;}
-.gymv2-header .ph, .plansv2-header-title .ph, .histv2-header .ph, .statsv2-header-title .ph{width:40px;height:40px;color:var(--m-orange);flex-shrink:0;}
-.gymv2-header h1, .plansv2-header-title h1, .histv2-header h1, .statsv2-header h1{margin:0;font-size:var(--m-fs-2xl);font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
+   space-between row); GYM + History put it straight on .*-header.
+   Figma node 191:703 shrank the title icon (40->32) + label
+   (--m-fs-2xl -> --m-fs-xl) and put a back arrow ahead of them. */
+.gymv2-header, .plansv2-header-title, .histv2-header, .statsv2-header-title{display:flex;align-items:center;gap:12px;}
+.gymv2-header .ph, .plansv2-header-title .ph, .histv2-header .ph, .statsv2-header-title .ph{width:32px;height:32px;color:var(--m-orange);flex-shrink:0;}
+.gymv2-header h1, .plansv2-header-title h1, .histv2-header h1, .statsv2-header h1{margin:0;font-size:var(--m-fs-xl);font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
 .gymv2-header, .histv2-header{margin-bottom:20px;}
+/* Back arrow — returns to Dashboard from any of the four v2 tab screens.
+   Sits before the title icon; its own 24px glyph (ink, not orange) so it
+   reads as navigation chrome rather than part of the title lockup. */
+.v2-hdr-back{background:none;border:none;padding:0;margin:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform .12s ease;}
+.v2-hdr-back:active{transform:scale(.88);}
+.gymv2-header .v2-hdr-back .ph, .plansv2-header-title .v2-hdr-back .ph, .histv2-header .v2-hdr-back .ph, .statsv2-header-title .v2-hdr-back .ph{width:24px;height:24px;color:var(--m-ink);}
 
 .gymv2-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:transform .12s ease;}
 .gymv2-plan-card:active{transform:scale(.98);}
@@ -1708,6 +1716,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button type="button" class="gymv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
 
       <div class="gymv2-header">
+        <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
         <span class="ph" data-ph="barbell"></span>
         <h1>GYM</h1>
       </div>
@@ -1766,6 +1775,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
            because that one really is a sub-screen you back out of.) -->
       <div class="plansv2-header">
         <div class="plansv2-header-title">
+          <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
           <span class="ph" data-ph="barbell"></span>
           <h1>PLANS</h1>
         </div>
@@ -1919,6 +1929,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button type="button" class="histv2-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
 
       <div class="histv2-header">
+        <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
         <span class="ph" data-ph="calendar-dots"></span>
         <h1>HISTORY</h1>
       </div>
@@ -1963,6 +1974,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
       <div class="statsv2-header">
         <div class="statsv2-header-title">
+          <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
           <span class="ph" data-ph="chart-line-up"></span>
           <h1>STATS</h1>
         </div>
@@ -2343,6 +2355,7 @@ const T_EN = {
   whatsnewTitle: "WHAT'S NEW",
   whatsnewClose: 'Great, close',
   whatsnewFeaturedBadge: 'New',
+  navBack: 'Back',
   feedbackTitle: 'Share feedback',
   feedbackBody: 'Report a bug or drop an idea — we read every submission.',
   feedbackBug: 'Bug',
@@ -2625,6 +2638,10 @@ const PH = {
 "chat-dots": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 146 146\" fill=\"none\"><path d=\"M122.933 28.4567H22.7655C20.6523 28.4567 18.6256 29.2962 17.1313 30.7905C15.6371 32.2847 14.7976 34.3114 14.7976 36.4246V127.486C14.7894 129.005 15.2193 130.495 16.036 131.775C16.8526 133.056 18.0212 134.075 19.4019 134.708C20.456 135.197 21.6036 135.452 22.7655 135.454C24.6426 135.455 26.4586 134.787 27.8877 133.57L27.9218 133.542L46.8 117.242H122.933C125.046 117.242 127.073 116.402 128.567 114.908C130.062 113.414 130.901 111.387 130.901 109.274V36.4246C130.901 34.3114 130.062 32.2847 128.567 30.7905C127.073 29.2962 125.046 28.4567 122.933 28.4567ZM124.071 109.274C124.071 109.576 123.951 109.865 123.738 110.079C123.525 110.292 123.235 110.412 122.933 110.412H45.5309C44.7116 110.412 43.9198 110.707 43.2999 111.243L23.4826 128.357C23.3164 128.492 23.1157 128.577 22.9033 128.603C22.6909 128.629 22.4755 128.594 22.2818 128.503C22.0881 128.413 21.924 128.269 21.8082 128.089C21.6924 127.909 21.6297 127.7 21.6272 127.486V36.4246C21.6272 36.1227 21.7471 35.8332 21.9606 35.6197C22.1741 35.4063 22.4636 35.2863 22.7655 35.2863H122.933C123.235 35.2863 123.525 35.4063 123.738 35.6197C123.951 35.8332 124.071 36.1227 124.071 36.4246V109.274ZM94.4764 63.7431C94.4764 64.6487 94.1167 65.5173 93.4763 66.1577C92.8359 66.7981 91.9673 67.1579 91.0616 67.1579H54.637C53.7314 67.1579 52.8628 66.7981 52.2224 66.1577C51.582 65.5173 51.2222 64.6487 51.2222 63.7431C51.2222 62.8374 51.582 61.9688 52.2224 61.3284C52.8628 60.688 53.7314 60.3283 54.637 60.3283H91.0616C91.9673 60.3283 92.8359 60.688 93.4763 61.3284C94.1167 61.9688 94.4764 62.8374 94.4764 63.7431ZM94.4764 81.9554C94.4764 82.861 94.1167 83.7296 93.4763 84.37C92.8359 85.0104 91.9673 85.3702 91.0616 85.3702H54.637C53.7314 85.3702 52.8628 85.0104 52.2224 84.37C51.582 83.7296 51.2222 82.861 51.2222 81.9554C51.2222 81.0497 51.582 80.1811 52.2224 79.5407C52.8628 78.9003 53.7314 78.5406 54.637 78.5406H91.0616C91.9673 78.5406 92.8359 78.9003 93.4763 79.5407C94.1167 80.1811 94.4764 81.0497 94.4764 81.9554Z\" fill=\"currentColor\"/></svg>"
 };
 Object.assign(PH, {"magnifying-glass": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.32l50.06,50.06a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z\"/></svg>"});
+/* v2 screen-header back arrow (Figma node 191:726 "ArrowLeft", exported
+   asset — thin weight, 24px viewBox; fill hardcoded->currentColor so
+   .v2-hdr-back CSS drives the color). */
+Object.assign(PH, {"arrow-left": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M20.8125 12C20.8125 12.1492 20.7532 12.2923 20.6477 12.3977C20.5423 12.5032 20.3992 12.5625 20.25 12.5625H5.10844L10.8975 18.3525C10.9528 18.404 10.9971 18.4661 11.0278 18.5351C11.0586 18.6041 11.0751 18.6786 11.0764 18.7541C11.0778 18.8296 11.0639 18.9047 11.0356 18.9747C11.0073 19.0447 10.9652 19.1084 10.9118 19.1618C10.8584 19.2152 10.7947 19.2573 10.7247 19.2856C10.6547 19.3139 10.5796 19.3278 10.5041 19.3264C10.4286 19.3251 10.3541 19.3086 10.2851 19.2778C10.2161 19.2471 10.154 19.2028 10.1025 19.1475L3.3525 12.3975C3.24716 12.292 3.18799 12.1491 3.18799 12C3.18799 11.8509 3.24716 11.708 3.3525 11.6025L10.1025 4.8525C10.2091 4.75314 10.3502 4.69905 10.4959 4.70162C10.6416 4.70419 10.7807 4.76322 10.8837 4.86628C10.9868 4.96934 11.0458 5.10838 11.0484 5.25411C11.051 5.39983 10.9969 5.54087 10.8975 5.6475L5.10844 11.4375H20.25C20.3992 11.4375 20.5423 11.4968 20.6477 11.6023C20.7532 11.7077 20.8125 11.8508 20.8125 12Z\"/></svg>"});
 /* Dashboard hero "powtórzeń" row icon (Figma node 110:717, exported
    asset — layer is stale-named "SneakerMove" from before the metric
    swapped from km to reps, but the SVG content itself is the new
@@ -3012,7 +3029,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.10.33";
+const APP_VERSION = "4.10.34";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
