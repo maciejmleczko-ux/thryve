@@ -3165,7 +3165,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.12.0";
+const APP_VERSION = "4.12.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7383,50 +7383,154 @@ function drawShareCardFooter(ctx, dateHuman){
   ctx.font = '700 24px Geist, Inter, sans-serif';
   ctx.fillText('MEKKIO.APP', SHARE_CARD_W/2, SHARE_CARD_H-50);
 }
+function scLetterSpacing(ctx, px){ try{ ctx.letterSpacing = px + 'px'; }catch(e){} }
+/* Figma assets for the share card, as raw vector paths (node 199:703 — all
+   fill #ff3300). Drawn with Path2D, NOT drawImage(<svg>), because WebKit
+   taints a canvas when an SVG image is drawn onto it → the later toBlob()
+   throws and the "nie udało się wygenerować grafiki" toast fires. */
+const SC_BARBELL_VB = [253.578, 253.578];
+const SC_BARBELL_D = "M230.686 119.746H221.882V89.81C221.882 86.5407 220.583 83.4053 218.271 81.0936C215.96 78.7819 212.824 77.4832 209.555 77.4832H193.706V68.6784C193.706 65.4092 192.408 62.2738 190.096 59.9621C187.784 57.6504 184.649 56.3517 181.38 56.3517H160.248C156.979 56.3517 153.843 57.6504 151.532 59.9621C149.22 62.2738 147.921 65.4092 147.921 68.6784V119.746H102.136V68.6784C102.136 65.4092 100.838 62.2738 98.5259 59.9621C96.2142 57.6504 93.0788 56.3517 89.8096 56.3517H68.678C65.4088 56.3517 62.2734 57.6504 59.9617 59.9621C57.65 62.2738 56.3513 65.4092 56.3513 68.6784V77.4832H40.5027C37.2334 77.4832 34.0981 78.7819 31.7863 81.0936C29.4746 83.4053 28.1759 86.5407 28.1759 89.81V119.746H19.3711C17.97 119.746 16.6263 120.303 15.6356 121.294C14.6448 122.284 14.0882 123.628 14.0882 125.029C14.0882 126.43 14.6448 127.774 15.6356 128.765C16.6263 129.755 17.97 130.312 19.3711 130.312H28.1759V160.248C28.1759 163.518 29.4746 166.653 31.7863 168.965C34.0981 171.276 37.2334 172.575 40.5027 172.575H56.3513V181.38C56.3513 184.649 57.65 187.785 59.9617 190.096C62.2734 192.408 65.4088 193.707 68.678 193.707H89.8096C93.0788 193.707 96.2142 192.408 98.5259 190.096C100.838 187.785 102.136 184.649 102.136 181.38V130.312H147.921V181.38C147.921 184.649 149.22 187.785 151.532 190.096C153.843 192.408 156.979 193.707 160.248 193.707H181.38C184.649 193.707 187.784 192.408 190.096 190.096C192.408 187.785 193.706 184.649 193.706 181.38V172.575H209.555C212.824 172.575 215.96 171.276 218.271 168.965C220.583 166.653 221.882 163.518 221.882 160.248V130.312H230.686C232.088 130.312 233.431 129.755 234.422 128.765C235.413 127.774 235.969 126.43 235.969 125.029C235.969 123.628 235.413 122.284 234.422 121.294C233.431 120.303 232.088 119.746 230.686 119.746ZM40.5027 162.009C40.0356 162.009 39.5877 161.824 39.2575 161.494C38.9272 161.163 38.7417 160.715 38.7417 160.248V89.81C38.7417 89.3429 38.9272 88.895 39.2575 88.5648C39.5877 88.2345 40.0356 88.049 40.5027 88.049H56.3513V162.009H40.5027ZM91.5705 181.38C91.5705 181.847 91.385 182.295 91.0548 182.625C90.7245 182.955 90.2766 183.141 89.8096 183.141H68.678C68.211 183.141 67.7631 182.955 67.4329 182.625C67.1026 182.295 66.9171 181.847 66.9171 181.38V68.6784C66.9171 68.2114 67.1026 67.7635 67.4329 67.4332C67.7631 67.103 68.211 66.9175 68.678 66.9175H89.8096C90.2766 66.9175 90.7245 67.103 91.0548 67.4332C91.385 67.7635 91.5705 68.2114 91.5705 68.6784V181.38ZM183.141 181.38C183.141 181.847 182.955 182.295 182.625 182.625C182.295 182.955 181.847 183.141 181.38 183.141H160.248C159.781 183.141 159.333 182.955 159.003 182.625C158.673 182.295 158.487 181.847 158.487 181.38V68.6784C158.487 68.2114 158.673 67.7635 159.003 67.4332C159.333 67.103 159.781 66.9175 160.248 66.9175H181.38C181.847 66.9175 182.295 67.103 182.625 67.4332C182.955 67.7635 183.141 68.2114 183.141 68.6784V181.38ZM211.316 160.248C211.316 160.715 211.13 161.163 210.8 161.494C210.47 161.824 210.022 162.009 209.555 162.009H193.706V88.049H209.555C210.022 88.049 210.47 88.2345 210.8 88.5648C211.13 88.895 211.316 89.3429 211.316 89.81V160.248Z";
+const SC_TROPHY_VB = [75.5673, 60.1977];
+const SC_TROPHY_D = "M71.0845 7.68481H62.7593V1.9212C62.7593 1.41167 62.5569 0.923002 62.1966 0.562707C61.8363 0.202412 61.3476 0 60.8381 0H14.7292C14.2197 0 13.731 0.202412 13.3707 0.562707C13.0104 0.923002 12.808 1.41167 12.808 1.9212V7.68481H4.48281C3.29389 7.68481 2.15367 8.1571 1.31298 8.99779C0.472294 9.83848 0 10.9787 0 12.1676V17.2908C0 20.5179 1.28194 23.6128 3.56381 25.8946C5.84568 28.1765 8.94056 29.4584 12.1676 29.4584H13.8134C15.244 34.3193 18.1192 38.6301 22.0574 41.8185C25.9955 45.0069 30.8103 46.922 35.8624 47.3096V56.3553H27.5372C27.0277 56.3553 26.539 56.5577 26.1787 56.918C25.8184 57.2783 25.616 57.7669 25.616 58.2765C25.616 58.786 25.8184 59.2747 26.1787 59.635C26.539 59.9953 27.0277 60.1977 27.5372 60.1977H48.0301C48.5396 60.1977 49.0283 59.9953 49.3886 59.635C49.7488 59.2747 49.9513 58.786 49.9513 58.2765C49.9513 57.7669 49.7488 57.2783 49.3886 56.918C49.0283 56.5577 48.5396 56.3553 48.0301 56.3553H39.7048V47.3096C50.0921 46.5027 58.7344 39.2085 61.677 29.4584H63.3997C66.6267 29.4584 69.7216 28.1765 72.0035 25.8946C74.2853 23.6128 75.5673 20.5179 75.5673 17.2908V12.1676C75.5673 10.9787 75.095 9.83848 74.2543 8.99779C73.4136 8.1571 72.2734 7.68481 71.0845 7.68481ZM12.1676 25.616C9.95963 25.616 7.84208 24.7389 6.2808 23.1776C4.71952 21.6164 3.8424 19.4988 3.8424 17.2908V12.1676C3.8424 11.9978 3.90988 11.8349 4.02997 11.7148C4.15007 11.5947 4.31296 11.5272 4.48281 11.5272H12.808V22.414C12.8111 23.4846 12.8806 24.554 13.0161 25.616H12.1676ZM58.9169 22.1258C58.9169 33.8516 49.5094 43.4608 37.9437 43.5473C35.155 43.5684 32.3897 43.0373 29.8072 41.9848C27.2247 40.9322 24.8761 39.3789 22.8967 37.4144C20.9173 35.4499 19.3463 33.113 18.2743 30.5385C17.2022 27.964 16.6503 25.2028 16.6504 22.414V3.8424H58.9169V22.1258ZM71.7249 17.2908C71.7249 19.4988 70.8478 21.6164 69.2865 23.1776C67.7252 24.7389 65.6077 25.616 63.3997 25.616H62.5127C62.6759 24.4598 62.7583 23.2936 62.7593 22.1258V11.5272H71.0845C71.2543 11.5272 71.4172 11.5947 71.5373 11.7148C71.6574 11.8349 71.7249 11.9978 71.7249 12.1676V17.2908Z";
+const SC_LOGO_VB = [211.248, 47.8069];
+const SC_LOGO_D = [
+"M194.113 47.8069C190.669 47.8069 187.639 47.0657 185.023 45.5834C182.451 44.0574 180.445 41.921 179.006 39.1743C177.611 36.4275 176.914 33.223 176.914 29.5606C176.914 25.8547 177.611 22.6501 179.006 19.947C180.445 17.2002 182.451 15.0857 185.023 13.6033C187.639 12.0773 190.669 11.3143 194.113 11.3143C197.558 11.3143 200.566 12.0773 203.139 13.6033C205.711 15.0857 207.695 17.2002 209.09 19.947C210.529 22.6501 211.248 25.8547 211.248 29.5606C211.248 33.223 210.529 36.4275 209.09 39.1743C207.695 41.921 205.711 44.0574 203.139 45.5834C200.566 47.0657 197.558 47.8069 194.113 47.8069ZM194.113 41.0054C196.817 41.0054 198.888 40.0026 200.326 37.9971C201.809 35.9915 202.55 33.1794 202.55 29.5606C202.55 25.9855 201.809 23.1951 200.326 21.1896C198.888 19.1404 196.817 18.1158 194.113 18.1158C191.41 18.1158 189.318 19.1404 187.835 21.1896C186.353 23.1951 185.612 25.9855 185.612 29.5606C185.612 33.1794 186.353 35.9915 187.835 37.9971C189.318 40.0026 191.41 41.0054 194.113 41.0054Z",
+"M163.928 47.0218C163.234 47.0218 162.671 46.4587 162.671 45.7642V13.3565C162.671 12.6619 163.234 12.0988 163.928 12.0988H169.784C170.479 12.0988 171.042 12.6619 171.042 13.3565V45.7641C171.042 46.4587 170.479 47.0218 169.784 47.0218H163.928ZM163.797 7.45548C163.103 7.45548 162.54 6.8924 162.54 6.19781V1.25767C162.54 0.563079 163.103 0 163.797 0H169.98C170.675 0 171.238 0.563079 171.238 1.25767V6.19781C171.238 6.8924 170.675 7.45548 169.98 7.45548H163.797Z",
+"M126.773 47.0217C126.079 47.0217 125.516 46.4586 125.516 45.764V1.8461C125.516 1.1515 126.079 0.588425 126.773 0.588425H132.629C133.324 0.588425 133.887 1.1515 133.887 1.8461V24.6057C133.887 25.7554 135.302 26.3023 136.075 25.4515L147.835 12.5105C148.073 12.2482 148.411 12.0986 148.766 12.0986H155.631C156.733 12.0986 157.302 13.4158 156.546 14.2184L145.571 25.8761C145.164 26.3083 145.115 26.9661 145.453 27.4541L157.634 45.0481C158.211 45.8822 157.614 47.0217 156.599 47.0217H150.259C149.836 47.0217 149.442 46.8098 149.209 46.4575L140.255 32.911C139.808 32.2348 138.848 32.1518 138.291 32.7413L134.23 37.0446C134.009 37.278 133.887 37.5868 133.887 37.9078V45.764C133.887 46.4586 133.324 47.0217 132.629 47.0217H126.773Z",
+"M120.587 47.0217C121.282 47.0217 121.845 46.4586 121.845 45.764V1.8461C121.845 1.1515 121.282 0.588425 120.587 0.588425H114.732C114.037 0.588425 113.474 1.1515 113.474 1.8461V24.6057C113.474 25.7554 112.059 26.3023 111.286 25.4515L99.526 12.5105C99.2876 12.2482 98.9496 12.0986 98.5952 12.0986H91.73C90.6277 12.0986 90.0587 13.4158 90.8143 14.2184L101.789 25.8761C102.196 26.3083 102.246 26.9661 101.908 27.4541L89.7272 45.0481C89.1497 45.8822 89.7467 47.0217 90.7612 47.0217H97.1021C97.5243 47.0217 97.9184 46.8098 98.1512 46.4575L107.106 32.911C107.553 32.2348 108.513 32.1518 109.07 32.7413L113.131 37.0446C113.351 37.278 113.474 37.5868 113.474 37.9078V45.764C113.474 46.4586 114.037 47.0217 114.732 47.0217H120.587Z",
+"M72.1732 47.8069C68.6852 47.8069 65.6551 47.0657 63.0827 45.5834C60.5104 44.0574 58.5266 41.921 57.1314 39.1743C55.7362 36.4275 55.0386 33.223 55.0386 29.5606C55.0386 25.8983 55.7362 22.7155 57.1314 20.0124C58.5266 17.2656 60.4886 15.1293 63.0173 13.6033C65.5897 12.0773 68.5762 11.3143 71.977 11.3143C75.2905 11.3143 78.1899 12.0555 80.675 13.5379C83.2038 15.0203 85.144 17.1566 86.4955 19.947C87.8471 22.7373 88.5229 26.0945 88.5229 30.0184V30.6573C88.5229 31.3519 87.9598 31.915 87.2652 31.915H65.0683C64.3455 31.915 63.7657 32.5242 63.8597 33.2409C64.1749 35.6448 64.9623 37.5136 66.2219 38.8473C67.7478 40.3732 69.7534 41.1362 72.2386 41.1362C74.1133 41.1362 75.6611 40.722 76.8819 39.8936C77.8811 39.2046 78.6352 38.3113 79.1443 37.2138C79.3874 36.6896 79.9027 36.3214 80.4795 36.3567L86.5078 36.7248C87.3084 36.7737 87.8621 37.5519 87.5711 38.2994C86.5168 41.0076 84.7849 43.1958 82.3754 44.864C79.585 46.8259 76.1843 47.8069 72.1732 47.8069ZM63.9804 24.8815C63.8168 25.6221 64.4086 26.2907 65.1671 26.2907H78.5528C79.2778 26.2907 79.8595 25.6775 79.754 24.9602C79.4352 22.7923 78.674 21.143 77.4705 20.0124C76.0317 18.6172 74.2005 17.9196 71.977 17.9196C69.7534 17.9196 67.9004 18.639 66.4181 20.0778C65.2404 21.2554 64.4278 22.8567 63.9804 24.8815Z",
+"M1.25779 47.0217C0.5632 47.0217 0.00012207 46.4586 0.00012207 45.764V1.8461C0.00012207 1.1515 0.563201 0.588425 1.25779 0.588425H10.558C11.0898 0.588425 11.5641 0.922946 11.7427 1.42391L23.0784 33.2334C23.4754 34.3474 25.0508 34.3474 25.4478 33.2334L36.7836 1.42391C36.9621 0.922945 37.4364 0.588425 37.9683 0.588425H47.2685C47.963 0.588425 48.5261 1.1515 48.5261 1.8461V45.764C48.5261 46.4586 47.963 47.0217 47.2685 47.0217H41.2819C40.5873 47.0217 40.0243 46.4586 40.0243 45.764V22.0707C40.0243 20.6649 38.0688 20.3182 37.5856 21.6383L28.62 46.1309C28.4385 46.6266 27.9668 46.9563 27.4389 46.9563H21.0873C20.5594 46.9563 20.0877 46.6266 19.9063 46.1309L10.9407 21.6383C10.4575 20.3182 8.50198 20.6649 8.50198 22.0707V45.764C8.50198 46.4586 7.9389 47.0217 7.24431 47.0217H1.25779Z"
+];
+/* fill one or more SVG paths into a target rect, scaled from viewBox */
+function scDrawPaths(ctx, ds, vb, dx, dy, dw, dh, color){
+  ctx.save();
+  ctx.translate(dx, dy);
+  ctx.scale(dw / vb[0], dh / vb[1]);
+  ctx.fillStyle = color;
+  (Array.isArray(ds) ? ds : [ds]).forEach(d=> ctx.fill(new Path2D(d)));
+  ctx.restore();
+}
+/* Workout share card — Figma node 199:703 "Instagram story - 1". 1080×1920,
+   TRANSPARENT background (saves as a PNG with no backdrop, to drop onto an
+   IG story). Exact type sizes / colours / positions from get_design_context. */
 async function buildWorkoutCardBlob(w){
   await ensureFontsReady();
+  try{ await Promise.all(['300','400','500','600','700'].map(wt=> document.fonts.load(wt + ' 40px Geist'))); }catch(e){}
   const canvas = document.createElement('canvas');
   canvas.width = SHARE_CARD_W; canvas.height = SHARE_CARD_H;
-  const ctx = canvas.getContext('2d');
-  drawShareCardBg(ctx);
-  drawShareCardHeader(ctx, t('histWorkoutLabel','TRENING'));
+  const ctx = canvas.getContext('2d');       // no bg fill — stays transparent
+  const CX = SHARE_CARD_W / 2;
 
-  const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
+  const totalVol = Math.round(w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0));
+  const totalReps = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.reps, 0), 0);
+  const rec = histWorkoutRecordV2(w);
+  // no record card → drop the whole icon+hero+stats block a bit lower so
+  // the space it would have taken is shared, not left as a hole
+  const shiftY = rec ? 0 : 150;
+
+  // --- barbell icon (rotate 172.14° + y-flip, per Figma) ---
+  ctx.save();
+  ctx.translate(CX, 726.94 + shiftY);
+  ctx.rotate(172.14 * Math.PI / 180);
+  ctx.scale(1, -1);
+  scDrawPaths(ctx, SC_BARBELL_D, SC_BARBELL_VB, -126.789, -126.789, 253.578, 253.578, '#ff3300');
+  ctx.restore();
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+
+  // --- OBJĘTOŚĆ + hero number ---
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.font = '500 26.714px Geist, Inter, sans-serif';
+  scLetterSpacing(ctx, 2.6714);
+  ctx.fillText(t('gymFinVolume','OBJĘTOŚĆ').toUpperCase(), CX, 886.96 + shiftY);
+  scLetterSpacing(ctx, 0);
+
+  const volStr = formatDashNum(totalVol, 0);
   ctx.textAlign = 'left';
+  ctx.font = '600 155.832px Geist, Inter, sans-serif';
+  scLetterSpacing(ctx, 4.675);
+  const volW = ctx.measureText(volStr).width;
+  ctx.font = '400 62.333px Geist, Inter, sans-serif';
+  scLetterSpacing(ctx, 0);
+  const kgW = ctx.measureText(' kg').width;
+  let x = CX - (volW + kgW) / 2;
   ctx.fillStyle = '#fff';
-  ctx.font = '700 160px Geist, Inter, sans-serif';
-  ctx.fillText(Math.round(totalVol).toLocaleString(LANG==='pl'?'pl-PL':'en-US'), 80, 400);
-  ctx.font = '600 34px Geist, Inter, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.7)';
-  ctx.fillText(t('shareCardExercises', 'KG OBJĘTOŚCI  ·  ' + w.exercises.length + ' ĆWICZEŃ', w.exercises.length, Math.round(totalVol)), 80, 460);
+  ctx.font = '600 155.832px Geist, Inter, sans-serif';
+  scLetterSpacing(ctx, 4.675);
+  ctx.fillText(volStr, x, 924 + shiftY);
+  scLetterSpacing(ctx, 0);
+  x += volW;
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.font = '400 62.333px Geist, Inter, sans-serif';
+  ctx.fillText(' kg', x, 924 + 93 + shiftY);   // baseline-aligned with the big number
 
-  const listX = 80, listW = SHARE_CARD_W - 160;
-  const shown = w.exercises.slice(0, 8);
-  const extra = w.exercises.length - shown.length;
-  let y = 600;
-  ctx.fillStyle = 'rgba(255,255,255,.08)';
-  roundRect(ctx, listX, y, listW, shown.length*112 + 40 + (extra>0?60:0), 28);
-  ctx.fill();
-  y += 62;
-  shown.forEach(e=>{
+  // --- POWTÓRZENIA / CZAS ---
+  ctx.textAlign = 'center';
+  const colL = 362.5, colR = 717.6;
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.font = '500 26.714px Geist, Inter, sans-serif';
+  scLetterSpacing(ctx, 2.6714);
+  ctx.fillText(t('gymFinReps','POWTÓRZENIA').toUpperCase(), colL, 1179.7 + shiftY);
+  ctx.fillText(t('gymFinTime','CZAS').toUpperCase(), colR, 1179.7 + shiftY);
+  scLetterSpacing(ctx, 0);
+  ctx.fillStyle = '#fff';
+  ctx.font = '600 80.142px Geist, Inter, sans-serif';
+  ctx.fillText(String(totalReps), colL, 1216 + shiftY);
+  if(w.durationMin){
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#fff';
-    ctx.font = '700 36px Geist, Inter, sans-serif';
-    ctx.fillText(truncateToWidth(ctx, e.name.toUpperCase(), listW-80), listX+40, y);
-    ctx.fillStyle = 'rgba(255,255,255,.6)';
-    ctx.font = '400 30px Geist, Inter, sans-serif';
-    const doneSets = e.sets.filter(s=> s.weight>0 || s.reps>0);
-    const setsText = doneSets.map(s=>`${s.weight}kg×${s.reps}`).join('  ·  ');
-    ctx.fillText(truncateToWidth(ctx, setsText, listW-80), listX+40, y+46);
-    y += 112;
-  });
-  if(extra>0){
-    ctx.textAlign = 'left';
-    ctx.fillStyle = 'rgba(255,255,255,.55)';
-    ctx.font = '600 28px Geist, Inter, sans-serif';
-    ctx.fillText(t('shareCardMore', `+ ${extra} więcej`, extra), listX+40, y+10);
+    ctx.font = '600 80.142px Geist, Inter, sans-serif';
+    const nStr = w.durationMin + ' ';
+    const nW = ctx.measureText(nStr).width;
+    ctx.font = '600 40.071px Geist, Inter, sans-serif';
+    const mW = ctx.measureText('min').width;
+    let tx = colR - (nW + mW) / 2;
+    ctx.font = '600 80.142px Geist, Inter, sans-serif';
+    ctx.fillText(nStr, tx, 1216 + shiftY);
+    ctx.font = '600 40.071px Geist, Inter, sans-serif';
+    ctx.fillText('min', tx + nW, 1216 + 40 + shiftY);
+    ctx.textAlign = 'center';
+  } else {
+    ctx.font = '600 80.142px Geist, Inter, sans-serif';
+    ctx.fillText('—', colR, 1216 + shiftY);
   }
-  drawShareCardFooter(ctx, fmtDateHuman(w.date));
+
+  // --- NOWY REKORD card (only when this workout set one) ---
+  if(rec){
+    ctx.fillStyle = '#fdfbff';
+    roundRect(ctx, 341, 1400, 402, 171, 31.07);
+    ctx.fill();
+    scDrawPaths(ctx, SC_TROPHY_D, SC_TROPHY_VB, 602.2, 1475.7, 75.567, 60.198, '#ff3300');
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#343941';
+    ctx.font = '500 21.36px Geist, Inter, sans-serif';
+    scLetterSpacing(ctx, 2.136);
+    ctx.fillText(t('gymFinRecordLabel','NOWY REKORD').toUpperCase(), 406.07, 1431.07);
+    scLetterSpacing(ctx, 0);
+    ctx.font = '400 58.256px Geist, Inter, sans-serif';
+    const rvNum = fmtGymWeight(rec.weight) + ' ';
+    ctx.fillText(rvNum, 406.07, 1495);
+    const rnW = ctx.measureText(rvNum).width;
+    ctx.fillStyle = 'rgba(52,57,65,0.8)';
+    ctx.font = '400 23.302px Geist, Inter, sans-serif';
+    ctx.fillText('kg', 406.07 + rnW, 1495 + 35);
+    ctx.fillStyle = '#96959b';
+    ctx.font = '700 11.651px Geist, Inter, sans-serif';
+    scLetterSpacing(ctx, 3.0293);
+    ctx.fillText(truncateToWidth(ctx, rec.name.toUpperCase(), 330), 409.95, 1524.28);
+    scLetterSpacing(ctx, 0);
+  }
+
+  // --- wordmark + tagline ---
+  scDrawPaths(ctx, SC_LOGO_D, SC_LOGO_VB, CX - 105.624, 1697, 211.248, 47.806, '#ff3300');
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ff3300';
+  ctx.font = '300 13.74px Geist, Inter, sans-serif';
+  scLetterSpacing(ctx, 1.374);
+  ctx.fillText('EVERY REP COUNTS.', CX, 1773.28);
+  ctx.fillText('LITERALLY.', CX, 1773.28 + 12.53);
+  scLetterSpacing(ctx, 0);
+
   return new Promise(res=> canvas.toBlob(res, 'image/png'));
 }
 async function buildRunCardBlob(r){
