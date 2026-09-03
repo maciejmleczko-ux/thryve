@@ -3165,7 +3165,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.12.1";
+const APP_VERSION = "4.12.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7507,17 +7507,22 @@ async function buildWorkoutCardBlob(w){
     scLetterSpacing(ctx, 2.136);
     ctx.fillText(t('gymFinRecordLabel','NOWY REKORD').toUpperCase(), 406.07, 1431.07);
     scLetterSpacing(ctx, 0);
+    // weight — Figma 199:864: a 60.2px box centred on y≈1494.18, "kg" on the
+    // same baseline. Draw middle-anchored so it can't drop onto the name below.
+    ctx.textBaseline = 'middle';
     ctx.font = '400 58.256px Geist, Inter, sans-serif';
     const rvNum = fmtGymWeight(rec.weight) + ' ';
-    ctx.fillText(rvNum, 406.07, 1495);
+    ctx.fillText(rvNum, 406.07, 1494.18);
     const rnW = ctx.measureText(rvNum).width;
     ctx.fillStyle = 'rgba(52,57,65,0.8)';
     ctx.font = '400 23.302px Geist, Inter, sans-serif';
-    ctx.fillText('kg', 406.07 + rnW, 1495 + 35);
+    ctx.fillText('kg', 406.07 + rnW, 1494.18 + 13);   // nudge onto the big number's baseline
+    ctx.textBaseline = 'top';
     ctx.fillStyle = '#96959b';
     ctx.font = '700 11.651px Geist, Inter, sans-serif';
     scLetterSpacing(ctx, 3.0293);
-    ctx.fillText(truncateToWidth(ctx, rec.name.toUpperCase(), 330), 409.95, 1524.28);
+    // cap width so a long name can't run under the trophy (left edge ≈ x602)
+    ctx.fillText(truncateToWidth(ctx, rec.name.toUpperCase(), 185), 409.95, 1524.28);
     scLetterSpacing(ctx, 0);
   }
 
