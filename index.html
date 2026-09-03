@@ -1775,7 +1775,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
         <div class="dash-mini-col">
           <div class="dash-mini-card">
-            <p class="dash-mini-label" data-i18n="dashNewRecord">Nowy rekord</p>
+            <p class="dash-mini-label" id="dashPrLabel">Nowy rekord</p>
             <div class="dash-mini-row">
               <div>
                 <p class="dash-mini-num" id="dashPrNum">—</p>
@@ -2561,6 +2561,7 @@ const T_EN = {
   dashWeekSummary: 'This week',
   dashYourPlan: 'Your plan',
   dashNewRecord: 'New record',
+  dashRecord: 'Record',
   dashVolumeTrend: 'Volume trend',
   dashWeeklyProgress: 'Weekly progress',
   dashNoPlanPicked: 'No plan selected',
@@ -3131,7 +3132,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.11.6";
+const APP_VERSION = "4.11.7";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5993,6 +5994,7 @@ function animateDashNumber(el, target, decimals, suffixHtml){
   }
   requestAnimationFrame(frame);
 }
+let lastDashPrName = null; // so the "rekord" tile doesn't repeat back-to-back
 function renderDashboard(){
   const weekDates = dashboardWeekDates();
   const todayIso = todayStr();
@@ -6045,10 +6047,30 @@ function renderDashboard(){
     document.getElementById('dashPlanCount').textContent = '';
   }
 
+  // "Rekord" tile — the heaviest set for EACH exercise is a record; show a
+  // random one, a different pick each time you land on the dashboard rather
+  // than always the single global max. "Nowy rekord" only when that best
+  // was set in your most recent session.
+  const prBest = {};
+  allSets.forEach(s=>{
+    const b = prBest[s.name];
+    if(!b || s.weight > b.weight
+        || (s.weight === b.weight && (s.reps > b.reps || (s.reps === b.reps && s.date > b.date)))){
+      prBest[s.name] = s;
+    }
+  });
+  const prPool = Object.values(prBest);
   let pr = null;
-  allSets.forEach(s=>{ if(!pr || s.weight>pr.weight) pr = s; });
+  if(prPool.length){
+    const choices = prPool.length > 1 ? prPool.filter(p=> p.name !== lastDashPrName) : prPool;
+    pr = choices[Math.floor(Math.random() * choices.length)];
+    lastDashPrName = pr.name;
+  }
+  const latestWorkoutDate = workouts.reduce((d,w)=> w.date > d ? w.date : d, '');
   document.getElementById('dashPrNum').innerHTML = pr ? `${pr.weight} <span style="font-size:var(--m-fs-base);">kg</span>` : '—';
   document.getElementById('dashPrName').textContent = pr ? pr.name : '';
+  document.getElementById('dashPrLabel').textContent = (pr && pr.date === latestWorkoutDate)
+    ? t('dashNewRecord','Nowy rekord') : t('dashRecord','Rekord');
 
   const trendDays = [];
   for(let i=13;i>=0;i--){ const dd=new Date(todayIso+'T00:00:00'); dd.setDate(dd.getDate()-i); trendDays.push(dateStr(dd)); }
