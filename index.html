@@ -779,6 +779,22 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-week-day.today span:first-child .ph{color:var(--m-plan-hard);}
 .dash-week-day em{font-style:normal;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.85);}
 
+/* Short phones (iPhone 13 mini 812, SE 667): the 390×844 tuning + a real
+   ~50px notch inset tips a 3-line greeting past one screen, so renderDashboard()
+   flips on .dashboard-scrollable and the dashboard starts to move. Reclaim ~44px
+   of the flexible spacing here so it fits again; keeps padding-bottom (the 24px
+   gap above the nav) intact — the greeting gap is what gives. */
+@media (max-height: 820px){
+  .dash-root{padding-top:calc(12px + env(safe-area-inset-top,0px));}
+  .dash-header{margin-bottom:18px;}
+  .dash-headline{font-size:var(--m-fs-xl);line-height:1.1;}
+  .dash-hero{padding:12px;}
+  .dash-hero-stats{margin:8px 0;gap:6px;}
+  .dash-grid2{gap:6px;margin-bottom:6px;}
+  .dash-week-card{padding:12px;}
+  .dash-week-head{margin-bottom:10px;}
+}
+
 /* ---- subtle motion: staggered reveal on entry, bars grow in, checks pop ---- */
 @media (prefers-reduced-motion: no-preference){
   @keyframes dashRise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
@@ -3165,7 +3181,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.12.4";
+const APP_VERSION = "4.12.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6179,7 +6195,9 @@ function renderDashboard(){
     const week = dashRoot.querySelector('.dash-week-card');
     const contentH = parseFloat(rs.paddingTop) + parseFloat(rs.paddingBottom)
       + h(hdr) + mb(hdr) + h(hero) + mb(hero) + h(grid) + mb(grid) + h(week);
-    document.documentElement.classList.toggle('dashboard-scrollable', contentH > window.innerHeight + 1);
+    // small tolerance: a few px of overshoot isn't worth unlocking the whole
+    // screen to scroll (sub-pixel rounding, font-metric drift on web-font swap).
+    document.documentElement.classList.toggle('dashboard-scrollable', contentH > window.innerHeight + 6);
   }
 }
 
