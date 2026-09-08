@@ -931,6 +931,12 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .gymv2-no-plan .add-pill{margin:0 auto;}
 
 .gymv2-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;}
+.gymv2-section-head.hidden{display:none;}
+.gymv2-grid.hidden{display:none;}
+.gymv2-edit-plan.hidden{display:none;}
+/* rest day — no plan exercises today */
+.gymv2-rest-note{margin:0 0 12px;font-size:var(--m-fs-sm);color:var(--m-muted);line-height:1.45;}
+.gymv2-rest-note.hidden{display:none;}
 .gymv2-section-head p{margin:0;}
 .gymv2-edit-plan{background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:6px 20px;width:123px;color:#fff;font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;transition:transform .12s ease;}
 .gymv2-edit-plan:active{transform:scale(.95);}
@@ -1988,10 +1994,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </span>
       </button>
 
-      <div class="gymv2-section-head">
-        <p data-i18n="gymV2ExercisesInPlan">Ćwiczenia w planie</p>
-        <button type="button" class="gymv2-edit-plan" onclick="openPlanEditorV2(starredPlanId)" data-i18n="gymV2EditPlan">Edytuj plan</button>
+      <div class="gymv2-section-head" id="gymV2SectionHead">
+        <p id="gymV2SectionLabel" data-i18n="gymV2ExercisesInPlan">Ćwiczenia w planie</p>
+        <button type="button" class="gymv2-edit-plan" id="gymV2EditPlanBtn" onclick="openPlanEditorV2(starredPlanId)" data-i18n="gymV2EditPlan">Edytuj plan</button>
       </div>
+      <p class="gymv2-rest-note hidden" id="gymV2RestNote" data-i18n="gymV2RestDay">Dziś nie masz zaplanowanego treningu. Możesz i tak coś zalogować.</p>
       <div class="gymv2-grid" id="gymGridV2"></div>
 
       <p class="gymv2-done-head hidden" id="gymDoneV2Section" data-i18n="gymV2Done">Ćwiczenia zrobione</p>
@@ -2788,6 +2795,9 @@ const T_EN = {
   gymV2NoPlanMsg: "You don't have a starred plan yet.",
   gymV2CreatePlan: 'Create or pick a plan',
   gymV2ExercisesInPlan: 'Exercises in your plan',
+  gymV2ExercisesRepeat: 'Exercises from that workout',
+  gymV2ExercisesToday: "Today's exercises",
+  gymV2RestDay: "No workout planned for today. You can still log something.",
   gymV2EditPlan: 'Edit plan',
   gymV2Done: 'Completed',
   gymV2SaveWorkout: 'SAVE WORKOUT',
@@ -3378,7 +3388,7 @@ function afterOnboardingStep(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.17.1";
+const APP_VERSION = "4.17.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4183,15 +4193,16 @@ loadGymSessionTiming();
    sessionExercises / extraGymTiles lived only in memory, so a reload
    (or iOS killing the tab) wiped everything logged but not yet saved.
    Now every mutation is mirrored to localStorage and restored on boot.
-   Dropped after GYM_DRAFT_MAX_AGE_H so a days-old ghost session doesn't
-   reappear (the same "abandoned" idea as GYM_SESSION_STALE_GAP_MIN). */
+   Dropped after GYM_DRAFT_MAX_AGE_H, or once it's a different calendar day
+   AND more than a few hours old — a gym session is a same-day thing, but a
+   late-night one still survives crossing midnight. */
 const LS_GYM_SESSION_DRAFT = "fitlog_gym_session_draft_v1";
 const GYM_DRAFT_MAX_AGE_H = 24;
 function persistGymSession(){
   try{
     if(sessionExercises.length || extraGymTiles.length || repeatMode){
       localStorage.setItem(LS_GYM_SESSION_DRAFT, JSON.stringify({
-        savedAt: Date.now(), sessionExercises, extraGymTiles, repeatMode
+        savedAt: Date.now(), date: todayStr(), sessionExercises, extraGymTiles, repeatMode
       }));
     } else {
       localStorage.removeItem(LS_GYM_SESSION_DRAFT);
@@ -4203,7 +4214,9 @@ function restoreGymSession(){
     const raw = localStorage.getItem(LS_GYM_SESSION_DRAFT);
     if(!raw) return;
     const obj = JSON.parse(raw);
-    if(!obj || (Date.now() - (obj.savedAt||0)) > GYM_DRAFT_MAX_AGE_H*3600e3){
+    const ageMs = Date.now() - (obj && obj.savedAt || 0);
+    const staleDay = obj && obj.date && obj.date !== todayStr() && ageMs > 4*3600e3;
+    if(!obj || ageMs > GYM_DRAFT_MAX_AGE_H*3600e3 || staleDay){
       localStorage.removeItem(LS_GYM_SESSION_DRAFT);
       return;
     }
@@ -7050,6 +7063,37 @@ function renderGymV2(){
     card.classList.add('hidden');
     noPlan.classList.remove('hidden');
   }
+
+  /* "Ćwiczenia w planie" only makes sense when today HAS plan exercises.
+     On a rest day: if there's a repeat set or a session going, relabel it
+     neutrally; otherwise hide the header + grid and show a rest-day note. */
+  const planToday = plan ? (plan.schedule[dayKeyFromDate(iso)]||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name)).length : 0;
+  const hasWork = sessionExercises.length || extraGymTiles.length;
+  const head = document.getElementById('gymV2SectionHead');
+  const label = document.getElementById('gymV2SectionLabel');
+  const editBtn = document.getElementById('gymV2EditPlanBtn');
+  const restNote = document.getElementById('gymV2RestNote');
+  const grid = document.getElementById('gymGridV2');
+  if(repeatMode){
+    head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
+    label.textContent = t('gymV2ExercisesRepeat', 'Ćwiczenia z tego treningu');
+    editBtn.classList.add('hidden');
+  } else if(planToday > 0){
+    head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
+    label.textContent = t('gymV2ExercisesInPlan', 'Ćwiczenia w planie');
+    editBtn.classList.toggle('hidden', !plan);
+  } else if(hasWork){
+    head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
+    label.textContent = t('gymV2ExercisesToday', 'Ćwiczenia na dziś');
+    editBtn.classList.add('hidden');
+  } else {
+    // clean rest day — nothing planned, nothing logged. Keep the grid (it
+    // still holds "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie"), drop the
+    // misleading "Ćwiczenia w planie" header, add a rest-day line.
+    head.classList.add('hidden'); grid.classList.remove('hidden');
+    restNote.classList.toggle('hidden', !plan); // only when a plan exists but today's a rest day
+  }
+
   updateGymV2RepeatBtn();
   renderGymGridV2(true);
   renderGymDoneV2(true);
