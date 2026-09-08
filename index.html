@@ -1410,6 +1410,24 @@ body.pev2-bg{background:var(--m-red-page);}
 .exv2-tip{background:#000;border-radius:var(--m-r-sm);padding:9px 17px;text-align:left;}
 .exv2-tip .lbl{display:block;font-size:var(--m-fs-xs);font-weight:700;letter-spacing:.24px;color:var(--m-orange);margin-bottom:9px;}
 .exv2-tip .txt{font-size:var(--m-fs-xs);color:var(--m-card);line-height:1.4;}
+
+/* #6 — sticky per-exercise note */
+.exv2-note{background:#e7ecff;border-radius:var(--m-r-sm);padding:10px 14px;display:flex;align-items:flex-start;gap:11px;text-align:left;}
+.exv2-note-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.exv2-note-k{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#2c3fae;}
+.exv2-note-v{font-size:var(--m-fs-sm);color:#2c3fae;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere;}
+.exv2-note-edit{flex-shrink:0;width:18px;height:18px;border:0;background:none;padding:0;cursor:pointer;color:#2c3fae;}
+.exv2-note-edit .ph,.exv2-note-edit svg{display:block;width:100%;height:100%;}
+.exv2-note.is-edit{flex-direction:column;gap:8px;}
+.exv2-note-input{width:100%;box-sizing:border-box;border:1px solid #c2ccf2;border-radius:10px;padding:9px 11px;font-family:inherit;font-size:var(--m-fs-sm);color:var(--m-ink);background:#fff;line-height:1.45;resize:none;}
+.exv2-note-actions{display:flex;gap:8px;justify-content:flex-end;width:100%;}
+.exv2-note-actions button{border:0;border-radius:var(--m-r-pill);padding:7px 15px;font-family:inherit;font-size:var(--m-fs-xs);font-weight:700;cursor:pointer;}
+.exv2-note-cancel{background:rgba(44,63,174,.12);color:#2c3fae;}
+.exv2-note-save{background:#2c3fae;color:#fff;}
+.exv2-note-hint{margin:0;font-size:var(--m-fs-2xs);color:#6f78b8;line-height:1.4;}
+.exv2-note-add{display:flex;align-items:center;gap:8px;width:100%;background:none;border:1px dashed #b9c2ef;border-radius:var(--m-r-sm);padding:10px 14px;font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#2c3fae;cursor:pointer;text-align:left;}
+.exv2-note-add .ph,.exv2-note-add svg{width:15px;height:15px;flex-shrink:0;}
+.exv2-note-add:active{transform:scale(.99);}
 .exv2-series-section{display:flex;flex-direction:column;gap:16px;}
 .exv2-series-list{display:flex;flex-direction:column;gap:4px;}
 /* Series-card layout per updated Figma (node 122:4121): "Seria X" moved
@@ -1444,7 +1462,8 @@ body.pev2-bg{background:var(--m-red-page);}
 @media (prefers-reduced-motion: no-preference){
   @keyframes exv2FadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
   .exv2-anim-in.exv2-header-group{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.28s;}
-  .exv2-anim-in.exv2-tip{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.32s;}
+  .exv2-anim-in.exv2-note,.exv2-anim-in.exv2-note-add{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.3s;}
+  .exv2-anim-in.exv2-tip{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.34s;}
   .exv2-anim-in.exv2-series-controls,.exv2-anim-in.exv2-submit{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;} /* delay set inline, depends on set count */
 
   @keyframes exv2CardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
@@ -2653,6 +2672,12 @@ const T_EN = {
   repsLabel: 'Reps',
   removeSeries: 'Remove set',
   addSeries: 'Add set',
+  exNoteLabel: 'Your note',
+  exNoteAdd: 'Add a note for this exercise',
+  exNoteSave: 'Save note',
+  exNotePh: 'e.g. Seat 4, narrow grip',
+  exNoteHint: 'It comes back every time you train this exercise.',
+  edit: 'Edit',
   noSetsLogged: 'no sets logged',
   checklistDone: 'done',
   shareCardExercises: (n, v) => `${v} KG · ${n} EXERCISE${n===1?'':'S'}`,
@@ -3303,7 +3328,7 @@ function afterOnboardingStep(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.14.0";
+const APP_VERSION = "4.15.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3352,6 +3377,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.15.0": {
+    pl: [
+      {featured:true, icon:'pencil', badge:'Nowość', title:'Notatki, które wracają', text:'W GYM możesz zapisać notatkę przy dowolnym ćwiczeniu — ustawienia maszyny, chwyt, cokolwiek chcesz pamiętać. Wróci w panelu logowania serii, gdy następnym razem otworzysz to ćwiczenie.'},
+    ],
+    en: [
+      {featured:true, icon:'pencil', badge:'New', title:'Notes that come back', text:'In GYM you can jot a note on any exercise — the machine setting, the grip, whatever you want to remember. It comes back in the set-logging sheet the next time you open that exercise.'},
+    ],
+  },
   "4.14.0": {
     pl: [
       {featured:true, icon:'trophy', badge:'Nowość', title:'Widać, o ile się poprawiłeś', text:'Po zapisaniu treningu ekran „Gratulacje" pokazuje kartę z Twoją największą zmianą od ostatniego razu — na przykład +2 powtórzenia w Chest Press przy 40 kg. Doszedł też kafelek „Serie" i rekord objętości ćwiczenia. Z ekranu przeskoczysz od razu do tego treningu w historii.'},
@@ -4132,6 +4165,23 @@ function restoreTodaySwaps(){
 }
 restoreTodaySwaps();
 
+/* ---------- per-exercise sticky note (#6) — "Siedzisko: 4, uchwyt wąski"
+   type reminders that come back in the set-logging sheet every time you
+   open that exercise. Kept in its own map, separate from a workout's
+   per-session `notes`, so it persists across sessions. */
+const LS_EXERCISE_NOTES = "fitlog_exercise_notes_v1";
+let exerciseNotes = {};
+function loadExerciseNotes(){
+  try{ exerciseNotes = JSON.parse(localStorage.getItem(LS_EXERCISE_NOTES)) || {}; }catch(e){ exerciseNotes = {}; }
+}
+function saveExerciseNotes(){
+  try{ localStorage.setItem(LS_EXERCISE_NOTES, JSON.stringify(exerciseNotes)); }catch(e){}
+}
+loadExerciseNotes();
+function escHtml(s){
+  return String(s).replace(/[&<>"']/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 const LS_FAVORITE_EXERCISES = "fitlog_favorite_exercises_v1";
 function loadFavoriteExercises(){
   try{ return new Set(JSON.parse(localStorage.getItem(LS_FAVORITE_EXERCISES)) || []); }catch(e){ return new Set(); }
@@ -4152,6 +4202,8 @@ let popupExercise = null;
 // easy to mistake for already-filled values, so confirming with genuinely
 // empty fields shows this warning instead of silently doing nothing.
 let popupShowWarning = false;
+let popupNoteEditing = false;   // #6 — sticky-note field expanded to a textarea
+let popupNoteDraft = '';
 
 function lastSessionsFor(exerciseName){
   return workouts
@@ -4277,6 +4329,8 @@ function openExercisePopupV2(ex){
     ? {...already, setValues: already.setValues.map(s=>({...s}))}
     : {...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''};
   popupShowWarning = false;
+  popupNoteEditing = false;
+  popupNoteDraft = exerciseNotes[ex.name] || '';
   renderExercisePopupV2(true);
   const overlay = document.getElementById('exercisePopupOverlayV2');
   const sheet = document.getElementById('exercisePopupSheetV2');
@@ -4581,8 +4635,35 @@ function popupRemoveSetRowV2(){
   popupExercise.sets = popupExercise.setValues.length;
   renderExercisePopupV2();
 }
+/* #6 — sticky note in the set-logging sheet */
+function popupNoteEditV2(){
+  if(!popupExercise) return;
+  popupNoteEditing = true;
+  popupNoteDraft = exerciseNotes[popupExercise.name] || '';
+  renderExercisePopupV2();
+  const ta = document.querySelector('.exv2-note-input');
+  if(ta){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+}
+function popupNoteCancelV2(){
+  popupNoteEditing = false;
+  renderExercisePopupV2();
+}
+function commitPopupNote(){
+  if(!popupExercise) return;
+  const v = popupNoteDraft.trim();
+  if(v) exerciseNotes[popupExercise.name] = v;
+  else delete exerciseNotes[popupExercise.name];
+  saveExerciseNotes();
+}
+function popupNoteSaveV2(){
+  commitPopupNote();
+  popupNoteEditing = false;
+  renderExercisePopupV2();
+}
 function confirmExercisePopupV2(){
   if(!popupExercise) return;
+  if(popupNoteEditing) commitPopupNote();   // don't lose a typed-but-unsaved note
+  popupExercise.notes = exerciseNotes[popupExercise.name] || '';   // also carried into workout history
   const idx = sessionExercises.findIndex(e=>e.name===popupExercise.name);
   const hasData = popupExercise.setValues.some(s=>s.weight!=='' || s.reps!=='');
   if(!hasData){
@@ -4639,6 +4720,34 @@ function renderExercisePopupV2(animate){
   const btnLabel = isEdit ? t('saveChanges','Zapisz') : t('addToWorkout','Dodaj do treningu');
   const controlsDelay = CARD_BASE_DELAY + ex.sets*CARD_STEP + 30;
   const submitDelay = controlsDelay + 60;
+
+  // #6 — sticky note: collapsed reminder + pencil, an editable textarea,
+  // or a dashed "add note" button when there's nothing saved yet.
+  const noteVal = exerciseNotes[ex.name] || '';
+  let noteHtml;
+  if(popupNoteEditing){
+    noteHtml = `
+      <div class="exv2-note is-edit${animCls}">
+        <span class="exv2-note-k">${t('exNoteLabel','Twoja notatka')}</span>
+        <textarea class="exv2-note-input" rows="3" maxlength="280" placeholder="${escHtml(t('exNotePh','np. Siedzisko 4, uchwyt wąski'))}" oninput="popupNoteDraft=this.value">${escHtml(popupNoteDraft)}</textarea>
+        <div class="exv2-note-actions">
+          <button type="button" class="exv2-note-cancel" onclick="popupNoteCancelV2()">${t('cancel','Anuluj')}</button>
+          <button type="button" class="exv2-note-save" onclick="popupNoteSaveV2()">${t('exNoteSave','Zapisz notatkę')}</button>
+        </div>
+        <p class="exv2-note-hint">${t('exNoteHint','Wróci przy każdym treningu tego ćwiczenia.')}</p>
+      </div>`;
+  } else if(noteVal){
+    noteHtml = `
+      <div class="exv2-note${animCls}">
+        <div class="exv2-note-body">
+          <span class="exv2-note-k">${t('exNoteLabel','Twoja notatka')}</span>
+          <span class="exv2-note-v">${escHtml(noteVal)}</span>
+        </div>
+        <button type="button" class="exv2-note-edit" aria-label="${escHtml(t('edit','Edytuj'))}" onclick="popupNoteEditV2()">${ph('pencil')}</button>
+      </div>`;
+  } else {
+    noteHtml = `<button type="button" class="exv2-note-add${animCls}" onclick="popupNoteEditV2()">${ph('pencil')}<span>${t('exNoteAdd','Dodaj notatkę do tego ćwiczenia')}</span></button>`;
+  }
   box.innerHTML = `
     <div class="exv2-card">
       <div class="exv2-header-group${animCls}">
@@ -4655,6 +4764,7 @@ function renderExercisePopupV2(animate){
           <div class="exv2-stat">${ph('clock-countdown')}<span>${ex.rest}</span></div>
         </div>
       </div>
+      ${noteHtml}
       <div class="exv2-tip${animCls}"><span class="lbl">${t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><span class="txt">${sugg.text}</span></div>
       <div class="exv2-series-section">
         <div class="exv2-series-list">${seriesHtml}</div>
