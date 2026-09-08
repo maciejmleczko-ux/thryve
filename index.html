@@ -3388,7 +3388,7 @@ function afterOnboardingStep(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.17.2";
+const APP_VERSION = "4.17.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7652,13 +7652,19 @@ function buildHistCardV2(kind, item, orderIdx, animate){
   wrap.appendChild(del);
   wrap.appendChild(share);
   wrap.appendChild(card);
-  attachSwipeRow(wrap, card, {
-    delEl: del, shareEl: share,
-    deleteConfirm: confirmActivityDeleteV2,
-    doDelete,
-    doShare: ()=> shareHistCard(kind, id),
-    onTap: exp ? null : ()=> toggleHistExpandV2(id),
-  });
+  // Swipe-to-delete / swipe-to-share only while the card is collapsed.
+  // Once it's expanded the left/right drag would fight the user reading
+  // the set list, and there's a dedicated [x] to close it — so skip the
+  // gesture entirely and just let a tap do nothing.
+  if(!exp){
+    attachSwipeRow(wrap, card, {
+      delEl: del, shareEl: share,
+      deleteConfirm: confirmActivityDeleteV2,
+      doDelete,
+      doShare: ()=> shareHistCard(kind, id),
+      onTap: ()=> toggleHistExpandV2(id),
+    });
+  }
   return wrap;
 }
 function renderHistDetailV2(animate){
