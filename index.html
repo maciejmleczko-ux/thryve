@@ -900,6 +900,11 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .gymv2-repeat-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
 .gymv2-repeat-t{font-size:var(--m-fs-sm);font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#2c2727;}
 .gymv2-repeat-s{font-size:var(--m-fs-2xs);color:#6c6b78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums;}
+/* repeat mode active — the button becomes the "you're repeating X, tap to
+   go back" control. */
+.gymv2-repeat.is-active{border-color:var(--m-orange);background:#fff4f1;}
+.gymv2-repeat.is-active .gymv2-repeat-ico{background:#ffe0d7;}
+.gymv2-repeat.is-active .gymv2-repeat-t{color:var(--m-orange);}
 .gymv2-plan-card.hidden{display:none;}
 .gymv2-plan-eyebrow{margin:0;}
 .gymv2-plan-body{display:flex;flex-direction:column;}
@@ -1002,7 +1007,6 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .gymv2-done-row-info{display:flex;align-items:center;gap:7px;}
 .gymv2-done-row-info .ph{width:24px;height:24px;color:var(--m-orange);flex-shrink:0;}
 .gymv2-done-row-info span{font-size:var(--m-fs-md);font-weight:700;letter-spacing:.16px;text-transform:uppercase;color:var(--m-ink);}
-.gymv2-done-row-info span.gymv2-done-loaded{font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.08em;color:#7b6fb0;background:#eae2fb;border-radius:var(--m-r-pill);padding:2px 8px;flex-shrink:0;}
 .gymv2-done-row-actions{display:flex;align-items:center;gap:11px;}
 .gymv2-done-row-actions .ph{width:24px;height:24px;color:var(--m-muted);cursor:pointer;}
 
@@ -2804,7 +2808,8 @@ const T_EN = {
   repeatConfirmTitle: 'Repeat your last workout?',
   repeatConfirmBody: "You've already started a workout. Loading the last one will replace what you're entering now.",
   repeatConfirmYes: 'Load',
-  repeatLoadedTag: 'loaded',
+  repeatActive: d => `Workout from ${d}`,
+  repeatBackToPlan: 'Tap to go back to the plan',
   histV2YourWorkouts: 'Your workouts',
   histV2EmptyMonth: (m) => `No activity logged — ${m}`,
   histV2EmptyDay: (d) => `No activity logged — ${d}`,
@@ -3373,7 +3378,7 @@ function afterOnboardingStep(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.17.0";
+const APP_VERSION = "4.17.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4091,6 +4096,12 @@ function goRoute(route){
    ============================================================ */
 let sessionExercises = []; // {name, group, sets, repLow, repHigh, rest, day, setValues:[{weight,reps}], rpe, notes}
 let extraGymTiles = []; // exercises picked via "Wybierz inne ćwiczenie" for today — visible as tiles, not yet logged
+/* "Powtórz ostatni trening" (#1): when set, the GYM grid shows ONLY this
+   set of exercises (last saved workout's, in order) instead of the plan —
+   as tiles to log, nothing pre-done. `prefill` seeds the logging sheet
+   with that workout's weights/reps when you open each one. Cleared on
+   save or when the user taps the button again to go back to the plan. */
+let repeatMode = null; // { date, names:[], prefill:{name:[{weight,reps}]} }
 
 /* Workout duration tracking — Maciej's request: start counting on the first
    tile tap (any tile, plan exercise or one-off), stop at save. Rather than
@@ -4178,9 +4189,9 @@ const LS_GYM_SESSION_DRAFT = "fitlog_gym_session_draft_v1";
 const GYM_DRAFT_MAX_AGE_H = 24;
 function persistGymSession(){
   try{
-    if(sessionExercises.length || extraGymTiles.length){
+    if(sessionExercises.length || extraGymTiles.length || repeatMode){
       localStorage.setItem(LS_GYM_SESSION_DRAFT, JSON.stringify({
-        savedAt: Date.now(), sessionExercises, extraGymTiles
+        savedAt: Date.now(), sessionExercises, extraGymTiles, repeatMode
       }));
     } else {
       localStorage.removeItem(LS_GYM_SESSION_DRAFT);
@@ -4198,6 +4209,7 @@ function restoreGymSession(){
     }
     if(Array.isArray(obj.sessionExercises)) sessionExercises = obj.sessionExercises;
     if(Array.isArray(obj.extraGymTiles)) extraGymTiles = obj.extraGymTiles;
+    if(obj.repeatMode && Array.isArray(obj.repeatMode.names)) repeatMode = obj.repeatMode;
   }catch(e){}
 }
 restoreGymSession();
@@ -4387,9 +4399,15 @@ function openExercisePopupV2(ex){
   markGymActivity();
   if(exv2CloseTimer){ clearTimeout(exv2CloseTimer); exv2CloseTimer = null; } // reopening mid-close-animation — cut it short
   const already = sessionExercises.find(e=>e.name===ex.name);
+  // "Powtórz ostatni trening": a not-yet-logged exercise opens with that
+  // workout's weights/reps already filled in.
+  const pre = (!already && repeatMode && repeatMode.prefill[ex.name]) || null;
+  const freshSets = (pre && pre.length)
+    ? pre.map(s=>({ weight: String(s.weight ?? ''), reps: String(s.reps ?? '') }))
+    : Array.from({length:ex.sets},()=>({weight:'',reps:''}));
   popupExercise = already
     ? {...already, setValues: already.setValues.map(s=>({...s}))}
-    : {...ex, setValues: Array.from({length:ex.sets},()=>({weight:'',reps:''})), rpe:'', notes:''};
+    : {...ex, sets: freshSets.length || ex.sets, setValues: freshSets, rpe:'', notes:''};
   popupShowWarning = false;
   popupNoteEditing = false;
   popupNoteDraft = exerciseNotes[ex.name] || '';
@@ -4729,7 +4747,6 @@ function confirmExercisePopupV2(){
   if(!popupExercise) return;
   if(popupNoteEditing) commitPopupNote();   // don't lose a typed-but-unsaved note
   popupExercise.notes = exerciseNotes[popupExercise.name] || '';   // also carried into workout history
-  delete popupExercise._loaded;   // reviewed now — tile switches to the normal "done" look
   const idx = sessionExercises.findIndex(e=>e.name===popupExercise.name);
   const hasData = popupExercise.setValues.some(s=>s.weight!=='' || s.reps!=='');
   if(!hasData){
@@ -5077,6 +5094,7 @@ function saveWorkout(){
   toast(t('workoutSaved','Trening zapisany'));
   sessionExercises = [];
   extraGymTiles = [];
+  repeatMode = null;
   persistGymSession(); // clears the autosaved in-progress draft
   todaySwaps = {};
   persistTodaySwaps(); // today's swaps don't carry past a saved workout
@@ -7046,15 +7064,31 @@ function lastSavedWorkout(){
 function updateGymV2RepeatBtn(){
   const btn = document.getElementById('gymV2RepeatBtn');
   if(!btn) return;
+  const tEl = btn.querySelector('.gymv2-repeat-t');
+  const sEl = document.getElementById('gymV2RepeatSub');
+  if(repeatMode){
+    btn.classList.add('is-active');
+    tEl.textContent = t('repeatActive', `Trening z ${fmtDateHuman(repeatMode.date)}`, fmtDateHuman(repeatMode.date));
+    sEl.textContent = t('repeatBackToPlan', 'Dotknij, żeby wrócić do planu');
+    btn.hidden = false;
+    return;
+  }
+  btn.classList.remove('is-active');
   const last = lastSavedWorkout();
   if(!last){ btn.hidden = true; return; }
   const n = last.exercises.length;
   const vol = Math.round(last.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight * st.reps, 0), 0));
-  document.getElementById('gymV2RepeatSub').textContent =
-    `${fmtDateHuman(last.date)} · ${planExCountText(n)}` + (vol > 0 ? ` · ${formatDashNum(vol, 0)} kg` : '');
+  tEl.textContent = t('repeatLastWorkout','Powtórz ostatni trening');
+  sEl.textContent = `${fmtDateHuman(last.date)} · ${planExCountText(n)}` + (vol > 0 ? ` · ${formatDashNum(vol, 0)} kg` : '');
   btn.hidden = false;
 }
 function repeatLastWorkoutV2(){
+  if(repeatMode){   // already in repeat mode — tap = back to the plan
+    repeatMode = null;
+    persistGymSession();
+    renderGymV2();
+    return;
+  }
   if(!lastSavedWorkout()){ toast(t('repeatNoWorkout','Brak zapisanego treningu do powtórzenia')); return; }
   if(sessionExercises.length){
     document.getElementById('repeatConfirmOverlay').classList.remove('hidden');
@@ -7071,36 +7105,28 @@ function repeatLastWorkoutConfirmed(){
   closeRepeatConfirm();
   applyRepeatLastWorkout();
 }
+/* Doesn't pre-log anything. Sets repeatMode so the grid becomes exactly
+   this workout's exercise set (as tiles); each opens prefilled with its
+   weights/reps (see openExercisePopupV2). */
 function applyRepeatLastWorkout(){
   const last = lastSavedWorkout();
   if(!last) return;
-  const lib = new Map(orderedExerciseLibrary().map(e=>[e.name, e]));
-  sessionExercises = last.exercises.map(ex=>{
-    const meta = lib.get(ex.name);
-    if(meta && meta.type === 'checklist') return { ...meta, done: true };
-    const setValues = (ex.sets || []).map(s=>({
+  const names = [], prefill = {};
+  last.exercises.forEach(ex=>{
+    names.push(ex.name);
+    const sv = (ex.sets || []).map(s=>({
       weight: s.weight > 0 ? String(s.weight) : '',
       reps:   s.reps   > 0 ? String(s.reps)   : ''
     }));
-    if(!setValues.length) setValues.push({ weight:'', reps:'' });
-    return {
-      name: ex.name,
-      group: ex.group || (meta ? meta.group : ''),
-      sets: setValues.length,
-      repLow:  meta ? meta.repLow  : 8,
-      repHigh: meta ? meta.repHigh : 12,
-      rest:    meta ? meta.rest    : '90s',
-      setValues,
-      rpe: '',
-      notes: '',
-      _loaded: true   // prefilled from a past workout, not yet reviewed — see renderGymGridV2 / renderGymDoneV2
-    };
+    prefill[ex.name] = sv.length ? sv : [{ weight:'', reps:'' }];
   });
+  repeatMode = { date: last.date, names, prefill };
+  sessionExercises = [];
   extraGymTiles = [];
   markGymActivity();
   persistGymSession();
   if(currentRoute !== 'gym-v2') goRoute('gym-v2');
-  else { renderGymGridV2(true); renderGymDoneV2(true); }
+  else renderGymV2();
   toast(t('repeatDone', `Wczytano trening z ${fmtDateHuman(last.date)}`, fmtDateHuman(last.date)));
 }
 function renderGymGridV2(animate){
@@ -7109,18 +7135,34 @@ function renderGymGridV2(animate){
   grid.innerHTML = '';
   const fullLib = orderedExerciseLibrary();
   const byName = new Map(fullLib.map(ex=>[ex.name, ex]));
-  const planEx = todayPlanExerciseNames() || [];
-  // Resolve any "Zamień na dziś" swaps: a swapped plan slot shows the
-  // replacement exercise but remembers which plan exercise it stands in
-  // for (swapOrigin), so its tile still carries the swap control.
-  const planSlots = planEx.map(e=>{
-    const sw = todaySwaps[e.name];
-    if(sw){
-      const repl = byName.get(sw.name) || sw;
-      return { ex: repl, swapOrigin: e.name, swapped: true, bookend: BOOKEND_EX_NAMES.has(e.name) };
-    }
-    return { ex: byName.get(e.name) || e, swapOrigin: e.name, swapped: false, bookend: BOOKEND_EX_NAMES.has(e.name) };
-  });
+  let planSlots;
+  if(repeatMode){
+    // "Powtórz ostatni trening": the grid is exactly that workout's
+    // exercises (in order) plus the plan's warm-up/stretch bookends —
+    // nothing else from the plan.
+    const bookends = (todayPlanExerciseNames() || []).filter(e=> BOOKEND_EX_NAMES.has(e.name))
+      .map(e=>({ ex: byName.get(e.name) || e, swapOrigin: null, swapped: false, bookend: true }));
+    const repeatSlots = repeatMode.names
+      .filter(name=> !BOOKEND_EX_NAMES.has(name))
+      .map(name=>({
+        ex: byName.get(name) || { name, group:'', sets: (repeatMode.prefill[name]||[]).length || 3, repLow: 8, repHigh: 12, rest: '90s' },
+        swapOrigin: null, swapped: false, bookend: false
+      }));
+    planSlots = [...bookends, ...repeatSlots];
+  } else {
+    const planEx = todayPlanExerciseNames() || [];
+    // Resolve any "Zamień na dziś" swaps: a swapped plan slot shows the
+    // replacement exercise but remembers which plan exercise it stands in
+    // for (swapOrigin), so its tile still carries the swap control.
+    planSlots = planEx.map(e=>{
+      const sw = todaySwaps[e.name];
+      if(sw){
+        const repl = byName.get(sw.name) || sw;
+        return { ex: repl, swapOrigin: e.name, swapped: true, bookend: BOOKEND_EX_NAMES.has(e.name) };
+      }
+      return { ex: byName.get(e.name) || e, swapOrigin: e.name, swapped: false, bookend: BOOKEND_EX_NAMES.has(e.name) };
+    });
+  }
   const shown = new Set(planSlots.map(s=>s.ex.name));
   const slots = planSlots.slice();
   extraGymTiles.forEach(ex=>{
@@ -7131,16 +7173,13 @@ function renderGymGridV2(animate){
   });
   slots.forEach(slot=>{
     const ex = slot.ex;
-    const se = sessionExercises.find(e=>e.name===ex.name);
-    // a "Powtórz ostatni trening" prefill isn't "done" until the user opens
-    // it — keep its tile live (coloured), not the grey `added` look.
-    const inSession = !!se && !se._loaded;
+    const inSession = sessionExercises.some(e=>e.name===ex.name);
     const isExtra = extraGymTiles.some(e=>e.name===ex.name);
     const state = inSession ? 'added' : (isExtra ? 'picked' : 'plain');
-    // swap control only on a plain plan exercise not yet in the session, and
-    // not a warm-up / stretch bookend (Maciej Q4: once it has logged sets
-    // you've committed to it, so no swap then).
-    const canSwap = slot.swapOrigin && !slot.bookend && ex.type !== 'checklist' && !se;
+    // swap control only on a plain plan exercise not yet logged, and not a
+    // warm-up / stretch bookend (Maciej Q4: once it has logged sets you've
+    // committed to it, so no swap then). Not in "Powtórz" mode either.
+    const canSwap = !repeatMode && slot.swapOrigin && !slot.bookend && ex.type !== 'checklist' && !inSession;
     const btn = buildExerciseTileV2(ex, state, canSwap ? { swapOrigin: slot.swapOrigin, swapped: slot.swapped } : null);
     btn.classList.add('gymv2-tile');
     btn.onclick = ()=> onTileTapV2(ex);
@@ -7189,7 +7228,7 @@ function renderGymDoneV2(animate){
     row.className = 'gymv2-done-row';
     row.onclick = ()=> openExercisePopupV2(ex);
     row.innerHTML = `
-      <div class="gymv2-done-row-info">${ph('check-circle')}<span>${ex.name}</span>${ex._loaded ? `<span class="gymv2-done-loaded">${t('repeatLoadedTag','wczytane')}</span>` : ''}</div>
+      <div class="gymv2-done-row-info">${ph('check-circle')}<span>${ex.name}</span></div>
       <div class="gymv2-done-row-actions">
         ${ph('pencil')}
         <span onclick="event.stopPropagation();removeExerciseFromSession('${safeName}')">${ph('trash')}</span>
