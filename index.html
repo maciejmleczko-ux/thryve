@@ -1486,18 +1486,11 @@ body.pev2-bg{background:var(--m-red-page);}
 .swapv2-filters{display:flex;gap:8px;flex-wrap:wrap;}
 .swapv2-filters button{border:1px solid #d8d5e2;background:#fff;border-radius:var(--m-r-pill);padding:8px 14px;font:inherit;font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);cursor:pointer;}
 .swapv2-filters button.active{background:var(--m-orange);border-color:var(--m-orange);color:#fff;}
-.swapv2-list{display:flex;flex-direction:column;gap:10px;}
-.swapv2-opt{width:100%;display:flex;align-items:center;gap:14px;text-align:left;background:#fff;border:1px solid transparent;border-radius:var(--m-r-md);padding:12px 14px;cursor:pointer;font:inherit;}
-.swapv2-opt.active{border-color:var(--m-orange);}
-.swapv2-opt-ico{width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--m-plan-c-easy);}
-.swapv2-opt-ico svg{display:block;width:100%;height:100%;}
-.swapv2-opt-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
-.swapv2-opt-nm{font-size:var(--m-fs-base);font-weight:700;color:#2c2727;line-height:1.2;}
-.swapv2-opt-sub{font-size:var(--m-fs-2xs);color:#6c6b78;margin-top:2px;text-transform:uppercase;letter-spacing:.04em;}
-.swapv2-opt-dot{width:22px;height:22px;border-radius:var(--m-r-pill);border:2px solid #cfccd9;flex-shrink:0;display:grid;place-items:center;}
-.swapv2-opt.active .swapv2-opt-dot{border-color:var(--m-orange);}
-.swapv2-opt.active .swapv2-opt-dot::after{content:"";width:11px;height:11px;border-radius:var(--m-r-pill);background:var(--m-orange);}
+/* alternatives are a tile grid + selection badge — same component as
+   "Wybierz ćwiczenie" (buildExerciseTileV2 / .gymv2-grid / .gymv2-tile-
+   selected + .gymv2-tile-check). */
 .swapv2-empty{font-size:var(--m-fs-sm);color:#6c6b78;text-align:center;padding:18px 4px;}
+.swapv2-revert{border:0;background:none;font:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#5b5555;text-decoration:underline;cursor:pointer;padding:2px 4px;}
 .swapv2-foot{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;flex-shrink:0;padding:0 18px;box-sizing:border-box;}
 .swapv2-submit{border:0;border-radius:var(--m-r-pill);height:49px;width:100%;background:var(--m-orange);color:#fff;font:inherit;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;}
 .swapv2-submit:disabled{opacity:.4;cursor:default;}
@@ -2772,6 +2765,7 @@ const T_EN = {
   swapV2AnyEquip: 'Any equipment',
   swapV2Empty: 'No other exercises for this group with this filter.',
   swapV2Apply: 'Swap for today',
+  swapV2Revert: 'Restore the original',
   swapV2Logged: "This exercise already has logged sets — it can't be swapped.",
   histV2YourWorkouts: 'Your workouts',
   histV2EmptyMonth: (m) => `No activity logged — ${m}`,
@@ -3341,7 +3335,7 @@ function afterOnboardingStep(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.16.1";
+const APP_VERSION = "4.16.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4511,8 +4505,6 @@ function swapAlternatives(){
   if(swapEquipFilter !== 'all'){
     list = list.filter(e=> e.name === swapPickName || !e.equipment || e.equipment === swapEquipFilter);
   }
-  // once a swap is active, let the user pick the original back
-  if(todaySwaps[swapOriginName]) list = [origin, ...list.filter(e=>e.name!==origin.name)];
   return { origin, bucket, list };
 }
 function renderSwapSheetV2(){
@@ -4520,21 +4512,8 @@ function renderSwapSheetV2(){
   if(!box) return;
   const { origin, bucket, list } = swapAlternatives();
   if(!origin){ box.innerHTML = ''; return; }
-  const optsHtml = list.length ? list.map(e=>{
-    const slug = EXERCISE_ICON_MAP[e.name] || e.icon;
-    const svg = slug ? iconSvgV3(slug) : (PH['barbell'] || '');
-    const isOriginRow = e.name === swapOriginName;
-    const sub = isOriginRow ? t('swapV2Original','Oryginał z planu')
-      : (e.equipment ? swapEquipLabel(e.equipment) : t('swapV2AnyEquip','Dowolny sprzęt'));
-    const active = e.name === swapPickName;
-    const safe = e.name.replace(/'/g,"\\'");
-    return `<button type="button" class="swapv2-opt${active?' active':''}" onclick="pickSwapV2('${safe}')">
-      <span class="swapv2-opt-ico">${svg}</span>
-      <span class="swapv2-opt-txt"><span class="swapv2-opt-nm">${e.name}</span><span class="swapv2-opt-sub">${sub}</span></span>
-      <span class="swapv2-opt-dot"></span>
-    </button>`;
-  }).join('') : `<p class="swapv2-empty">${t('swapV2Empty','Brak innych ćwiczeń na tę grupę z tym filtrem.')}</p>`;
-  const current = todaySwaps[swapOriginName] ? todaySwaps[swapOriginName].name : swapOriginName;
+  const isSwapped = !!todaySwaps[swapOriginName];
+  const current = isSwapped ? todaySwaps[swapOriginName].name : swapOriginName;
   const canApply = !!swapPickName && swapPickName !== current;
   box.innerHTML = `
     <div class="swapv2-card">
@@ -4549,13 +4528,31 @@ function renderSwapSheetV2(){
       <div class="swapv2-filters">
         ${PLAN_EQUIP_FILTERS.map(f=>`<button type="button" class="${swapEquipFilter===f.key?'active':''}" onclick="setSwapEquipV2('${f.key}')">${LANG==='en'?f.en:f.pl}</button>`).join('')}
       </div>
-      <div class="swapv2-list">${optsHtml}</div>
+      ${list.length
+        ? `<div class="gymv2-grid" id="swapGridV2"></div>`
+        : `<p class="swapv2-empty">${t('swapV2Empty','Brak innych ćwiczeń na tę grupę z tym filtrem.')}</p>`}
     </div>
     <div class="swapv2-foot">
+      ${isSwapped ? `<button type="button" class="swapv2-revert" onclick="revertSwapV2()">${t('swapV2Revert','Przywróć oryginał')}</button>` : ''}
       <button type="button" class="swapv2-submit" ${canApply?'':'disabled'} onclick="confirmSwapV2()">${t('swapV2Apply','Zamień na dziś')}</button>
     </div>`;
+  // exercise tiles — same component + selection look as "Wybierz ćwiczenie"
+  const grid = document.getElementById('swapGridV2');
+  if(grid){
+    list.forEach(e=>{
+      const tile = buildExerciseTileV2(e, e.name === swapPickName ? 'selected' : 'plain');
+      tile.classList.add('gymv2-tile');
+      tile.onclick = ()=> pickSwapV2(e.name);
+      grid.appendChild(tile);
+    });
+  }
 }
-function pickSwapV2(name){ swapPickName = name; renderSwapSheetV2(); }
+function pickSwapV2(name){ swapPickName = (swapPickName === name ? null : name); renderSwapSheetV2(); }
+function revertSwapV2(){
+  if(swapOriginName){ delete todaySwaps[swapOriginName]; persistTodaySwaps(); }
+  closeSwapSheetV2();
+  renderGymGridV2();
+}
 function setSwapEquipV2(key){
   swapEquipFilter = key;
   // if the current pick is filtered out (and isn't the origin), drop it
@@ -4577,7 +4574,7 @@ function openSwapSheetV2(originName){
   }
   swapOriginName = originName;
   swapEquipFilter = 'all';
-  swapPickName = todaySwaps[originName] ? todaySwaps[originName].name : originName;
+  swapPickName = todaySwaps[originName] ? todaySwaps[originName].name : null;
   markGymActivity();
   renderSwapSheetV2();
   mSheetOpenReset('swapExerciseOverlayV2');
