@@ -634,6 +634,36 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .feedback-type-row{display:flex;gap:8px;margin-bottom:14px;}
 .feedback-type{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:9px 4px;font-size:var(--m-fs-xs);font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
 .feedback-type.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+
+/* ---------- account panel (guest, no backend) ---------- */
+.acct-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:95;display:flex;justify-content:flex-end;}
+.acct-overlay.hidden{display:none;}
+.acct-panel{background:var(--m-panel);width:min(420px,100%);height:100%;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;}
+.acct-head{display:flex;align-items:center;justify-content:space-between;padding:6px 0 14px;}
+.acct-title{font-size:var(--m-fs-md);font-weight:600;color:var(--m-ink);}
+.acct-x{background:none;border:0;padding:6px;margin:-6px;cursor:pointer;display:flex;}
+.acct-x .ph{width:22px;height:22px;color:var(--m-ink);}
+.acct-id{display:flex;align-items:center;gap:13px;padding:4px 2px 16px;background:none;border:0;text-align:left;cursor:pointer;font-family:inherit;width:100%;}
+.acct-av{width:52px;height:52px;flex-shrink:0;}
+.acct-av .ph{width:52px;height:52px;display:block;}
+.acct-id-txt{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.acct-id-name{font-size:var(--m-fs-base);font-weight:600;color:var(--m-ink);}
+.acct-id-sub{font-size:var(--m-fs-2xs);color:var(--m-muted);}
+.acct-cloud{position:relative;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-md);padding:15px 15px 14px;}
+.acct-soon{position:absolute;top:13px;right:13px;font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--m-orange);background:#ffe9e3;border-radius:var(--m-r-pill);padding:4px 9px;}
+.acct-cloud-t{margin:0 0 4px;font-size:var(--m-fs-sm);font-weight:600;color:var(--m-ink);}
+.acct-cloud-d{margin:0;font-size:var(--m-fs-2xs);color:var(--m-muted);line-height:1.5;max-width:34ch;}
+.acct-sec{margin:20px 0 8px;font-size:var(--m-fs-2xs);letter-spacing:.11em;text-transform:uppercase;color:var(--m-muted);}
+.acct-rows{display:flex;flex-direction:column;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-md);overflow:hidden;}
+.acct-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;font-size:var(--m-fs-base);color:var(--m-ink);background:none;border:0;border-top:1px solid #e6e2ec;font-family:inherit;text-align:left;cursor:pointer;width:100%;}
+.acct-row:first-child{border-top:0;}
+.acct-row:active{background:var(--m-panel);}
+.acct-row .acct-v{color:var(--m-muted);font-size:var(--m-fs-xs);flex-shrink:0;}
+.acct-row .acct-lead{display:flex;align-items:center;gap:11px;}
+.acct-row .acct-lead .ph{width:17px;height:17px;color:var(--m-ink);}
+.acct-hint{margin:7px 3px 0;font-size:var(--m-fs-2xs);color:var(--m-muted);}
+.acct-foot{margin:auto 0 0;padding-top:18px;font-size:var(--m-fs-2xs);color:var(--m-muted);text-align:center;line-height:1.5;}
+#nameEditOverlay{z-index:100;}
 /* "Co nowego" v2 (Figma node 185:14176) — backdrop values copied
    exactly from .exv2-overlay (same rgba+blur already established for
    this app's other full-screen popups), everything else is new. */
@@ -740,6 +770,10 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .gymv2-chat-btn, .histv2-chat-btn{margin-left:auto;}
 .dash-chat-btn:active, .gymv2-chat-btn:active, .plansv2-chat-btn:active, .histv2-chat-btn:active, .statsv2-chat-btn:active{transform:scale(.9);}
 .dash-chat-btn .ph, .gymv2-chat-btn .ph, .plansv2-chat-btn .ph, .histv2-chat-btn .ph, .statsv2-chat-btn .ph{width:24px;height:24px;color:var(--m-orange);}
+/* account entry reuses .dash-chat-btn's position/size but the glyph is a
+   self-contained badge SVG (orange disc + white user) — no button bg, full-bleed icon. */
+.dash-acct-btn{background:none;}
+.dash-acct-btn .ph{width:40px;height:40px;}
 /* greeting hugs the top (see .dash-root padding). margin-bottom is the
    MINIMUM gap to the first tile (used as-is when the dashboard scrolls);
    when it fits on one screen, .dash-hero's margin-top:auto adds the extra
@@ -1898,7 +1932,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <!-- ===================== DASHBOARD (v3 "Mekkio" home — the app boots here) ===================== -->
   <section class="view active" id="view-dashboard">
     <div class="dash-root">
-      <button type="button" class="dash-chat-btn" onclick="openFeedbackV2()" title="Podziel się opinią" data-i18n-title="feedbackTitle"><span class="ph" data-ph="chat-dots"></span></button>
+      <button type="button" class="dash-chat-btn dash-acct-btn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
 
       <div class="dash-header">
         <p class="dash-hi" id="dashHi"></p>
@@ -2264,6 +2298,50 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <div class="rotate-lock-overlay">
   <div class="rotate-lock-icon"></div>
   <p data-i18n="rotateLockMsg">Obróć telefon z powrotem — Mekkio działa tylko w pionie.</p>
+</div>
+
+<!-- Account panel (guest, no backend). Entry: the account badge top-right of
+     the Dashboard (was the feedback/chat button). Name-driven header — "Gość"
+     until profileName is set. Feedback lives here as a row now. -->
+<div class="acct-overlay hidden" id="accountOverlay" onclick="if(event.target===this) closeAccountPanel()">
+  <div class="acct-panel">
+    <div class="acct-head">
+      <span class="acct-title">Konto</span>
+      <button type="button" class="acct-x" onclick="closeAccountPanel()" aria-label="Zamknij"><span class="ph" data-ph="x"></span></button>
+    </div>
+    <button type="button" class="acct-id" onclick="openNameEdit()">
+      <span class="acct-av"><span class="ph" data-ph="account"></span></span>
+      <span class="acct-id-txt">
+        <span class="acct-id-name" id="acctName">Gość</span>
+        <span class="acct-id-sub" id="acctSub">Działasz jako gość — dane tylko na tym urządzeniu</span>
+      </span>
+    </button>
+    <div class="acct-cloud">
+      <span class="acct-soon">Wkrótce</span>
+      <p class="acct-cloud-t">Konto w chmurze</p>
+      <p class="acct-cloud-d">Historia dostępna na innych urządzeniach i bezpieczna, gdy zmienisz telefon.</p>
+    </div>
+    <p class="acct-sec">Aplikacja</p>
+    <div class="acct-rows">
+      <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="download-simple"></span>Kopia zapasowa</span><span class="acct-v">Pobierz</span></button>
+      <button type="button" class="acct-row" onclick="closeAccountPanel(); openFeedbackV2();"><span class="acct-lead"><span class="ph" data-ph="chat-dots"></span>Podziel się opinią</span><span class="acct-v"></span></button>
+    </div>
+    <p class="acct-foot">Mekkio <span id="acctVer"></span> · dane treningowe tylko na tym urządzeniu</p>
+  </div>
+</div>
+
+<!-- Rename sheet — reachable any time from the account panel. Separate from
+     #onboardOverlay so it doesn't re-trigger the first-run plan/install steps. -->
+<div class="onboard-overlay hidden" id="nameEditOverlay" onclick="if(event.target===this) closeNameEdit()">
+  <div class="onboard-box">
+    <h3>Jak Cię nazywać?</h3>
+    <p>Tym imieniem podpisujemy kopie zapasowe i witamy Cię na pulpicie. Możesz je wyczyścić — wrócisz do „Gościa".</p>
+    <input type="text" id="nameEditInput" placeholder="np. Maciek" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="onboard-actions">
+      <button type="button" class="skip" onclick="closeNameEdit()">Anuluj</button>
+      <button type="button" class="save" onclick="saveNameEdit()">Zapisz</button>
+    </div>
+  </div>
 </div>
 
 <div class="onboard-overlay hidden" id="onboardOverlay">
@@ -2984,6 +3062,9 @@ const PH = {
 "chat-dots": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 146 146\" fill=\"none\"><path d=\"M122.933 28.4567H22.7655C20.6523 28.4567 18.6256 29.2962 17.1313 30.7905C15.6371 32.2847 14.7976 34.3114 14.7976 36.4246V127.486C14.7894 129.005 15.2193 130.495 16.036 131.775C16.8526 133.056 18.0212 134.075 19.4019 134.708C20.456 135.197 21.6036 135.452 22.7655 135.454C24.6426 135.455 26.4586 134.787 27.8877 133.57L27.9218 133.542L46.8 117.242H122.933C125.046 117.242 127.073 116.402 128.567 114.908C130.062 113.414 130.901 111.387 130.901 109.274V36.4246C130.901 34.3114 130.062 32.2847 128.567 30.7905C127.073 29.2962 125.046 28.4567 122.933 28.4567ZM124.071 109.274C124.071 109.576 123.951 109.865 123.738 110.079C123.525 110.292 123.235 110.412 122.933 110.412H45.5309C44.7116 110.412 43.9198 110.707 43.2999 111.243L23.4826 128.357C23.3164 128.492 23.1157 128.577 22.9033 128.603C22.6909 128.629 22.4755 128.594 22.2818 128.503C22.0881 128.413 21.924 128.269 21.8082 128.089C21.6924 127.909 21.6297 127.7 21.6272 127.486V36.4246C21.6272 36.1227 21.7471 35.8332 21.9606 35.6197C22.1741 35.4063 22.4636 35.2863 22.7655 35.2863H122.933C123.235 35.2863 123.525 35.4063 123.738 35.6197C123.951 35.8332 124.071 36.1227 124.071 36.4246V109.274ZM94.4764 63.7431C94.4764 64.6487 94.1167 65.5173 93.4763 66.1577C92.8359 66.7981 91.9673 67.1579 91.0616 67.1579H54.637C53.7314 67.1579 52.8628 66.7981 52.2224 66.1577C51.582 65.5173 51.2222 64.6487 51.2222 63.7431C51.2222 62.8374 51.582 61.9688 52.2224 61.3284C52.8628 60.688 53.7314 60.3283 54.637 60.3283H91.0616C91.9673 60.3283 92.8359 60.688 93.4763 61.3284C94.1167 61.9688 94.4764 62.8374 94.4764 63.7431ZM94.4764 81.9554C94.4764 82.861 94.1167 83.7296 93.4763 84.37C92.8359 85.0104 91.9673 85.3702 91.0616 85.3702H54.637C53.7314 85.3702 52.8628 85.0104 52.2224 84.37C51.582 83.7296 51.2222 82.861 51.2222 81.9554C51.2222 81.0497 51.582 80.1811 52.2224 79.5407C52.8628 78.9003 53.7314 78.5406 54.637 78.5406H91.0616C91.9673 78.5406 92.8359 78.9003 93.4763 79.5407C94.1167 80.1811 94.4764 81.0497 94.4764 81.9554Z\" fill=\"currentColor\"/></svg>"
 };
 Object.assign(PH, {"magnifying-glass": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.32l50.06,50.06a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z\"/></svg>"});
+/* account entry / avatar — self-contained badge (Maciej-supplied): orange disc
+   + white Phosphor "user" glyph. Colours are baked in, not currentColor. */
+Object.assign(PH, {"account": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 40 40\" fill=\"none\"><rect width=\"40\" height=\"40\" rx=\"20\" fill=\"#FF3300\"/><path d=\"M29.4867 27.9687C28.0045 25.4075 25.6776 23.6103 22.9739 22.8481C24.2884 22.1799 25.3396 21.0885 25.9579 19.7498C26.5762 18.411 26.7256 16.9031 26.382 15.4691C26.0385 14.0351 25.222 12.7586 24.0642 11.8454C22.9064 10.9322 21.4747 10.4355 20.0001 10.4355C18.5255 10.4355 17.0939 10.9322 15.9361 11.8454C14.7783 12.7586 13.9618 14.0351 13.6182 15.4691C13.2747 16.9031 13.4241 18.411 14.0424 19.7498C14.6607 21.0885 15.7119 22.1799 17.0264 22.8481C14.3226 23.6094 11.9958 25.4065 10.5136 27.9687C10.4729 28.0328 10.4456 28.1043 10.4332 28.1792C10.4209 28.2541 10.4239 28.3306 10.4419 28.4043C10.46 28.478 10.4927 28.5473 10.5383 28.608C10.5838 28.6687 10.6411 28.7195 10.7068 28.7575C10.7725 28.7955 10.8451 28.8197 10.9205 28.8289C10.9958 28.838 11.0721 28.8319 11.145 28.8107C11.2179 28.7896 11.2857 28.7539 11.3444 28.7059C11.4031 28.6579 11.4515 28.5985 11.4867 28.5312C13.2876 25.4197 16.4695 23.5625 20.0001 23.5625C23.5308 23.5625 26.7126 25.4197 28.5136 28.5312C28.5487 28.5985 28.5971 28.6579 28.6559 28.7059C28.7146 28.7539 28.7824 28.7896 28.8553 28.8107C28.9281 28.8319 29.0045 28.838 29.0798 28.8289C29.1551 28.8197 29.2278 28.7955 29.2935 28.7575C29.3592 28.7195 29.4165 28.6687 29.462 28.608C29.5075 28.5473 29.5403 28.478 29.5584 28.4043C29.5764 28.3306 29.5794 28.2541 29.567 28.1792C29.5547 28.1043 29.5274 28.0328 29.4867 27.9687ZM14.5626 17C14.5626 15.9245 14.8815 14.8733 15.479 13.9791C16.0765 13.0849 16.9257 12.3879 17.9193 11.9764C18.9129 11.5648 20.0062 11.4572 21.0609 11.667C22.1157 11.8768 23.0846 12.3946 23.845 13.1551C24.6055 13.9155 25.1234 14.8844 25.3332 15.9392C25.543 16.994 25.4353 18.0873 25.0237 19.0808C24.6122 20.0744 23.9152 20.9236 23.0211 21.5211C22.1269 22.1186 21.0756 22.4375 20.0001 22.4375C18.5586 22.4357 17.1765 21.8623 16.1572 20.843C15.1378 19.8236 14.5644 18.4416 14.5626 17Z\" fill=\"white\"/></svg>"});
 /* v2 screen-header back arrow (Figma node 191:726 "ArrowLeft", exported
    asset — thin weight, 24px viewBox; fill hardcoded->currentColor so
    .v2-hdr-back CSS drives the color). */
@@ -3381,6 +3462,53 @@ function afterOnboardingStep(){
   else checkInstallPrompt();
 }
 
+/* ---------- account panel (guest, no backend) ----------
+   Entry point: the account badge top-right of the Dashboard. Header is
+   name-driven off profileName — "Gość" until a name is set. No login yet;
+   the "Konto w chmurze" card is a teaser for roadmap phase 2. */
+function renderAccountPanel(){
+  const named = !!profileName;
+  const nameEl = document.getElementById('acctName');
+  const subEl = document.getElementById('acctSub');
+  if(nameEl) nameEl.textContent = named ? profileName : 'Gość';
+  if(subEl) subEl.textContent = named
+    ? 'Dane tylko na tym urządzeniu · zmień imię'
+    : 'Działasz jako gość — dane tylko na tym urządzeniu';
+  const verEl = document.getElementById('acctVer');
+  if(verEl) verEl.textContent = APP_VERSION;
+}
+function openAccountPanel(){
+  renderAccountPanel();
+  document.getElementById('accountOverlay').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+}
+function closeAccountPanel(){
+  document.getElementById('accountOverlay').classList.add('hidden');
+  if(document.getElementById('nameEditOverlay').classList.contains('hidden'))
+    document.documentElement.classList.remove('modal-lock');
+}
+function openNameEdit(){
+  document.getElementById('nameEditInput').value = profileName || '';
+  document.getElementById('nameEditOverlay').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+  setTimeout(()=>{ try{ document.getElementById('nameEditInput').focus(); }catch(e){} }, 40);
+}
+function closeNameEdit(){
+  document.getElementById('nameEditOverlay').classList.add('hidden');
+  if(document.getElementById('accountOverlay').classList.contains('hidden'))
+    document.documentElement.classList.remove('modal-lock');
+}
+function saveNameEdit(){
+  const val = document.getElementById('nameEditInput').value.trim();
+  profileName = val;
+  if(val) localStorage.setItem(LS_PROFILE_NAME, val);
+  else localStorage.removeItem(LS_PROFILE_NAME);
+  updateWelcomeGreeting();
+  if(typeof renderDashboard === 'function') renderDashboard();
+  renderAccountPanel();
+  closeNameEdit();
+}
+
 /* ---------- what's new / changelog ----------
    Wersjonowanie: MAJOR.MINOR.PATCH
    MAJOR — duże nowe funkcjonalności
@@ -3388,7 +3516,7 @@ function afterOnboardingStep(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.17.3";
+const APP_VERSION = "4.18.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3437,6 +3565,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.18.0": {
+    pl: [
+      {featured:true, icon:'account', badge:'Nowość', title:'Panel konta', text:'Ikona w prawym górnym rogu pulpitu otwiera panel konta. Na razie bez logowania — działasz jako „Gość", a gdy podasz imię, przywitamy Cię nim. W panelu ustawisz imię, pobierzesz kopię zapasową i prześlesz opinię. Konto w chmurze i synchronizacja między urządzeniami — wkrótce.'},
+    ],
+    en: [
+      {featured:true, icon:'account', badge:'New', title:'Account panel', text:'The icon in the top-right of the dashboard opens an account panel. No login yet — you\'re a "Guest" until you set a name, then it greets you by it. From the panel you set your name, download a backup and send feedback. Cloud account and cross-device sync are coming.'},
+    ],
+  },
   "4.17.0": {
     pl: [
       {featured:true, icon:'dash-repeat', badge:'Nowość', title:'Powtórz ostatni trening', text:'W GYM jest teraz przycisk „Powtórz ostatni trening", nad listą ćwiczeń. Wczytuje ćwiczenia z ostatniego zapisanego treningu z ciężarami i powtórzeniami z tamtego razu — z jednorazowymi zamianami włącznie. Zmieniasz tylko to, co dziś inaczej, i zapisujesz.'},
