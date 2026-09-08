@@ -929,12 +929,15 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .gymv2-tile-check{position:absolute;top:6px;right:6px;width:18px;height:18px;z-index:1;}
 .gymv2-tile-check svg{display:block;width:100%;height:100%;}
 /* "Zamień na dziś" corner control on a GYM plan tile */
-.gymv2-tile-swap{position:absolute;top:4px;right:4px;width:26px;height:26px;z-index:2;display:flex;align-items:center;justify-content:center;border-radius:var(--m-r-pill);background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);box-shadow:0 1px 4px rgba(0,0,0,.12);color:#5b5555;cursor:pointer;transition:transform .12s ease,background .12s ease,color .12s ease;}
-.gymv2-tile-swap svg{display:block;width:15px;height:15px;}
+.gymv2-tile-swap{position:absolute;top:3px;right:3px;width:26px;height:26px;z-index:2;display:flex;align-items:center;justify-content:center;background:none;color:#5b5555;cursor:pointer;transition:transform .12s ease,color .12s ease;}
+.gymv2-tile-swap svg{display:block;width:19px;height:19px;}
 .gymv2-tile-swap:hover{color:#2c2727;}
-.gymv2-tile-swap:active{transform:scale(.88);}
-.gymv2-tile-swap.is-swapped{background:var(--m-orange);color:#fff;box-shadow:0 2px 6px rgba(255,51,0,.35);}
-.gymv2-tile-swap:focus-visible{outline:2px solid var(--m-orange);outline-offset:1px;}
+.gymv2-tile-swap:active{transform:scale(.85);}
+/* swapped: the whole tile gets an inset orange stroke; the corner glyph
+   just turns orange, no backing. */
+.gymv2-tile-swap.is-swapped{color:var(--m-orange);}
+.gymv2-tile.gymv2-tile-swapped{box-shadow:inset 0 0 0 2px var(--m-orange);}
+.gymv2-tile-swap:focus-visible{outline:2px solid var(--m-orange);outline-offset:1px;border-radius:6px;}
 .gymv2-tile img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;}
 .gymv2-tile.custom-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#fff;}
 .gymv2-tile.custom-tile .ph{width:24px;height:24px;color:var(--m-orange);}
@@ -3338,7 +3341,7 @@ function afterOnboardingStep(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.16.0";
+const APP_VERSION = "4.16.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4294,6 +4297,7 @@ function buildExerciseTileV2(ex, state, opts){
   }
   if(opts && opts.swapOrigin){
     const safe = opts.swapOrigin.replace(/'/g, "\\'");
+    if(opts.swapped) btn.classList.add('gymv2-tile-swapped');
     btn.insertAdjacentHTML('beforeend',
       `<span class="gymv2-tile-swap${opts.swapped?' is-swapped':''}" role="button" tabindex="0" aria-label="${t('gymV2Swap','Zamień na dziś')}" title="${t('gymV2Swap','Zamień na dziś')}" onclick="event.stopPropagation();openSwapSheetV2('${safe}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openSwapSheetV2('${safe}');}">${GYMV2_SWAP_SVG}</span>`);
   }
