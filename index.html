@@ -663,7 +663,51 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-row .acct-lead .ph{width:17px;height:17px;color:var(--m-ink);}
 .acct-hint{margin:7px 3px 0;font-size:var(--m-fs-2xs);color:var(--m-muted);}
 .acct-foot{margin:auto 0 0;padding-top:18px;font-size:var(--m-fs-2xs);color:var(--m-muted);text-align:center;line-height:1.5;}
-#nameEditOverlay{z-index:100;}
+/* above the account panel (95) AND the GYM finish screen (9500) — weight /
+   edit-kcal sheets can be opened straight from the finish screen. */
+#nameEditOverlay,#weightSheet,#bodyDataSheet,#editKcalSheet{z-index:9600;}
+/* body-data / weight / edit-kcal sheets reuse .onboard-box (old light palette) */
+.acct-fl{display:block;font-size:var(--m-fs-2xs);letter-spacing:.08em;text-transform:uppercase;color:var(--m-muted);margin:0 0 6px;}
+.onboard-box input[type=number],.onboard-box input[type=date]{margin-bottom:14px;}
+.acct-seg{display:flex;gap:7px;margin-bottom:14px;}
+.acct-seg button{flex:1;border:1px solid var(--border);background:var(--light-2);color:var(--text-dark);border-radius:10px;padding:11px;font-size:var(--m-fs-sm);font-weight:700;font-family:inherit;cursor:pointer;}
+.acct-seg button.on{background:var(--orange);border-color:var(--orange);color:#fff;}
+.acct-mini{font-size:var(--m-fs-2xs);color:#8a8585;margin:-4px 0 14px;}
+.acct-wlog{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+.acct-wlog-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 12px;font-size:var(--m-fs-sm);border-top:1px solid var(--border);}
+.acct-wlog-row:first-child{border-top:0;}
+.acct-wlog-row .d{color:#8a8585;}
+.acct-wlog-row .d b{color:var(--text-dark);}
+.acct-wlog-empty{padding:11px 12px;font-size:var(--m-fs-2xs);color:#8a8585;}
+.acct-revert{display:block;width:100%;text-align:center;background:none;border:0;color:var(--orange);font-size:var(--m-fs-2xs);font-weight:700;font-family:inherit;padding:2px 0 12px;cursor:pointer;}
+.acct-revert[hidden]{display:none;}
+/* GYM finish — calories row */
+.gymfin-kcal{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--m-panel);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:11px 14px;margin-top:8px;font-family:inherit;cursor:pointer;text-align:left;}
+.gymfin-kcal[hidden]{display:none;}
+.gymfin-kcal-l{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.gymfin-kcal-k{font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--m-muted);}
+.gymfin-kcal-v{font-size:var(--m-fs-xl);font-weight:600;color:var(--m-ink);line-height:1;}
+.gymfin-kcal-edit{display:flex;align-items:center;gap:6px;flex-shrink:0;border:1px solid #e6e2ec;border-radius:var(--m-r-pill);padding:6px 12px;font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);background:var(--m-card);}
+.gymfin-kcal-edit[hidden]{display:none;}
+.gymfin-kcal-edit .ph{width:13px;height:13px;}
+/* History detail — calories row */
+.histv2-wkcal{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:11px 13px;margin-top:10px;cursor:pointer;}
+.histv2-wkcal-k{margin:0 0 3px;font-size:var(--m-fs-2xs);letter-spacing:.08em;text-transform:uppercase;color:var(--m-muted);}
+.histv2-wkcal-v{margin:0;font-size:var(--m-fs-md);font-weight:600;color:var(--m-ink);}
+.histv2-wkcal-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.histv2-wkcal-chip{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--m-orange);background:#ffe9e3;border-radius:var(--m-r-pill);padding:3px 8px;}
+.histv2-wkcal-was{font-size:var(--m-fs-2xs);color:var(--m-muted);text-decoration:line-through;}
+.histv2-wkcal-tag{font-size:var(--m-fs-2xs);color:var(--m-muted);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;}
+/* Stats — calories + weight-trend cards (neutral, not the orange YTD shell) */
+.statsv2-kcard{background:var(--m-card);border-radius:var(--m-r-md);padding:18px 18px 16px;}
+.statsv2-kcard-eyebrow{margin:0 0 10px;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--m-muted);}
+.statsv2-kcard-num-row{display:flex;align-items:center;gap:12px;}
+.statsv2-kcard-num-row .ph{width:32px;height:32px;color:var(--m-orange);flex-shrink:0;}
+.statsv2-kcard-num-row .ph svg{display:block;width:100%;height:100%;}
+.statsv2-kcard-num{font-size:var(--m-fs-2xl);font-weight:600;color:var(--m-ink);letter-spacing:-.02em;line-height:1;}
+.statsv2-kcard-num small{font-size:var(--m-fs-base);font-weight:400;color:var(--m-muted);margin-left:4px;}
+.statsv2-kcard-delta{margin:8px 0 0;font-size:var(--m-fs-2xs);color:var(--m-muted);}
+.statsv2-kcal-spark{width:100%;height:54px;margin-top:10px;display:block;}
 /* "Co nowego" v2 (Figma node 185:14176) — backdrop values copied
    exactly from .exv2-overlay (same rgba+blur already established for
    this app's other full-screen popups), everything else is new. */
@@ -1891,6 +1935,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="gymfin-stat gymfin-stat--plain"><p class="gymfin-stat-k" data-i18n="gymFinVolume">Objętość</p><p class="gymfin-stat-v" id="gymFinVolV">0</p></div>
       </div>
 
+      <button type="button" class="gymfin-kcal" id="gymFinKcal" hidden onclick="gymFinEditKcal()">
+        <span class="gymfin-kcal-l">
+          <span class="gymfin-kcal-k" id="gymFinKcalK">Kalorie · szacunek</span>
+          <span class="gymfin-kcal-v" id="gymFinKcalV">— kcal</span>
+        </span>
+        <span class="gymfin-kcal-edit" id="gymFinKcalEdit"><span class="ph" data-ph="pencil"></span>Edytuj</span>
+      </button>
+
       <div class="gymfin-record" id="gymFinRecord" hidden>
         <span class="ph" data-ph="trophy"></span>
         <div>
@@ -2321,6 +2373,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <p class="acct-cloud-t">Konto w chmurze</p>
       <p class="acct-cloud-d">Historia dostępna na innych urządzeniach i bezpieczna, gdy zmienisz telefon.</p>
     </div>
+    <p class="acct-sec">Dane do kalorii</p>
+    <div class="acct-rows">
+      <button type="button" class="acct-row" onclick="openWeightSheet()"><span>Masa ciała</span><span class="acct-v" id="acctWeightV">Uzupełnij</span></button>
+      <button type="button" class="acct-row" onclick="openBodyDataSheet()"><span>Wzrost</span><span class="acct-v" id="acctHeightV">Uzupełnij</span></button>
+      <button type="button" class="acct-row" onclick="openBodyDataSheet()"><span>Wiek</span><span class="acct-v" id="acctAgeV">—</span></button>
+      <button type="button" class="acct-row" onclick="openBodyDataSheet()"><span>Płeć</span><span class="acct-v" id="acctSexV">—</span></button>
+    </div>
+    <p class="acct-hint" id="acctWeightUpd" hidden></p>
     <p class="acct-sec">Aplikacja</p>
     <div class="acct-rows">
       <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="download-simple"></span>Kopia zapasowa</span><span class="acct-v">Pobierz</span></button>
@@ -2340,6 +2400,60 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="onboard-actions">
       <button type="button" class="skip" onclick="closeNameEdit()">Anuluj</button>
       <button type="button" class="save" onclick="saveNameEdit()">Zapisz</button>
+    </div>
+  </div>
+</div>
+
+<!-- Weight sheet — quick dated weigh-in, appends to weightLog (one entry/day). -->
+<div class="onboard-overlay hidden" id="weightSheet" onclick="if(event.target===this) closeWeightSheet()">
+  <div class="onboard-box">
+    <h3>Masa ciała</h3>
+    <p>Zapiszemy dzień pomiaru. Waż się o tej samej porze — najlepiej rano, na czczo.</p>
+    <label class="acct-fl" for="weightInput">Waga (kg)</label>
+    <input type="number" inputmode="decimal" step="0.1" min="30" max="300" id="weightInput" placeholder="np. 74,0">
+    <label class="acct-fl" for="weightDateInput">Data pomiaru</label>
+    <input type="date" id="weightDateInput">
+    <label class="acct-fl">Ostatnie wpisy</label>
+    <div class="acct-wlog" id="weightLogList"></div>
+    <div class="onboard-actions">
+      <button type="button" class="skip" onclick="closeWeightSheet()">Anuluj</button>
+      <button type="button" class="save" onclick="saveWeightSheet()">Zapisz pomiar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Body-data sheet — rarely-changed: height / age / sex. Weight lives in its own sheet. -->
+<div class="onboard-overlay hidden" id="bodyDataSheet" onclick="if(event.target===this) closeBodyDataSheet()">
+  <div class="onboard-box">
+    <h3>Dane do kalorii</h3>
+    <p>Używamy ich tylko do szacowania kalorii spalonych na treningu. Zostają na tym urządzeniu.</p>
+    <label class="acct-fl" for="heightInput">Wzrost (cm)</label>
+    <input type="number" inputmode="numeric" step="1" min="120" max="230" id="heightInput" placeholder="np. 181">
+    <label class="acct-fl" for="ageInput">Wiek</label>
+    <input type="number" inputmode="numeric" step="1" min="12" max="100" id="ageInput" placeholder="np. 29">
+    <label class="acct-fl">Płeć</label>
+    <div class="acct-seg" id="sexSeg">
+      <button type="button" data-sex="f" onclick="pickSex('f')">Kobieta</button>
+      <button type="button" data-sex="m" onclick="pickSex('m')">Mężczyzna</button>
+    </div>
+    <p class="acct-mini">Sama masa ciała wystarczy, żeby zacząć liczyć.</p>
+    <div class="onboard-actions">
+      <button type="button" class="skip" onclick="closeBodyDataSheet()">Anuluj</button>
+      <button type="button" class="save" onclick="saveBodyDataSheet()">Zapisz</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit-kcal sheet — override the estimate for one workout; stored as kcalUser. -->
+<div class="onboard-overlay hidden" id="editKcalSheet" onclick="if(event.target===this) closeEditKcal()">
+  <div class="onboard-box">
+    <h3>Spalone kalorie</h3>
+    <p>To szacunek z Twojej masy ciała i czasu treningu. Popraw, jeśli masz dokładniejszy odczyt — np. z zegarka albo pasa na klatkę.</p>
+    <input type="number" inputmode="numeric" step="1" min="0" max="3000" id="kcalInput">
+    <button type="button" class="acct-revert" id="kcalRevertBtn" hidden onclick="revertKcal()"></button>
+    <div class="onboard-actions">
+      <button type="button" class="skip" onclick="closeEditKcal()">Anuluj</button>
+      <button type="button" class="save" onclick="saveEditKcal()">Zapisz</button>
     </div>
   </div>
 </div>
@@ -3462,42 +3576,111 @@ function afterOnboardingStep(){
   else checkInstallPrompt();
 }
 
+/* ---------- body data + weight log (local, feeds calorie estimates) ----------
+   weightLog is dated so Stats can trend it; the calorie formula pulls the
+   weight effective on the day of each workout. No backend, no login. */
+const LS_WEIGHT_LOG = "fitlog_weight_log_v1";   // [{kg:Number, date:"YYYY-MM-DD"}] ascending
+const LS_BODY_DATA  = "fitlog_body_data_v1";    // {heightCm, age, sex:"f"|"m"}
+const KCAL_MODEL_VERSION = 1;
+function loadWeightLog(){ try{ const a = JSON.parse(localStorage.getItem(LS_WEIGHT_LOG)); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+function saveWeightLog(a){ localStorage.setItem(LS_WEIGHT_LOG, JSON.stringify(a)); }
+function loadBodyData(){ try{ return JSON.parse(localStorage.getItem(LS_BODY_DATA)) || {}; }catch(e){ return {}; } }
+function saveBodyDataLS(o){ localStorage.setItem(LS_BODY_DATA, JSON.stringify(o)); }
+let weightLog = loadWeightLog();
+let bodyData = loadBodyData();
+function currentWeightKg(){ return weightLog.length ? weightLog[weightLog.length-1].kg : null; }
+function lastWeightDate(){ return weightLog.length ? weightLog[weightLog.length-1].date : null; }
+function weightAtDate(d){
+  if(!weightLog.length) return null;
+  let pick = null;
+  for(const e of weightLog){ if(e.date <= d) pick = e; else break; }
+  return (pick || weightLog[0]).kg;   // before the earliest entry, fall back to it
+}
+function logWeight(kg, date){
+  kg = Math.round(kg*10)/10;
+  const i = weightLog.findIndex(e=> e.date === date);
+  if(i >= 0) weightLog[i].kg = kg;
+  else weightLog.push({kg, date});
+  weightLog.sort((a,b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  saveWeightLog(weightLog);
+  recomputeWorkoutCalories();
+}
+function sessionMet(durationMin, setCount){
+  if(!durationMin || durationMin <= 0) return 5;
+  const density = setCount / durationMin;   // sets per minute ~ how short the rests are
+  if(density >= 0.75) return 8;             // circuit pace
+  if(density >= 0.45) return 6;             // brisk strength
+  return 3.5;                               // long rests / heavy work
+}
+function estimateKcal(durationMin, met, weightKg){
+  if(!durationMin || !weightKg) return null;
+  return Math.round(met * 3.5 * weightKg / 200 * durationMin);
+}
+function workoutSetCount(w){ return w.exercises.reduce((s,e)=> s + e.sets.length, 0); }
+function computeWorkoutKcal(w){
+  const wt = weightAtDate(w.date);
+  if(!wt || !w.durationMin) return { kcalEstimated:null, metUsed:null, bodyweightKg: wt || null, kcalModelVersion: KCAL_MODEL_VERSION };
+  const met = sessionMet(w.durationMin, workoutSetCount(w));
+  return { kcalEstimated: estimateKcal(w.durationMin, met, wt), metUsed: met, bodyweightKg: wt, kcalModelVersion: KCAL_MODEL_VERSION };
+}
+function workoutKcalShown(w){
+  if(w.kcalUser != null) return w.kcalUser;
+  if(w.kcalEstimated != null) return w.kcalEstimated;
+  return computeWorkoutKcal(w).kcalEstimated;   // lazy for pre-feature workouts
+}
+function recomputeWorkoutCalories(){
+  if(typeof workouts === 'undefined' || !Array.isArray(workouts)) return;
+  let changed = false;
+  workouts.forEach(w=>{
+    const c = computeWorkoutKcal(w);
+    if(c.kcalEstimated != null && (w.kcalEstimated !== c.kcalEstimated || w.bodyweightKg !== c.bodyweightKg)){
+      w.kcalEstimated = c.kcalEstimated; w.metUsed = c.metUsed;
+      w.bodyweightKg = c.bodyweightKg; w.kcalModelVersion = c.kcalModelVersion;
+      changed = true;
+    }
+  });
+  if(changed) saveWorkouts(workouts);
+}
+function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
+
 /* ---------- account panel (guest, no backend) ----------
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
+const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','editKcalSheet'];
+function showSheet(id){
+  document.getElementById(id).classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+}
+function hideSheet(id){
+  document.getElementById(id).classList.add('hidden');
+  const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
+  if(!anyOpen) document.documentElement.classList.remove('modal-lock');
+}
 function renderAccountPanel(){
   const named = !!profileName;
-  const nameEl = document.getElementById('acctName');
-  const subEl = document.getElementById('acctSub');
-  if(nameEl) nameEl.textContent = named ? profileName : 'Gość';
-  if(subEl) subEl.textContent = named
+  const set = (id, txt)=>{ const e = document.getElementById(id); if(e) e.textContent = txt; };
+  set('acctName', named ? profileName : 'Gość');
+  set('acctSub', named
     ? 'Dane tylko na tym urządzeniu · zmień imię'
-    : 'Działasz jako gość — dane tylko na tym urządzeniu';
-  const verEl = document.getElementById('acctVer');
-  if(verEl) verEl.textContent = APP_VERSION;
+    : 'Działasz jako gość — dane tylko na tym urządzeniu');
+  set('acctVer', APP_VERSION);
+  const cw = currentWeightKg();
+  set('acctWeightV', cw != null ? fmtKg(cw) + ' kg' : 'Uzupełnij');
+  set('acctHeightV', bodyData.heightCm ? bodyData.heightCm + ' cm' : 'Uzupełnij');
+  set('acctAgeV', bodyData.age ? bodyData.age + ' lat' : '—');
+  set('acctSexV', bodyData.sex === 'f' ? 'Kobieta' : bodyData.sex === 'm' ? 'Mężczyzna' : '—');
+  const upd = document.getElementById('acctWeightUpd');
+  if(upd){ const d = lastWeightDate(); upd.textContent = d ? 'Ostatnia aktualizacja wagi: ' + fmtDate(d) : ''; upd.hidden = !d; }
 }
-function openAccountPanel(){
-  renderAccountPanel();
-  document.getElementById('accountOverlay').classList.remove('hidden');
-  document.documentElement.classList.add('modal-lock');
-}
-function closeAccountPanel(){
-  document.getElementById('accountOverlay').classList.add('hidden');
-  if(document.getElementById('nameEditOverlay').classList.contains('hidden'))
-    document.documentElement.classList.remove('modal-lock');
-}
+function openAccountPanel(){ renderAccountPanel(); showSheet('accountOverlay'); }
+function closeAccountPanel(){ hideSheet('accountOverlay'); }
 function openNameEdit(){
   document.getElementById('nameEditInput').value = profileName || '';
-  document.getElementById('nameEditOverlay').classList.remove('hidden');
-  document.documentElement.classList.add('modal-lock');
+  showSheet('nameEditOverlay');
   setTimeout(()=>{ try{ document.getElementById('nameEditInput').focus(); }catch(e){} }, 40);
 }
-function closeNameEdit(){
-  document.getElementById('nameEditOverlay').classList.add('hidden');
-  if(document.getElementById('accountOverlay').classList.contains('hidden'))
-    document.documentElement.classList.remove('modal-lock');
-}
+function closeNameEdit(){ hideSheet('nameEditOverlay'); }
 function saveNameEdit(){
   const val = document.getElementById('nameEditInput').value.trim();
   profileName = val;
@@ -3509,6 +3692,167 @@ function saveNameEdit(){
   closeNameEdit();
 }
 
+/* ---------- weight sheet ---------- */
+function renderWeightLogList(){
+  const el = document.getElementById('weightLogList');
+  if(!el) return;
+  if(!weightLog.length){ el.innerHTML = '<div class="acct-wlog-empty">Brak pomiarów — to będzie pierwszy.</div>'; return; }
+  const rows = weightLog.slice(-5).reverse();
+  el.innerHTML = rows.map((e,idx)=>{
+    const prev = rows[idx+1];
+    const delta = prev ? +(e.kg - prev.kg).toFixed(1) : null;
+    const dTxt = (delta != null && Math.abs(delta) >= 0.05)
+      ? ` <b>${delta > 0 ? '+' : '−'}${Math.abs(delta).toFixed(1).replace('.', ',')}</b>` : '';
+    return `<div class="acct-wlog-row"><span>${fmtKg(e.kg)} kg</span><span class="d">${fmtDate(e.date)}${dTxt}</span></div>`;
+  }).join('');
+}
+function openWeightSheet(){
+  const cw = currentWeightKg();
+  document.getElementById('weightInput').value = cw != null ? cw : '';
+  document.getElementById('weightDateInput').value = todayStr();
+  document.getElementById('weightDateInput').max = todayStr();
+  renderWeightLogList();
+  showSheet('weightSheet');
+  setTimeout(()=>{ try{ document.getElementById('weightInput').focus(); }catch(e){} }, 40);
+}
+function closeWeightSheet(){ hideSheet('weightSheet'); }
+function saveWeightSheet(){
+  const kg = parseFloat(String(document.getElementById('weightInput').value).replace(',', '.'));
+  const date = document.getElementById('weightDateInput').value || todayStr();
+  if(!(kg >= 30 && kg <= 300)){ toast('Podaj wagę między 30 a 300 kg'); return; }
+  if(date > todayStr()){ toast('Data nie może być z przyszłości'); return; }
+  logWeight(kg, date);
+  renderAccountPanel();
+  if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
+  if(document.getElementById('histDetailV2') && selectedHistDateV2) renderHistDetailV2(false);
+  closeWeightSheet();
+  toast('Zapisano pomiar');
+}
+
+/* ---------- body-data sheet (height / age / sex) ---------- */
+let _pickSex = null;
+function pickSex(s){
+  _pickSex = s;
+  document.querySelectorAll('#sexSeg button').forEach(b=> b.classList.toggle('on', b.dataset.sex === s));
+}
+function openBodyDataSheet(){
+  document.getElementById('heightInput').value = bodyData.heightCm || '';
+  document.getElementById('ageInput').value = bodyData.age || '';
+  pickSex(bodyData.sex || null);
+  showSheet('bodyDataSheet');
+}
+function closeBodyDataSheet(){ hideSheet('bodyDataSheet'); }
+function saveBodyDataSheet(){
+  const h = parseInt(document.getElementById('heightInput').value, 10);
+  const a = parseInt(document.getElementById('ageInput').value, 10);
+  bodyData = {
+    heightCm: (h >= 120 && h <= 230) ? h : undefined,
+    age: (a >= 12 && a <= 100) ? a : undefined,
+    sex: _pickSex || undefined
+  };
+  saveBodyDataLS(bodyData);
+  renderAccountPanel();
+  closeBodyDataSheet();
+}
+
+/* ---------- edit-kcal sheet (per workout) ---------- */
+let editKcalWorkoutId = null;
+function openEditKcal(wid){
+  const w = workouts.find(x=> x.id === wid);
+  if(!w){ return; }
+  editKcalWorkoutId = wid;
+  const est = (w.kcalEstimated != null) ? w.kcalEstimated : computeWorkoutKcal(w).kcalEstimated;
+  const cur = (w.kcalUser != null) ? w.kcalUser : est;
+  document.getElementById('kcalInput').value = (cur != null) ? cur : '';
+  const rb = document.getElementById('kcalRevertBtn');
+  if(est != null && w.kcalUser != null){ rb.hidden = false; rb.textContent = 'Wróć do szacunku (' + est + ')'; }
+  else rb.hidden = true;
+  showSheet('editKcalSheet');
+  setTimeout(()=>{ try{ document.getElementById('kcalInput').focus(); }catch(e){} }, 40);
+}
+function closeEditKcal(){ hideSheet('editKcalSheet'); }
+function afterKcalEdit(){
+  closeEditKcal();
+  if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
+  if(document.getElementById('histDetailV2') && selectedHistDateV2) renderHistDetailV2(false);
+}
+function revertKcal(){
+  const w = workouts.find(x=> x.id === editKcalWorkoutId);
+  if(!w) return;
+  w.kcalUser = null; saveWorkouts(workouts);
+  afterKcalEdit();
+}
+function saveEditKcal(){
+  const w = workouts.find(x=> x.id === editKcalWorkoutId);
+  if(!w) return;
+  const v = parseInt(document.getElementById('kcalInput').value, 10);
+  if(!(v >= 0 && v <= 3000)){ toast('Podaj wartość 0–3000'); return; }
+  w.kcalUser = v; saveWorkouts(workouts);
+  afterKcalEdit();
+}
+
+/* ---------- GYM finish — calories row ---------- */
+let gymFinWorkoutId = null;
+let gymFinKcalMode = null;   // 'edit' | 'noweight'
+function gymFinEditKcal(){
+  if(gymFinKcalMode === 'noweight'){ openWeightSheet(); return; }
+  if(gymFinWorkoutId) openEditKcal(gymFinWorkoutId);
+}
+function refreshGymFinKcal(){
+  const el = document.getElementById('gymFinKcal');
+  if(!el || el.hidden || !gymFinWorkoutId) return;
+  const w = workouts.find(x=> x.id === gymFinWorkoutId);
+  if(!w) return;
+  const shown = workoutKcalShown(w);
+  const kEl = document.getElementById('gymFinKcalK');
+  const vEl = document.getElementById('gymFinKcalV');
+  const eEl = document.getElementById('gymFinKcalEdit');
+  if(shown == null){
+    kEl.textContent = 'Kalorie'; vEl.textContent = 'Dodaj masę ciała'; eEl.hidden = true; gymFinKcalMode = 'noweight';
+  } else {
+    kEl.textContent = (w.kcalUser != null) ? 'Kalorie · edytowane' : 'Kalorie · szacunek';
+    vEl.textContent = shown + ' kcal'; eEl.hidden = false; gymFinKcalMode = 'edit';
+  }
+}
+
+/* ---------- Stats — calorie + weight-trend helpers ---------- */
+function kcalStats(days){
+  const cut = new Date(); cut.setDate(cut.getDate() - days);
+  const cs = dateStr(cut);
+  let sum = 0, n = 0;
+  workouts.forEach(w=>{
+    if(w.date < cs) return;
+    const k = workoutKcalShown(w);
+    if(k != null){ sum += k; n++; }
+  });
+  return { sum, n, avg: n ? Math.round(sum / n) : 0 };
+}
+function weightTrend(days){
+  if(!weightLog.length) return null;
+  const cut = new Date(); cut.setDate(cut.getDate() - days);
+  const cs = dateStr(cut);
+  const inWin = weightLog.filter(e=> e.date >= cs);
+  const cur = weightLog[weightLog.length - 1].kg;
+  const base = (inWin.length ? inWin[0] : weightLog[0]).kg;
+  const pts = (inWin.length >= 2 ? inWin : weightLog).slice(-10);
+  return { cur, delta: +(cur - base).toFixed(1), pts, lastDate: lastWeightDate() };
+}
+function weightSparkSvg(pts){
+  if(!pts || pts.length < 2) return '';
+  const W = 312, H = 54, pad = 5;
+  const ks = pts.map(p=> p.kg);
+  const mn = Math.min(...ks), mx = Math.max(...ks), span = (mx - mn) || 1;
+  const xy = pts.map((p,i)=>[
+    (i / (pts.length - 1)) * W,
+    pad + (1 - (p.kg - mn) / span) * (H - pad * 2)
+  ]);
+  const d = xy.map((c,i)=> (i ? 'L' : 'M') + c[0].toFixed(1) + ' ' + c[1].toFixed(1)).join(' ');
+  const last = xy[xy.length - 1];
+  return `<svg class="statsv2-kcal-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`
+    + `<path d="${d}" fill="none" stroke="var(--m-plan-mid)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
+    + `<circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3.5" fill="var(--m-orange)"/></svg>`;
+}
+
 /* ---------- what's new / changelog ----------
    Wersjonowanie: MAJOR.MINOR.PATCH
    MAJOR — duże nowe funkcjonalności
@@ -3516,7 +3860,7 @@ function saveNameEdit(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.18.0";
+const APP_VERSION = "4.19.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3565,6 +3909,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.19.0": {
+    pl: [
+      {featured:true, icon:'flame', badge:'Nowość', title:'Spalone kalorie na treningu', text:'Po zapisaniu treningu ekran „Gratulacje" pokazuje szacunek spalonych kalorii — liczony z Twojej masy ciała i czasu treningu. Możesz go poprawić, jeśli masz dokładniejszy odczyt z zegarka. Masę ciała podajesz w panelu konta (z datą — Statystyki pokazują też jej trend), a Statystyki mają nowy kafel kalorii.'},
+    ],
+    en: [
+      {featured:true, icon:'flame', badge:'New', title:'Calories burned per workout', text:'After you save a workout the "Congrats" screen shows an estimate of the calories burned — worked out from your bodyweight and the session length. You can correct it if your watch gave you a better number. You enter your weight in the account panel (dated — Stats also trends it), and Stats has a new calories tile.'},
+    ],
+  },
   "4.18.0": {
     pl: [
       {featured:true, icon:'account', badge:'Nowość', title:'Panel konta', text:'Ikona w prawym górnym rogu pulpitu otwiera panel konta. Na razie bez logowania — działasz jako „Gość", a gdy podasz imię, przywitamy Cię nim. W panelu ustawisz imię, pobierzesz kopię zapasową i prześlesz opinię. Konto w chmurze i synchronizacja między urządzeniami — wkrótce.'},
@@ -5323,6 +5675,24 @@ function showGymFinishV2(summary, onDone){
   const linkEl = document.getElementById('gymFinHistoryLink');
   linkEl.hidden = !summary.date;
 
+  // calories row (F3) — estimate, "Dodaj masę ciała" when no weight, tap to edit
+  const kcalEl = document.getElementById('gymFinKcal');
+  if(kcalEl){
+    gymFinWorkoutId = summary.workoutId || null;
+    const kEl = document.getElementById('gymFinKcalK');
+    const vEl = document.getElementById('gymFinKcalV');
+    const eEl = document.getElementById('gymFinKcalEdit');
+    if(summary.kcalNoWeight){
+      kcalEl.hidden = false; kEl.textContent = 'Kalorie'; vEl.textContent = 'Dodaj masę ciała';
+      eEl.hidden = true; gymFinKcalMode = 'noweight';
+    } else if(summary.kcal != null){
+      kcalEl.hidden = false; kEl.textContent = 'Kalorie · szacunek'; vEl.textContent = summary.kcal + ' kcal';
+      eEl.hidden = false; gymFinKcalMode = 'edit';
+    } else {
+      kcalEl.hidden = true; gymFinKcalMode = null;
+    }
+  }
+
   el.classList.remove('hiding', 'anim-in');
   el.classList.add('visible');
 
@@ -5458,6 +5828,15 @@ function saveWorkoutV2(){
   });
   const exCount = w.exercises.filter(ex=> ex.sets.some(s=> s.weight > 0 || s.reps > 0)).length;
 
+  // --- calories (F3): estimate from bodyweight-on-the-day + session METs ---
+  const kc = computeWorkoutKcal(w);
+  w.kcalEstimated = kc.kcalEstimated;
+  w.kcalUser = null;
+  w.metUsed = kc.metUsed;
+  w.bodyweightKg = kc.bodyweightKg;
+  w.kcalModelVersion = KCAL_MODEL_VERSION;
+  saveWorkouts(workouts);
+
   // --- #7 "Twój postęp": biggest positive change vs the previous session ---
   const progress = buildProgressCard(w.exercises, name => priorTopSet[name], true);
 
@@ -5480,7 +5859,10 @@ function saveWorkoutV2(){
     sets: setCount,
     record: record,
     progress: progress,
-    date: w.date
+    date: w.date,
+    workoutId: w.id,
+    kcal: w.kcalEstimated,
+    kcalNoWeight: kc.bodyweightKg == null
   }, ()=> goRoute('dashboard'));
 }
 
@@ -7724,6 +8106,18 @@ function histWorkoutCardInner(w){
       <div class="histv2-wtile histv2-wtile--navy"><p class="k">${t('gymFinSets','Serie')}</p><p class="v">${setCount}</p></div>
       <div class="histv2-wtile histv2-wtile--plain"><p class="k">${t('gymFinVolume','Objętość')}</p><p class="v">${formatDashNum(Math.round(totalVol),0)}<small>kg</small></p></div>
     </div>
+    ${(()=>{
+      const shown = workoutKcalShown(w);
+      if(shown == null) return '';
+      const edited = w.kcalUser != null;
+      const est = (w.kcalEstimated != null) ? w.kcalEstimated : computeWorkoutKcal(w).kcalEstimated;
+      return `<div class="histv2-wkcal" onclick="event.stopPropagation();openEditKcal('${w.id}')">
+        <div><p class="histv2-wkcal-k">${t('gymFinKcal','Kalorie')}</p><p class="histv2-wkcal-v">${shown} kcal</p></div>
+        ${edited
+          ? `<div class="histv2-wkcal-r"><span class="histv2-wkcal-chip">edytowane</span>${est!=null?`<span class="histv2-wkcal-was">szac. ${est}</span>`:''}</div>`
+          : `<span class="histv2-wkcal-tag">szacunek</span>`}
+      </div>`;
+    })()}
     ${rec ? `<div class="histv2-wrecord">${ph('trophy')}<div>
       <p class="histv2-wrecord-k">${t('gymFinRecordLabel','Nowy rekord')}</p>
       <p class="histv2-wrecord-v">${rec.name} — ${fmtGymWeight(rec.weight)} kg</p>
@@ -8173,6 +8567,33 @@ function renderStatsV2Overview(){
         </div>
         <div class="statsv2-ytd-labels">${ytdLabels.map(l=>`<span>${l}</span>`).join('')}</div>
       </div>
+
+      ${(()=>{
+        const k = kcalStats(7);
+        return `<div class="statsv2-kcard statsv2-anim-card" style="--i:3">
+          <p class="statsv2-kcard-eyebrow">Kalorie — ostatnie 7 dni</p>
+          <div class="statsv2-kcard-num-row">${ph('flame')}<span class="statsv2-kcard-num">${k.n ? k.sum.toLocaleString('pl-PL') : '—'}<small>kcal</small></span></div>
+          <p class="statsv2-kcard-delta">${k.n ? `śr. ${k.avg} kcal / trening · ${k.n} sesji` : 'Dodaj masę ciała w panelu konta, żeby liczyć'}</p>
+        </div>`;
+      })()}
+
+      ${(()=>{
+        const wt = weightTrend(90);
+        if(!wt) return `<div class="statsv2-kcard statsv2-anim-card" style="--i:4">
+          <p class="statsv2-kcard-eyebrow">Masa ciała</p>
+          <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">—<small>kg</small></span></div>
+          <p class="statsv2-kcard-delta">Dodaj pomiar w panelu konta</p>
+        </div>`;
+        const dTxt = Math.abs(wt.delta) < 0.05
+          ? 'bez zmian / 90 dni'
+          : `${wt.delta > 0 ? '+' : '−'}${Math.abs(wt.delta).toFixed(1).replace('.', ',')} kg / 90 dni`;
+        return `<div class="statsv2-kcard statsv2-anim-card" style="--i:4">
+          <p class="statsv2-kcard-eyebrow">Masa ciała</p>
+          <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${fmtKg(wt.cur)}<small>kg</small></span></div>
+          <p class="statsv2-kcard-delta">${dTxt} · ost. ${fmtDate(wt.lastDate)}</p>
+          ${weightSparkSvg(wt.pts)}
+        </div>`;
+      })()}
     </div>
     ${renderStatsV2ExerciseRow(null)}`;
 }
