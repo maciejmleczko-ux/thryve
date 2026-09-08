@@ -1366,22 +1366,36 @@ body.pev2-bg{background:var(--m-red-page);}
    - its entrance/exit animation was unconditional, not gated behind
      prefers-reduced-motion like every other popup in this family (and
      like [[feedback_thryve_animation_vocabulary]] calls for app-wide). */
-.exv2-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);padding:10px;}
-.exv2-popup-stack{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:420px;font-family:var(--m-font);}
+/* ============================================================
+   .m-sheet — shared iOS-style bottom sheet: pinned to the bottom
+   edge, full width, rounded top only, grabber, springs up from
+   translateY(100%). Stage 1 host: the set-logging popup (below).
+   Stage 2 folds the whole .plansv2-customize-* family onto this.
+   Simplified drag-to-dismiss is wired in JS (mSheetDrag): drag the
+   grabber down, release past ~40% or on a downward flick to close,
+   otherwise snap back — inner scroll is left alone. Reuses the app's
+   established slide-up curve (cubic-bezier(.22,1,.36,1)) rather than
+   a new one, per [[feedback_thryve_animation_vocabulary]]. */
+.m-sheet-overlay{flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden;background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
+.m-sheet{width:100%;max-width:520px;margin:0 auto;background:var(--m-panel);border-radius:22px 22px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:92dvh;display:flex;flex-direction:column;overflow:hidden;font-family:var(--m-font);will-change:transform;}
+.m-sheet-grab{flex-shrink:0;width:40px;height:5px;border-radius:3px;background:rgba(44,39,39,.22);margin:8px auto 10px;cursor:grab;touch-action:none;}
+.m-sheet-grab:active{cursor:grabbing;}
+.m-sheet-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:24px;overflow:hidden;}
+.m-sheet-snapback{transition:transform .3s cubic-bezier(.22,1,.36,1);}
 @media (prefers-reduced-motion: no-preference){
-  .exv2-overlay{animation:exv2BackdropIn .22s ease-out;}
-  .exv2-overlay.exv2-closing{animation:exv2BackdropOut .2s ease-in forwards;}
-  .exv2-popup-stack{animation:exv2SlideUp .28s cubic-bezier(.22,1,.36,1);}
-  .exv2-closing .exv2-popup-stack{animation:exv2SlideDown .2s ease-in forwards;}
-  @keyframes exv2BackdropIn{from{opacity:0;}to{opacity:1;}}
-  @keyframes exv2BackdropOut{from{opacity:1;}to{opacity:0;}}
-  @keyframes exv2SlideUp{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
-  @keyframes exv2SlideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(24px);}}
+  .m-sheet-overlay{animation:mSheetBackdropIn .24s ease-out;}
+  .m-sheet-overlay.m-sheet-closing{animation:mSheetBackdropOut .24s ease-in forwards;}
+  .m-sheet-overlay:not(.m-sheet-dragging) .m-sheet{animation:mSheetUp .4s cubic-bezier(.22,1,.36,1);}
+  .m-sheet-overlay.m-sheet-closing .m-sheet{animation:mSheetDown .26s cubic-bezier(.4,0,1,1) forwards;}
+  @keyframes mSheetBackdropIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes mSheetBackdropOut{from{opacity:1;}to{opacity:0;}}
+  @keyframes mSheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  @keyframes mSheetDown{from{transform:translateY(0);}to{transform:translateY(100%);}}
 }
-/* max-height reserve: overlay padding (10px×2) + popup-stack gap (24px) +
-   submit button (49px) = 93px minimum needed outside the card; 120px
-   leaves a comfortable safety margin. */
-.exv2-card{display:flex;flex-direction:column;gap:24px;background:var(--m-panel);border-radius:var(--m-r-md);padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 120px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
+/* set-logging card: the sheet owns the panel bg + rounded top; the card
+   keeps its own internal scroll so the submit button below stays pinned
+   to the sheet's bottom edge (flex sibling, flex-shrink:0). */
+.exv2-card{flex:1;min-height:0;display:flex;flex-direction:column;gap:24px;background:transparent;border-radius:0;padding:2px 18px 4px;width:100%;box-sizing:border-box;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
 .exv2-header-group{display:flex;flex-direction:column;gap:8px;}
 .exv2-title-block{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;}
 .exv2-pill{display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 8px;border-radius:var(--m-r-pill);background:#a4bdff;}
@@ -2408,8 +2422,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 </div>
 
 <!-- GYM set-logging popup — see openExercisePopupV2(). -->
-<div class="onboard-overlay hidden exv2-overlay" id="exercisePopupOverlayV2" onclick="if(event.target===this) closeExercisePopupV2()">
-  <div class="exv2-popup-stack" id="exercisePopupBoxV2"></div>
+<div class="onboard-overlay hidden m-sheet-overlay" id="exercisePopupOverlayV2" onclick="if(event.target===this) closeExercisePopupV2()">
+  <div class="m-sheet" id="exercisePopupSheetV2">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="m-sheet-body" id="exercisePopupBoxV2"></div>
+  </div>
 </div>
 
 <script>/*!
@@ -4148,22 +4165,93 @@ function openExercisePopupV2(ex){
   popupShowWarning = false;
   renderExercisePopupV2(true);
   const overlay = document.getElementById('exercisePopupOverlayV2');
-  overlay.classList.remove('exv2-closing');
+  const sheet = document.getElementById('exercisePopupSheetV2');
+  overlay.classList.remove('m-sheet-closing');
+  sheet.classList.remove('m-sheet-snapback');
+  sheet.style.transform = '';
+  overlay.style.opacity = '';
   overlay.classList.remove('hidden');
+  document.getElementById('exercisePopupBoxV2').scrollTop = 0;
   document.documentElement.classList.add('modal-lock');
 }
-function closeExercisePopupV2(){
+// viaDrag: the finger already carried the sheet off-screen, so skip the
+// slide-down animation and just hide on the next frame.
+function closeExercisePopupV2(viaDrag){
   const overlay = document.getElementById('exercisePopupOverlayV2');
-  overlay.classList.add('exv2-closing'); // plays the slide-down/fade-out, see .exv2-closing CSS
-  exv2CloseTimer = setTimeout(()=>{
+  const sheet = document.getElementById('exercisePopupSheetV2');
+  const finish = ()=>{
     overlay.classList.add('hidden');
-    overlay.classList.remove('exv2-closing');
+    overlay.classList.remove('m-sheet-closing');
+    sheet.classList.remove('m-sheet-snapback');
+    sheet.style.transform = '';
+    overlay.style.opacity = '';
     document.documentElement.classList.remove('modal-lock');
     exv2CloseTimer = null;
-  }, 220);
+  };
+  if(viaDrag){
+    exv2CloseTimer = setTimeout(finish, 20);
+  } else {
+    overlay.classList.add('m-sheet-closing'); // plays the slide-down/fade-out
+    exv2CloseTimer = setTimeout(finish, 260);
+  }
   popupExercise = null;
   popupShowWarning = false;
 }
+/* Simplified drag-to-dismiss for a .m-sheet — bind once per sheet to the
+   static grabber. Tracks the pointer, moves the sheet with the finger,
+   and on release closes if it's been pulled past 40% of its height or
+   flicked down fast; otherwise snaps back. Inner scroll is untouched
+   (the handle is its own element, above the scroll body). */
+function mSheetDrag(overlayId, sheetId, closeFn){
+  const overlay = document.getElementById(overlayId);
+  const sheet = document.getElementById(sheetId);
+  if(!overlay || !sheet) return;
+  const handle = sheet.querySelector('.m-sheet-grab');
+  if(!handle) return;
+  let startY = 0, dy = 0, lastY = 0, lastT = 0, vY = 0, dragging = false;
+  const move = e=>{
+    if(!dragging) return;
+    dy = Math.max(0, e.clientY - startY);
+    if(e.timeStamp !== lastT){ vY = (e.clientY - lastY) / (e.timeStamp - lastT); lastY = e.clientY; lastT = e.timeStamp; }
+    sheet.style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
+    const h = sheet.offsetHeight || 1;
+    overlay.style.opacity = Math.max(0.15, 1 - (dy / h) * 1.15).toFixed(3);
+    e.preventDefault();
+  };
+  const up = ()=>{
+    if(!dragging) return;
+    dragging = false;
+    overlay.classList.remove('m-sheet-dragging');
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', up);
+    window.removeEventListener('pointercancel', up);
+    const h = sheet.offsetHeight || 1;
+    if(dy > h * 0.4 || vY > 0.6){
+      overlay.style.opacity = '';
+      sheet.style.transform = 'translateY(100%)';
+      closeFn(true);
+    } else {
+      sheet.classList.add('m-sheet-snapback');
+      sheet.style.transform = '';
+      overlay.style.opacity = '';
+      setTimeout(()=>sheet.classList.remove('m-sheet-snapback'), 320);
+    }
+  };
+  handle.addEventListener('pointerdown', e=>{
+    dragging = true;
+    dy = 0;
+    startY = lastY = e.clientY;
+    lastT = e.timeStamp;
+    vY = 0;
+    overlay.classList.add('m-sheet-dragging');
+    sheet.classList.remove('m-sheet-snapback');
+    try{ handle.setPointerCapture(e.pointerId); }catch(_){}
+    window.addEventListener('pointermove', move, {passive:false});
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  });
+}
+mSheetDrag('exercisePopupOverlayV2', 'exercisePopupSheetV2', closeExercisePopupV2);
 function popupSetLiveV2(idx, field, val){
   if(!popupExercise) return;
   popupExercise.setValues[idx][field] = val;
