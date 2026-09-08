@@ -2139,11 +2139,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <!-- Rebuilt from NAV_ITEMS_V3 by renderBottomNavForContext() on the first
        goRoute(); this static copy just matches it so there's no icon flash. -->
   <nav class="bottom-nav" id="bottomNav">
-    <button class="nav-item" data-route="dashboard" onclick="navTap('dashboard')"><span class="ph" data-ph="house"></span></button>
-    <button class="nav-item" data-route="plans" onclick="navTap('plans')"><span class="ph" data-ph="clipboard-text"></span></button>
-    <button class="nav-item nav-item-lg" data-route="gym" onclick="navTap('gym')"><span class="ph" data-ph="barbell"></span></button>
-    <button class="nav-item" data-route="history" onclick="navTap('history')"><span class="ph" data-ph="calendar-dots"></span></button>
-    <button class="nav-item" data-route="stats" onclick="navTap('stats')"><span class="ph" data-ph="chart-line-up"></span></button>
+    <button class="nav-item" data-route="dashboard" onclick="navTap('dashboard')" aria-label="Pulpit" data-i18n-aria="navA11yDashboard"><span class="ph" data-ph="house"></span></button>
+    <button class="nav-item" data-route="plans" onclick="navTap('plans')" aria-label="Plany" data-i18n-aria="navA11yPlans"><span class="ph" data-ph="clipboard-text"></span></button>
+    <button class="nav-item nav-item-lg" data-route="gym" onclick="navTap('gym')" aria-label="Trening" data-i18n-aria="navA11yGym"><span class="ph" data-ph="barbell"></span></button>
+    <button class="nav-item" data-route="history" onclick="navTap('history')" aria-label="Historia" data-i18n-aria="navA11yHistory"><span class="ph" data-ph="calendar-dots"></span></button>
+    <button class="nav-item" data-route="stats" onclick="navTap('stats')" aria-label="Statystyki" data-i18n-aria="navA11yStats"><span class="ph" data-ph="chart-line-up"></span></button>
   </nav>
 
 </div>
@@ -2211,6 +2211,18 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <h3 data-i18n="emptyWorkoutTitle">Nie ma jeszcze co zapisać</h3>
     <p id="emptyWorkoutMsg"></p>
     <button type="button" class="empty-workout-ok" onclick="closeEmptyWorkoutPopup()" data-i18n="gotIt">Rozumiem</button>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden" id="importChoiceOverlay" onclick="if(event.target===this) closeImportChoice()">
+  <div class="onboard-box new-ex-form">
+    <h3 data-i18n="importChoiceTitle">Import kopii zapasowej</h3>
+    <p data-i18n="importChoiceBody">Masz już zapisane dane na tym urządzeniu. Dołączyć do nich to, co jest w pliku, czy zastąpić je plikiem?</p>
+    <div class="btns" style="margin-top:16px;flex-direction:column;">
+      <button type="button" class="save" onclick="applyImport('merge')" data-i18n="importChoiceMerge">Połącz</button>
+      <button type="button" class="cancel" style="color:#e5484d;font-weight:700;" onclick="applyImport('replace')" data-i18n="importChoiceReplace">Zastąp wszystko</button>
+      <button type="button" class="cancel" onclick="closeImportChoice()" data-i18n="cancel">Anuluj</button>
+    </div>
   </div>
 </div>
 
@@ -2500,6 +2512,11 @@ const T_EN = {
   whatsnewClose: 'Great, close',
   whatsnewFeaturedBadge: 'New',
   navBack: 'Back',
+  navA11yDashboard: 'Dashboard',
+  navA11yPlans: 'Plans',
+  navA11yGym: 'Workout',
+  navA11yHistory: 'History',
+  navA11yStats: 'Stats',
   gymFinTitle: 'GOOD JOB',
   gymFinSub: 'WORKOUT SAVED',
   gymFinTime: 'Time',
@@ -2541,6 +2558,10 @@ const T_EN = {
   dataImported: 'Data imported',
   fileReadFailed: "Couldn't read the file",
   importConfirm: 'OK = merge with existing data, Cancel = replace existing data',
+  importChoiceTitle: 'Import backup',
+  importChoiceBody: 'You already have data saved on this device. Add the file’s contents to it, or replace it with the file?',
+  importChoiceMerge: 'Merge',
+  importChoiceReplace: 'Replace everything',
   imageSaved: 'Image saved to device',
   imageGenFailed: "Couldn't generate the image",
   noPriorResults: 'No previous results yet — pick a weight so your last set finishes with 1-2 reps in reserve (RPE 7-8), toward the low end of the range.',
@@ -2686,6 +2707,7 @@ const T_EN = {
   stV2Record: 'Record',
   stV2CurrentRecord: n => `Current record — ${n}`,
   stV2DeltaSinceLastMonth: 'vs last month',
+  stV2FirstResult: 'First recorded result',
   stV2Est1RM: 'EST. 1RM',
   stV2TotalSets: 'TOTAL SETS',
   stV2LastTrained: 'LAST',
@@ -2882,6 +2904,10 @@ function hydrateI18n(){
   document.querySelectorAll('[data-i18n-title]').forEach(el=>{
     const v = T_EN[el.dataset.i18nTitle];
     if(v !== undefined) el.title = v;
+  });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>{
+    const v = T_EN[el.dataset.i18nAria];
+    if(v !== undefined) el.setAttribute('aria-label', v);
   });
 }
 hydrateI18n();
@@ -3167,13 +3193,22 @@ function saveOnboarding(){
   localStorage.setItem(LS_ONBOARD_SEEN, '1');
   localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);
   document.getElementById('onboardOverlay').classList.add('hidden');
-  if(!starredPlanId) startPlanOnboarding();
+  afterOnboardingStep();
 }
 function skipOnboarding(){
   localStorage.setItem(LS_ONBOARD_SEEN, '1');
   localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);
   document.getElementById('onboardOverlay').classList.add('hidden');
+  afterOnboardingStep();
+}
+/* First-run steps are shown one at a time, not stacked: the name prompt
+   covered the install nudge on first launch. Name prompt → plan
+   onboarding (if no plan yet) → only then the install prompt, via
+   exitPlanOnboarding(). If a plan is already starred there's no plan
+   step, so fire the install prompt straight away. */
+function afterOnboardingStep(){
   if(!starredPlanId) startPlanOnboarding();
+  else checkInstallPrompt();
 }
 
 /* ---------- what's new / changelog ----------
@@ -3183,7 +3218,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.12.6";
+const APP_VERSION = "4.12.7";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3744,16 +3779,18 @@ function navTap(route){
    goRoute() call rather than toggling classes on fixed markup, since
    the set of icons itself changes, not just their color/state. */
 const NAV_ITEMS_V3 = [
-  {route:'dashboard', icon:'house'},
-  {route:'plans', icon:'clipboard-text'},
-  {route:'gym', icon:'barbell', cls:'nav-item-lg'},
-  {route:'history', icon:'calendar-dots'},
-  {route:'stats', icon:'chart-line-up'},
+  {route:'dashboard', icon:'house', label:'Pulpit', labelKey:'navA11yDashboard'},
+  {route:'plans', icon:'clipboard-text', label:'Plany', labelKey:'navA11yPlans'},
+  {route:'gym', icon:'barbell', cls:'nav-item-lg', label:'Trening', labelKey:'navA11yGym'},
+  {route:'history', icon:'calendar-dots', label:'Historia', labelKey:'navA11yHistory'},
+  {route:'stats', icon:'chart-line-up', label:'Statystyki', labelKey:'navA11yStats'},
 ];
 function renderBottomNavForContext(){
   const nav = document.getElementById('bottomNav');
+  // aria-label on each icon-only button so a screen reader announces the
+  // destination instead of "button" / the raw SVG.
   nav.innerHTML = NAV_ITEMS_V3.map(it=>
-    `<button class="nav-item${it.cls?' '+it.cls:''}" data-route="${it.route}" onclick="navTap('${it.route}')"><span class="ph" data-ph="${it.icon}"></span></button>`
+    `<button class="nav-item${it.cls?' '+it.cls:''}" data-route="${it.route}" onclick="navTap('${it.route}')" aria-label="${t(it.labelKey, it.label)}"><span class="ph" data-ph="${it.icon}"></span></button>`
   ).join('');
   // hydratePhIcons() only ran once at page load against the original
   // static markup — freshly-injected [data-ph] spans need it re-run
@@ -3937,6 +3974,42 @@ function resetGymSessionTiming(){
 }
 loadGymSessionTiming();
 
+/* ---------- in-progress workout autosave ----------
+   Maciej: "Rozpoczęty trening znika po odświeżeniu. Nawet ćwiczenie
+   zatwierdzone jako zrobione przepada przed użyciem Zapisz trening."
+   sessionExercises / extraGymTiles lived only in memory, so a reload
+   (or iOS killing the tab) wiped everything logged but not yet saved.
+   Now every mutation is mirrored to localStorage and restored on boot.
+   Dropped after GYM_DRAFT_MAX_AGE_H so a days-old ghost session doesn't
+   reappear (the same "abandoned" idea as GYM_SESSION_STALE_GAP_MIN). */
+const LS_GYM_SESSION_DRAFT = "fitlog_gym_session_draft_v1";
+const GYM_DRAFT_MAX_AGE_H = 24;
+function persistGymSession(){
+  try{
+    if(sessionExercises.length || extraGymTiles.length){
+      localStorage.setItem(LS_GYM_SESSION_DRAFT, JSON.stringify({
+        savedAt: Date.now(), sessionExercises, extraGymTiles
+      }));
+    } else {
+      localStorage.removeItem(LS_GYM_SESSION_DRAFT);
+    }
+  }catch(e){}
+}
+function restoreGymSession(){
+  try{
+    const raw = localStorage.getItem(LS_GYM_SESSION_DRAFT);
+    if(!raw) return;
+    const obj = JSON.parse(raw);
+    if(!obj || (Date.now() - (obj.savedAt||0)) > GYM_DRAFT_MAX_AGE_H*3600e3){
+      localStorage.removeItem(LS_GYM_SESSION_DRAFT);
+      return;
+    }
+    if(Array.isArray(obj.sessionExercises)) sessionExercises = obj.sessionExercises;
+    if(Array.isArray(obj.extraGymTiles)) extraGymTiles = obj.extraGymTiles;
+  }catch(e){}
+}
+restoreGymSession();
+
 const LS_FAVORITE_EXERCISES = "fitlog_favorite_exercises_v1";
 function loadFavoriteExercises(){
   try{ return new Set(JSON.parse(localStorage.getItem(LS_FAVORITE_EXERCISES)) || []); }catch(e){ return new Set(); }
@@ -4049,10 +4122,19 @@ function onTileTapV2(ex){
   if(ex.type === 'checklist'){
     const already = sessionExercises.find(e=>e.name===ex.name);
     if(already) removeExerciseFromSession(ex.name);
-    else { sessionExercises.push({...ex, done:true}); renderGymGrid(); renderExercisePanels(); }
+    else { sessionExercises.push({...ex, done:true}); persistGymSession(); renderGymGrid(); renderExercisePanels(); }
     return;
   }
   openExercisePopupV2(ex);
+}
+/* Re-added in the autosave pass — the two call sites (checklist un-tap
+   above, and the trash icon in renderGymDoneV2) had outlived the
+   original definition, which the L5 teardown removed. */
+function removeExerciseFromSession(name){
+  sessionExercises = sessionExercises.filter(e => e.name !== name);
+  persistGymSession();
+  renderGymGrid();
+  renderExercisePanels();
 }
 let exv2CloseTimer = null; // pending hide from a close animation still playing, see closeExercisePopupV2()
 function openExercisePopupV2(ex){
@@ -4120,6 +4202,7 @@ function confirmExercisePopupV2(){
   } else {
     sessionExercises[idx] = popupExercise;
   }
+  persistGymSession();
   closeExercisePopupV2();
   renderGymGrid();
   renderExercisePanels();
@@ -4389,6 +4472,7 @@ function confirmExercisePickerV2(){
     }
   });
   pickerSelectedV2 = new Set();
+  persistGymSession();
   closeExercisePickerV2();
   renderGymGridV2();
 }
@@ -4414,10 +4498,16 @@ function saveWorkout(){
   const result = sessionExercises.filter(ex=>ex.type!=='checklist').map(ex=>({
     name: ex.name,
     group: ex.group,
-    sets: ex.setValues.map(s=>({weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0})),
+    // Skip set rows the user never filled in — a partly-logged exercise
+    // (e.g. only the first of three series) was landing in history as
+    // "20kg×10 · 0kg×0 · 0kg×0". A row counts as filled if it has EITHER
+    // a weight or a reps value, so a bodyweight set (reps only) still saves.
+    sets: ex.setValues
+      .filter(s => String(s.weight).trim() !== '' || String(s.reps).trim() !== '')
+      .map(s=>({weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0})),
     rpe: ex.rpe || null,
     notes: ex.notes || ''
-  }));
+  })).filter(e => e.sets.length); // drop exercises left with no filled sets at all
   const hasAny = result.some(e => e.sets.some(s => s.weight>0 || s.reps>0));
   if(!hasAny){ showEmptyWorkoutPopup(t('enterAtLeastOneResult','Wpisz przynajmniej jeden wynik przed zapisem')); return; }
   const cls = classifySession(result.map(e=>e.name));
@@ -4435,6 +4525,7 @@ function saveWorkout(){
   toast(t('workoutSaved','Trening zapisany'));
   sessionExercises = [];
   extraGymTiles = [];
+  persistGymSession(); // clears the autosaved in-progress draft
   renderGymGridV2();
   renderGymDoneV2();
   return true;
@@ -4798,6 +4889,7 @@ let planOnboardingActive = false; // true while a brand-new user is being forced
 function exitPlanOnboarding(){
   planOnboardingActive = false;
   goRoute('dashboard');
+  checkInstallPrompt(); // deferred here so it never stacks on the first-run name / plan steps
 }
 function completePlanOnboardingIfNeeded(){
   if(!planOnboardingActive) return;
@@ -6871,12 +6963,18 @@ function statsV2ExerciseRecord(name){
   // Not trained yet this month? Fall back to the all-time PR so the
   // trend line still means something instead of reading as a big drop.
   const trendNow = bestThisMonth || best.weight;
+  // No data from any earlier month means there's nothing to compare
+  // against — the first logged result was showing a bogus "+20 kg od
+  // zeszłego miesiąca" (delta vs a zero baseline). Flag it so the card
+  // can say "Pierwszy zapisany wynik" instead.
+  const hasPriorMonthData = sets.some(s => statsV2MonthKey(s.date) < thisMonthKey);
   return {
     weight: best.weight,
     est1RM: Math.round(statsV2Epley(best.weight, best.reps)),
     totalSets: sets.length,
     lastTrained: statsV2RelativeDate(sets[sets.length-1].date),
     deltaKg: Math.round(trendNow - bestPrevMonth),
+    firstResult: !hasPriorMonthData,
   };
 }
 // running all-time-best weight per month for this exercise, PR-flagged,
@@ -7124,11 +7222,14 @@ function renderStatsV2Detail(name){
   // progres - ta sama w dol pokazuje regres - brak ten sam ciezar". Reuses
   // the one arrow-up-right SVG for both directions (a vertical flip turns
   // "up-right" into "down-right") rather than adding a near-duplicate icon.
-  const deltaArrow = rec.deltaKg > 0
-    ? `<span class="ph statsv2-record-arrow">${PH['arrow-up-right']}</span>`
-    : rec.deltaKg < 0
-      ? `<span class="ph statsv2-record-arrow down">${PH['arrow-up-right']}</span>`
-      : '';
+  const deltaArrow = (rec.firstResult || rec.deltaKg === 0)
+    ? ''
+    : rec.deltaKg > 0
+      ? `<span class="ph statsv2-record-arrow">${PH['arrow-up-right']}</span>`
+      : `<span class="ph statsv2-record-arrow down">${PH['arrow-up-right']}</span>`;
+  const deltaText = rec.firstResult
+    ? t('stV2FirstResult','Pierwszy zapisany wynik')
+    : `${rec.deltaKg>=0?'+':''}${rec.deltaKg} kg ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`;
 
   return `
     ${renderStatsV2ExerciseRow(name)}
@@ -7140,7 +7241,7 @@ function renderStatsV2Detail(name){
           <span class="statsv2-record-num">${rec.weight}<small>kg</small></span>
           ${deltaArrow}
         </div>
-        <p class="statsv2-record-delta">${rec.deltaKg>=0?'+':''}${rec.deltaKg} kg ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}</p>
+        <p class="statsv2-record-delta">${deltaText}</p>
         <div class="statsv2-record-sep"></div>
         <div class="statsv2-record-stats">
           <div class="statsv2-record-stat"><span>${t('stV2Est1RM','EST. 1RM')}</span><strong>${rec.est1RM} kg</strong></div>
@@ -7689,6 +7790,11 @@ function exportData(){
   toast(t('backupDownloaded','Kopia zapasowa pobrana'));
 }
 
+/* A backup import used to run through a two-button confirm() where
+   Cancel meant REPLACE — there was no way to actually back out, and a
+   mis-tap wiped every workout. Now it opens a real three-way modal:
+   Połącz / Zastąp wszystko / Anuluj, the last of which truly aborts. */
+let pendingImportData = null;
 function importData(evt){
   const file = evt.target.files[0];
   if(!file) return;
@@ -7703,50 +7809,62 @@ function importData(evt){
         localStorage.setItem(LS_PROFILE_NAME, profileName);
         updateWelcomeGreeting();
       }
-      const mode = confirm(t('importConfirm','OK = połącz z istniejącymi danymi, Anuluj = zastąp istniejące dane'));
-      if(mode){
-        const existingWIds = new Set(workouts.map(w=>w.id));
-        const existingRIds = new Set(runs.map(r=>r.id));
-        data.workouts.forEach(w=>{ if(!existingWIds.has(w.id)) workouts.push(w); });
-        data.runs.forEach(r=>{ if(!existingRIds.has(r.id)) runs.push(r); });
-        if(Array.isArray(data.trainingPlans)){
-          const existingPIds = new Set(trainingPlans.map(p=>p.id));
-          data.trainingPlans.forEach(p=>{ if(!existingPIds.has(p.id)) trainingPlans.push(p); });
-        }
-        if(Array.isArray(data.customExercises)){
-          const existingCNames = new Set(customExercises.map(e=>e.name));
-          data.customExercises.forEach(e=>{ if(!existingCNames.has(e.name)) customExercises.push(e); });
-        }
-        if(Array.isArray(data.favoriteExercises)) data.favoriteExercises.forEach(n=> favoriteExercises.add(n));
-        if(!starredPlanId && data.starredPlanId) starredPlanId = data.starredPlanId;
-      } else {
-        workouts = data.workouts;
-        runs = data.runs;
-        if(Array.isArray(data.trainingPlans)) trainingPlans = data.trainingPlans;
-        if(Array.isArray(data.customExercises)) customExercises = data.customExercises;
-        if(Array.isArray(data.favoriteExercises)) favoriteExercises = new Set(data.favoriteExercises);
-        if(Array.isArray(data.exerciseOrder)) exerciseOrder = data.exerciseOrder;
-        starredPlanId = data.starredPlanId || null;
-      }
-      trainingPlans.forEach(p=> ensureWarmupStretch(p.schedule));
-      saveWorkouts(workouts);
-      saveRuns(runs);
-      saveTrainingPlansList();
-      saveCustomExercises(customExercises);
-      saveFavoriteExercises();
-      if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId); else localStorage.removeItem(LS_STARRED_PLAN);
-      saveExerciseOrderList(exerciseOrder);
-      // A backup import replaces everything — re-render whatever screen is
-      // currently showing. goRoute() with the same route skips the slide
-      // (oldEl === newEl) and just re-runs that route's render (v2 or old).
-      goRoute(currentRoute);
-      toast(t('dataImported','Zaimportowano dane'));
+      pendingImportData = data;
+      document.getElementById('importChoiceOverlay').classList.remove('hidden');
     }catch(err){
+      pendingImportData = null;
       toast(t('fileReadFailed','Nie udało się wczytać pliku'));
     }
     evt.target.value = '';
   };
   reader.readAsText(file);
+}
+function closeImportChoice(){
+  pendingImportData = null;
+  document.getElementById('importChoiceOverlay').classList.add('hidden');
+}
+function applyImport(mode){
+  const data = pendingImportData;
+  pendingImportData = null;
+  document.getElementById('importChoiceOverlay').classList.add('hidden');
+  if(!data) return;
+  if(mode === 'merge'){
+    const existingWIds = new Set(workouts.map(w=>w.id));
+    const existingRIds = new Set(runs.map(r=>r.id));
+    data.workouts.forEach(w=>{ if(!existingWIds.has(w.id)) workouts.push(w); });
+    data.runs.forEach(r=>{ if(!existingRIds.has(r.id)) runs.push(r); });
+    if(Array.isArray(data.trainingPlans)){
+      const existingPIds = new Set(trainingPlans.map(p=>p.id));
+      data.trainingPlans.forEach(p=>{ if(!existingPIds.has(p.id)) trainingPlans.push(p); });
+    }
+    if(Array.isArray(data.customExercises)){
+      const existingCNames = new Set(customExercises.map(e=>e.name));
+      data.customExercises.forEach(e=>{ if(!existingCNames.has(e.name)) customExercises.push(e); });
+    }
+    if(Array.isArray(data.favoriteExercises)) data.favoriteExercises.forEach(n=> favoriteExercises.add(n));
+    if(!starredPlanId && data.starredPlanId) starredPlanId = data.starredPlanId;
+  } else {
+    workouts = data.workouts;
+    runs = data.runs;
+    if(Array.isArray(data.trainingPlans)) trainingPlans = data.trainingPlans;
+    if(Array.isArray(data.customExercises)) customExercises = data.customExercises;
+    if(Array.isArray(data.favoriteExercises)) favoriteExercises = new Set(data.favoriteExercises);
+    if(Array.isArray(data.exerciseOrder)) exerciseOrder = data.exerciseOrder;
+    starredPlanId = data.starredPlanId || null;
+  }
+  trainingPlans.forEach(p=> ensureWarmupStretch(p.schedule));
+  saveWorkouts(workouts);
+  saveRuns(runs);
+  saveTrainingPlansList();
+  saveCustomExercises(customExercises);
+  saveFavoriteExercises();
+  if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId); else localStorage.removeItem(LS_STARRED_PLAN);
+  saveExerciseOrderList(exerciseOrder);
+  // Re-render whatever screen is currently showing. goRoute() with the
+  // same route skips the slide (oldEl === newEl) and just re-runs that
+  // route's render.
+  goRoute(currentRoute);
+  toast(t('dataImported','Zaimportowano dane'));
 }
 
 /* Old #view-stats (GYM weight-progress checklist + Chart.js line/bar/pace
@@ -7772,7 +7890,8 @@ showLoadScreenV2(()=>{}); // production boot splash — the "Mekkio" load screen
 updatePlanPillLabel();
 goRoute('dashboard'); // v3 "Mekkio" redesign is now the main layout — boot straight into it
 updateWelcomeGreeting();
-if(!localStorage.getItem(LS_ONBOARD_SEEN)){
+const onboardSeen = !!localStorage.getItem(LS_ONBOARD_SEEN);
+if(!onboardSeen){
   document.getElementById('onboardOverlay').classList.remove('hidden');
 } else if(localStorage.getItem(LS_LAST_SEEN_VERSION) !== APP_VERSION){
   if(pendingChangelogItems().length){
@@ -7783,7 +7902,10 @@ if(!localStorage.getItem(LS_ONBOARD_SEEN)){
   }
 }
 checkForImportedPlan();
-checkInstallPrompt();
+// On a first launch the install nudge is deferred until after the name /
+// plan onboarding steps (see afterOnboardingStep / exitPlanOnboarding) so
+// two dialogs never show at once.
+if(onboardSeen) checkInstallPrompt();
 // Best-effort native orientation lock — only actually works in a handful of
 // contexts (mainly an installed Android PWA in standalone display mode).
 // iOS Safari/home-screen apps don't implement this API at all, and the
