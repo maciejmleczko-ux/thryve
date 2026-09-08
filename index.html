@@ -1035,68 +1035,28 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .plansv2-card-customize{cursor:pointer;flex-shrink:0;display:flex;}
 .plansv2-card-customize .ph{width:24px;height:24px;color:#fff;}
 .plansv2-hidden{display:none;}
-/* "Dostosuj plan" modal — rebuilt (2026-08-29) to share the exact same
-   visual DNA as the exercise-logging popup (.exv2-* — see its CSS block
-   above, this mirrors it structurally: overlay/backdrop, popup-stack +
-   card, slide-up/down + fade timing, pill/title-row header, muted
-   field-label typography) so the two popups read as one consistent
-   component language instead of two different-looking ones. Confirmed
-   with Maciej (2026-08-29): colors, spacing, fonts should match exv2. */
-/* 10px margin from every edge (Maciej, 2026-09-02) — overrides
-   .onboard-overlay's shared 20px padding, scoped to just the v3
-   popups (Dostosuj plan / Dodaj ćwiczenie / Wyszukaj ćwiczenie, all
-   three reuse this class) rather than the old popups' own padding.
-   355px stack max-width + 10px×2 padding = 375px, an exact fit on a
-   base iPhone-width viewport. */
-.plansv2-customize-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);padding:10px;flex-direction:column;gap:24px;}
-/* max-width was 355px, tuned for an exactly-375px viewport (355 +
-   10px×2 padding = 375) — on a real phone wider than that (390/393/
-   430pt, the common current iPhone sizes) the card stopped growing at
-   355px and centered with extra dead space beyond the 10px padding,
-   so the side margin read as bigger than 10px (Maciej, 2026-09-02:
-   "Boki wydaja mi sie nadal wieksze niz 10px"). 420px matches .app's
-   own 440px max-width minus 10px×2, so on any real phone (all narrower
-   than that) the card now always fills to exactly the padding, and
-   still caps sanely on a wide desktop/tablet test. */
-.plansv2-customize-stack{display:flex;flex-direction:column;align-items:center;width:100%;max-width:420px;font-family:var(--m-font);}
-/* Entrance/exit motion, gated behind prefers-reduced-motion like every
-   other animation added this session — exv2's own version of this
-   predates that convention and isn't gated (see feedback_thryve_
-   animation_vocabulary), that's not license to skip it here. Without
-   the animation property applying (reduced-motion case), the overlay/
-   stack simply render at their normal opacity:1/transform:none resting
-   state — no flash, no motion, just instantly there. */
+/* "Dostosuj plan" / "Dodaj ćwiczenie" / "Wybierz ćwiczenie" / "Opinia" v2
+   — stage 2 of the sheet refactor: this family now rides the shared
+   .m-sheet bottom sheet (see the .m-sheet block above) instead of a
+   centered card. The three class names stay so all four open/close
+   functions keep working; only the geometry + motion change here.
+   .plansv2-customize-stack is the moving panel (== .m-sheet),
+   .plansv2-customize-card is its scrolling body. */
+.plansv2-customize-overlay{flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden;gap:0;background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
+.plansv2-customize-stack{width:100%;max-width:520px;margin:0 auto;background:var(--m-panel);border-radius:22px 22px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:92dvh;display:flex;flex-direction:column;align-items:center;overflow:hidden;font-family:var(--m-font);will-change:transform;}
+.plansv2-customize-stack.m-sheet-snapback{transition:transform .3s cubic-bezier(.22,1,.36,1);}
 @media (prefers-reduced-motion: no-preference){
-  .plansv2-customize-overlay{animation:plansv2CustomizeBackdropIn .22s ease-out;}
-  .plansv2-customize-overlay.plansv2-customize-closing{animation:plansv2CustomizeBackdropOut .2s ease-in forwards;}
-  .plansv2-customize-stack{animation:plansv2CustomizeSlideUp .28s cubic-bezier(.22,1,.36,1);}
-  .plansv2-customize-closing .plansv2-customize-stack{animation:plansv2CustomizeSlideDown .2s ease-in forwards;}
-  @keyframes plansv2CustomizeBackdropIn{from{opacity:0;}to{opacity:1;}}
-  @keyframes plansv2CustomizeBackdropOut{from{opacity:1;}to{opacity:0;}}
-  @keyframes plansv2CustomizeSlideUp{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
-  @keyframes plansv2CustomizeSlideDown{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(24px);}}
+  .plansv2-customize-overlay{animation:mSheetBackdropIn .24s ease-out;}
+  .plansv2-customize-overlay.plansv2-customize-closing{animation:mSheetBackdropOut .24s ease-in forwards;}
+  .plansv2-customize-overlay:not(.m-sheet-dragging) .plansv2-customize-stack{animation:mSheetUp .4s cubic-bezier(.22,1,.36,1);}
+  .plansv2-customize-overlay.plansv2-customize-closing .plansv2-customize-stack{animation:mSheetDown .26s cubic-bezier(.4,0,1,1) forwards;}
 }
-/* Reverted to 120px (Maciej, 2026-09-02, real phone: "Od gory zostaw
-   jednak tak jak bylo") — the tighter calc(100dvh - 20px) from build
-   99 let a maxed-out popup reach flush to the very top of the screen,
-   colliding with the status bar/notch since nothing here accounts for
-   env(safe-area-inset-top). Left/right stay fixed at 10px via
-   .plansv2-customize-overlay's own padding, unaffected by this. */
-.plansv2-customize-card{display:flex;flex-direction:column;gap:20px;background:var(--m-panel);border-radius:var(--m-r-md);padding:18px;width:100%;box-sizing:border-box;max-height:calc(100dvh - 120px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
-/* Picker-only: reserve the floating .newex-v2-add-fab's own space
-   (24px gap + ~48px button) out of the SAME 120px total budget as the
-   other two popups, instead of letting the card claim the full
-   calc(100dvh - 120px) and pushing the fab+gap over that budget. When
-   a centered flex column's content overflows the viewport, browsers
-   clip/shift from the top rather than splitting the overflow evenly —
-   so letting the group (card+gap+button) grow past that original
-   120px budget re-broke the exact "card touches the status bar" bug
-   build 100 fixed, just via a different path (Maciej, real device
-   screenshot on build 103: "gora popup powinna byc nizej tak jak w
-   innych popupach"). Matching the same total budget as before keeps
-   the top margin identical to the other two (button-less) popups in
-   every state, including fully expanded/overflowing. */
-#pickExerciseOverlayV2 .plansv2-customize-card{max-height:calc(100dvh - 120px - 24px - 48px);}
+.plansv2-customize-card{flex:1;min-height:0;display:flex;flex-direction:column;gap:20px;background:transparent;border-radius:0;padding:4px 16px 4px;width:100%;box-sizing:border-box;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
+/* picker: the "DODAJ" button is now a pinned sibling of the card inside
+   the sheet (moved into .plansv2-customize-stack in the markup), so the
+   card just fills the remaining sheet height like the others. */
+#pickExerciseOverlayV2 .plansv2-customize-card{max-height:none;}
+#pickExerciseOverlayV2 .newex-v2-add-fab{margin:14px 0 0;}
 /* Rebuilt to match Figma node 153:701 (2026-08-29) — app-level
    topbar (barbell + PLANS + X, same pattern as .plansv2-header on the
    real Plans v2 screen, just sized for the narrower modal) instead of
@@ -1957,6 +1917,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
        same muted-caption typography for field labels. -->
   <div class="onboard-overlay hidden plansv2-customize-overlay" id="planCustomizeOverlay" onclick="if(event.target===this) closePlanCustomizeV2()">
     <div class="plansv2-customize-stack">
+      <div class="m-sheet-grab" aria-hidden="true"></div>
       <div class="plansv2-customize-card">
         <div class="plansv2-customize-topbar">
           <div class="plansv2-customize-topbar-title">
@@ -2315,6 +2276,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
      version dropped — not part of this design. -->
 <div class="onboard-overlay hidden plansv2-customize-overlay" id="newExerciseOverlayV2" onclick="if(event.target===this) closeNewExerciseFormV2()">
   <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
       <div class="newex-v2-topbar">
         <div class="newex-v2-topbar-title">
@@ -2376,6 +2338,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
      picker untouched. -->
 <div class="onboard-overlay hidden plansv2-customize-overlay" id="pickExerciseOverlayV2" onclick="if(event.target===this) closeExercisePickerV2()">
   <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
       <div class="newex-v2-topbar">
         <div class="newex-v2-topbar-title">
@@ -2390,8 +2353,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
       <div class="pev2-groups" id="pickExerciseGridV2"></div>
     </div>
+    <button type="button" class="newex-v2-add-fab" id="pickExerciseAddBtnV2" onclick="confirmExercisePickerV2()" disabled>DODAJ</button>
   </div>
-  <button type="button" class="newex-v2-add-fab" id="pickExerciseAddBtnV2" onclick="confirmExercisePickerV2()" disabled>DODAJ</button>
 </div>
 
 <!-- "Podziel się opinią" v2 (Figma node 175:9818) — replaces openFeedback()
@@ -2399,6 +2362,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
      Welcome screen keeps the old #feedbackOverlay untouched. -->
 <div class="onboard-overlay hidden plansv2-customize-overlay" id="feedbackOverlayV2" onclick="if(event.target===this) closeFeedbackV2()">
   <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
       <div class="fbv2-header">
         <div class="fbv2-title-row">
@@ -3571,31 +3535,20 @@ async function submitFeedback(){
    (still used by the Welcome screen) stays untouched. Default type is
    "idea", matching what the Figma frame shows selected. */
 let feedbackTypeV2 = 'idea';
-let feedbackV2CloseTimer = null;
 function setFeedbackTypeV2(btn){
   feedbackTypeV2 = btn.dataset.type;
   document.querySelectorAll('#feedbackTypeRowV2 .plansv2-choice-chip').forEach(b=> b.classList.toggle('active', b===btn));
 }
 function openFeedbackV2(){
-  clearTimeout(feedbackV2CloseTimer);
-  feedbackV2CloseTimer = null;
   document.getElementById('feedbackMessageV2').value = '';
   feedbackTypeV2 = 'idea';
   document.querySelectorAll('#feedbackTypeRowV2 .plansv2-choice-chip').forEach(b=> b.classList.toggle('active', b.dataset.type===feedbackTypeV2));
-  const overlay = document.getElementById('feedbackOverlayV2');
-  overlay.classList.remove('hidden');
+  resetPlansCustomizeSheet('feedbackOverlayV2');
+  document.getElementById('feedbackOverlayV2').classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');
 }
-function closeFeedbackV2(){
-  const overlay = document.getElementById('feedbackOverlayV2');
-  overlay.classList.add('plansv2-customize-closing');
-  clearTimeout(feedbackV2CloseTimer);
-  feedbackV2CloseTimer = setTimeout(()=>{
-    overlay.classList.add('hidden');
-    overlay.classList.remove('plansv2-customize-closing');
-    document.documentElement.classList.remove('modal-lock');
-    feedbackV2CloseTimer = null;
-  }, 220);
+function closeFeedbackV2(viaDrag){
+  closePlansCustomizeSheet('feedbackOverlayV2', viaDrag);
 }
 async function submitFeedbackV2(){
   const message = document.getElementById('feedbackMessageV2').value.trim();
@@ -4197,24 +4150,27 @@ function closeExercisePopupV2(viaDrag){
   popupExercise = null;
   popupShowWarning = false;
 }
-/* Simplified drag-to-dismiss for a .m-sheet — bind once per sheet to the
-   static grabber. Tracks the pointer, moves the sheet with the finger,
+/* Simplified drag-to-dismiss for a .m-sheet (or the .plansv2-customize-*
+   family, which now rides the same shell) — bind once per overlay to the
+   static grabber. Tracks the pointer, moves the panel with the finger,
    and on release closes if it's been pulled past 40% of its height or
    flicked down fast; otherwise snaps back. Inner scroll is untouched
-   (the handle is its own element, above the scroll body). */
-function mSheetDrag(overlayId, sheetId, closeFn){
+   (the handle is its own element, above the scroll body). closeFn is
+   called with `true` so it can skip its own slide-down animation. */
+function mSheetDrag(overlayId, closeFn){
   const overlay = document.getElementById(overlayId);
-  const sheet = document.getElementById(sheetId);
-  if(!overlay || !sheet) return;
-  const handle = sheet.querySelector('.m-sheet-grab');
+  if(!overlay) return;
+  const mover = overlay.querySelector('.m-sheet, .plansv2-customize-stack');
+  if(!mover) return;
+  const handle = mover.querySelector('.m-sheet-grab');
   if(!handle) return;
   let startY = 0, dy = 0, lastY = 0, lastT = 0, vY = 0, dragging = false;
   const move = e=>{
     if(!dragging) return;
     dy = Math.max(0, e.clientY - startY);
     if(e.timeStamp !== lastT){ vY = (e.clientY - lastY) / (e.timeStamp - lastT); lastY = e.clientY; lastT = e.timeStamp; }
-    sheet.style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
-    const h = sheet.offsetHeight || 1;
+    mover.style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
+    const h = mover.offsetHeight || 1;
     overlay.style.opacity = Math.max(0.15, 1 - (dy / h) * 1.15).toFixed(3);
     e.preventDefault();
   };
@@ -4225,16 +4181,16 @@ function mSheetDrag(overlayId, sheetId, closeFn){
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', up);
     window.removeEventListener('pointercancel', up);
-    const h = sheet.offsetHeight || 1;
+    const h = mover.offsetHeight || 1;
     if(dy > h * 0.4 || vY > 0.6){
       overlay.style.opacity = '';
-      sheet.style.transform = 'translateY(100%)';
+      mover.style.transform = 'translateY(100%)';
       closeFn(true);
     } else {
-      sheet.classList.add('m-sheet-snapback');
-      sheet.style.transform = '';
+      mover.classList.add('m-sheet-snapback');
+      mover.style.transform = '';
       overlay.style.opacity = '';
-      setTimeout(()=>sheet.classList.remove('m-sheet-snapback'), 320);
+      setTimeout(()=>mover.classList.remove('m-sheet-snapback'), 320);
     }
   };
   handle.addEventListener('pointerdown', e=>{
@@ -4244,14 +4200,53 @@ function mSheetDrag(overlayId, sheetId, closeFn){
     lastT = e.timeStamp;
     vY = 0;
     overlay.classList.add('m-sheet-dragging');
-    sheet.classList.remove('m-sheet-snapback');
+    mover.classList.remove('m-sheet-snapback');
     try{ handle.setPointerCapture(e.pointerId); }catch(_){}
     window.addEventListener('pointermove', move, {passive:false});
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', up);
   });
 }
-mSheetDrag('exercisePopupOverlayV2', 'exercisePopupSheetV2', closeExercisePopupV2);
+mSheetDrag('exercisePopupOverlayV2', closeExercisePopupV2);
+['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
+  .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
+
+/* Shared reset/teardown for the .plansv2-customize-* sheet family (stage 2).
+   Each open function calls resetPlansCustomizeSheet() before un-hiding;
+   each close function delegates to closePlansCustomizeSheet(). */
+const _plansSheetTimers = {};
+function resetPlansCustomizeSheet(overlayId){
+  const overlay = document.getElementById(overlayId);
+  if(!overlay) return;
+  const mover = overlay.querySelector('.plansv2-customize-stack');
+  clearTimeout(_plansSheetTimers[overlayId]);
+  overlay.classList.remove('plansv2-customize-closing');
+  overlay.style.opacity = '';
+  if(mover){ mover.classList.remove('m-sheet-snapback'); mover.style.transform = ''; }
+  const body = overlay.querySelector('.plansv2-customize-card');
+  if(body) body.scrollTop = 0;
+}
+function closePlansCustomizeSheet(overlayId, viaDrag){
+  const overlay = document.getElementById(overlayId);
+  if(!overlay) return;
+  const mover = overlay.querySelector('.plansv2-customize-stack');
+  if(overlayId === 'planCustomizeOverlay') planv2CustomizeTargetId = null;
+  const finish = ()=>{
+    overlay.classList.add('hidden');
+    overlay.classList.remove('plansv2-customize-closing');
+    overlay.style.opacity = '';
+    if(mover){ mover.classList.remove('m-sheet-snapback'); mover.style.transform = ''; }
+    document.documentElement.classList.remove('modal-lock');
+    _plansSheetTimers[overlayId] = null;
+  };
+  clearTimeout(_plansSheetTimers[overlayId]);
+  if(viaDrag){
+    _plansSheetTimers[overlayId] = setTimeout(finish, 20);
+  } else {
+    overlay.classList.add('plansv2-customize-closing');
+    _plansSheetTimers[overlayId] = setTimeout(finish, 260);
+  }
+}
 function popupSetLiveV2(idx, field, val){
   if(!popupExercise) return;
   popupExercise.setValues[idx][field] = val;
@@ -4374,9 +4369,7 @@ function renderExercisePopupV2(animate){
    own render functions, the two plan editors): the old flow stays
    completely untouched. */
 let newExerciseContextV2 = 'gym';
-let newExerciseV2CloseTimer = null;
 function openNewExerciseFormV2(prefillGroup, context){
-  if(newExerciseV2CloseTimer){ clearTimeout(newExerciseV2CloseTimer); newExerciseV2CloseTimer = null; }
   newExerciseContextV2 = context || 'gym';
   document.getElementById('newExTitleV2').value = '';
   // prefillGroup comes from PLAN_EX_GROUPS' own pl label (see
@@ -4388,20 +4381,12 @@ function openNewExerciseFormV2(prefillGroup, context){
   document.getElementById('newExSetsV2').value = '3';
   document.getElementById('newExRepLowV2').value = '8';
   document.getElementById('newExRepHighV2').value = '12';
-  const overlay = document.getElementById('newExerciseOverlayV2');
-  overlay.classList.remove('plansv2-customize-closing');
-  overlay.classList.remove('hidden');
+  resetPlansCustomizeSheet('newExerciseOverlayV2');
+  document.getElementById('newExerciseOverlayV2').classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');
 }
-function closeNewExerciseFormV2(){
-  const overlay = document.getElementById('newExerciseOverlayV2');
-  overlay.classList.add('plansv2-customize-closing'); // plays the slide-down/fade-out, see .plansv2-customize-closing CSS
-  newExerciseV2CloseTimer = setTimeout(()=>{
-    overlay.classList.add('hidden');
-    overlay.classList.remove('plansv2-customize-closing');
-    document.documentElement.classList.remove('modal-lock');
-    newExerciseV2CloseTimer = null;
-  }, 220);
+function closeNewExerciseFormV2(viaDrag){
+  closePlansCustomizeSheet('newExerciseOverlayV2', viaDrag);
 }
 function saveNewExerciseV2(){
   const name = document.getElementById('newExTitleV2').value.trim();
@@ -4452,28 +4437,18 @@ function saveNewExerciseV2(){
 let pickerSelectedV2 = new Set();
 let pickExerciseEquipFilterV2 = 'all';
 let pickExerciseV2Collapsed = new Set();
-let pickExerciseV2CloseTimer = null;
 function openExercisePickerV2(){
-  if(pickExerciseV2CloseTimer){ clearTimeout(pickExerciseV2CloseTimer); pickExerciseV2CloseTimer = null; }
   pickerSelectedV2 = new Set();
   pickExerciseEquipFilterV2 = 'all';
   pickExerciseV2Collapsed = new Set();
   renderPickExerciseEquipRowV2();
   renderExercisePickerGridV2(true);
-  const overlay = document.getElementById('pickExerciseOverlayV2');
-  overlay.classList.remove('plansv2-customize-closing');
-  overlay.classList.remove('hidden');
+  resetPlansCustomizeSheet('pickExerciseOverlayV2');
+  document.getElementById('pickExerciseOverlayV2').classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');
 }
-function closeExercisePickerV2(){
-  const overlay = document.getElementById('pickExerciseOverlayV2');
-  overlay.classList.add('plansv2-customize-closing');
-  pickExerciseV2CloseTimer = setTimeout(()=>{
-    overlay.classList.add('hidden');
-    overlay.classList.remove('plansv2-customize-closing');
-    document.documentElement.classList.remove('modal-lock');
-    pickExerciseV2CloseTimer = null;
-  }, 220);
+function closeExercisePickerV2(viaDrag){
+  closePlansCustomizeSheet('pickExerciseOverlayV2', viaDrag);
 }
 function setPickExerciseEquipFilterV2(key){
   pickExerciseEquipFilterV2 = key;
@@ -5194,11 +5169,9 @@ function generateSplitPlanScheduleV2(splitId, goal, difficulty, equipment){
   return schedule;
 }
 let planv2CustomizeTargetId = null;
-let plansv2CustomizeCloseTimer = null; // mirrors exv2CloseTimer — lets a reopen mid-close-animation cut the close short instead of fighting it
 function openPlanCustomizeV2(id){
   const plan = trainingPlans.find(p=>p.id===id);
   if(!plan) return;
-  if(plansv2CustomizeCloseTimer){ clearTimeout(plansv2CustomizeCloseTimer); plansv2CustomizeCloseTimer = null; }
   planv2CustomizeTargetId = id;
   const saved = plan.customizationV2 || {goal:'mass', difficulty:'medium', equipment:'mix', frequency:3};
   document.getElementById('planCustomizeTitle').textContent = plan.name;
@@ -5219,9 +5192,8 @@ function openPlanCustomizeV2(id){
   const freqIdx = PLANSV2_FREQUENCY_SLIDER.indexOf(saved.frequency);
   freqSlider.value = freqIdx===-1 ? 1 : freqIdx;
   updatePlanCustomizeSliderVisual(freqSlider, 'frequency');
-  const overlay = document.getElementById('planCustomizeOverlay');
-  overlay.classList.remove('plansv2-customize-closing');
-  overlay.classList.remove('hidden');
+  resetPlansCustomizeSheet('planCustomizeOverlay');
+  document.getElementById('planCustomizeOverlay').classList.remove('hidden');
   document.documentElement.classList.add('modal-lock'); // same full lock every other modal in the app uses while open
 }
 // Bolds whichever tick label matches the slider's current position
@@ -5252,16 +5224,8 @@ function updatePlanCustomizeSliderVisual(input, group){
 function onPlanCustomizeSliderInput(input, group){
   updatePlanCustomizeSliderVisual(input, group);
 }
-function closePlanCustomizeV2(){
-  const overlay = document.getElementById('planCustomizeOverlay');
-  overlay.classList.add('plansv2-customize-closing'); // plays the slide-down/fade-out, see .plansv2-customize-closing CSS
-  plansv2CustomizeCloseTimer = setTimeout(()=>{
-    overlay.classList.add('hidden');
-    overlay.classList.remove('plansv2-customize-closing');
-    document.documentElement.classList.remove('modal-lock');
-    plansv2CustomizeCloseTimer = null;
-  }, 220);
-  planv2CustomizeTargetId = null;
+function closePlanCustomizeV2(viaDrag){
+  closePlansCustomizeSheet('planCustomizeOverlay', viaDrag); // also nulls planv2CustomizeTargetId
 }
 function pickPlanCustomizeChipV2(el){
   const group = el.dataset.group;
