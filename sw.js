@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mekkio-cache-v11';
+const CACHE_NAME = 'mekkio-cache-v12';
 const URLS_TO_CACHE = ['./', './index.html', './lottie.min.js', './success.json'];
 
 self.addEventListener('install', (event) => {

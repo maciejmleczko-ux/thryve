@@ -779,21 +779,23 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-week-day.today span:first-child .ph{color:var(--m-plan-hard);}
 .dash-week-day em{font-style:normal;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.85);}
 
-/* Short phones (iPhone 13 mini 812, SE 667): the 390×844 tuning + a real
-   ~50px notch inset tips a 3-line greeting past one screen, so renderDashboard()
-   flips on .dashboard-scrollable and the dashboard starts to move. Reclaim ~44px
-   of the flexible spacing here so it fits again; keeps padding-bottom (the 24px
-   gap above the nav) intact — the greeting gap is what gives. */
-@media (max-height: 820px){
-  .dash-root{padding-top:calc(12px + env(safe-area-inset-top,0px));}
-  .dash-header{margin-bottom:18px;}
-  .dash-headline{font-size:var(--m-fs-xl);line-height:1.1;}
-  .dash-hero{padding:12px;}
-  .dash-hero-stats{margin:8px 0;gap:6px;}
-  .dash-grid2{gap:6px;margin-bottom:6px;}
-  .dash-week-card{padding:12px;}
-  .dash-week-head{margin-bottom:10px;}
-}
+/* Short phones: the 390×844 tuning + a real ~50px notch inset tips a 3-line
+   greeting past one screen on an iPhone 13 mini / SE, so renderDashboard()
+   flips on .dashboard-scrollable and the dashboard starts to move. Reclaim
+   ~44px of the flexible spacing to make it fit again; padding-bottom (the
+   24px gap above the nav) is kept — the greeting gap is what gives.
+   Driven by a JS class, NOT `@media (max-height)`: Safari reports a shrunken
+   viewport height while its URL bar is up, so a media query fires this on
+   big phones too (17 Pro in a browser tab). renderDashboard() adds
+   .dash-compact only when the real content actually overflows. */
+html.dash-compact .dash-root{padding-top:calc(12px + env(safe-area-inset-top,0px));}
+html.dash-compact .dash-header{margin-bottom:18px;}
+html.dash-compact .dash-headline{font-size:var(--m-fs-xl);line-height:1.1;}
+html.dash-compact .dash-hero{padding:12px;}
+html.dash-compact .dash-hero-stats{margin:8px 0;gap:6px;}
+html.dash-compact .dash-grid2{gap:6px;margin-bottom:6px;}
+html.dash-compact .dash-week-card{padding:12px;}
+html.dash-compact .dash-week-head{margin-bottom:10px;}
 
 /* ---- subtle motion: staggered reveal on entry, bars grow in, checks pop ---- */
 @media (prefers-reduced-motion: no-preference){
@@ -3181,7 +3183,7 @@ function skipOnboarding(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.12.5";
+const APP_VERSION = "4.12.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3784,9 +3786,9 @@ function goRoute(route){
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===navActiveRoute));
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
-  // renderDashboard() re-decides .dashboard-scrollable on every entry; make
-  // sure a stale one from a previous visit never lingers while off-dashboard.
-  if(route!=='dashboard') document.documentElement.classList.remove('dashboard-scrollable');
+  // renderDashboard() re-decides .dashboard-scrollable / .dash-compact on every
+  // entry; make sure a stale one from a previous visit never lingers off-dashboard.
+  if(route!=='dashboard') document.documentElement.classList.remove('dashboard-scrollable', 'dash-compact');
   document.body.classList.toggle('dashboard-bg', route==='dashboard');
   // Plan editor v2 shares Plans v2's scroll-lock mechanics (same
   // scroll-only-when-needed treatment — it's the same "Plans" flow,
@@ -6174,32 +6176,56 @@ function renderDashboard(){
     }
   });
 
-  // Only grant scroll/touch-drag capability when the dashboard genuinely
-  // doesn't fit one screen — see the dashboard-lock/.dashboard-scrollable
-  // CSS for the full reasoning. .dash-root is now a min-height:100dvh flex
-  // column, so its own scrollHeight/rect is always ~one screen and can't be
-  // the measure. Instead sum the NATURAL content height: each tile's
-  // offsetHeight (transform-immune, unlike getBoundingClientRect during the
-  // entrance animation) + the fixed margins from CSS. .dash-hero's
-  // margin-top is `auto` (the flexible slack that anchors the last tile
-  // when things DO fit) so it's deliberately excluded here — this is the
-  // "if we didn't distribute any slack" height.
-  const dashRoot = document.querySelector('.dash-root');
-  if(dashRoot){
-    const rs = getComputedStyle(dashRoot);
+  fitDashboardToScreen();
+}
+
+/* Decide, from the REAL laid-out content, whether the dashboard needs its
+   spacing compacted (short phones — 13 mini / SE) and/or scroll unlocked.
+   Deferred a tick so it runs after renderDashboard()'s tile innerHTML has
+   settled. setTimeout (not rAF) so it still fires when the tab is
+   backgrounded. Class-driven, NOT @media(max-height): Safari reports a
+   shrunken viewport height while its URL bar is up, so a media query fires
+   the "small phone" styles on big phones too (17 Pro in a browser tab). */
+let _fitDashT = 0;
+function fitDashboardToScreen(){
+  clearTimeout(_fitDashT);
+  _fitDashT = setTimeout(()=>{
+    const dashRoot = document.querySelector('.dash-root');
+    if(!dashRoot || dashRoot.offsetParent === null) return;   // not visible yet
+    const root = document.documentElement;
     const mb = el => el ? (parseFloat(getComputedStyle(el).marginBottom) || 0) : 0;
-    const h = el => el ? el.offsetHeight : 0;
-    const hdr = dashRoot.querySelector('.dash-header');
+    const h  = el => el ? el.offsetHeight : 0;
+    const hdr  = dashRoot.querySelector('.dash-header');
     const hero = dashRoot.querySelector('.dash-hero');
     const grid = dashRoot.querySelector('.dash-grid2');
     const week = dashRoot.querySelector('.dash-week-card');
-    const contentH = parseFloat(rs.paddingTop) + parseFloat(rs.paddingBottom)
-      + h(hdr) + mb(hdr) + h(hero) + mb(hero) + h(grid) + mb(grid) + h(week);
-    // small tolerance: a few px of overshoot isn't worth unlocking the whole
-    // screen to scroll (sub-pixel rounding, font-metric drift on web-font swap).
-    document.documentElement.classList.toggle('dashboard-scrollable', contentH > window.innerHeight + 6);
-  }
+    // NATURAL content height: tile offsetHeights (transform-immune during the
+    // entrance animation) + fixed margins + the root's padding. .dash-hero's
+    // margin-top is `auto` — the flexible slack that anchors the last tile
+    // when things DO fit — so it's excluded: this is the "no slack" height.
+    const measure = () => {
+      const rs = getComputedStyle(dashRoot);
+      return parseFloat(rs.paddingTop) + parseFloat(rs.paddingBottom)
+        + h(hdr) + mb(hdr) + h(hero) + mb(hero) + h(grid) + mb(grid) + h(week);
+    };
+    // 6px tolerance for sub-pixel rounding / web-font swap. Two stages:
+    // compact the flexible spacing first, only unlock scroll if it still
+    // overflows.
+    const fits = () => measure() <= window.innerHeight + 6;
+    root.classList.remove('dash-compact');
+    void dashRoot.offsetHeight;
+    let compact = false, scrollable = false;
+    if(!fits()){
+      root.classList.add('dash-compact');
+      void dashRoot.offsetHeight;
+      compact = true;
+      scrollable = !fits();
+    }
+    root.classList.toggle('dash-compact', compact);
+    root.classList.toggle('dashboard-scrollable', scrollable);
+  }, 60);
 }
+window.addEventListener('resize', ()=>{ if(currentRoute==='dashboard') fitDashboardToScreen(); });
 
 /* ============================================================
    GYM v2 — second screen of the "v3" preview (see [[project_thryve_roadmap]]).
