@@ -291,16 +291,40 @@ button{font-family:inherit;}
 .gymfin-chat .ph{width:22px;height:22px;color:var(--m-orange);display:block;}
 .gymfin-brand .ph svg, .gymfin-chat .ph svg{display:block;width:100%;height:100%;}
 
-.gymfin-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;min-height:0;}
-.gymfin-anim{width:min(240px,36vh);height:min(240px,36vh);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+/* The #7 progress card + history link can push content past a short
+   phone's height. .gymfin-inner's `margin:auto 0` centres the block when
+   it fits (old behaviour) and collapses to top-aligned + scrollable when
+   it doesn't, instead of clipping at the vertical centre. */
+.gymfin-body{flex:1;display:flex;flex-direction:column;min-height:0;overflow-y:auto;}
+.gymfin-inner{margin:auto 0;display:flex;flex-direction:column;align-items:center;gap:13px;text-align:center;width:100%;padding:2px 0;}
+/* smaller than before — the #7 "Twój postęp" card now carries the payoff,
+   so the success flourish steps back to leave room without scrolling. */
+.gymfin-anim{width:min(140px,22vh);height:min(140px,22vh);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .gymfin-anim svg{display:block;width:100%;height:100%;}
 .gymfin-anim .gymfin-check{display:none;}
+/* fallback (no Lottie): collapse the box to the check so it doesn't
+   float in a tall empty square now that the body is top-aligned. */
+.gymfin-anim.is-fallback{width:88px;height:88px;}
 .gymfin-anim.is-fallback .gymfin-check{display:flex;}
 .gymfin-check{width:88px;height:88px;border-radius:50%;background:var(--m-orange);align-items:center;justify-content:center;flex-shrink:0;}
 .gymfin-check svg{width:52px;height:52px;display:block;}
 .gymfin-heads{display:flex;flex-direction:column;gap:8px;}
 .gymfin-title{margin:0;font-size:var(--m-fs-hero);font-weight:500;color:var(--m-orange);letter-spacing:1.6px;line-height:1;}
 .gymfin-sub{margin:0;font-size:var(--m-fs-md);font-weight:400;color:#000;letter-spacing:.7px;}
+
+/* #7 — "Twój postęp" card: biggest positive change vs the previous
+   workout of the same plan day (reps at equal/higher weight, else weight).
+   Hidden when there's no prior data to compare against. */
+.gymfin-progress{width:100%;background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:14px 16px 15px;color:#fff;text-align:left;}
+.gymfin-progress[hidden]{display:none;}
+.gymfin-progress-k{margin:0;display:flex;align-items:center;gap:8px;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:rgba(255,255,255,.82);}
+.gymfin-progress-k .ph{width:14px;height:14px;flex-shrink:0;}
+.gymfin-progress-k .ph svg{display:block;width:100%;height:100%;}
+.gymfin-progress-v{margin:9px 0 0;font-size:var(--m-fs-2xl);font-weight:600;letter-spacing:-.02em;line-height:1;}
+.gymfin-progress-ex{margin:7px 0 0;font-size:var(--m-fs-base);font-weight:500;}
+.gymfin-progress-delta{margin:3px 0 0;font-size:var(--m-fs-xs);color:rgba(255,255,255,.78);}
+.gymfin-cap{margin:0;font-size:var(--m-fs-2xs);color:var(--m-muted);text-align:center;}
+.gymfin-cap[hidden]{display:none;}
 
 /* summary tiles — the four dashboard bento colours */
 .gymfin-stats{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px;}
@@ -328,11 +352,15 @@ button{font-family:inherit;}
 
 .gymfin-cta{width:100%;flex-shrink:0;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;padding:16px;font-family:inherit;font-size:var(--m-fs-base);font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:4px;transition:transform .12s ease;}
 .gymfin-cta:active{transform:scale(.97);}
+.gymfin-link{width:100%;flex-shrink:0;border:0;background:none;color:var(--m-orange);font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;padding:9px 0 2px;cursor:pointer;}
+.gymfin-link[hidden]{display:none;}
 
-@media (max-height:640px){
-  .gymfin-anim{width:150px;height:150px;}
-  .gymfin-body{gap:11px;}
+@media (max-height:700px){
+  .gymfin-anim{width:110px;height:110px;}
+  .gymfin-anim.is-fallback{width:72px;height:72px;}
+  .gymfin-body{gap:10px;}
   .gymfin-title{font-size:var(--m-fs-2xl);}
+  .gymfin-progress{padding:12px 15px 13px;}
 }
 
 @media (prefers-reduced-motion: no-preference){
@@ -342,13 +370,16 @@ button{font-family:inherit;}
      loadv2Rise keyframe + curve as the load screen / dashboard tiles. */
   .gymfin-root.visible .gymfin-anim.is-fallback .gymfin-check{animation:gymfinPop .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.06s;}
   .gymfin-root.anim-in .gymfin-heads{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.14s;}
+  .gymfin-root.anim-in .gymfin-progress:not([hidden]){animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.22s;}
   .gymfin-root.anim-in .gymfin-stats .gymfin-stat{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;}
-  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(1){animation-delay:.28s;}
-  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(2){animation-delay:.36s;}
-  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(3){animation-delay:.44s;}
-  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(4){animation-delay:.52s;}
-  .gymfin-root.anim-in .gymfin-record:not([hidden]){animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.6s;}
-  .gymfin-root.anim-in .gymfin-cta{animation:loadv2Rise .45s cubic-bezier(.16,1,.3,1) both;animation-delay:.7s;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(1){animation-delay:.32s;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(2){animation-delay:.4s;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(3){animation-delay:.48s;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(4){animation-delay:.56s;}
+  .gymfin-root.anim-in .gymfin-record:not([hidden]){animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.64s;}
+  .gymfin-root.anim-in .gymfin-cap:not([hidden]){animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.72s;}
+  .gymfin-root.anim-in .gymfin-cta{animation:loadv2Rise .45s cubic-bezier(.16,1,.3,1) both;animation-delay:.76s;}
+  .gymfin-root.anim-in .gymfin-link:not([hidden]){animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.82s;}
 }
 @media (prefers-reduced-motion: reduce){ .gymfin-root{transition:none;} }
 html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow, html.statsv2-bg .app-glow, html.histv2-bg .app-glow{display:none;}
@@ -1756,32 +1787,44 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
 
     <div class="gymfin-body">
+     <div class="gymfin-inner">
       <div class="gymfin-anim" id="gymFinAnim">
         <span class="gymfin-check"><svg viewBox="0 0 45.3333 45.3333" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M41.1715 14.2538L18.5048 36.9204C18.3074 37.1186 18.0728 37.2757 17.8145 37.383C17.5562 37.4902 17.2793 37.5455 16.9996 37.5455C16.7199 37.5455 16.443 37.4902 16.1847 37.383C15.9264 37.2757 15.6918 37.1186 15.4944 36.9204L5.57771 27.0038C5.38004 26.8061 5.22324 26.5714 5.11627 26.3132C5.00929 26.0549 4.95423 25.7781 4.95423 25.4986C4.95423 25.219 5.00929 24.9422 5.11627 24.684C5.22324 24.4257 5.38004 24.191 5.57771 23.9934C5.77538 23.7957 6.01004 23.6389 6.2683 23.5319C6.52657 23.4249 6.80337 23.3699 7.08292 23.3699C7.36246 23.3699 7.63927 23.4249 7.89753 23.5319C8.15579 23.6389 8.39046 23.7957 8.58813 23.9934L17.0014 32.4066L38.1646 11.2469C38.5638 10.8477 39.1052 10.6234 39.6698 10.6234C40.2344 10.6234 40.7758 10.8477 41.175 11.2469C41.5742 11.6461 41.7985 12.1875 41.7985 12.7521C41.7985 13.3167 41.5742 13.8581 41.175 14.2573L41.1715 14.2538Z" fill="#fff"/></svg></span>
       </div>
 
       <div class="gymfin-heads">
         <p class="gymfin-title" data-i18n="gymFinTitle">GRATULACJE</p>
-        <p class="gymfin-sub" data-i18n="gymFinSub">TRENING ZOSTAŁ ZAPISANY</p>
+        <p class="gymfin-sub" id="gymFinSub" data-i18n="gymFinSub">TRENING ZOSTAŁ ZAPISANY</p>
+      </div>
+
+      <div class="gymfin-progress" id="gymFinProgress" hidden>
+        <p class="gymfin-progress-k"><span class="ph" data-ph="trophy"></span><span data-i18n="gymFinProgressLabel">Twój postęp</span></p>
+        <p class="gymfin-progress-v" id="gymFinProgressV"></p>
+        <p class="gymfin-progress-ex" id="gymFinProgressEx"></p>
+        <p class="gymfin-progress-delta" id="gymFinProgressDelta"></p>
       </div>
 
       <div class="gymfin-stats">
-        <div class="gymfin-stat gymfin-stat--orange"><p class="gymfin-stat-k" data-i18n="gymFinVolume">Objętość</p><p class="gymfin-stat-v" id="gymFinVolV">0</p></div>
+        <div class="gymfin-stat gymfin-stat--orange"><p class="gymfin-stat-k" data-i18n="gymFinTime">Czas</p><p class="gymfin-stat-v" id="gymFinTimeV">—</p></div>
         <div class="gymfin-stat gymfin-stat--blue"><p class="gymfin-stat-k" data-i18n="gymFinExercises">Ćwiczenia</p><p class="gymfin-stat-v" id="gymFinExV">0</p></div>
-        <div class="gymfin-stat gymfin-stat--navy"><p class="gymfin-stat-k" data-i18n="gymFinReps">Powtórzenia</p><p class="gymfin-stat-v" id="gymFinRepsV">0</p></div>
-        <div class="gymfin-stat gymfin-stat--plain"><p class="gymfin-stat-k" data-i18n="gymFinTime">Czas</p><p class="gymfin-stat-v" id="gymFinTimeV">—</p></div>
+        <div class="gymfin-stat gymfin-stat--navy"><p class="gymfin-stat-k" data-i18n="gymFinSets">Serie</p><p class="gymfin-stat-v" id="gymFinSetsV">0</p></div>
+        <div class="gymfin-stat gymfin-stat--plain"><p class="gymfin-stat-k" data-i18n="gymFinVolume">Objętość</p><p class="gymfin-stat-v" id="gymFinVolV">0</p></div>
       </div>
 
       <div class="gymfin-record" id="gymFinRecord" hidden>
         <span class="ph" data-ph="trophy"></span>
         <div>
-          <p class="gymfin-record-k" data-i18n="gymFinRecordLabel">Nowy rekord</p>
+          <p class="gymfin-record-k" id="gymFinRecordLabel" data-i18n="gymFinRecordLabel">Nowy rekord</p>
           <p class="gymfin-record-v" id="gymFinRecordText"></p>
         </div>
       </div>
+
+      <p class="gymfin-cap" id="gymFinCap" hidden data-i18n="gymFinComparedTo">Porównanie z poprzednim treningiem.</p>
+     </div>
     </div>
 
     <button type="button" class="gymfin-cta" id="gymFinCta" data-i18n="gymFinCta">Gotowe</button>
+    <button type="button" class="gymfin-link" id="gymFinHistoryLink" hidden data-i18n="gymFinSeeInHistory">Zobacz trening w historii</button>
   </div>
 </div>
 
@@ -2550,7 +2593,13 @@ const T_EN = {
   gymFinVolume: 'Volume',
   gymFinExercises: 'Exercises',
   gymFinReps: 'Reps',
+  gymFinSets: 'Sets',
   gymFinRecordLabel: 'New record',
+  gymFinRecordVolume: 'New volume record',
+  gymFinProgressLabel: 'Your progress',
+  gymFinComparedTo: 'Compared with your previous workout.',
+  gymFinSeeInHistory: 'See workout in history',
+  gymFinWas: (a, b) => `Last time ${a} → today ${b}`,
   gymFinCta: 'Done',
   statsV2BackToOverview: 'All stats',
   feedbackTitle: 'Share feedback',
@@ -3254,7 +3303,7 @@ function afterOnboardingStep(){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.13.0";
+const APP_VERSION = "4.14.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -3303,6 +3352,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.14.0": {
+    pl: [
+      {featured:true, icon:'trophy', badge:'Nowość', title:'Widać, o ile się poprawiłeś', text:'Po zapisaniu treningu ekran „Gratulacje" pokazuje kartę z Twoją największą zmianą od ostatniego razu — na przykład +2 powtórzenia w Chest Press przy 40 kg. Doszedł też kafelek „Serie" i rekord objętości ćwiczenia. Z ekranu przeskoczysz od razu do tego treningu w historii.'},
+    ],
+    en: [
+      {featured:true, icon:'trophy', badge:'New', title:'See how much you moved up', text:'After you save a workout, the "Congrats" screen shows a card with your biggest change since last time — say, +2 reps on Chest Press at 40 kg. There\'s also a "Sets" tile and a per-exercise volume record. From that screen you can jump straight to the workout in history.'},
+    ],
+  },
   "4.13.0": {
     pl: [
       {featured:true, icon:'check-circle', badge:'Nowość', title:'Trening już nie przepada', text:'Zamkniesz apkę w trakcie treningu albo ją odświeżysz — wpisane serie czekają na miejscu, kiedy wrócisz do GYM. A serie, których nie wypełnisz, nie trafiają już do historii jako zera.'},
@@ -4890,18 +4947,38 @@ function showGymFinishV2(summary, onDone){
   const timeEl = document.getElementById('gymFinTimeV');
   const volEl  = document.getElementById('gymFinVolV');
   const exEl   = document.getElementById('gymFinExV');
-  const repsEl = document.getElementById('gymFinRepsV');
+  const setsEl = document.getElementById('gymFinSetsV');
   timeEl.textContent = summary.durationMin ? '0' : '—';
-  volEl.textContent = '0'; exEl.textContent = '0'; repsEl.textContent = '0';
+  volEl.textContent = '0'; exEl.textContent = '0'; setsEl.textContent = '0';
+
+  if(summary.subtitle) document.getElementById('gymFinSub').textContent = summary.subtitle;
+
+  // #7 — "Twój postęp" card + "compared to" caption
+  const progEl = document.getElementById('gymFinProgress');
+  const capEl  = document.getElementById('gymFinCap');
+  if(summary.progress){
+    document.getElementById('gymFinProgressV').textContent = summary.progress.headline;
+    document.getElementById('gymFinProgressEx').textContent = summary.progress.exLine;
+    document.getElementById('gymFinProgressDelta').textContent = summary.progress.deltaLine;
+    progEl.hidden = false;
+    capEl.hidden = false;
+  } else {
+    progEl.hidden = true;
+    capEl.hidden = true;
+  }
 
   const recEl = document.getElementById('gymFinRecord');
   if(summary.record){
-    document.getElementById('gymFinRecordText').textContent =
-      summary.record.name + ' — ' + fmtGymWeight(summary.record.weight) + ' kg';
+    document.getElementById('gymFinRecordLabel').textContent = summary.record.label
+      || t('gymFinRecordLabel', 'Nowy rekord');
+    document.getElementById('gymFinRecordText').textContent = summary.record.text;
     recEl.hidden = false;
   } else {
     recEl.hidden = true;
   }
+
+  const linkEl = document.getElementById('gymFinHistoryLink');
+  linkEl.hidden = !summary.date;
 
   el.classList.remove('hiding', 'anim-in');
   el.classList.add('visible');
@@ -4911,7 +4988,7 @@ function showGymFinishV2(summary, onDone){
     if(summary.durationMin) animateDashNumber(timeEl, summary.durationMin, 0, '<small>min</small>');
     animateDashNumber(volEl, summary.volume || 0, 0, '<small>kg</small>');
     animateDashNumber(exEl, summary.exercises || 0, 0, '');
-    animateDashNumber(repsEl, summary.reps || 0, 0, '');
+    animateDashNumber(setsEl, summary.sets || 0, 0, '');
   };
   if(reduce){ startFill(); }
   else { requestAnimationFrame(()=> el.classList.add('anim-in')); setTimeout(startFill, 340); }
@@ -4929,47 +5006,129 @@ function showGymFinishV2(summary, onDone){
     });
   }).catch(()=>{ animBox.classList.add('is-fallback'); });
 
-  document.getElementById('gymFinCta').onclick = ()=>{
+  const dismiss = (then)=>{
     el.classList.add('hiding');
-    onDone();
+    (then || onDone)();
     gymFinDismissT = setTimeout(()=>{
       el.classList.remove('visible', 'hiding', 'anim-in');
       if(gymFinAnim){ try{ gymFinAnim.destroy(); }catch(e){} gymFinAnim = null; }
     }, 350); // matches .gymfin-root's opacity transition
   };
+  document.getElementById('gymFinCta').onclick = ()=> dismiss();
+  document.getElementById('gymFinHistoryLink').onclick = ()=> dismiss(()=>{
+    if(summary.date){
+      const d = new Date(summary.date + 'T00:00:00');
+      calStateV2 = { year: d.getFullYear(), month: d.getMonth() };
+      selectedHistDateV2 = summary.date;
+      histExpandedV2 = {};
+    }
+    goRoute('history-v2');
+  });
 }
 /* GYM v2 save button: wraps the shared saveWorkout() (production GYM's own
    button is untouched), then shows the finish screen with a summary of the
    session. The PR check reads history BEFORE saveWorkout() pushes. */
+function gymFinTopSet(sets){
+  const valid = (sets || []).filter(s=> s.weight > 0 || s.reps > 0);
+  if(!valid.length) return null;
+  return valid.reduce((best, s)=>{
+    if(s.weight > best.weight) return s;
+    if(s.weight === best.weight && s.reps > best.reps) return s;
+    return best;
+  });
+}
+function gymFinRepsWord(n){
+  if(LANG === 'en') return n === 1 ? 'rep' : 'reps';
+  const m10 = n % 10, m100 = n % 100;
+  if(n === 1) return 'powtórzenie';
+  if(m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) return 'powtórzenia';
+  return 'powtórzeń';
+}
 function saveWorkoutV2(){
-  // best-ever weight per exercise, from history so far
-  const priorBest = {};
-  workouts.forEach(w=> w.exercises.forEach(ex=> ex.sets.forEach(s=>{
-    if(s.weight > 0) priorBest[ex.name] = Math.max(priorBest[ex.name] || 0, s.weight);
-  })));
+  // --- read history BEFORE saveWorkout() pushes this session ---
+  const priorBestWeight = {};   // best-ever weight per exercise
+  const priorBestVol = {};      // best single-session volume per exercise
+  workouts.forEach(w=>{
+    const perEx = {};
+    w.exercises.forEach(ex=> ex.sets.forEach(s=>{
+      if(s.weight > 0) priorBestWeight[ex.name] = Math.max(priorBestWeight[ex.name] || 0, s.weight);
+      perEx[ex.name] = (perEx[ex.name] || 0) + s.weight * s.reps;
+    }));
+    Object.keys(perEx).forEach(n=>{ priorBestVol[n] = Math.max(priorBestVol[n] || 0, perEx[n]); });
+  });
+  const priorTopSet = {};
+  sessionExercises.filter(e=> e.type !== 'checklist').forEach(e=>{
+    const prev = lastSessionsFor(e.name)[0];   // most recent prior session of this exercise
+    if(prev) priorTopSet[e.name] = gymFinTopSet(prev.sets);
+  });
 
   const ok = saveWorkout();
   if(!ok) return;
 
   const w = workouts[workouts.length - 1];
-  let volume = 0, reps = 0, pr = null;
+  let volume = 0, setCount = 0, weightPR = null;
+  const exVol = {};
   w.exercises.forEach(ex=>{
-    const hadHistory = priorBest[ex.name] !== undefined;
-    const prev = priorBest[ex.name] || 0;
+    const hadW = priorBestWeight[ex.name] !== undefined;
+    const prevW = priorBestWeight[ex.name] || 0;
     ex.sets.forEach(s=>{
       volume += s.weight * s.reps;
-      reps += s.reps;
-      if(hadHistory && s.weight > prev && (!pr || s.weight > pr.weight)) pr = { name: ex.name, weight: s.weight };
+      setCount += 1;
+      exVol[ex.name] = (exVol[ex.name] || 0) + s.weight * s.reps;
+      if(hadW && s.weight > prevW && (!weightPR || s.weight > weightPR.weight)) weightPR = { name: ex.name, weight: s.weight };
     });
   });
   const exCount = w.exercises.filter(ex=> ex.sets.some(s=> s.weight > 0 || s.reps > 0)).length;
+
+  // --- #7 "Twój postęp": biggest positive change vs the previous session ---
+  const gains = [];
+  w.exercises.forEach(ex=>{
+    const prev = priorTopSet[ex.name];
+    const now = gymFinTopSet(ex.sets);
+    if(!prev || !now) return;
+    if(now.weight > prev.weight){
+      gains.push({ kind:'weight', ex:ex.name, delta:+(now.weight - prev.weight).toFixed(2), from:prev.weight, to:now.weight, atReps:now.reps });
+    } else if(now.weight === prev.weight && now.reps > prev.reps){
+      gains.push({ kind:'reps', ex:ex.name, delta:now.reps - prev.reps, from:prev.reps, to:now.reps, weight:now.weight });
+    }
+  });
+  gains.sort((a,b)=> a.kind !== b.kind ? (a.kind === 'reps' ? -1 : 1) : (b.delta - a.delta));
+  let progress = null;
+  if(gains.length){
+    const g = gains[0];
+    progress = g.kind === 'reps'
+      ? {
+          headline: '+' + g.delta + ' ' + gymFinRepsWord(g.delta),
+          exLine: g.ex + ' · ' + fmtGymWeight(g.weight) + ' kg',
+          deltaLine: t('gymFinWas', `Ostatnio ${g.from} → dziś ${g.to}`, g.from, g.to)
+        }
+      : {
+          headline: '+' + fmtGymWeight(g.delta) + ' kg',
+          exLine: g.ex + ' · ' + fmtGymWeight(g.to) + ' kg × ' + g.atReps,
+          deltaLine: t('gymFinWas', `Ostatnio ${fmtGymWeight(g.from)} → dziś ${fmtGymWeight(g.to)} kg`, fmtGymWeight(g.from), fmtGymWeight(g.to) + ' kg')
+        };
+  }
+
+  // --- record row: a weight PR wins; otherwise a session-volume PR ---
+  let record = null;
+  if(weightPR){
+    record = { label: t('gymFinRecordLabel','Nowy rekord'), text: weightPR.name + ' — ' + fmtGymWeight(weightPR.weight) + ' kg' };
+  } else {
+    let volPR = null;
+    Object.keys(exVol).forEach(n=>{
+      if(priorBestVol[n] !== undefined && exVol[n] > priorBestVol[n] && (!volPR || exVol[n] > volPR.vol)) volPR = { name:n, vol: exVol[n] };
+    });
+    if(volPR) record = { label: t('gymFinRecordVolume','Nowy rekord objętości'), text: volPR.name + ' · ' + formatDashNum(Math.round(volPR.vol), 0) + ' kg' };
+  }
 
   showGymFinishV2({
     durationMin: w.durationMin,
     volume: Math.round(volume),
     exercises: exCount,
-    reps: reps,
-    record: pr
+    sets: setCount,
+    record: record,
+    progress: progress,
+    date: w.date
   }, ()=> goRoute('dashboard'));
 }
 
