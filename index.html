@@ -1667,13 +1667,6 @@ body.pev2-bg{background:var(--m-red-page);}
    for History read as an outlier from that specific export rather than
    a deliberate deviation; Maciej confirmed ("sprawdz czy jest taka sama
    jak np w gym") these three peer screens should match. */
-.histv2-actions{display:flex;gap:10px;margin-bottom:24px;}
-.histv2-btn-outline{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
-.histv2-btn-outline:active{transform:scale(.96);}
-.histv2-btn-outline .ph{width:24px;height:24px;color:var(--m-ink);}
-.histv2-btn-fill{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;}
-.histv2-btn-fill:active{transform:scale(.96);}
-.histv2-btn-fill .ph{width:24px;height:24px;color:var(--m-card);}
 
 .histv2-cal-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:24px 16px 16px;margin-bottom:24px;box-sizing:border-box;}
 .histv2-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
@@ -1759,8 +1752,7 @@ body.pev2-bg{background:var(--m-red-page);}
 .histv2-run-notes{margin-top:12px;font-size:var(--m-fs-sm);color:var(--m-ink);}
 
 @media (prefers-reduced-motion: no-preference){
-  .histv2-actions{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.08s;}
-  .histv2-cal-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.14s;}
+  .histv2-cal-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.1s;}
   .histv2-section-label{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;animation-delay:.2s;}
   .histv2-anim-in{animation:dashDayIn .45s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.24s + var(--i,0) * 70ms);}
   /* the summary + exercise rows rise in when a card is EXPANDED (hist-reveal
@@ -2317,12 +2309,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <button type="button" class="histv2-chat-btn histv2-acct-btn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
       </div>
 
-      <div class="histv2-actions">
-        <!-- down arrow = import (pull a backup in), up arrow = export (send a backup out) -->
-        <button type="button" class="histv2-btn-outline" onclick="document.getElementById('importFile').click()" title="Importuj kopię zapasową" data-i18n-title="importTitle"><span class="ph" data-ph="download-simple"></span></button>
-        <button type="button" class="histv2-btn-fill" onclick="exportData()" title="Pobierz kopię zapasową" data-i18n-title="exportTitle"><span class="ph" data-ph="upload-simple"></span></button>
-      </div>
-
       <div class="histv2-cal-card">
         <div class="histv2-cal-head">
           <div class="histv2-cal-nav-month">
@@ -2428,9 +2414,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button type="button" class="acct-row" onclick="openBodyDataSheet()"><span>Płeć</span><span class="acct-v" id="acctSexV">—</span></button>
     </div>
     <p class="acct-hint" id="acctWeightUpd" hidden></p>
+    <p class="acct-sec">Kopia zapasowa</p>
+    <div class="acct-rows">
+      <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="upload-simple"></span>Pobierz kopię</span><span class="acct-v">Plik .json</span></button>
+      <button type="button" class="acct-row" onclick="closeAccountPanel(); document.getElementById('importFile').click();"><span class="acct-lead"><span class="ph" data-ph="download-simple"></span>Wgraj kopię</span><span class="acct-v"></span></button>
+    </div>
+    <p class="acct-hint">Dane treningowe trzymamy tylko na tym urządzeniu. Warto co jakiś czas pobrać kopię.</p>
     <p class="acct-sec">Aplikacja</p>
     <div class="acct-rows">
-      <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="download-simple"></span>Kopia zapasowa</span><span class="acct-v">Pobierz</span></button>
       <button type="button" class="acct-row" onclick="closeAccountPanel(); openFeedbackV2();"><span class="acct-lead"><span class="ph" data-ph="chat-dots"></span>Podziel się opinią</span><span class="acct-v"></span></button>
     </div>
     <p class="acct-foot">Mekkio <span id="acctVer"></span> · dane treningowe tylko na tym urządzeniu</p>
@@ -4100,7 +4091,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.21.0";
+const APP_VERSION = "4.22.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4149,6 +4140,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.22.0": {
+    pl: [
+      {featured:true, icon:'upload-simple', badge:'Zmiana', title:'Kopia zapasowa w panelu konta', text:'Pobieranie i wgrywanie kopii zapasowej przeniosło się z Historii do panelu konta, do sekcji „Kopia zapasowa”. Nagłówek Historii jest teraz czystszy.'},
+    ],
+    en: [
+      {featured:true, icon:'upload-simple', badge:'Change', title:'Backup lives in the account panel', text:'Downloading and restoring a backup moved from History into the account panel. The History header is cleaner now.'},
+    ],
+  },
   "4.21.0": {
     pl: [
       {featured:true, icon:'account', badge:'Nowość', title:'Zdjęcie na avatar', text:'W panelu konta, w profilu, wgrasz własne zdjęcie. Pokaże się w panelu i na ikonie konta w rogu ekranu. Zdjęcie zostaje na tym urządzeniu, nigdzie go nie wysyłamy. Sam panel dostał też nagłówek jak reszta apki: strzałka wstecz i ikona zamiast krzyżyka.'},
