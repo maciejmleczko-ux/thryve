@@ -639,13 +639,25 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:95;display:flex;justify-content:flex-end;}
 .acct-overlay.hidden{display:none;}
 .acct-panel{background:var(--m-panel);width:min(420px,100%);height:100%;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;}
-.acct-head{display:flex;align-items:center;justify-content:space-between;padding:6px 0 14px;}
-.acct-title{font-size:var(--m-fs-md);font-weight:600;color:var(--m-ink);}
-.acct-x{background:none;border:0;padding:6px;margin:-6px;cursor:pointer;display:flex;}
-.acct-x .ph{width:22px;height:22px;color:var(--m-ink);}
+/* header matches the tab-screen pattern: back-arrow + icon + title, no X */
+.acct-head{display:flex;align-items:center;gap:10px;padding:6px 0 14px;}
+.acct-back{margin-left:-6px;}
+.acct-head-icon{width:28px;height:28px;flex-shrink:0;}
+.acct-head-icon .ph, .acct-head-icon.ph{display:block;width:28px;height:28px;}
+.acct-head-icon svg{display:block;width:100%;height:100%;}
+.acct-title{margin:0;font-size:var(--m-fs-xl);font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
 .acct-id{display:flex;align-items:center;gap:13px;padding:4px 2px 16px;background:none;border:0;text-align:left;cursor:pointer;font-family:inherit;width:100%;}
-.acct-av{width:52px;height:52px;flex-shrink:0;}
+.acct-av{width:52px;height:52px;flex-shrink:0;border-radius:50%;overflow:hidden;}
 .acct-av .ph{width:52px;height:52px;display:block;}
+.acct-photo{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
+/* profile sheet — photo picker */
+.acct-photo-row{display:flex;align-items:center;gap:14px;}
+.acct-photo-preview{width:56px;height:56px;flex-shrink:0;border-radius:50%;overflow:hidden;background:var(--m-panel);display:flex;align-items:center;justify-content:center;}
+.acct-photo-preview .ph{width:56px;height:56px;display:block;}
+.acct-photo-btns{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+.acct-photo-pick{display:inline-block;background:var(--m-orange);color:#fff;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;}
+.acct-photo-clear{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);font-weight:600;cursor:pointer;padding:2px 0;font-family:inherit;}
+.acct-photo-clear[hidden]{display:none;}
 .acct-id-txt{display:flex;flex-direction:column;gap:2px;min-width:0;}
 .acct-id-name{font-size:var(--m-fs-base);font-weight:600;color:var(--m-ink);}
 .acct-id-sub{font-size:var(--m-fs-2xs);color:var(--m-muted);}
@@ -2381,8 +2393,9 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <div class="acct-overlay hidden" id="accountOverlay" onclick="if(event.target===this) closeAccountPanel()">
   <div class="acct-panel">
     <div class="acct-head">
-      <span class="acct-title">Konto</span>
-      <button type="button" class="acct-x" onclick="closeAccountPanel()" aria-label="Zamknij"><span class="ph" data-ph="x"></span></button>
+      <button type="button" class="v2-hdr-back acct-back" onclick="closeAccountPanel()" title="Wstecz" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
+      <span class="ph acct-head-icon" data-ph="account"></span>
+      <h1 class="acct-title">KONTO</h1>
     </div>
     <button type="button" class="acct-id" onclick="openNameEdit()">
       <span class="acct-av"><span class="ph" data-ph="account"></span></span>
@@ -2423,10 +2436,20 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="plansv2-customize-card">
       <div class="fbv2-header">
         <div class="fbv2-title-row">
-          <h1>IMIĘ</h1>
+          <h1>PROFIL</h1>
           <span class="ph plansv2-customize-close" data-ph="x" onclick="closeNameEdit()"></span>
         </div>
-        <p class="fbv2-subtitle">Podpisujemy tym kopie zapasowe i witamy Cię na pulpicie.<br>Puste pole to powrót do „Gościa”.</p>
+        <p class="fbv2-subtitle">Imię podpisuje kopie zapasowe i wita Cię na pulpicie.<br>Wszystko zostaje na tym urządzeniu.</p>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Zdjęcie</p>
+        <div class="acct-photo-row">
+          <span class="acct-photo-preview" id="acctPhotoPreview"><span class="ph" data-ph="account"></span></span>
+          <div class="acct-photo-btns">
+            <label class="acct-photo-pick">Wgraj zdjęcie<input type="file" accept="image/*" id="acctPhotoInput" hidden onchange="setAvatarFromFile(this.files[0]); this.value='';"></label>
+            <button type="button" class="acct-photo-clear" id="acctPhotoClearBtn" hidden onclick="clearAvatar()">Usuń zdjęcie</button>
+          </div>
+        </div>
       </div>
       <div class="plansv2-customize-section">
         <p class="plansv2-customize-label">Jak Cię nazywać?</p>
@@ -3819,6 +3842,7 @@ function openAccountPanel(){ renderAccountPanel(); showSheet('accountOverlay'); 
 function closeAccountPanel(){ hideSheet('accountOverlay'); }
 function openNameEdit(){
   document.getElementById('nameEditInput').value = profileName || '';
+  applyAvatarEverywhere();   // syncs the sheet's photo preview + clear button
   acctSheetOpen('nameEditOverlay');
   setTimeout(()=>{ try{ document.getElementById('nameEditInput').focus(); }catch(e){} }, 40);
 }
@@ -3832,6 +3856,57 @@ function saveNameEdit(){
   if(typeof renderDashboard === 'function') renderDashboard();
   renderAccountPanel();
   closeNameEdit();
+}
+
+/* ---------- avatar photo (local, no backend) ----------
+   Center-cropped to a 160px square JPEG data URL in localStorage. Shows in
+   the panel and on every account-entry button; falls back to the badge glyph. */
+const LS_AVATAR = "fitlog_avatar_v1";
+let avatarDataUrl = localStorage.getItem(LS_AVATAR) || '';
+const ACCT_ENTRY_SEL = '.acct-av, .acct-photo-preview, .dash-acct-btn, .gymv2-acct-btn, .plansv2-acct-btn, .histv2-acct-btn, .statsv2-acct-btn';
+function applyAvatarEverywhere(){
+  document.querySelectorAll(ACCT_ENTRY_SEL).forEach(el=>{
+    let img = el.querySelector('.acct-photo');
+    const glyph = el.querySelector('.ph');
+    if(avatarDataUrl){
+      if(!img){ img = document.createElement('img'); img.className = 'acct-photo'; img.alt = ''; el.appendChild(img); }
+      img.src = avatarDataUrl;
+      if(glyph) glyph.style.display = 'none';
+    } else {
+      if(img) img.remove();
+      if(glyph) glyph.style.display = '';
+    }
+  });
+  const cb = document.getElementById('acctPhotoClearBtn');
+  if(cb) cb.hidden = !avatarDataUrl;
+}
+function setAvatarFromFile(file){
+  if(!file || !/^image\//.test(file.type||'')){ toast(t('avatarBadFile','To nie jest zdjęcie')); return; }
+  const rd = new FileReader();
+  rd.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const S = 160, c = document.createElement('canvas');
+      c.width = S; c.height = S;
+      const ctx = c.getContext('2d');
+      const side = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
+      try{
+        avatarDataUrl = c.toDataURL('image/jpeg', 0.85);
+        localStorage.setItem(LS_AVATAR, avatarDataUrl);
+      }catch(e){ toast(t('avatarTooBig','Nie udało się zapisać zdjęcia')); return; }
+      applyAvatarEverywhere();
+      toast(t('avatarSaved','Zdjęcie ustawione'));
+    };
+    img.onerror = ()=> toast(t('avatarBadFile','Nie udało się wczytać zdjęcia'));
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(file);
+}
+function clearAvatar(){
+  avatarDataUrl = '';
+  localStorage.removeItem(LS_AVATAR);
+  applyAvatarEverywhere();
 }
 
 /* ---------- weight sheet ---------- */
@@ -3998,7 +4073,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.20.0";
+const APP_VERSION = "4.21.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4047,6 +4122,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.21.0": {
+    pl: [
+      {featured:true, icon:'account', badge:'Nowość', title:'Zdjęcie na avatar', text:'W panelu konta, w profilu, wgrasz własne zdjęcie. Pokaże się w panelu i na ikonie konta w rogu ekranu. Zdjęcie zostaje na tym urządzeniu, nigdzie go nie wysyłamy. Sam panel dostał też nagłówek jak reszta apki: strzałka wstecz i ikona zamiast krzyżyka.'},
+    ],
+    en: [
+      {featured:true, icon:'account', badge:'New', title:'Avatar photo', text:'In the account panel, under your profile, you can upload a photo. It shows in the panel and on the account icon in the screen corner. The photo stays on this device and is never uploaded anywhere. The panel header also matches the rest of the app now: a back arrow and icon instead of a close X.'},
+    ],
+  },
   "4.20.0": {
     pl: [
       {featured:true, icon:'stack', badge:'Nowość', title:'Plan układa się sam w dobrej kolejności', text:'BUILDER pokazuje partie mięśniowe od największych do najmniejszych, a każde dodane ćwiczenie wskakuje na swoje miejsce w dniu: najpierw ciężkie ruchy wielostawowe, potem izolacja, brzuch na końcu. Nie musisz nic sortować, plan wychodzi poukładany w trakcie budowania. Kolejność dalej przestawisz ręcznie w GYM. Plany generowane wychodzą tak samo.'},
@@ -9514,6 +9597,7 @@ showLoadScreenV2(()=>{}); // production boot splash — the "Mekkio" load screen
 updatePlanPillLabel();
 goRoute('dashboard'); // v3 "Mekkio" redesign is now the main layout — boot straight into it
 updateWelcomeGreeting();
+applyAvatarEverywhere(); // paint a saved avatar photo onto the entry buttons
 const onboardSeen = !!localStorage.getItem(LS_ONBOARD_SEEN);
 if(!onboardSeen){
   document.getElementById('onboardOverlay').classList.remove('hidden');
