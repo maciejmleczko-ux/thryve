@@ -1410,8 +1410,9 @@ body.pev2-bg{background:var(--m-red-page);}
 .pev2-day-chip.picked{box-shadow:inset 0 0 0 2px #2c2727;}
 /* Maciej, 2026-08-31: "wystarczy sama czarna ramka bez tego znaku
    ptaszka" — the ring alone is enough, dropped the corner checkmark. */
-.pev2-day-hint-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;}
-.pev2-day-hint{flex:1;margin:0;font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted);}
+.pev2-day-hint-row{display:flex;align-items:center;justify-content:space-between;gap:10px 12px;margin-top:6px;flex-wrap:wrap;}
+.pev2-day-hint{flex:1 1 140px;margin:0;font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted);}
+.pev2-day-actions{display:flex;gap:6px;flex-shrink:0;margin-left:auto;}
 .pev2-select-mode-btn{flex-shrink:0;border:none;border-radius:var(--m-r-pill);background:var(--m-plan-c-easy);color:#fff;padding:6px 20px;font-size:var(--m-fs-xs);font-weight:500;letter-spacing:.48px;cursor:pointer;font-family:inherit;}
 .pev2-select-mode-btn.hidden{display:none;}
 /* Contained as one card, not loose floating pieces — before any day is
@@ -2260,7 +2261,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <div class="pev2-day-row" id="planDayRowV2"></div>
           <div class="pev2-day-hint-row">
             <p class="pev2-day-hint" id="planDayHintTextV2" data-i18n="peV2DayHint">Wybierz dzień tygodnia i przypisz mu ćwiczenia</p>
-            <button type="button" class="pev2-select-mode-btn hidden" id="daySelectModeBtnV2" onclick="toggleDaySelectMode()" data-i18n="peV2SelectDays">Zaznacz dni</button>
+            <div class="pev2-day-actions">
+              <button type="button" class="pev2-select-mode-btn hidden" id="planDaySortBtnV2" onclick="sortPlanEditorDay()">Uporządkuj</button>
+              <button type="button" class="pev2-select-mode-btn hidden" id="daySelectModeBtnV2" onclick="toggleDaySelectMode()" data-i18n="peV2SelectDays">Zaznacz dni</button>
+            </div>
           </div>
           <div class="pev2-select-bar hidden" id="daySelectBarV2">
             <span class="pev2-select-count" id="daySelectCountV2"></span>
@@ -6987,6 +6991,33 @@ function confirmDaySelectClear(){
   exitDaySelectMode();
   planEditorRepaintGrid();
 }
+function planEditorDayRealCount(){
+  if(!editingPlan) return 0;
+  return (editingPlan.schedule[editingPlan.activeDay]||[]).filter(e=> !BOOKEND_EX_NAMES.has(e.name)).length;
+}
+/* "Uporządkuj ćwiczenia" — sort the active day's exercises by
+   exerciseOrderKey (big-before-small, compound-before-isolation, free
+   weights first). Warm-up / stretch bookends stay pinned to the ends.
+   Takes effect in GYM once the plan is saved; a hand-drag still wins. */
+function sortPlanEditorDay(){
+  if(!editingPlan) return;
+  const day = editingPlan.activeDay;
+  const list = editingPlan.schedule[day] || [];
+  const first = list[0], last = list[list.length - 1];
+  const lead = (first && BOOKEND_EX_NAMES.has(first.name)) ? [first] : [];
+  const trail = (last && last !== first && BOOKEND_EX_NAMES.has(last.name)) ? [last] : [];
+  const real = list.slice(lead.length, list.length - trail.length).filter(e=> !BOOKEND_EX_NAMES.has(e.name));
+  if(real.length < 2) return;
+  const sorted = sortExercisesByKey(real);
+  if(sorted.every((e, i) => e.name === real[i].name)){
+    toast(t('planOrderAlready','Kolejność już wygląda dobrze'));
+    return;
+  }
+  editingPlan.schedule[day] = [...lead, ...sorted, ...trail];
+  planEditorRepaintDayRow();
+  planEditorRepaintGrid();
+  toast(t('planOrderDone','Uporządkowano ćwiczenia'));
+}
 function renderPlanDayRowV2(){
   const row = document.getElementById('planDayRowV2');
   if(!row) return;
@@ -7003,13 +7034,16 @@ function renderPlanDayRowV2(){
   const hintEl = document.getElementById('planDayHintTextV2');
   const modeBtn = document.getElementById('daySelectModeBtnV2');
   const bar = document.getElementById('daySelectBarV2');
+  const sortBtn = document.getElementById('planDaySortBtnV2');
   if(!daySelectMode){
     if(hintEl) hintEl.textContent = t('planDayHint','Wybierz dzień tygodnia i przypisz mu ćwiczenia');
     if(modeBtn){ modeBtn.classList.toggle('hidden', daysWithExercises().length===0); modeBtn.textContent = t('daySelectModeBtn','Zaznacz dni'); }
+    if(sortBtn) sortBtn.classList.toggle('hidden', planEditorDayRealCount() < 2);
     if(bar) bar.classList.add('hidden');
     return;
   }
   if(modeBtn) modeBtn.classList.add('hidden');
+  if(sortBtn) sortBtn.classList.add('hidden');
   if(hintEl) hintEl.textContent = t('planDaySelectHint','Zaznacz dni, które chcesz zmienić.');
   if(bar) bar.classList.remove('hidden');
   const count = daySelected.size;
