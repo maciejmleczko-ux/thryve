@@ -639,11 +639,21 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:95;display:flex;justify-content:flex-end;}
 .acct-overlay.hidden{display:none;}
 .acct-panel{background:var(--m-panel);width:min(420px,100%);height:100%;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;}
+/* right drawer — same backdrop fade + slide-in curve as the bottom sheets,
+   just on the X axis (mSheetBackdropIn/Out reused) */
+@media (prefers-reduced-motion: no-preference){
+  .acct-overlay{animation:mSheetBackdropIn .24s ease-out;}
+  .acct-overlay.acct-closing{animation:mSheetBackdropOut .24s ease-in forwards;}
+  .acct-overlay .acct-panel{animation:acctDrawerIn .4s cubic-bezier(.22,1,.36,1);}
+  .acct-overlay.acct-closing .acct-panel{animation:acctDrawerOut .26s cubic-bezier(.4,0,1,1) forwards;}
+  @keyframes acctDrawerIn{from{transform:translateX(100%);}to{transform:translateX(0);}}
+  @keyframes acctDrawerOut{from{transform:translateX(0);}to{transform:translateX(100%);}}
+}
 /* header matches the tab-screen pattern: back-arrow + icon + title, no X */
 .acct-head{display:flex;align-items:center;gap:10px;padding:6px 0 14px;}
 .acct-back{margin-left:-6px;}
-.acct-head-icon{width:28px;height:28px;flex-shrink:0;}
-.acct-head-icon .ph, .acct-head-icon.ph{display:block;width:28px;height:28px;}
+.acct-head-icon{width:32px;height:32px;flex-shrink:0;}
+.acct-head-icon .ph, .acct-head-icon.ph{display:block;width:32px;height:32px;}
 .acct-head-icon svg{display:block;width:100%;height:100%;}
 .acct-title{margin:0;font-size:var(--m-fs-xl);font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
 .acct-id{display:flex;align-items:center;gap:13px;padding:4px 2px 16px;background:none;border:0;text-align:left;cursor:pointer;font-family:inherit;width:100%;}
@@ -655,7 +665,8 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-photo-preview{width:56px;height:56px;flex-shrink:0;border-radius:50%;overflow:hidden;background:var(--m-panel);display:flex;align-items:center;justify-content:center;}
 .acct-photo-preview .ph{width:56px;height:56px;display:block;}
 .acct-photo-btns{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
-.acct-photo-pick{display:inline-block;background:var(--m-orange);color:#fff;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;}
+.acct-photo-pick{display:inline-block;background:var(--m-orange);color:#fff;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;transition:transform .12s ease;}
+.acct-photo-pick:active{transform:scale(.96);}
 .acct-photo-clear{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);font-weight:600;cursor:pointer;padding:2px 0;font-family:inherit;}
 .acct-photo-clear[hidden]{display:none;}
 .acct-id-txt{display:flex;flex-direction:column;gap:2px;min-width:0;}
@@ -3838,8 +3849,24 @@ function renderAccountPanel(){
   const upd = document.getElementById('acctWeightUpd');
   if(upd){ const d = lastWeightDate(); upd.textContent = d ? 'Ostatnia aktualizacja wagi: ' + fmtDate(d) : ''; upd.hidden = !d; }
 }
-function openAccountPanel(){ renderAccountPanel(); showSheet('accountOverlay'); }
-function closeAccountPanel(){ hideSheet('accountOverlay'); }
+let _acctPanelCloseT = null;
+function openAccountPanel(){
+  renderAccountPanel();
+  const o = document.getElementById('accountOverlay');
+  clearTimeout(_acctPanelCloseT);
+  o.classList.remove('acct-closing');
+  showSheet('accountOverlay');
+}
+function closeAccountPanel(){
+  const o = document.getElementById('accountOverlay');
+  o.classList.add('acct-closing');   // backdrop fades, panel slides out (same curve as the sheets)
+  clearTimeout(_acctPanelCloseT);
+  _acctPanelCloseT = setTimeout(()=>{
+    o.classList.add('hidden');
+    o.classList.remove('acct-closing');
+    acctLockCheck();
+  }, 240);
+}
 function openNameEdit(){
   document.getElementById('nameEditInput').value = profileName || '';
   applyAvatarEverywhere();   // syncs the sheet's photo preview + clear button
