@@ -1410,9 +1410,8 @@ body.pev2-bg{background:var(--m-red-page);}
 .pev2-day-chip.picked{box-shadow:inset 0 0 0 2px #2c2727;}
 /* Maciej, 2026-08-31: "wystarczy sama czarna ramka bez tego znaku
    ptaszka" — the ring alone is enough, dropped the corner checkmark. */
-.pev2-day-hint-row{display:flex;align-items:center;justify-content:space-between;gap:10px 12px;margin-top:6px;flex-wrap:wrap;}
-.pev2-day-hint{flex:1 1 140px;margin:0;font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted);}
-.pev2-day-actions{display:flex;gap:6px;flex-shrink:0;margin-left:auto;}
+.pev2-day-hint-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;}
+.pev2-day-hint{flex:1;margin:0;font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted);}
 .pev2-select-mode-btn{flex-shrink:0;border:none;border-radius:var(--m-r-pill);background:var(--m-plan-c-easy);color:#fff;padding:6px 20px;font-size:var(--m-fs-xs);font-weight:500;letter-spacing:.48px;cursor:pointer;font-family:inherit;}
 .pev2-select-mode-btn.hidden{display:none;}
 /* Contained as one card, not loose floating pieces — before any day is
@@ -2260,10 +2259,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <div class="pev2-day-row" id="planDayRowV2"></div>
           <div class="pev2-day-hint-row">
             <p class="pev2-day-hint" id="planDayHintTextV2" data-i18n="peV2DayHint">Wybierz dzień tygodnia i przypisz mu ćwiczenia</p>
-            <div class="pev2-day-actions">
-              <button type="button" class="pev2-select-mode-btn hidden" id="planDaySortBtnV2" onclick="sortPlanEditorDay()">Uporządkuj</button>
-              <button type="button" class="pev2-select-mode-btn hidden" id="daySelectModeBtnV2" onclick="toggleDaySelectMode()" data-i18n="peV2SelectDays">Zaznacz dni</button>
-            </div>
+            <button type="button" class="pev2-select-mode-btn hidden" id="daySelectModeBtnV2" onclick="toggleDaySelectMode()" data-i18n="peV2SelectDays">Zaznacz dni</button>
           </div>
           <div class="pev2-select-bar hidden" id="daySelectBarV2">
             <span class="pev2-select-count" id="daySelectCountV2"></span>
@@ -3194,14 +3190,19 @@ const GROUP_LABELS_EN = {
   'Barki (tylne)':'Shoulders (rear)', 'Nogi (całość)':'Legs (overall)',
   'Klatka piersiowa (dół)':'Chest (lower)', 'Brzuch (skos)':'Abs (obliques)',
 };
+// Order = biggest muscle groups first, small isolation + core last. The
+// BUILDER's section list and the exercise picker both render in this order,
+// so picking top-to-bottom already lays a day out sensibly; togglePlanExercise
+// then slots each pick at its exerciseOrderKey position so tap order doesn't
+// matter. Same priority the auto plan generator uses (PLANSV2_MUSCLE_BUCKETS).
 const PLAN_EX_GROUPS = [
-  {key:'Klatka', match:['klatka'], pl:'Klatka', en:'Chest'},
-  {key:'Plecy', match:['plecy'], pl:'Plecy', en:'Back'},
   {key:'Nogi', match:['nog','uda','czworogł','dwugł','łydk','pośladk'], pl:'Nogi', en:'Legs'},
+  {key:'Plecy', match:['plecy'], pl:'Plecy', en:'Back'},
+  {key:'Klatka', match:['klatka'], pl:'Klatka', en:'Chest'},
   {key:'Barki', match:['bark'], pl:'Barki', en:'Shoulders'},
+  {key:'Brzuch', match:['brzuch'], pl:'Brzuch', en:'Abs'},
   {key:'Biceps', match:['biceps'], pl:'Biceps', en:'Biceps'},
   {key:'Triceps', match:['triceps'], pl:'Triceps', en:'Triceps'},
-  {key:'Brzuch', match:['brzuch'], pl:'Brzuch', en:'Abs'},
   {key:'Wlasne', match:[], pl:'Własne', en:'Custom'}, // fallback — always last, matches anything unrecognized
 ];
 function muscleGroupBucket(group){
@@ -4048,10 +4049,10 @@ const DASH_REST_DAY_PL = [
 const CHANGELOG = {
   "4.20.0": {
     pl: [
-      {featured:true, icon:'stack', badge:'Nowość', title:'Kolejność ćwiczeń w planie', text:'W edytorze planu jest teraz przycisk „Uporządkuj”. Sortuje ćwiczenia dnia tak, jak zwykle układa się trening: najpierw ciężkie ruchy wielostawowe i duże partie, potem izolacja, brzuch na końcu. Rozgrzewka i rozciąganie zostają na swoich miejscach. To podpowiedź, kolejność dalej przestawisz ręcznie. Plany generowane wychodzą już poukładane.'},
+      {featured:true, icon:'stack', badge:'Nowość', title:'Plan układa się sam w dobrej kolejności', text:'BUILDER pokazuje partie mięśniowe od największych do najmniejszych, a każde dodane ćwiczenie wskakuje na swoje miejsce w dniu: najpierw ciężkie ruchy wielostawowe, potem izolacja, brzuch na końcu. Nie musisz nic sortować, plan wychodzi poukładany w trakcie budowania. Kolejność dalej przestawisz ręcznie w GYM. Plany generowane wychodzą tak samo.'},
     ],
     en: [
-      {featured:true, icon:'stack', badge:'New', title:'Exercise order in your plan', text:'The plan editor now has a Reorder button. It sorts the day\'s exercises the way you\'d normally structure a session: heavy multi-joint lifts and big muscles first, isolation after, core last. Warm-up and stretch stay put. It\'s a suggestion — you can still drag exercises into any order. Auto-generated plans already come out sorted.'},
+      {featured:true, icon:'stack', badge:'New', title:'Plans order themselves', text:'BUILDER lists muscle groups largest to smallest, and every exercise you add drops into its place in the day: heavy compound lifts first, isolation after, core last. Nothing to sort, the plan comes out ordered as you build it. You can still drag exercises into any order in GYM. Generated plans come out the same way.'},
     ],
   },
   "4.19.0": {
@@ -6998,33 +6999,6 @@ function confirmDaySelectClear(){
   exitDaySelectMode();
   planEditorRepaintGrid();
 }
-function planEditorDayRealCount(){
-  if(!editingPlan) return 0;
-  return (editingPlan.schedule[editingPlan.activeDay]||[]).filter(e=> !BOOKEND_EX_NAMES.has(e.name)).length;
-}
-/* "Uporządkuj ćwiczenia" — sort the active day's exercises by
-   exerciseOrderKey (big-before-small, compound-before-isolation, free
-   weights first). Warm-up / stretch bookends stay pinned to the ends.
-   Takes effect in GYM once the plan is saved; a hand-drag still wins. */
-function sortPlanEditorDay(){
-  if(!editingPlan) return;
-  const day = editingPlan.activeDay;
-  const list = editingPlan.schedule[day] || [];
-  const first = list[0], last = list[list.length - 1];
-  const lead = (first && BOOKEND_EX_NAMES.has(first.name)) ? [first] : [];
-  const trail = (last && last !== first && BOOKEND_EX_NAMES.has(last.name)) ? [last] : [];
-  const real = list.slice(lead.length, list.length - trail.length).filter(e=> !BOOKEND_EX_NAMES.has(e.name));
-  if(real.length < 2) return;
-  const sorted = sortExercisesByKey(real);
-  if(sorted.every((e, i) => e.name === real[i].name)){
-    toast(t('planOrderAlready','Kolejność już wygląda dobrze'));
-    return;
-  }
-  editingPlan.schedule[day] = [...lead, ...sorted, ...trail];
-  planEditorRepaintDayRow();
-  planEditorRepaintGrid();
-  toast(t('planOrderDone','Uporządkowano ćwiczenia'));
-}
 function renderPlanDayRowV2(){
   const row = document.getElementById('planDayRowV2');
   if(!row) return;
@@ -7041,16 +7015,13 @@ function renderPlanDayRowV2(){
   const hintEl = document.getElementById('planDayHintTextV2');
   const modeBtn = document.getElementById('daySelectModeBtnV2');
   const bar = document.getElementById('daySelectBarV2');
-  const sortBtn = document.getElementById('planDaySortBtnV2');
   if(!daySelectMode){
     if(hintEl) hintEl.textContent = t('planDayHint','Wybierz dzień tygodnia i przypisz mu ćwiczenia');
     if(modeBtn){ modeBtn.classList.toggle('hidden', daysWithExercises().length===0); modeBtn.textContent = t('daySelectModeBtn','Zaznacz dni'); }
-    if(sortBtn) sortBtn.classList.toggle('hidden', planEditorDayRealCount() < 2);
     if(bar) bar.classList.add('hidden');
     return;
   }
   if(modeBtn) modeBtn.classList.add('hidden');
-  if(sortBtn) sortBtn.classList.add('hidden');
   if(hintEl) hintEl.textContent = t('planDaySelectHint','Zaznacz dni, które chcesz zmienić.');
   if(bar) bar.classList.remove('hidden');
   const count = daySelected.size;
@@ -7198,8 +7169,23 @@ function refreshPlanEditorV2Scroll(){
 function togglePlanExercise(ex){
   const dayExercises = editingPlan.schedule[editingPlan.activeDay];
   const idx = dayExercises.findIndex(e=>e.name===ex.name);
-  if(idx===-1) dayExercises.push({...ex});
-  else dayExercises.splice(idx,1);
+  if(idx !== -1){ dayExercises.splice(idx,1); }
+  else {
+    // insert at the exerciseOrderKey position (big muscles → small,
+    // compound → isolation) so the day stays ordered as it's built,
+    // regardless of the order the tiles were tapped. Warm-up / stretch
+    // bookends (if the plan already has them) stay pinned to the ends.
+    const newEx = {...ex};
+    const lead = (dayExercises[0] && BOOKEND_EX_NAMES.has(dayExercises[0].name)) ? 1 : 0;
+    const last = dayExercises[dayExercises.length-1];
+    const trail = (dayExercises.length > lead && last && BOOKEND_EX_NAMES.has(last.name)) ? 1 : 0;
+    const key = exerciseOrderKey(newEx);
+    let pos = dayExercises.length - trail;
+    for(let i = lead; i < dayExercises.length - trail; i++){
+      if(exerciseOrderKey(dayExercises[i]) > key){ pos = i; break; }
+    }
+    dayExercises.splice(pos, 0, newEx);
+  }
   planEditorRepaintDayRow();
   planEditorRepaintGrid();
 }
