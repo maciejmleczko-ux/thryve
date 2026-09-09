@@ -665,21 +665,24 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-foot{margin:auto 0 0;padding-top:18px;font-size:var(--m-fs-2xs);color:var(--m-muted);text-align:center;line-height:1.5;}
 /* above the account panel (95) AND the GYM finish screen (9500) — weight /
    edit-kcal sheets can be opened straight from the finish screen. */
+/* Account sub-sheets (weight / body data / edit kcal / rename) ride the
+   shared .plansv2-customize-* bottom sheet. z-index sits above the account
+   panel (95) and the GYM finish screen (9500) — weight / kcal sheets open
+   straight from the finish screen too. Only the few genuinely new bits
+   below; everything else reuses .plansv2-customize-* / .exv2-field /
+   .plansv2-choice-*. */
 #nameEditOverlay,#weightSheet,#bodyDataSheet,#editKcalSheet{z-index:9600;}
-/* body-data / weight / edit-kcal sheets reuse .onboard-box (old light palette) */
-.acct-fl{display:block;font-size:var(--m-fs-2xs);letter-spacing:.08em;text-transform:uppercase;color:var(--m-muted);margin:0 0 6px;}
-.onboard-box input[type=number],.onboard-box input[type=date]{margin-bottom:14px;}
-.acct-seg{display:flex;gap:7px;margin-bottom:14px;}
-.acct-seg button{flex:1;border:1px solid var(--border);background:var(--light-2);color:var(--text-dark);border-radius:10px;padding:11px;font-size:var(--m-fs-sm);font-weight:700;font-family:inherit;cursor:pointer;}
-.acct-seg button.on{background:var(--orange);border-color:var(--orange);color:#fff;}
-.acct-mini{font-size:var(--m-fs-2xs);color:#8a8585;margin:-4px 0 14px;}
-.acct-wlog{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px;}
-.acct-wlog-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 12px;font-size:var(--m-fs-sm);border-top:1px solid var(--border);}
+.acct-num-row{display:flex;gap:12px;}
+.acct-num-row.solo{max-width:172px;}
+.acct-num-row.name{max-width:260px;}
+.acct-sheet-hint{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:#2c2727;}
+.acct-wlog{border:1px solid #c7c6cb;border-radius:var(--m-r-sm);overflow:hidden;background:var(--m-card);}
+.acct-wlog-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px;font-size:var(--m-fs-sm);color:var(--m-ink);border-top:1px solid rgba(0,0,0,.06);}
 .acct-wlog-row:first-child{border-top:0;}
-.acct-wlog-row .d{color:#8a8585;}
-.acct-wlog-row .d b{color:var(--text-dark);}
-.acct-wlog-empty{padding:11px 12px;font-size:var(--m-fs-2xs);color:#8a8585;}
-.acct-revert{display:block;width:100%;text-align:center;background:none;border:0;color:var(--orange);font-size:var(--m-fs-2xs);font-weight:700;font-family:inherit;padding:2px 0 12px;cursor:pointer;}
+.acct-wlog-row .d{color:var(--m-muted);}
+.acct-wlog-row .d b{color:var(--m-ink);font-weight:600;}
+.acct-wlog-empty{padding:11px 14px;font-size:var(--m-fs-2xs);color:var(--m-muted);}
+.acct-revert{align-self:flex-start;background:none;border:0;color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;font-family:inherit;padding:2px 0;cursor:pointer;}
 .acct-revert[hidden]{display:none;}
 /* GYM finish — calories row */
 .gymfin-kcal{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--m-panel);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:11px 14px;margin-top:8px;font-family:inherit;cursor:pointer;text-align:left;}
@@ -2393,70 +2396,131 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<!-- Rename sheet — reachable any time from the account panel. Separate from
-     #onboardOverlay so it doesn't re-trigger the first-run plan/install steps. -->
-<div class="onboard-overlay hidden" id="nameEditOverlay" onclick="if(event.target===this) closeNameEdit()">
-  <div class="onboard-box">
-    <h3>Jak Cię nazywać?</h3>
-    <p>Tym imieniem podpisujemy kopie zapasowe i witamy Cię na pulpicie. Możesz je wyczyścić — wrócisz do „Gościa".</p>
-    <input type="text" id="nameEditInput" placeholder="np. Maciek" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false">
-    <div class="onboard-actions">
-      <button type="button" class="skip" onclick="closeNameEdit()">Anuluj</button>
-      <button type="button" class="save" onclick="saveNameEdit()">Zapisz</button>
+<!-- Account sub-sheets — all ride the shared .plansv2-customize-* bottom
+     sheet (grabber + drag-to-close), same shell as "Dodaj ćwiczenie" /
+     "Opinia". Separate from #onboardOverlay so the rename doesn't
+     re-trigger first-run steps. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="nameEditOverlay" onclick="if(event.target===this) closeNameEdit()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-header">
+        <div class="fbv2-title-row">
+          <h1>IMIĘ</h1>
+          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeNameEdit()"></span>
+        </div>
+        <p class="fbv2-subtitle">Podpisujemy tym kopie zapasowe i witamy Cię na pulpicie.<br>Puste pole to powrót do „Gościa”.</p>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Jak Cię nazywać?</p>
+        <div class="acct-num-row name">
+          <div class="exv2-field">
+            <input type="text" id="nameEditInput" placeholder="np. Maciek" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false">
+          </div>
+        </div>
+      </div>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-cancel" onclick="closeNameEdit()">ANULUJ</button>
+        <button type="button" class="plansv2-customize-apply" onclick="saveNameEdit()">ZAPISZ</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Weight sheet — quick dated weigh-in, appends to weightLog (one entry/day). -->
-<div class="onboard-overlay hidden" id="weightSheet" onclick="if(event.target===this) closeWeightSheet()">
-  <div class="onboard-box">
-    <h3>Masa ciała</h3>
-    <p>Zapiszemy dzień pomiaru. Waż się o tej samej porze — najlepiej rano, na czczo.</p>
-    <label class="acct-fl" for="weightInput">Waga (kg)</label>
-    <input type="number" inputmode="decimal" step="0.1" min="30" max="300" id="weightInput" placeholder="np. 74,0">
-    <label class="acct-fl" for="weightDateInput">Data pomiaru</label>
-    <input type="date" id="weightDateInput">
-    <label class="acct-fl">Ostatnie wpisy</label>
-    <div class="acct-wlog" id="weightLogList"></div>
-    <div class="onboard-actions">
-      <button type="button" class="skip" onclick="closeWeightSheet()">Anuluj</button>
-      <button type="button" class="save" onclick="saveWeightSheet()">Zapisz pomiar</button>
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="weightSheet" onclick="if(event.target===this) closeWeightSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-header">
+        <div class="fbv2-title-row">
+          <h1>MASA CIAŁA</h1>
+          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeWeightSheet()"></span>
+        </div>
+        <p class="fbv2-subtitle">Zapiszemy dzisiejszą datę.<br>Waż się o tej samej porze, najlepiej rano na czczo.</p>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Waga</p>
+        <div class="acct-num-row solo">
+          <div class="exv2-field">
+            <input type="number" inputmode="decimal" step="0.1" min="30" max="300" id="weightInput" placeholder="kg">
+          </div>
+        </div>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Ostatnie wpisy</p>
+        <div class="acct-wlog" id="weightLogList"></div>
+      </div>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-cancel" onclick="closeWeightSheet()">ANULUJ</button>
+        <button type="button" class="plansv2-customize-apply" onclick="saveWeightSheet()">ZAPISZ POMIAR</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Body-data sheet — rarely-changed: height / age / sex. Weight lives in its own sheet. -->
-<div class="onboard-overlay hidden" id="bodyDataSheet" onclick="if(event.target===this) closeBodyDataSheet()">
-  <div class="onboard-box">
-    <h3>Dane do kalorii</h3>
-    <p>Używamy ich tylko do szacowania kalorii spalonych na treningu. Zostają na tym urządzeniu.</p>
-    <label class="acct-fl" for="heightInput">Wzrost (cm)</label>
-    <input type="number" inputmode="numeric" step="1" min="120" max="230" id="heightInput" placeholder="np. 181">
-    <label class="acct-fl" for="ageInput">Wiek</label>
-    <input type="number" inputmode="numeric" step="1" min="12" max="100" id="ageInput" placeholder="np. 29">
-    <label class="acct-fl">Płeć</label>
-    <div class="acct-seg" id="sexSeg">
-      <button type="button" data-sex="f" onclick="pickSex('f')">Kobieta</button>
-      <button type="button" data-sex="m" onclick="pickSex('m')">Mężczyzna</button>
-    </div>
-    <p class="acct-mini">Sama masa ciała wystarczy, żeby zacząć liczyć.</p>
-    <div class="onboard-actions">
-      <button type="button" class="skip" onclick="closeBodyDataSheet()">Anuluj</button>
-      <button type="button" class="save" onclick="saveBodyDataSheet()">Zapisz</button>
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="bodyDataSheet" onclick="if(event.target===this) closeBodyDataSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-header">
+        <div class="fbv2-title-row">
+          <h1>DANE DO KALORII</h1>
+          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeBodyDataSheet()"></span>
+        </div>
+        <p class="fbv2-subtitle">Używamy ich tylko do szacowania kalorii.<br>Sama masa ciała wystarczy, żeby zacząć liczyć.</p>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Wzrost i wiek</p>
+        <div class="acct-num-row">
+          <div class="exv2-field">
+            <label>Wzrost (cm)</label>
+            <input type="number" inputmode="numeric" step="1" min="120" max="230" id="heightInput" placeholder="181">
+          </div>
+          <div class="exv2-field">
+            <label>Wiek</label>
+            <input type="number" inputmode="numeric" step="1" min="12" max="100" id="ageInput" placeholder="29">
+          </div>
+        </div>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Płeć</p>
+        <div class="plansv2-choice-row" id="sexSeg">
+          <button type="button" class="plansv2-choice-chip" data-sex="f" onclick="pickSex('f')">Kobieta</button>
+          <button type="button" class="plansv2-choice-chip" data-sex="m" onclick="pickSex('m')">Mężczyzna</button>
+        </div>
+      </div>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-cancel" onclick="closeBodyDataSheet()">ANULUJ</button>
+        <button type="button" class="plansv2-customize-apply" onclick="saveBodyDataSheet()">ZAPISZ</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Edit-kcal sheet — override the estimate for one workout; stored as kcalUser. -->
-<div class="onboard-overlay hidden" id="editKcalSheet" onclick="if(event.target===this) closeEditKcal()">
-  <div class="onboard-box">
-    <h3>Spalone kalorie</h3>
-    <p>To szacunek z Twojej masy ciała i czasu treningu. Popraw, jeśli masz dokładniejszy odczyt — np. z zegarka albo pasa na klatkę.</p>
-    <input type="number" inputmode="numeric" step="1" min="0" max="3000" id="kcalInput">
-    <button type="button" class="acct-revert" id="kcalRevertBtn" hidden onclick="revertKcal()"></button>
-    <div class="onboard-actions">
-      <button type="button" class="skip" onclick="closeEditKcal()">Anuluj</button>
-      <button type="button" class="save" onclick="saveEditKcal()">Zapisz</button>
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="editKcalSheet" onclick="if(event.target===this) closeEditKcal()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-header">
+        <div class="fbv2-title-row">
+          <h1>SPALONE KALORIE</h1>
+          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeEditKcal()"></span>
+        </div>
+        <p class="fbv2-subtitle">To szacunek z Twojej masy ciała i czasu treningu.<br>Popraw, jeśli masz dokładniejszy odczyt z zegarka.</p>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Kalorie</p>
+        <div class="acct-num-row solo">
+          <div class="exv2-field">
+            <input type="number" inputmode="numeric" step="1" min="0" max="3000" id="kcalInput" placeholder="kcal">
+          </div>
+        </div>
+        <button type="button" class="acct-revert" id="kcalRevertBtn" hidden onclick="revertKcal()"></button>
+      </div>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-cancel" onclick="closeEditKcal()">ANULUJ</button>
+        <button type="button" class="plansv2-customize-apply" onclick="saveEditKcal()">ZAPISZ</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3658,14 +3722,42 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
 const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','editKcalSheet'];
+function acctLockCheck(){
+  const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
+  if(!anyOpen) document.documentElement.classList.remove('modal-lock');
+}
+/* #accountOverlay is the right-side panel (not a .plansv2-customize sheet) */
 function showSheet(id){
   document.getElementById(id).classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');
 }
 function hideSheet(id){
   document.getElementById(id).classList.add('hidden');
-  const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
-  if(!anyOpen) document.documentElement.classList.remove('modal-lock');
+  acctLockCheck();
+}
+/* the four sub-sheets ride the shared bottom-sheet shell — reuse its
+   reset + closing animation, only the lock check is account-aware. */
+const _acctSheetT = {};
+function acctSheetOpen(id){
+  resetPlansCustomizeSheet(id);
+  document.getElementById(id).classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+}
+function acctSheetClose(id, viaDrag){
+  const overlay = document.getElementById(id);
+  if(!overlay) return;
+  const mover = overlay.querySelector('.plansv2-customize-stack');
+  const finish = ()=>{
+    overlay.classList.add('hidden');
+    overlay.classList.remove('plansv2-customize-closing');
+    overlay.style.opacity = '';
+    if(mover){ mover.classList.remove('m-sheet-snapback'); mover.style.transform = ''; }
+    _acctSheetT[id] = null;
+    acctLockCheck();
+  };
+  clearTimeout(_acctSheetT[id]);
+  if(viaDrag){ _acctSheetT[id] = setTimeout(finish, 20); }
+  else { overlay.classList.add('plansv2-customize-closing'); _acctSheetT[id] = setTimeout(finish, 260); }
 }
 function renderAccountPanel(){
   const named = !!profileName;
@@ -3687,10 +3779,10 @@ function openAccountPanel(){ renderAccountPanel(); showSheet('accountOverlay'); 
 function closeAccountPanel(){ hideSheet('accountOverlay'); }
 function openNameEdit(){
   document.getElementById('nameEditInput').value = profileName || '';
-  showSheet('nameEditOverlay');
+  acctSheetOpen('nameEditOverlay');
   setTimeout(()=>{ try{ document.getElementById('nameEditInput').focus(); }catch(e){} }, 40);
 }
-function closeNameEdit(){ hideSheet('nameEditOverlay'); }
+function closeNameEdit(viaDrag){ acctSheetClose('nameEditOverlay', viaDrag); }
 function saveNameEdit(){
   const val = document.getElementById('nameEditInput').value.trim();
   profileName = val;
@@ -3706,7 +3798,7 @@ function saveNameEdit(){
 function renderWeightLogList(){
   const el = document.getElementById('weightLogList');
   if(!el) return;
-  if(!weightLog.length){ el.innerHTML = '<div class="acct-wlog-empty">Brak pomiarów — to będzie pierwszy.</div>'; return; }
+  if(!weightLog.length){ el.innerHTML = '<div class="acct-wlog-empty">Brak pomiarów. To będzie pierwszy.</div>'; return; }
   const rows = weightLog.slice(-5).reverse();
   el.innerHTML = rows.map((e,idx)=>{
     const prev = rows[idx+1];
@@ -3719,19 +3811,15 @@ function renderWeightLogList(){
 function openWeightSheet(){
   const cw = currentWeightKg();
   document.getElementById('weightInput').value = cw != null ? cw : '';
-  document.getElementById('weightDateInput').value = todayStr();
-  document.getElementById('weightDateInput').max = todayStr();
   renderWeightLogList();
-  showSheet('weightSheet');
+  acctSheetOpen('weightSheet');
   setTimeout(()=>{ try{ document.getElementById('weightInput').focus(); }catch(e){} }, 40);
 }
-function closeWeightSheet(){ hideSheet('weightSheet'); }
+function closeWeightSheet(viaDrag){ acctSheetClose('weightSheet', viaDrag); }
 function saveWeightSheet(){
   const kg = parseFloat(String(document.getElementById('weightInput').value).replace(',', '.'));
-  const date = document.getElementById('weightDateInput').value || todayStr();
   if(!(kg >= 30 && kg <= 300)){ toast('Podaj wagę między 30 a 300 kg'); return; }
-  if(date > todayStr()){ toast('Data nie może być z przyszłości'); return; }
-  logWeight(kg, date);
+  logWeight(kg, todayStr());
   renderAccountPanel();
   if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
   if(document.getElementById('histDetailV2') && selectedHistDateV2) renderHistDetailV2(false);
@@ -3743,15 +3831,15 @@ function saveWeightSheet(){
 let _pickSex = null;
 function pickSex(s){
   _pickSex = s;
-  document.querySelectorAll('#sexSeg button').forEach(b=> b.classList.toggle('on', b.dataset.sex === s));
+  document.querySelectorAll('#sexSeg .plansv2-choice-chip').forEach(b=> b.classList.toggle('active', b.dataset.sex === s));
 }
 function openBodyDataSheet(){
   document.getElementById('heightInput').value = bodyData.heightCm || '';
   document.getElementById('ageInput').value = bodyData.age || '';
   pickSex(bodyData.sex || null);
-  showSheet('bodyDataSheet');
+  acctSheetOpen('bodyDataSheet');
 }
-function closeBodyDataSheet(){ hideSheet('bodyDataSheet'); }
+function closeBodyDataSheet(viaDrag){ acctSheetClose('bodyDataSheet', viaDrag); }
 function saveBodyDataSheet(){
   const h = parseInt(document.getElementById('heightInput').value, 10);
   const a = parseInt(document.getElementById('ageInput').value, 10);
@@ -3777,10 +3865,10 @@ function openEditKcal(wid){
   const rb = document.getElementById('kcalRevertBtn');
   if(est != null && w.kcalUser != null){ rb.hidden = false; rb.textContent = 'Wróć do szacunku (' + est + ')'; }
   else rb.hidden = true;
-  showSheet('editKcalSheet');
+  acctSheetOpen('editKcalSheet');
   setTimeout(()=>{ try{ document.getElementById('kcalInput').focus(); }catch(e){} }, 40);
 }
-function closeEditKcal(){ hideSheet('editKcalSheet'); }
+function closeEditKcal(viaDrag){ acctSheetClose('editKcalSheet', viaDrag); }
 function afterKcalEdit(){
   closeEditKcal();
   if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
@@ -3870,7 +3958,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.19.2";
+const APP_VERSION = "4.19.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5018,6 +5106,8 @@ mSheetDrag('exercisePopupOverlayV2', closeExercisePopupV2);
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
+['nameEditOverlay','weightSheet','bodyDataSheet','editKcalSheet']
+  .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 
 /* ---- "Zamień ćwiczenie" sheet (stage 3, idea #5) — rides .m-sheet ---- */
 const _mSheetTimers = {};
