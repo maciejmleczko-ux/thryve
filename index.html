@@ -638,7 +638,11 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 /* ---------- account panel (guest, no backend) ---------- */
 .acct-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:95;display:flex;justify-content:flex-end;}
 .acct-overlay.hidden{display:none;}
-.acct-panel{background:var(--m-panel);width:min(420px,100%);height:100%;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;}
+.acct-panel{background:var(--m-panel);width:min(420px,100%);height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(14px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;}
+/* every block keeps its natural height — otherwise flexbox shrinks the tall
+   cards to fit the viewport (rows clip under .acct-rows overflow:hidden) and
+   the panel never scrolls. flex-shrink:0 makes overflow-y:auto do its job. */
+.acct-panel > *{flex-shrink:0;}
 /* right drawer — same backdrop fade + slide-in curve as the bottom sheets,
    just on the X axis (mSheetBackdropIn/Out reused) */
 @media (prefers-reduced-motion: no-preference){
@@ -4143,9 +4147,11 @@ const CHANGELOG = {
   "4.23.0": {
     pl: [
       {featured:true, icon:'upload-simple', badge:'Zmiana', title:'Kopia zapasowa obejmuje całą apkę', text:'Kopia zapasowa zapisuje teraz też log wagi, dane do kalorii, zdjęcie profilowe, notatki do ćwiczeń i ukryte plany. Wcześniej zostawały tylko na jednym urządzeniu. Zrób świeżą kopię, żeby mieć w niej wszystko.'},
+      'Poprawka: na krótszych ekranach panel konta bywał ścięty na sekcji „Dane do kalorii”, a wiersze rozjeżdżały się względem karty. Panel przewija się teraz do końca.',
     ],
     en: [
       {featured:true, icon:'upload-simple', badge:'Change', title:'Backup now covers the whole app', text:'A backup now also stores your weight log, calorie body data, profile photo, exercise notes and hidden plans. Until now those stayed on one device only. Make a fresh backup so it has everything.'},
+      'Fix: on shorter screens the account panel could be clipped at the calorie-data section, with rows drifting out of the card. It scrolls all the way now.',
     ],
   },
   "4.22.0": {
