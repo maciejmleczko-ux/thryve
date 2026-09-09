@@ -3601,10 +3601,21 @@ const GYM_PLAN_C_EXTRA = [
   {name:"Kettlebell Halo", group:"Barki", sets:2, repLow:10, repHigh:12, rest:"45-60s", icon:"kettlebell_halo", equipment:"kettlebell"},
   {name:"Turkish Get-Up", group:"Brzuch", sets:3, repLow:3, repHigh:5, rest:"90s", icon:"turkish_get_up", equipment:"kettlebell"},
 ];
+/* Multi-joint lifts — everything else in the library is single-joint /
+   isolation. Drives exercise ordering (compound before isolation within a
+   muscle group); see exerciseOrderKey(). Match is by exact name. */
+const COMPOUND_EXERCISES = new Set([
+  "Chest Press","Lat Pulldown","Leg Press Machine","Shoulder Press",
+  "Incline Chest","Seated Row","Barbell Deadlift","Dumbbell Row","Triceps Dip",
+  "Dumbbell Shoulder Press","Dumbbell Walking Lunge","Hack Squat Machine",
+  "Dumbbell Bench Press","Barbell Bench Press","Hip Thrust","Chest Dip",
+  "Barbell Back Squat","Kettlebell Swing","Kettlebell Goblet Squat",
+  "Kettlebell Deadlift","Kettlebell Row","Turkish Get-Up",
+]);
 const BUILTIN_EXERCISES = [
-  ...GYM_PLAN.A.map(e => ({...e, day:'A'})),
-  ...GYM_PLAN.B.map(e => ({...e, day:'B'})),
-  ...GYM_PLAN_C_EXTRA.map(e => ({...e, day:'C'})),
+  ...GYM_PLAN.A.map(e => ({...e, day:'A', compound: COMPOUND_EXERCISES.has(e.name)})),
+  ...GYM_PLAN.B.map(e => ({...e, day:'B', compound: COMPOUND_EXERCISES.has(e.name)})),
+  ...GYM_PLAN_C_EXTRA.map(e => ({...e, day:'C', compound: COMPOUND_EXERCISES.has(e.name)})),
 ];
 function getExerciseLibrary(){
   return [...BUILTIN_EXERCISES, ...customExercises.map(e => ({...e, day:'Własne'}))];
@@ -3976,7 +3987,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.19.5";
+const APP_VERSION = "4.20.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6372,6 +6383,31 @@ const PLANSV2_MUSCLE_BUCKETS = [
 ];
 function planv2MatchesEquipment(ex, equipment){
   return equipment==='mix' || ex.equipment===equipment;
+}
+
+/* ---------- exercise ordering ----------
+   Suggested order = big muscle groups before small, multi-joint before
+   isolation, free weights before machines. Same group priority the auto
+   plan generator already uses (PLANSV2_MUSCLE_BUCKETS). A suggestion, not
+   a lock — the GYM list stays hand-draggable. */
+const EX_EQUIP_RANK = { hantle:0, kettlebell:0, 'wolne ciężary':0, sztanga:0, maszyny:1, guma:1, 'masa ciała':1 };
+function exerciseGroupRank(group){
+  const i = PLANSV2_MUSCLE_BUCKETS.findIndex(b => b.match(group || ''));
+  return i === -1 ? PLANSV2_MUSCLE_BUCKETS.length : i;
+}
+function exerciseOrderKey(ex){
+  const g = exerciseGroupRank(ex && ex.group);
+  const c = (ex && ex.compound) ? 0 : 1;
+  const e = (ex && EX_EQUIP_RANK[ex.equipment] != null) ? EX_EQUIP_RANK[ex.equipment] : 1;
+  return g * 100 + c * 10 + e;
+}
+/* Stable sort of an exercise array by the key, with an optional pinned
+   name forced to the front (priority). Returns a new array. */
+function sortExercisesByKey(list, pinnedName){
+  return list
+    .map((ex, i) => ({ ex, i, k: (pinnedName && ex.name === pinnedName) ? -1 : exerciseOrderKey(ex) }))
+    .sort((a, b) => a.k - b.k || a.i - b.i)
+    .map(x => x.ex);
 }
 // The actual selection: cycle through the given muscle buckets in
 // priority order, taking one not-yet-picked, equipment-matching
