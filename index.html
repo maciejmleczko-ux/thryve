@@ -4095,7 +4095,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.23.1";
+const APP_VERSION = "4.23.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -8011,7 +8011,10 @@ function applyRepeatLastWorkout(){
   repeatMode = { date: last.date, names, prefill };
   sessionExercises = [];
   extraGymTiles = [];
-  markGymActivity();
+  // Loading a repeat only arranges the grid — it isn't training yet. The
+  // session clock starts on the first real tile tap (onTileTapV2 →
+  // markGymActivity), same as a fresh session; calling it here made the
+  // plan card jump straight to "1 min".
   persistGymSession();
   if(currentRoute !== 'gym-v2') goRoute('gym-v2');
   else renderGymV2();
