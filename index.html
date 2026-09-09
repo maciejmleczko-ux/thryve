@@ -4091,7 +4091,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.22.1";
+const APP_VERSION = "4.23.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4140,6 +4140,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.23.0": {
+    pl: [
+      {featured:true, icon:'upload-simple', badge:'Zmiana', title:'Kopia zapasowa obejmuje całą apkę', text:'Kopia zapasowa zapisuje teraz też log wagi, dane do kalorii, zdjęcie profilowe, notatki do ćwiczeń i ukryte plany. Wcześniej zostawały tylko na jednym urządzeniu. Zrób świeżą kopię, żeby mieć w niej wszystko.'},
+    ],
+    en: [
+      {featured:true, icon:'upload-simple', badge:'Change', title:'Backup now covers the whole app', text:'A backup now also stores your weight log, calorie body data, profile photo, exercise notes and hidden plans. Until now those stayed on one device only. Make a fresh backup so it has everything.'},
+    ],
+  },
   "4.22.0": {
     pl: [
       {featured:true, icon:'upload-simple', badge:'Zmiana', title:'Kopia zapasowa w panelu konta', text:'Pobieranie i wgrywanie kopii zapasowej przeniosło się z Historii do panelu konta, do sekcji „Kopia zapasowa”. Nagłówek Historii jest teraz czystszy.'},
@@ -9508,6 +9516,9 @@ function exportData(){
     trainingPlans, customExercises,
     favoriteExercises: [...favoriteExercises],
     starredPlanId, exerciseOrder,
+    weightLog, bodyData, exerciseNotes,
+    avatar: avatarDataUrl || null,
+    deletedBuiltinPlans: [...deletedBuiltinPlans],
     exportedAt: new Date().toISOString(),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
@@ -9576,6 +9587,19 @@ function applyImport(mode){
     }
     if(Array.isArray(data.favoriteExercises)) data.favoriteExercises.forEach(n=> favoriteExercises.add(n));
     if(!starredPlanId && data.starredPlanId) starredPlanId = data.starredPlanId;
+    if(Array.isArray(data.weightLog)){
+      const seenDates = new Set(weightLog.map(e=>e.date));
+      data.weightLog.forEach(e=>{ if(e && e.date && !seenDates.has(e.date)) weightLog.push(e); });
+      weightLog.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+    }
+    if(data.bodyData && typeof data.bodyData === 'object'){
+      bodyData = Object.assign({}, data.bodyData, bodyData);
+    }
+    if(data.exerciseNotes && typeof data.exerciseNotes === 'object'){
+      for(const k in data.exerciseNotes){ if(!(k in exerciseNotes)) exerciseNotes[k] = data.exerciseNotes[k]; }
+    }
+    if(!avatarDataUrl && typeof data.avatar === 'string' && data.avatar) avatarDataUrl = data.avatar;
+    if(Array.isArray(data.deletedBuiltinPlans)) data.deletedBuiltinPlans.forEach(id=> deletedBuiltinPlans.add(id));
   } else {
     workouts = data.workouts;
     runs = data.runs;
@@ -9584,6 +9608,13 @@ function applyImport(mode){
     if(Array.isArray(data.favoriteExercises)) favoriteExercises = new Set(data.favoriteExercises);
     if(Array.isArray(data.exerciseOrder)) exerciseOrder = data.exerciseOrder;
     starredPlanId = data.starredPlanId || null;
+    if(Array.isArray(data.weightLog)){
+      weightLog = data.weightLog.slice().sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+    }
+    if(data.bodyData && typeof data.bodyData === 'object') bodyData = data.bodyData;
+    if(data.exerciseNotes && typeof data.exerciseNotes === 'object') exerciseNotes = data.exerciseNotes;
+    if('avatar' in data) avatarDataUrl = (typeof data.avatar === 'string' && data.avatar) ? data.avatar : '';
+    if(Array.isArray(data.deletedBuiltinPlans)) deletedBuiltinPlans = new Set(data.deletedBuiltinPlans);
   }
   trainingPlans.forEach(p=> ensureWarmupStretch(p.schedule));
   saveWorkouts(workouts);
@@ -9593,6 +9624,13 @@ function applyImport(mode){
   saveFavoriteExercises();
   if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId); else localStorage.removeItem(LS_STARRED_PLAN);
   saveExerciseOrderList(exerciseOrder);
+  saveWeightLog(weightLog);
+  saveBodyDataLS(bodyData);
+  saveExerciseNotes();
+  saveDeletedBuiltinPlans();
+  if(avatarDataUrl) localStorage.setItem(LS_AVATAR, avatarDataUrl); else localStorage.removeItem(LS_AVATAR);
+  applyAvatarEverywhere();
+  recomputeWorkoutCalories();
   // Re-render whatever screen is currently showing. goRoute() with the
   // same route skips the slide (oldEl === newEl) and just re-runs that
   // route's render.
