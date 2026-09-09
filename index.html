@@ -2718,6 +2718,13 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
             <span class="ph newex-v2-select-caret" data-ph="caret-down"></span>
           </div>
         </div>
+        <div class="plansv2-customize-section">
+          <p class="plansv2-customize-label">Typ</p>
+          <div class="plansv2-choice-row" id="newExTypeRowV2">
+            <button type="button" class="plansv2-choice-chip active" data-compound="1" onclick="setNewExType(1)">Wielostawowe</button>
+            <button type="button" class="plansv2-choice-chip" data-compound="0" onclick="setNewExType(0)">Izolowane</button>
+          </div>
+        </div>
         <div class="newex-v2-bento">
           <div class="newex-v2-bento-row">
             <p class="newex-v2-bento-label">Serie</p>
@@ -5506,9 +5513,16 @@ function renderExercisePopupV2(animate){
    own render functions, the two plan editors): the old flow stays
    completely untouched. */
 let newExerciseContextV2 = 'gym';
+let _newExCompound = true;
+function setNewExType(c){
+  _newExCompound = Number(c) === 1;
+  document.querySelectorAll('#newExTypeRowV2 .plansv2-choice-chip')
+    .forEach(b => b.classList.toggle('active', Number(b.dataset.compound) === Number(c)));
+}
 function openNewExerciseFormV2(prefillGroup, context){
   newExerciseContextV2 = context || 'gym';
   document.getElementById('newExTitleV2').value = '';
+  setNewExType(1);
   // prefillGroup comes from PLAN_EX_GROUPS' own pl label (see
   // buildAddCustomExerciseTile()), which is exactly the <option> value
   // set — a direct match, no fallback needed. Falls back to the
@@ -5538,7 +5552,7 @@ function saveNewExerciseV2(){
   const sets = Math.max(1, parseInt(document.getElementById('newExSetsV2').value) || 3);
   let repLow = Math.max(1, parseInt(document.getElementById('newExRepLowV2').value) || 8);
   let repHigh = Math.max(repLow, parseInt(document.getElementById('newExRepHighV2').value) || 12);
-  const newEx = {name, group, sets, repLow, repHigh, rest:t('asNeeded',"wg uznania"), icon: null};
+  const newEx = {name, group, sets, repLow, repHigh, rest:t('asNeeded',"wg uznania"), icon: null, compound: _newExCompound};
   customExercises.push(newEx);
   saveCustomExercises(customExercises);
   trackEvent('/event/add-custom-exercise', 'Dodano własne ćwiczenie');
@@ -6443,10 +6457,10 @@ function generatePlanScheduleV2(goal, difficulty, equipment, frequency){
   const params = PLANSV2_GOAL_PARAMS[goal];
   const count = PLANSV2_DIFFICULTY_COUNT[difficulty];
   const days = PLANSV2_FREQUENCY_DAYS[frequency] || PLANSV2_FREQUENCY_DAYS[3];
-  const exercises = planv2PickExercises(count, equipment).map(ex=>({
-    name: ex.name, group: ex.group, icon: ex.icon,
+  const exercises = sortExercisesByKey(planv2PickExercises(count, equipment).map(ex=>({
+    name: ex.name, group: ex.group, icon: ex.icon, compound: ex.compound, equipment: ex.equipment,
     sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest,
-  }));
+  })));   // big-before-small, compound-before-isolation within a group
   const schedule = scheduleOnDays(days, exercises); // same full exercise list every session — still genuinely fullbody, only the day count changes
   ensureWarmupStretch(schedule);
   return schedule;
@@ -6465,10 +6479,10 @@ function generateSplitPlanScheduleV2(splitId, goal, difficulty, equipment){
   const count = PLANSV2_DIFFICULTY_COUNT[difficulty];
   const schedule = emptySchedule();
   Object.keys(dayRoles).forEach(day=>{
-    const exercises = planv2PickExercisesForRole(count, equipment, dayRoles[day]).map(ex=>({
-      name: ex.name, group: ex.group, icon: ex.icon,
+    const exercises = sortExercisesByKey(planv2PickExercisesForRole(count, equipment, dayRoles[day]).map(ex=>({
+      name: ex.name, group: ex.group, icon: ex.icon, compound: ex.compound, equipment: ex.equipment,
       sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest,
-    }));
+    })));
     schedule[day] = exercises;
   });
   ensureWarmupStretch(schedule);
