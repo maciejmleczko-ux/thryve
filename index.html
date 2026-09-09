@@ -3581,7 +3581,7 @@ function afterOnboardingStep(){
    weight effective on the day of each workout. No backend, no login. */
 const LS_WEIGHT_LOG = "fitlog_weight_log_v1";   // [{kg:Number, date:"YYYY-MM-DD"}] ascending
 const LS_BODY_DATA  = "fitlog_body_data_v1";    // {heightCm, age, sex:"f"|"m"}
-const KCAL_MODEL_VERSION = 1;
+const KCAL_MODEL_VERSION = 2;
 function loadWeightLog(){ try{ const a = JSON.parse(localStorage.getItem(LS_WEIGHT_LOG)); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function saveWeightLog(a){ localStorage.setItem(LS_WEIGHT_LOG, JSON.stringify(a)); }
 function loadBodyData(){ try{ return JSON.parse(localStorage.getItem(LS_BODY_DATA)) || {}; }catch(e){ return {}; } }
@@ -3605,23 +3605,28 @@ function logWeight(kg, date){
   saveWeightLog(weightLog);
   recomputeWorkoutCalories();
 }
-function sessionMet(durationMin, setCount){
-  if(!durationMin || durationMin <= 0) return 5;
-  const density = setCount / durationMin;   // sets per minute ~ how short the rests are
-  if(density >= 0.75) return 8;             // circuit pace
-  if(density >= 0.45) return 6;             // brisk strength
-  return 3.5;                               // long rests / heavy work
+/* Model v2 — hybrid: mechanical-work term (tonnage) + a background-metabolism
+   term for the whole session. Constants fit by least squares to 4 of Maciej's
+   Apple Watch sessions (bodyweight ~96.5 kg): K=83, base MET=2.4, ~7% MAE.
+   The estimate stays editable, so a bad-day session that runs hot on HR (which
+   this model can't see) is a one-tap correction. */
+const KCAL_TONNAGE_K = 83;   // ~1 kcal per 83 kg of lifted tonnage
+const KCAL_BASE_MET  = 2.4;  // light background activity for the gym session
+function workoutTonnage(w, bodyweightKg){
+  let t = 0;
+  w.exercises.forEach(e=> e.sets.forEach(s=>{
+    if(!(s.reps > 0)) return;
+    if(s.weight > 0) t += s.weight * s.reps;
+    else if(bodyweightKg) t += s.reps * bodyweightKg * 0.5;   // pull-ups / dips / push-ups ~ half bodyweight
+  }));
+  return t;
 }
-function estimateKcal(durationMin, met, weightKg){
-  if(!durationMin || !weightKg) return null;
-  return Math.round(met * 3.5 * weightKg / 200 * durationMin);
-}
-function workoutSetCount(w){ return w.exercises.reduce((s,e)=> s + e.sets.length, 0); }
 function computeWorkoutKcal(w){
   const wt = weightAtDate(w.date);
   if(!wt || !w.durationMin) return { kcalEstimated:null, metUsed:null, bodyweightKg: wt || null, kcalModelVersion: KCAL_MODEL_VERSION };
-  const met = sessionMet(w.durationMin, workoutSetCount(w));
-  return { kcalEstimated: estimateKcal(w.durationMin, met, wt), metUsed: met, bodyweightKg: wt, kcalModelVersion: KCAL_MODEL_VERSION };
+  const workKcal = workoutTonnage(w, wt) / KCAL_TONNAGE_K;
+  const baseKcal = KCAL_BASE_MET * 3.5 * wt / 200 * w.durationMin;
+  return { kcalEstimated: Math.round(workKcal + baseKcal), metUsed: KCAL_BASE_MET, bodyweightKg: wt, kcalModelVersion: KCAL_MODEL_VERSION };
 }
 function workoutKcalShown(w){
   if(w.kcalUser != null) return w.kcalUser;
@@ -3633,7 +3638,9 @@ function recomputeWorkoutCalories(){
   let changed = false;
   workouts.forEach(w=>{
     const c = computeWorkoutKcal(w);
-    if(c.kcalEstimated != null && (w.kcalEstimated !== c.kcalEstimated || w.bodyweightKg !== c.bodyweightKg)){
+    if(c.kcalEstimated == null) return;
+    if(w.kcalEstimated !== c.kcalEstimated || w.metUsed !== c.metUsed
+       || w.bodyweightKg !== c.bodyweightKg || w.kcalModelVersion !== c.kcalModelVersion){
       w.kcalEstimated = c.kcalEstimated; w.metUsed = c.metUsed;
       w.bodyweightKg = c.bodyweightKg; w.kcalModelVersion = c.kcalModelVersion;
       changed = true;
@@ -3911,7 +3918,7 @@ const DASH_REST_DAY_PL = [
 const CHANGELOG = {
   "4.19.0": {
     pl: [
-      {featured:true, icon:'flame', badge:'Nowość', title:'Spalone kalorie na treningu', text:'Po zapisaniu treningu ekran „Gratulacje" pokazuje szacunek spalonych kalorii — liczony z Twojej masy ciała i czasu treningu. Możesz go poprawić, jeśli masz dokładniejszy odczyt z zegarka. Masę ciała podajesz w panelu konta (z datą — Statystyki pokazują też jej trend), a Statystyki mają nowy kafel kalorii.'},
+      {featured:true, icon:'flame', badge:'Nowość', title:'Spalone kalorie na treningu', text:'Po zapisaniu treningu ekran „Gratulacje" pokazuje szacunek spalonych kalorii — liczony z Twojej masy ciała, objętości i czasu treningu. Możesz go poprawić, jeśli masz dokładniejszy odczyt z zegarka. Masę ciała podajesz w panelu konta (z datą — Statystyki pokazują też jej trend), a Statystyki mają nowy kafel kalorii.'},
     ],
     en: [
       {featured:true, icon:'flame', badge:'New', title:'Calories burned per workout', text:'After you save a workout the "Congrats" screen shows an estimate of the calories burned — worked out from your bodyweight and the session length. You can correct it if your watch gave you a better number. You enter your weight in the account panel (dated — Stats also trends it), and Stats has a new calories tile.'},
@@ -4339,6 +4346,7 @@ let workouts = loadWorkouts();
 let runs = loadRuns();
 let customExercises = loadCustomExercises();
 if(migrateLegacyExerciseNames(workouts)){ saveWorkouts(workouts); }
+recomputeWorkoutCalories();   // re-estimate on model-version bumps / new weight data
 
 function trackEvent(path, title){
   if(window.goatcounter && typeof window.goatcounter.count === 'function'){
