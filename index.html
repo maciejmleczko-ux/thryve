@@ -4255,7 +4255,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.30.4";
+const APP_VERSION = "4.30.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -9256,11 +9256,15 @@ function statsV2RingSample(ramp,t){
   return { c: ramp[ramp.length-1][1], o: ramp[ramp.length-1][2] };
 }
 function statsV2RingPt(cx,cy,r,deg){ const a=(deg-90)*Math.PI/180; return { x:cx+r*Math.cos(a), y:cy+r*Math.sin(a) }; }
-function statsV2RingArc(cx,cy,r,sw,startDeg,sweepDeg,ramp,baseIdx,glowId,glowFromT){
+// filterId/filterFromT: segments sampled at ramp position >= filterFromT
+// are wrapped in <g filter="url(#filterId)"> — used for the drop shadow,
+// keeping the near-invisible grey tail (t below filterFromT) OUT of it so
+// it doesn't cast a faint shadow on the track.
+function statsV2RingArc(cx,cy,r,sw,startDeg,sweepDeg,ramp,baseIdx,filterId,filterFromT){
   if(sweepDeg<=0) return { svg:'', segs:0 };
   const N=Math.max(4,Math.round(sweepDeg/3));
-  const from = glowFromT == null ? 0 : glowFromT;
-  let plain='', glowy='';
+  const from = filterFromT == null ? 0 : filterFromT;
+  let plain='', filtered='';
   for(let i=0;i<N;i++){
     const t=(i+0.5)/N;
     // each segment reaches ~1.6° past the next start so the round caps
@@ -9269,9 +9273,9 @@ function statsV2RingArc(cx,cy,r,sw,startDeg,sweepDeg,ramp,baseIdx,glowId,glowFro
     const p1=statsV2RingPt(cx,cy,r,startDeg+sweepDeg*((i+1)/N)+(i<N-1?1.6:0));
     const col=statsV2RingSample(ramp,t);
     const seg=`<path class="statsv2-ring-seg" style="--s:${baseIdx+i}" d="M ${p0.x.toFixed(2)} ${p0.y.toFixed(2)} A ${r} ${r} 0 0 1 ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}" fill="none" stroke="${col.c}" stroke-opacity="${col.o.toFixed(3)}" stroke-width="${sw}" stroke-linecap="round"/>`;
-    if(glowId && t >= from) glowy += seg; else plain += seg;
+    if(filterId && t >= from) filtered += seg; else plain += seg;
   }
-  const svg = (plain ? plain : '') + (glowy ? `<g filter="url(#${glowId})">${glowy}</g>` : '');
+  const svg = plain + (filtered ? `<g filter="url(#${filterId})">${filtered}</g>` : '');
   return { svg, segs: N };
 }
 
@@ -9332,8 +9336,10 @@ function renderStatsV2Overview(){
   const ringExtra = Math.max(0, week.done - week.total);
   // no arc-wide glow filter — a hard plain/glow segment boundary left a
   // bright blob mid-ring. The comet's "świetlisty" head is carried by the
-  // dedicated head bloom circle instead.
-  const ringMain = statsV2RingArc(66, 66, R, 13, 0, ringSweepFrac*360, STATSV2_RING_RAMP, 0, null, 0);
+  // dedicated head bloom circle instead. At 4/4+ the whole comet gets a
+  // drop shadow — but only from where it turns colour (t >= .10), so the
+  // grey melt-in tail doesn't cast a faint shadow on the track.
+  const ringMain = statsV2RingArc(66, 66, R, 13, 0, ringSweepFrac*360, STATSV2_RING_RAMP, 0, ringFull ? ringShadowId : null, 0.10);
   const ringHeadDeg = ringSweepFrac * 360;
   const ringHead = statsV2RingPt(66, 66, R, ringHeadDeg);
   // the head dot lands right after the LAST arc segment (segments stagger
@@ -9413,7 +9419,7 @@ function renderStatsV2Overview(){
                 <filter id="${ringBloomId}" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4.5"/></filter>
               </defs>
               <circle cx="66" cy="66" r="${R}" fill="none" stroke="${STATSV2_RING_TRACK}" stroke-width="13"/>
-              ${ringFull ? `<g filter="url(#${ringShadowId})">${ringMain.svg}</g>` : ringMain.svg}
+              ${ringMain.svg}
               ${week.total > 0 ? `<circle class="statsv2-ring-head" style="animation-delay:${ringHeadDelay}s" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="10" fill="#ffb877" opacity="0.5" filter="url(#${ringBloomId})"/>
               <circle class="statsv2-ring-head" style="animation-delay:${ringHeadDelay}s" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="6.5" fill="#ffc07a"/>` : ''}
             </svg>
