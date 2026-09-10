@@ -4231,7 +4231,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.27.2";
+const APP_VERSION = "4.27.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -9052,11 +9052,12 @@ function renderStatsV2ExerciseRow(activeName){
    <stroke> linearGradient flattens out on a variable-length arc).
    Segments carry --s for the tail→head "draw" stagger. */
 const STATSV2_RING_TRACK = '#2b2b30';
-// [position 0..1, "#rrggbb", opacity] — a comet: transparent tip, a long
-// grey tail that sits ON the track colour, then a quick warm ramp to a
-// bright head. Same ramp at every fill level — at 100% the bright head
-// laps back to 12 o'clock and closes over its own grey tail.
-const STATSV2_RING_RAMP      = [[0,STATSV2_RING_TRACK,0],[.14,STATSV2_RING_TRACK,1],[.34,STATSV2_RING_TRACK,1],[.48,'#7c2310',1],[.66,'#ff3300',1],[.85,'#ff8a3d',1],[1,'#ffc07a',1]];
+// [position 0..1, "#rrggbb", opacity] — a comet: it begins exactly at
+// 12 o'clock (0°) painted in the track colour, so the tail is present but
+// invisible against the track, then a long grey stretch and a quick warm
+// ramp to a bright head. Same ramp at every fill level — at 100% the
+// bright head laps back to 12 and closes over its own grey tail.
+const STATSV2_RING_RAMP      = [[0,STATSV2_RING_TRACK,1],[.32,STATSV2_RING_TRACK,1],[.46,'#7c2310',1],[.66,'#ff3300',1],[.85,'#ff8a3d',1],[1,'#ffc07a',1]];
 const STATSV2_RING_RAMP_OVER = [[0,'#ff3300',1],[1,'#ff3300',1]];                     // second coil — pure accent, hard contrast
 function statsV2RingHex(h){ h=h.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
 function statsV2RingMix(c1,c2,t){ const a=statsV2RingHex(c1),b=statsV2RingHex(c2); return `rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`; }
@@ -9104,7 +9105,7 @@ function renderStatsV2Overview(){
   // dedicated head bloom circle instead.
   const ringMain = statsV2RingArc(66, 66, R, 13, 0, ringMainFrac*360, STATSV2_RING_RAMP, 0, null, 0);
   const ringOverA = ringOver > 0 ? statsV2RingArc(66, 66, R, 13, 0, ringOver*360, STATSV2_RING_RAMP_OVER, ringMain.segs + 4, null, 0) : { svg:'', segs:0 };
-  const ringHeadShadow = ringOver > 0 || ringFull;   // head laps its own tail — lift it with a shadow
+  const ringHeadShadow = ringOver > 0;   // the 2nd-coil head needs its own lift; a full comet is shadowed whole
   const ringHeadDeg = (ringOver > 0 ? ringOver : ringMainFrac) * 360;
   const ringHead = statsV2RingPt(66, 66, R, ringHeadDeg);
 
@@ -9180,7 +9181,7 @@ function renderStatsV2Overview(){
                 <filter id="${ringBloomId}" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4.5"/></filter>
               </defs>
               <circle cx="66" cy="66" r="${R}" fill="none" stroke="${STATSV2_RING_TRACK}" stroke-width="13"/>
-              ${ringMain.svg}
+              ${ringFull ? `<g filter="url(#${ringShadowId})">${ringMain.svg}</g>` : ringMain.svg}
               ${ringOverA.svg ? `<g filter="url(#${ringShadowId})">${ringOverA.svg}</g>` : ''}
               ${week.total > 0 ? `<circle class="statsv2-ring-head" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="10" fill="#ffb877" opacity="0.5" filter="url(#${ringBloomId})"/>
               <circle class="statsv2-ring-head" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="6.5" fill="${ringOver > 0 ? 'var(--m-orange)' : '#ffc07a'}"${ringHeadShadow ? ` filter="url(#${ringShadowId})"` : ''}/>` : ''}
