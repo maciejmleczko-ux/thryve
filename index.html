@@ -4115,7 +4115,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.24.0";
+const APP_VERSION = "4.24.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -9123,10 +9123,13 @@ function renderStatsV2Detail(name){
             </defs>
             <path class="statsv2-draw-path" d="${dPath}" fill="none" ${statsV2Stroke(detailGradId,'#ff8a3d')} stroke-width="2.5" stroke-linecap="round"/>
           </svg>
-          ${chartPts.map((p,i)=> i===chartPts.length-1
-            ? `<div class="statsv2-chart-dot" style="width:13px;height:13px;background:#ffc542;left:${(p.x/dW*100).toFixed(1)}%;top:${(p.y/(dH+16)*100).toFixed(1)}%;"></div>`
-            : (series.prMonths.has(p.key) ? `<div class="statsv2-chart-dot" style="width:8px;height:8px;background:#221b17;border:2px solid #ff8a3d;left:${(p.x/dW*100).toFixed(1)}%;top:${(p.y/(dH+16)*100).toFixed(1)}%;"></div>` : '')
-          ).join('')}
+          ${chartPts.map((p,i)=>{
+            const L = (p.x/dW*100).toFixed(1), T = (p.y/(dH+16)*100).toFixed(1);
+            if(i===chartPts.length-1) return `<div class="statsv2-chart-dot" style="width:13px;height:13px;background:#ffc542;left:${L}%;top:${T}%;"></div>`;
+            if(series.prMonths.has(p.key)) return `<div class="statsv2-chart-dot" style="width:8px;height:8px;background:#221b17;border:2px solid #ff8a3d;left:${L}%;top:${T}%;"></div>`;
+            // a yellow dot on every other plotted point (each training day / month on the line)
+            return `<div class="statsv2-chart-dot" style="width:6px;height:6px;background:#ffc542;left:${L}%;top:${T}%;"></div>`;
+          }).join('')}
         </div>
         <div class="statsv2-detail-wave-labels">${dLabels.map(p=> p.month ? `<span>${MONTH_ABBR_PL[p.month-1]}</span>` : `<span>${new Date(p.date+'T00:00:00').getDate()}.${String(new Date(p.date+'T00:00:00').getMonth()+1).padStart(2,'0')}</span>`).join('')}</div>
       </div>
