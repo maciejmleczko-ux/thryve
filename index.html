@@ -1802,7 +1802,7 @@ body.pev2-bg{background:var(--m-red-page);}
 /* overview chart carousel — horizontal scroll-snap strip; vertical page
    scroll is untouched (touch-action:pan-x lets the browser hand vertical
    drags back to the page). */
-.statsv2-caro{display:flex;align-items:stretch;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;margin:0 -7px;}
+.statsv2-caro{display:flex;align-items:stretch;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;margin:0 -7px;}
 .statsv2-caro::-webkit-scrollbar{display:none;}
 /* Each slide is a full container-width column with a 7px inner gutter, so
    snapped cards keep 14px of clear space between them (no colour bleed
@@ -2612,6 +2612,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           </div>
         </div>
         <button type="button" class="acct-revert" id="kcalRevertBtn" hidden onclick="revertKcal()"></button>
+        <p class="acct-hint" id="kcalLearnHint" hidden></p>
       </div>
       <div class="plansv2-customize-actions">
         <button type="button" class="plansv2-customize-cancel" onclick="closeEditKcal()">ANULUJ</button>
@@ -3829,12 +3830,51 @@ function workoutTonnage(w, bodyweightKg){
   }));
   return t;
 }
+
+/* ---------- personal calorie factor ----------
+   The formula can't see heart rate, so once you've corrected the estimate
+   a few times we scale every other estimate by the MEDIAN of
+   (your value ÷ raw formula estimate). Kicks in at KCAL_FACTOR_MIN_EDITS
+   corrections; clamped so one odd edit can't skew it; median so it's
+   robust. Stored so it survives reloads and rides along in the backup
+   implicitly (re-derived from each workout's kcalUser on import). */
+const LS_KCAL_FACTOR = "fitlog_kcal_factor_v1";
+const KCAL_FACTOR_MIN_EDITS = 3;
+const KCAL_FACTOR_LO = 0.6, KCAL_FACTOR_HI = 1.6;
+let kcalPersonalFactor = (()=>{ const v = parseFloat(localStorage.getItem(LS_KCAL_FACTOR)); return (v >= KCAL_FACTOR_LO && v <= KCAL_FACTOR_HI) ? v : 1; })();
+function rawWorkoutKcal(w){   // the pure formula, before any personal factor
+  const wt = weightAtDate(w.date);
+  if(!wt || !w.durationMin) return null;
+  return workoutTonnage(w, wt) / KCAL_TONNAGE_K + KCAL_BASE_MET * 3.5 * wt / 200 * w.durationMin;
+}
+function kcalEditRatios(){
+  const out = [];
+  (Array.isArray(workouts) ? workouts : []).forEach(w=>{
+    if(!(w.kcalUser > 0)) return;
+    const raw = rawWorkoutKcal(w);
+    if(raw > 0) out.push(w.kcalUser / raw);
+  });
+  return out;
+}
+function kcalEditCount(){ return kcalEditRatios().length; }
+function recomputeKcalFactor(){
+  const s = kcalEditRatios().sort((a,b)=> a - b);
+  let f = 1;
+  if(s.length >= KCAL_FACTOR_MIN_EDITS){
+    const m = Math.floor(s.length / 2);
+    const med = s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2;
+    f = Math.min(KCAL_FACTOR_HI, Math.max(KCAL_FACTOR_LO, med));
+  }
+  kcalPersonalFactor = f;
+  if(f === 1) localStorage.removeItem(LS_KCAL_FACTOR);
+  else localStorage.setItem(LS_KCAL_FACTOR, String(Math.round(f * 1000) / 1000));
+}
+
 function computeWorkoutKcal(w){
   const wt = weightAtDate(w.date);
-  if(!wt || !w.durationMin) return { kcalEstimated:null, metUsed:null, bodyweightKg: wt || null, kcalModelVersion: KCAL_MODEL_VERSION };
-  const workKcal = workoutTonnage(w, wt) / KCAL_TONNAGE_K;
-  const baseKcal = KCAL_BASE_MET * 3.5 * wt / 200 * w.durationMin;
-  return { kcalEstimated: Math.round(workKcal + baseKcal), metUsed: KCAL_BASE_MET, bodyweightKg: wt, kcalModelVersion: KCAL_MODEL_VERSION };
+  const raw = rawWorkoutKcal(w);
+  if(raw == null) return { kcalEstimated:null, metUsed:null, bodyweightKg: wt || null, kcalModelVersion: KCAL_MODEL_VERSION, kcalFactor: kcalPersonalFactor };
+  return { kcalEstimated: Math.round(raw * kcalPersonalFactor), metUsed: KCAL_BASE_MET, bodyweightKg: wt, kcalModelVersion: KCAL_MODEL_VERSION, kcalFactor: kcalPersonalFactor };
 }
 function workoutKcalShown(w){
   if(w.kcalUser != null) return w.kcalUser;
@@ -3843,14 +3883,16 @@ function workoutKcalShown(w){
 }
 function recomputeWorkoutCalories(){
   if(typeof workouts === 'undefined' || !Array.isArray(workouts)) return;
+  recomputeKcalFactor();
   let changed = false;
   workouts.forEach(w=>{
     const c = computeWorkoutKcal(w);
     if(c.kcalEstimated == null) return;
     if(w.kcalEstimated !== c.kcalEstimated || w.metUsed !== c.metUsed
-       || w.bodyweightKg !== c.bodyweightKg || w.kcalModelVersion !== c.kcalModelVersion){
+       || w.bodyweightKg !== c.bodyweightKg || w.kcalModelVersion !== c.kcalModelVersion || w.kcalFactor !== c.kcalFactor){
       w.kcalEstimated = c.kcalEstimated; w.metUsed = c.metUsed;
       w.bodyweightKg = c.bodyweightKg; w.kcalModelVersion = c.kcalModelVersion;
+      w.kcalFactor = c.kcalFactor;
       changed = true;
     }
   });
@@ -4074,6 +4116,19 @@ function openEditKcal(wid){
   const rb = document.getElementById('kcalRevertBtn');
   if(est != null && w.kcalUser != null){ rb.hidden = false; rb.textContent = 'Wróć do szacunku (' + est + ')'; }
   else rb.hidden = true;
+  const hint = document.getElementById('kcalLearnHint');
+  if(hint){
+    const n = kcalEditCount();
+    if(n >= KCAL_FACTOR_MIN_EDITS){
+      hint.hidden = false;
+      hint.textContent = `Dostrajam szacunki do Twoich poprawek (${n}). Mnożnik ×${kcalPersonalFactor.toFixed(2).replace('.', ',')}.`;
+    } else if(n > 0 || w.kcalUser != null){
+      hint.hidden = false;
+      hint.textContent = `Zbieram Twoje poprawki (${n}/${KCAL_FACTOR_MIN_EDITS}). Po ${KCAL_FACTOR_MIN_EDITS} zacznę dostrajać pozostałe szacunki.`;
+    } else {
+      hint.hidden = true;
+    }
+  }
   acctSheetOpen('editKcalSheet');
   setTimeout(()=>{ try{ document.getElementById('kcalInput').focus(); }catch(e){} }, 40);
 }
@@ -4087,6 +4142,7 @@ function revertKcal(){
   const w = workouts.find(x=> x.id === editKcalWorkoutId);
   if(!w) return;
   w.kcalUser = null; saveWorkouts(workouts);
+  recomputeWorkoutCalories();   // one fewer correction — refit the personal factor
   afterKcalEdit();
 }
 function saveEditKcal(){
@@ -4095,6 +4151,7 @@ function saveEditKcal(){
   const v = parseInt(document.getElementById('kcalInput').value, 10);
   if(!(v >= 0 && v <= 3000)){ toast('Podaj wartość 0–3000'); return; }
   w.kcalUser = v; saveWorkouts(workouts);
+  recomputeWorkoutCalories();   // new correction — refit the personal factor + re-estimate the rest
   afterKcalEdit();
 }
 
@@ -4167,7 +4224,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.25.1";
+const APP_VERSION = "4.26.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4216,6 +4273,16 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.26.0": {
+    pl: [
+      {featured:true, icon:'flame', badge:'Nowość', title:'Kalorie uczą się z Twoich poprawek', text:'Po trzech poprawkach spalonych kalorii aplikacja liczy medianę Twoich korekt i dostraja tym mnożnikiem wszystkie pozostałe szacunki. Cofnięcie poprawek albo zejście poniżej trzech wyłącza dostrajanie. Na ekranie edycji widać, ile poprawek już zebrano i jaki jest mnożnik.'},
+      'Wykres „Progres ciężaru” rysuje się teraz po kolei: najpierw linia, potem kropki od lewej do prawej, na końcu wskakują etykiety rekordów.',
+    ],
+    en: [
+      {featured:true, icon:'flame', badge:'New', title:'Calories learn from your corrections', text:'After three calorie edits the app takes the median of your corrections and scales every other estimate by that factor. Undoing edits or dropping below three turns the tuning off. The edit screen shows how many corrections you have made and the current factor.'},
+      'The "Weight progress" chart now animates in sequence: the line first, then the dots left to right, then the record labels pop in.',
+    ],
+  },
   "4.25.0": {
     pl: [
       {featured:true, icon:'chart-line', badge:'Zmiana', title:'Statystyki z karuzelą wykresów', text:'Ekran Statystyki ma teraz karuzelę. Przesuwasz palcem w lewo i prawo między trzema panelami: objętość miesiąc po miesiącu, objętość od początku roku i liczba treningów w miesiącu. Kalorie i masa ciała siedzą nad karuzelą jako dwa stałe kafle ze strzałką trendu w górę albo w dół. Wykresy wjeżdżają z animacją: linia się rysuje, słupki rosną po kolei, kropki pojawiają się na końcu.'},
@@ -9325,12 +9392,17 @@ function statsV2HideDrawn(container){
     path.style.strokeDashoffset = len;   // fully hidden until its card is in view
   });
   // the dots / PR tags sit ON the line, so keep them hidden too — draw()
-  // fades them back in near the end of the line reaching them
+  // wakes them once the line reaches them
   container.querySelectorAll('.statsv2-chart-dot, .statsv2-pr-tag').forEach(d=>{
     if(d.closest('.statsv2-caro')) return;
     d.style.animation = 'none';
     d.style.transition = 'none';
     d.style.opacity = '0';
+  });
+  // PR tags also start slightly shrunk so they pop, not just fade
+  container.querySelectorAll('.statsv2-pr-tag').forEach(t=>{
+    if(t.closest('.statsv2-caro')) return;
+    t.style.transform = 'translate(-50%,-100%) scale(.72)';
   });
 }
 function statsV2SetupDrawReveal(body){
@@ -9345,6 +9417,28 @@ function statsV2SetupDrawReveal(body){
     if(el.dataset.sv2Drawn) return;
     el.dataset.sv2Drawn = '1';
     statsV2AnimateDrawPaths(el);
+    if(el.classList.contains('statsv2-detail-chart-card')){
+      // "Progres ciężaru": line draws (~1s), then dots wake left→right
+      // behind it, then the PR label pops in once the dots have landed.
+      const dots = [].slice.call(el.querySelectorAll('.statsv2-chart-dot'))
+        .sort((a,b)=> parseFloat(a.style.left||0) - parseFloat(b.style.left||0));
+      const DOT_BASE = 0.85;  // line draw is ~1s — dots start once it's essentially there
+      dots.forEach((d,i)=>{
+        d.getBoundingClientRect();
+        d.style.transition = 'opacity .24s ease';
+        d.style.transitionDelay = (DOT_BASE + i * 0.06).toFixed(2) + 's';
+        d.style.opacity = '1';
+      });
+      const popAt = (DOT_BASE + dots.length * 0.06 + 0.1).toFixed(2);
+      el.querySelectorAll('.statsv2-pr-tag').forEach(tag=>{
+        tag.getBoundingClientRect();
+        tag.style.transition = 'opacity .2s ease, transform .34s cubic-bezier(.22,1.2,.36,1)';
+        tag.style.transitionDelay = popAt + 's';
+        tag.style.transform = 'translate(-50%,-100%) scale(1)';
+        tag.style.opacity = '1';
+      });
+      return;
+    }
     el.querySelectorAll('.statsv2-chart-dot, .statsv2-pr-tag').forEach(d=>{
       d.getBoundingClientRect();
       d.style.transition = 'opacity .3s ease .7s'; // lands as the ~1s line draw finishes
