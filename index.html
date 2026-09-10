@@ -748,6 +748,13 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .histv2-wkcal-tag{font-size:var(--m-fs-2xs);color:var(--m-muted);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;}
 /* Stats — calories + weight-trend cards (neutral, not the orange YTD shell) */
 .statsv2-kcard{background:var(--m-card);border-radius:var(--m-r-md);padding:18px 18px 16px;}
+.statsv2-krow{display:flex;gap:8px;align-items:stretch;}
+.statsv2-krow > .statsv2-kcard{flex:1;min-width:0;}
+.statsv2-kcard--half{padding:16px 14px 14px;}
+.statsv2-kcard--half .statsv2-kcard-num{font-size:var(--m-fs-xl);}
+.statsv2-kcard--half .statsv2-kcard-num-row{gap:9px;}
+.statsv2-kcard--half .statsv2-kcard-num-row .ph{width:24px;height:24px;}
+.statsv2-kcard--half .statsv2-kcard-delta{line-height:1.45;}
 .statsv2-kcard-eyebrow{margin:0 0 10px;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--m-muted);}
 .statsv2-kcard-num-row{display:flex;align-items:center;gap:12px;}
 .statsv2-kcard-num-row .ph{width:32px;height:32px;color:var(--m-orange);flex-shrink:0;}
@@ -1900,9 +1907,8 @@ body.pev2-bg{background:var(--m-red-page);}
 .statsv2-log-date span{font-size:var(--m-fs-2xs);color:var(--m-ink);}
 .statsv2-log-main{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
 .statsv2-log-sets-v{font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);letter-spacing:.36px;text-align:right;}
-.statsv2-log-row.is-pr .statsv2-log-sets-v{color:var(--m-orange);}
 .statsv2-log-tags{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px;}
-.statsv2-log-tag{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--m-orange);color:#fff;border-radius:var(--m-r-pill);padding:2px 7px;line-height:1.5;}
+.statsv2-log-tag{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--m-ink);color:#fff;border-radius:var(--m-r-pill);padding:2px 7px;line-height:1.5;}
 .statsv2-log-trophy{width:26px;height:26px;color:var(--m-orange);flex-shrink:0;}
 
 /* .statsv2-empty — see the shared empty-state rule near .gymv2-no-plan */
@@ -4115,7 +4121,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.24.1";
+const APP_VERSION = "4.24.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -8970,32 +8976,33 @@ function renderStatsV2Overview(){
         <div class="statsv2-ytd-labels">${ytdLabels.map(l=>`<span>${l}</span>`).join('')}</div>
       </div>
 
-      ${(()=>{
-        const k = kcalStats(7);
-        return `<div class="statsv2-kcard statsv2-anim-card" style="--i:3">
-          <p class="statsv2-kcard-eyebrow">Kalorie — ostatnie 7 dni</p>
-          <div class="statsv2-kcard-num-row">${ph('flame')}<span class="statsv2-kcard-num">${k.n ? k.sum.toLocaleString('pl-PL') : '—'}<small>kcal</small></span></div>
-          <p class="statsv2-kcard-delta">${k.n ? `śr. ${k.avg} kcal / trening · ${k.n} sesji` : 'Dodaj masę ciała w panelu konta, żeby liczyć'}</p>
-        </div>`;
-      })()}
-
-      ${(()=>{
-        const wt = weightTrend(90);
-        if(!wt) return `<div class="statsv2-kcard statsv2-anim-card" style="--i:4">
-          <p class="statsv2-kcard-eyebrow">Masa ciała</p>
-          <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">—<small>kg</small></span></div>
-          <p class="statsv2-kcard-delta">Dodaj pomiar w panelu konta</p>
-        </div>`;
-        const dTxt = Math.abs(wt.delta) < 0.05
-          ? 'bez zmian / 90 dni'
-          : `${wt.delta > 0 ? '+' : '−'}${Math.abs(wt.delta).toFixed(1).replace('.', ',')} kg / 90 dni`;
-        return `<div class="statsv2-kcard statsv2-anim-card" style="--i:4">
-          <p class="statsv2-kcard-eyebrow">Masa ciała</p>
-          <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${fmtKg(wt.cur)}<small>kg</small></span></div>
-          <p class="statsv2-kcard-delta">${dTxt} · ost. ${fmtDate(wt.lastDate)}</p>
-          ${weightSparkSvg(wt.pts)}
-        </div>`;
-      })()}
+      <div class="statsv2-krow" style="--i:3">
+        ${(()=>{
+          const k = kcalStats(7);
+          return `<div class="statsv2-kcard statsv2-kcard--half statsv2-anim-card" style="--i:3">
+            <p class="statsv2-kcard-eyebrow">Kalorie · 7 dni</p>
+            <div class="statsv2-kcard-num-row">${ph('flame')}<span class="statsv2-kcard-num">${k.n ? k.sum.toLocaleString('pl-PL') : '—'}<small>kcal</small></span></div>
+            <p class="statsv2-kcard-delta">${k.n ? `śr. ${k.avg} kcal / trening` : 'Dodaj masę ciała w koncie'}</p>
+          </div>`;
+        })()}
+        ${(()=>{
+          const wt = weightTrend(90);
+          if(!wt) return `<div class="statsv2-kcard statsv2-kcard--half statsv2-anim-card" style="--i:4">
+            <p class="statsv2-kcard-eyebrow">Masa ciała</p>
+            <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">—<small>kg</small></span></div>
+            <p class="statsv2-kcard-delta">Dodaj pomiar w koncie</p>
+          </div>`;
+          const dTxt = Math.abs(wt.delta) < 0.05
+            ? 'bez zmian / 90 dni'
+            : `${wt.delta > 0 ? '+' : '−'}${Math.abs(wt.delta).toFixed(1).replace('.', ',')} kg / 90 dni`;
+          return `<div class="statsv2-kcard statsv2-kcard--half statsv2-anim-card" style="--i:4">
+            <p class="statsv2-kcard-eyebrow">Masa ciała</p>
+            <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${fmtKg(wt.cur)}<small>kg</small></span></div>
+            <p class="statsv2-kcard-delta">${dTxt}</p>
+            ${weightSparkSvg(wt.pts)}
+          </div>`;
+        })()}
+      </div>
     </div>
     ${renderStatsV2ExerciseRow(null)}`;
 }
@@ -9052,7 +9059,7 @@ function renderStatsV2Detail(name){
           <span class="statsv2-log-sets-v">${setsStr}</span>
           ${tags ? `<span class="statsv2-log-tags">${tags}</span>` : ''}
         </div>
-        ${r.prSila?`<span class="ph statsv2-log-trophy">${PH.trophy}</span>`:''}
+        ${flagged?`<span class="ph statsv2-log-trophy">${PH.trophy}</span>`:''}
       </div>`;
   }).join('');
 
@@ -9125,10 +9132,10 @@ function renderStatsV2Detail(name){
           </svg>
           ${chartPts.map((p,i)=>{
             const L = (p.x/dW*100).toFixed(1), T = (p.y/(dH+16)*100).toFixed(1);
-            if(i===chartPts.length-1) return `<div class="statsv2-chart-dot" style="width:13px;height:13px;background:#ffc542;left:${L}%;top:${T}%;"></div>`;
-            if(series.prMonths.has(p.key)) return `<div class="statsv2-chart-dot" style="width:8px;height:8px;background:#221b17;border:2px solid #ff8a3d;left:${L}%;top:${T}%;"></div>`;
+            if(i===chartPts.length-1) return `<div class="statsv2-chart-dot" style="width:14px;height:14px;background:#ffc542;left:${L}%;top:${T}%;"></div>`;
+            if(series.prMonths.has(p.key)) return `<div class="statsv2-chart-dot" style="width:10px;height:10px;background:#221b17;border:2px solid #ff8a3d;left:${L}%;top:${T}%;"></div>`;
             // a yellow dot on every other plotted point (each training day / month on the line)
-            return `<div class="statsv2-chart-dot" style="width:6px;height:6px;background:#ffc542;left:${L}%;top:${T}%;"></div>`;
+            return `<div class="statsv2-chart-dot" style="width:10px;height:10px;background:#ffc542;left:${L}%;top:${T}%;"></div>`;
           }).join('')}
         </div>
         <div class="statsv2-detail-wave-labels">${dLabels.map(p=> p.month ? `<span>${MONTH_ABBR_PL[p.month-1]}</span>` : `<span>${new Date(p.date+'T00:00:00').getDate()}.${String(new Date(p.date+'T00:00:00').getMonth()+1).padStart(2,'0')}</span>`).join('')}</div>
