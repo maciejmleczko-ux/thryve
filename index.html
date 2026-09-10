@@ -1802,11 +1802,14 @@ body.pev2-bg{background:var(--m-red-page);}
 /* overview chart carousel — horizontal scroll-snap strip; vertical page
    scroll is untouched (touch-action:pan-x lets the browser hand vertical
    drags back to the page). */
-.statsv2-caro{display:flex;align-items:stretch;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;}
+.statsv2-caro{display:flex;align-items:stretch;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;margin:0 -7px;}
 .statsv2-caro::-webkit-scrollbar{display:none;}
-/* every slide stretches to the tallest one so the block height doesn't
-   jump between tabs */
-.statsv2-slide{flex:0 0 100%;min-width:0;scroll-snap-align:center;box-sizing:border-box;display:flex;}
+/* Each slide is a full container-width column with a 7px inner gutter, so
+   snapped cards keep 14px of clear space between them (no colour bleed
+   from the neighbour); the -7px container margin realigns card edges with
+   the rest of the page. Slides stretch to the tallest so the block
+   height is fixed across tabs. */
+.statsv2-slide{flex:0 0 100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always;box-sizing:border-box;display:flex;padding:0 7px;}
 .statsv2-slide > *{flex:1;min-width:0;}
 .statsv2-caro-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;}
 .statsv2-caro-arw{width:26px;height:26px;border:0;background:none;color:var(--m-muted);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;}
@@ -3261,6 +3264,7 @@ const T_EN = {
   stV2SessionsMonthly: 'Workouts · month by month',
   stV2SessionsThisMonth: 'this month',
   stV2SinceMonthShort: 'since',
+  stV2NoChangeShort: 'no change',
   histV2Workout: 'WORKOUT',
   gymV2Today: "Today's workout.",
   planDifficultyEasy: 'Easy',
@@ -4163,7 +4167,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.25.0";
+const APP_VERSION = "4.25.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -9079,19 +9083,6 @@ function renderStatsV2Overview(){
 
       <div class="statsv2-caro" id="statsCaro">
         <div class="statsv2-slide">
-          <div class="statsv2-bar-card statsv2-anim-card" style="--i:2">
-            <p class="statsv2-bar-eyebrow">${t('stV2VolMonthly','Objętość - miesiąc po miesiącu')}</p>
-            <p class="statsv2-scard-num">${(window6[5].kg||0).toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></p>
-            <p class="statsv2-scard-delta">${MONTH_NAMES[window6[5].month-1]}${(()=>{const d=Math.round(window6[5].kg-window6[4].kg);if(d===0)return '';const prev=MONTH_GEN_PL[window6[4].month-1];return ` · ${d>0?'+':'−'}${Math.abs(d).toLocaleString(LANG==='en'?'en-US':'pl-PL')} kg ${t('stV2SinceMonthShort','od')} ${prev}`;})()}</p>
-            <div class="statsv2-bar-row" style="margin-top:12px;">${barsHtml}</div>
-            <div class="statsv2-bar-nav">
-              <span class="ph${leftDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(90deg)" onclick="statsV2MoveBarPage(1)">${PH['caret-down']}</span>
-              <span class="ph${rightDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="statsV2MoveBarPage(-1)">${PH['caret-down']}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="statsv2-slide">
           <div class="statsv2-ytd-card statsv2-anim-card" style="--i:2">
             <p class="statsv2-ytd-eyebrow">${t('stV2VolYtd','Objętość od początku roku')}</p>
             <div class="statsv2-ytd-num-row">${ph('dash-barbell')}<div><span class="statsv2-ytd-num">${ytd.total.toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></span></div></div>
@@ -9109,6 +9100,19 @@ function renderStatsV2Overview(){
               ${lastPt?`<div class="statsv2-chart-dot" style="width:14px;height:14px;background:#ffc542;left:${(lastPt.x/wW*100).toFixed(1)}%;top:${(lastPt.y/(wH+16)*100).toFixed(1)}%;"></div>`:''}
             </div>
             <div class="statsv2-ytd-labels">${ytdLabels.map(l=>`<span>${l}</span>`).join('')}</div>
+          </div>
+        </div>
+
+        <div class="statsv2-slide">
+          <div class="statsv2-bar-card statsv2-anim-card" style="--i:2">
+            <p class="statsv2-bar-eyebrow">${t('stV2VolMonthly','Objętość - miesiąc po miesiącu')}</p>
+            <p class="statsv2-scard-num">${(window6[5].kg||0).toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></p>
+            <p class="statsv2-scard-delta">${MONTH_NAMES[window6[5].month-1]} · ${(()=>{const d=Math.round(window6[5].kg-window6[4].kg);if(d===0)return t('stV2NoChangeShort','bez zmian');const prev=MONTH_GEN_PL[window6[4].month-1];return `${d>0?'+':'−'}${Math.abs(d).toLocaleString(LANG==='en'?'en-US':'pl-PL')} kg ${t('stV2SinceMonthShort','od')} ${prev}`;})()}</p>
+            <div class="statsv2-bar-row" style="margin-top:12px;">${barsHtml}</div>
+            <div class="statsv2-bar-nav">
+              <span class="ph${leftDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(90deg)" onclick="statsV2MoveBarPage(1)">${PH['caret-down']}</span>
+              <span class="ph${rightDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="statsV2MoveBarPage(-1)">${PH['caret-down']}</span>
+            </div>
           </div>
         </div>
 
@@ -9464,7 +9468,7 @@ function statsV2CaroMove(delta){
   if(!el) return;
   const n = el.querySelectorAll('.statsv2-slide').length;
   statsV2CaroPage = Math.max(0, Math.min(n-1, statsV2CaroPage + delta));
-  el.scrollTo({ left: statsV2CaroPage * el.clientWidth, behavior: 'smooth' });
+  el.scrollTo({ left: Math.round(statsV2CaroPage * el.clientWidth), behavior: 'smooth' });
   statsV2CaroSyncDots();
   statsV2AnimateSlide(el.querySelectorAll('.statsv2-slide')[statsV2CaroPage]);
 }
@@ -9510,7 +9514,7 @@ function statsV2InitCarousel(animate){
   if(!el) return;
   const n = el.querySelectorAll('.statsv2-slide').length;
   statsV2CaroPage = Math.max(0, Math.min(n-1, statsV2CaroPage));
-  el.scrollLeft = statsV2CaroPage * el.clientWidth;
+  el.scrollLeft = Math.round(statsV2CaroPage * el.clientWidth);
   statsV2CaroSyncDots();
   el.addEventListener('scroll', ()=>{
     const p = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
