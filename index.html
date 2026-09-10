@@ -1764,6 +1764,9 @@ body.pev2-bg{background:var(--m-red-page);}
 
 @media (prefers-reduced-motion: no-preference){
   .histv2-cal-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.1s;}
+  /* month change (swipe on the calendar, or the ‹ › arrows): the grid
+     slides in from the direction you swiped, like the stats carousel */
+  @keyframes histCalSlide{from{opacity:.3;transform:translateX(var(--sd,0));}to{opacity:1;transform:translateX(0);}}
   .histv2-section-label{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;animation-delay:.2s;}
   .histv2-anim-in{animation:dashDayIn .45s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.24s + var(--i,0) * 70ms);}
   /* the summary + exercise rows rise in when a card is EXPANDED (hist-reveal
@@ -4238,7 +4241,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.28.1";
+const APP_VERSION = "4.29.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4287,6 +4290,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.29.0": {
+    pl: [
+      {featured:true, icon:'calendar-dots', badge:'Nowość', title:'Przesuwanie miesięcy w Historii', text:'W Historii zmienisz miesiąc, przesuwając palcem po kalendarzu w lewo lub w prawo. Przewijanie w górę i w dół zostaje bez zmian. Strzałki ‹ › też działają.'},
+    ],
+    en: [
+      {featured:true, icon:'calendar-dots', badge:'New', title:'Swipe between months in History', text:'In History you change the month by swiping left or right on the calendar. Scrolling up and down stays the same. The ‹ › arrows still work too.'},
+    ],
+  },
   "4.28.0": {
     pl: [
       {featured:true, icon:'chart-line', badge:'Zmiana', title:'Świecąca linia na wykresach', text:'„Objętość od początku roku” i „Progres ciężaru” w wybranym ćwiczeniu rysują się teraz jak kometa: ogon wtapia się w tło karty, a głowa na ostatnim punkcie jaśnieje do żółci z poświatą. Kropki sesji zostają, każda z cienką obwódką w kolorze karty. Linia rysuje się od ogona do głowy, potem pojawiają się kropki, na końcu wskakują etykiety rekordów.'},
@@ -8398,10 +8409,44 @@ function calMoveMonthV2(delta){
   if(calStateV2.month > 11){ calStateV2.month = 0; calStateV2.year++; }
   else if(calStateV2.month < 0){ calStateV2.month = 11; calStateV2.year--; }
   renderCalendarV2();
+  histCalSlideV2(delta);
 }
 function calMoveYearV2(delta){
   calStateV2.year += delta;
   renderCalendarV2();
+}
+// slide the freshly-rendered grid in from the side you moved toward
+function histCalSlideV2(delta){
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const grid = document.getElementById('histCalGridV2');
+  if(!grid) return;
+  grid.style.animation = 'none';
+  grid.style.setProperty('--sd', (delta > 0 ? 18 : -18) + 'px');
+  grid.getBoundingClientRect();               // reflow so the replay takes
+  grid.style.animation = 'histCalSlide .26s cubic-bezier(.16,1,.3,1)';
+}
+// Maciej: "swipe na miesiącach" — a horizontal drag on the calendar card
+// steps the month, while a vertical drag still scrolls the page. All
+// listeners passive (never preventDefault), so page scroll is untouched;
+// we only act on a touchend that was decisively horizontal.
+function wireHistCalSwipeV2(){
+  const card = document.querySelector('#view-history-v2 .histv2-cal-card');
+  if(!card || card.dataset.swipeWired) return;
+  card.dataset.swipeWired = '1';
+  let x0 = 0, y0 = 0, tracking = false;
+  card.addEventListener('touchstart', e=>{
+    if(e.touches.length !== 1){ tracking = false; return; }
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; tracking = true;
+  }, { passive: true });
+  card.addEventListener('touchend', e=>{
+    if(!tracking) return;
+    tracking = false;
+    const tt = e.changedTouches[0];
+    const dx = tt.clientX - x0, dy = tt.clientY - y0;
+    if(Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.6){
+      calMoveMonthV2(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
 }
 let histJustExpandedId = null; // the card that just opened — gets the reveal animation, others don't
 function toggleHistExpandV2(key){
@@ -8463,6 +8508,7 @@ function renderCalendarV2(animate){
     html += `<button type="button" class="histv2-cal-day outside" disabled>${i}</button>`;
   }
   grid.innerHTML = html;
+  wireHistCalSwipeV2();
   renderHistDetailV2(animate);
 }
 // Maciej: "jesli zmieniam na miesiac - zaden dzien nie jest zaznaczony -
