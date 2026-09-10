@@ -1836,7 +1836,7 @@ body.pev2-bg{background:var(--m-red-page);}
 .statsv2-ring-eyebrow{margin:0;}
 .statsv2-ring-row{display:flex;align-items:center;justify-content:space-between;}
 .statsv2-ring-wrap{position:relative;width:132px;height:132px;flex-shrink:0;}
-.statsv2-ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg);}
+.statsv2-ring-wrap svg{width:100%;height:100%;overflow:visible;}
 .statsv2-ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .statsv2-ring-num strong{font-size:var(--m-fs-2xl);font-weight:400;color:#fff;letter-spacing:1.2px;line-height:1;font-variant-numeric:tabular-nums;}
 .statsv2-ring-num small{margin-top:2px;font-size:var(--m-fs-2xs);color:var(--m-muted);letter-spacing:1.1px;text-transform:uppercase;}
@@ -3266,6 +3266,7 @@ const T_EN = {
   stV2SessionsThisMonth: 'this month',
   stV2SinceMonthShort: 'since',
   stV2NoChangeShort: 'no change',
+  stV2OverPlan: 'Over plan',
   histV2Workout: 'WORKOUT',
   gymV2Today: "Today's workout.",
   planDifficultyEasy: 'Easy',
@@ -4224,7 +4225,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.26.0";
+const APP_VERSION = "4.27.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4273,6 +4274,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.27.0": {
+    pl: [
+      {featured:true, icon:'chart-line', badge:'Zmiana', title:'Pierścień tygodnia jak w zegarku sportowym', text:'Kiedy nie domykasz planu, pierścień „Postęp tygodniowy” pokazuje kolorowy łuk z przejściem od szarości w pomarańcz i żółć. Kiedy przekroczysz zaplanowaną liczbę treningów, pętla idzie dalej i nachodzi na początek, z delikatnym cieniem. W legendzie zamiast „Zostało” jest wtedy „Ponad plan +N”.'},
+    ],
+    en: [
+      {featured:true, icon:'chart-line', badge:'Change', title:'A sports-watch style weekly ring', text:'Below your plan the "Weekly progress" ring shows a coloured arc that fades from grey into orange and yellow. Once you pass your planned number of workouts the loop keeps going and overlaps its start, with a soft shadow. The legend then swaps "Left" for "Over plan +N".'},
+    ],
+  },
   "4.26.0": {
     pl: [
       {featured:true, icon:'flame', badge:'Nowość', title:'Kalorie uczą się z Twoich poprawek', text:'Po trzech poprawkach spalonych kalorii aplikacja liczy medianę Twoich korekt i dostraja tym mnożnikiem wszystkie pozostałe szacunki. Cofnięcie poprawek albo zejście poniżej trzech wyłącza dostrajanie. Na ekranie edycji widać, ile poprawek już zebrano i jaki jest mnożnik.'},
@@ -9033,11 +9042,15 @@ function renderStatsV2ExerciseRow(activeName){
 }
 
 function renderStatsV2Overview(){
-  const ringGradId = statsV2Uid(), ytdGradId = statsV2Uid();
+  const ringGradId = statsV2Uid(), ytdGradId = statsV2Uid(), ringShadowId = statsV2Uid();
   const week = statsV2WeeklyProgress();
   const R = 58, C = 2*Math.PI*R;
-  const doneFrac = week.total ? week.done/week.total : 0;
-  const ringOffset = (C*(1-doneFrac)).toFixed(2);
+  const ringFrac = week.total ? week.done/week.total : 0;
+  const ringMainFrac = Math.min(1, ringFrac);
+  const ringMainOffset = (C*(1-ringMainFrac)).toFixed(2);            // 0..full
+  const ringOver = Math.max(0, Math.min(1, ringFrac - 1));           // extra loop, capped at one
+  const ringOverOffset = (C*(1-ringOver)).toFixed(2);
+  const ringExtra = Math.max(0, week.done - week.total);
 
   const window6 = statsV2MonthWindow(statsV2BarPage);
   const maxKg = Math.max(1, ...window6.map(m=>m.kg));
@@ -9107,20 +9120,26 @@ function renderStatsV2Overview(){
           <div class="statsv2-ring-wrap">
             <svg viewBox="0 0 132 132">
               <defs>
-                <linearGradient id="${ringGradId}" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="var(--m-orange)"/>
-                  <stop offset="55%" stop-color="#ff8a3d"/>
-                  <stop offset="100%" stop-color="#ffc542"/>
+                <linearGradient id="${ringGradId}" gradientUnits="userSpaceOnUse" x1="66" y1="8" x2="22" y2="112">
+                  <stop offset="0" stop-color="#5f5a5c"/>
+                  <stop offset=".42" stop-color="var(--m-orange)"/>
+                  <stop offset="1" stop-color="#ffc542"/>
                 </linearGradient>
+                <filter id="${ringShadowId}" x="-45%" y="-45%" width="190%" height="190%">
+                  <feDropShadow dx="3" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.55"/>
+                </filter>
               </defs>
-              <circle cx="66" cy="66" r="${R}" fill="none" stroke="var(--m-ink)" stroke-width="12"/>
-              <circle class="statsv2-draw-path" data-draw-to="${ringOffset}" data-draw-delay="260" cx="66" cy="66" r="${R}" fill="none" ${statsV2Stroke(ringGradId,'#ff8a3d')} stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringOffset}"/>
+              <circle cx="66" cy="66" r="${R}" fill="none" stroke="var(--m-ink)" stroke-width="13" transform="rotate(-90 66 66)"/>
+              <circle class="statsv2-draw-path" data-draw-to="${ringMainOffset}" data-draw-delay="260" cx="66" cy="66" r="${R}" fill="none" ${statsV2Stroke(ringGradId,'#ff8a3d')} stroke-width="13" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringMainOffset}" transform="rotate(-90 66 66)"/>
+              ${ringOver > 0 ? `<circle class="statsv2-draw-path" data-draw-to="${ringOverOffset}" data-draw-delay="1250" cx="66" cy="66" r="${R}" fill="none" stroke="var(--m-orange)" stroke-width="13" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringOverOffset}" filter="url(#${ringShadowId})" transform="rotate(-90 66 66)"/>` : ''}
             </svg>
             <div class="statsv2-ring-num"><strong>${week.done}/${week.total}</strong><small>${t('stV2Days','dni')}</small></div>
           </div>
           <div class="statsv2-ring-legend">
             <div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot done"></span><div><p class="statsv2-ring-legend-label">${t('stV2Done','Zrobione')}</p><p class="statsv2-ring-legend-value">${week.done} ${t('stV2DaysUpper','DNI')}</p></div></div>
-            <div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot left"></span><div><p class="statsv2-ring-legend-label">${t('stV2Left','Zostało')}</p><p class="statsv2-ring-legend-value">${Math.max(0,week.total-week.done)} ${t('stV2DaysUpper','DNI')}</p></div></div>
+            ${ringExtra > 0
+              ? `<div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot done"></span><div><p class="statsv2-ring-legend-label">${t('stV2OverPlan','Ponad plan')}</p><p class="statsv2-ring-legend-value">+${ringExtra} ${t('stV2DaysUpper','DNI')}</p></div></div>`
+              : `<div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot left"></span><div><p class="statsv2-ring-legend-label">${t('stV2Left','Zostało')}</p><p class="statsv2-ring-legend-value">${Math.max(0,week.total-week.done)} ${t('stV2DaysUpper','DNI')}</p></div></div>`}
           </div>
         </div>
       </div>
