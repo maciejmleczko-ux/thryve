@@ -1679,8 +1679,13 @@ body.pev2-bg{background:var(--m-red-page);}
    a deliberate deviation; Maciej confirmed ("sprawdz czy jest taka sama
    jak np w gym") these three peer screens should match. */
 
-.histv2-cal-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:24px 16px 16px;margin-bottom:24px;box-sizing:border-box;}
+.histv2-cal-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:24px 16px 16px;margin-bottom:24px;box-sizing:border-box;overflow:hidden;}
 .histv2-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+/* the day-of-week row + grid drag with the finger; pan-y keeps vertical
+   page scroll native, horizontal is ours (see wireHistCalSwipeV2) */
+.histv2-cal-body{touch-action:pan-y;}
+.histv2-cal-body.cal-snap{transition:transform .24s cubic-bezier(.16,1,.3,1);}
+@media (prefers-reduced-motion: reduce){ .histv2-cal-body.cal-snap{transition:none;} }
 .histv2-cal-nav-month{display:flex;align-items:center;gap:8px;}
 .histv2-cal-nav-month .ph{width:24px;height:24px;color:#fff;cursor:pointer;flex-shrink:0;}
 .histv2-cal-nav-month .ph:active{opacity:.6;}
@@ -2392,8 +2397,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
             <span class="ph" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="calMoveYearV2(1)"></span>
           </div>
         </div>
-        <div class="histv2-cal-dow-row" id="histCalDowRowV2"></div>
-        <div class="histv2-cal-days" id="histCalGridV2"></div>
+        <div class="histv2-cal-body" id="histCalBodyV2">
+          <div class="histv2-cal-dow-row" id="histCalDowRowV2"></div>
+          <div class="histv2-cal-days" id="histCalGridV2"></div>
+        </div>
       </div>
 
       <p class="histv2-section-label" data-i18n="histV2YourWorkouts">Twoje treningi</p>
@@ -4241,7 +4248,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.29.0";
+const APP_VERSION = "4.29.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -8404,12 +8411,12 @@ function datesWithLogs(){
 let calStateV2 = (()=>{ const d=new Date(); return {year:d.getFullYear(), month:d.getMonth()}; })();
 let selectedHistDateV2 = null;
 let histExpandedV2 = {};
-function calMoveMonthV2(delta){
+function calMoveMonthV2(delta, fromDrag){
   calStateV2.month += delta;
   if(calStateV2.month > 11){ calStateV2.month = 0; calStateV2.year++; }
   else if(calStateV2.month < 0){ calStateV2.month = 11; calStateV2.year--; }
   renderCalendarV2();
-  histCalSlideV2(delta);
+  if(!fromDrag) histCalSlideV2(delta);   // the drag handler runs its own slide
 }
 function calMoveYearV2(delta){
   calStateV2.year += delta;
@@ -8425,26 +8432,64 @@ function histCalSlideV2(delta){
   grid.getBoundingClientRect();               // reflow so the replay takes
   grid.style.animation = 'histCalSlide .26s cubic-bezier(.16,1,.3,1)';
 }
-// Maciej: "swipe na miesiącach" — a horizontal drag on the calendar card
-// steps the month, while a vertical drag still scrolls the page. All
-// listeners passive (never preventDefault), so page scroll is untouched;
-// we only act on a touchend that was decisively horizontal.
+// Maciej: "swipe na miesiącach", then "cała karta się przesuwa, coś jak
+// drag'n'drop" — the calendar body (day-of-week row + grid) tracks the
+// finger live; on release it either flies out and the next month flies in
+// from the other side, or springs back. `touch-action:pan-y` on the body
+// keeps vertical page scroll fully native, so every listener stays passive
+// (no preventDefault) and scrolling is never blocked.
 function wireHistCalSwipeV2(){
   const card = document.querySelector('#view-history-v2 .histv2-cal-card');
-  if(!card || card.dataset.swipeWired) return;
+  const body = document.getElementById('histCalBodyV2');
+  if(!card || !body || card.dataset.swipeWired) return;
   card.dataset.swipeWired = '1';
-  let x0 = 0, y0 = 0, tracking = false;
-  card.addEventListener('touchstart', e=>{
-    if(e.touches.length !== 1){ tracking = false; return; }
-    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; tracking = true;
+  let x0 = 0, y0 = 0, axis = '', dragging = false, committing = false;
+  const reset = ()=>{ body.classList.remove('cal-snap'); body.style.transform = ''; };
+
+  body.addEventListener('touchstart', e=>{
+    if(committing || e.touches.length !== 1){ dragging = false; return; }
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    axis = ''; dragging = false;
+    body.classList.remove('cal-snap');
   }, { passive: true });
-  card.addEventListener('touchend', e=>{
-    if(!tracking) return;
-    tracking = false;
-    const tt = e.changedTouches[0];
-    const dx = tt.clientX - x0, dy = tt.clientY - y0;
-    if(Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.6){
-      calMoveMonthV2(dx < 0 ? 1 : -1);
+
+  body.addEventListener('touchmove', e=>{
+    if(committing || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - x0, dy = e.touches[0].clientY - y0;
+    if(!axis){
+      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      dragging = axis === 'x';
+    }
+    if(!dragging) return;
+    const w = card.clientWidth || 1;
+    let t = dx;
+    if(Math.abs(dx) > w * 0.5) t = (dx < 0 ? -1 : 1) * (w * 0.5 + (Math.abs(dx) - w * 0.5) * 0.3);
+    body.style.transform = `translateX(${t.toFixed(1)}px)`;
+  }, { passive: true });
+
+  body.addEventListener('touchend', e=>{
+    if(!dragging || committing){ dragging = false; return; }
+    dragging = false;
+    const dx = e.changedTouches[0].clientX - x0;
+    const w = card.clientWidth || 1;
+    body.classList.add('cal-snap');
+    if(Math.abs(dx) > w * 0.22){
+      committing = true;
+      const dir = dx < 0 ? 1 : -1;                 // swipe left → next month
+      body.style.transform = `translateX(${(-dir * w).toFixed(0)}px)`;   // fly out
+      setTimeout(()=>{
+        calMoveMonthV2(dir, true);                 // swap the grid, no mini-slide
+        body.classList.remove('cal-snap');
+        body.style.transform = `translateX(${(dir * w).toFixed(0)}px)`;  // new month waits off the other edge
+        body.getBoundingClientRect();
+        body.classList.add('cal-snap');
+        body.style.transform = 'translateX(0)';    // fly in
+        setTimeout(()=>{ committing = false; reset(); }, 280);
+      }, 180);
+    } else {
+      body.style.transform = 'translateX(0)';       // spring back
+      setTimeout(reset, 280);
     }
   }, { passive: true });
 }
