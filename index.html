@@ -1805,17 +1805,18 @@ body.pev2-bg{background:var(--m-red-page);}
 .statsv2-panel{padding:calc(16px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
 .statsv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .statsv2-cards{display:flex;flex-direction:column;gap:8px;}
-/* overview chart carousel — horizontal scroll-snap strip; vertical page
-   scroll is untouched (touch-action:pan-x lets the browser hand vertical
-   drags back to the page). */
-.statsv2-caro{display:flex;align-items:stretch;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;margin:0 -7px;}
-.statsv2-caro::-webkit-scrollbar{display:none;}
+/* overview chart carousel — a transform track dragged with the finger
+   (see statsV2InitCarousel); `touch-action:pan-y` keeps vertical page
+   scroll fully native, horizontal is ours. Same throw feel as the
+   History calendar. */
+.statsv2-caro{overflow:hidden;touch-action:pan-y;margin:0 -7px;}
+.statsv2-caro-track{display:flex;align-items:stretch;will-change:transform;}
 /* Each slide is a full container-width column with a 7px inner gutter, so
-   snapped cards keep 14px of clear space between them (no colour bleed
-   from the neighbour); the -7px container margin realigns card edges with
-   the rest of the page. Slides stretch to the tallest so the block
-   height is fixed across tabs. */
-.statsv2-slide{flex:0 0 100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always;box-sizing:border-box;display:flex;padding:0 7px;}
+   cards keep 14px of clear space between them (no colour bleed from the
+   neighbour); the -7px container margin realigns card edges with the rest
+   of the page. Slides stretch to the tallest so the block height is fixed
+   across tabs. */
+.statsv2-slide{flex:0 0 100%;min-width:0;box-sizing:border-box;display:flex;padding:0 7px;}
 .statsv2-slide > *{flex:1;min-width:0;}
 .statsv2-caro-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;}
 .statsv2-caro-arw{width:26px;height:26px;border:0;background:none;color:var(--m-muted);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;}
@@ -4246,7 +4247,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.29.3";
+const APP_VERSION = "4.30.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4295,6 +4296,16 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.30.0": {
+    pl: [
+      {featured:true, icon:'calendar-dots', badge:'Zmiana', title:'Ikona Historii wraca do dzisiaj', text:'Kliknięcie ikony Historii w menu zawsze otwiera bieżący miesiąc z zaznaczonym dzisiejszym dniem, nawet gdy wcześniej przewinąłeś kalendarz do innego miesiąca albo roku.'},
+      'Karuzela wykresów w Statystykach przesuwa się teraz tak jak kalendarz w Historii: karta jedzie za palcem i miękko wyhamowuje na miejscu.',
+    ],
+    en: [
+      {featured:true, icon:'calendar-dots', badge:'Change', title:'The History icon returns to today', text:'Tapping the History icon in the menu always opens the current month with today selected, even after you have scrolled the calendar to another month or year.'},
+      'The chart carousel in Stats now moves like the History calendar: the card follows your finger and eases to rest.',
+    ],
+  },
   "4.29.0": {
     pl: [
       {featured:true, icon:'calendar-dots', badge:'Nowość', title:'Przesuwanie miesięcy w Historii', text:'W Historii zmienisz miesiąc, przesuwając palcem po kalendarzu w lewo lub w prawo. Przewijanie w górę i w dół zostaje bez zmian. Strzałki ‹ › też działają.'},
@@ -4936,6 +4947,14 @@ const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2', history: 'history-v2'
 const V3_ROUTE_ALIAS = { 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats' }; // which nav icon a v3 route should light up
 function navTap(route){
   const target = (previewMode && PREVIEW_ROUTES[route]) ? PREVIEW_ROUTES[route] : route;
+  // Maciej: the History nav icon always lands on today — after browsing
+  // other months/years there was no way back to the current day.
+  if(target === 'history-v2'){
+    const d = new Date();
+    calStateV2 = { year: d.getFullYear(), month: d.getMonth() };
+    selectedHistDateV2 = todayStr();
+    histExpandedV2 = {};
+  }
   goRoute(target);
 }
 /* Bottom-nav button sets — production keeps its original 5 icons
@@ -9415,6 +9434,7 @@ function renderStatsV2Overview(){
       </div>
 
       <div class="statsv2-caro" id="statsCaro">
+        <div class="statsv2-caro-track" id="statsCaroTrack">
         <div class="statsv2-slide">
           <div class="statsv2-ytd-card statsv2-anim-card" style="--i:2">
             <p class="statsv2-ytd-eyebrow">${t('stV2VolYtd','Objętość od początku roku')}</p>
@@ -9442,6 +9462,7 @@ function renderStatsV2Overview(){
         </div>
 
         ${sessionsSlide}
+        </div>
       </div>
       <div class="statsv2-caro-nav">
         <button type="button" class="statsv2-caro-arw" onclick="statsV2CaroMove(-1)" aria-label="${t('navBack','Wstecz')}"><span class="ph" style="transform:rotate(90deg)">${PH['caret-down']}</span></button>
@@ -9823,14 +9844,61 @@ function statsV2CaroSyncDots(){
   if(arws[0]) arws[0].classList.toggle('disabled', statsV2CaroPage<=0);
   if(arws[1]) arws[1].classList.toggle('disabled', statsV2CaroPage>=dots.length-1);
 }
-function statsV2CaroMove(delta){
-  const el = document.getElementById('statsCaro');
-  if(!el) return;
-  const n = el.querySelectorAll('.statsv2-slide').length;
-  statsV2CaroPage = Math.max(0, Math.min(n-1, statsV2CaroPage + delta));
-  el.scrollTo({ left: Math.round(statsV2CaroPage * el.clientWidth), behavior: 'smooth' });
+let statsV2CaroBusy = false;
+const STATSV2_CARO_REDUCE = ()=> !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function statsV2CaroTrackX(track){
+  const tr = track && getComputedStyle(track).transform;
+  if(!tr || tr === 'none') return 0;
+  const m = tr.match(/matrix\(([^)]+)\)/);
+  return m ? parseFloat(m[1].split(',')[4]) || 0 : 0;
+}
+// Slide the track to a page — one eased throw (same feel as the History
+// calendar): a release velocity shortens the glide, an arrow tap uses a
+// steady curve. onfinish OR a setTimeout guard advances the state, so a
+// backgrounded PWA (animations suspended) still lands on the right page.
+function statsV2CaroGoTo(page, opts){
+  opts = opts || {};
+  const caro = document.getElementById('statsCaro');
+  const track = document.getElementById('statsCaroTrack');
+  if(!caro || !track) return;
+  const n = track.children.length;
+  page = Math.max(0, Math.min(n - 1, page));
+  const w = caro.clientWidth || 1;
+  const toPx = -page * w;
+  const fromPx = statsV2CaroTrackX(track);
+  const changed = page !== statsV2CaroPage;
+  statsV2CaroPage = page;
   statsV2CaroSyncDots();
-  statsV2AnimateSlide(el.querySelectorAll('.statsv2-slide')[statsV2CaroPage]);
+  let done = false;
+  const land = ()=>{
+    if(done) return; done = true;
+    track.style.transform = `translateX(${toPx}px)`;
+    if(track.getAnimations) track.getAnimations().forEach(a=>a.cancel());
+    statsV2CaroBusy = false;
+    if(changed || opts.replay) statsV2AnimateSlide(track.children[page]);
+  };
+  if(STATSV2_CARO_REDUCE()){ land(); return; }
+  const dist = Math.abs(toPx - fromPx);
+  const speed = opts.vel ? Math.min(3.6, Math.max(Math.abs(opts.vel), 0.9)) : 1.5;  // px/ms
+  const dur = Math.min(440, Math.max(190, dist / speed));
+  statsV2CaroBusy = true;
+  const a = track.animate(
+    [{ transform:`translateX(${fromPx}px)` }, { transform:`translateX(${toPx}px)` }],
+    { duration: dur, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' }
+  );
+  a.onfinish = land;
+  setTimeout(land, dur + 60);
+}
+function statsV2CaroMove(delta){
+  if(statsV2CaroBusy) return;
+  statsV2CaroGoTo(statsV2CaroPage + delta);
+}
+function statsV2CaroResize(){
+  const caro = document.getElementById('statsCaro');
+  const track = document.getElementById('statsCaroTrack');
+  if(!caro || !track) return;
+  if(track.getAnimations) track.getAnimations().forEach(a=>a.cancel());
+  track.style.transform = `translateX(${-statsV2CaroPage * caro.clientWidth}px)`;
 }
 // Replay the chart entrance for one slide — line redraws, bars grow one
 // after another, dots fade in behind them. Runs every time a slide
@@ -9875,23 +9943,62 @@ function statsV2AnimateSlide(slide){
   });
 }
 function statsV2InitCarousel(animate){
-  // #statsCaro is recreated on every renderStatsV2() (body.innerHTML), so
-  // this re-wires a fresh element each time and restores the saved page.
-  const el = document.getElementById('statsCaro');
-  if(!el) return;
-  const n = el.querySelectorAll('.statsv2-slide').length;
-  statsV2CaroPage = Math.max(0, Math.min(n-1, statsV2CaroPage));
-  el.scrollLeft = Math.round(statsV2CaroPage * el.clientWidth);
+  // #statsCaro / #statsCaroTrack are recreated on every renderStatsV2()
+  // (body.innerHTML), so this wires a fresh element each time and restores
+  // the saved page. The track is dragged with the finger; a release
+  // throws to the nearest page (velocity-aware), the ‹ › arrows glide the
+  // same way. touch-action:pan-y keeps vertical page scroll native, so
+  // every listener stays passive.
+  const caro = document.getElementById('statsCaro');
+  const track = document.getElementById('statsCaroTrack');
+  if(!caro || !track) return;
+  const n = track.children.length;
+  statsV2CaroPage = Math.max(0, Math.min(n - 1, statsV2CaroPage));
+  statsV2CaroBusy = false;
+  track.style.transform = `translateX(${-statsV2CaroPage * (caro.clientWidth || 1)}px)`;
   statsV2CaroSyncDots();
-  el.addEventListener('scroll', ()=>{
-    const p = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
-    if(p !== statsV2CaroPage){
-      statsV2CaroPage = p;
-      statsV2CaroSyncDots();
-      statsV2AnimateSlide(el.querySelectorAll('.statsv2-slide')[p]);
+  window.removeEventListener('resize', statsV2CaroResize);
+  window.addEventListener('resize', statsV2CaroResize);
+
+  let x0 = 0, y0 = 0, axis = '', dragging = false, base = 0;
+  let lastX = 0, lastT = 0, prevX = 0, prevT = 0;
+  caro.addEventListener('touchstart', e=>{
+    if(statsV2CaroBusy || e.touches.length !== 1){ dragging = false; return; }
+    const p = e.touches[0];
+    x0 = p.clientX; y0 = p.clientY; axis = ''; dragging = false;
+    prevX = lastX = p.clientX; prevT = lastT = e.timeStamp;
+    base = statsV2CaroTrackX(track);
+  }, { passive: true });
+  caro.addEventListener('touchmove', e=>{
+    if(statsV2CaroBusy || e.touches.length !== 1) return;
+    const p = e.touches[0];
+    const dx = p.clientX - x0, dy = p.clientY - y0;
+    if(!axis){
+      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      dragging = axis === 'x';
     }
-  }, {passive:true});
-  if(animate) statsV2AnimateSlide(el.querySelectorAll('.statsv2-slide')[statsV2CaroPage]);
+    if(!dragging) return;
+    prevX = lastX; prevT = lastT; lastX = p.clientX; lastT = e.timeStamp;
+    const w = caro.clientWidth || 1, min = -(n - 1) * w;
+    let t = base + dx;
+    if(t > 0) t *= 0.3;                                  // rubber-band before the first page
+    else if(t < min) t = min + (t - min) * 0.3;          // and past the last
+    track.style.transform = `translateX(${t.toFixed(1)}px)`;
+  }, { passive: true });
+  caro.addEventListener('touchend', e=>{
+    if(!dragging || statsV2CaroBusy){ dragging = false; return; }
+    dragging = false;
+    const w = caro.clientWidth || 1;
+    const dx = e.changedTouches[0].clientX - x0;
+    const vel = (lastX - prevX) / Math.max(1, lastT - prevT);   // px/ms, signed
+    const flick = Math.abs(vel) > 0.4 && Math.abs(dx) > 20 && (vel < 0) === (dx < 0);
+    let target = statsV2CaroPage;
+    if(Math.abs(dx) > w * 0.22 || flick) target += dx < 0 ? 1 : -1;
+    statsV2CaroGoTo(target, { vel });
+  }, { passive: true });
+
+  if(animate) statsV2AnimateSlide(track.children[statsV2CaroPage]);
 }
 function setStatsV2RangeV2(months){
   statsV2Range = months;
