@@ -1799,6 +1799,35 @@ body.pev2-bg{background:var(--m-red-page);}
 .statsv2-panel{padding:calc(16px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
 .statsv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .statsv2-cards{display:flex;flex-direction:column;gap:8px;}
+/* overview chart carousel — horizontal scroll-snap strip; vertical page
+   scroll is untouched (touch-action:pan-x lets the browser hand vertical
+   drags back to the page). */
+.statsv2-caro{display:flex;align-items:stretch;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;}
+.statsv2-caro::-webkit-scrollbar{display:none;}
+/* every slide stretches to the tallest one so the block height doesn't
+   jump between tabs */
+.statsv2-slide{flex:0 0 100%;min-width:0;scroll-snap-align:center;box-sizing:border-box;display:flex;}
+.statsv2-slide > *{flex:1;min-width:0;}
+.statsv2-caro-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;}
+.statsv2-caro-arw{width:26px;height:26px;border:0;background:none;color:var(--m-muted);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.statsv2-caro-arw:active{background:rgba(128,128,128,.14);}
+.statsv2-caro-arw .ph{width:16px;height:16px;display:block;}
+.statsv2-caro-arw.disabled{opacity:.28;pointer-events:none;}
+.statsv2-caro-dots{display:flex;align-items:center;gap:8px;}
+.statsv2-caro-dots i{width:7px;height:7px;border-radius:50%;background:var(--m-muted);opacity:.45;transition:width .2s ease,height .2s ease,opacity .2s ease,background .2s ease;}
+.statsv2-caro-dots i.on{width:8.4px;height:8.4px;opacity:1;background:var(--m-orange);}
+.statsv2-scard{background:var(--m-card);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;}
+.statsv2-scard-eyebrow{margin:0 0 8px;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--m-muted);}
+.statsv2-scard-num{margin:0;font-size:var(--m-fs-2xl);font-weight:600;color:var(--m-ink);letter-spacing:-.02em;line-height:1;}
+.statsv2-scard-num small{font-size:var(--m-fs-base);font-weight:400;color:var(--m-muted);margin-left:4px;}
+.statsv2-scard-delta{margin:6px 0 0;font-size:var(--m-fs-2xs);color:var(--m-muted);text-transform:uppercase;letter-spacing:.05em;}
+.statsv2-scard-chart{position:relative;height:114px;margin-top:14px;}
+.statsv2-scard-chart svg{width:100%;height:100%;overflow:visible;}
+.statsv2-scard-labels{display:flex;justify-content:space-between;margin-top:6px;}
+.statsv2-scard-labels span{font-size:var(--m-fs-xs);color:var(--m-muted);}
+.statsv2-scard-empty{margin:14px 0 6px;font-size:var(--m-fs-sm);color:var(--m-muted);line-height:1.5;}
+.statsv2-kcard-arw{width:18px;height:18px;color:var(--m-orange);flex-shrink:0;margin-left:auto;}
+.statsv2-kcard-arw.down{transform:scaleY(-1);}
 
 .statsv2-ring-card{background:#000;border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;height:204px;display:flex;flex-direction:column;justify-content:space-between;}
 .statsv2-ring-eyebrow{margin:0;}
@@ -3219,6 +3248,19 @@ const T_EN = {
   stV2TagSila: 'strength',
   stV2TagCiezar: 'weight',
   stV2TagObjetosc: 'volume',
+  stV2Next: 'Next',
+  stV2ThisWeekShort: 'This',
+  stV2WeightTitle: 'Body weight · 90 days',
+  stV2WeightEmpty: 'Add at least two measurements in your account to see the trend.',
+  stV2NoChange90: 'no change / 90 days',
+  stV2KcalWeekly: 'Calories · recent weeks',
+  stV2KcalPerWeek: 'kcal / week',
+  stV2KcalThisWeek: 'this week',
+  stV2KcalAvgOf: 'avg of',
+  stV2KcalWeeklyEmpty: 'Add your body weight in the account to estimate calories',
+  stV2SessionsMonthly: 'Workouts · month by month',
+  stV2SessionsThisMonth: 'this month',
+  stV2SinceMonthShort: 'since',
   histV2Workout: 'WORKOUT',
   gymV2Today: "Today's workout.",
   planDifficultyEasy: 'Easy',
@@ -4121,7 +4163,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.24.2";
+const APP_VERSION = "4.25.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4170,6 +4212,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.25.0": {
+    pl: [
+      {featured:true, icon:'chart-line', badge:'Zmiana', title:'Statystyki z karuzelą wykresów', text:'Ekran Statystyki ma teraz karuzelę. Przesuwasz palcem w lewo i prawo między trzema panelami: objętość miesiąc po miesiącu, objętość od początku roku i liczba treningów w miesiącu. Kalorie i masa ciała siedzą nad karuzelą jako dwa stałe kafle ze strzałką trendu w górę albo w dół. Wykresy wjeżdżają z animacją: linia się rysuje, słupki rosną po kolei, kropki pojawiają się na końcu.'},
+    ],
+    en: [
+      {featured:true, icon:'chart-line', badge:'Change', title:'Stats with a chart carousel', text:'The Stats screen now has a carousel. Swipe left and right between three panels: volume month by month, volume since the start of the year, and workouts per month. Calories and body weight sit above the carousel as two fixed cards with an up or down trend arrow. The charts animate in: the line draws itself, bars grow one by one, dots appear last.'},
+    ],
+  },
   "4.24.0": {
     pl: [
       {featured:true, icon:'trophy', badge:'Nowość', title:'Nowy sposób liczenia rekordów', text:'Rekord ćwiczenia liczy się teraz przez szacowany ciężar na jedno powtórzenie (e1RM). Dzięki temu dołożone powtórzenia przy tym samym ciężarze też są progresem, nie tylko wejście na wyższy ciężar. W detalu ćwiczenia w Statystykach masz cztery rekordy: siła, najcięższy ciężar, największa objętość sesji i najdłuższa seria. W historii serii każda sesja pokazuje, który rekord tym razem pobiła.'},
@@ -4848,7 +4898,7 @@ function goRoute(route){
   if(route==='plans-v2'){ previewMode = true; renderPlansListV2(true); }
   if(route==='plan-editor-v2'){ previewMode = true; refreshPlanEditorV2Scroll(); }
   if(route==='history-v2'){ previewMode = true; renderCalendarV2(true); }
-  if(route==='stats-v2'){ previewMode = true; renderStatsV2(true); }
+  if(route==='stats-v2'){ previewMode = true; statsV2CaroPage = 0; renderStatsV2(true); }
   commitViewTransition();
   window.scrollTo(0,0);
 }
@@ -8652,6 +8702,26 @@ function statsV2EarliestWorkoutDate(){
   if(!workouts.length) return null;
   return workouts.reduce((min,w)=> (!min || w.date<min) ? w.date : min, null);
 }
+// kcal per week for the last `n` Monday-started weeks, oldest → newest
+function statsV2WeeklyKcal(n){
+  const today = new Date(todayStr()+'T00:00:00');
+  const monOff = (today.getDay()+6)%7;
+  const thisMon = new Date(today); thisMon.setDate(today.getDate()-monOff);
+  const weeks = [];
+  for(let i=n-1;i>=0;i--){
+    const s = new Date(thisMon); s.setDate(thisMon.getDate()-i*7);
+    const e = new Date(s); e.setDate(s.getDate()+7);
+    const sStr = dateStr(s), eStr = dateStr(e);
+    let kcal = 0, sessions = 0;
+    workouts.forEach(w=>{
+      if(w.date < sStr || w.date >= eStr) return;
+      const k = workoutKcalShown(w);
+      if(k != null){ kcal += k; sessions++; }
+    });
+    weeks.push({ kcal: Math.round(kcal), sessions, label: i===0 ? t('stV2ThisWeekShort','Ten') : `−${i}` });
+  }
+  return weeks;
+}
 function statsV2YtdStats(){
   const map = statsV2MonthlyVolumeMap();
   const today = new Date(todayStr()+'T00:00:00');
@@ -8922,6 +8992,42 @@ function renderStatsV2Overview(){
   const lastPt = wavePts[wavePts.length-1];
   const ytdLabels = MONTH_ABBR_PL.map((abbr,idx)=> (idx%2===0 && idx+1<=ytd.points.length) ? abbr : null).filter(Boolean);
 
+  // --- pinned kcards: trend arrows (same up/down as "Progres ćwiczeń") ---
+  const k7 = kcalStats(7);
+  const k14 = kcalStats(14);
+  const kcalPrev = k14.sum - k7.sum;                 // the 7 days before this week
+  const kcalDir = k7.n === 0 ? 'down' : (k7.sum >= kcalPrev ? 'up' : 'down');
+  const wt = weightTrend(90);
+  const wtDir = !wt ? null : (wt.delta > 0.05 ? 'up' : wt.delta < -0.05 ? 'down' : null);
+  const arwSvg = dir => `<span class="ph statsv2-kcard-arw${dir==='down'?' down':''}">${PH['arrow-up-right']}</span>`;
+
+  // --- carousel slide 3: sessions per month (last 6) ---
+  const sessionsSlide = (()=>{
+    const today = new Date(todayStr()+'T00:00:00');
+    const months = [];
+    for(let i=5;i>=0;i--){
+      const d = new Date(today.getFullYear(), today.getMonth()-i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      let n = 0;
+      workouts.forEach(w=>{ if(statsV2MonthKey(w.date)===key) n++; });
+      runs.forEach(r=>{ if(statsV2MonthKey(r.date)===key) n++; });
+      months.push({ month:d.getMonth()+1, n });
+    }
+    const total = months.reduce((s,m)=>s+m.n,0);
+    const maxN = Math.max(1, ...months.map(m=>m.n));
+    const cur = months[months.length-1].n;
+    return `
+      <div class="statsv2-slide"><div class="statsv2-scard statsv2-anim-card" style="--i:2">
+        <p class="statsv2-scard-eyebrow">${t('stV2SessionsMonthly','Treningi · miesiąc po miesiącu')}</p>
+        <p class="statsv2-scard-num">${cur}<small>${t('stV2SessionsThisMonth','w tym miesiącu')}</small></p>
+        <p class="statsv2-scard-delta">${total} ${LANG==='en'?'in 6 months':'w 6 miesiącach'}</p>
+        <div class="statsv2-bar-row" style="margin-top:14px;">${months.map((m,i)=>{
+          const h = Math.max(4, Math.round(m.n/maxN*112));
+          return `<div class="statsv2-bar-col"><div class="bar statsv2-bar-anim" style="--i:${i};height:${h}px;background:linear-gradient(180deg,#ffbb00,#ff8843 55%,var(--m-orange));${m.n>0?'':'opacity:.35;'}"></div><span>${MONTH_ABBR_PL[m.month-1]}</span></div>`;
+        }).join('')}</div>
+      </div></div>`;
+  })();
+
   return `
     <div class="statsv2-cards">
       <div class="statsv2-ring-card statsv2-anim-card" style="--i:0">
@@ -8948,46 +9054,14 @@ function renderStatsV2Overview(){
         </div>
       </div>
 
-      <div class="statsv2-bar-card statsv2-anim-card" style="--i:1">
-        <p class="statsv2-bar-eyebrow">${t('stV2VolMonthly','Objętość - miesiąc po miesiącu')}</p>
-        <div class="statsv2-bar-row">${barsHtml}</div>
-        <div class="statsv2-bar-nav">
-          <span class="ph${leftDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(90deg)" onclick="statsV2MoveBarPage(1)">${PH['caret-down']}</span>
-          <span class="ph${rightDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="statsV2MoveBarPage(-1)">${PH['caret-down']}</span>
+      <div class="statsv2-krow statsv2-anim-card" style="--i:1">
+        <div class="statsv2-kcard statsv2-kcard--half">
+          <p class="statsv2-kcard-eyebrow">Kalorie · 7 dni</p>
+          <div class="statsv2-kcard-num-row">${ph('flame')}<span class="statsv2-kcard-num">${k7.n ? k7.sum.toLocaleString('pl-PL') : '—'}<small>kcal</small></span>${k7.n?arwSvg(kcalDir):''}</div>
+          <p class="statsv2-kcard-delta">${k7.n ? `śr. ${k7.avg} kcal / trening` : 'Dodaj masę ciała w koncie'}</p>
         </div>
-      </div>
-
-      <div class="statsv2-ytd-card statsv2-anim-card" style="--i:2">
-        <p class="statsv2-ytd-eyebrow">${t('stV2VolYtd','Objętość od początku roku')}</p>
-        <div class="statsv2-ytd-num-row">${ph('dash-barbell')}<div><span class="statsv2-ytd-num">${ytd.total.toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></span></div></div>
-        <p class="statsv2-ytd-delta">+ ${ytd.deltaKg.toLocaleString(LANG==='en'?'en-US':'pl-PL')} kg ${ytd.deltaLabel}</p>
-        <div class="statsv2-ytd-chart">
-          <svg viewBox="0 0 ${wW} ${wH+16}" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="${ytdGradId}" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#ffe8b0"/>
-                <stop offset="100%" stop-color="#fff"/>
-              </linearGradient>
-            </defs>
-            <path class="statsv2-draw-path" d="${wavePath}" fill="none" ${statsV2Stroke(ytdGradId,'#ff8a3d')} stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-          ${lastPt?`<div class="statsv2-chart-dot" style="width:12px;height:12px;background:#ffc542;left:${(lastPt.x/wW*100).toFixed(1)}%;top:${(lastPt.y/(wH+16)*100).toFixed(1)}%;"></div>`:''}
-        </div>
-        <div class="statsv2-ytd-labels">${ytdLabels.map(l=>`<span>${l}</span>`).join('')}</div>
-      </div>
-
-      <div class="statsv2-krow" style="--i:3">
         ${(()=>{
-          const k = kcalStats(7);
-          return `<div class="statsv2-kcard statsv2-kcard--half statsv2-anim-card" style="--i:3">
-            <p class="statsv2-kcard-eyebrow">Kalorie · 7 dni</p>
-            <div class="statsv2-kcard-num-row">${ph('flame')}<span class="statsv2-kcard-num">${k.n ? k.sum.toLocaleString('pl-PL') : '—'}<small>kcal</small></span></div>
-            <p class="statsv2-kcard-delta">${k.n ? `śr. ${k.avg} kcal / trening` : 'Dodaj masę ciała w koncie'}</p>
-          </div>`;
-        })()}
-        ${(()=>{
-          const wt = weightTrend(90);
-          if(!wt) return `<div class="statsv2-kcard statsv2-kcard--half statsv2-anim-card" style="--i:4">
+          if(!wt) return `<div class="statsv2-kcard statsv2-kcard--half">
             <p class="statsv2-kcard-eyebrow">Masa ciała</p>
             <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">—<small>kg</small></span></div>
             <p class="statsv2-kcard-delta">Dodaj pomiar w koncie</p>
@@ -8995,13 +9069,55 @@ function renderStatsV2Overview(){
           const dTxt = Math.abs(wt.delta) < 0.05
             ? 'bez zmian / 90 dni'
             : `${wt.delta > 0 ? '+' : '−'}${Math.abs(wt.delta).toFixed(1).replace('.', ',')} kg / 90 dni`;
-          return `<div class="statsv2-kcard statsv2-kcard--half statsv2-anim-card" style="--i:4">
+          return `<div class="statsv2-kcard statsv2-kcard--half">
             <p class="statsv2-kcard-eyebrow">Masa ciała</p>
-            <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${fmtKg(wt.cur)}<small>kg</small></span></div>
+            <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${fmtKg(wt.cur)}<small>kg</small></span>${wtDir?arwSvg(wtDir):''}</div>
             <p class="statsv2-kcard-delta">${dTxt}</p>
-            ${weightSparkSvg(wt.pts)}
           </div>`;
         })()}
+      </div>
+
+      <div class="statsv2-caro" id="statsCaro">
+        <div class="statsv2-slide">
+          <div class="statsv2-bar-card statsv2-anim-card" style="--i:2">
+            <p class="statsv2-bar-eyebrow">${t('stV2VolMonthly','Objętość - miesiąc po miesiącu')}</p>
+            <p class="statsv2-scard-num">${(window6[5].kg||0).toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></p>
+            <p class="statsv2-scard-delta">${MONTH_NAMES[window6[5].month-1]}${(()=>{const d=Math.round(window6[5].kg-window6[4].kg);if(d===0)return '';const prev=MONTH_GEN_PL[window6[4].month-1];return ` · ${d>0?'+':'−'}${Math.abs(d).toLocaleString(LANG==='en'?'en-US':'pl-PL')} kg ${t('stV2SinceMonthShort','od')} ${prev}`;})()}</p>
+            <div class="statsv2-bar-row" style="margin-top:12px;">${barsHtml}</div>
+            <div class="statsv2-bar-nav">
+              <span class="ph${leftDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(90deg)" onclick="statsV2MoveBarPage(1)">${PH['caret-down']}</span>
+              <span class="ph${rightDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="statsV2MoveBarPage(-1)">${PH['caret-down']}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="statsv2-slide">
+          <div class="statsv2-ytd-card statsv2-anim-card" style="--i:2">
+            <p class="statsv2-ytd-eyebrow">${t('stV2VolYtd','Objętość od początku roku')}</p>
+            <div class="statsv2-ytd-num-row">${ph('dash-barbell')}<div><span class="statsv2-ytd-num">${ytd.total.toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></span></div></div>
+            <p class="statsv2-ytd-delta">+ ${ytd.deltaKg.toLocaleString(LANG==='en'?'en-US':'pl-PL')} kg ${ytd.deltaLabel}</p>
+            <div class="statsv2-ytd-chart">
+              <svg viewBox="0 0 ${wW} ${wH+16}" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="${ytdGradId}" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ffe8b0"/>
+                    <stop offset="100%" stop-color="#fff"/>
+                  </linearGradient>
+                </defs>
+                <path d="${wavePath}" fill="none" ${statsV2Stroke(ytdGradId,'#ff8a3d')} stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+              ${lastPt?`<div class="statsv2-chart-dot" style="width:14px;height:14px;background:#ffc542;left:${(lastPt.x/wW*100).toFixed(1)}%;top:${(lastPt.y/(wH+16)*100).toFixed(1)}%;"></div>`:''}
+            </div>
+            <div class="statsv2-ytd-labels">${ytdLabels.map(l=>`<span>${l}</span>`).join('')}</div>
+          </div>
+        </div>
+
+        ${sessionsSlide}
+      </div>
+      <div class="statsv2-caro-nav">
+        <button type="button" class="statsv2-caro-arw" onclick="statsV2CaroMove(-1)" aria-label="${t('navBack','Wstecz')}"><span class="ph" style="transform:rotate(90deg)">${PH['caret-down']}</span></button>
+        <div class="statsv2-caro-dots" id="statsCaroDots">${[0,1,2].map(i=>`<i${i===0?' class="on"':''}></i>`).join('')}</div>
+        <button type="button" class="statsv2-caro-arw" onclick="statsV2CaroMove(1)" aria-label="${t('stV2Next','Dalej')}"><span class="ph" style="transform:rotate(-90deg)">${PH['caret-down']}</span></button>
       </div>
     </div>
     ${renderStatsV2ExerciseRow(null)}`;
@@ -9193,7 +9309,11 @@ function statsV2TeardownReveal(){
   if(statsV2RevealScrollFn){ window.removeEventListener('scroll', statsV2RevealScrollFn); statsV2RevealScrollFn = null; }
 }
 function statsV2HideDrawn(container){
+  // charts inside the horizontal carousel render static — they're
+  // off-screen at first paint, so there's no draw-in worth staging and
+  // no revealing card type watching them.
   container.querySelectorAll('.statsv2-draw-path').forEach(path=>{
+    if(path.closest('.statsv2-caro')) return;
     let len; try{ len = path.getTotalLength(); }catch(e){ return; }
     if(!len) return;
     path.style.transition = 'none';
@@ -9203,6 +9323,7 @@ function statsV2HideDrawn(container){
   // the dots / PR tags sit ON the line, so keep them hidden too — draw()
   // fades them back in near the end of the line reaching them
   container.querySelectorAll('.statsv2-chart-dot, .statsv2-pr-tag').forEach(d=>{
+    if(d.closest('.statsv2-caro')) return;
     d.style.animation = 'none';
     d.style.transition = 'none';
     d.style.opacity = '0';
@@ -9285,6 +9406,7 @@ function renderStatsV2(animate, drawLines){
   // on every render, an animated scroll on each range-chip click would be
   // distracting) keeps the active tile in the middle at all times.
   statsV2CenterActiveTile();
+  if(!selectedStatsExerciseV2) statsV2InitCarousel(animate);
 }
 function statsV2CenterActiveTile(){
   const row = document.querySelector('.statsv2-ex-row');
@@ -9322,6 +9444,83 @@ function statsV2Back(){
 function statsV2MoveBarPage(delta){
   statsV2BarPage = Math.max(0, statsV2BarPage + delta);
   renderStatsV2(false);
+}
+
+/* Stats-overview chart carousel — a horizontally scroll-snapping strip;
+   the page still scrolls vertically. Page index survives re-renders
+   (bar-page nav rebuilds the DOM) so paging months doesn't bounce you
+   back to slide 1. */
+let statsV2CaroPage = 0;
+function statsV2CaroSyncDots(){
+  const dots = document.querySelectorAll('#statsCaroDots i');
+  if(!dots.length) return;
+  dots.forEach((d,i)=> d.classList.toggle('on', i===statsV2CaroPage));
+  const arws = document.querySelectorAll('.statsv2-caro-arw');
+  if(arws[0]) arws[0].classList.toggle('disabled', statsV2CaroPage<=0);
+  if(arws[1]) arws[1].classList.toggle('disabled', statsV2CaroPage>=dots.length-1);
+}
+function statsV2CaroMove(delta){
+  const el = document.getElementById('statsCaro');
+  if(!el) return;
+  const n = el.querySelectorAll('.statsv2-slide').length;
+  statsV2CaroPage = Math.max(0, Math.min(n-1, statsV2CaroPage + delta));
+  el.scrollTo({ left: statsV2CaroPage * el.clientWidth, behavior: 'smooth' });
+  statsV2CaroSyncDots();
+  statsV2AnimateSlide(el.querySelectorAll('.statsv2-slide')[statsV2CaroPage]);
+}
+// Replay the chart entrance for one slide — line redraws, bars grow one
+// after another, dots fade in behind them. Runs every time a slide
+// becomes active (deliberate swipe), reusing the app's motion vocabulary
+// (dashBarGrow / stroke-dashoffset / opacity, curve cubic-bezier(.16,1,.3,1)).
+function statsV2AnimateSlide(slide){
+  if(!slide) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  slide.querySelectorAll('.statsv2-ytd-chart path, .statsv2-scard-chart path').forEach(path=>{
+    let len; try{ len = path.getTotalLength(); }catch(e){ return; }
+    if(!len) return;
+    path.style.transition = 'none';
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    path.getBoundingClientRect();
+    path.style.transition = 'stroke-dashoffset .9s cubic-bezier(.16,1,.3,1)';
+    path.style.strokeDashoffset = '0';
+  });
+  const bars = slide.querySelectorAll('.bar.statsv2-bar-anim');
+  bars.forEach((b,i)=>{
+    b.style.animation = 'none';
+    b.getBoundingClientRect();
+    b.style.animation = 'dashBarGrow .42s cubic-bezier(.16,1,.3,1) both';
+    b.style.animationDelay = (i*55) + 'ms';
+  });
+  const settleMs = bars.length ? bars.length*55 + 120 : 620;
+  slide.querySelectorAll('.statsv2-chart-dot').forEach(d=>{
+    d.style.animation = 'none';
+    d.style.transition = 'none';
+    d.style.opacity = '0';
+    d.getBoundingClientRect();
+    d.style.transition = 'opacity .3s ease';
+    d.style.transitionDelay = settleMs + 'ms';
+    d.style.opacity = '1';
+  });
+}
+function statsV2InitCarousel(animate){
+  // #statsCaro is recreated on every renderStatsV2() (body.innerHTML), so
+  // this re-wires a fresh element each time and restores the saved page.
+  const el = document.getElementById('statsCaro');
+  if(!el) return;
+  const n = el.querySelectorAll('.statsv2-slide').length;
+  statsV2CaroPage = Math.max(0, Math.min(n-1, statsV2CaroPage));
+  el.scrollLeft = statsV2CaroPage * el.clientWidth;
+  statsV2CaroSyncDots();
+  el.addEventListener('scroll', ()=>{
+    const p = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
+    if(p !== statsV2CaroPage){
+      statsV2CaroPage = p;
+      statsV2CaroSyncDots();
+      statsV2AnimateSlide(el.querySelectorAll('.statsv2-slide')[p]);
+    }
+  }, {passive:true});
+  if(animate) statsV2AnimateSlide(el.querySelectorAll('.statsv2-slide')[statsV2CaroPage]);
 }
 function setStatsV2RangeV2(months){
   statsV2Range = months;
