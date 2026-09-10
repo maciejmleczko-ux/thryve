@@ -1198,12 +1198,12 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    edge-to-edge, not just a same-width sliver); only one is opacity:1 at
    a time, toggled by attachPlanSwipeV2() from the live drag direction. */
 .plansv2-card-wrap{position:relative;overflow:hidden;border-radius:var(--m-r-md);touch-action:pan-y;}
-.plansv2-card-delete{position:absolute;inset:0;border-radius:var(--m-r-md);background:#f00;display:flex;align-items:center;justify-content:flex-end;padding-right:28px;color:#fff;cursor:pointer;opacity:0;}
+.plansv2-card-delete{position:absolute;inset:0;border-radius:var(--m-r-md);background:#f00;display:flex;align-items:center;justify-content:flex-end;padding-right:28px;color:#fff;cursor:pointer;opacity:0;pointer-events:none;}
 .plansv2-card-delete .ph{width:32px;height:32px;transition:transform .15s ease;}
 /* Past the full-swipe threshold: bump the icon so it's obvious that
    releasing now deletes, rather than just snapping open to the reveal. */
 .plansv2-card-wrap.plansv2-will-delete .plansv2-card-delete .ph{transform:scale(1.35);}
-.plansv2-card-share{position:absolute;inset:0;border-radius:var(--m-r-md);background:#f5b942;display:flex;align-items:center;justify-content:flex-start;padding-left:28px;color:#2c2727;cursor:pointer;opacity:0;}
+.plansv2-card-share{position:absolute;inset:0;border-radius:var(--m-r-md);background:#f5b942;display:flex;align-items:center;justify-content:flex-start;padding-left:28px;color:#2c2727;cursor:pointer;opacity:0;pointer-events:none;}
 .plansv2-card-share .ph{width:32px;height:32px;transition:transform .15s ease;}
 .plansv2-card-wrap.plansv2-will-share .plansv2-card-share .ph{transform:scale(1.35);}
 .plansv2-card{border-radius:var(--m-r-md);padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform .12s ease;touch-action:pan-y;}
@@ -4095,7 +4095,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.23.0";
+const APP_VERSION = "4.23.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6831,8 +6831,15 @@ function attachSwipeRow(wrap, cardBtn, opts){
   // drag) or the snapped-open side — never both, they fully overlap
   // (inset:0) so only one can show through the sliver the card exposes.
   const updateLayers = (dragX)=>{
-    delEl.style.opacity = dragX < 0 ? '1' : '0';
-    shareEl.style.opacity = dragX > 0 ? '1' : '0';
+    const showDel = dragX < 0, showShare = dragX > 0;
+    delEl.style.opacity = showDel ? '1' : '0';
+    shareEl.style.opacity = showShare ? '1' : '0';
+    // Both layers are inset:0 and fully overlap; opacity:0 alone still
+    // takes taps, so the hidden one (share, painted last) was catching a
+    // tap on the revealed trash and sharing instead of deleting. Only the
+    // visible layer accepts pointer events.
+    delEl.style.pointerEvents = showDel ? 'auto' : 'none';
+    shareEl.style.pointerEvents = showShare ? 'auto' : 'none';
   };
   const isOpen = ()=> openSide !== null;
   const openLeft = ()=>{ closePlansv2Swipe(); setX(-PLANSV2_SWIPE_REVEAL, true); updateLayers(-1); openSide='left'; plansv2OpenSwipe = {cardBtn, close: closeThis}; };
