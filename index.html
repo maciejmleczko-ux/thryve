@@ -1847,6 +1847,12 @@ body.pev2-bg{background:var(--m-red-page);}
 .statsv2-ring-dot.left{background:var(--m-ink);}
 .statsv2-ring-legend-label{margin:0;font-size:var(--m-fs-2xs);color:var(--m-muted);letter-spacing:1.1px;text-transform:uppercase;}
 .statsv2-ring-legend-value{margin:0;font-size:var(--m-fs-2xl);color:#fff;letter-spacing:1.2px;font-weight:400;line-height:1.1;font-variant-numeric:tabular-nums;}
+@media (prefers-reduced-motion: no-preference){
+  /* the ring "draws" tail→head — each segment fades in on a --s stagger */
+  .statsv2-ring-seg{animation:statsv2SegIn .3s ease both;animation-delay:calc(.18s + var(--s,0) * 10ms);}
+  .statsv2-ring-head{animation:statsv2SegIn .3s ease both;animation-delay:1.1s;}
+  @keyframes statsv2SegIn{from{opacity:0;}to{opacity:1;}}
+}
 
 .statsv2-bar-card{background:var(--m-card);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;}
 .statsv2-bar-eyebrow{margin:0 0 16px;}
@@ -4225,7 +4231,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.27.0";
+const APP_VERSION = "4.27.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -9041,16 +9047,63 @@ function renderStatsV2ExerciseRow(activeName){
     </div>`;
 }
 
+/* Weekly ring — a real angular gradient by chopping the arc into short
+   round-capped segments, each a colour sampled along the sweep (a plain
+   <stroke> linearGradient flattens out on a variable-length arc).
+   Segments carry --s for the tail→head "draw" stagger. */
+const STATSV2_RING_TRACK = '#2b2b30';
+// [position 0..1, "#rrggbb", opacity] — tail starts fully transparent then
+// settles on the track colour (so it truly melts into the track, and the
+// head glow can't halo around an invisible tip), warming to a bright head
+const STATSV2_RING_RAMP        = [[0,STATSV2_RING_TRACK,0],[.10,STATSV2_RING_TRACK,1],[.22,'#7c2310',1],[.48,'#ff3300',1],[.74,'#ff8a3d',1],[1,'#ffc07a',1]];
+const STATSV2_RING_RAMP_CLOSED = [[0,'#b7350f',1],[.5,'#e6551f',1],[1,'#b7350f',1]];   // first coil once the ring is full
+const STATSV2_RING_RAMP_OVER   = [[0,'#ff3300',1],[1,'#ff3300',1]];                     // second coil — pure accent, hard contrast
+// past this point along the sweep the segments are warm enough to carry
+// the head glow; before it they sit plain so the tail blends with the track
+const STATSV2_RING_GLOW_FROM = 0.30;
+function statsV2RingHex(h){ h=h.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
+function statsV2RingMix(c1,c2,t){ const a=statsV2RingHex(c1),b=statsV2RingHex(c2); return `rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`; }
+function statsV2RingSample(ramp,t){
+  for(let i=0;i<ramp.length-1;i++){
+    const s0=ramp[i],s1=ramp[i+1];
+    if(t<=s1[0]||i===ramp.length-2){
+      let k=(t-s0[0])/((s1[0]-s0[0])||1); k=Math.max(0,Math.min(1,k));
+      return { c: statsV2RingMix(s0[1],s1[1],k), o: (s0[2]+(s1[2]-s0[2])*k) };
+    }
+  }
+  return { c: ramp[ramp.length-1][1], o: ramp[ramp.length-1][2] };
+}
+function statsV2RingPt(cx,cy,r,deg){ const a=(deg-90)*Math.PI/180; return { x:cx+r*Math.cos(a), y:cy+r*Math.sin(a) }; }
+function statsV2RingArc(cx,cy,r,sw,startDeg,sweepDeg,ramp,baseIdx,glowId,glowFromT){
+  if(sweepDeg<=0) return { svg:'', segs:0 };
+  const N=Math.max(3,Math.round(sweepDeg/4));
+  const from = glowFromT == null ? 0 : glowFromT;
+  let plain='', glowy='';
+  for(let i=0;i<N;i++){
+    const t=(i+0.5)/N;
+    const p0=statsV2RingPt(cx,cy,r,startDeg+sweepDeg*(i/N));
+    const p1=statsV2RingPt(cx,cy,r,startDeg+sweepDeg*((i+1)/N));
+    const col=statsV2RingSample(ramp,t);
+    const seg=`<path class="statsv2-ring-seg" style="--s:${baseIdx+i}" d="M ${p0.x.toFixed(2)} ${p0.y.toFixed(2)} A ${r} ${r} 0 0 1 ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}" fill="none" stroke="${col.c}" stroke-opacity="${col.o.toFixed(3)}" stroke-width="${sw}" stroke-linecap="round"/>`;
+    if(glowId && t >= from) glowy += seg; else plain += seg;
+  }
+  const svg = (plain ? plain : '') + (glowy ? `<g filter="url(#${glowId})">${glowy}</g>` : '');
+  return { svg, segs: N };
+}
+
 function renderStatsV2Overview(){
-  const ringGradId = statsV2Uid(), ytdGradId = statsV2Uid(), ringShadowId = statsV2Uid();
+  const ringGlowId = statsV2Uid(), ytdGradId = statsV2Uid(), ringShadowId = statsV2Uid(), ringBloomId = statsV2Uid();
   const week = statsV2WeeklyProgress();
   const R = 58, C = 2*Math.PI*R;
   const ringFrac = week.total ? week.done/week.total : 0;
   const ringMainFrac = Math.min(1, ringFrac);
-  const ringMainOffset = (C*(1-ringMainFrac)).toFixed(2);            // 0..full
+  const ringFull = ringMainFrac >= 1;
   const ringOver = Math.max(0, Math.min(1, ringFrac - 1));           // extra loop, capped at one
-  const ringOverOffset = (C*(1-ringOver)).toFixed(2);
   const ringExtra = Math.max(0, week.done - week.total);
+  const ringMain = statsV2RingArc(66, 66, R, 13, 0, ringMainFrac*360, ringFull ? STATSV2_RING_RAMP_CLOSED : STATSV2_RING_RAMP, 0, ringGlowId, ringFull ? 0 : STATSV2_RING_GLOW_FROM);
+  const ringOverA = ringOver > 0 ? statsV2RingArc(66, 66, R, 13, 0, ringOver*360, STATSV2_RING_RAMP_OVER, ringMain.segs + 4, null, 0) : { svg:'', segs:0 };
+  const ringHeadDeg = (ringOver > 0 ? ringOver : ringMainFrac) * 360;
+  const ringHead = statsV2RingPt(66, 66, R, ringHeadDeg);
 
   const window6 = statsV2MonthWindow(statsV2BarPage);
   const maxKg = Math.max(1, ...window6.map(m=>m.kg));
@@ -9120,18 +9173,15 @@ function renderStatsV2Overview(){
           <div class="statsv2-ring-wrap">
             <svg viewBox="0 0 132 132">
               <defs>
-                <linearGradient id="${ringGradId}" gradientUnits="userSpaceOnUse" x1="66" y1="8" x2="22" y2="112">
-                  <stop offset="0" stop-color="#5f5a5c"/>
-                  <stop offset=".42" stop-color="var(--m-orange)"/>
-                  <stop offset="1" stop-color="#ffc542"/>
-                </linearGradient>
-                <filter id="${ringShadowId}" x="-45%" y="-45%" width="190%" height="190%">
-                  <feDropShadow dx="3" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.55"/>
-                </filter>
+                <filter id="${ringGlowId}" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="2.6" flood-color="#ff4d18" flood-opacity="0.5"/></filter>
+                <filter id="${ringShadowId}" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.6"/></filter>
+                <filter id="${ringBloomId}" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4.5"/></filter>
               </defs>
-              <circle cx="66" cy="66" r="${R}" fill="none" stroke="var(--m-ink)" stroke-width="13" transform="rotate(-90 66 66)"/>
-              <circle class="statsv2-draw-path" data-draw-to="${ringMainOffset}" data-draw-delay="260" cx="66" cy="66" r="${R}" fill="none" ${statsV2Stroke(ringGradId,'#ff8a3d')} stroke-width="13" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringMainOffset}" transform="rotate(-90 66 66)"/>
-              ${ringOver > 0 ? `<circle class="statsv2-draw-path" data-draw-to="${ringOverOffset}" data-draw-delay="1250" cx="66" cy="66" r="${R}" fill="none" stroke="var(--m-orange)" stroke-width="13" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${ringOverOffset}" filter="url(#${ringShadowId})" transform="rotate(-90 66 66)"/>` : ''}
+              <circle cx="66" cy="66" r="${R}" fill="none" stroke="${STATSV2_RING_TRACK}" stroke-width="13"/>
+              ${ringMain.svg}
+              ${ringOverA.svg ? `<g filter="url(#${ringShadowId})">${ringOverA.svg}</g>` : ''}
+              ${ringMainFrac > 0 ? `<circle class="statsv2-ring-head" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="10" fill="#ffb877" opacity="0.5" filter="url(#${ringBloomId})"/>
+              <circle class="statsv2-ring-head" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="6.5" fill="${ringOver > 0 ? 'var(--m-orange)' : '#ffc07a'}"${ringOver > 0 ? ` filter="url(#${ringShadowId})"` : ''}/>` : ''}
             </svg>
             <div class="statsv2-ring-num"><strong>${week.done}/${week.total}</strong><small>${t('stV2Days','dni')}</small></div>
           </div>
@@ -9501,7 +9551,7 @@ function renderStatsV2(animate, drawLines){
   const body = document.getElementById('statsV2Body');
   statsV2TeardownReveal();
   body.innerHTML = selectedStatsExerciseV2 ? renderStatsV2Detail(selectedStatsExerciseV2) : renderStatsV2Overview();
-  if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile,.statsv2-bar-anim,.statsv2-chart-dot,.statsv2-pr-tag').forEach(el=>{
+  if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile,.statsv2-bar-anim,.statsv2-chart-dot,.statsv2-pr-tag,.statsv2-ring-seg,.statsv2-ring-head').forEach(el=>{
     el.style.animation = 'none';
   });
   if(drawLines) statsV2SetupDrawReveal(body);
