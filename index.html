@@ -1601,7 +1601,13 @@ body.pev2-bg{background:var(--m-red-page);}
 .exv2-field{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
 .exv2-field label{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--m-muted);}
 .exv2-field input{background:#fff;border:1px solid #c7c6cb;border-radius:var(--m-r-sm);padding:8px 12px;font-size:var(--m-fs-md);font-weight:500;color:var(--m-ink);font-family:inherit;width:100%;box-sizing:border-box;}
-.exv2-field input::placeholder{color:var(--m-ink);opacity:1;}
+/* the placeholder is last session's numbers — a faint hint, so a filled
+   field (your real value) stands out from one you haven't touched yet */
+.exv2-field input::placeholder{color:var(--m-ink);opacity:.42;}
+/* right-side tick: appears once both weight AND reps are filled */
+.exv2-series-tick{width:20px;height:20px;flex-shrink:0;align-self:center;color:#1f9d63;opacity:0;transform:scale(.5);transition:opacity .16s ease,transform .22s cubic-bezier(.22,1.3,.36,1);}
+.exv2-series-tick svg{display:block;width:100%;height:100%;}
+.exv2-series-card.is-done .exv2-series-tick{opacity:1;transform:scale(1);}
 .exv2-series-controls{display:flex;gap:10px;width:100%;}
 .exv2-btn-outline{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);font-family:inherit;cursor:pointer;text-align:center;}
 .exv2-btn-outline:disabled{opacity:.4;cursor:default;}
@@ -4247,7 +4253,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.30.1";
+const APP_VERSION = "4.30.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5693,6 +5699,10 @@ function closePlansCustomizeSheet(overlayId, viaDrag){
 function popupSetLiveV2(idx, field, val){
   if(!popupExercise) return;
   popupExercise.setValues[idx][field] = val;
+  // toggle the right-side tick live (no re-render — keeps input focus)
+  const sv = popupExercise.setValues[idx];
+  const card = document.querySelector(`.exv2-series-card[data-set="${idx}"]`);
+  if(card) card.classList.toggle('is-done', String(sv.weight).trim() !== '' && String(sv.reps).trim() !== '');
   if(popupShowWarning){
     popupShowWarning = false;
     const warnEl = document.querySelector('.exv2-warn');
@@ -5777,8 +5787,9 @@ function renderExercisePopupV2(animate){
   for(let s=0;s<ex.sets;s++){
     const lastW = lastSets[s] ? lastSets[s].weight : '';
     const lastR = lastSets[s] ? lastSets[s].reps : '';
+    const setDone = String(ex.setValues[s].weight).trim() !== '' && String(ex.setValues[s].reps).trim() !== '';
     seriesHtml += `
-      <div class="exv2-series-card${animCls}" style="animation-delay:${CARD_BASE_DELAY + s*CARD_STEP}ms">
+      <div class="exv2-series-card${animCls}${setDone?' is-done':''}" data-set="${s}" style="animation-delay:${CARD_BASE_DELAY + s*CARD_STEP}ms">
         <div class="exv2-series-label">${t('seriesLabel', `Seria ${s+1}`, s+1)}</div>
         <div class="exv2-series-fields">
           <div class="exv2-field">
@@ -5790,6 +5801,7 @@ function renderExercisePopupV2(animate){
             <input type="number" step="1" min="0" placeholder="${lastR!==''?lastR:t('repsUnit','powt.')}" value="${ex.setValues[s].reps}" oninput="popupSetLiveV2(${s},'reps',this.value)">
           </div>
         </div>
+        ${ph('check-circle','exv2-series-tick')}
       </div>`;
   }
   const isEdit = sessionExercises.some(e=>e.name===ex.name);
