@@ -444,6 +444,11 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .bottom-nav.bottom-nav-light .nav-item.active .ph{color:#fff;}
 .bottom-nav .nav-blob{display:none;}
 .bottom-nav.bottom-nav-light .nav-blob{display:block;position:absolute;top:50%;left:0;width:52px;height:52px;border-radius:50%;background:var(--m-orange);transform:translateY(-50%);pointer-events:none;z-index:0;transition:left .42s cubic-bezier(.16,1,.3,1),width .42s cubic-bezier(.16,1,.3,1),height .42s cubic-bezier(.16,1,.3,1);}
+@media (prefers-reduced-motion: no-preference){
+  /* the freshly-selected tab's icon spins into place as the blob arrives */
+  .bottom-nav.bottom-nav-light .nav-item.nav-spin .ph{animation:navIconSpin .5s cubic-bezier(.16,1,.3,1);}
+  @keyframes navIconSpin{0%{transform:rotate(-165deg) scale(.55);}100%{transform:rotate(0) scale(1);}}
+}
 @media (prefers-reduced-motion: reduce){ .bottom-nav.bottom-nav-light .nav-blob{transition:none;} .bottom-nav.bottom-nav-light .nav-item .ph{transition:none;} }
 /* GYM's enlarged circle: 69px vs the v3 row's 52px (exact SVG ratio).
    Negative vertical margin equal to half the size delta keeps its
@@ -4262,7 +4267,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.31.0";
+const APP_VERSION = "4.31.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5010,7 +5015,7 @@ function renderBottomNavForContext(){
 // Slide the single orange indicator to the active tab (and size it to
 // that tab — GYM's circle is bigger). animate=false jumps instantly
 // (first paint, resize, nav rebuild); true glides.
-let navBlobReady = false;
+let navBlobReady = false, lastNavActiveRoute = null;
 function positionNavBlob(animate){
   const nav = document.getElementById('bottomNav');
   if(!nav || !nav.classList.contains('bottom-nav-light')) return;
@@ -5054,9 +5059,15 @@ function goRoute(route){
     document.getElementById('bottomNav').dataset.navSet = String(isV3);
   }
   const navActiveRoute = V3_ROUTE_ALIAS[route] || route;
+  const navTabChanged = navBlobReady && navActiveRoute !== lastNavActiveRoute;
+  lastNavActiveRoute = navActiveRoute;
   document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.route===navActiveRoute));
   positionNavBlob(navBlobReady);   // first call jumps, the rest glide
   navBlobReady = true;
+  if(navTabChanged){
+    const act = document.querySelector('#bottomNav .nav-item.active');
+    if(act){ act.classList.remove('nav-spin'); void act.offsetWidth; act.classList.add('nav-spin'); setTimeout(()=>act && act.classList.remove('nav-spin'), 550); }
+  }
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
   // renderDashboard() re-decides .dashboard-scrollable / .dash-compact on every
