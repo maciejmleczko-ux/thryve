@@ -1852,7 +1852,14 @@ body.pev2-bg{background:var(--m-red-page);}
   .statsv2-ring-seg{animation:statsv2SegIn .3s ease both;animation-delay:calc(.18s + var(--s,0) * 10ms);}
   .statsv2-ring-head{animation:statsv2SegIn .3s ease both;animation-delay:1.1s;}
   @keyframes statsv2SegIn{from{opacity:0;}to{opacity:1;}}
+  /* the comet wave line draws the same way — --p is 0..1 tail→head so the
+     whole line lands in ~.8s regardless of how many segments it has */
+  .statsv2-comet-seg{animation:statsv2SegIn .3s ease both;animation-delay:calc(var(--p,0) * .8s);}
+  .statsv2-chart-head{animation:statsv2SegIn .3s ease both;animation-delay:.9s;}
 }
+/* glowing "head" of the comet line, sitting on the latest point */
+.statsv2-chart-head{position:absolute;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;background:#ffc07a;box-shadow:0 0 9px 3px rgba(255,176,120,.85);}
+.statsv2-chart-head.on-orange{background:#ffe9c6;box-shadow:0 0 10px 4px rgba(255,233,198,.9);}
 
 .statsv2-bar-card{background:var(--m-card);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;}
 .statsv2-bar-eyebrow{margin:0 0 16px;}
@@ -4231,7 +4238,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.27.4";
+const APP_VERSION = "4.28.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4280,6 +4287,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.28.0": {
+    pl: [
+      {featured:true, icon:'chart-line', badge:'Zmiana', title:'Świecąca linia na wykresach', text:'„Objętość od początku roku” i „Progres ciężaru” w wybranym ćwiczeniu rysują się teraz jak kometa: ogon wtapia się w tło karty, a głowa na ostatnim punkcie jaśnieje do żółci z poświatą. Kropki sesji zostają, każda z cienką obwódką w kolorze karty. Linia rysuje się od ogona do głowy, potem pojawiają się kropki, na końcu wskakują etykiety rekordów.'},
+    ],
+    en: [
+      {featured:true, icon:'chart-line', badge:'Change', title:'A glowing line on the charts', text:'"Volume since the start of the year" and "Weight progress" for the selected exercise now draw like a comet: the tail melts into the card and the head on the latest point brightens to yellow with a glow. Session dots stay, each with a thin ring in the card colour. The line draws from tail to head, then the dots appear, then the record labels pop in.'},
+    ],
+  },
   "4.27.0": {
     pl: [
       {featured:true, icon:'chart-line', badge:'Zmiana', title:'Pierścień tygodnia jak w zegarku sportowym', text:'Kiedy nie domykasz planu, pierścień „Postęp tygodniowy” pokazuje kolorowy łuk z przejściem od szarości w pomarańcz i żółć. Kiedy przekroczysz zaplanowaną liczbę treningów, pętla idzie dalej i nachodzi na początek, z delikatnym cieniem. W legendzie zamiast „Zostało” jest wtedy „Ponad plan +N”.'},
@@ -9090,8 +9105,53 @@ function statsV2RingArc(cx,cy,r,sw,startDeg,sweepDeg,ramp,baseIdx,glowId,glowFro
   return { svg, segs: N };
 }
 
+// --- comet line for the wave charts (YTD volume, per-exercise progress) ---
+// Same idea as the ring: chop the line into short round-capped segments,
+// each a SOLID colour sampled along a ramp (tail = the card's own colour so
+// it melts in, head = bright yellow). Solid strokes only — a
+// stroke="url(#gradient)" is invisible on iOS Safari (see statsV2Stroke),
+// which is exactly where these get looked at. Segments carry --p (0..1) for
+// the tail→head draw-in stagger; see .statsv2-comet-seg.
+const STATSV2_DETAIL_RAMP = [[0,'#fdfbff',1],[.06,'#fdfbff',1],[.22,'#ff5a2a',1],[.5,'#ff3300',1],[.8,'#ff8a3d',1],[1,'#ffc07a',1]];
+const STATSV2_YTD_RAMP    = [[0,'#ff3300',1],[.06,'#ff3300',1],[.3,'#ffab63',1],[.62,'#ffd7a3',1],[1,'#ffe9c6',1]];
+// densify a statsV2SmoothPath-style polyline (cubic bezier per segment,
+// horizontal-midpoint control points) into points ~`step` px apart
+function statsV2DensifyPath(pts, step){
+  if(pts.length < 2) return pts.slice();
+  const out = [pts[0]];
+  for(let i=1;i<pts.length;i++){
+    const p0 = pts[i-1], p1 = pts[i], cx = (p0.x+p1.x)/2;
+    const c1x = cx, c1y = p0.y, c2x = cx, c2y = p1.y;
+    const steps = Math.max(2, Math.round(Math.hypot(p1.x-p0.x, p1.y-p0.y)/step));
+    for(let s=1;s<=steps;s++){
+      const u = s/steps, iu = 1-u;
+      out.push({
+        x: iu*iu*iu*p0.x + 3*iu*iu*u*c1x + 3*iu*u*u*c2x + u*u*u*p1.x,
+        y: iu*iu*iu*p0.y + 3*iu*iu*u*c1y + 3*iu*u*u*c2y + u*u*u*p1.y,
+      });
+    }
+  }
+  return out;
+}
+function statsV2CometLine(pts, ramp, sw){
+  if(pts.length < 2) return { svg:'', segs:0 };
+  const dense = statsV2DensifyPath(pts, 6);
+  const N = dense.length - 1;
+  let out = '';
+  for(let i=0;i<N;i++){
+    const a = dense[i], b = dense[i+1];
+    // nudge each segment end a hair past the next start so the round caps
+    // overlap and the colours blend (same trick as the ring's +1.6°)
+    const dx = b.x-a.x, dy = b.y-a.y, dl = Math.hypot(dx,dy) || 1;
+    const ex = b.x + dx/dl*0.6, ey = b.y + dy/dl*0.6;
+    const col = statsV2RingSample(ramp, (i+0.5)/N);
+    out += `<path class="statsv2-comet-seg" style="--p:${(i/N).toFixed(3)}" d="M${a.x.toFixed(2)} ${a.y.toFixed(2)} L${ex.toFixed(2)} ${ey.toFixed(2)}" fill="none" stroke="${col.c}" stroke-width="${sw}" stroke-linecap="round"/>`;
+  }
+  return { svg: out, segs: N };
+}
+
 function renderStatsV2Overview(){
-  const ytdGradId = statsV2Uid(), ringShadowId = statsV2Uid(), ringBloomId = statsV2Uid();
+  const ringShadowId = statsV2Uid(), ringBloomId = statsV2Uid();
   const week = statsV2WeeklyProgress();
   const R = 58, C = 2*Math.PI*R;
   const ringFrac = week.total ? week.done/week.total : 0;
@@ -9127,7 +9187,7 @@ function renderStatsV2Overview(){
     x: ytd.points.length>1 ? (i/(ytd.points.length-1))*wW : wW/2,
     y: wPad + (1 - p.cum/maxCum) * (wH - wPad*2),
   }));
-  const wavePath = statsV2SmoothPath(wavePts);
+  const ytdComet = statsV2CometLine(wavePts, STATSV2_YTD_RAMP, 3);
   const lastPt = wavePts[wavePts.length-1];
   const ytdLabels = MONTH_ABBR_PL.map((abbr,idx)=> (idx%2===0 && idx+1<=ytd.points.length) ? abbr : null).filter(Boolean);
 
@@ -9224,16 +9284,8 @@ function renderStatsV2Overview(){
             <div class="statsv2-ytd-num-row">${ph('dash-barbell')}<div><span class="statsv2-ytd-num">${ytd.total.toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></span></div></div>
             <p class="statsv2-ytd-delta">+ ${ytd.deltaKg.toLocaleString(LANG==='en'?'en-US':'pl-PL')} kg ${ytd.deltaLabel}</p>
             <div class="statsv2-ytd-chart">
-              <svg viewBox="0 0 ${wW} ${wH+16}" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="${ytdGradId}" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#ffe8b0"/>
-                    <stop offset="100%" stop-color="#fff"/>
-                  </linearGradient>
-                </defs>
-                <path d="${wavePath}" fill="none" ${statsV2Stroke(ytdGradId,'#ff8a3d')} stroke-width="2.5" stroke-linecap="round"/>
-              </svg>
-              ${lastPt?`<div class="statsv2-chart-dot" style="width:14px;height:14px;background:#ffc542;left:${(lastPt.x/wW*100).toFixed(1)}%;top:${(lastPt.y/(wH+16)*100).toFixed(1)}%;"></div>`:''}
+              <svg viewBox="0 0 ${wW} ${wH+16}" preserveAspectRatio="none">${ytdComet.svg}</svg>
+              ${lastPt?`<div class="statsv2-chart-head on-orange" style="left:${(lastPt.x/wW*100).toFixed(1)}%;top:${(lastPt.y/(wH+16)*100).toFixed(1)}%;"></div>`:''}
             </div>
             <div class="statsv2-ytd-labels">${ytdLabels.map(l=>`<span>${l}</span>`).join('')}</div>
           </div>
@@ -9264,7 +9316,6 @@ function renderStatsV2Overview(){
 }
 
 function renderStatsV2Detail(name){
-  const detailGradId = statsV2Uid();
   const rec = statsV2ExerciseRecord(name);
   if(!rec) return renderStatsV2ExerciseRow(name) + `<div class="statsv2-empty">${t('stV2NoSeries','Brak zapisanych serii dla tego ćwiczenia.')}</div>`;
 
@@ -9291,7 +9342,7 @@ function renderStatsV2Detail(name){
     x: pts.length>1 ? (i/(pts.length-1))*dW : dW/2,
     y: dPadTop + (1 - p.weight/maxW) * (dH - dPadTop - dPadBottom),
   }));
-  const dPath = statsV2SmoothPath(chartPts);
+  const detailComet = statsV2CometLine(chartPts, STATSV2_DETAIL_RAMP, 3);
   const lastKey = chartPts.length ? chartPts[chartPts.length-1].key : null;
   const prPts = chartPts.filter(p=>series.prMonths.has(p.key)).map(p=>({...p, r: p.key===lastKey?6.5:4}));
   const dLabels = chartPts.filter((_,i)=> pts.length<=6 || i%Math.ceil(pts.length/6)===0 || i===pts.length-1);
@@ -9377,21 +9428,15 @@ function renderStatsV2Detail(name){
         </div>
         <div class="statsv2-detail-wave">
           ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(Math.max(0,p.y-p.r-6)/(dH+16)*100).toFixed(1)}%;">PR ${p.weight}kg</div>`).join('')}
-          <svg viewBox="0 0 ${dW} ${dH+16}" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="${detailGradId}" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#ff8a3d"/>
-                <stop offset="100%" stop-color="#ffc542"/>
-              </linearGradient>
-            </defs>
-            <path class="statsv2-draw-path" d="${dPath}" fill="none" ${statsV2Stroke(detailGradId,'#ff8a3d')} stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
+          <svg viewBox="0 0 ${dW} ${dH+16}" preserveAspectRatio="none">${detailComet.svg}</svg>
           ${chartPts.map((p,i)=>{
             const L = (p.x/dW*100).toFixed(1), T = (p.y/(dH+16)*100).toFixed(1);
-            if(i===chartPts.length-1) return `<div class="statsv2-chart-dot" style="width:14px;height:14px;background:#ffc542;left:${L}%;top:${T}%;"></div>`;
+            // latest point = the glowing comet head
+            if(i===chartPts.length-1) return `<div class="statsv2-chart-head" style="left:${L}%;top:${T}%;"></div>`;
+            // a dot on every plotted point, with a 2 pt card-coloured ring
+            // that lifts it off the gradient line (past PRs keep the dark fill)
             if(series.prMonths.has(p.key)) return `<div class="statsv2-chart-dot" style="width:10px;height:10px;background:#221b17;border:2px solid #ff8a3d;left:${L}%;top:${T}%;"></div>`;
-            // a yellow dot on every other plotted point (each training day / month on the line)
-            return `<div class="statsv2-chart-dot" style="width:10px;height:10px;background:#ffc542;left:${L}%;top:${T}%;"></div>`;
+            return `<div class="statsv2-chart-dot" style="width:10px;height:10px;background:#ffc542;border:2px solid var(--m-card);left:${L}%;top:${T}%;"></div>`;
           }).join('')}
         </div>
         <div class="statsv2-detail-wave-labels">${dLabels.map(p=> p.month ? `<span>${MONTH_ABBR_PL[p.month-1]}</span>` : `<span>${new Date(p.date+'T00:00:00').getDate()}.${String(new Date(p.date+'T00:00:00').getMonth()+1).padStart(2,'0')}</span>`).join('')}</div>
@@ -9473,6 +9518,13 @@ function statsV2HideDrawn(container){
     if(t.closest('.statsv2-caro')) return;
     t.style.transform = 'translate(-50%,-100%) scale(.72)';
   });
+  // comet wave line (per-exercise progress) — hold its segments + glowing
+  // head hidden until draw() replays the CSS tail→head stagger
+  container.querySelectorAll('.statsv2-comet-seg, .statsv2-chart-head').forEach(s=>{
+    if(s.closest('.statsv2-caro')) return;
+    s.style.animation = 'none';
+    s.style.opacity = '0';
+  });
 }
 function statsV2SetupDrawReveal(body){
   statsV2TeardownReveal();
@@ -9486,6 +9538,14 @@ function statsV2SetupDrawReveal(body){
     if(el.dataset.sv2Drawn) return;
     el.dataset.sv2Drawn = '1';
     statsV2AnimateDrawPaths(el);
+    // replay the comet wave line (segments + head) tail→head via its CSS
+    // --p stagger, now that the card is actually in view
+    el.querySelectorAll('.statsv2-comet-seg, .statsv2-chart-head').forEach(s=>{
+      if(s.closest('.statsv2-caro')) return;
+      s.style.opacity = '';
+      s.getBoundingClientRect();
+      s.style.animation = '';
+    });
     if(el.classList.contains('statsv2-detail-chart-card')){
       // "Progres ciężaru": line draws (~1s), then dots wake left→right
       // behind it, then the PR label pops in once the dots have landed.
@@ -9551,7 +9611,7 @@ function renderStatsV2(animate, drawLines){
   const body = document.getElementById('statsV2Body');
   statsV2TeardownReveal();
   body.innerHTML = selectedStatsExerciseV2 ? renderStatsV2Detail(selectedStatsExerciseV2) : renderStatsV2Overview();
-  if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile,.statsv2-bar-anim,.statsv2-chart-dot,.statsv2-pr-tag,.statsv2-ring-seg,.statsv2-ring-head').forEach(el=>{
+  if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile,.statsv2-bar-anim,.statsv2-chart-dot,.statsv2-pr-tag,.statsv2-ring-seg,.statsv2-ring-head,.statsv2-comet-seg,.statsv2-chart-head').forEach(el=>{
     el.style.animation = 'none';
   });
   if(drawLines) statsV2SetupDrawReveal(body);
@@ -9642,7 +9702,7 @@ function statsV2CaroMove(delta){
 function statsV2AnimateSlide(slide){
   if(!slide) return;
   if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  slide.querySelectorAll('.statsv2-ytd-chart path, .statsv2-scard-chart path').forEach(path=>{
+  slide.querySelectorAll('.statsv2-ytd-chart path:not(.statsv2-comet-seg), .statsv2-scard-chart path').forEach(path=>{
     let len; try{ len = path.getTotalLength(); }catch(e){ return; }
     if(!len) return;
     path.style.transition = 'none';
@@ -9651,6 +9711,13 @@ function statsV2AnimateSlide(slide){
     path.getBoundingClientRect();
     path.style.transition = 'stroke-dashoffset .9s cubic-bezier(.16,1,.3,1)';
     path.style.strokeDashoffset = '0';
+  });
+  // comet wave line (YTD slide): replay its tail→head CSS --p stagger
+  slide.querySelectorAll('.statsv2-comet-seg, .statsv2-chart-head').forEach(s=>{
+    s.style.animation = 'none';
+    s.style.opacity = '';
+    s.getBoundingClientRect();
+    s.style.animation = '';
   });
   const bars = slide.querySelectorAll('.bar.statsv2-bar-anim');
   bars.forEach((b,i)=>{
