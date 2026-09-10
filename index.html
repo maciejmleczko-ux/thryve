@@ -4247,7 +4247,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.30.0";
+const APP_VERSION = "4.30.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -9852,10 +9852,13 @@ function statsV2CaroTrackX(track){
   const m = tr.match(/matrix\(([^)]+)\)/);
   return m ? parseFloat(m[1].split(',')[4]) || 0 : 0;
 }
-// Slide the track to a page — one eased throw (same feel as the History
-// calendar): a release velocity shortens the glide, an arrow tap uses a
-// steady curve. onfinish OR a setTimeout guard advances the state, so a
-// backgrounded PWA (animations suspended) still lands on the right page.
+// Slide the track to a page with the SAME throw as the History calendar:
+// on a page change the track accelerates off (ease-in) then the next
+// panel decelerates in (ease-out) — two chained animations, the rail's
+// equivalent of History's fly-out / fly-in (it just has no off-screen
+// content swap to hide). A snap back to the same page is a short spring.
+// Each phase lands on its onfinish OR a setTimeout guard, so a
+// backgrounded PWA (animations suspended) still reaches the right page.
 function statsV2CaroGoTo(page, opts){
   opts = opts || {};
   const caro = document.getElementById('statsCaro');
@@ -9869,25 +9872,52 @@ function statsV2CaroGoTo(page, opts){
   const changed = page !== statsV2CaroPage;
   statsV2CaroPage = page;
   statsV2CaroSyncDots();
+  const killAnims = ()=>{ if(track.getAnimations) track.getAnimations().forEach(a=>a.cancel()); };
   let done = false;
   const land = ()=>{
     if(done) return; done = true;
     track.style.transform = `translateX(${toPx}px)`;
-    if(track.getAnimations) track.getAnimations().forEach(a=>a.cancel());
+    killAnims();
     statsV2CaroBusy = false;
     if(changed || opts.replay) statsV2AnimateSlide(track.children[page]);
   };
-  if(STATSV2_CARO_REDUCE()){ land(); return; }
   const dist = Math.abs(toPx - fromPx);
-  const speed = opts.vel ? Math.min(3.6, Math.max(Math.abs(opts.vel), 0.9)) : 1.5;  // px/ms
-  const dur = Math.min(440, Math.max(190, dist / speed));
+  if(STATSV2_CARO_REDUCE() || dist < 1){ land(); return; }
   statsV2CaroBusy = true;
-  const a = track.animate(
-    [{ transform:`translateX(${fromPx}px)` }, { transform:`translateX(${toPx}px)` }],
-    { duration: dur, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' }
+
+  if(!changed){
+    // eased back to the same page — a brief spring, no throw
+    const dur = Math.min(300, Math.max(190, dist / 1.4));
+    const a = track.animate(
+      [{ transform:`translateX(${fromPx}px)` }, { transform:`translateX(${toPx}px)` }],
+      { duration: dur, easing:'cubic-bezier(.22,1.2,.36,1)', fill:'forwards' }
+    );
+    a.onfinish = land;
+    setTimeout(land, dur + 60);
+    return;
+  }
+
+  const speed = opts.vel ? Math.min(3.6, Math.max(Math.abs(opts.vel), 1.0)) : 1.15;  // px/ms
+  const total = Math.min(460, Math.max(240, dist / speed));
+  const midPx = fromPx + (toPx - fromPx) * 0.5;
+  const d1 = total * 0.42, d2 = total * 0.58;
+  let phase2 = false;
+  const flyIn = ()=>{
+    if(phase2) return; phase2 = true;
+    track.style.transform = `translateX(${midPx}px)`; killAnims();
+    const aIn = track.animate(
+      [{ transform:`translateX(${midPx}px)` }, { transform:`translateX(${toPx}px)` }],
+      { duration: d2, easing:'cubic-bezier(0,0,.3,1)', fill:'forwards' }   // enters at speed, eases to rest
+    );
+    aIn.onfinish = land;
+    setTimeout(land, d2 + 60);
+  };
+  const aOut = track.animate(
+    [{ transform:`translateX(${fromPx}px)` }, { transform:`translateX(${midPx}px)` }],
+    { duration: d1, easing:'cubic-bezier(.4,0,1,1)', fill:'forwards' }     // slow start, exits at speed
   );
-  a.onfinish = land;
-  setTimeout(land, dur + 60);
+  aOut.onfinish = flyIn;
+  setTimeout(flyIn, d1 + 40);
 }
 function statsV2CaroMove(delta){
   if(statsV2CaroBusy) return;
