@@ -4231,7 +4231,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.27.3";
+const APP_VERSION = "4.27.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -9057,8 +9057,7 @@ const STATSV2_RING_TRACK = '#2b2b30';
 // invisible against the track, then a long grey stretch and a quick warm
 // ramp to a bright head. Same ramp at every fill level — at 100% the
 // bright head laps back to 12 and closes over its own grey tail.
-const STATSV2_RING_RAMP      = [[0,STATSV2_RING_TRACK,1],[.32,STATSV2_RING_TRACK,1],[.46,'#7c2310',1],[.66,'#ff3300',1],[.85,'#ff8a3d',1],[1,'#ffc07a',1]];
-const STATSV2_RING_RAMP_OVER = [[0,'#ff3300',1],[1,'#ff3300',1]];                     // second coil — pure accent, hard contrast
+const STATSV2_RING_RAMP      = [[0,STATSV2_RING_TRACK,1],[.04,STATSV2_RING_TRACK,1],[.15,'#7c2310',1],[.46,'#ff3300',1],[.78,'#ff8a3d',1],[1,'#ffc07a',1]];
 function statsV2RingHex(h){ h=h.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
 function statsV2RingMix(c1,c2,t){ const a=statsV2RingHex(c1),b=statsV2RingHex(c2); return `rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`; }
 function statsV2RingSample(ramp,t){
@@ -9096,17 +9095,16 @@ function renderStatsV2Overview(){
   const week = statsV2WeeklyProgress();
   const R = 58, C = 2*Math.PI*R;
   const ringFrac = week.total ? week.done/week.total : 0;
-  const ringMainFrac = Math.min(1, ringFrac);
-  const ringFull = ringMainFrac >= 1;
-  const ringOver = Math.max(0, Math.min(1, ringFrac - 1));           // extra loop, capped at one
+  // one continuous comet — over plan it just keeps flying round the same
+  // ring (up to a second full lap), no separate coil, no cut.
+  const ringSweepFrac = Math.min(2, ringFrac);
+  const ringFull = ringSweepFrac >= 1;
   const ringExtra = Math.max(0, week.done - week.total);
   // no arc-wide glow filter — a hard plain/glow segment boundary left a
   // bright blob mid-ring. The comet's "świetlisty" head is carried by the
   // dedicated head bloom circle instead.
-  const ringMain = statsV2RingArc(66, 66, R, 13, 0, ringMainFrac*360, STATSV2_RING_RAMP, 0, null, 0);
-  const ringOverA = ringOver > 0 ? statsV2RingArc(66, 66, R, 13, 0, ringOver*360, STATSV2_RING_RAMP_OVER, ringMain.segs + 4, null, 0) : { svg:'', segs:0 };
-  const ringHeadShadow = ringOver > 0;   // the 2nd-coil head needs its own lift; a full comet is shadowed whole
-  const ringHeadDeg = (ringOver > 0 ? ringOver : ringMainFrac) * 360;
+  const ringMain = statsV2RingArc(66, 66, R, 13, 0, ringSweepFrac*360, STATSV2_RING_RAMP, 0, null, 0);
+  const ringHeadDeg = ringSweepFrac * 360;
   const ringHead = statsV2RingPt(66, 66, R, ringHeadDeg);
 
   const window6 = statsV2MonthWindow(statsV2BarPage);
@@ -9182,9 +9180,8 @@ function renderStatsV2Overview(){
               </defs>
               <circle cx="66" cy="66" r="${R}" fill="none" stroke="${STATSV2_RING_TRACK}" stroke-width="13"/>
               ${ringFull ? `<g filter="url(#${ringShadowId})">${ringMain.svg}</g>` : ringMain.svg}
-              ${ringOverA.svg ? `<g filter="url(#${ringShadowId})">${ringOverA.svg}</g>` : ''}
               ${week.total > 0 ? `<circle class="statsv2-ring-head" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="10" fill="#ffb877" opacity="0.5" filter="url(#${ringBloomId})"/>
-              <circle class="statsv2-ring-head" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="6.5" fill="${ringOver > 0 ? 'var(--m-orange)' : '#ffc07a'}"${ringHeadShadow ? ` filter="url(#${ringShadowId})"` : ''}/>` : ''}
+              <circle class="statsv2-ring-head" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="6.5" fill="#ffc07a"/>` : ''}
             </svg>
             <div class="statsv2-ring-num"><strong>${week.done}/${week.total}</strong><small>${t('stV2Days','dni')}</small></div>
           </div>
