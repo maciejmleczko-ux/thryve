@@ -82,6 +82,7 @@
   --m-plan-c-easy:#ff6343; /* custom / imported plan cards */
   --m-plan-c-mid:var(--m-orange);
   --m-plan-c-hard:#cd1200;
+  --m-plan-accent:#6891ff; /* planned/missed/done markers on History calendar + Dashboard weekly progress */
 
   --m-r-sm:12px;           /* inputs, chips, small tiles */
   --m-r-md:16px;           /* cards, panels */
@@ -973,14 +974,20 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-week-days{display:flex;justify-content:space-between;}
 .dash-week-day{display:flex;flex-direction:column;align-items:center;gap:6px;}
 .dash-week-day span:first-child{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.dash-week-day.past span:first-child{background:rgba(255,255,255,.101961);}
-.dash-week-day.future span:first-child{border:1px solid rgba(255,255,255,.101961);}
-.dash-week-day.done span:first-child{background:none;border:1px solid #fff;}
+.dash-week-day.rest span:first-child{background:rgba(255,255,255,.101961);}
+/* Same three plan states as the History calendar (Figma 177:10109) — see
+   renderDashboard()'s dashWeekDays block for the priority logic. */
+.dash-week-day.planned span:first-child{border:1.5px solid rgba(255,255,255,.75);}
+.dash-week-day.missed span:first-child{border:1.5px dashed var(--m-plan-accent);}
+.dash-week-day.done span:first-child{background:var(--m-plan-accent);}
 .dash-week-day span:first-child .ph{width:30px;height:30px;display:block;flex-shrink:0;}
 .dash-week-day span:first-child .ph svg{display:block;width:100%;height:100%;}
 .dash-week-day.done span:first-child .ph{color:#fff;}
 .dash-week-day.today span:first-child{background:#fff;border:none;}
 .dash-week-day.today span:first-child .ph{color:var(--m-plan-hard);}
+/* Ring around "today", only when today is also a plan day — same
+   white-wins-but-don't-hide-the-plan-info treatment as the calendar. */
+.dash-week-day.today.has-ring span:first-child{outline:1.5px solid #fff;outline-offset:2px;}
 .dash-week-day em{font-style:normal;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.85);}
 
 /* Short phones: the 390×844 tuning + a real ~50px notch inset tips a 3-line
@@ -1742,8 +1749,19 @@ body.pev2-bg{background:var(--m-red-page);}
 .histv2-cal-days{display:grid;grid-template-columns:repeat(7,1fr);row-gap:6px;}
 .histv2-cal-day{aspect-ratio:1;width:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:var(--m-fs-base);color:#fff;cursor:pointer;border:none;background:none;font-family:inherit;padding:0;}
 .histv2-cal-day.outside{color:rgba(255,255,255,.3);cursor:default;}
-.histv2-cal-day.has-log:not(.selected){border:1px solid rgba(255,255,255,.8);}
+/* Three plan states (Maciej, Figma 177:10109) — a day is at most one of
+   these, checked in this priority: logged beats everything (even an
+   off-plan session still counts as done); otherwise a plan day in the
+   past is "missed", a plan day today/ahead is "planned"; a non-plan day
+   gets no marker at all. See renderCalendarV2(). */
+.histv2-cal-day.planned:not(.selected){border:1.5px solid rgba(255,255,255,.75);}
+.histv2-cal-day.missed:not(.selected){border:1.5px dashed var(--m-plan-accent);color:var(--m-plan-accent);font-weight:600;}
+.histv2-cal-day.has-log:not(.selected){background:var(--m-plan-accent);font-weight:600;}
 .histv2-cal-day.selected{background:#fff;color:#2c2727;font-weight:600;}
+/* "today" stays the existing white .selected fill — this just adds a ring
+   around it (or around a tapped non-today day) when that day is also a
+   plan day, so the training-day info doesn't get lost under the white fill. */
+.histv2-cal-day.selected.has-ring{outline:1.5px solid #fff;outline-offset:2px;}
 
 .histv2-section-label{margin:0 0 12px;}
 /* .histv2-empty — see the shared empty-state rule near .gymv2-no-plan */
@@ -4397,7 +4415,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.32.0";
+const APP_VERSION = "4.33.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4446,6 +4464,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.33.0": {
+    pl: [
+      {featured:true, icon:'calendar-dots', badge:'Zmiana', title:'Kalendarz i postęp tygodniowy pokazują zaległości', text:'Kalendarz w Historii nie kończy się już na dzisiaj — widać cały bieżący miesiąc. Dzień treningowy z planu ma pełny biały obrys, jeśli jest przed nami, i przerywany niebieski, jeśli minął bez wpisu. Zrealizowany trening wypełnia kółko na niebiesko. Ten sam układ dostał widget "Postęp tygodniowy" na Dashboardzie.'},
+    ],
+    en: [
+      {featured:true, icon:'calendar-dots', badge:'Change', title:'The calendar and weekly progress now show what you missed', text:'The History calendar no longer stops at today — it shows the whole current month. A planned training day gets a solid white outline ahead of time, and a dashed blue one once it has passed with no entry. A completed workout fills the circle blue. The Dashboard\'s "Weekly progress" widget got the same treatment.'},
+    ],
+  },
   "4.32.0": {
     pl: [
       {featured:true, icon:'barbell', badge:'Nowość', title:'Kalistenika w bibliotece ćwiczeń', text:'16 nowych ćwiczeń z masą ciała — pompki, podciąganie, przysiady, deska i więcej — z własnymi ikonami. Logowanie serii pokazuje teraz same powtórzenia, bez pola na kilogramy, a Statystyki i ekran podsumowania liczą rekordy i postęp po powtórzeniach zamiast ciężaru.'},
@@ -8270,8 +8296,14 @@ function renderDashboard(){
   document.getElementById('dashWeekCount').textContent = t('dashWeekCount', `${weekDone} / ${weekTotal} dni zaliczone`, weekDone, weekTotal);
   document.getElementById('dashWeekDays').innerHTML = weekDates.map((d,i)=>{
     const isDone = trainedDays.includes(d);
+    const isScheduled = scheduledDays.includes(d);
     const isToday = d===todayIso;
-    const stateClass = isToday ? 'today' : isDone ? 'done' : (d<todayIso ? 'past' : 'future');
+    let stateClass;
+    if(isDone) stateClass = 'done';
+    else if(isScheduled && d<todayIso) stateClass = 'missed';
+    else if(isScheduled) stateClass = 'planned';
+    else stateClass = 'rest';
+    if(isToday) stateClass += ' today' + (isScheduled ? ' has-ring' : '');
     return `<div class="dash-week-day ${stateClass}" style="--i:${i}">
       <span>${isDone?ph('dash-check'):''}</span>
       <em>${planDayLabel(dayKeyFromDate(d))}</em>
@@ -8862,6 +8894,8 @@ function renderCalendarV2(animate){
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const prevMonthDays = new Date(year, month, 0).getDate();
   const logged = datesWithLogs();
+  const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
+  const todayIso = todayStr();
   const monthKey = `${year}-${String(month+1).padStart(2,'0')}`;
   // A day stays selected across month nav only while it's still in the
   // viewed month; step to any other month and the selection drops so the
@@ -8881,9 +8915,13 @@ function renderCalendarV2(animate){
   }
   for(let d=1; d<=daysInMonth; d++){
     const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isPlanDay = !!(plan && (plan.schedule[dayKeyFromDate(iso)]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
     const cls = ['histv2-cal-day'];
     if(logged.get(iso)) cls.push('has-log');
+    else if(isPlanDay && iso < todayIso) cls.push('missed');
+    else if(isPlanDay) cls.push('planned');
     if(iso===selectedHistDateV2) cls.push('selected');
+    if(isPlanDay) cls.push('has-ring');
     html += `<button type="button" class="${cls.join(' ')}" onclick="selectedHistDateV2='${iso}';histExpandedV2={};renderCalendarV2();">${d}</button>`;
   }
   const totalCells = startOffset + daysInMonth;
