@@ -1505,10 +1505,25 @@ body.pev2-bg{background:var(--m-red-page);}
 .pev2-select-action.hidden{display:none;}
 .pev2-select-action.danger{border-color:#c00;color:#c00;}
 .pev2-select-exit{border:none;background:none;color:#5b5555;font-size:var(--m-fs-base);cursor:pointer;padding:4px 6px;line-height:1;font-family:inherit;}
-.pev2-equip-row{display:flex;gap:4px;flex-wrap:wrap;}
-.pev2-equip-chip{flex:none;background:var(--m-card);border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 16px;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);cursor:pointer;font-family:inherit;transition:transform .12s ease;}
-.pev2-equip-chip:active{transform:scale(.95);}
-.pev2-equip-chip.active{background:var(--m-orange);border-color:var(--m-orange);color:var(--m-card);}
+/* Equipment-filter icon row (exercise picker / plan editor / swap sheet)
+   — same glide+spin mechanic as the bottom nav's orange blob (see
+   .nav-blob / navIconSpin): one absolutely-positioned circle slides
+   under the chips via positionEquipBlob(), and the freshly-active
+   chip's icon spins into place via .equip-spin. */
+.equip-row{position:relative;display:flex;gap:8px;}
+.equip-chip{position:relative;z-index:1;flex:none;width:44px;height:44px;border-radius:50%;background:var(--m-card);border:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform .12s ease,border-color .3s cubic-bezier(.16,1,.3,1);}
+.equip-chip:active{transform:scale(.93);}
+.equip-chip .ic{width:22px;height:22px;display:block;}
+.equip-chip .ic path,.equip-chip .ic circle,.equip-chip .ic rect{fill:var(--m-orange);transition:fill .3s cubic-bezier(.16,1,.3,1);}
+.equip-chip .ic.icon-stroke path{fill:none;stroke:var(--m-orange);transition:stroke .3s cubic-bezier(.16,1,.3,1);}
+.equip-chip.active{background:transparent;border-color:transparent;}
+.equip-chip.active .ic path,.equip-chip.active .ic circle,.equip-chip.active .ic rect{fill:#fff;}
+.equip-chip.active .ic.icon-stroke path{stroke:#fff !important;}
+.equip-blob{position:absolute;top:0;left:0;width:44px;height:44px;border-radius:50%;background:var(--m-orange);pointer-events:none;z-index:0;transition:left .42s cubic-bezier(.16,1,.3,1);}
+@media (prefers-reduced-motion: no-preference){
+  .equip-chip.equip-spin .ic{animation:navIconSpin .5s cubic-bezier(.16,1,.3,1);}
+}
+@media (prefers-reduced-motion: reduce){ .equip-blob{transition:none;} }
 .pev2-groups{display:flex;flex-direction:column;gap:8px;}
 .pev2-section{border:1px solid #c7c6cb;border-radius:var(--m-r-sm);padding:10px;display:flex;flex-direction:column;gap:12px;}
 /* Collapsed section = plain white pill, no border (Figma node
@@ -1692,9 +1707,6 @@ body.pev2-bg{background:var(--m-red-page);}
 .swapv2-instead{font-size:var(--m-fs-sm);color:#5b5555;margin:0;}
 .swapv2-instead b{color:#2c2727;}
 .swapv2-group-chip{align-self:flex-start;display:inline-flex;align-items:center;height:22px;padding:0 12px;border-radius:var(--m-r-pill);background:#dfe6ff;color:#2c3fae;font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
-.swapv2-filters{display:flex;gap:8px;flex-wrap:wrap;}
-.swapv2-filters button{border:1px solid #d8d5e2;background:#fff;border-radius:var(--m-r-pill);padding:8px 14px;font:inherit;font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);cursor:pointer;}
-.swapv2-filters button.active{background:var(--m-orange);border-color:var(--m-orange);color:#fff;}
 /* alternatives are a tile grid + selection badge — same component as
    "Wybierz ćwiczenie" (buildExerciseTileV2 / .gymv2-grid / .gymv2-tile-
    selected + .gymv2-tile-check). */
@@ -2423,7 +2435,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
         <div class="pev2-anim-tile pev2-anim-tile-3">
           <p class="plansv2-section-label" data-i18n="peV2EquipLabel">WYBIERZ SWÓJ SPRZĘT</p>
-          <div class="pev2-equip-row" id="planEquipFilterRowV2"></div>
+          <div class="equip-row" id="planEquipFilterRowV2"></div>
         </div>
 
         <div class="pev2-groups" id="planEditorGridV2"></div>
@@ -2955,7 +2967,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
       <div class="plansv2-customize-section">
         <p class="plansv2-customize-label">Wybierz swój sprzęt</p>
-        <div class="pev2-equip-row" id="pickExerciseEquipRowV2"></div>
+        <div class="equip-row" id="pickExerciseEquipRowV2"></div>
       </div>
       <div class="pev2-groups" id="pickExerciseGridV2"></div>
     </div>
@@ -4415,7 +4427,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.33.0";
+const APP_VERSION = "4.34.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -4464,6 +4476,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.34.0": {
+    pl: [
+      {featured:true, icon:'barbell', badge:'Zmiana', title:'Filtr sprzętu to teraz ikony, z animacją menu', text:'W wyborze ćwiczenia, w BUILDERZE i przy zamianie ćwiczenia w GYM filtr sprzętu pokazuje teraz ikony zamiast napisów — Wszystkie / Hantle / Maszyny / Kettlebell / Kalistenika. Zaznaczenie przesuwa się między nimi tym samym pomarańczowym kółkiem co dolne menu, a nowo wybrana ikonka wskakuje na miejsce z małym obrotem.'},
+    ],
+    en: [
+      {featured:true, icon:'barbell', badge:'Change', title:'Equipment filter is now icons, with the nav\'s glide animation', text:'The equipment filter (adding an exercise, in the BUILDER, and swapping an exercise in GYM) shows icons instead of text — All / Free weights / Machines / Kettlebell / Bodyweight. The selection glides between them with the same orange circle as the bottom nav, and the newly-picked icon spins into place.'},
+    ],
+  },
   "4.33.0": {
     pl: [
       {featured:true, icon:'calendar-dots', badge:'Zmiana', title:'Kalendarz i postęp tygodniowy pokazują zaległości', text:'Kalendarz w Historii nie kończy się już na dzisiaj — widać cały bieżący miesiąc. Dzień treningowy z planu ma pełny biały obrys, jeśli jest przed nami, i przerywany niebieski, jeśli minął bez wpisu. Zrealizowany trening wypełnia kółko na niebiesko. Ten sam układ dostał widget "Postęp tygodniowy" na Dashboardzie.'},
@@ -5807,11 +5827,9 @@ function swapAlternatives(){
 function renderSwapSheetV2(){
   const box = document.getElementById('swapExerciseBodyV2');
   if(!box) return;
-  const { origin, bucket, list } = swapAlternatives();
+  const { origin, bucket } = swapAlternatives();
   if(!origin){ box.innerHTML = ''; return; }
   const isSwapped = !!todaySwaps[swapOriginName];
-  const current = isSwapped ? todaySwaps[swapOriginName].name : swapOriginName;
-  const canApply = !!swapPickName && swapPickName !== current;
   box.innerHTML = `
     <div class="swapv2-card">
       <div class="swapv2-head">
@@ -5822,20 +5840,29 @@ function renderSwapSheetV2(){
         <p class="swapv2-instead">${t('swapV2Instead','Zamiast')}: <b>${swapOriginName}</b></p>
         <span class="swapv2-group-chip">${t('swapV2SameGroup','Ta sama grupa')}: ${LANG==='en' ? bucket.en : bucket.pl}</span>
       </div>
-      <div class="swapv2-filters">
-        ${PLAN_EQUIP_FILTERS.map(f=>`<button type="button" class="${swapEquipFilter===f.key?'active':''}" onclick="setSwapEquipV2('${f.key}')">${LANG==='en'?f.en:f.pl}</button>`).join('')}
-      </div>
-      ${list.length
-        ? `<div class="gymv2-grid" id="swapGridV2"></div>`
-        : `<p class="swapv2-empty">${t('swapV2Empty','Brak innych ćwiczeń na tę grupę z tym filtrem.')}</p>`}
+      <div class="equip-row" id="swapEquipRowV2">${equipRowInnerHtml(swapEquipFilter, 'setSwapEquipV2')}</div>
+      <div id="swapListAreaV2"></div>
     </div>
     <div class="swapv2-foot">
       ${isSwapped ? `<button type="button" class="swapv2-revert" onclick="revertSwapV2()">${t('swapV2Revert','Przywróć oryginał')}</button>` : ''}
-      <button type="button" class="swapv2-submit" ${canApply?'':'disabled'} onclick="confirmSwapV2()">${t('swapV2Apply','Zamień na dziś')}</button>
+      <button type="button" class="swapv2-submit" id="swapSubmitV2" onclick="confirmSwapV2()">${t('swapV2Apply','Zamień na dziś')}</button>
     </div>`;
-  // exercise tiles — same component + selection look as "Wybierz ćwiczenie"
+  positionEquipBlob(document.getElementById('swapEquipRowV2'), false);
+  refreshSwapListArea();
+}
+// Just the tile grid/empty-state + submit-button enabled state — kept
+// separate from the equip row so a filter click (setSwapEquipV2) never
+// has to rebuild (and thus reset) the row the blob animation lives in.
+function refreshSwapListArea(){
+  const { list } = swapAlternatives();
+  const area = document.getElementById('swapListAreaV2');
+  if(!area) return;
+  area.innerHTML = list.length
+    ? `<div class="gymv2-grid" id="swapGridV2"></div>`
+    : `<p class="swapv2-empty">${t('swapV2Empty','Brak innych ćwiczeń na tę grupę z tym filtrem.')}</p>`;
   const grid = document.getElementById('swapGridV2');
   if(grid){
+    // exercise tiles — same component + selection look as "Wybierz ćwiczenie"
     list.forEach(e=>{
       const tile = buildExerciseTileV2(e, e.name === swapPickName ? 'selected' : 'plain');
       tile.classList.add('gymv2-tile');
@@ -5843,6 +5870,15 @@ function renderSwapSheetV2(){
       grid.appendChild(tile);
     });
   }
+  refreshSwapSubmitState();
+}
+function refreshSwapSubmitState(){
+  const { origin } = swapAlternatives();
+  const btn = document.getElementById('swapSubmitV2');
+  if(!origin || !btn) return;
+  const isSwapped = !!todaySwaps[swapOriginName];
+  const current = isSwapped ? todaySwaps[swapOriginName].name : swapOriginName;
+  btn.disabled = !(swapPickName && swapPickName !== current);
 }
 function pickSwapV2(name){ swapPickName = (swapPickName === name ? null : name); renderSwapSheetV2(); }
 function revertSwapV2(){
@@ -5857,7 +5893,8 @@ function setSwapEquipV2(key){
   if(swapPickName && swapPickName !== swapOriginName && !list.some(e=>e.name===swapPickName)){
     swapPickName = null;
   }
-  renderSwapSheetV2();
+  setEquipRowActive(document.getElementById('swapEquipRowV2'), key);
+  refreshSwapListArea();
 }
 function openSwapSheetV2(originName){
   const planEx = todayPlanExerciseNames() || [];
@@ -6214,15 +6251,14 @@ function closeExercisePickerV2(viaDrag){
 }
 function setPickExerciseEquipFilterV2(key){
   pickExerciseEquipFilterV2 = key;
-  renderPickExerciseEquipRowV2();
+  setEquipRowActive(document.getElementById('pickExerciseEquipRowV2'), key);
   renderExercisePickerGridV2();
 }
 function renderPickExerciseEquipRowV2(){
   const row = document.getElementById('pickExerciseEquipRowV2');
   if(!row) return;
-  row.innerHTML = PLAN_EQUIP_FILTERS.map(f=>
-    `<button type="button" class="pev2-equip-chip${pickExerciseEquipFilterV2===f.key?' active':''}" onclick="setPickExerciseEquipFilterV2('${f.key}')">${LANG==='en'?f.en:f.pl}</button>`
-  ).join('');
+  row.innerHTML = equipRowInnerHtml(pickExerciseEquipFilterV2, 'setPickExerciseEquipFilterV2');
+  positionEquipBlob(row, false);
 }
 function togglePickExerciseV2Section(key){
   if(pickExerciseV2Collapsed.has(key)) pickExerciseV2Collapsed.delete(key);
@@ -7699,18 +7735,64 @@ const PLAN_EQUIP_FILTERS = [
   {key:'kettlebell', pl:'Kettlebell', en:'Kettlebell'},
   {key:'masa ciała', pl:'Kalistenika', en:'Bodyweight'},
 ];
+/* Equipment-filter icons — used by the exercise picker, the plan editor's
+   equip filter and the swap sheet (all three keyed off PLAN_EQUIP_FILTERS).
+   "Wszystkie"/"Hantle" fills are ours; Maszyny/Kettlebell/Kalistenika are
+   Maciej's own SVGs, recolored via the .equip-chip CSS below. Kalistenika
+   is a stroke drawing (not filled), hence the .icon-stroke class. */
+const EQUIP_ICONS = {
+  all: `<svg class="ic" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="M102,32H54A22,22,0,0,0,32,54v48a22,22,0,0,0,22,22h48a22,22,0,0,0,22,-22V54A22,22,0,0,0,102,32ZM109,109H47V47H109ZM202,32H154A22,22,0,0,0,132,54v48a22,22,0,0,0,22,22h48a22,22,0,0,0,22,-22V54A22,22,0,0,0,202,32ZM209,109H147V47H209ZM102,132H54A22,22,0,0,0,32,154v48a22,22,0,0,0,22,22h48a22,22,0,0,0,22,-22V154A22,22,0,0,0,102,132ZM109,209H47V147H109ZM202,132H154A22,22,0,0,0,132,154v48a22,22,0,0,0,22,22h48a22,22,0,0,0,22,-22V154A22,22,0,0,0,202,132ZM209,209H147V147H209Z"/></svg>`,
+  hantle: `<svg class="ic" viewBox="0 -96 512 512" xmlns="http://www.w3.org/2000/svg"><path d="m482 110h-10v-45c0-22.058594-17.949219-40-40-40-7.710938 0-14.921875 2.191406-21.03125 5.988281-4.089844-17.738281-20.019531-30.988281-38.96875-30.988281h-.011719c-22.046875 0-40 17.941406-40 40v70h-151.976562v-70c0-22.058594-17.953125-40-40.011719-40-18.949219 0-34.878906 13.25-38.96875 30.988281-6.109375-3.796875-13.320312-5.988281-21.03125-5.988281-22.050781 0-40 17.941406-40 40v45h-10c-16.539062 0-30 13.460938-30 30v40c0 16.539062 13.460938 30 30 30h10v45c0 22.058594 17.949219 40 40 40 7.710938 0 14.921875-2.191406 21.03125-5.988281 4.089844 17.738281 20.019531 30.988281 38.96875 30.988281h.011719c22.046875 0 40-17.941406 40-40v-70h151.976562v70c0 22.058594 17.953125 40 40.011719 40 18.949219 0 34.878906-13.25 38.96875-30.988281 6.109375 3.796875 13.320312 5.988281 21.03125 5.988281 22.050781 0 40-17.941406 40-40v-45h10c16.539062 0 30-13.460938 30-30v-40c0-16.539062-13.460938-30-30-30zm-442 80h-10c-5.511719 0-10-4.488281-10-10v-40c0-5.511719 4.488281-10 10-10h10zm60 65c0 5.519531-2.238281 10.519531-5.859375 14.140625s-8.621094 5.859375-14.140625 5.859375c-11.03125 0-20-8.96875-20-20v-190c0-11.03125 8.96875-20 20-20s20 8.96875 20 20zm60.011719 25c0 11.03125-8.980469 20-20 20h-.011719c-11.019531 0-20-8.96875-20-20v-240c0-11.03125 8.980469-20 20.011719-20 11.019531 0 20 8.96875 20 20zm171.917969-130h-69.929688c-5.519531 0-10 4.480469-10 10s4.480469 10 10 10h69.929688v20h-151.96875v-60h151.96875zm60.070312 130c0 11.03125-8.980469 20-20.011719 20-11.019531 0-20-8.96875-20-20v-119.488281c-.007812.21875-.027343.4375-.058593.648437v-2.320312c.03125.210937.050781.429687.058593.648437v-119.488281c0-11.03125 8.980469-20 20-20h.011719c11.019531 0 20 8.96875 20 20zm60-25c0 11.03125-8.96875 20-20 20s-20-8.96875-20-20v-190c0-11.03125 8.96875-20 20-20s20 8.96875 20 20zm40-75c0 5.511719-4.488281 10-10 10h-10v-60h10c5.511719 0 10 4.488281 10 10zm0 0"/><path d="m222.019531 170c-5.523437 0-10.003906-4.476562-10.003906-10s4.472656-10 9.996094-10h.007812c5.523438 0 10 4.476562 10 10s-4.476562 10-10 10zm0 0"/></svg>`,
+  maszyny: `<svg class="ic" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><g><g><path d="M121.201,466.2c-0.131-0.64-0.32-1.27-0.57-1.87c-0.25-0.61-0.561-1.19-0.92-1.73c-0.37-0.55-0.79-1.06-1.25-1.52 c-0.46-0.46-0.97-0.88-1.521-1.24c-0.54-0.36-1.12-0.67-1.72-0.92c-0.61-0.25-1.24-0.44-1.87-0.57c-1.29-0.26-2.62-0.26-3.91,0 c-0.64,0.13-1.269,0.32-1.87,0.57c-0.609,0.25-1.189,0.56-1.729,0.92c-0.55,0.36-1.06,0.78-1.521,1.24 c-0.46,0.46-0.88,0.97-1.239,1.52c-0.36,0.54-0.67,1.12-0.92,1.73c-0.25,0.6-0.44,1.23-0.57,1.87s-0.2,1.3-0.2,1.95 s0.07,1.31,0.2,1.95s0.32,1.27,0.57,1.87c0.25,0.61,0.56,1.19,0.92,1.73c0.359,0.55,0.779,1.06,1.239,1.52 c1.86,1.86,4.44,2.93,7.07,2.93c0.65,0,1.31-0.07,1.96-0.2c0.63-0.12,1.26-0.32,1.87-0.57c0.6-0.25,1.18-0.56,1.72-0.92 c0.551-0.36,1.061-0.78,1.521-1.24c0.46-0.46,0.88-0.97,1.25-1.52c0.359-0.54,0.67-1.12,0.92-1.73c0.25-0.6,0.439-1.23,0.57-1.87 c0.129-0.64,0.189-1.3,0.189-1.95S121.331,466.84,121.201,466.2z"/></g></g><g><g><path d="M476.4,177.22h-13.01V67.543c0-21.249-17.293-38.535-38.548-38.535h-137.61V10c0-5.523-4.478-10-10-10h-42.457 c-5.522,0-10,4.477-10,10v19.008H87.166c-21.256,0-38.549,17.287-38.549,38.535V177.22H35.6c-5.522,0-10,4.477-10,10v96.513 c0,5.523,4.478,10,10,10h58.402c5.522,0,10-4.477,10-10V84.375h120.773v8.999h-19.473c-16.299,0-29.56,13.26-29.56,29.559v117.619 c0,16.299,13.261,29.559,29.56,29.559h19.473v11.928h-52.429c-5.522,0-10,4.477-10,10v36.154c0,5.523,4.478,10,10,10h52.429 v86.108H71.795c-14.888,0-27,12.112-27,27V502c0,5.523,4.478,10,10,10h402.419c5.522,0,10-4.477,10-10v-50.699 c0-14.888-12.112-27-27-27H287.232v-86.108h52.43c5.522,0,10-4.477,10-10v-36.154c0-5.523-4.478-10-10-10h-52.43v-11.928h19.474 c16.299,0,29.56-13.26,29.56-29.559V122.933c0-16.299-13.261-29.559-29.56-29.559h-19.474v-8.999h120.774v199.358 c0,5.523,4.478,10,10,10H476.4c5.522,0,10-4.477,10-10V187.22C486.4,181.697,481.923,177.22,476.4,177.22z M244.775,20h22.457 v73.374h-22.457V20z M84.002,273.733H45.6V197.22h38.402V273.733z M94.002,64.376L94.002,64.376c-5.522-0.001-10,4.476-10,9.999 V177.22H68.617V67.543c0-10.22,8.321-18.535,18.549-18.535h137.609v15.368H94.002z M440.214,444.301c3.859,0,7,3.14,7,7v6.85 H149.81c-5.522,0-10,4.477-10,10s4.478,10,10,10h297.404V492H64.795v-40.699c0-3.86,3.141-7,7-7H440.214z M244.775,424.301 v-86.108h22.457v86.108H244.775z M329.662,302.039v16.154H182.347v-16.154H329.662z M244.775,282.039v-11.928h22.457v11.928 H244.775z M306.706,113.374c5.272,0,9.56,4.288,9.56,9.559v117.619c0,5.271-4.288,9.559-9.56,9.559H205.303 c-5.271,0-9.56-4.288-9.56-9.559V122.933c0-5.271,4.288-9.559,9.56-9.559H306.706z M418.006,64.375H287.232V49.008h137.61 c10.228,0,18.548,8.315,18.548,18.535V177.22h-15.384V74.375C428.006,68.852,423.528,64.375,418.006,64.375z M466.4,273.733 h-38.394V197.22H466.4V273.733z"/></g></g></svg>`,
+  kettlebell: `<svg class="ic" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><g><g><path d="M283.39,459.52c-0.66-4.94-4.921-8.67-9.89-8.67c-0.45,0-0.899,0.03-1.35,0.09c-2.65,0.36-5,1.721-6.62,3.851 c-1.62,2.12-2.311,4.75-1.96,7.399c0.67,4.94,4.92,8.66,9.899,8.66c0.44,0,0.891-0.03,1.33-0.09c0,0,0.011,0,0.021,0 C280.28,470.031,284.13,464.98,283.39,459.52z"/></g></g><g><g><path d="M380.64,370.27c-1.171-0.46-2.4-0.689-3.65-0.689c-4.15,0-7.8,2.489-9.32,6.34c-11.18,28.49-32.6,51.42-60.29,64.57 c-2.41,1.14-4.229,3.159-5.13,5.68c-0.899,2.51-0.76,5.229,0.391,7.64c1.649,3.471,5.189,5.71,9.04,5.71 c1.479,0,2.92-0.319,4.279-0.96c15.96-7.58,30.181-17.99,42.28-30.92c12.14-12.979,21.57-27.92,28.05-44.399 C388.31,378.1,385.77,372.29,380.64,370.27z"/></g></g><g><g><path d="M416.862,249.005c-5.956-20.854-7.452-42.439-4.435-64.276c1.865-13.496,12.662-42.533,16.66-52.57 c4.533-11.339,6.832-23.335,6.832-35.657c0-24.507-9.482-48.969-26.016-67.113C392.635,10.438,369.768,0,345.515,0 c-2.204,0-23.568,2.46-32.907,4.109c-16.247,2.867-34.66,6.118-56.607,6.118c-21.947,0-40.361-3.251-56.607-6.118 C190.054,2.46,168.69,0,166.486,0c-24.252,0-47.118,10.438-64.388,29.39C85.564,47.535,76.081,71.997,76.081,96.502 c0,12.322,2.299,24.318,6.827,35.645c4.003,10.051,14.802,39.09,16.665,52.583c3.108,22.488,1.429,44.708-4.979,66.137 c-0.481,1.608-1.765,5.323-1.765,5.323c-11.113,23.847-16.748,49.38-16.748,75.891C76.081,431.288,156.792,512,256,512 s179.919-80.712,179.919-179.92c0-26.511-5.635-52.044-16.747-75.888C419.138,256.118,417.202,250.195,416.862,249.005z M96.081,96.502C96.081,55.033,128.322,20,166.486,20c1.68,0,3.388,0.067,5.076,0.201c7.139,0.564,15.117,1.973,24.354,3.604 c16.21,2.861,36.385,6.423,60.084,6.423c23.698,0,43.873-3.562,60.084-6.423c9.237-1.631,17.216-3.039,24.355-3.604 c1.688-0.134,3.396-0.201,5.075-0.201c38.163,0,70.404,35.033,70.404,76.502c0,9.768-1.817,19.266-5.407,28.244 c-0.624,1.567-15.32,38.602-17.897,57.246c-1.445,10.458-1.971,20.869-1.583,31.187c-10.784-12.238-23.227-23.034-37.073-32.037 c-3.523-2.291-7.116-4.448-10.77-6.476c3.313-23.075,16.821-58.157,20.903-68.411c1.235-3.096,1.861-6.377,1.861-9.753 c0-7.982-3.578-16.25-9.332-21.57c-3.556-3.293-7.324-4.962-11.202-4.962c-0.36,0-4.049,0.34-5.806,0.582 c-4.268,0.589-9.441,1.505-14.825,2.459c-17.165,3.032-40.673,7.185-68.787,7.185c-28.115,0-51.623-4.152-68.784-7.184 c-5.358-0.949-10.506-1.861-14.752-2.449c-1.78-0.247-5.523-0.593-5.883-0.593c-3.876,0-7.645,1.669-11.197,4.957 c-5.759,5.327-9.337,13.594-9.337,21.575c0,3.38,0.617,6.637,1.828,9.664c4.092,10.283,17.622,45.437,20.937,68.5 c-0.002,0.004-0.003,0.008-0.005,0.013c-18.018,10.003-34.231,23.158-47.84,38.601c0-0.005,0-0.012,0.001-0.017 c0.394-10.347-0.133-20.783-1.582-31.271c-2.575-18.64-17.272-55.679-17.902-57.259C97.898,115.768,96.081,106.27,96.081,96.502z M324.442,165.647c-21.569-8.874-44.761-13.486-68.441-13.486c-11.125,0-22.268,1.025-33.115,3.047 c-12.138,2.259-23.956,5.761-35.322,10.44c-4.569-23.88-16.046-54.162-21.112-66.892c-0.269-0.671-0.404-1.429-0.404-2.254 c0-2.15,0.961-4.667,2.354-6.304c4.007,0.503,9.746,1.519,15.332,2.508c17.894,3.16,42.398,7.489,72.267,7.489 c29.867,0,54.372-4.329,72.27-7.49c5.577-0.987,11.309-2.002,15.329-2.506c1.393,1.633,2.354,4.151,2.354,6.303 c0,0.85-0.139,1.593-0.44,2.348C341.559,108.78,329.208,140.887,324.442,165.647z M256,492c-88.18,0-159.92-71.74-159.92-159.92 c0-23.57,5.005-46.261,14.858-67.402l0.144-0.308c0.08-0.171,0.159-0.344,0.244-0.514l0.092-0.188 c14.425-30.435,38.673-56.063,68.278-72.163c14.675-7.983,30.438-13.58,46.851-16.635c9.645-1.798,19.555-2.709,29.453-2.709 c61.946,0,118.879,36.299,145.042,92.478c9.872,21.181,14.877,43.871,14.877,67.441C415.919,420.26,344.18,492,256,492z"/></g></g></svg>`,
+  kalistenika: `<svg class="ic icon-stroke" viewBox="0 0 682.66669 682.66669" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(1.3333333,0,0,-1.3333333,0,682.66667)"><g><g><g transform="translate(105.8745,489.0205)"><path d="m 0,0 c 17.423,11.628 37.876,16.915 60.613,9.67 66.401,-21.158 64.484,-46.231 57.053,-76.637 -10.158,-38.124 -32.416,-62.909 -90.706,-56.678 -5.746,-68.516 24.624,-115.569 15.596,-184.085 70.414,93.665 165.896,58.381 203.218,10.238 m -30.763,27.765 c 25.731,44.822 67.903,59.983 103.738,49.866 94.594,-26.707 134.844,-209.476 -71.815,-237.284 -107.434,-49.115 -159.711,-2.11 -236.39,11.556 -103.723,14.954 -71.885,31.992 -93.57,82.549 -36.115,84.201 14.774,229.487 20.52,264.984 1.156,7.146 4.032,16.679 8.449,27.163" style="fill:none;stroke:var(--m-orange);stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:22.926;stroke-dasharray:none;stroke-opacity:1" /></g><g transform="translate(132.835,365.3755)"><path d="M 0,0 C -11.943,1.559 -20.801,5.572 -26.547,12.031" style="fill:none;stroke:var(--m-orange);stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:22.926;stroke-dasharray:none;stroke-opacity:1" /></g><g transform="translate(312.3662,122.0649)"><path d="M 0,0 C 0,0 -50.377,-23.256 -109.838,4.153" style="fill:none;stroke:var(--m-orange);stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:22.926;stroke-dasharray:none;stroke-opacity:1" /></g><g transform="translate(73.9312,457.3232)"><path d="M 0,0 H 0.007" style="fill:none;stroke:var(--m-orange);stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:2.613;stroke-dasharray:none;stroke-opacity:1" /></g></g></g></g></svg>`,
+};
+function equipIconKey(filterKey){ return filterKey === 'masa ciała' ? 'kalistenika' : filterKey; }
+function equipRowInnerHtml(activeKey, onclickFn){
+  return '<span class="equip-blob" aria-hidden="true"></span>' + PLAN_EQUIP_FILTERS.map(f=>{
+    const label = LANG==='en' ? f.en : f.pl;
+    return `<button type="button" class="equip-chip${f.key===activeKey?' active':''}" data-key="${f.key}" title="${label}" aria-label="${label}" onclick="${onclickFn}('${f.key}')">${EQUIP_ICONS[equipIconKey(f.key)]}</button>`;
+  }).join('');
+}
+// Slide the equip row's blob to the active chip. animate=false jumps
+// instantly (fresh render); true glides — same technique as
+// positionNavBlob() for the bottom nav.
+function positionEquipBlob(row, animate){
+  if(!row) return;
+  const blob = row.querySelector('.equip-blob');
+  const act = row.querySelector('.equip-chip.active');
+  if(!blob || !act) return;
+  if(!animate){
+    const keep = blob.style.transition;
+    blob.style.transition = 'none';
+    blob.style.left = act.offsetLeft + 'px';
+    blob.getBoundingClientRect();
+    blob.style.transition = keep;
+    return;
+  }
+  blob.style.left = act.offsetLeft + 'px';
+}
+// Toggle .active in place (no innerHTML rebuild, or the blob element
+// itself would be destroyed and couldn't glide) + spin the newly-active
+// icon, mirroring the bottom nav's .nav-spin.
+function setEquipRowActive(row, activeKey){
+  if(!row) return;
+  row.querySelectorAll('.equip-chip').forEach(b=> b.classList.toggle('active', b.dataset.key === activeKey));
+  positionEquipBlob(row, true);
+  const act = row.querySelector('.equip-chip.active');
+  if(act){ act.classList.remove('equip-spin'); void act.offsetWidth; act.classList.add('equip-spin'); setTimeout(()=>act && act.classList.remove('equip-spin'), 550); }
+}
 let planEditorEquipmentFilter = 'all';
 function setPlanEquipFilter(key){
   planEditorEquipmentFilter = key;
-  planEditorRepaintEquipRow();
+  setEquipRowActive(document.getElementById('planEquipFilterRowV2'), key);
   planEditorRepaintGrid();
 }
 function renderPlanEquipFilterRowV2(){
   const row = document.getElementById('planEquipFilterRowV2');
   if(!row) return;
-  row.innerHTML = PLAN_EQUIP_FILTERS.map(f=>
-    `<button type="button" class="pev2-equip-chip${planEditorEquipmentFilter===f.key?' active':''}" onclick="setPlanEquipFilter('${f.key}')">${LANG==='en'?f.en:f.pl}</button>`
-  ).join('');
+  row.innerHTML = equipRowInnerHtml(planEditorEquipmentFilter, 'setPlanEquipFilter');
+  positionEquipBlob(row, false);
 }
 // Which PLAN_EX_GROUPS section headers are collapsed, in the v2 plan
 // editor's accordion (Figma node 155:1086 shows sections as
