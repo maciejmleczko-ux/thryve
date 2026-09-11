@@ -1505,27 +1505,20 @@ body.pev2-bg{background:var(--m-red-page);}
 .pev2-select-action.hidden{display:none;}
 .pev2-select-action.danger{border-color:#c00;color:#c00;}
 .pev2-select-exit{border:none;background:none;color:#5b5555;font-size:var(--m-fs-base);cursor:pointer;padding:4px 6px;line-height:1;font-family:inherit;}
-/* Equipment-filter icon row (exercise picker / plan editor / swap sheet)
-   — same blob-glide as the bottom nav (see .nav-blob): one
-   absolutely-positioned circle slides under the chips via
-   positionEquipBlob(). The freshly-active icon gets a small scale-in
-   (.equip-spin) — deliberately lighter than the nav's rotate+scale
-   spin, since several of these fire back-to-back while filtering. */
-.equip-row{position:relative;display:flex;gap:8px;}
-.equip-chip{position:relative;z-index:1;flex:none;width:52px;height:52px;border-radius:50%;background:var(--m-card);border:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform .12s ease,border-color .3s cubic-bezier(.16,1,.3,1);}
+/* Equipment-filter icon row (exercise picker / plan editor / swap sheet).
+   Tried a bottom-nav-style sliding blob here first — Maciej felt the
+   whole concept didn't fit this smaller, denser row. Settled on the
+   simplest thing: each chip just fades its own background/icon color
+   on .active, no shared moving element. */
+.equip-row{display:flex;gap:8px;}
+.equip-chip{flex:none;width:52px;height:52px;border-radius:50%;background:var(--m-card);border:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform .12s ease,background-color .25s cubic-bezier(.16,1,.3,1),border-color .25s cubic-bezier(.16,1,.3,1);}
 .equip-chip:active{transform:scale(.93);}
 .equip-chip .ic{width:26px;height:26px;display:block;}
-.equip-chip .ic path,.equip-chip .ic circle,.equip-chip .ic rect{fill:var(--m-orange);transition:fill .3s cubic-bezier(.16,1,.3,1);}
-.equip-chip .ic.icon-stroke path{fill:none;stroke:var(--m-orange);transition:stroke .3s cubic-bezier(.16,1,.3,1);}
-.equip-chip.active{background:transparent;border-color:transparent;}
+.equip-chip .ic path,.equip-chip .ic circle,.equip-chip .ic rect{fill:var(--m-orange);transition:fill .25s cubic-bezier(.16,1,.3,1);}
+.equip-chip .ic.icon-stroke path{fill:none;stroke:var(--m-orange);transition:stroke .25s cubic-bezier(.16,1,.3,1);}
+.equip-chip.active{background:var(--m-orange);border-color:var(--m-orange);}
 .equip-chip.active .ic path,.equip-chip.active .ic circle,.equip-chip.active .ic rect{fill:#fff;}
 .equip-chip.active .ic.icon-stroke path{stroke:#fff !important;}
-.equip-blob{position:absolute;top:0;left:0;width:52px;height:52px;border-radius:50%;background:var(--m-orange);pointer-events:none;z-index:0;transition:left .42s cubic-bezier(.16,1,.3,1);}
-@media (prefers-reduced-motion: no-preference){
-  .equip-chip.equip-spin .ic{animation:equipIconPop .28s cubic-bezier(.16,1,.3,1);}
-  @keyframes equipIconPop{0%{transform:scale(.8);}100%{transform:scale(1);}}
-}
-@media (prefers-reduced-motion: reduce){ .equip-blob{transition:none;} }
 .pev2-groups{display:flex;flex-direction:column;gap:8px;}
 .pev2-section{border:1px solid #c7c6cb;border-radius:var(--m-r-sm);padding:10px;display:flex;flex-direction:column;gap:12px;}
 /* Collapsed section = plain white pill, no border (Figma node
@@ -5849,7 +5842,6 @@ function renderSwapSheetV2(){
       ${isSwapped ? `<button type="button" class="swapv2-revert" onclick="revertSwapV2()">${t('swapV2Revert','Przywróć oryginał')}</button>` : ''}
       <button type="button" class="swapv2-submit" id="swapSubmitV2" onclick="confirmSwapV2()">${t('swapV2Apply','Zamień na dziś')}</button>
     </div>`;
-  positionEquipBlob(document.getElementById('swapEquipRowV2'), false);
   refreshSwapListArea();
 }
 // Just the tile grid/empty-state + submit-button enabled state — kept
@@ -6260,7 +6252,6 @@ function renderPickExerciseEquipRowV2(){
   const row = document.getElementById('pickExerciseEquipRowV2');
   if(!row) return;
   row.innerHTML = equipRowInnerHtml(pickExerciseEquipFilterV2, 'setPickExerciseEquipFilterV2');
-  positionEquipBlob(row, false);
 }
 function togglePickExerciseV2Section(key){
   if(pickExerciseV2Collapsed.has(key)) pickExerciseV2Collapsed.delete(key);
@@ -7751,38 +7742,16 @@ const EQUIP_ICONS = {
 };
 function equipIconKey(filterKey){ return filterKey === 'masa ciała' ? 'kalistenika' : filterKey; }
 function equipRowInnerHtml(activeKey, onclickFn){
-  return '<span class="equip-blob" aria-hidden="true"></span>' + PLAN_EQUIP_FILTERS.map(f=>{
+  return PLAN_EQUIP_FILTERS.map(f=>{
     const label = LANG==='en' ? f.en : f.pl;
     return `<button type="button" class="equip-chip${f.key===activeKey?' active':''}" data-key="${f.key}" title="${label}" aria-label="${label}" onclick="${onclickFn}('${f.key}')">${EQUIP_ICONS[equipIconKey(f.key)]}</button>`;
   }).join('');
 }
-// Slide the equip row's blob to the active chip. animate=false jumps
-// instantly (fresh render); true glides — same technique as
-// positionNavBlob() for the bottom nav.
-function positionEquipBlob(row, animate){
-  if(!row) return;
-  const blob = row.querySelector('.equip-blob');
-  const act = row.querySelector('.equip-chip.active');
-  if(!blob || !act) return;
-  if(!animate){
-    const keep = blob.style.transition;
-    blob.style.transition = 'none';
-    blob.style.left = act.offsetLeft + 'px';
-    blob.getBoundingClientRect();
-    blob.style.transition = keep;
-    return;
-  }
-  blob.style.left = act.offsetLeft + 'px';
-}
-// Toggle .active in place (no innerHTML rebuild, or the blob element
-// itself would be destroyed and couldn't glide) + spin the newly-active
-// icon, mirroring the bottom nav's .nav-spin.
+// Toggle .active in place (a plain CSS color fade on the chip itself —
+// no shared moving element, so no innerHTML-rebuild constraint here).
 function setEquipRowActive(row, activeKey){
   if(!row) return;
   row.querySelectorAll('.equip-chip').forEach(b=> b.classList.toggle('active', b.dataset.key === activeKey));
-  positionEquipBlob(row, true);
-  const act = row.querySelector('.equip-chip.active');
-  if(act){ act.classList.remove('equip-spin'); void act.offsetWidth; act.classList.add('equip-spin'); setTimeout(()=>act && act.classList.remove('equip-spin'), 550); }
 }
 let planEditorEquipmentFilter = 'all';
 function setPlanEquipFilter(key){
@@ -7794,7 +7763,6 @@ function renderPlanEquipFilterRowV2(){
   const row = document.getElementById('planEquipFilterRowV2');
   if(!row) return;
   row.innerHTML = equipRowInnerHtml(planEditorEquipmentFilter, 'setPlanEquipFilter');
-  positionEquipBlob(row, false);
 }
 // Which PLAN_EX_GROUPS section headers are collapsed, in the v2 plan
 // editor's accordion (Figma node 155:1086 shows sections as
