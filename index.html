@@ -1936,7 +1936,7 @@ body.pev2-bg{background:var(--m-red-page);}
 }
 /* glowing "head" of the comet line, sitting on the latest point */
 .statsv2-chart-head{position:absolute;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;background:#ffc07a;box-shadow:0 0 9px 3px rgba(255,176,120,.85);}
-.statsv2-chart-head.on-orange{background:#ffe9c6;box-shadow:0 0 10px 4px rgba(255,233,198,.9);}
+.statsv2-chart-head.on-orange{background:#fff;box-shadow:0 0 12px 5px rgba(255,255,255,.9);}
 
 .statsv2-bar-card{background:var(--m-card);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;}
 .statsv2-bar-eyebrow{margin:0 0 16px;}
@@ -9687,7 +9687,7 @@ function statsV2RingArc(cx,cy,r,sw,startDeg,sweepDeg,ramp,baseIdx,filterId,filte
 // which is exactly where these get looked at. Segments carry --p (0..1) for
 // the tail→head draw-in stagger; see .statsv2-comet-seg.
 const STATSV2_DETAIL_RAMP = [[0,'#fdfbff',1],[.06,'#fdfbff',1],[.22,'#ff5a2a',1],[.5,'#ff3300',1],[.8,'#ff8a3d',1],[1,'#ffc07a',1]];
-const STATSV2_YTD_RAMP    = [[0,'#ff3300',1],[.06,'#ff3300',1],[.3,'#ffab63',1],[.62,'#ffd7a3',1],[1,'#ffe9c6',1]];
+const STATSV2_YTD_RAMP    = [[0,'#ff3300',1],[.06,'#ff3300',1],[.3,'#ffab63',1],[.62,'#ffe0ba',1],[1,'#ffffff',1]];
 // densify a statsV2SmoothPath-style polyline (cubic bezier per segment,
 // horizontal-midpoint control points) into points ~`step` px apart
 function statsV2DensifyPath(pts, step){
@@ -9770,6 +9770,16 @@ function renderStatsV2Overview(){
   const ytdComet = statsV2CometLine(wavePts, STATSV2_YTD_RAMP, 3);
   const lastPt = wavePts[wavePts.length-1];
   const ytdLabels = MONTH_ABBR_PL.map((abbr,idx)=> (idx%2===0 && idx+1<=ytd.points.length) ? abbr : null).filter(Boolean);
+  // Soft glow under the curve — an area fill from the line down to the
+  // chart's baseline, gradient-faded to transparent. Because the line
+  // itself sits low early in the year (little cumulative volume yet) and
+  // climbs toward "today", the filled area is naturally thin/invisible
+  // over the flat months and only reads as a glow where the curve rises —
+  // no separate shaping needed, just a plain top-to-bottom fade.
+  const ytdFillId = statsV2Uid();
+  const ytdAreaPath = wavePts.length>1
+    ? `${statsV2SmoothPath(wavePts)} L${lastPt.x},${wH} L${wavePts[0].x},${wH} Z`
+    : '';
 
   // --- pinned kcards: trend arrows (same up/down as "Progres ćwiczeń") ---
   const k7 = kcalStats(7);
@@ -9865,7 +9875,14 @@ function renderStatsV2Overview(){
             <div class="statsv2-ytd-num-row">${ph('dash-barbell')}<div><span class="statsv2-ytd-num">${ytd.total.toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></span></div></div>
             <p class="statsv2-ytd-delta">+ ${ytd.deltaKg.toLocaleString(LANG==='en'?'en-US':'pl-PL')} kg ${ytd.deltaLabel}</p>
             <div class="statsv2-ytd-chart">
-              <svg viewBox="0 0 ${wW} ${wH+16}" preserveAspectRatio="none">${ytdComet.svg}</svg>
+              <svg viewBox="0 0 ${wW} ${wH+16}" preserveAspectRatio="none">
+                <defs><linearGradient id="${ytdFillId}" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fff" stop-opacity="0.4"/>
+                  <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+                </linearGradient></defs>
+                ${ytdAreaPath?`<path class="statsv2-comet-seg" style="--p:0" d="${ytdAreaPath}" fill="url(#${ytdFillId})" stroke="none"/>`:''}
+                ${ytdComet.svg}
+              </svg>
               ${lastPt?`<div class="statsv2-chart-head on-orange" style="left:${(lastPt.x/wW*100).toFixed(1)}%;top:${(lastPt.y/(wH+16)*100).toFixed(1)}%;"></div>`:''}
             </div>
             <div class="statsv2-ytd-labels">${ytdLabels.map(l=>`<span>${l}</span>`).join('')}</div>
