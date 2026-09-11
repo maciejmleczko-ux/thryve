@@ -1506,10 +1506,11 @@ body.pev2-bg{background:var(--m-red-page);}
 .pev2-select-action.danger{border-color:#c00;color:#c00;}
 .pev2-select-exit{border:none;background:none;color:#5b5555;font-size:var(--m-fs-base);cursor:pointer;padding:4px 6px;line-height:1;font-family:inherit;}
 /* Equipment-filter icon row (exercise picker / plan editor / swap sheet)
-   — same glide+spin mechanic as the bottom nav's orange blob (see
-   .nav-blob / navIconSpin): one absolutely-positioned circle slides
-   under the chips via positionEquipBlob(), and the freshly-active
-   chip's icon spins into place via .equip-spin. */
+   — same blob-glide as the bottom nav (see .nav-blob): one
+   absolutely-positioned circle slides under the chips via
+   positionEquipBlob(). The freshly-active icon gets a small scale-in
+   (.equip-spin) — deliberately lighter than the nav's rotate+scale
+   spin, since several of these fire back-to-back while filtering. */
 .equip-row{position:relative;display:flex;gap:8px;}
 .equip-chip{position:relative;z-index:1;flex:none;width:52px;height:52px;border-radius:50%;background:var(--m-card);border:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform .12s ease,border-color .3s cubic-bezier(.16,1,.3,1);}
 .equip-chip:active{transform:scale(.93);}
@@ -1521,7 +1522,8 @@ body.pev2-bg{background:var(--m-red-page);}
 .equip-chip.active .ic.icon-stroke path{stroke:#fff !important;}
 .equip-blob{position:absolute;top:0;left:0;width:52px;height:52px;border-radius:50%;background:var(--m-orange);pointer-events:none;z-index:0;transition:left .42s cubic-bezier(.16,1,.3,1);}
 @media (prefers-reduced-motion: no-preference){
-  .equip-chip.equip-spin .ic{animation:navIconSpin .5s cubic-bezier(.16,1,.3,1);}
+  .equip-chip.equip-spin .ic{animation:equipIconPop .28s cubic-bezier(.16,1,.3,1);}
+  @keyframes equipIconPop{0%{transform:scale(.8);}100%{transform:scale(1);}}
 }
 @media (prefers-reduced-motion: reduce){ .equip-blob{transition:none;} }
 .pev2-groups{display:flex;flex-direction:column;gap:8px;}
