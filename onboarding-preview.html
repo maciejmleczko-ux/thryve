@@ -190,11 +190,17 @@ function buildHRuler(min,max,value,onChange){
     // assumed index*width) — flex layout can round each tick's width by
     // a fraction of a px, and that error compounds over dozens of ticks
     // (visible as real drift on some browsers/devices, e.g. iOS Safari).
+    // scroll-snap is switched off while we set this, then restored next
+    // frame — iOS Safari can otherwise silently re-snap a programmatic
+    // scrollLeft to whichever tick it thinks is closest right after
+    // layout settles, landing one unit off from the value we asked for.
+    track.style.scrollSnapType = 'none';
     const target = track.querySelector(`[data-v="${value}"]`);
     if(target){
       const tr = track.getBoundingClientRect(), gr = target.getBoundingClientRect();
       track.scrollLeft += (gr.left+gr.width/2) - (tr.left+tr.width/2);
     }
+    requestAnimationFrame(()=>{ track.style.scrollSnapType = 'x mandatory'; });
     let raf = null;
     track.addEventListener('scroll', ()=>{
       if(raf) cancelAnimationFrame(raf);
@@ -237,12 +243,15 @@ function buildVRuler(min,max,value,onChange){
     track.firstElementChild.style.marginTop = center+'px';
     track.lastElementChild.style.marginBottom = center+'px';
     // Same real-position fix as buildHRuler — center on the target row's
-    // actual rendered offset, not an assumed index*height.
+    // actual rendered offset, not an assumed index*height. Snap toggled
+    // off/on around it for the same iOS Safari re-snap reason.
+    track.style.scrollSnapType = 'none';
     const target = track.querySelector(`[data-v="${value}"]`);
     if(target){
       const tr = track.getBoundingClientRect(), gr = target.getBoundingClientRect();
       track.scrollTop += (gr.top+gr.height/2) - (tr.top+tr.height/2);
     }
+    requestAnimationFrame(()=>{ track.style.scrollSnapType = 'y mandatory'; });
     let raf = null;
     track.addEventListener('scroll', ()=>{
       if(raf) cancelAnimationFrame(raf);
