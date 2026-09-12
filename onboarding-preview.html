@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mekkio — onboarding preview</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@200;300;400;500;700&display=swap">
 <style>
 :root{
   --m-orange:#ff3300;
@@ -14,7 +14,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;height:100%;background:#0c0c0e;}
-body{display:flex;align-items:center;justify-content:center;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+body{display:flex;align-items:center;justify-content:center;font-family:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-weight:300;}
 #app{position:relative;width:100%;max-width:430px;height:100dvh;overflow:hidden;background:var(--m-bg);}
 
 .ob-screen{
@@ -32,34 +32,43 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Inter',
 }
 .ob-screen.active{opacity:1;transform:translateX(0);pointer-events:auto;}
 
-.ob-topbar{display:flex;align-items:center;gap:30px;margin-bottom:34px;flex-shrink:0;}
+.ob-topbar{display:flex;align-items:center;gap:30px;flex-shrink:0;}
+/* Exact vertical rhythm read off the real SVG (812px-tall frame): a big
+   ~204px gap sits between the topbar and the heading on every screen —
+   content is NOT pinned right under the topbar like a first draft would
+   assume. Spacers are flex-grow so the ratio holds at any viewport height. */
+.ob-spacer{flex-shrink:0;}
 .ob-back{width:24px;height:24px;border:none;background:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--m-ink);}
 .ob-back svg{width:20px;height:20px;}
 .ob-progress{flex:1;display:flex;align-items:center;gap:9px;}
 .ob-progress-dot{height:6px;border-radius:var(--m-r-pill);background:#A3A3A3;opacity:.39;width:15px;flex-shrink:0;transition:width .3s cubic-bezier(.16,1,.3,1),opacity .3s cubic-bezier(.16,1,.3,1);}
 .ob-progress-dot.current{width:30px;background:var(--m-orange);opacity:1;}
 
-.ob-body{flex:1;display:flex;flex-direction:column;min-height:0;}
-.ob-h1{font-size:22px;font-weight:700;letter-spacing:-.01em;color:var(--m-ink);margin:0 0 10px;text-transform:uppercase;}
-.ob-sub{font-size:13.5px;line-height:1.5;color:rgba(52,57,65,.6);margin:0 0 8px;max-width:30ch;}
+.ob-body{flex:1;display:flex;flex-direction:column;min-height:0;text-align:center;}
+/* Exact type spec from Maciej (read off Figma Inspect): */
+.ob-h1{font-size:20px;font-weight:400;letter-spacing:.04em;color:var(--m-ink);margin:0 0 10px;text-transform:uppercase;}
+.ob-sub{font-size:12px;font-weight:400;line-height:1.5;color:rgba(52,57,65,.6);margin:0 auto 8px;max-width:30ch;}
 
-.ob-name-wrap{margin-top:auto;margin-bottom:auto;}
-.ob-name-input{width:100%;border:none;background:transparent;border-bottom:2px solid rgba(52,57,65,.18);font-family:inherit;font-size:34px;font-weight:600;color:var(--m-orange);padding:6px 0 10px;outline:none;}
+/* "duży tekst" (name / big number): extra light 54px, centered, sitting a
+   fixed 106px below the subtitle — not a proportional gap. */
+.ob-big-gap{flex-shrink:0;height:106px;}
+.ob-name-wrap{}
+.ob-name-input{width:100%;border:none;background:transparent;border-bottom:2px solid rgba(52,57,65,.18);font-family:inherit;font-size:54px;font-weight:200;text-align:center;color:var(--m-orange);padding:6px 0 10px;outline:none;}
 .ob-name-input::placeholder{color:rgba(255,51,0,.35);}
 
-.ob-gender-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(52,57,65,.45);margin:24px 0 12px;}
+.ob-gender-label{font-size:10px;font-weight:700;letter-spacing:.04em;color:rgba(52,57,65,.45);margin:24px 0 12px;}
 .ob-gender-row{display:flex;gap:8px;}
 .ob-gender-chip{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;aspect-ratio:115.667/107.211;border-radius:16px;background:rgba(255,255,255,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1.5px solid transparent;cursor:pointer;transition:border-color .2s ease;}
 .ob-gender-chip svg{width:26px;height:26px;color:#FF6343;}
-.ob-gender-chip span{font-size:11px;font-weight:700;letter-spacing:.06em;color:#2C2727;}
+.ob-gender-chip span{font-size:10px;font-weight:700;letter-spacing:.04em;color:#2C2727;}
 .ob-gender-chip.active{border-color:rgba(255,51,0,.45);}
 
-.ob-num-wrap{margin-top:28px;text-align:left;}
-.ob-num-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(52,57,65,.45);margin:0 0 4px;}
-.ob-num{font-size:64px;font-weight:700;color:var(--m-orange);letter-spacing:-.02em;line-height:1;}
-.ob-num small{font-size:22px;font-weight:600;color:rgba(52,57,65,.55);margin-left:4px;}
+.ob-num-wrap{text-align:center;}
+.ob-num-label{font-size:10px;font-weight:700;letter-spacing:.04em;color:rgba(52,57,65,.45);margin:0 0 4px;}
+.ob-num{font-size:54px;font-weight:200;color:var(--m-orange);letter-spacing:-.02em;line-height:1;}
+.ob-num small{font-size:20px;font-weight:300;color:rgba(52,57,65,.55);margin-left:4px;}
 
-.ruler-h{position:relative;margin-top:auto;height:70px;flex-shrink:0;}
+.ruler-h{position:relative;height:70px;flex-shrink:0;}
 .ruler-h-track{height:100%;overflow-x:scroll;scroll-snap-type:x mandatory;display:flex;align-items:flex-end;-ms-overflow-style:none;scrollbar-width:none;}
 .ruler-h-track::-webkit-scrollbar{display:none;}
 .ruler-h-tick{flex:none;width:6px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
@@ -68,7 +77,7 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Inter',
 .ruler-h-tick label{font-size:10px;color:rgba(52,57,65,.5);margin-top:4px;white-space:nowrap;}
 .ruler-h-indicator{position:absolute;left:50%;top:0;bottom:24px;width:1px;background:var(--m-orange);transform:translateX(-50%);pointer-events:none;}
 
-.ob-height-row{flex:1;display:flex;align-items:center;gap:8px;margin-top:8px;min-height:0;}
+.ob-height-row{flex-shrink:0;height:280px;display:flex;align-items:center;gap:8px;min-height:0;}
 .ob-height-num-col{flex:1;}
 .ruler-v{position:relative;width:64px;height:100%;max-height:340px;flex-shrink:0;}
 .ruler-v-track{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;display:flex;flex-direction:column;align-items:flex-start;-ms-overflow-style:none;scrollbar-width:none;}
@@ -79,7 +88,7 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Inter',
 .ruler-v-tick label{font-size:10px;color:rgba(52,57,65,.5);}
 .ruler-v-indicator{position:absolute;top:50%;left:0;right:8px;height:1px;background:var(--m-orange);transform:translateY(-50%);pointer-events:none;}
 
-.ob-cta{margin-top:24px;width:100%;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:16px;cursor:pointer;transition:transform .12s ease;flex-shrink:0;}
+.ob-cta{margin-top:24px;width:100%;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:16px;cursor:pointer;transition:transform .12s ease;flex-shrink:0;}
 .ob-cta:active{transform:scale(.97);}
 </style>
 </head>
@@ -104,22 +113,30 @@ function progressHtml(){
   ).join('')}</div>`;
 }
 
+// The 204 spacer (topbar -> heading) is the one constant every screen in
+// the real file shares — everything after the heading varies per screen
+// type, so each screen function builds its own spacers below that point.
 function screenShell(bodyHtml){
   return `
     <div class="ob-topbar">
       <button type="button" class="ob-back" onclick="obBack()">${backIcon()}</button>
       ${progressHtml()}
     </div>
-    <div class="ob-body">${bodyHtml}</div>`;
+    <div class="ob-body">
+      <div class="ob-spacer" style="flex-grow:204"></div>
+      ${bodyHtml}
+    </div>`;
 }
 
 function screenName(){
   return screenShell(`
     <h1 class="ob-h1">Jak masz na imię?</h1>
     <p class="ob-sub">Będziemy wiedzieć, komu kibicować przy nowych rekordach.</p>
+    <div class="ob-big-gap"></div>
     <div class="ob-name-wrap">
       <input type="text" class="ob-name-input" id="obNameInput" placeholder="np. Maciek" value="${state.name}">
     </div>
+    <div class="ob-spacer" style="flex-grow:277"></div>
     <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
   `);
 }
@@ -133,11 +150,13 @@ function screenGender(){
   return screenShell(`
     <h1 class="ob-h1">Opowiedz coś o sobie</h1>
     <p class="ob-sub">Pomoże nam to precyzyjniej wyliczać spalone kalorie i progres siłowy.</p>
+    <div class="ob-spacer" style="flex-grow:86"></div>
     <p class="ob-gender-label">PŁEĆ</p>
     <div class="ob-gender-row">
       ${opts.map(o=>`<button type="button" class="ob-gender-chip${state.gender===o.key?' active':''}" onclick="obSetGender('${o.key}')">${o.icon}<span>${o.label}</span></button>`).join('')}
     </div>
-    <button type="button" class="ob-cta" style="margin-top:auto;" onclick="obNext()">Dalej</button>
+    <div class="ob-spacer" style="flex-grow:256"></div>
+    <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
   `);
 }
 
@@ -207,11 +226,14 @@ function screenAge(){
   return screenShell(`
     <h1 class="ob-h1">Opowiedz coś o sobie</h1>
     <p class="ob-sub">Wiek pomaga w ustaleniu tempa regeneracji i optymalnej intensywności serii.</p>
+    <div class="ob-big-gap"></div>
     <div class="ob-num-wrap">
       <p class="ob-num-label">WIEK</p>
       <div class="ob-num" id="obAgeNum">${state.age}</div>
     </div>
+    <div class="ob-spacer" style="flex-grow:26"></div>
     ${buildHRuler(16,90,state.age,v=>{ state.age=v; const el=document.getElementById('obAgeNum'); if(el) el.textContent=v; })}
+    <div class="ob-spacer" style="flex-grow:137"></div>
     <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
   `);
 }
@@ -220,11 +242,14 @@ function screenWeight(){
   return screenShell(`
     <h1 class="ob-h1">Opowiedz coś o sobie</h1>
     <p class="ob-sub">To Twój punkt wyjścia do mierzenia postępów i wyliczania siły względnej.</p>
+    <div class="ob-big-gap"></div>
     <div class="ob-num-wrap">
       <p class="ob-num-label">WAGA</p>
       <div class="ob-num" id="obWeightNum">${state.weight}<small>kg</small></div>
     </div>
+    <div class="ob-spacer" style="flex-grow:26"></div>
     ${buildHRuler(35,180,state.weight,v=>{ state.weight=v; const el=document.getElementById('obWeightNum'); if(el) el.innerHTML=v+'<small>kg</small>'; })}
+    <div class="ob-spacer" style="flex-grow:137"></div>
     <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
   `);
 }
@@ -233,6 +258,7 @@ function screenHeight(){
   return screenShell(`
     <h1 class="ob-h1">Opowiedz coś o sobie</h1>
     <p class="ob-sub">Pomoże w analizie proporcji sylwetki i prawidłowego wskaźnika masy ciała.</p>
+    <div class="ob-big-gap"></div>
     <div class="ob-height-row">
       <div class="ob-height-num-col">
         <p class="ob-num-label">WZROST</p>
@@ -240,6 +266,7 @@ function screenHeight(){
       </div>
       ${buildVRuler(140,210,state.height,v=>{ state.height=v; const el=document.getElementById('obHeightNum'); if(el) el.innerHTML=v+'<small>cm</small>'; })}
     </div>
+    <div class="ob-spacer" style="flex-grow:137"></div>
     <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
   `);
 }
