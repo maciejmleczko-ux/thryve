@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Stops iOS Safari's data-detector from underlining things like "176cm"
+     as a tappable measurement/phone-number-style link (that stray blue
+     line under the big number on Maciej's iPhone). -->
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
 <title>Mekkio — onboarding preview</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@200;300;400;500;700&display=swap">
 <style>
@@ -86,7 +90,12 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Geist',
    one light orange, only length marks a multiple of 5), just running
    top-to-bottom instead of left-to-right, with the number block on top
    (centered, identical to wiek/waga) instead of sitting beside it. */
-.ruler-v-wrap{flex-shrink:0;display:flex;align-items:center;justify-content:center;height:280px;}
+/* Maciej: the reference only ever shows ~5 labels at once (165-185) —
+   280px of scrollable viewport showed far more unlabeled rows than that,
+   which is what was pushing the button off the bottom of short phone
+   screens. 180px ≈ 4 label-intervals (5 rows × 8px each) plus a little
+   breathing room top/bottom, matching the reference framing. */
+.ruler-v-wrap{flex-shrink:0;display:flex;align-items:center;justify-content:center;height:180px;}
 .ruler-v-scale{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-ms-overflow-style:none;scrollbar-width:none;}
 .ruler-v-scale::-webkit-scrollbar{display:none;}
 .ruler-v-row{height:8px;scroll-snap-align:center;display:flex;align-items:center;}
