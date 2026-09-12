@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mekkio — onboarding preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --m-orange:#ff3300;
+  --m-ink:#343941;
+  --m-bg:#eceaf1;
+  --m-r-pill:999px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;height:100%;background:#0c0c0e;}
+body{display:flex;align-items:center;justify-content:center;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+#app{position:relative;width:100%;max-width:430px;height:100dvh;overflow:hidden;background:var(--m-bg);}
+
+.ob-screen{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  padding:calc(22px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+  box-sizing:border-box;
+  background:
+    linear-gradient(rgba(245,241,251,.61), rgba(245,241,251,.61)),
+    radial-gradient(120% 55% at 55% 14%, rgba(247,190,110,.55) 0%, rgba(247,190,110,0) 55%),
+    radial-gradient(90% 45% at 88% 28%, rgba(244,190,205,.4) 0%, rgba(244,190,205,0) 60%),
+    radial-gradient(100% 55% at 8% 78%, rgba(244,190,205,.32) 0%, rgba(244,190,205,0) 60%),
+    var(--m-bg);
+  opacity:0;transform:translateX(24px);pointer-events:none;
+  transition:opacity .28s cubic-bezier(.16,1,.3,1), transform .28s cubic-bezier(.16,1,.3,1);
+}
+.ob-screen.active{opacity:1;transform:translateX(0);pointer-events:auto;}
+
+.ob-topbar{display:flex;align-items:center;gap:30px;margin-bottom:34px;flex-shrink:0;}
+.ob-back{width:24px;height:24px;border:none;background:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--m-ink);}
+.ob-back svg{width:20px;height:20px;}
+.ob-progress{flex:1;display:flex;align-items:center;gap:9px;}
+.ob-progress-dot{height:6px;border-radius:var(--m-r-pill);background:#A3A3A3;opacity:.39;width:15px;flex-shrink:0;transition:width .3s cubic-bezier(.16,1,.3,1),opacity .3s cubic-bezier(.16,1,.3,1);}
+.ob-progress-dot.current{width:30px;background:var(--m-orange);opacity:1;}
+
+.ob-body{flex:1;display:flex;flex-direction:column;min-height:0;}
+.ob-h1{font-size:22px;font-weight:700;letter-spacing:-.01em;color:var(--m-ink);margin:0 0 10px;text-transform:uppercase;}
+.ob-sub{font-size:13.5px;line-height:1.5;color:rgba(52,57,65,.6);margin:0 0 8px;max-width:30ch;}
+
+.ob-name-wrap{margin-top:auto;margin-bottom:auto;}
+.ob-name-input{width:100%;border:none;background:transparent;border-bottom:2px solid rgba(52,57,65,.18);font-family:inherit;font-size:34px;font-weight:600;color:var(--m-orange);padding:6px 0 10px;outline:none;}
+.ob-name-input::placeholder{color:rgba(255,51,0,.35);}
+
+.ob-gender-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(52,57,65,.45);margin:24px 0 12px;}
+.ob-gender-row{display:flex;gap:8px;}
+.ob-gender-chip{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;aspect-ratio:115.667/107.211;border-radius:16px;background:rgba(255,255,255,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1.5px solid transparent;cursor:pointer;transition:border-color .2s ease;}
+.ob-gender-chip svg{width:26px;height:26px;color:#FF6343;}
+.ob-gender-chip span{font-size:11px;font-weight:700;letter-spacing:.06em;color:#2C2727;}
+.ob-gender-chip.active{border-color:rgba(255,51,0,.45);}
+
+.ob-num-wrap{margin-top:28px;text-align:left;}
+.ob-num-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(52,57,65,.45);margin:0 0 4px;}
+.ob-num{font-size:64px;font-weight:700;color:var(--m-orange);letter-spacing:-.02em;line-height:1;}
+.ob-num small{font-size:22px;font-weight:600;color:rgba(52,57,65,.55);margin-left:4px;}
+
+.ruler-h{position:relative;margin-top:auto;height:70px;flex-shrink:0;}
+.ruler-h-track{height:100%;overflow-x:scroll;scroll-snap-type:x mandatory;display:flex;align-items:flex-end;-ms-overflow-style:none;scrollbar-width:none;}
+.ruler-h-track::-webkit-scrollbar{display:none;}
+.ruler-h-tick{flex:none;width:6px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+.ruler-h-tick i{display:block;width:1px;background:var(--m-orange);opacity:.3;border-radius:1px;height:12px;}
+.ruler-h-tick.major i{height:20px;opacity:1;}
+.ruler-h-tick label{font-size:10px;color:rgba(52,57,65,.5);margin-top:4px;white-space:nowrap;}
+.ruler-h-indicator{position:absolute;left:50%;top:0;bottom:24px;width:1px;background:var(--m-orange);transform:translateX(-50%);pointer-events:none;}
+
+.ob-height-row{flex:1;display:flex;align-items:center;gap:8px;margin-top:8px;min-height:0;}
+.ob-height-num-col{flex:1;}
+.ruler-v{position:relative;width:64px;height:100%;max-height:340px;flex-shrink:0;}
+.ruler-v-track{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;display:flex;flex-direction:column;align-items:flex-start;-ms-overflow-style:none;scrollbar-width:none;}
+.ruler-v-track::-webkit-scrollbar{display:none;}
+.ruler-v-tick{flex:none;height:6px;scroll-snap-align:center;display:flex;align-items:center;gap:6px;width:100%;}
+.ruler-v-tick i{display:block;height:1px;width:12px;background:var(--m-orange);opacity:.3;border-radius:1px;}
+.ruler-v-tick.major i{width:20px;opacity:1;}
+.ruler-v-tick label{font-size:10px;color:rgba(52,57,65,.5);}
+.ruler-v-indicator{position:absolute;top:50%;left:0;right:8px;height:1px;background:var(--m-orange);transform:translateY(-50%);pointer-events:none;}
+
+.ob-cta{margin-top:24px;width:100%;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:16px;cursor:pointer;transition:transform .12s ease;flex-shrink:0;}
+.ob-cta:active{transform:scale(.97);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const STEPS = ['imie','plec','wiek','waga','wzrost'];
+let stepIdx = 0;
+const state = { name:'', gender:null, age:45, weight:100, height:176 };
+
+function backIcon(){
+  return `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.8125 12C20.8125 12.1492 20.7532 12.2923 20.6477 12.3977C20.5423 12.5032 20.3992 12.5625 20.25 12.5625H5.10844L10.8975 18.3525C10.9528 18.404 10.9971 18.4661 11.0278 18.5351C11.0586 18.6041 11.0751 18.6786 11.0764 18.7541C11.0778 18.8296 11.0639 18.9047 11.0356 18.9747C11.0073 19.0447 10.9652 19.1084 10.9118 19.1618C10.8584 19.2152 10.7947 19.2573 10.7247 19.2856C10.6547 19.3139 10.5796 19.3278 10.5041 19.3264C10.4286 19.3251 10.3541 19.3086 10.2851 19.2778C10.2161 19.2471 10.154 19.2028 10.1025 19.1475L3.3525 12.3975C3.24716 12.292 3.18799 12.1491 3.18799 12C3.18799 11.8509 3.24716 11.708 3.3525 11.6025L10.1025 4.8525C10.2091 4.75314 10.3502 4.69905 10.4959 4.70162C10.6416 4.70419 10.7807 4.76322 10.8837 4.86628C10.9868 4.96934 11.0458 5.10838 11.0484 5.25411C11.051 5.39983 10.9969 5.54087 10.8975 5.6475L5.10844 11.4375H20.25C20.3992 11.4375 20.5423 11.4968 20.6477 11.6023C20.7532 11.7077 20.8125 11.8508 20.8125 12Z"/></svg>`;
+}
+function femaleIcon(){ return `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="9" r="6" stroke="currentColor" stroke-width="1.8"/><path d="M12 15V22M8.5 18.5H15.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`; }
+function maleIcon(){ return `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="14" r="6" stroke="currentColor" stroke-width="1.8"/><path d="M14.5 9.5L21 3M21 3H15.5M21 3V8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`; }
+function skipIcon(){ return `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 4L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`; }
+
+function progressHtml(){
+  return `<div class="ob-progress">${STEPS.map((s,i)=>
+    `<span class="ob-progress-dot${i===stepIdx?' current':''}"></span>`
+  ).join('')}</div>`;
+}
+
+function screenShell(bodyHtml){
+  return `
+    <div class="ob-topbar">
+      <button type="button" class="ob-back" onclick="obBack()">${backIcon()}</button>
+      ${progressHtml()}
+    </div>
+    <div class="ob-body">${bodyHtml}</div>`;
+}
+
+function screenName(){
+  return screenShell(`
+    <h1 class="ob-h1">Jak masz na imię?</h1>
+    <p class="ob-sub">Będziemy wiedzieć, komu kibicować przy nowych rekordach.</p>
+    <div class="ob-name-wrap">
+      <input type="text" class="ob-name-input" id="obNameInput" placeholder="np. Maciek" value="${state.name}">
+    </div>
+    <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
+  `);
+}
+
+function screenGender(){
+  const opts = [
+    {key:'f', label:'KOBIETA', icon:femaleIcon()},
+    {key:'m', label:'MĘŻCZYZNA', icon:maleIcon()},
+    {key:'skip', label:'POMIŃ', icon:skipIcon()},
+  ];
+  return screenShell(`
+    <h1 class="ob-h1">Opowiedz coś o sobie</h1>
+    <p class="ob-sub">Pomoże nam to precyzyjniej wyliczać spalone kalorie i progres siłowy.</p>
+    <p class="ob-gender-label">PŁEĆ</p>
+    <div class="ob-gender-row">
+      ${opts.map(o=>`<button type="button" class="ob-gender-chip${state.gender===o.key?' active':''}" onclick="obSetGender('${o.key}')">${o.icon}<span>${o.label}</span></button>`).join('')}
+    </div>
+    <button type="button" class="ob-cta" style="margin-top:auto;" onclick="obNext()">Dalej</button>
+  `);
+}
+
+function buildHRuler(min,max,value,onChange){
+  const uid = 'r'+Math.random().toString(36).slice(2,8);
+  let ticks = '';
+  for(let v=min; v<=max; v++){
+    const major = v % 5 === 0;
+    ticks += `<div class="ruler-h-tick${major?' major':''}" data-v="${v}"><i></i>${major?`<label>${v}</label>`:''}</div>`;
+  }
+  setTimeout(()=>{
+    const track = document.getElementById(uid);
+    if(!track) return;
+    const tickW = 8;
+    const center = track.clientWidth/2;
+    track.style.scrollPaddingLeft = center+'px';
+    track.style.scrollPaddingRight = center+'px';
+    track.firstElementChild.style.marginLeft = center+'px';
+    track.lastElementChild.style.marginRight = center+'px';
+    track.scrollLeft = (value-min)*tickW;
+    let raf = null;
+    track.addEventListener('scroll', ()=>{
+      if(raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(()=>{
+        const v = Math.round(track.scrollLeft/tickW)+min;
+        onChange(Math.max(min,Math.min(max,v)));
+      });
+    });
+  }, 0);
+  return `<div class="ruler-h">
+    <div class="ruler-h-track" id="${uid}">${ticks}</div>
+    <div class="ruler-h-indicator"></div>
+  </div>`;
+}
+
+function buildVRuler(min,max,value,onChange){
+  const uid = 'r'+Math.random().toString(36).slice(2,8);
+  let ticks = '';
+  for(let v=min; v<=max; v++){
+    const major = v % 5 === 0;
+    ticks += `<div class="ruler-v-tick${major?' major':''}" data-v="${v}"><i></i>${major?`<label>${v}</label>`:''}</div>`;
+  }
+  setTimeout(()=>{
+    const track = document.getElementById(uid);
+    if(!track) return;
+    const tickH = 8;
+    const center = track.clientHeight/2;
+    track.style.paddingTop = center+'px';
+    track.style.paddingBottom = center+'px';
+    track.scrollTop = (value-min)*tickH;
+    let raf = null;
+    track.addEventListener('scroll', ()=>{
+      if(raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(()=>{
+        const v = min + Math.round(track.scrollTop/tickH);
+        onChange(Math.max(min,Math.min(max,v)));
+      });
+    });
+  }, 0);
+  return `<div class="ruler-v">
+    <div class="ruler-v-track" id="${uid}">${ticks}</div>
+    <div class="ruler-v-indicator"></div>
+  </div>`;
+}
+
+function screenAge(){
+  return screenShell(`
+    <h1 class="ob-h1">Opowiedz coś o sobie</h1>
+    <p class="ob-sub">Wiek pomaga w ustaleniu tempa regeneracji i optymalnej intensywności serii.</p>
+    <div class="ob-num-wrap">
+      <p class="ob-num-label">WIEK</p>
+      <div class="ob-num" id="obAgeNum">${state.age}</div>
+    </div>
+    ${buildHRuler(16,90,state.age,v=>{ state.age=v; const el=document.getElementById('obAgeNum'); if(el) el.textContent=v; })}
+    <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
+  `);
+}
+
+function screenWeight(){
+  return screenShell(`
+    <h1 class="ob-h1">Opowiedz coś o sobie</h1>
+    <p class="ob-sub">To Twój punkt wyjścia do mierzenia postępów i wyliczania siły względnej.</p>
+    <div class="ob-num-wrap">
+      <p class="ob-num-label">WAGA</p>
+      <div class="ob-num" id="obWeightNum">${state.weight}<small>kg</small></div>
+    </div>
+    ${buildHRuler(35,180,state.weight,v=>{ state.weight=v; const el=document.getElementById('obWeightNum'); if(el) el.innerHTML=v+'<small>kg</small>'; })}
+    <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
+  `);
+}
+
+function screenHeight(){
+  return screenShell(`
+    <h1 class="ob-h1">Opowiedz coś o sobie</h1>
+    <p class="ob-sub">Pomoże w analizie proporcji sylwetki i prawidłowego wskaźnika masy ciała.</p>
+    <div class="ob-height-row">
+      <div class="ob-height-num-col">
+        <p class="ob-num-label">WZROST</p>
+        <div class="ob-num" id="obHeightNum">${state.height}<small>cm</small></div>
+      </div>
+      ${buildVRuler(140,210,state.height,v=>{ state.height=v; const el=document.getElementById('obHeightNum'); if(el) el.innerHTML=v+'<small>cm</small>'; })}
+    </div>
+    <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
+  `);
+}
+
+const RENDERERS = { imie:screenName, plec:screenGender, wiek:screenAge, waga:screenWeight, wzrost:screenHeight };
+
+function renderStep(){
+  const key = STEPS[stepIdx];
+  const html = RENDERERS[key]();
+  const app = document.getElementById('app');
+  app.innerHTML = `<div class="ob-screen active">${html}</div>`;
+  const input = document.getElementById('obNameInput');
+  if(input) input.addEventListener('input', e=>{ state.name = e.target.value; });
+}
+
+function obNext(){
+  if(stepIdx < STEPS.length-1){ stepIdx++; renderStep(); }
+}
+function obBack(){
+  if(stepIdx > 0){ stepIdx--; renderStep(); }
+}
+function obSetGender(key){
+  state.gender = (state.gender===key ? null : key);
+  renderStep();
+}
+
+renderStep();
+</script>
+</body>
+</html>
