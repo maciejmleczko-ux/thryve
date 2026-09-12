@@ -67,9 +67,6 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Geist',
 .ob-num-label{font-size:10px;font-weight:700;letter-spacing:.04em;color:rgba(52,57,65,.45);margin:0 0 4px;}
 .ob-num{font-size:102px;font-weight:200;color:var(--m-orange);letter-spacing:-.02em;line-height:1;}
 .ob-num small{font-size:20px;font-weight:300;color:rgba(52,57,65,.55);margin-left:4px;}
-/* wzrost keeps the old smaller size for now — Maciej: fix that one after
-   wiek/waga are confirmed, it sits in a row next to the vertical ruler. */
-.ob-height-num-col .ob-num{font-size:54px;}
 
 /* Ruler: number(s) sit ABOVE the tick marks, ticks are ALL the same light
    orange (only height marks a multiple of 5, not a color/opacity split),
@@ -84,16 +81,19 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Geist',
 .ruler-h-tick i{display:block;width:1px;background:var(--m-orange);opacity:.4;border-radius:1px;height:10px;}
 .ruler-h-tick.major i{height:18px;}
 
-.ob-height-row{flex-shrink:0;height:280px;display:flex;align-items:center;gap:8px;min-height:0;}
-.ob-height-num-col{flex:1;}
-.ruler-v{position:relative;width:64px;height:100%;max-height:340px;flex-shrink:0;}
-.ruler-v-track{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;display:flex;flex-direction:column;align-items:flex-start;-ms-overflow-style:none;scrollbar-width:none;}
-.ruler-v-track::-webkit-scrollbar{display:none;}
-.ruler-v-tick{flex:none;height:6px;scroll-snap-align:center;display:flex;align-items:center;gap:6px;width:100%;}
-.ruler-v-tick i{display:block;height:1px;width:12px;background:var(--m-orange);opacity:.3;border-radius:1px;}
-.ruler-v-tick.major i{width:20px;opacity:1;}
-.ruler-v-tick label{font-size:10px;color:rgba(52,57,65,.5);}
-.ruler-v-indicator{position:absolute;top:50%;left:0;right:8px;height:1px;background:var(--m-orange);transform:translateY(-50%);pointer-events:none;}
+/* wzrost's ruler is the exact same horizontal ruler, rotated 90° — same
+   fonts/colors/rules as wiek/waga (numbers next to their tick, all ticks
+   one light orange, only length marks a multiple of 5), just running
+   top-to-bottom instead of left-to-right, with the number block on top
+   (centered, identical to wiek/waga) instead of sitting beside it. */
+.ruler-v-wrap{flex-shrink:0;display:flex;align-items:center;justify-content:flex-start;height:280px;}
+.ruler-v-scale{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-ms-overflow-style:none;scrollbar-width:none;}
+.ruler-v-scale::-webkit-scrollbar{display:none;}
+.ruler-v-row{height:8px;scroll-snap-align:center;display:flex;align-items:center;}
+.ruler-v-row label{font-size:10px;font-weight:400;color:rgba(52,57,65,.55);width:26px;text-align:right;margin-right:6px;white-space:nowrap;flex-shrink:0;}
+.ruler-v-row i{display:block;height:1px;width:10px;background:var(--m-orange);opacity:.4;border-radius:1px;flex-shrink:0;}
+.ruler-v-row.major i{width:18px;}
+.ruler-v-indicator{width:36px;height:1px;background:var(--m-orange);margin-left:16px;flex-shrink:0;}
 
 .ob-cta{margin-top:24px;width:100%;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:16px;cursor:pointer;transition:transform .12s ease;flex-shrink:0;}
 .ob-cta:active{transform:scale(.97);}
@@ -203,20 +203,26 @@ function buildHRuler(min,max,value,onChange){
   </div>`;
 }
 
+// Same ruler as buildHRuler, rotated: label sits to the LEFT of its tick
+// (both scroll together), the fixed indicator is a separate horizontal
+// line further to the right with a gap — mirrors the horizontal one's
+// "indicator separate from the scale" rule, just turned 90°.
 function buildVRuler(min,max,value,onChange){
   const uid = 'r'+Math.random().toString(36).slice(2,8);
-  let ticks = '';
+  let rows = '';
   for(let v=min; v<=max; v++){
     const major = v % 5 === 0;
-    ticks += `<div class="ruler-v-tick${major?' major':''}" data-v="${v}"><i></i>${major?`<label>${v}</label>`:''}</div>`;
+    rows += `<div class="ruler-v-row${major?' major':''}" data-v="${v}"><label>${major?v:''}</label><i></i></div>`;
   }
   setTimeout(()=>{
     const track = document.getElementById(uid);
     if(!track) return;
     const tickH = 8;
     const center = track.clientHeight/2;
-    track.style.paddingTop = center+'px';
-    track.style.paddingBottom = center+'px';
+    track.style.scrollPaddingTop = center+'px';
+    track.style.scrollPaddingBottom = center+'px';
+    track.firstElementChild.style.marginTop = center+'px';
+    track.lastElementChild.style.marginBottom = center+'px';
     track.scrollTop = (value-min)*tickH;
     let raf = null;
     track.addEventListener('scroll', ()=>{
@@ -227,8 +233,8 @@ function buildVRuler(min,max,value,onChange){
       });
     });
   }, 0);
-  return `<div class="ruler-v">
-    <div class="ruler-v-track" id="${uid}">${ticks}</div>
+  return `<div class="ruler-v-wrap">
+    <div class="ruler-v-scale" id="${uid}">${rows}</div>
     <div class="ruler-v-indicator"></div>
   </div>`;
 }
@@ -270,13 +276,12 @@ function screenHeight(){
     <h1 class="ob-h1">Opowiedz coś o sobie</h1>
     <p class="ob-sub">Pomoże w analizie proporcji sylwetki i prawidłowego wskaźnika masy ciała.</p>
     <div class="ob-big-gap"></div>
-    <div class="ob-height-row">
-      <div class="ob-height-num-col">
-        <p class="ob-num-label">WZROST</p>
-        <div class="ob-num" id="obHeightNum">${state.height}<small>cm</small></div>
-      </div>
-      ${buildVRuler(140,210,state.height,v=>{ state.height=v; const el=document.getElementById('obHeightNum'); if(el) el.innerHTML=v+'<small>cm</small>'; })}
+    <div class="ob-num-wrap">
+      <p class="ob-num-label">WZROST</p>
+      <div class="ob-num" id="obHeightNum">${state.height}<small>cm</small></div>
     </div>
+    <div class="ob-spacer" style="flex-grow:26"></div>
+    ${buildVRuler(140,210,state.height,v=>{ state.height=v; const el=document.getElementById('obHeightNum'); if(el) el.innerHTML=v+'<small>cm</small>'; })}
     <div class="ob-spacer" style="flex-grow:137"></div>
     <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
   `);
