@@ -710,7 +710,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    straight from the finish screen too. Only the few genuinely new bits
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
-#nameEditOverlay,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet{z-index:9600;}
+#nameEditOverlay,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet{z-index:9600;}
 .acct-num-row{display:flex;gap:12px;}
 .acct-num-row.solo{max-width:172px;}
 .acct-num-row.name{max-width:260px;}
@@ -719,19 +719,32 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 #nameEditOverlay .plansv2-customize-stack,
 #weightSheet .plansv2-customize-stack,
 #bodyDataSheet .plansv2-customize-stack,
-#editKcalSheet .plansv2-customize-stack{min-height:52dvh;}
+#editKcalSheet .plansv2-customize-stack,
+#authSheet .plansv2-customize-stack{min-height:52dvh;}
 #nameEditOverlay .plansv2-customize-card,
 #weightSheet .plansv2-customize-card,
 #bodyDataSheet .plansv2-customize-card,
-#editKcalSheet .plansv2-customize-card{gap:26px;padding:16px 20px 6px;}
+#editKcalSheet .plansv2-customize-card,
+#authSheet .plansv2-customize-card{gap:26px;padding:16px 20px 6px;}
 #nameEditOverlay .plansv2-customize-section,
 #weightSheet .plansv2-customize-section,
 #bodyDataSheet .plansv2-customize-section,
-#editKcalSheet .plansv2-customize-section{gap:12px;}
+#editKcalSheet .plansv2-customize-section,
+#authSheet .plansv2-customize-section{gap:12px;}
 #nameEditOverlay .plansv2-customize-actions,
 #weightSheet .plansv2-customize-actions,
 #bodyDataSheet .plansv2-customize-actions,
-#editKcalSheet .plansv2-customize-actions{margin-top:auto;}
+#editKcalSheet .plansv2-customize-actions,
+#authSheet .plansv2-customize-actions{margin-top:auto;}
+/* ---- cloud account (Supabase) — Faza 2 / E0 ---- */
+.acct-cloud-signed{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
+.acct-cloud-signed[hidden],.acct-cloud-cta[hidden]{display:none;}
+.acct-cloud-email{font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.acct-cloud-cta{margin-top:10px;}
+.acct-cloud-mode-link{display:block;width:100%;background:none;border:0;color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;padding:4px 0;font-family:inherit;text-align:center;}
+.acct-cloud-forgot{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);cursor:pointer;padding:6px 0 0;font-family:inherit;align-self:flex-end;}
+.acct-auth-error{margin:6px 0 0;font-size:var(--m-fs-2xs);color:#c00;line-height:1.4;}
+.acct-auth-error.info{color:var(--m-ink);}
 .acct-sheet-hint{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:#2c2727;}
 .acct-wlog{border:1px solid #c7c6cb;border-radius:var(--m-r-sm);overflow:hidden;background:var(--m-card);}
 .acct-wlog-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px;font-size:var(--m-fs-sm);color:var(--m-ink);border-top:1px solid rgba(0,0,0,.06);}
@@ -2054,6 +2067,7 @@ body.pev2-bg{background:var(--m-red-page);}
 .statsv2-root .ph svg{display:block;width:100%;height:100%;}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <script>
@@ -2549,9 +2563,13 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </span>
     </button>
     <div class="acct-cloud">
-      <span class="acct-soon">Wkrótce</span>
       <p class="acct-cloud-t">Konto w chmurze</p>
       <p class="acct-cloud-d">Historia dostępna na innych urządzeniach i bezpieczna, gdy zmienisz telefon.</p>
+      <div class="acct-cloud-signed" id="acctCloudSignedIn" hidden>
+        <span class="acct-cloud-email" id="acctCloudEmail"></span>
+        <button type="button" class="acct-photo-clear" onclick="signOutCloud()">Wyloguj</button>
+      </div>
+      <button type="button" class="acct-photo-pick acct-cloud-cta" id="acctCloudCta" onclick="openAuthSheet('login')">Zaloguj się</button>
     </div>
     <p class="acct-sec">Dane do kalorii</p>
     <div class="acct-rows">
@@ -2682,6 +2700,46 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="plansv2-customize-actions">
         <button type="button" class="plansv2-customize-cancel" onclick="closeBodyDataSheet()">ANULUJ</button>
         <button type="button" class="plansv2-customize-apply" onclick="saveBodyDataSheet()">ZAPISZ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Konto w chmurze (Supabase Auth) — Faza 2 / E0. Rides the same
+     plansv2-customize-* shell as the other account sub-sheets. One form,
+     two modes (login/signup) toggled via setAuthMode(). -->
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="authSheet" onclick="if(event.target===this) closeAuthSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-header">
+        <div class="fbv2-title-row">
+          <h1 id="authSheetTitle">ZALOGUJ SIĘ</h1>
+          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeAuthSheet()"></span>
+        </div>
+        <p class="fbv2-subtitle" id="authSheetSubtitle">Twoje treningi i plany będą dostępne na każdym urządzeniu.</p>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">E-mail i hasło</p>
+        <div class="acct-num-row name" style="flex-direction:column;">
+          <div class="exv2-field">
+            <label>E-mail</label>
+            <input type="email" id="authEmailInput" placeholder="ty@przyklad.pl" autocomplete="email" autocorrect="off" spellcheck="false">
+          </div>
+          <div class="exv2-field">
+            <label>Hasło</label>
+            <input type="password" id="authPasswordInput" placeholder="min. 6 znaków" autocomplete="current-password">
+          </div>
+        </div>
+        <button type="button" class="acct-cloud-forgot" id="authForgotBtn" onclick="requestPasswordReset()">Zapomniałeś hasła?</button>
+        <p class="acct-auth-error" id="authError" hidden></p>
+      </div>
+      <div class="plansv2-customize-section">
+        <button type="button" class="acct-cloud-mode-link" id="authModeSwitch" onclick="toggleAuthMode()">Nie masz konta? Załóż je</button>
+      </div>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-cancel" onclick="closeAuthSheet()">ANULUJ</button>
+        <button type="button" class="plansv2-customize-apply" id="authSubmitBtn" onclick="submitAuthForm()">ZALOGUJ</button>
       </div>
     </div>
   </div>
@@ -4072,7 +4130,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','editKcalSheet','changelogHistorySheet'];
+const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','editKcalSheet','changelogHistorySheet','authSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -4126,6 +4184,7 @@ function renderAccountPanel(){
   set('acctSexV', bodyData.sex === 'f' ? 'Kobieta' : bodyData.sex === 'm' ? 'Mężczyzna' : '—');
   const upd = document.getElementById('acctWeightUpd');
   if(upd){ const d = lastWeightDate(); upd.textContent = d ? 'Ostatnia aktualizacja wagi: ' + fmtDate(d) : ''; upd.hidden = !d; }
+  renderAcctCloudCard();
 }
 let _acctPanelCloseT = null;
 function openAccountPanel(){
@@ -4271,6 +4330,163 @@ function saveBodyDataSheet(){
   saveBodyDataLS(bodyData);
   renderAccountPanel();
   closeBodyDataSheet();
+}
+
+/* ---------- cloud account (Supabase Auth) — Faza 2 / E0 ----------
+   Project URL + anon/publishable key from Supabase → Project Settings →
+   API. The anon key is safe to ship client-side — every table it can
+   touch is gated by Row Level Security (see supabase-schema.sql), so it
+   can only ever read/write the signed-in user's own rows. */
+const SUPABASE_URL = 'https://ajxsguyjewxzmnfphjze.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_GV1qHi1JDzQgVbz6c5OGgw_b7UGktTZ';
+
+const SUPABASE_CONFIGURED = !SUPABASE_URL.includes('YOUR-') && !SUPABASE_ANON_KEY.includes('YOUR-');
+let supabaseClient = (SUPABASE_CONFIGURED && window.supabase)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+let cloudSession = null;
+let authMode = 'login'; // 'login' | 'signup'
+
+function initSupabaseAuth(){
+  if(!supabaseClient) return;
+  supabaseClient.auth.getSession().then(({data})=>{
+    cloudSession = data && data.session ? data.session : null;
+    renderAcctCloudCard();
+  });
+  supabaseClient.auth.onAuthStateChange((_event, session)=>{
+    cloudSession = session;
+    renderAcctCloudCard();
+  });
+}
+
+function renderAcctCloudCard(){
+  const cta = document.getElementById('acctCloudCta');
+  const signedBox = document.getElementById('acctCloudSignedIn');
+  if(!cta || !signedBox) return;
+  if(!SUPABASE_CONFIGURED){
+    cta.hidden = true;
+    signedBox.hidden = true;
+    return;
+  }
+  if(cloudSession && cloudSession.user){
+    cta.hidden = true;
+    signedBox.hidden = false;
+    const emailEl = document.getElementById('acctCloudEmail');
+    if(emailEl) emailEl.textContent = cloudSession.user.email || '';
+  } else {
+    cta.hidden = false;
+    signedBox.hidden = true;
+  }
+}
+
+function toggleAuthMode(){ setAuthMode(authMode === 'login' ? 'signup' : 'login'); }
+function setAuthMode(mode){
+  authMode = mode;
+  const title = document.getElementById('authSheetTitle');
+  const sub = document.getElementById('authSheetSubtitle');
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const switchBtn = document.getElementById('authModeSwitch');
+  const forgotBtn = document.getElementById('authForgotBtn');
+  if(mode === 'signup'){
+    if(title) title.textContent = 'ZAŁÓŻ KONTO';
+    if(sub) sub.textContent = 'Jedno konto, dowolna liczba urządzeń — Twoje dane zostają Twoje.';
+    if(submitBtn) submitBtn.textContent = 'ZAŁÓŻ KONTO';
+    if(switchBtn) switchBtn.textContent = 'Masz już konto? Zaloguj się';
+    if(forgotBtn) forgotBtn.hidden = true;
+  } else {
+    if(title) title.textContent = 'ZALOGUJ SIĘ';
+    if(sub) sub.textContent = 'Twoje treningi i plany będą dostępne na każdym urządzeniu.';
+    if(submitBtn) submitBtn.textContent = 'ZALOGUJ';
+    if(switchBtn) switchBtn.textContent = 'Nie masz konta? Załóż je';
+    if(forgotBtn) forgotBtn.hidden = false;
+  }
+  const err = document.getElementById('authError');
+  if(err){ err.hidden = true; err.textContent = ''; }
+}
+
+function openAuthSheet(mode){
+  if(!SUPABASE_CONFIGURED){ toast('Konta w chmurze jeszcze nie są gotowe'); return; }
+  setAuthMode(mode || 'login');
+  document.getElementById('authEmailInput').value = '';
+  document.getElementById('authPasswordInput').value = '';
+  closeAccountPanel();
+  setTimeout(()=> acctSheetOpen('authSheet'), 200); // po animacji zamykania panelu konta
+}
+function closeAuthSheet(viaDrag){ acctSheetClose('authSheet', viaDrag); }
+
+function authErrorMessage(err){
+  const msg = (err && err.message) || '';
+  if(/already registered|already exists|user_already_exists/i.test(msg)) return 'To konto już istnieje — zaloguj się.';
+  if(/invalid login credentials/i.test(msg)) return 'Zły e-mail albo hasło.';
+  if(/email not confirmed/i.test(msg)) return 'Potwierdź e-mail (sprawdź skrzynkę) — dopiero potem się zalogujesz.';
+  if(/password.*(least|6|characters)/i.test(msg)) return 'Hasło musi mieć min. 6 znaków.';
+  if(/rate limit/i.test(msg)) return 'Za dużo prób — spróbuj za chwilę.';
+  if(/email.*invalid/i.test(msg)) return 'Sprawdź adres e-mail.';
+  return msg || 'Coś poszło nie tak. Spróbuj ponownie.';
+}
+
+async function submitAuthForm(){
+  if(!supabaseClient) return;
+  const email = document.getElementById('authEmailInput').value.trim();
+  const password = document.getElementById('authPasswordInput').value;
+  const errEl = document.getElementById('authError');
+  const btn = document.getElementById('authSubmitBtn');
+  if(errEl){ errEl.hidden = true; errEl.classList.remove('info'); }
+  if(!email || !password){
+    if(errEl){ errEl.textContent = 'Podaj e-mail i hasło.'; errEl.hidden = false; }
+    return;
+  }
+  const wasSignup = authMode === 'signup';
+  const prevLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '…';
+  let switchedMode = false;
+  try{
+    const { data, error } = wasSignup
+      ? await supabaseClient.auth.signUp({ email, password })
+      : await supabaseClient.auth.signInWithPassword({ email, password });
+    if(error){
+      if(errEl){ errEl.textContent = authErrorMessage(error); errEl.hidden = false; }
+      return;
+    }
+    // Supabase domyślnie wymaga potwierdzenia e-mailem — signUp wtedy
+    // zwraca usera, ale BEZ sesji (nie jesteśmy jeszcze zalogowani).
+    if(wasSignup && data && data.user && !data.session){
+      switchedMode = true;
+      setAuthMode('login'); // resets #authError first (incl. button label) — message set after
+      document.getElementById('authEmailInput').value = email;
+      if(errEl){
+        errEl.classList.add('info');
+        errEl.textContent = 'Konto założone — sprawdź maila i kliknij link potwierdzający, potem się zaloguj.';
+        errEl.hidden = false;
+      }
+      return;
+    }
+    closeAuthSheet();
+    toast(wasSignup ? 'Konto założone' : 'Zalogowano');
+    openAccountPanel();
+  } catch(e){
+    if(errEl){ errEl.textContent = 'Coś poszło nie tak. Spróbuj ponownie.'; errEl.hidden = false; }
+  } finally {
+    btn.disabled = false;
+    if(!switchedMode) btn.textContent = prevLabel; // setAuthMode already set the right label otherwise
+  }
+}
+
+async function requestPasswordReset(){
+  if(!supabaseClient) return;
+  const email = document.getElementById('authEmailInput').value.trim();
+  if(!email){ toast('Podaj najpierw e-mail'); return; }
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+  toast(error ? 'Nie udało się wysłać maila' : 'Wysłaliśmy link do resetu hasła');
+}
+
+async function signOutCloud(){
+  if(!supabaseClient) return;
+  await supabaseClient.auth.signOut();
+  renderAccountPanel();
+  toast('Wylogowano');
 }
 
 /* ---------- "Historia zmian" sheet (account panel → Aplikacja) ----------
@@ -5757,7 +5973,7 @@ mSheetDrag('exercisePopupOverlayV2', closeExercisePopupV2);
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightSheet','bodyDataSheet','editKcalSheet','changelogHistorySheet']
+['nameEditOverlay','weightSheet','bodyDataSheet','editKcalSheet','changelogHistorySheet','authSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 
 /* ---- "Zamień ćwiczenie" sheet (stage 3, idea #5) — rides .m-sheet ---- */
@@ -10972,6 +11188,7 @@ function applyImport(mode){
    INIT
    ============================================================ */
 showLoadScreenV2(()=>{}); // production boot splash — the "Mekkio" load screen (name + version) covers every launch for ~1.5s
+initSupabaseAuth();
 updatePlanPillLabel();
 goRoute('dashboard'); // v3 "Mekkio" redesign is now the main layout — boot straight into it
 updateWelcomeGreeting();
