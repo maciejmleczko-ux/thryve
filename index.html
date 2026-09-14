@@ -4435,11 +4435,16 @@ async function syncCloudData(){
     if(allPlansErr || allWorkoutsErr){ console.error('syncCloudData: pull', allPlansErr || allWorkoutsErr); return; }
 
     if(allPlans){
-      trainingPlans = allPlans.map(row => ({
-        id: row.local_id || row.id,
-        name: row.name,
-        schedule: row.schedule && Object.keys(row.schedule).length ? row.schedule : emptySchedule()
-      }));
+      const builtinIds = new Set(defaultTrainingPlans().map(p => p.id));
+      trainingPlans = allPlans.map(row => {
+        const id = row.local_id || row.id;
+        return {
+          id,
+          name: row.name,
+          schedule: row.schedule && Object.keys(row.schedule).length ? row.schedule : emptySchedule(),
+          builtin: builtinIds.has(id)
+        };
+      });
       const activeRow = allPlans.find(r => r.is_active);
       starredPlanId = activeRow ? (activeRow.local_id || activeRow.id) : null;
       saveTrainingPlansList();
