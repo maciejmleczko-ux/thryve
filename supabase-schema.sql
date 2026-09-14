@@ -64,6 +64,24 @@ create table if not exists public.plans (
 
 create index if not exists plans_owner_id_idx on public.plans(owner_id);
 
+-- De-dupe BEFORE adding the unique constraint below — two tabs/devices
+-- syncing at nearly the same moment (no DB-level guard existed until
+-- now) could each push the same local plan as a separate row. Keeps the
+-- oldest row per (owner_id, local_id), drops the rest.
+with ranked as (
+  select id, row_number() over (partition by owner_id, local_id order by created_at asc, id asc) as rn
+  from public.plans
+  where local_id is not null
+)
+delete from public.plans where id in (select id from ranked where rn > 1);
+
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'plans_owner_local_unique') then
+    alter table public.plans add constraint plans_owner_local_unique unique (owner_id, local_id);
+  end if;
+end $$;
+
 alter table public.plans enable row level security;
 
 drop policy if exists "plans: owner full access" on public.plans;
@@ -87,6 +105,21 @@ create table if not exists public.workouts (
 
 create index if not exists workouts_user_id_idx on public.workouts(user_id);
 create index if not exists workouts_user_date_idx on public.workouts(user_id, date);
+
+-- Same de-dupe + unique constraint as plans, same reason.
+with ranked as (
+  select id, row_number() over (partition by user_id, local_id order by created_at asc, id asc) as rn
+  from public.workouts
+  where local_id is not null
+)
+delete from public.workouts where id in (select id from ranked where rn > 1);
+
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'workouts_user_local_unique') then
+    alter table public.workouts add constraint workouts_user_local_unique unique (user_id, local_id);
+  end if;
+end $$;
 
 alter table public.workouts enable row level security;
 

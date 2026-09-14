@@ -4395,6 +4395,31 @@ function initSupabaseAuth(){
    No per-field conflict resolution: plans have one owner/editor, workouts
    are append-only, so "cloud after phase 1" is simply correct — matches
    the "last write wins per record" call in the original spec. */
+/* ---------- delete propagation ----------
+   syncCloudData() only ever adds rows (push-unsynced, pull-authoritative)
+   — it has no concept of "this used to exist and was removed", so on its
+   own a local delete gets silently resurrected by the next pull (the row
+   is still sitting in the cloud, untouched). Fix: the two local delete
+   paths (plan delete/hide, workout delete) also fire a best-effort cloud
+   delete for the matching local_id. Fire-and-forget — if it fails (no
+   session, offline, network hiccup) the local delete still stands; the
+   row just resurrects on the next sync, same as before this existed,
+   rather than blocking the user's delete on network round-trip.
+   NOT a full tombstone system: a delete made on device A while device B
+   is offline still won't reach B until B itself deletes it (or gets told
+   to some other way) — cross-device delete sync is a separate, bigger
+   piece than this. */
+function deleteCloudPlan(id){
+  if(!supabaseClient || !cloudSession || !cloudSession.user) return;
+  supabaseClient.from('plans').delete().eq('owner_id', cloudSession.user.id).eq('local_id', String(id))
+    .then(({error})=>{ if(error) console.error('deleteCloudPlan', error); });
+}
+function deleteCloudWorkout(id){
+  if(!supabaseClient || !cloudSession || !cloudSession.user) return;
+  supabaseClient.from('workouts').delete().eq('user_id', cloudSession.user.id).eq('local_id', String(id))
+    .then(({error})=>{ if(error) console.error('deleteCloudWorkout', error); });
+}
+
 let _cloudSyncInFlight = false;
 async function syncCloudData(){
   if(!supabaseClient || !cloudSession || !cloudSession.user) return;
@@ -4408,24 +4433,40 @@ async function syncCloudData(){
     ]);
     if(cloudPlansErr || cloudWorkoutsErr){ console.error('syncCloudData: read', cloudPlansErr || cloudWorkoutsErr); return; }
 
+    // plansPushOk/workoutsPushOk guard the destructive pull-replace below:
+    // if a push fails (network hiccup, or the DB is missing the unique
+    // constraint upsert needs — see supabase-schema.sql), the cloud read
+    // right after would be missing whatever failed to push. Blindly
+    // replacing trainingPlans[]/workouts[] with that incomplete read would
+    // DELETE local data instead of just failing to back it up. Skipping
+    // the pull for that resource this round is the safe failure mode —
+    // local stays exactly as it was, and the next successful sync catches
+    // up normally.
+    let plansPushOk = true, workoutsPushOk = true;
+
     const cloudPlanIds = new Set((cloudPlans || []).map(p => p.local_id));
     const newPlans = (trainingPlans || []).filter(p => !cloudPlanIds.has(String(p.id)));
     if(newPlans.length){
-      const { error } = await supabaseClient.from('plans').insert(newPlans.map(p => ({
+      // upsert (not insert): two tabs/devices syncing at nearly the same
+      // moment could both decide the same plan is "new" before either has
+      // written it — onConflict makes the second write a harmless update
+      // instead of a duplicate row. Needs the (owner_id, local_id) unique
+      // constraint from supabase-schema.sql.
+      const { error } = await supabaseClient.from('plans').upsert(newPlans.map(p => ({
         owner_id: uid, local_id: String(p.id), name: p.name,
         schedule: p.schedule || {}, is_active: p.id === starredPlanId
-      })));
-      if(error) console.error('syncCloudData: push plans', error);
+      })), { onConflict: 'owner_id,local_id' });
+      if(error){ console.error('syncCloudData: push plans', error); plansPushOk = false; }
     }
 
     const cloudWorkoutIds = new Set((cloudWorkouts || []).map(w => w.local_id));
     const newWorkouts = (workouts || []).filter(w => !cloudWorkoutIds.has(String(w.id)));
     if(newWorkouts.length){
-      const { error } = await supabaseClient.from('workouts').insert(newWorkouts.map(w => ({
+      const { error } = await supabaseClient.from('workouts').upsert(newWorkouts.map(w => ({
         user_id: uid, local_id: String(w.id), date: w.date, duration_min: w.durationMin || null,
         exercises: w.exercises || [], kcal_estimated: w.kcalEstimated ?? null, kcal_user: w.kcalUser ?? null
-      })));
-      if(error) console.error('syncCloudData: push workouts', error);
+      })), { onConflict: 'user_id,local_id' });
+      if(error){ console.error('syncCloudData: push workouts', error); workoutsPushOk = false; }
     }
 
     const [{ data: allPlans, error: allPlansErr }, { data: allWorkouts, error: allWorkoutsErr }] = await Promise.all([
@@ -4434,7 +4475,7 @@ async function syncCloudData(){
     ]);
     if(allPlansErr || allWorkoutsErr){ console.error('syncCloudData: pull', allPlansErr || allWorkoutsErr); return; }
 
-    if(allPlans){
+    if(allPlans && plansPushOk){
       const builtinIds = new Set(defaultTrainingPlans().map(p => p.id));
       trainingPlans = allPlans.map(row => {
         const id = row.local_id || row.id;
@@ -4451,7 +4492,7 @@ async function syncCloudData(){
       if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId);
       else localStorage.removeItem(LS_STARRED_PLAN);
     }
-    if(allWorkouts){
+    if(allWorkouts && workoutsPushOk){
       workouts = allWorkouts.map(row => ({
         id: row.local_id || row.id,
         date: row.date,
@@ -4489,7 +4530,7 @@ async function syncCloudData(){
 
     goRoute(currentRoute); // re-render whatever screen is currently on-screen with the synced data
     if(!document.getElementById('accountOverlay').classList.contains('hidden')) renderAccountPanel(); // it's an overlay, not part of currentRoute
-    if(newPlans.length || newWorkouts.length || pushedProfile) toast('Zsynchronizowano z chmurą');
+    if((newPlans.length && plansPushOk) || (newWorkouts.length && workoutsPushOk) || pushedProfile) toast('Zsynchronizowano z chmurą');
   } catch(e){
     console.error('syncCloudData failed', e);
   } finally {
@@ -7758,6 +7799,7 @@ function performPlanDeleteV2(id){
   if(plan.builtin){ deletedBuiltinPlans.add(id); saveDeletedBuiltinPlans(); } // otherwise loadTrainingPlans() re-adds it next launch
   if(starredPlanId===id){ starredPlanId=null; localStorage.removeItem(LS_STARRED_PLAN); }
   saveTrainingPlansList();
+  deleteCloudPlan(id); // best-effort — otherwise the next sync's pull resurrects it
   toast(t('planDeleted','Plan usunięty'));
   updateTodayPlanBanner();
   updatePlanPillLabel();
@@ -9452,6 +9494,7 @@ function confirmActivityDeleteV2(){
 function performHistWorkoutDeleteV2(id){
   workouts = workouts.filter(w=>w.id!==id);
   saveWorkouts(workouts);
+  deleteCloudWorkout(id); // best-effort — otherwise the next sync's pull resurrects it
   delete histExpandedV2[id];
   toast(t('workoutDeleted','Trening usunięty'));
   renderCalendarV2(); // repaints the day panel + the calendar's has-log dots
