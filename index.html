@@ -2591,7 +2591,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button type="button" class="acct-row" onclick="closeAccountPanel(); openFeedbackV2();"><span class="acct-lead"><span class="ph" data-ph="chat-dots"></span>Podziel się opinią</span><span class="acct-v"></span></button>
       <button type="button" class="acct-row" onclick="openChangelogHistorySheet()"><span class="acct-lead"><span class="ph" data-ph="clock-counter-clockwise"></span>Historia zmian</span><span class="acct-v" id="acctChlVer"></span></button>
     </div>
-    <p class="acct-foot">Mekkio <span id="acctVer"></span> · dane treningowe tylko na tym urządzeniu</p>
+    <p class="acct-foot">Mekkio <span id="acctVer"></span> · <span id="acctFootData">dane treningowe tylko na tym urządzeniu</span></p>
   </div>
 </div>
 
@@ -4186,13 +4186,17 @@ function acctSheetClose(id, viaDrag){
 }
 function renderAccountPanel(){
   const named = !!profileName;
+  const inCloud = !!(cloudSession && cloudSession.user);
   const set = (id, txt)=>{ const e = document.getElementById(id); if(e) e.textContent = txt; };
   set('acctName', named ? profileName : 'Gość');
-  set('acctSub', named
-    ? 'Dane tylko na tym urządzeniu · zmień imię'
-    : 'Działasz jako gość — dane tylko na tym urządzeniu');
+  set('acctSub', inCloud
+    ? (named ? 'Zsynchronizowane w chmurze · zmień imię' : 'Zsynchronizowane w chmurze')
+    : named
+      ? 'Dane tylko na tym urządzeniu · zmień imię'
+      : 'Działasz jako gość — dane tylko na tym urządzeniu');
   set('acctVer', APP_VERSION);
   set('acctChlVer', 'v' + APP_VERSION);
+  set('acctFootData', inCloud ? 'dane zsynchronizowane z chmurą' : 'dane treningowe tylko na tym urządzeniu');
   const cw = currentWeightKg();
   set('acctWeightV', cw != null ? fmtKg(cw) + ' kg' : 'Uzupełnij');
   set('acctHeightV', bodyData.heightCm ? bodyData.heightCm + ' cm' : 'Uzupełnij');
