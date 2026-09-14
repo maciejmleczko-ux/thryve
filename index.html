@@ -740,7 +740,8 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-cloud-signed{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
 .acct-cloud-signed[hidden],.acct-cloud-cta[hidden]{display:none;}
 .acct-cloud-email{font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.acct-cloud-cta{margin-top:10px;}
+.acct-cloud-cta{display:inline-block;margin-top:10px;background:var(--m-orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
+.acct-cloud-cta:active{transform:scale(.96);}
 .acct-cloud-mode-link{display:block;width:100%;background:none;border:0;color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;padding:4px 0;font-family:inherit;text-align:center;}
 .acct-cloud-forgot{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);cursor:pointer;padding:6px 0 0;font-family:inherit;align-self:flex-end;}
 .acct-auth-error{margin:6px 0 0;font-size:var(--m-fs-2xs);color:#c00;line-height:1.4;}
@@ -2569,7 +2570,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <span class="acct-cloud-email" id="acctCloudEmail"></span>
         <button type="button" class="acct-photo-clear" onclick="signOutCloud()">Wyloguj</button>
       </div>
-      <button type="button" class="acct-photo-pick acct-cloud-cta" id="acctCloudCta" onclick="openAuthSheet('login')">Zaloguj się</button>
+      <button type="button" class="acct-cloud-cta" id="acctCloudCta" onclick="openAuthSheet('login')">Zaloguj się</button>
     </div>
     <p class="acct-sec">Dane do kalorii</p>
     <div class="acct-rows">
@@ -2790,6 +2791,21 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <button type="button" class="plansv2-customize-cancel" onclick="closeEditKcal()">ANULUJ</button>
         <button type="button" class="plansv2-customize-apply" onclick="saveEditKcal()">ZAPISZ</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Occasional nudge toward creating a cloud account, for guests who've
+     actually used the app already. Never stacks with onboarding/whatsnew/
+     install-prompt — see maybeShowCloudReminder(), called last and gated
+     on modal-lock being free. -->
+<div class="onboard-overlay hidden" id="cloudReminderOverlay">
+  <div class="onboard-box">
+    <h3>Nie zgub swoich treningów</h3>
+    <p>Załóż darmowe konto — Twoje plany i historia będą bezpieczne, nawet jeśli zmienisz telefon albo wyczyścisz dane przeglądarki.</p>
+    <div class="onboard-actions">
+      <button class="skip" onclick="dismissCloudReminder()">Później</button>
+      <button class="save" onclick="dismissCloudReminder(); openAuthSheet('signup');">Załóż konto</button>
     </div>
   </div>
 </div>
@@ -4438,13 +4454,59 @@ async function syncCloudData(){
       saveWorkouts(workouts);
     }
 
+    // profile fields (waga, wzrost/wiek/płeć, imię) — one row, not a list:
+    // push local up only where the cloud is still empty for that field,
+    // then pull whatever the cloud now has as the authoritative value.
+    let pushedProfile = false;
+    const { data: profileRow, error: profileErr } = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
+    if(profileErr){ console.error('syncCloudData: profile read', profileErr); }
+    else if(profileRow){
+      const patch = {};
+      if((!profileRow.weight_log || !profileRow.weight_log.length) && weightLog.length) patch.weight_log = weightLog;
+      if((!profileRow.body_data || !Object.keys(profileRow.body_data).length) && bodyData && Object.keys(bodyData).length) patch.body_data = bodyData;
+      if(!profileRow.display_name && profileName) patch.display_name = profileName;
+      if(Object.keys(patch).length){
+        const { error } = await supabaseClient.from('profiles').update(patch).eq('id', uid);
+        if(error) console.error('syncCloudData: push profile', error);
+        else { Object.assign(profileRow, patch); pushedProfile = true; }
+      }
+      if(profileRow.weight_log && profileRow.weight_log.length){ weightLog = profileRow.weight_log; saveWeightLog(weightLog); }
+      if(profileRow.body_data && Object.keys(profileRow.body_data).length){ bodyData = profileRow.body_data; saveBodyDataLS(bodyData); }
+      if(profileRow.display_name && profileRow.display_name !== profileName){
+        profileName = profileRow.display_name;
+        localStorage.setItem(LS_PROFILE_NAME, profileName);
+      }
+    }
+
     goRoute(currentRoute); // re-render whatever screen is currently on-screen with the synced data
-    if(newPlans.length || newWorkouts.length) toast('Zsynchronizowano z chmurą');
+    if(!document.getElementById('accountOverlay').classList.contains('hidden')) renderAccountPanel(); // it's an overlay, not part of currentRoute
+    if(newPlans.length || newWorkouts.length || pushedProfile) toast('Zsynchronizowano z chmurą');
   } catch(e){
     console.error('syncCloudData failed', e);
   } finally {
     _cloudSyncInFlight = false;
   }
+}
+
+/* ---------- occasional "create an account" nudge ----------
+   Guest only, backend configured, has actually used the app (>=1 saved
+   workout — don't nag someone who just opened it), at most once every
+   CLOUD_REMINDER_INTERVAL_DAYS, and never on top of another popup. */
+const LS_CLOUD_REMINDER_LAST = 'fitlog_cloud_reminder_last_v1';
+const CLOUD_REMINDER_INTERVAL_DAYS = 12;
+function maybeShowCloudReminder(){
+  if(!SUPABASE_CONFIGURED || cloudSession) return;
+  if(!workouts.length) return;
+  if(document.documentElement.classList.contains('modal-lock')) return;
+  const last = parseInt(localStorage.getItem(LS_CLOUD_REMINDER_LAST) || '0', 10);
+  if(Date.now() - last < CLOUD_REMINDER_INTERVAL_DAYS * 86400000) return;
+  localStorage.setItem(LS_CLOUD_REMINDER_LAST, String(Date.now()));
+  document.getElementById('cloudReminderOverlay').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+}
+function dismissCloudReminder(){
+  document.getElementById('cloudReminderOverlay').classList.add('hidden');
+  document.documentElement.classList.remove('modal-lock');
 }
 
 function renderAcctCloudCard(){
@@ -11296,6 +11358,7 @@ checkForImportedPlan();
 // plan onboarding steps (see afterOnboardingStep / exitPlanOnboarding) so
 // two dialogs never show at once.
 if(onboardSeen) checkInstallPrompt();
+setTimeout(maybeShowCloudReminder, 400); // after any of the above have had their chance to claim modal-lock
 // Best-effort native orientation lock — only actually works in a handful of
 // contexts (mainly an installed Android PWA in standalone display mode).
 // iOS Safari/home-screen apps don't implement this API at all, and the

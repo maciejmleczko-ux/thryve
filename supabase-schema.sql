@@ -8,8 +8,12 @@
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text,
+  weight_log jsonb not null default '[]'::jsonb,  -- [{kg, date}] ascending, mirrors fitlog_weight_log_v1
+  body_data jsonb not null default '{}'::jsonb,    -- {heightCm, age, sex}, mirrors fitlog_body_data_v1
   created_at timestamptz not null default now()
 );
+alter table public.profiles add column if not exists weight_log jsonb not null default '[]'::jsonb;
+alter table public.profiles add column if not exists body_data jsonb not null default '{}'::jsonb;
 
 alter table public.profiles enable row level security;
 
