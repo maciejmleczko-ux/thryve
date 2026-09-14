@@ -67,10 +67,16 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Geist',
 .ob-label-gap{flex-shrink:0;height:46px;}
 
 .ob-gender-label{font-size:10px;font-weight:700;letter-spacing:.04em;color:rgba(52,57,65,.45);margin:24px 0 12px;}
-.ob-gender-row{display:flex;gap:8px;}
-.ob-gender-chip{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;aspect-ratio:115.667/107.211;border-radius:16px;background:rgba(255,255,255,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1.5px solid transparent;cursor:pointer;transition:border-color .2s ease;}
-.ob-gender-chip svg{width:26px;height:26px;color:#FF6343;}
-.ob-gender-chip span{font-size:10px;font-weight:700;letter-spacing:.04em;color:#2C2727;}
+/* Figma: chips are 4px apart (not 8), icon is 50x50 inside a ~115x107
+   card (was rendering at 26px — half the real size), 25px backdrop
+   blur (was 6 — barely visible), and the label under it is SemiBold
+   600 not Bold 700. All three chips (Kobieta/Mężczyzna/Pomiń) are
+   pixel-identical in the source file — still no selected-state design
+   to pull from, confirmed now from structured data not just a look. */
+.ob-gender-row{display:flex;gap:4px;}
+.ob-gender-chip{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;aspect-ratio:115.667/107.211;border-radius:16px;background:rgba(255,255,255,.42);-webkit-backdrop-filter:blur(25px);backdrop-filter:blur(25px);border:1.5px solid transparent;cursor:pointer;transition:border-color .2s ease;}
+.ob-gender-chip svg{width:50px;height:50px;color:#FF6343;}
+.ob-gender-chip span{font-size:10px;font-weight:600;letter-spacing:.04em;color:#2C2727;}
 .ob-gender-chip.active{border-color:rgba(255,51,0,.45);}
 
 .ob-num-wrap{text-align:center;}
