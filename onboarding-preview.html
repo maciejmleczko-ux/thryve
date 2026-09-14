@@ -53,12 +53,18 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Geist',
 .ob-h1{font-size:20px;font-weight:400;letter-spacing:.04em;color:var(--m-ink);margin:0 0 10px;text-transform:uppercase;}
 .ob-sub{font-size:12px;font-weight:400;line-height:1.5;color:rgba(52,57,65,.6);margin:0 auto 8px;max-width:30ch;}
 
-/* "duży tekst" (name / big number): extra light 54px, centered, sitting a
-   fixed 106px below the subtitle — not a proportional gap. */
+/* Exact values pulled from the Figma REST API (finally connected) —
+   node 261:8888, all 5 onboarding frames. Numbers below are the real
+   thing, not read-off-a-screenshot estimates. */
+
+/* imię only: subtitle -> 106px fixed gap -> name, no label in between. */
 .ob-big-gap{flex-shrink:0;height:106px;}
 .ob-name-wrap{}
 .ob-name-input{width:100%;border:none;background:transparent;border-bottom:2px solid rgba(52,57,65,.18);font-family:inherit;font-size:54px;font-weight:200;text-align:center;color:var(--m-orange);padding:6px 0 10px;outline:none;}
 .ob-name-input::placeholder{color:rgba(255,51,0,.35);}
+
+/* wiek/waga/wzrost: subtitle -> 46px fixed gap -> label -> number. */
+.ob-label-gap{flex-shrink:0;height:46px;}
 
 .ob-gender-label{font-size:10px;font-weight:700;letter-spacing:.04em;color:rgba(52,57,65,.45);margin:24px 0 12px;}
 .ob-gender-row{display:flex;gap:8px;}
@@ -68,41 +74,41 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Geist',
 .ob-gender-chip.active{border-color:rgba(255,51,0,.45);}
 
 .ob-num-wrap{text-align:center;}
-.ob-num-label{font-size:10px;font-weight:700;letter-spacing:.04em;color:rgba(52,57,65,.45);margin:0 0 4px;}
-.ob-num{font-size:102px;font-weight:200;color:var(--m-orange);letter-spacing:-.02em;line-height:1;}
-.ob-num small{font-size:20px;font-weight:300;color:rgba(52,57,65,.55);margin-left:4px;}
+.ob-num-label{font-size:10px;font-weight:700;letter-spacing:.04em;color:rgba(52,57,65,.45);margin:0 0 10px;}
+/* real figma value: ExtraLight 108px (not 102 — that was Maciej's own
+   read of Inspect, close but the API gives the exact number). */
+.ob-num{font-size:108px;font-weight:200;color:var(--m-orange);letter-spacing:-.02em;line-height:1;}
+/* the "kg"/"cm" suffix is its own text run (ts2) — 40px, same ExtraLight
+   weight and same orange as the number, not a smaller muted grey. */
+.ob-num small{font-size:40px;font-weight:200;color:var(--m-orange);margin-left:4px;}
 
-/* Ruler: number(s) sit ABOVE the tick marks, ticks are ALL the same light
-   orange (only height marks a multiple of 5, not a color/opacity split),
-   and there's a real gap between the indicator line and the scale below
-   it — not one continuous line running into the ticks. */
+.ob-ruler-gap{flex-shrink:0;height:16px;}
+
+/* Horizontal ruler (wiek/waga). Figma's ticks-row is 294x10 at y:585,
+   labels sit at y:567 (18px above), indicator is a 60px line ending at
+   y:560 (7px above the labels) — so: indicator(60) -> gap(7) ->
+   label(~12) -> gap(6) -> ticks(10). Major ticks 10px tall, minor 6px,
+   all the same light orange (no separate color/opacity split). */
 .ruler-h{flex-shrink:0;display:flex;flex-direction:column;align-items:center;}
-.ruler-h-indicator{width:1px;height:36px;background:var(--m-orange);margin-bottom:16px;flex-shrink:0;}
-.ruler-h-track{width:100%;height:46px;overflow-x:scroll;scroll-snap-type:x mandatory;display:flex;align-items:flex-end;-ms-overflow-style:none;scrollbar-width:none;}
+.ruler-h-indicator{width:1px;height:60px;background:var(--m-orange);margin-bottom:7px;flex-shrink:0;}
+.ruler-h-track{width:100%;height:28px;overflow-x:scroll;scroll-snap-type:x mandatory;display:flex;align-items:flex-end;-ms-overflow-style:none;scrollbar-width:none;}
 .ruler-h-track::-webkit-scrollbar{display:none;}
-.ruler-h-tick{flex:none;width:8px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+.ruler-h-tick{flex:none;width:7px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
 .ruler-h-tick label{font-size:10px;font-weight:400;color:rgba(52,57,65,.55);margin-bottom:6px;white-space:nowrap;}
-.ruler-h-tick i{display:block;width:1px;background:var(--m-orange);opacity:.4;border-radius:1px;height:10px;}
-.ruler-h-tick.major i{height:18px;}
+.ruler-h-tick i{display:block;width:1px;background:var(--m-orange);opacity:.4;border-radius:1px;height:6px;}
+.ruler-h-tick.major i{height:10px;}
 
-/* wzrost's ruler is the exact same horizontal ruler, rotated 90° — same
-   fonts/colors/rules as wiek/waga (numbers next to their tick, all ticks
-   one light orange, only length marks a multiple of 5), just running
-   top-to-bottom instead of left-to-right, with the number block on top
-   (centered, identical to wiek/waga) instead of sitting beside it. */
-/* Maciej: the reference only ever shows ~5 labels at once (165-185) —
-   280px of scrollable viewport showed far more unlabeled rows than that,
-   which is what was pushing the button off the bottom of short phone
-   screens. 180px ≈ 4 label-intervals (5 rows × 8px each) plus a little
-   breathing room top/bottom, matching the reference framing. */
-.ruler-v-wrap{flex-shrink:0;display:flex;align-items:center;justify-content:center;height:180px;}
+/* wzrost's ruler is the same one rotated 90°. Figma: whole label+tick
+   group is 34x153 (not the 280/180 I'd guessed), indicator is a 60px
+   line starting 5px past the group (not 16). */
+.ruler-v-wrap{flex-shrink:0;display:flex;align-items:center;justify-content:center;height:153px;}
 .ruler-v-scale{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-ms-overflow-style:none;scrollbar-width:none;}
 .ruler-v-scale::-webkit-scrollbar{display:none;}
-.ruler-v-row{height:8px;scroll-snap-align:center;display:flex;align-items:center;}
-.ruler-v-row label{font-size:10px;font-weight:400;color:rgba(52,57,65,.55);width:26px;text-align:right;margin-right:6px;white-space:nowrap;flex-shrink:0;}
-.ruler-v-row i{display:block;height:1px;width:10px;background:var(--m-orange);opacity:.4;border-radius:1px;flex-shrink:0;}
-.ruler-v-row.major i{width:18px;}
-.ruler-v-indicator{width:36px;height:1px;background:var(--m-orange);margin-left:16px;flex-shrink:0;}
+.ruler-v-row{height:6px;scroll-snap-align:center;display:flex;align-items:center;}
+.ruler-v-row label{font-size:10px;font-weight:400;color:rgba(52,57,65,.55);width:22px;text-align:right;margin-right:4px;white-space:nowrap;flex-shrink:0;}
+.ruler-v-row i{display:block;height:1px;width:6px;background:var(--m-orange);opacity:.4;border-radius:1px;flex-shrink:0;}
+.ruler-v-row.major i{width:10px;}
+.ruler-v-indicator{width:60px;height:1px;background:var(--m-orange);margin-left:5px;flex-shrink:0;}
 
 .ob-cta{margin-top:24px;width:100%;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:16px;cursor:pointer;transition:transform .12s ease;flex-shrink:0;}
 .ob-cta:active{transform:scale(.97);}
@@ -287,12 +293,12 @@ function screenAge(){
   return screenShell(`
     <h1 class="ob-h1">Opowiedz coś o sobie</h1>
     <p class="ob-sub">Wiek pomaga w ustaleniu tempa regeneracji i optymalnej intensywności serii.</p>
-    <div class="ob-big-gap"></div>
+    <div class="ob-label-gap"></div>
     <div class="ob-num-wrap">
       <p class="ob-num-label">WIEK</p>
       <div class="ob-num" id="obAgeNum">${state.age}</div>
     </div>
-    <div class="ob-spacer" style="flex-grow:26"></div>
+    <div class="ob-ruler-gap"></div>
     ${buildHRuler(14,80,state.age,v=>{ state.age=v; const el=document.getElementById('obAgeNum'); if(el) el.textContent=v; })}
     <div class="ob-spacer" style="flex-grow:137"></div>
     <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
@@ -303,12 +309,12 @@ function screenWeight(){
   return screenShell(`
     <h1 class="ob-h1">Opowiedz coś o sobie</h1>
     <p class="ob-sub">To Twój punkt wyjścia do mierzenia postępów i wyliczania siły względnej.</p>
-    <div class="ob-big-gap"></div>
+    <div class="ob-label-gap"></div>
     <div class="ob-num-wrap">
       <p class="ob-num-label">WAGA</p>
       <div class="ob-num" id="obWeightNum">${state.weight}<small>kg</small></div>
     </div>
-    <div class="ob-spacer" style="flex-grow:26"></div>
+    <div class="ob-ruler-gap"></div>
     ${buildHRuler(35,180,state.weight,v=>{ state.weight=v; const el=document.getElementById('obWeightNum'); if(el) el.innerHTML=v+'<small>kg</small>'; })}
     <div class="ob-spacer" style="flex-grow:137"></div>
     <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
@@ -319,12 +325,12 @@ function screenHeight(){
   return screenShell(`
     <h1 class="ob-h1">Opowiedz coś o sobie</h1>
     <p class="ob-sub">Pomoże w analizie proporcji sylwetki i prawidłowego wskaźnika masy ciała.</p>
-    <div class="ob-big-gap"></div>
+    <div class="ob-label-gap"></div>
     <div class="ob-num-wrap">
       <p class="ob-num-label">WZROST</p>
       <div class="ob-num" id="obHeightNum">${state.height}<small>cm</small></div>
     </div>
-    <div class="ob-spacer" style="flex-grow:26"></div>
+    <div class="ob-ruler-gap"></div>
     ${buildVRuler(140,210,state.height,v=>{ state.height=v; const el=document.getElementById('obHeightNum'); if(el) el.innerHTML=v+'<small>cm</small>'; })}
     <div class="ob-spacer" style="flex-grow:137"></div>
     <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
