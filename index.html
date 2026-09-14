@@ -4353,11 +4353,63 @@ function initSupabaseAuth(){
   supabaseClient.auth.getSession().then(({data})=>{
     cloudSession = data && data.session ? data.session : null;
     renderAcctCloudCard();
+    if(cloudSession) migrateLocalDataToCloud();
   });
   supabaseClient.auth.onAuthStateChange((_event, session)=>{
     cloudSession = session;
     renderAcctCloudCard();
+    if(cloudSession) migrateLocalDataToCloud();
   });
+}
+
+/* ---------- one-time local -> cloud migration ----------
+   Runs once per (Supabase account, device) the first time that account
+   has an active session here. Pushes whatever is sitting in this
+   browser's trainingPlans[]/workouts[] up to Supabase; does NOT pull
+   anything back down yet (that needs a real read/merge path through the
+   rest of the app — a separate, bigger step). Plans and workouts are
+   flagged independently so a failure on one side doesn't force a re-push
+   of the half that already succeeded. */
+function migrateLocalDataToCloud(){
+  if(!supabaseClient || !cloudSession || !cloudSession.user) return;
+  const uid = cloudSession.user.id;
+  const plansFlag = 'fitlog_cloud_migrated_plans_v1_' + uid;
+  const workoutsFlag = 'fitlog_cloud_migrated_workouts_v1_' + uid;
+  const needPlans = !localStorage.getItem(plansFlag) && Array.isArray(trainingPlans) && trainingPlans.length;
+  const needWorkouts = !localStorage.getItem(workoutsFlag) && Array.isArray(workouts) && workouts.length;
+  if(!needPlans && !needWorkouts) return;
+
+  (async ()=>{
+    let movedPlans = 0, movedWorkouts = 0, failed = false;
+    if(needPlans){
+      const rows = trainingPlans.map(p=>({
+        owner_id: uid,
+        local_id: String(p.id),
+        name: p.name,
+        schedule: p.schedule || {},
+        is_active: p.id === starredPlanId
+      }));
+      const { error } = await supabaseClient.from('plans').insert(rows);
+      if(error){ console.error('migrateLocalDataToCloud: plans', error); failed = true; }
+      else { localStorage.setItem(plansFlag, new Date().toISOString()); movedPlans = rows.length; }
+    }
+    if(needWorkouts){
+      const rows = workouts.map(w=>({
+        user_id: uid,
+        local_id: String(w.id),
+        date: w.date,
+        duration_min: w.durationMin || null,
+        exercises: w.exercises || [],
+        kcal_estimated: w.kcalEstimated ?? null,
+        kcal_user: w.kcalUser ?? null
+      }));
+      const { error } = await supabaseClient.from('workouts').insert(rows);
+      if(error){ console.error('migrateLocalDataToCloud: workouts', error); failed = true; }
+      else { localStorage.setItem(workoutsFlag, new Date().toISOString()); movedWorkouts = rows.length; }
+    }
+    if(movedPlans || movedWorkouts) toast('Kopia w chmurze gotowa (' + movedPlans + ' planów, ' + movedWorkouts + ' treningów)');
+    else if(failed) toast('Nie udało się zsynchronizować z chmurą — spróbujemy ponownie później');
+  })();
 }
 
 function renderAcctCloudCard(){
