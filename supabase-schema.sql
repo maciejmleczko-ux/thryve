@@ -17,7 +17,7 @@ drop policy if exists "profiles: select own" on public.profiles;
 create policy "profiles: select own" on public.profiles
   for select using (auth.uid() = id);
 
-drop policy if exists "profiles: upsert own" on public.profiles;
+drop policy if exists "profiles: insert own" on public.profiles;
 create policy "profiles: insert own" on public.profiles
   for insert with check (auth.uid() = id);
 
@@ -105,6 +105,18 @@ drop trigger if exists plans_set_updated_at on public.plans;
 create trigger plans_set_updated_at
   before update on public.plans
   for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------
+-- GRANTs — "Automatically expose new tables" było wyłączone przy
+-- tworzeniu projektu (celowo), więc rola authenticated nie ma nawet
+-- podstawowego dostępu do tabel bez tego. RLS powyżej i tak filtruje
+-- WIERSZE (tylko właściciel); to tutaj odblokowuje samą TABELĘ.
+-- anon (niezalogowany) świadomie nie dostaje nic.
+-- ---------------------------------------------------------------------
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on public.profiles to authenticated;
+grant select, insert, update, delete on public.plans to authenticated;
+grant select, insert, update, delete on public.workouts to authenticated;
 
 -- Gotowe. Reszta (coaching_*, coach_feedback, coach_media) dochodzi
 -- dopiero w fazie 3 (moduł trenera) — patrz osobna specyfikacja.
