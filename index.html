@@ -5697,6 +5697,29 @@ function goRoute(route){
    page behind it (setting an explicit height from vv.height caused
    exactly that gap, since vv.height excludes the area under the
    keyboard). */
+/* Bottom sheets (.m-sheet-overlay, e.g. the exercise-logging popup) are a
+   different case from the centered .onboard-box popups above: they rely
+   on .m-sheet's own `max-height:92dvh` to size the sheet, and `dvh` does
+   NOT shrink for the on-screen keyboard on iOS (only for browser chrome
+   like the address bar) — so with the keyboard open, the sheet can still
+   claim up to 92% of the FULL device height, no smaller. If that's more
+   than what's actually visible above the keyboard, the excess renders
+   past the true bottom edge of the screen; reported by Maciej (2026-09-15,
+   screenshot) as the submit button floating with the (intentionally
+   translucent) backdrop and the screen behind it visible below it instead
+   of the button sitting right above the keyboard. Fix: while any
+   .m-sheet-overlay is open, cap its .m-sheet's max-height to the live
+   visualViewport height (minus a small margin) via inline style, so the
+   sheet always fits the actually-visible area and scrolls internally
+   (.m-sheet-body/.exv2-card already have overflow-y:auto) instead of
+   extending past it. Cleared back to the CSS default when no sheet is
+   open, so this never fights the keyboard-closed 92dvh sizing. */
+function syncSheetHeightToVisualViewport(){
+  if(!window.visualViewport) return;
+  const vv = window.visualViewport;
+  const openSheets = document.querySelectorAll('.m-sheet-overlay:not(.hidden) > .m-sheet');
+  openSheets.forEach(el=>{ el.style.maxHeight = Math.max(200, vv.height - 16) + 'px'; });
+}
 (function pinOverlaysToVisualViewport(){
   if(!window.visualViewport) return;
   const vv = window.visualViewport;
@@ -5704,6 +5727,7 @@ function goRoute(route){
     document.querySelectorAll('.onboard-overlay').forEach(el=>{
       el.style.top = vv.offsetTop + 'px';
     });
+    syncSheetHeightToVisualViewport();
   }
   vv.addEventListener('resize', sync);
   vv.addEventListener('scroll', sync);
