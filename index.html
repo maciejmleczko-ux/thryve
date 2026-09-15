@@ -5760,6 +5760,19 @@ function syncSheetHeightToVisualViewport(){
   const vv = window.visualViewport;
   const openSheets = document.querySelectorAll('.m-sheet-overlay:not(.hidden) > .m-sheet');
   openSheets.forEach(el=>{ el.style.maxHeight = Math.max(200, vv.height - 16) + 'px'; });
+  // Follow-up to the fix above (Maciej, 2026-09-15): the sheet no longer
+  // overflows under the keyboard, but its sticky-footer submit button
+  // (.exv2-submit — always visible below the scrollable card, by design,
+  // so it's reachable without scrolling past a long set list) now sits
+  // squeezed right above the keyboard, which reads as cramped. Simplest
+  // fix: hide it entirely while the keyboard is open (frees its ~49px
+  // back to the scrollable card) and bring it back the moment the
+  // keyboard closes. >100px shrink reliably means the keyboard, not just
+  // Safari's address bar collapsing (~50-90px).
+  const keyboardOpen = (window.innerHeight - vv.height) > 100;
+  document.querySelectorAll('.exv2-submit').forEach(btn=>{
+    btn.style.display = keyboardOpen ? 'none' : '';
+  });
 }
 (function pinOverlaysToVisualViewport(){
   if(!window.visualViewport) return;
