@@ -1612,6 +1612,20 @@ body.pev2-bg{background:var(--m-red-page);}
 .m-sheet-grab{flex-shrink:0;width:40px;height:5px;border-radius:3px;background:rgba(44,39,39,.22);margin:8px auto 10px;cursor:grab;touch-action:none;}
 .m-sheet-grab:active{cursor:grabbing;}
 .m-sheet-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:24px;overflow:hidden;}
+/* Exercise-logging popup only (Figma node 305:582, 2026-09-15) — Maciej's
+   redesign: sheet rides much higher (~30px from the top, not the shared
+   .m-sheet's 92dvh). Scoped to THIS popup's ids only, not the shared
+   .m-sheet/.m-sheet-body classes — swapExerciseSheetV2 and everything
+   else stay as they were until Maciej confirms this look and asks to
+   roll it out everywhere. */
+#exercisePopupSheetV2{max-height:calc(100dvh - 30px);}
+/* Maciej (2026-09-15, live iteration on the above): the submit button
+   sitting outside/below .exv2-card's own scroll as a sticky footer could
+   still read as covering content near the bottom on some layouts — moved
+   it to be the last item INSIDE .exv2-card (plain scroll flow, nothing
+   can ever sit on top of it) instead. .exv2-card's own 24px gap + this
+   16px margin = the 40px spacing he asked for before the button. */
+.exv2-card .exv2-submit{margin-top:16px;}
 .m-sheet-snapback{transition:transform .3s cubic-bezier(.22,1,.36,1);}
 @media (prefers-reduced-motion: no-preference){
   .m-sheet-overlay{animation:mSheetBackdropIn .24s ease-out;}
@@ -1674,9 +1688,10 @@ body.pev2-bg{background:var(--m-red-page);}
 .exv2-field{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
 .exv2-field label{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--m-muted);}
 .exv2-field input{background:#fff;border:1px solid #c7c6cb;border-radius:var(--m-r-sm);padding:8px 12px;font-size:var(--m-fs-md);font-weight:500;color:var(--m-ink);font-family:inherit;width:100%;box-sizing:border-box;}
-/* the placeholder is last session's numbers — a faint hint, so a filled
-   field (your real value) stands out from one you haven't touched yet */
-.exv2-field input::placeholder{color:var(--m-ink);opacity:.42;}
+/* the placeholder is last session's numbers — a hint, so a filled
+   field (your real value) stands out from one you haven't touched yet.
+   Solid #71747A per Figma node 305:582 (2026-09-15) — was --m-ink @ .42. */
+.exv2-field input::placeholder{color:#71747A;opacity:1;}
 /* right-side tick: solid green disc + white check, appears once both
    weight AND reps are filled. align-self:flex-end + margin-bottom centres
    it on the input box, not the whole (taller) card. */
@@ -4868,7 +4883,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.35.1";
+const APP_VERSION = "4.35.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6637,8 +6652,8 @@ function renderExercisePopupV2(animate){
         </div>
       </div>
       ${popupShowWarning ? `<div class="exv2-warn">${t('popupNoValues','Pola są puste — liczby w tle to tylko podpowiedź z ostatniego treningu. Wpisz je, żeby dodać ćwiczenie.')}</div>` : ''}
+      <button type="button" class="exv2-submit${animCls}" style="animation-delay:${submitDelay}ms" onclick="confirmExercisePopupV2()">${btnLabel}</button>
     </div>
-    <button type="button" class="exv2-submit${animCls}" style="animation-delay:${submitDelay}ms" onclick="confirmExercisePopupV2()">${btnLabel}</button>
   `;
 }
 
