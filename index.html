@@ -4883,7 +4883,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.35.2";
+const APP_VERSION = "4.35.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5801,19 +5801,15 @@ function syncSheetHeightToVisualViewport(){
   const vv = window.visualViewport;
   const openSheets = document.querySelectorAll('.m-sheet-overlay:not(.hidden) > .m-sheet');
   openSheets.forEach(el=>{ el.style.maxHeight = Math.max(200, vv.height - 16) + 'px'; });
-  // Follow-up to the fix above (Maciej, 2026-09-15): the sheet no longer
-  // overflows under the keyboard, but its sticky-footer submit button
-  // (.exv2-submit — always visible below the scrollable card, by design,
-  // so it's reachable without scrolling past a long set list) now sits
-  // squeezed right above the keyboard, which reads as cramped. Simplest
-  // fix: hide it entirely while the keyboard is open (frees its ~49px
-  // back to the scrollable card) and bring it back the moment the
-  // keyboard closes. >100px shrink reliably means the keyboard, not just
-  // Safari's address bar collapsing (~50-90px).
-  const keyboardOpen = (window.innerHeight - vv.height) > 100;
-  document.querySelectorAll('.exv2-submit').forEach(btn=>{
-    btn.style.display = keyboardOpen ? 'none' : '';
-  });
+  // The hide-.exv2-submit-while-keyboard-open follow-up that used to live
+  // here is gone (2026-09-15): now that the button lives INSIDE .exv2-card
+  // as plain scrollable content (not a sticky footer outside it), toggling
+  // its display caused a layout reflow that lagged behind the keyboard's
+  // own close animation — Maciej saw the button (and everything below the
+  // fold) go missing for a beat right after dismissing the keyboard. It's
+  // no longer squeezed against the keyboard either way now that it just
+  // scrolls with the rest of the content, so there was nothing left for
+  // this to fix.
 }
 (function pinOverlaysToVisualViewport(){
   if(!window.visualViewport) return;
