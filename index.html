@@ -4883,7 +4883,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.35.5";
+const APP_VERSION = "4.35.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5811,6 +5811,35 @@ function syncSheetHeightToVisualViewport(){
   // scrolls with the rest of the content, so there was nothing left for
   // this to fix.
 }
+/* Center the currently-focused Seria card in the space between the top of
+   the screen and the top of the keyboard (Maciej, 2026-09-15) — the
+   browser's own scroll-into-view only guarantees the focused INPUT is
+   visible, often right at the bottom edge just above the keyboard, so
+   reaching it (or seeing its label/tick) still needed a manual scroll.
+   `pendingSeriesCenterInput` is set on focusin and only acted on the next
+   visualViewport resize/scroll — acting immediately on focus would
+   measure against the keyboard-closed viewport, since the resize hasn't
+   happened yet at that point. */
+let pendingSeriesCenterInput = null;
+document.addEventListener('focusin', function(e){
+  if(e.target && e.target.matches && e.target.matches('.exv2-series-fields input')){
+    pendingSeriesCenterInput = e.target;
+  }
+});
+function centerFocusedSeriesCard(){
+  if(!pendingSeriesCenterInput) return;
+  const input = pendingSeriesCenterInput;
+  pendingSeriesCenterInput = null;
+  if(document.activeElement !== input) return; // blurred again before this ran
+  const card = input.closest('.exv2-series-card');
+  const scrollEl = input.closest('.exv2-card');
+  if(!card || !scrollEl) return;
+  const vv = window.visualViewport;
+  const visibleHeight = vv ? vv.height : window.innerHeight;
+  const cardRect = card.getBoundingClientRect();
+  const delta = (cardRect.top + cardRect.height / 2) - (visibleHeight / 2);
+  scrollEl.scrollTop += delta;
+}
 (function pinOverlaysToVisualViewport(){
   if(!window.visualViewport) return;
   const vv = window.visualViewport;
@@ -5828,6 +5857,7 @@ function syncSheetHeightToVisualViewport(){
       el.style.top = vv.offsetTop + 'px';
     });
     syncSheetHeightToVisualViewport();
+    centerFocusedSeriesCard();
   }
   vv.addEventListener('resize', sync);
   vv.addEventListener('scroll', sync);
