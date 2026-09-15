@@ -5778,7 +5778,16 @@ function syncSheetHeightToVisualViewport(){
   if(!window.visualViewport) return;
   const vv = window.visualViewport;
   function sync(){
-    document.querySelectorAll('.onboard-overlay').forEach(el=>{
+    // Bottom sheets (.m-sheet-overlay) are excluded here — they're
+    // anchored to the true bottom via `bottom:0` + flex `justify-content:
+    // flex-end`, not by centering, so they never needed `top` pinning.
+    // Maciej found (2026-09-15) that focusing Seria 2/3 (i.e. a `scroll`
+    // event from iOS auto-scrolling a lower input into view, as opposed
+    // to the `resize` from the keyboard first opening on Seria 1) made
+    // the sheet jump toward the top of the screen — exactly what forcing
+    // `top = vv.offsetTop` on a bottom-anchored flex sheet would do the
+    // moment vv.offsetTop stops being 0 during that scroll.
+    document.querySelectorAll('.onboard-overlay:not(.m-sheet-overlay)').forEach(el=>{
       el.style.top = vv.offsetTop + 'px';
     });
     syncSheetHeightToVisualViewport();
