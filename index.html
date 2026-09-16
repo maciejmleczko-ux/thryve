@@ -4562,9 +4562,16 @@ function pickAiGoal(g){
 function openAiPrefsSheet(){
   pickAiGoal(aiPrefs.goal || null);
   document.getElementById('aiAvoidInput').value = aiPrefs.avoid || '';
+  // Hide the account panel underneath — it was never actually hidden by
+  // acctSheetOpen() (just visually covered by this sheet's own backdrop),
+  // which showed through around this sheet's edges (Maciej, 2026-09-17).
+  document.getElementById('accountOverlay').classList.add('hidden');
   acctSheetOpen('aiPrefsSheet');
 }
-function closeAiPrefsSheet(viaDrag){ acctSheetClose('aiPrefsSheet', viaDrag); }
+function closeAiPrefsSheet(viaDrag){
+  acctSheetClose('aiPrefsSheet', viaDrag);
+  document.getElementById('accountOverlay').classList.remove('hidden');
+}
 function saveAiPrefsSheet(){
   if(!cloudSession || !cloudSession.user){ toast('Zaloguj się, żeby zapisać preferencje'); return; }
   const avoid = document.getElementById('aiAvoidInput').value.trim();
