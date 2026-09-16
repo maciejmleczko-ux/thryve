@@ -987,7 +987,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-trend{display:flex;align-items:flex-end;gap:2px;height:27px;}
 .dash-trend span{flex:1;min-width:3px;border-radius:3px;background:var(--m-orange);transform-origin:bottom;}
 
-.dash-week-card{background:var(--m-plan-hard);border-radius:var(--m-r-md);padding:14px;color:#fff;margin-bottom:8px;}
+.dash-week-card{background:var(--m-plan-hard);border-radius:var(--m-r-md);padding:14px;color:#fff;}
 .dash-week-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .dash-week-count{margin:0;font-size:var(--m-fs-xs);font-weight:700;}
 .dash-week-days{display:flex;justify-content:space-between;}
@@ -1012,7 +1012,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 /* AI asystent — Krok 1 (podsumowanie tygodnia). Black tile, matching
    .statsv2-ring-card's #000 (the one dark tile already in the app), not
    one of the --m-plan-* accent colours the other dash-* cards use. */
-.dash-ai-card{background:#000;border-radius:var(--m-r-md);padding:14px;color:#fff;}
+.dash-ai-card{background:#000;border-radius:var(--m-r-md);padding:14px;color:#fff;margin-bottom:8px;}
 .dash-ai-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
 .dash-ai-head .ph{width:18px;height:18px;flex-shrink:0;color:#fff;}
 .dash-ai-head .dash-eyebrow{margin:0;}
@@ -2231,6 +2231,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
       </div>
 
+      <div class="dash-ai-card" id="dashAiCard" hidden>
+        <div class="dash-ai-head">
+          <span class="ph" data-ph="sparks"></span>
+          <p class="dash-eyebrow">Podsumowanie tygodnia</p>
+        </div>
+        <p class="dash-ai-text" id="dashAiText"></p>
+      </div>
+
       <div class="dash-grid2">
         <div class="dash-plan-card" onclick="goRoute('plans-v2')">
           <p class="dash-eyebrow" data-i18n="dashYourPlan">Twój plan</p>
@@ -2263,14 +2271,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <p class="dash-week-count" id="dashWeekCount"></p>
         </div>
         <div class="dash-week-days" id="dashWeekDays"></div>
-      </div>
-
-      <div class="dash-ai-card" id="dashAiCard" hidden>
-        <div class="dash-ai-head">
-          <span class="ph" data-ph="sparks"></span>
-          <p class="dash-eyebrow">Podsumowanie tygodnia</p>
-        </div>
-        <p class="dash-ai-text" id="dashAiText"></p>
       </div>
     </div>
   </section>
@@ -8995,12 +8995,16 @@ function renderDashboard(){
   fitDashboardToScreen();
 }
 
-/* AI asystent — Krok 1: narracyjne podsumowanie tygodnia (czarna karta pod
-   .dash-week-card). Guests and empty weeks never call the backend — no
-   session to auth with, and nothing worth summarising. Cached per-week in
-   localStorage (fingerprinted on the numbers that would change the text)
-   so re-entering the dashboard doesn't re-spend the daily AI quota. */
+/* AI asystent — Krok 1: narracyjne podsumowanie tygodnia (czarna karta
+   między .dash-hero i .dash-grid2). Guests and empty weeks never call the
+   backend — no session to auth with, and nothing worth summarising. Cached
+   per-week in localStorage (fingerprinted on the numbers that would change
+   the text) so re-entering the dashboard doesn't re-spend the daily AI
+   quota. AI_SUMMARY_PROMPT_VERSION is part of the fingerprint so a prompt
+   change (see ai-proxy's FEATURES.weekly_summary) invalidates old cached
+   text instead of showing stale wording until the numbers next change. */
 const LS_AI_WEEKLY_SUMMARY = 'fitlog_ai_weekly_summary_v1';
+const AI_SUMMARY_PROMPT_VERSION = 'v2';
 async function renderDashboardAiSummary(payload, hasData, weekStartIso){
   const card = document.getElementById('dashAiCard');
   const textEl = document.getElementById('dashAiText');
@@ -9009,7 +9013,7 @@ async function renderDashboardAiSummary(payload, hasData, weekStartIso){
     return;
   }
 
-  const fingerprint = [weekStartIso, payload.workouts, payload.totalVolumeKg, payload.durationMinTotal].join('|');
+  const fingerprint = [AI_SUMMARY_PROMPT_VERSION, weekStartIso, payload.workouts, payload.totalVolumeKg, payload.durationMinTotal].join('|');
   let cached = null;
   try { cached = JSON.parse(localStorage.getItem(LS_AI_WEEKLY_SUMMARY) || 'null'); } catch(e){}
   if(cached && cached.userId === cloudSession.user.id && cached.fingerprint === fingerprint && cached.text){
@@ -9067,7 +9071,7 @@ function fitDashboardToScreen(){
     const measure = () => {
       const rs = getComputedStyle(dashRoot);
       return parseFloat(rs.paddingTop) + parseFloat(rs.paddingBottom)
-        + h(hdr) + mb(hdr) + h(hero) + mb(hero) + h(grid) + mb(grid) + h(week) + mb(week) + h(ai);
+        + h(hdr) + mb(hdr) + h(hero) + mb(hero) + h(ai) + mb(ai) + h(grid) + mb(grid) + h(week);
     };
     // 6px tolerance for sub-pixel rounding / web-font swap. Two stages:
     // compact the flexible spacing first, only unlock scroll if it still

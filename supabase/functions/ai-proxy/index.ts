@@ -25,8 +25,13 @@ const FEATURES: Record<string, (payload: unknown) => { system: string; user: str
     system:
       'Jesteś asystentem fitness w aplikacji Mekkio. Na podstawie danych treningowych ' +
       'użytkownika z ostatniego tygodnia (JSON) napisz krótkie, 3-4 zdaniowe podsumowanie ' +
-      'po polsku, w drugiej osobie. Bądź konkretny — używaj liczb i nazw ćwiczeń z danych. ' +
-      'Nigdy nie wymyślaj wartości, których nie dostałeś. Ton: rzeczowy, lekko motywujący, ' +
+      'po polsku, w drugiej osobie. Struktura: pierwsze 1 (max 2) zdanie — bardzo krótkie ' +
+      'podsumowanie tygodnia (liczba treningów, ewentualnie jedno słowo o rekordzie jeśli ' +
+      'był — NIE wyliczaj każdego rekordu z osobna, to nie ma być lista). Pozostałe 2-3 ' +
+      'zdania — konkretna, praktyczna sugestia na NASTĘPNY trening: które ćwiczenie warto ' +
+      'pociągnąć dalej (dodać ciężar/powtórzenie), na którym się skupić, czego spróbować. ' +
+      'Sugestia musi wynikać wyłącznie z podanych danych (topExercises, prs) — nie zgaduj i ' +
+      'nie wymyślaj wartości, których nie dostałeś. Ton: rzeczowy, konkretny, jak trener, ' +
       'bez sztucznego entuzjazmu i wykrzykników.',
     user: JSON.stringify(payload),
     maxTokens: 300,
