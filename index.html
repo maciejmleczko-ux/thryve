@@ -987,7 +987,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-trend{display:flex;align-items:flex-end;gap:2px;height:27px;}
 .dash-trend span{flex:1;min-width:3px;border-radius:3px;background:var(--m-orange);transform-origin:bottom;}
 
-.dash-week-card{background:var(--m-plan-hard);border-radius:var(--m-r-md);padding:14px;color:#fff;}
+.dash-week-card{background:var(--m-plan-hard);border-radius:var(--m-r-md);padding:14px;color:#fff;margin-bottom:8px;}
 .dash-week-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .dash-week-count{margin:0;font-size:var(--m-fs-xs);font-weight:700;}
 .dash-week-days{display:flex;justify-content:space-between;}
@@ -1009,6 +1009,15 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-week-day.today.has-ring span:first-child{outline:1.5px solid #fff;outline-offset:2px;}
 .dash-week-day em{font-style:normal;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.85);}
 
+/* AI asystent — Krok 1 (podsumowanie tygodnia). Black tile, matching
+   .statsv2-ring-card's #000 (the one dark tile already in the app), not
+   one of the --m-plan-* accent colours the other dash-* cards use. */
+.dash-ai-card{background:#000;border-radius:var(--m-r-md);padding:14px;color:#fff;}
+.dash-ai-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.dash-ai-head .ph{width:18px;height:18px;flex-shrink:0;color:#fff;}
+.dash-ai-head .dash-eyebrow{margin:0;}
+.dash-ai-text{margin:0;font-size:var(--m-fs-sm);line-height:1.5;color:rgba(255,255,255,.92);}
+
 /* Short phones: the 390×844 tuning + a real ~50px notch inset tips a 3-line
    greeting past one screen on an iPhone 13 mini / SE, so renderDashboard()
    flips on .dashboard-scrollable and the dashboard starts to move. Reclaim
@@ -1026,6 +1035,7 @@ html.dash-compact .dash-hero-stats{margin:8px 0;gap:6px;}
 html.dash-compact .dash-grid2{gap:6px;margin-bottom:6px;}
 html.dash-compact .dash-week-card{padding:12px;}
 html.dash-compact .dash-week-head{margin-bottom:10px;}
+html.dash-compact .dash-ai-card{padding:12px;}
 
 /* ---- subtle motion: staggered reveal on entry, bars grow in, checks pop ---- */
 @media (prefers-reduced-motion: no-preference){
@@ -1042,7 +1052,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
      + duration than dashRise above so the deceleration at the tail end
      actually reads instead of flashing by. */
   @keyframes dashTileRise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
-  .dash-hero,.dash-plan-card,.dash-mini-card,.dash-week-card{animation:dashTileRise .8s cubic-bezier(.16,1,.3,1) both;}
+  .dash-hero,.dash-plan-card,.dash-mini-card,.dash-week-card,.dash-ai-card{animation:dashTileRise .8s cubic-bezier(.16,1,.3,1) both;}
 
   /* Weekly-progress day circles fade in one after another, timed to start
      only once the .dash-week-card itself has mostly finished revealing —
@@ -2254,6 +2264,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
         <div class="dash-week-days" id="dashWeekDays"></div>
       </div>
+
+      <div class="dash-ai-card" id="dashAiCard" hidden>
+        <div class="dash-ai-head">
+          <span class="ph" data-ph="sparks"></span>
+          <p class="dash-eyebrow">Podsumowanie tygodnia</p>
+        </div>
+        <p class="dash-ai-text" id="dashAiText"></p>
+      </div>
     </div>
   </section>
 
@@ -3372,6 +3390,7 @@ const T_EN = {
   dashMinutesActivity: n => `${n} min active`,
   dashSessions: n => `${n} workout${n===1?'':'s'}`,
   dashWeekCount: (d,t) => `${d} / ${t} days done`,
+  dashAiLoading: 'Analyzing your week…',
   dashHeadlineRest: 'Nothing planned for today. Rest up.',
   gymV2NoPlanMsg: "You don't have a starred plan yet.",
   gymV2CreatePlan: 'Create or pick a plan',
@@ -3595,6 +3614,10 @@ Object.assign(PH, {"magnifying-glass": "<svg xmlns=\"http://www.w3.org/2000/svg\
 /* account entry / avatar — self-contained badge (Maciej-supplied): orange disc
    + white Phosphor "user" glyph. Colours are baked in, not currentColor. */
 Object.assign(PH, {"account": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 40 40\" fill=\"none\"><rect width=\"40\" height=\"40\" rx=\"20\" fill=\"#FF3300\"/><path d=\"M29.4867 27.9687C28.0045 25.4075 25.6776 23.6103 22.9739 22.8481C24.2884 22.1799 25.3396 21.0885 25.9579 19.7498C26.5762 18.411 26.7256 16.9031 26.382 15.4691C26.0385 14.0351 25.222 12.7586 24.0642 11.8454C22.9064 10.9322 21.4747 10.4355 20.0001 10.4355C18.5255 10.4355 17.0939 10.9322 15.9361 11.8454C14.7783 12.7586 13.9618 14.0351 13.6182 15.4691C13.2747 16.9031 13.4241 18.411 14.0424 19.7498C14.6607 21.0885 15.7119 22.1799 17.0264 22.8481C14.3226 23.6094 11.9958 25.4065 10.5136 27.9687C10.4729 28.0328 10.4456 28.1043 10.4332 28.1792C10.4209 28.2541 10.4239 28.3306 10.4419 28.4043C10.46 28.478 10.4927 28.5473 10.5383 28.608C10.5838 28.6687 10.6411 28.7195 10.7068 28.7575C10.7725 28.7955 10.8451 28.8197 10.9205 28.8289C10.9958 28.838 11.0721 28.8319 11.145 28.8107C11.2179 28.7896 11.2857 28.7539 11.3444 28.7059C11.4031 28.6579 11.4515 28.5985 11.4867 28.5312C13.2876 25.4197 16.4695 23.5625 20.0001 23.5625C23.5308 23.5625 26.7126 25.4197 28.5136 28.5312C28.5487 28.5985 28.5971 28.6579 28.6559 28.7059C28.7146 28.7539 28.7824 28.7896 28.8553 28.8107C28.9281 28.8319 29.0045 28.838 29.0798 28.8289C29.1551 28.8197 29.2278 28.7955 29.2935 28.7575C29.3592 28.7195 29.4165 28.6687 29.462 28.608C29.5075 28.5473 29.5403 28.478 29.5584 28.4043C29.5764 28.3306 29.5794 28.2541 29.567 28.1792C29.5547 28.1043 29.5274 28.0328 29.4867 27.9687ZM14.5626 17C14.5626 15.9245 14.8815 14.8733 15.479 13.9791C16.0765 13.0849 16.9257 12.3879 17.9193 11.9764C18.9129 11.5648 20.0062 11.4572 21.0609 11.667C22.1157 11.8768 23.0846 12.3946 23.845 13.1551C24.6055 13.9155 25.1234 14.8844 25.3332 15.9392C25.543 16.994 25.4353 18.0873 25.0237 19.0808C24.6122 20.0744 23.9152 20.9236 23.0211 21.5211C22.1269 22.1186 21.0756 22.4375 20.0001 22.4375C18.5586 22.4357 17.1765 21.8623 16.1572 20.843C15.1378 19.8236 14.5644 18.4416 14.5626 17Z\" fill=\"white\"/></svg>"});
+/* AI asystent glyph — "sparks" from the GRIDDY AI icon set (GRIDDY - SVG/AI/
+   sparks.svg), fill hardcoded->currentColor to match the other icons'
+   convention (source file has a static fill="#202023"). */
+Object.assign(PH, {"sparks": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M10.69 1.98c0 4 3.25 7.25 7.25 7.25v1.5c-3.995 0-7.25 3.25-7.25 7.25h-1.5c0-4-3.25-7.25-7.25-7.25v-1.5c4 0 7.25-3.25 7.25-7.25h1.5Zm-5.22 8a8.78 8.78 0 0 1 4.47 4.47 8.78 8.78 0 0 1 4.47-4.47 8.78 8.78 0 0 1-4.47-4.47 8.78 8.78 0 0 1-4.47 4.47ZM17.25 14h1.5c0 1.79 1.46 3.25 3.25 3.25v1.5c-1.79 0-3.25 1.46-3.25 3.25h-1.5c0-1.79-1.46-3.25-3.25-3.25v-1.5c1.79 0 3.25-1.46 3.25-3.25Zm-.7 4c.585.375 1.08.87 1.45 1.45.375-.585.87-1.08 1.45-1.45A4.775 4.775 0 0 1 18 16.55 4.775 4.775 0 0 1 16.55 18Z\" fill=\"currentColor\"/></svg>"});
 /* v2 screen-header back arrow (Figma node 191:726 "ArrowLeft", exported
    asset — thin weight, 24px viewBox; fill hardcoded->currentColor so
    .v2-hdr-back CSS drives the color). */
@@ -8942,7 +8965,7 @@ function renderDashboard(){
   // Re-roll the fade-in stagger every time the dashboard is (re)entered —
   // a small base step per tile keeps the order top-to-bottom, and the
   // random jitter on top stops it from feeling like a fixed animation.
-  document.querySelectorAll('#view-dashboard .dash-hero, #view-dashboard .dash-plan-card, #view-dashboard .dash-mini-card, #view-dashboard .dash-week-card').forEach((el, i)=>{
+  document.querySelectorAll('#view-dashboard .dash-hero, #view-dashboard .dash-plan-card, #view-dashboard .dash-mini-card, #view-dashboard .dash-week-card, #view-dashboard .dash-ai-card').forEach((el, i)=>{
     const delayMs = Math.round(i * 80 + Math.random() * 100);
     el.style.animationDelay = delayMs + 'ms';
     if(el.classList.contains('dash-week-card')){
@@ -8952,6 +8975,67 @@ function renderDashboard(){
     }
   });
 
+  // AI asystent — Krok 1: reuse the sets/PRs already computed above for the
+  // rest of the dashboard, don't recompute. Fire-and-forget: the card
+  // appears/updates once the (cached or fresh) summary is ready.
+  const prsThisWeek = Object.values(prBest)
+    .filter(b => weekDates.includes(b.date))
+    .map(b => ({ exercise: b.name, weightKg: b.weight }));
+  const volByExercise = {};
+  weekSets.forEach(s=>{ volByExercise[s.name] = (volByExercise[s.name]||0) + s.weight*s.reps; });
+  const topExercises = Object.entries(volByExercise).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([name])=>name);
+  renderDashboardAiSummary({
+    workouts: sessionCount,
+    totalVolumeKg: Math.round(weekKg),
+    durationMinTotal: Math.round(weekMin),
+    prs: prsThisWeek,
+    topExercises,
+  }, sessionCount > 0, weekDates[0]);
+
+  fitDashboardToScreen();
+}
+
+/* AI asystent — Krok 1: narracyjne podsumowanie tygodnia (czarna karta pod
+   .dash-week-card). Guests and empty weeks never call the backend — no
+   session to auth with, and nothing worth summarising. Cached per-week in
+   localStorage (fingerprinted on the numbers that would change the text)
+   so re-entering the dashboard doesn't re-spend the daily AI quota. */
+const LS_AI_WEEKLY_SUMMARY = 'fitlog_ai_weekly_summary_v1';
+async function renderDashboardAiSummary(payload, hasData, weekStartIso){
+  const card = document.getElementById('dashAiCard');
+  const textEl = document.getElementById('dashAiText');
+  if(!cloudSession || !hasData){
+    card.hidden = true;
+    return;
+  }
+
+  const fingerprint = [weekStartIso, payload.workouts, payload.totalVolumeKg, payload.durationMinTotal].join('|');
+  let cached = null;
+  try { cached = JSON.parse(localStorage.getItem(LS_AI_WEEKLY_SUMMARY) || 'null'); } catch(e){}
+  if(cached && cached.userId === cloudSession.user.id && cached.fingerprint === fingerprint && cached.text){
+    textEl.textContent = cached.text;
+    if(card.hidden){ card.hidden = false; fitDashboardToScreen(); }
+    return;
+  }
+
+  // Fresh fetch needed — show the card with a quiet loading state rather
+  // than popping in fully-formed once the request resolves.
+  textEl.textContent = t('dashAiLoading', 'Analizuję Twój tydzień…');
+  const wasHidden = card.hidden;
+  card.hidden = false;
+  if(wasHidden) fitDashboardToScreen();
+
+  const res = await callAI('weekly_summary', payload);
+  if(res.error || !res.text){
+    console.error('weekly_summary AI call failed', res.error);
+    card.hidden = true;
+    fitDashboardToScreen();
+    return;
+  }
+  textEl.textContent = res.text;
+  try {
+    localStorage.setItem(LS_AI_WEEKLY_SUMMARY, JSON.stringify({ userId: cloudSession.user.id, fingerprint, text: res.text }));
+  } catch(e){}
   fitDashboardToScreen();
 }
 
@@ -8975,6 +9059,7 @@ function fitDashboardToScreen(){
     const hero = dashRoot.querySelector('.dash-hero');
     const grid = dashRoot.querySelector('.dash-grid2');
     const week = dashRoot.querySelector('.dash-week-card');
+    const ai = dashRoot.querySelector('.dash-ai-card'); // 0 while [hidden] — no card, no height
     // NATURAL content height: tile offsetHeights (transform-immune during the
     // entrance animation) + fixed margins + the root's padding. .dash-hero's
     // margin-top is `auto` — the flexible slack that anchors the last tile
@@ -8982,7 +9067,7 @@ function fitDashboardToScreen(){
     const measure = () => {
       const rs = getComputedStyle(dashRoot);
       return parseFloat(rs.paddingTop) + parseFloat(rs.paddingBottom)
-        + h(hdr) + mb(hdr) + h(hero) + mb(hero) + h(grid) + mb(grid) + h(week);
+        + h(hdr) + mb(hdr) + h(hero) + mb(hero) + h(grid) + mb(grid) + h(week) + mb(week) + h(ai);
     };
     // 6px tolerance for sub-pixel rounding / web-font swap. Two stages:
     // compact the flexible spacing first, only unlock scroll if it still
