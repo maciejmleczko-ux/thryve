@@ -824,6 +824,17 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .wnv2-card-list li{margin-bottom:4px;}
 .wnv2-card-list li:last-child{margin-bottom:0;}
 .wnv2-card-text + .wnv2-card-list{margin-top:8px;}
+/* One-off: the "Trener AI" changelog card gets the same black/gradient/glow
+   treatment as the box itself (Maciej, 2026-09-16: "w stylu boxa AI tylko
+   ten jeden raz") — scoped to this exact version so it never recurs for a
+   future "hero" (newest) entry. Text stays white via the existing .hero
+   rules above (same specificity, this block just needs to sit after them
+   so its background/border/glow wins the background tie). */
+.wnv2-card[data-version="4.37.0"]{
+  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
+  border:2px solid transparent;
+  box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,1);
+}
 .backup-hint{padding:0 20px;margin-top:10px;font-size:var(--m-fs-2xs);line-height:1.5;color:rgba(255,255,255,.5);}
 
 /* ---------- "Historia zmian" sheet — full numbered CHANGELOG, reached
@@ -5449,7 +5460,7 @@ function renderWhatsNewCard(v, isFirst){
   const title = featured ? featured.title : t('whatsnewVersion','Wersja ' + v, v);
   const bodyHtml = featured ? `<p class="wnv2-card-text">${featured.text}</p>${listHtml}` : listHtml;
   return `
-    <div class="wnv2-card${isFirst?' hero':''}">
+    <div class="wnv2-card${isFirst?' hero':''}" data-version="${v}">
       <p class="wnv2-card-version">v.${v}</p>
       <p class="wnv2-card-title">${title}</p>
       ${bodyHtml}
