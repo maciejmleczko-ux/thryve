@@ -44,6 +44,8 @@ const FEATURES: Record<string, (payload: unknown) => { system: string; user: str
       'był — NIE wyliczaj każdego rekordu z osobna, to nie ma być lista). Pozostałe 2-3 ' +
       'zdania — konkretna, praktyczna sugestia na NASTĘPNY trening: które ćwiczenie warto ' +
       'pociągnąć dalej (dodać ciężar/powtórzenie), na którym się skupić, czego spróbować. ' +
+      'Rozdziel te dwie części jedną pustą linią (dwa znaki nowej linii, "\\n\\n") — bez ' +
+      'nagłówków, bez wypunktowań, tylko zwykły tekst w dwóch akapitach. ' +
       'Sugestia musi wynikać wyłącznie z podanych danych (topExercises, prs) — nie zgaduj i ' +
       'nie wymyślaj wartości, których nie dostałeś. Ton: rzeczowy, konkretny, jak trener, ' +
       'bez sztucznego entuzjazmu i wykrzykników. ' + PL_LANGUAGE_RULES,
