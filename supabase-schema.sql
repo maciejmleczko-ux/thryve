@@ -14,6 +14,7 @@ create table if not exists public.profiles (
 );
 alter table public.profiles add column if not exists weight_log jsonb not null default '[]'::jsonb;
 alter table public.profiles add column if not exists body_data jsonb not null default '{}'::jsonb;
+alter table public.profiles add column if not exists ai_preferences jsonb not null default '{}'::jsonb; -- {goal, avoid}, Trener AI
 
 alter table public.profiles enable row level security;
 

@@ -1533,6 +1533,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .fbv2-title-row h1{margin:0;font-size:var(--m-fs-lg);font-weight:400;color:#2c2727;letter-spacing:.04em;text-transform:uppercase;}
 .fbv2-subtitle{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:#2c2727;}
 .fbv2-textarea{display:block;width:100%;box-sizing:border-box;background:var(--m-card);border:1px solid #c7c6cb;border-radius:var(--m-r-sm);padding:12px 20px;font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);font-family:inherit;height:201px;resize:vertical;}
+.fbv2-textarea--sm{height:90px;}
 .fbv2-textarea::placeholder{color:var(--m-muted);opacity:1;}
 
 /* ===================== PLAN EDITOR v2 (Figma node 155:1086,
@@ -2678,6 +2679,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button type="button" class="acct-row" onclick="openBodyDataSheet()"><span>Płeć</span><span class="acct-v" id="acctSexV">—</span></button>
     </div>
     <p class="acct-hint" id="acctWeightUpd" hidden></p>
+    <p class="acct-sec">Trener AI</p>
+    <div class="acct-rows">
+      <button type="button" class="acct-row" onclick="openAiPrefsSheet()"><span>Cel treningowy</span><span class="acct-v" id="acctAiGoalV">Uzupełnij</span></button>
+      <button type="button" class="acct-row" onclick="openAiPrefsSheet()"><span>Czego unikać</span><span class="acct-v" id="acctAiAvoidV">Uzupełnij</span></button>
+    </div>
     <p class="acct-sec">Kopia zapasowa</p>
     <div class="acct-rows">
       <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="upload-simple"></span>Twórz kopię zapasową</span><span class="acct-v">Plik .json</span></button>
@@ -2799,6 +2805,38 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="plansv2-customize-actions">
         <button type="button" class="plansv2-customize-cancel" onclick="closeBodyDataSheet()">ANULUJ</button>
         <button type="button" class="plansv2-customize-apply" onclick="saveBodyDataSheet()">ZAPISZ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="aiPrefsSheet" onclick="if(event.target===this) closeAiPrefsSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-header">
+        <div class="fbv2-title-row">
+          <h1>PREFERENCJE TRENERA AI</h1>
+          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeAiPrefsSheet()"></span>
+        </div>
+        <p class="fbv2-subtitle">Wykorzystamy to w podsumowaniach i sugestiach po treningu — im więcej wiemy, tym trafniejsze porady.</p>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Cel treningowy</p>
+        <div class="plansv2-choice-row" id="aiGoalSeg">
+          <button type="button" class="plansv2-choice-chip" data-goal="masa" onclick="pickAiGoal('masa')">Masa</button>
+          <button type="button" class="plansv2-choice-chip" data-goal="sila" onclick="pickAiGoal('sila')">Siła</button>
+          <button type="button" class="plansv2-choice-chip" data-goal="wytrzymalosc" onclick="pickAiGoal('wytrzymalosc')">Wytrzymałość</button>
+          <button type="button" class="plansv2-choice-chip" data-goal="ogolna" onclick="pickAiGoal('ogolna')">Ogólna sprawność</button>
+        </div>
+      </div>
+      <div class="plansv2-customize-section">
+        <p class="plansv2-customize-label">Czego unikać</p>
+        <textarea class="fbv2-textarea fbv2-textarea--sm" id="aiAvoidInput" maxlength="300" placeholder="np. unikaj obciążania kolana, mam kontuzję barku"></textarea>
+      </div>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-cancel" onclick="closeAiPrefsSheet()">ANULUJ</button>
+        <button type="button" class="plansv2-customize-apply" onclick="saveAiPrefsSheet()">ZAPISZ</button>
       </div>
     </div>
   </div>
@@ -4166,6 +4204,11 @@ function loadBodyData(){ try{ return JSON.parse(localStorage.getItem(LS_BODY_DAT
 function saveBodyDataLS(o){ localStorage.setItem(LS_BODY_DATA, JSON.stringify(o)); }
 let weightLog = loadWeightLog();
 let bodyData = loadBodyData();
+// AI asystent preferences ({goal, avoid}) — cloud-only, unlike weightLog/
+// bodyData above. The AI popup already requires cloudSession to exist at
+// all, so there's no guest scenario to support here; pulled fresh from
+// profiles.ai_preferences on every session restore/sign-in (syncCloudData()).
+let aiPrefs = {};
 function currentWeightKg(){ return weightLog.length ? weightLog[weightLog.length-1].kg : null; }
 function lastWeightDate(){ return weightLog.length ? weightLog[weightLog.length-1].date : null; }
 function weightAtDate(d){
@@ -4273,7 +4316,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','editKcalSheet','changelogHistorySheet','authSheet'];
+const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -4329,6 +4372,9 @@ function renderAccountPanel(){
   set('acctHeightV', bodyData.heightCm ? bodyData.heightCm + ' cm' : 'Uzupełnij');
   set('acctAgeV', bodyData.age ? bodyData.age + ' lat' : '—');
   set('acctSexV', bodyData.sex === 'f' ? 'Kobieta' : bodyData.sex === 'm' ? 'Mężczyzna' : '—');
+  const AI_GOAL_LABELS = {masa:'Masa', sila:'Siła', wytrzymalosc:'Wytrzymałość', ogolna:'Ogólna sprawność'};
+  set('acctAiGoalV', AI_GOAL_LABELS[aiPrefs.goal] || 'Uzupełnij');
+  set('acctAiAvoidV', aiPrefs.avoid ? (aiPrefs.avoid.length > 24 ? aiPrefs.avoid.slice(0,24)+'…' : aiPrefs.avoid) : 'Uzupełnij');
   const upd = document.getElementById('acctWeightUpd');
   if(upd){ const d = lastWeightDate(); upd.textContent = d ? 'Ostatnia aktualizacja wagi: ' + fmtDate(d) : ''; upd.hidden = !d; }
   renderAcctCloudCard();
@@ -4477,6 +4523,28 @@ function saveBodyDataSheet(){
   saveBodyDataLS(bodyData);
   renderAccountPanel();
   closeBodyDataSheet();
+}
+
+/* ---------- AI asystent preferences sheet ---------- */
+let _pickAiGoal = null;
+function pickAiGoal(g){
+  _pickAiGoal = g;
+  document.querySelectorAll('#aiGoalSeg .plansv2-choice-chip').forEach(b=> b.classList.toggle('active', b.dataset.goal === g));
+}
+function openAiPrefsSheet(){
+  pickAiGoal(aiPrefs.goal || null);
+  document.getElementById('aiAvoidInput').value = aiPrefs.avoid || '';
+  acctSheetOpen('aiPrefsSheet');
+}
+function closeAiPrefsSheet(viaDrag){ acctSheetClose('aiPrefsSheet', viaDrag); }
+function saveAiPrefsSheet(){
+  if(!cloudSession || !cloudSession.user){ toast('Zaloguj się, żeby zapisać preferencje'); return; }
+  const avoid = document.getElementById('aiAvoidInput').value.trim();
+  aiPrefs = { goal: _pickAiGoal || undefined, avoid: avoid || undefined };
+  supabaseClient.from('profiles').update({ ai_preferences: aiPrefs }).eq('id', cloudSession.user.id)
+    .then(({error})=>{ if(error) console.error('saveAiPrefsSheet: push', error); });
+  renderAccountPanel();
+  closeAiPrefsSheet();
 }
 
 /* ---------- cloud account (Supabase Auth) — Faza 2 / E0 ----------
@@ -4649,6 +4717,10 @@ async function syncCloudData(){
       }
       if(profileRow.weight_log && profileRow.weight_log.length){ weightLog = profileRow.weight_log; saveWeightLog(weightLog); }
       if(profileRow.body_data && Object.keys(profileRow.body_data).length){ bodyData = profileRow.body_data; saveBodyDataLS(bodyData); }
+      // ai_preferences: pull-only, no "push if cloud empty" patch above —
+      // saveAiPrefsSheet() pushes straight to Supabase on every save instead,
+      // so edits after the first one aren't silently dropped by that pattern.
+      if(profileRow.ai_preferences && Object.keys(profileRow.ai_preferences).length){ aiPrefs = profileRow.ai_preferences; }
       if(profileRow.display_name && profileRow.display_name !== profileName){
         profileName = profileRow.display_name;
         localStorage.setItem(LS_PROFILE_NAME, profileName);
@@ -6436,7 +6508,7 @@ mSheetDrag('exercisePopupOverlayV2', closeExercisePopupV2);
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightSheet','bodyDataSheet','editKcalSheet','changelogHistorySheet','authSheet']
+['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 
 /* ---- "Zamień ćwiczenie" sheet (stage 3, idea #5) — rides .m-sheet ---- */
@@ -9084,6 +9156,24 @@ function renderDashboard(){
         if(!b || s.weight > b.weight || (s.weight===b.weight && s.reps>b.reps)) priorBest[ex.name] = {weight:s.weight||0, reps:s.reps};
       }));
     });
+    // Trend: best set (by weight, then reps) from up to the last 3 PRIOR
+    // sessions of this same exercise, oldest first — lets the model tell
+    // genuine multi-session progress from "just one good day" (isNewRecord
+    // alone can't do that, it only knows the single all-time best).
+    const exerciseTrend = {};
+    workouts.forEach(w=>{
+      if(w === lastWorkout) return;
+      w.exercises.forEach(ex=>{
+        const best = ex.sets.reduce((b,s)=> (s.reps>0 && (!b || s.weight>b.weight || (s.weight===b.weight && s.reps>b.reps))) ? s : b, null);
+        if(!best) return;
+        (exerciseTrend[ex.name] = exerciseTrend[ex.name] || []).push({date: w.date, weightKg: best.weight||0, reps: best.reps});
+      });
+    });
+    Object.keys(exerciseTrend).forEach(name=>{
+      exerciseTrend[name].sort((a,b)=> a.date < b.date ? -1 : 1);
+      exerciseTrend[name] = exerciseTrend[name].slice(-3);
+    });
+
     const exercisesPayload = lastWorkout.exercises.map(ex=>{
       const sets = ex.sets.filter(s=>s.reps>0).map(s=>({weightKg: s.weight||0, reps: s.reps}));
       const prior = priorBest[ex.name];
@@ -9094,7 +9184,7 @@ function renderDashboard(){
       if(sets.length >= 2 && sets[0].reps > 0){
         repFadePercent = Math.round((1 - sets[sets.length-1].reps / sets[0].reps) * 100);
       }
-      return { name: ex.name, group: muscleGroupBucket(ex.group).key, sets, rpe: ex.rpe || null, isNewRecord, repFadePercent };
+      return { name: ex.name, group: muscleGroupBucket(ex.group).key, sets, rpe: ex.rpe || null, isNewRecord, repFadePercent, trend: exerciseTrend[ex.name] || [] };
     });
     const totalVolumeKg = exercisesPayload.reduce((sum,ex)=> sum + ex.sets.reduce((s2,s)=> s2 + s.weightKg*s.reps, 0), 0);
 
@@ -9145,6 +9235,7 @@ function renderDashboard(){
       muscleGroupsThisWorkout,
       neglectedGroups,
       pushPullBalance,
+      userPreferences: (aiPrefs.goal || aiPrefs.avoid) ? { goal: aiPrefs.goal || null, avoid: aiPrefs.avoid || null } : null,
     };
   }
   lastAiWorkoutPayload = lastWorkoutPayload; // read by the popup's stat tiles when opened
@@ -9164,7 +9255,7 @@ function renderDashboard(){
    fingerprint so a prompt change (see ai-proxy's FEATURES.last_workout_summary)
    invalidates old cached text instead of showing stale wording forever. */
 const LS_AI_LAST_WORKOUT_SUMMARY = 'fitlog_ai_last_workout_summary_v1';
-const AI_SUMMARY_PROMPT_VERSION = 'v8';
+const AI_SUMMARY_PROMPT_VERSION = 'v9';
 let lastAiWorkoutPayload = null; // set in renderDashboard(), read by the popup's stat tiles
 // Reveal the (always-collapsed) teaser card. Only called the first time it
 // appears in a page load — see the `if(card.hidden)` call sites below —
@@ -9196,7 +9287,10 @@ async function renderDashboardAiSummary(payload, workoutId){
     return;
   }
 
-  const fingerprint = [AI_SUMMARY_PROMPT_VERSION, workoutId].join('|');
+  // userPreferences rides in the fingerprint too — editing your goal/avoid
+  // note should regenerate the take on the SAME workout, not wait for the
+  // next one.
+  const fingerprint = [AI_SUMMARY_PROMPT_VERSION, workoutId, JSON.stringify(payload.userPreferences)].join('|');
   let cached = null;
   try { cached = JSON.parse(localStorage.getItem(LS_AI_LAST_WORKOUT_SUMMARY) || 'null'); } catch(e){}
   if(cached && cached.userId === cloudSession.user.id && cached.fingerprint === fingerprint && cached.text){
