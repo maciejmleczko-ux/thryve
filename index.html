@@ -1752,6 +1752,11 @@ body.pev2-bg{background:var(--m-panel);}
 .exv2-tip{background:#000;border-radius:var(--m-r-sm);padding:9px 17px;text-align:left;}
 .exv2-tip .lbl{display:block;font-size:var(--m-fs-xs);font-weight:700;letter-spacing:.24px;color:var(--m-orange);margin-bottom:9px;}
 .exv2-tip .txt{font-size:var(--m-fs-xs);color:var(--m-card);line-height:1.4;}
+/* Trener AI variant (Maciej, 2026-09-16/17) — same black box, just the
+   sparkle glyph + a purple label tying it to the AI card/popup identity,
+   for the entries where getAiActionFor() found a real recommendation. */
+.exv2-tip .lbl .ph{width:11px;height:11px;display:inline-block;vertical-align:-1px;margin-right:5px;}
+.exv2-tip--ai .lbl{color:#DE74FF;}
 
 /* #6 — sticky per-exercise note */
 .exv2-note{background:#e7ecff;border-radius:var(--m-r-sm);padding:10px 14px;display:flex;align-items:flex-start;gap:11px;text-align:left;}
@@ -3456,6 +3461,7 @@ const T_EN = {
   exMeta: (group, sets, rl, rh, rest) => `${group} · ${sets} sets x ${rl}-${rh} reps · rest ${rest}`,
   statSetsCount: (n) => `${n} sets`,
   trainingTip: 'TRAINING TIP',
+  trainingTipAi: 'AI TRAINER TIP',
   seriesLabel: (n) => `Set ${n}`,
   weightLabel: 'Weight',
   repsLabel: 'Reps',
@@ -6318,6 +6324,23 @@ function lastSessionsFor(exerciseName){
     .map(w => w.exercises.find(e => e.name === exerciseName));
 }
 
+// Trener AI, surfaced for free in the exercise-logging tip box (Maciej,
+// 2026-09-16/17): reuses the action already generated for this exact
+// exercise by the LAST workout's "Trener AI" analysis (cached in
+// localStorage under LS_AI_LAST_WORKOUT_SUMMARY), instead of calling AI
+// live here — this popup opens many times per session, a live call per
+// open would be slow (network mid-set-logging) and burn the daily quota
+// in one session. null for most exercises: the model only names 1-3 per
+// workout, and this popup falls back to buildSuggestion() otherwise.
+function getAiActionFor(exerciseName){
+  if(!cloudSession || !cloudSession.user) return null;
+  let cached = null;
+  try { cached = JSON.parse(localStorage.getItem(LS_AI_LAST_WORKOUT_SUMMARY) || 'null'); } catch(e){ return null; }
+  if(!cached || cached.userId !== cloudSession.user.id || !cached.data || !Array.isArray(cached.data.actions)) return null;
+  const hit = cached.data.actions.find(a => a.exercise === exerciseName);
+  return hit ? hit.action : null;
+}
+
 function buildSuggestion(exMeta, history){
   const isBodyweightEx = exMeta.equipment === 'masa ciała';
   if(!history.length){
@@ -6846,6 +6869,7 @@ function renderExercisePopupV2(animate){
   const ex = popupExercise;
   const history = lastSessionsFor(ex.name);
   const sugg = buildSuggestion(ex, history);
+  const aiAction = getAiActionFor(ex.name);
   const lastSets = history[0] ? history[0].sets : [];
   const animCls = animate ? ' exv2-anim-in' : '';
   // Reveal timing: series cards cascade in one after another, starting
@@ -6927,7 +6951,7 @@ function renderExercisePopupV2(animate){
         </div>
       </div>
       ${noteHtml}
-      <div class="exv2-tip${animCls}"><span class="lbl">${t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><span class="txt">${sugg.text}</span></div>
+      <div class="exv2-tip${animCls}${aiAction?' exv2-tip--ai':''}"><span class="lbl">${aiAction ? ph('sparks','exv2-tip-ic') + t('trainingTipAi','SUGESTIA TRENERA AI') : t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><span class="txt">${escHtml(aiAction || sugg.text)}</span></div>
       <div class="exv2-series-section">
         <div class="exv2-series-list">${seriesHtml}</div>
         <div class="exv2-series-controls${animCls}" style="animation-delay:${controlsDelay}ms">
