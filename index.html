@@ -663,13 +663,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .ai-popup-head .ph{width:20px;height:20px;flex-shrink:0;color:#fff;}
 .ai-popup-head .dash-eyebrow{margin:0;font-size:var(--m-fs-base);}
 .ai-popup-date{margin:0 0 16px;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.55);}
-.ai-popup-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
-.ai-popup-stat{background:rgba(255,255,255,.08);border-radius:var(--m-r-sm);padding:10px 12px;}
-.ai-popup-stat-k{margin:0 0 4px;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.6);}
-.ai-popup-stat-v{margin:0;font-size:var(--m-fs-lg);font-weight:400;color:#fff;}
-.ai-popup-stat.ai-popup-stat--record{grid-column:1 / -1;display:flex;align-items:center;gap:10px;background:rgba(255,51,0,.16);}
-.ai-popup-stat--record .ph{width:22px;height:22px;color:var(--m-orange);flex-shrink:0;}
-.ai-popup-text{margin:0;font-size:var(--m-fs-xs);font-weight:300;line-height:1.55;color:rgba(255,255,255,.92);white-space:pre-line;}
+.ai-popup-text{margin:0;font-size:var(--m-fs-sm);font-weight:300;line-height:1.55;color:rgba(255,255,255,.92);white-space:pre-line;}
 .feedback-type-row{display:flex;gap:8px;margin-bottom:14px;}
 .feedback-type{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:9px 4px;font-size:var(--m-fs-xs);font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
 .feedback-type.active{background:var(--orange);border-color:var(--orange);color:#fff;}
@@ -2933,7 +2927,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <p class="dash-eyebrow">Trener AI</p>
     </div>
     <p class="ai-popup-date" id="aiPopupDate"></p>
-    <div class="ai-popup-stats" id="aiPopupStats"></div>
     <p class="ai-popup-text" id="aiPopupText"></p>
   </div>
 </div>
@@ -9171,7 +9164,7 @@ function renderDashboard(){
    fingerprint so a prompt change (see ai-proxy's FEATURES.last_workout_summary)
    invalidates old cached text instead of showing stale wording forever. */
 const LS_AI_LAST_WORKOUT_SUMMARY = 'fitlog_ai_last_workout_summary_v1';
-const AI_SUMMARY_PROMPT_VERSION = 'v6';
+const AI_SUMMARY_PROMPT_VERSION = 'v7';
 let lastAiWorkoutPayload = null; // set in renderDashboard(), read by the popup's stat tiles
 // Reveal the (always-collapsed) teaser card. Only called the first time it
 // appears in a page load — see the `if(card.hidden)` call sites below —
@@ -9183,17 +9176,10 @@ function showDashAiCard(card){
 function openAiPopup(){
   if(!lastAiWorkoutPayload) return;
   const p = lastAiWorkoutPayload;
-  const setCount = p.exercises.reduce((sum,ex)=> sum + ex.sets.length, 0);
-  const recordEx = p.exercises.find(ex=>ex.isNewRecord);
+  // No stat tiles/record bar here on purpose (Maciej, 2026-09-16) — that's
+  // exactly what History already shows for this same workout; the popup's
+  // whole reason to exist is the AI text, not a second copy of the numbers.
   document.getElementById('aiPopupDate').textContent = fmtDateHuman(p.date);
-  document.getElementById('aiPopupStats').innerHTML = `
-    <div class="ai-popup-stat"><p class="ai-popup-stat-k">Objętość</p><p class="ai-popup-stat-v">${p.totalVolumeKg} kg</p></div>
-    <div class="ai-popup-stat"><p class="ai-popup-stat-k">Ćwiczenia</p><p class="ai-popup-stat-v">${p.exercises.length}</p></div>
-    <div class="ai-popup-stat"><p class="ai-popup-stat-k">Serie</p><p class="ai-popup-stat-v">${setCount}</p></div>
-    <div class="ai-popup-stat"><p class="ai-popup-stat-k">Czas</p><p class="ai-popup-stat-v">${p.durationMin ? p.durationMin+' min' : '—'}</p></div>
-    ${recordEx ? `<div class="ai-popup-stat ai-popup-stat--record"><span class="ph" data-ph="trophy"></span><div><p class="ai-popup-stat-k">Nowy rekord</p><p class="ai-popup-stat-v">${recordEx.name}</p></div></div>` : ''}
-  `;
-  hydratePhIcons();
   document.getElementById('aiPopupText').textContent = document.getElementById('dashAiText').textContent;
   document.getElementById('aiPopupOverlay').classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');

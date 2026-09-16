@@ -69,8 +69,16 @@ const FEATURES: Record<string, (payload: unknown) => { system: string; user: str
       'zwracający uwagę na coś realnie ważnego. Jeśli żaden sygnał nie jest istotny — ' +
       'pomiń ten wątek całkowicie, nie zmyślaj problemu, którego nie ma. Wszystko musi ' +
       'wynikać wyłącznie z podanych danych — nie zgaduj i nie wymyślaj wartości, których ' +
-      'nie dostałeś. Ton: rzeczowy, konkretny, jak trener, bez sztucznego entuzjazmu i ' +
-      'wykrzykników. ' + PL_LANGUAGE_RULES,
+      'nie dostałeś. WAŻNE — piszesz dla przeciętnego użytkownika siłowni, nie dla ' +
+      'trenera ani studenta AWF: nazwy pól z JSON-a (RPE, push/pull, fade, isNewRecord, ' +
+      'highVolume) to etykiety danych dla Ciebie, nie słowa do użycia w odpowiedzi. Zamiast ' +
+      'żargonu opisz to zwykłymi słowami — np. zamiast "balans push/pull jest skewed" ' +
+      'napisz "częściej trenujesz mięśnie, które pchają (klatka, barki, triceps), niż te, ' +
+      'które ciągną (plecy, biceps)"; zamiast "wysokie RPE" napisz "seria była bliska ' +
+      'granicy wysiłku"; zamiast "duży fade" napisz coś jak "pod koniec zabrakło Ci sił na ' +
+      'te same powtórzenia". Krótkie, konkretne zdania, zero specjalistycznych skrótów. ' +
+      'Ton: rzeczowy, konkretny, jak trener, bez sztucznego entuzjazmu i wykrzykników. ' +
+      PL_LANGUAGE_RULES,
     user: JSON.stringify(payload),
     maxTokens: 350,
   }),
