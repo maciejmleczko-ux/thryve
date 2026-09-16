@@ -129,18 +129,22 @@ html.gymv2-bg,html.gymv2-bg body{overscroll-behavior-y:none;}
    scroll capability, zero touch give, when content fits (the common
    case). renderDashboard() measures the real content height after
    rendering and adds .dashboard-scrollable only when it actually
-   overflows the viewport (e.g. a long plan name); that variant switches
-   to overflow-y:auto + touch-action:pan-y + default overscroll-behavior,
-   which is what a genuine drag needs to (a) reach the rest of the
-   content and (b) get the native iOS rubber-band bounce/settle at the
-   edges rather than a hard stop. So: no scroll at all when nothing needs
-   it, real (bounce-y) scroll only when something does.
+   overflows the viewport (e.g. the "Trener AI" box expanded) — that
+   variant switches to overflow-y:auto + touch-action:pan-y so a genuine
+   drag can reach the rest of the content. overscroll-behavior-y:none
+   (Maciej, 2026-09-16) hard-stops it at both ends instead of the default
+   iOS rubber-band bounce — .dash-root's own padding-bottom (126px) is
+   already tuned so the last real tile's bottom edge rests ~20px above
+   the floating nav at max scroll; the old bounce let a drag travel past
+   that and briefly show empty space before springing back. So: no
+   scroll at all when nothing needs it, hard-bounded scroll only when
+   something does.
    body.dashboard-bg is the other half of this — the light background
    needs to extend under any bounce/overscroll, or that gap shows the
    app's normal dark body color instead of feeling like a continuation
    of the screen (same technique as .gymv2-bg above). */
 html.dashboard-lock, html.dashboard-lock body{overflow:hidden;height:100dvh;touch-action:none;}
-html.dashboard-lock.dashboard-scrollable, html.dashboard-lock.dashboard-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}
+html.dashboard-lock.dashboard-scrollable, html.dashboard-lock.dashboard-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;overscroll-behavior-y:none;}
 body.dashboard-bg{background:var(--m-bg);}
 /* PLANS v2 — same "fixed screen, real scroll only when actually needed"
    recipe as Dashboard above. STANDING RULE: every new v3 screen gets
@@ -907,6 +911,18 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    card's bottom line sits 24px above the menu. renderDashboard() sizes its
    scroll check off the natural content height, not this padded box. */
 .dash-root{position:relative;display:flex;flex-direction:column;min-height:100dvh;box-sizing:border-box;padding:calc(16px + env(safe-area-inset-top,0px)) 10px 126px;}
+/* Scrollable state only (content genuinely overflows, e.g. "Trener AI"
+   expanded on a short phone): .dash-root's own 126px was tuned for the
+   PINNED case above (margin-top:auto collapses the slack, last tile
+   settles against this padding). Once real scrolling is in play, .app's
+   own shared padding-bottom (110px, every scrolling route relies on it
+   for nav clearance — see the .app padding-bottom comment near
+   #bottomNav) is what actually determines the resting gap at max scroll,
+   and the two stack, so 126px here would double up and leave a much
+   bigger gap than intended. 12px is the measured amount that lands the
+   last tile's bottom exactly 20px above the nav on top of .app's 110px
+   (Maciej, 2026-09-16: wanted a hard 20px stop, not the original ~8px). */
+html.dashboard-scrollable .dash-root{padding-bottom:12px;}
 /* Safari/WebKit can size an inline <svg> with no explicit width/height
    to 0 inside a flex container (spec's "defaults to 100%" isn't applied
    reliably) — force it everywhere in this screen as a CSS-layer backstop,
