@@ -653,9 +653,9 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    .onboard-overlay backdrop/centering. */
 .ai-popup-box{position:relative;width:100%;max-width:360px;box-sizing:border-box;max-height:calc(100dvh - 84px);overflow-y:auto;
   border-radius:var(--m-r-md);padding:20px;color:#fff;
-  border:2px solid transparent;
+  border:1px solid transparent;
   background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
-  box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,1), 0 20px 50px rgba(0,0,0,.5);
+  box-shadow:inset 0 0 33px rgba(161,0,255,.66),inset 0 0 11.4px rgba(222,116,255,.7), 0 20px 50px rgba(0,0,0,.5);
 }
 .ai-popup-close{position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.12);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
 .ai-popup-close .ph{width:14px;height:14px;color:#fff;}
@@ -721,6 +721,16 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-row .acct-v{color:var(--m-muted);font-size:var(--m-fs-xs);flex-shrink:0;}
 .acct-row .acct-lead{display:flex;align-items:center;gap:11px;}
 .acct-row .acct-lead .ph{width:17px;height:17px;color:var(--m-ink);}
+/* Trener AI section in the account panel — same black/gradient-border
+   identity as .dash-ai-card / .ai-popup-box (Maciej, 2026-09-16). */
+.acct-rows--ai{
+  border:1px solid transparent;
+  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
+  box-shadow:inset 0 0 33px rgba(161,0,255,.66),inset 0 0 11.4px rgba(222,116,255,.7);
+}
+.acct-rows--ai .acct-row{color:#fff;border-top-color:rgba(255,255,255,.15);}
+.acct-rows--ai .acct-row .acct-v{color:rgba(255,255,255,.6);}
+.acct-rows--ai .acct-row:active{background:rgba(255,255,255,.08);}
 .acct-hint{margin:7px 3px 0;font-size:var(--m-fs-2xs);color:var(--m-muted);}
 .acct-foot{margin:auto 0 0;padding-top:18px;font-size:var(--m-fs-2xs);color:var(--m-muted);text-align:center;line-height:1.5;}
 /* above the account panel (95) AND the GYM finish screen (9500) — weight /
@@ -1063,9 +1073,9 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
    put a gradient directly on border-color, plus the design's inset purple
    glow — same treatment reused on .ai-popup-box for a consistent identity. */
 .dash-ai-card{border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:8px;
-  border:2px solid transparent;
+  border:1px solid transparent;
   background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
-  box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,1);
+  box-shadow:inset 0 0 33px rgba(161,0,255,.66),inset 0 0 11.4px rgba(222,116,255,.7);
 }
 .dash-ai-head{display:flex;align-items:center;justify-content:space-between;width:100%;
   background:none;border:none;padding:0;margin:0;color:inherit;font:inherit;cursor:pointer;
@@ -2680,7 +2690,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
     <p class="acct-hint" id="acctWeightUpd" hidden></p>
     <p class="acct-sec">Trener AI</p>
-    <div class="acct-rows">
+    <div class="acct-rows acct-rows--ai">
       <button type="button" class="acct-row" onclick="openAiPrefsSheet()"><span>Cel treningowy</span><span class="acct-v" id="acctAiGoalV">Uzupełnij</span></button>
       <button type="button" class="acct-row" onclick="openAiPrefsSheet()"><span>Czego unikać</span><span class="acct-v" id="acctAiAvoidV">Uzupełnij</span></button>
     </div>
