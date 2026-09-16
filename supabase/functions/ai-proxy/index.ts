@@ -17,6 +17,20 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+// Wspólne zasady poprawnej polszczyzny (skrót normy Rady Języka Polskiego
+// 2024/skill poprawna-polszczyzna, zawężony do tego, co faktycznie dotyczy
+// krótkiego, liczbowego tekstu treningowego) — doklejane do KAŻDEJ funkcji
+// AI poniżej, żeby nie duplikować w każdym prompt-cie z osobna.
+const PL_LANGUAGE_RULES =
+  'Zasady języka: liczby dziesiętne zapisuj z przecinkiem, nie kropką (82,5 kg, nie ' +
+  '82.5 kg). Jednostkę oddziel spacją (70 kg, nie 70kg). Nigdy nie używaj myślnika em ' +
+  '(—) jako pauzy retorycznej — zamiast niego przecinek, dwukropek albo krótsze zdanie. ' +
+  'Przecinek zawsze przed "że", "który", "bo", "gdy", "jeśli" oraz przed całym ' +
+  'zestawieniem typu "mimo że", "podczas gdy"; nigdy przed pojedynczym "i"/"lub"/"albo", ' +
+  'jeśli spójnik nie jest powtórzony. Nie powtarzaj tego samego słowa w jednym zdaniu. ' +
+  'Nie pisz pustych zdań, które nic nie wnoszą (np. "to świetny wynik", "brawo"). ' +
+  'Odmieniaj nazwy ćwiczeń i liczebniki gramatycznie poprawnie w zdaniu.';
+
 // Każda funkcja AI ma tu swój prompt — klient wysyła tylko dane, nigdy
 // gotowy prompt, żeby nie dało się przez konsolę przeglądarki podmienić
 // systemowej instrukcji.
@@ -32,7 +46,7 @@ const FEATURES: Record<string, (payload: unknown) => { system: string; user: str
       'pociągnąć dalej (dodać ciężar/powtórzenie), na którym się skupić, czego spróbować. ' +
       'Sugestia musi wynikać wyłącznie z podanych danych (topExercises, prs) — nie zgaduj i ' +
       'nie wymyślaj wartości, których nie dostałeś. Ton: rzeczowy, konkretny, jak trener, ' +
-      'bez sztucznego entuzjazmu i wykrzykników.',
+      'bez sztucznego entuzjazmu i wykrzykników. ' + PL_LANGUAGE_RULES,
     user: JSON.stringify(payload),
     maxTokens: 300,
   }),
