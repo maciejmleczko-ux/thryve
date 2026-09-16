@@ -9102,7 +9102,18 @@ async function renderDashboardAiSummary(payload, hasData, weekStartIso){
    shrunken viewport height while its URL bar is up, so a media query fires
    the "small phone" styles on big phones too (17 Pro in a browser tab). */
 let _fitDashT = 0;
-function fitDashboardToScreen(){
+let _fitDashSettleT = 0;
+// isSettleCheck: internal — a single delayed re-verification, not a public
+// parameter. Maciej found a real bug (2026-09-16, short phone): a call that
+// landed while the "Trener AI" card's async content/height was still
+// settling (network response landing, web-font swap, etc.) could measure a
+// smaller in-between size, wrongly conclude everything fits, and leave the
+// dashboard non-scrollable even though "Postęp tygodniowy" was genuinely
+// cut off below the fold — and nothing re-checked afterward to catch it.
+// One extra pass ~500ms after the normal (debounced) one is cheap and
+// self-corrects that, without turning into a ResizeObserver-on-the-element-
+// it-itself-resizes loop (tried that, it oscillates forever — see git log).
+function fitDashboardToScreen(isSettleCheck){
   clearTimeout(_fitDashT);
   _fitDashT = setTimeout(()=>{
     const dashRoot = document.querySelector('.dash-root');
@@ -9140,6 +9151,10 @@ function fitDashboardToScreen(){
     root.classList.toggle('dash-compact', compact);
     root.classList.toggle('dashboard-scrollable', scrollable);
   }, 60);
+  if(!isSettleCheck){
+    clearTimeout(_fitDashSettleT);
+    _fitDashSettleT = setTimeout(()=> fitDashboardToScreen(true), 550);
+  }
 }
 window.addEventListener('resize', ()=>{ if(currentRoute==='dashboard') fitDashboardToScreen(); });
 
