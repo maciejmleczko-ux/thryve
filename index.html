@@ -663,7 +663,17 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .ai-popup-head .ph{width:20px;height:20px;flex-shrink:0;color:#fff;}
 .ai-popup-head .dash-eyebrow{margin:0;font-size:var(--m-fs-base);}
 .ai-popup-date{margin:0 0 16px;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.55);}
-.ai-popup-text{margin:0;font-size:var(--m-fs-sm);font-weight:300;line-height:1.55;color:rgba(255,255,255,.92);white-space:pre-line;}
+/* Three distinct blocks (Maciej, 2026-09-16): 1) quick recap, 2) prose on
+   what faded/progressed, 3) a scannable per-exercise action list — not one
+   wall of text. summary/analysis text still comes from the model as plain
+   sentences; only actions[] is structured JSON, rendered as real rows. */
+.ai-popup-summary{margin:0 0 14px;font-size:var(--m-fs-sm);font-weight:500;line-height:1.5;color:#fff;}
+.ai-popup-text{margin:0 0 16px;font-size:var(--m-fs-sm);font-weight:300;line-height:1.55;color:rgba(255,255,255,.92);white-space:pre-line;}
+.ai-popup-actions{display:flex;flex-direction:column;gap:8px;}
+.ai-popup-actions-label{margin:0 0 2px;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.55);}
+.ai-popup-action{display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(255,255,255,.08);border-radius:var(--m-r-sm);padding:10px 12px;}
+.ai-popup-action-ex{font-size:var(--m-fs-xs);font-weight:600;color:#fff;flex-shrink:0;}
+.ai-popup-action-do{font-size:var(--m-fs-xs);color:rgba(255,255,255,.75);text-align:right;}
 .feedback-type-row{display:flex;gap:8px;margin-bottom:14px;}
 .feedback-type{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:9px 4px;font-size:var(--m-fs-xs);font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
 .feedback-type.active{background:var(--orange);border-color:var(--orange);color:#fff;}
@@ -2306,8 +2316,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           </span>
           <span class="ph dash-ai-caret" data-ph="caret-down"></span>
         </button>
-        <!-- data holder for the fetched/cached text — the popup reads it, never shown inline -->
-        <p class="dash-ai-text" id="dashAiText" hidden></p>
       </div>
 
       <div class="dash-grid2">
@@ -2975,7 +2983,9 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <p class="dash-eyebrow">Trener AI</p>
     </div>
     <p class="ai-popup-date" id="aiPopupDate"></p>
-    <p class="ai-popup-text" id="aiPopupText"></p>
+    <p class="ai-popup-summary" id="aiPopupSummary"></p>
+    <p class="ai-popup-text" id="aiPopupAnalysis"></p>
+    <div class="ai-popup-actions" id="aiPopupActions" hidden></div>
   </div>
 </div>
 
@@ -4767,7 +4777,7 @@ async function callAI(feature, payload){
     });
     const data = await res.json();
     if(!res.ok) return { error: data.error || 'ai_call_failed' };
-    return { text: data.text };
+    return data; // shape varies per feature — callers know what they asked for
   } catch(e){
     console.error('callAI failed', feature, e);
     return { error: 'network_error' };
@@ -9265,8 +9275,9 @@ function renderDashboard(){
    fingerprint so a prompt change (see ai-proxy's FEATURES.last_workout_summary)
    invalidates old cached text instead of showing stale wording forever. */
 const LS_AI_LAST_WORKOUT_SUMMARY = 'fitlog_ai_last_workout_summary_v1';
-const AI_SUMMARY_PROMPT_VERSION = 'v9';
+const AI_SUMMARY_PROMPT_VERSION = 'v10';
 let lastAiWorkoutPayload = null; // set in renderDashboard(), read by the popup's stat tiles
+let lastAiSummaryData = null; // {summary, analysis, actions[]} once fetched/cached — null while loading
 // Reveal the (always-collapsed) teaser card. Only called the first time it
 // appears in a page load — see the `if(card.hidden)` call sites below —
 // harmless to call again since it's idempotent.
@@ -9281,7 +9292,21 @@ function openAiPopup(){
   // exactly what History already shows for this same workout; the popup's
   // whole reason to exist is the AI text, not a second copy of the numbers.
   document.getElementById('aiPopupDate').textContent = fmtDateHuman(p.date);
-  document.getElementById('aiPopupText').textContent = document.getElementById('dashAiText').textContent;
+  const data = lastAiSummaryData; // {summary, analysis, actions} — null while still loading
+  document.getElementById('aiPopupSummary').textContent = data ? data.summary : t('dashAiLoading', 'Analizuję Twój ostatni trening…');
+  const analysisEl = document.getElementById('aiPopupAnalysis');
+  analysisEl.textContent = data ? data.analysis : '';
+  analysisEl.hidden = !data || !data.analysis;
+  const actionsEl = document.getElementById('aiPopupActions');
+  if(data && data.actions && data.actions.length){
+    actionsEl.hidden = false;
+    actionsEl.innerHTML = '<p class="ai-popup-actions-label">Na następny trening</p>' + data.actions.map(a=>
+      `<div class="ai-popup-action"><span class="ai-popup-action-ex">${escHtml(a.exercise)}</span><span class="ai-popup-action-do">${escHtml(a.action)}</span></div>`
+    ).join('');
+  } else {
+    actionsEl.hidden = true;
+    actionsEl.innerHTML = '';
+  }
   document.getElementById('aiPopupOverlay').classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');
 }
@@ -9291,7 +9316,6 @@ function closeAiPopup(){
 }
 async function renderDashboardAiSummary(payload, workoutId){
   const card = document.getElementById('dashAiCard');
-  const textEl = document.getElementById('dashAiText');
   if(!cloudSession || !workoutId){
     card.hidden = true;
     return;
@@ -9303,29 +9327,29 @@ async function renderDashboardAiSummary(payload, workoutId){
   const fingerprint = [AI_SUMMARY_PROMPT_VERSION, workoutId, JSON.stringify(payload.userPreferences)].join('|');
   let cached = null;
   try { cached = JSON.parse(localStorage.getItem(LS_AI_LAST_WORKOUT_SUMMARY) || 'null'); } catch(e){}
-  if(cached && cached.userId === cloudSession.user.id && cached.fingerprint === fingerprint && cached.text){
-    textEl.textContent = cached.text;
+  if(cached && cached.userId === cloudSession.user.id && cached.fingerprint === fingerprint && cached.data){
+    lastAiSummaryData = cached.data;
     if(card.hidden) showDashAiCard(card);
     return;
   }
 
   // Fresh fetch needed. The card stays collapsed either way (it's a teaser
-  // that opens the popup, never shows text inline), so the loading
-  // placeholder is only ever seen if the user opens the popup before the
-  // request resolves.
-  textEl.textContent = t('dashAiLoading', 'Analizuję Twój ostatni trening…');
+  // that opens the popup, never shows anything inline) — null signals
+  // "still loading" to openAiPopup(), which only matters if the user opens
+  // the popup before the request resolves.
+  lastAiSummaryData = null;
   if(card.hidden) showDashAiCard(card);
 
   const res = await callAI('last_workout_summary', payload);
-  if(res.error || !res.text){
+  if(res.error || typeof res.summary !== 'string'){
     console.error('last_workout_summary AI call failed', res.error);
     card.hidden = true;
     fitDashboardToScreen();
     return;
   }
-  textEl.textContent = res.text;
+  lastAiSummaryData = { summary: res.summary, analysis: res.analysis || '', actions: Array.isArray(res.actions) ? res.actions : [] };
   try {
-    localStorage.setItem(LS_AI_LAST_WORKOUT_SUMMARY, JSON.stringify({ userId: cloudSession.user.id, fingerprint, text: res.text }));
+    localStorage.setItem(LS_AI_LAST_WORKOUT_SUMMARY, JSON.stringify({ userId: cloudSession.user.id, fingerprint, data: lastAiSummaryData }));
   } catch(e){}
   fitDashboardToScreen();
 }

@@ -33,12 +33,14 @@ const PL_LANGUAGE_RULES =
 
 // Każda funkcja AI ma tu swój prompt — klient wysyła tylko dane, nigdy
 // gotowy prompt, żeby nie dało się przez konsolę przeglądarki podmienić
-// systemowej instrukcji.
-const FEATURES: Record<string, (payload: unknown) => { system: string; user: string; maxTokens: number }> = {
-  // Krok 1, "szerzej i porządnie" (Maciej, 2026-09-16): analiza POJEDYNCZEGO,
-  // najnowszego treningu, ale z "pro tip"-owym kontekstem POLICZONYM W KODZIE
-  // (renderDashboard() w index.html) — model dostaje gotowe sygnały zamiast
-  // zgadywać z surowych liczb. payload kształt:
+// systemowej instrukcji. jsonResponse:true → handler niżej parsuje
+// odpowiedź modelu jako JSON i zwraca ją klientowi 1:1 zamiast {text}.
+const FEATURES: Record<string, (payload: unknown) => { system: string; user: string; maxTokens: number; jsonResponse?: boolean }> = {
+  // Krok 1, "szerzej i porządnie" (Maciej, 2026-09-16), potem przepisane na
+  // strukturalny JSON zamiast dwóch akapitów prozy (Maciej, 2026-09-16: chce
+  // 1) krótkie podsumowanie, 2) komentarz o spadku/progresie, 3) czytelną
+  // listę konkretnych akcji per ćwiczenie — trzy różne bloki w popupie, nie
+  // ściana tekstu). payload kształt:
   //   exercises[]: {name, group, sets:[{weightKg,reps}], rpe, isNewRecord, repFadePercent, trend}
   //     trend[]: {date, weightKg, reps} — best set z do 3 POPRZEDNICH sesji tego
   //     ćwiczenia, od najstarszej do najnowszej (może być [] — brak historii)
@@ -69,31 +71,38 @@ const FEATURES: Record<string, (payload: unknown) => { system: string; user: str
       'nachylenia), a avoid to wolny tekst o kontuzji/ograniczeniu — jeśli jest ustawiony, ' +
       'NIGDY nie sugeruj zwiększania ciężaru ani obciążenia w ćwiczeniu, które może dotyczyć ' +
       'tego obszaru; zamiast tego zaproponuj ostrożność albo alternatywę. ' +
-      'Napisz krótkie, 4-5 zdaniowe podsumowanie po polsku, w drugiej osobie, w dwóch ' +
-      'akapitach rozdzielonych jedną pustą linią (dwa znaki nowej linii, "\\n\\n") — bez ' +
-      'nagłówków, bez wypunktowań, tylko zwykły tekst. Pierwszy akapit (1-2 zdania) — ' +
-      'bardzo krótkie podsumowanie TEGO treningu (liczba ćwiczeń, objętość, ewentualnie ' +
-      'jedno słowo o rekordzie jeśli isNewRecord — NIE wyliczaj każdego ćwiczenia z ' +
-      'osobna, to nie ma być lista). Drugi akapit (2-3 zdania) — konkretna sugestia na ' +
-      'NASTĘPNY trening, oparta na realnych seriach, trendzie i RPE/fade jeśli są dostępne, ' +
-      'dopasowana do celu z userPreferences (jeśli podany) i respektująca avoid (jeśli ' +
-      'podany). Jeśli w danych jest istotny sygnał (highVolume=true, niepusta ' +
-      'neglectedGroups, albo skewed=true) — wspomnij o NAJWAŻNIEJSZYM jednym z nich jednym ' +
-      'zdaniem, jak trener zwracający uwagę na coś realnie ważnego. Jeśli żaden sygnał nie ' +
-      'jest istotny — pomiń ten wątek całkowicie, nie zmyślaj problemu, którego nie ma. ' +
-      'Wszystko musi wynikać wyłącznie z podanych danych — nie zgaduj i nie wymyślaj ' +
-      'wartości, których nie dostałeś. WAŻNE — piszesz dla przeciętnego użytkownika ' +
-      'siłowni, nie dla trenera ani studenta AWF: nazwy pól z JSON-a (RPE, push/pull, fade, ' +
-      'isNewRecord, highVolume, trend, goal, avoid) to etykiety danych dla Ciebie, nie słowa ' +
-      'do użycia w odpowiedzi. Zamiast żargonu opisz to zwykłymi słowami — np. zamiast ' +
-      '"balans push/pull jest skewed" napisz "częściej trenujesz mięśnie, które pchają ' +
-      '(klatka, barki, triceps), niż te, które ciągną (plecy, biceps)"; zamiast "wysokie ' +
-      'RPE" napisz "seria była bliska granicy wysiłku"; zamiast "duży fade" napisz coś jak ' +
-      '"pod koniec zabrakło Ci sił na te same powtórzenia". Krótkie, konkretne zdania, zero ' +
-      'specjalistycznych skrótów. Ton: rzeczowy, konkretny, jak trener, bez sztucznego ' +
-      'entuzjazmu i wykrzykników. ' + PL_LANGUAGE_RULES,
+      'Zwróć WYŁĄCZNIE poprawny JSON, bez markdown, bez ``` , bez żadnego tekstu poza samym ' +
+      'obiektem, dokładnie w tym kształcie: {"summary": "...", "analysis": "...", ' +
+      '"actions": [{"exercise": "...", "action": "..."}]}. summary: 1-2 zdania, bardzo ' +
+      'krótkie podsumowanie TEGO treningu (liczba ćwiczeń, objętość, ewentualnie jedno ' +
+      'słowo o rekordzie jeśli isNewRecord) — NIE wyliczaj każdego ćwiczenia z osobna. ' +
+      'analysis: 1-3 zdania — komentarz o KONKRETNYCH ćwiczeniach (po nazwie) ze spadkiem ' +
+      'powtórzeń/wysokim RPE (blisko granicy wysiłku) albo z realnym, wieloseryjnym ' +
+      'postępem (po trend); jeśli w danych jest istotny sygnał kontekstowy (highVolume=true, ' +
+      'niepusta neglectedGroups, albo skewed=true), wspomnij o NAJWAŻNIEJSZYM jednym z nich ' +
+      'jednym zdaniem; jeśli nic się nie wyróżnia, jedno neutralne zdanie że trening ' +
+      'przebiegł standardowo — nie zmyślaj problemu, którego nie ma. actions: wybierz 1-3 ' +
+      'NAJWAŻNIEJSZE ćwiczenia z tej listy exercises (dokładna nazwa, skopiowana z danych), ' +
+      'NIE każde — te, gdzie repFadePercent/trend/RPE/isNewRecord faktycznie sugerują zmianę ' +
+      'na następny trening; action to krótka, konkretna czynność, np. "dołóż 2,5 kg", "zrób ' +
+      'jedną serię więcej", "spróbuj jedno powtórzenie więcej w każdej serii", "zostań przy ' +
+      'tym ciężarze i popracuj nad formą"; jeśli żadne ćwiczenie się nie wyróżnia, actions ' +
+      'może być pustą listą []. Wszystkie trzy pola: dopasuj do celu z userPreferences ' +
+      '(jeśli podany) i respektuj avoid (jeśli podany) — patrz zasada wyżej. Wszystko musi ' +
+      'wynikać wyłącznie z podanych danych — nie zgaduj i nie wymyślaj wartości, których nie ' +
+      'dostałeś. WAŻNE — piszesz dla przeciętnego użytkownika siłowni, nie dla trenera ani ' +
+      'studenta AWF: nazwy pól z JSON-a wejściowego (RPE, push/pull, fade, isNewRecord, ' +
+      'highVolume, trend, goal, avoid) to etykiety danych dla Ciebie, nie słowa do użycia w ' +
+      'odpowiedzi. Zamiast żargonu opisz to zwykłymi słowami — np. zamiast "balans push/pull ' +
+      'jest skewed" napisz "częściej trenujesz mięśnie, które pchają (klatka, barki, ' +
+      'triceps), niż te, które ciągną (plecy, biceps)"; zamiast "wysokie RPE" napisz "seria ' +
+      'była bliska granicy wysiłku"; zamiast "duży fade" napisz coś jak "pod koniec zabrakło ' +
+      'Ci sił na te same powtórzenia". Krótkie, konkretne zdania, zero specjalistycznych ' +
+      'skrótów. Ton: rzeczowy, konkretny, jak trener, bez sztucznego entuzjazmu i ' +
+      'wykrzykników. ' + PL_LANGUAGE_RULES,
     user: JSON.stringify(payload),
-    maxTokens: 550,
+    maxTokens: 650,
+    jsonResponse: true,
   }),
 };
 
@@ -148,7 +157,7 @@ Deno.serve(async (req) => {
     return json({ error: 'rate_limited' }, 429);
   }
 
-  const { system, user, maxTokens } = buildPrompt(body.payload);
+  const { system, user, maxTokens, jsonResponse } = buildPrompt(body.payload);
 
   const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -185,6 +194,21 @@ Deno.serve(async (req) => {
   // of assuming a position.
   const textBlock = (aiJson?.content ?? []).find((b: { type?: string }) => b?.type === 'text');
   const text: string = textBlock?.text ?? '';
+
+  if (jsonResponse) {
+    // Model was told "raw JSON only", but strip a stray ```json fence
+    // defensively rather than fail the whole request over formatting.
+    const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (e) {
+      console.error('ai json parse failed', e, text);
+      return json({ error: 'invalid_ai_response' }, 502);
+    }
+    await supabase.from('ai_usage').insert({ user_id: userId, feature });
+    return json(parsed);
+  }
 
   // Log dopiero po sukcesie — nieudane wywołanie nie zjada limitu usera.
   await supabase.from('ai_usage').insert({ user_id: userId, feature });
