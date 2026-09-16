@@ -9,7 +9,7 @@ const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 // Ile wywołań danej funkcji AI może zrobić jeden user w ciągu doby.
 // Startowo nisko — łatwiej podnieść limit niż odzyskać przepalone kredyty.
-const DAILY_LIMIT = 20;
+const DAILY_LIMIT = 25;
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
