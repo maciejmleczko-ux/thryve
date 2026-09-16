@@ -4565,6 +4565,33 @@ async function syncCloudData(){
   }
 }
 
+/* ---------- AI asystent — Edge Function proxy (Krok 0) ----------
+   Klient nigdy nie zna klucza Anthropic ani nie buduje promptu — woła
+   ai-proxy z tokenem sesji Supabase, funkcja sama dokleja klucz z
+   sekretu i pilnuje dziennego limitu. Wymaga zalogowania (cloudSession);
+   goście nie mają dostępu, bo proxy weryfikuje token Supabase Auth. */
+const AI_PROXY_URL = SUPABASE_URL + '/functions/v1/ai-proxy';
+
+async function callAI(feature, payload){
+  if(!cloudSession || !cloudSession.access_token) return { error: 'not_logged_in' };
+  try {
+    const res = await fetch(AI_PROXY_URL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'authorization': 'Bearer ' + cloudSession.access_token,
+      },
+      body: JSON.stringify({ feature, payload }),
+    });
+    const data = await res.json();
+    if(!res.ok) return { error: data.error || 'ai_call_failed' };
+    return { text: data.text };
+  } catch(e){
+    console.error('callAI failed', feature, e);
+    return { error: 'network_error' };
+  }
+}
+
 /* ---------- occasional "create an account" nudge ----------
    Guest only, backend configured, has actually used the app (>=1 saved
    workout — don't nag someone who just opened it), at most once every
