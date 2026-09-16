@@ -3431,7 +3431,7 @@ const T_EN = {
   dashMinutesActivity: n => `${n} min active`,
   dashSessions: n => `${n} workout${n===1?'':'s'}`,
   dashWeekCount: (d,t) => `${d} / ${t} days done`,
-  dashAiLoading: 'Analyzing your week…',
+  dashAiLoading: 'Analyzing your last workout…',
   dashHeadlineRest: 'Nothing planned for today. Rest up.',
   gymV2NoPlanMsg: "You don't have a starred plan yet.",
   gymV2CreatePlan: 'Create or pick a plan',
@@ -9025,36 +9025,57 @@ function renderDashboard(){
     }
   });
 
-  // AI asystent — Krok 1: reuse the sets/PRs already computed above for the
-  // rest of the dashboard, don't recompute. Fire-and-forget: the card
-  // appears/updates once the (cached or fresh) summary is ready.
-  const prsThisWeek = Object.values(prBest)
-    .filter(b => weekDates.includes(b.date))
-    .map(b => ({ exercise: b.name, weightKg: b.weight }));
-  const volByExercise = {};
-  weekSets.forEach(s=>{ volByExercise[s.name] = (volByExercise[s.name]||0) + s.weight*s.reps; });
-  const topExercises = Object.entries(volByExercise).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([name])=>name);
-  renderDashboardAiSummary({
-    workouts: sessionCount,
-    totalVolumeKg: Math.round(weekKg),
-    durationMinTotal: Math.round(weekMin),
-    prs: prsThisWeek,
-    topExercises,
-  }, sessionCount > 0, weekDates[0]);
+  // AI asystent — Krok 1: analiza OSTATNIEGO treningu, nie całego tygodnia
+  // (Maciej, 2026-09-16). workouts.push()-uje zawsze na koniec i nic w tym
+  // pliku nigdy nie sortuje/reorderuje tę tablicę, więc ostatni element
+  // faktycznie jest ostatnio zapisanym treningiem (id/'w_'+Date.now() też
+  // rosnący, ale array order jest prostsze i już się na nim polega saveWorkout()).
+  const lastWorkout = workouts.length ? workouts[workouts.length - 1] : null;
+  let lastWorkoutPayload = null;
+  if(lastWorkout){
+    // Best-per-ćwiczenie z CAŁEJ historii Z WYŁĄCZENIEM tego treningu — żeby
+    // "isNewRecord" porównywał względem tego, co było PRZED, nie względem
+    // samego siebie.
+    const priorBest = {};
+    workouts.forEach(w=>{
+      if(w === lastWorkout) return;
+      w.exercises.forEach(ex=> ex.sets.forEach(s=>{
+        if(!(s.reps>0)) return;
+        const b = priorBest[ex.name];
+        if(!b || s.weight > b.weight || (s.weight===b.weight && s.reps>b.reps)) priorBest[ex.name] = {weight:s.weight||0, reps:s.reps};
+      }));
+    });
+    const exercisesPayload = lastWorkout.exercises.map(ex=>{
+      const sets = ex.sets.filter(s=>s.reps>0).map(s=>({weightKg: s.weight||0, reps: s.reps}));
+      const prior = priorBest[ex.name];
+      const isNewRecord = sets.some(s=> !prior || s.weightKg > prior.weight || (s.weightKg===prior.weight && s.reps>prior.reps));
+      return { name: ex.name, sets, isNewRecord };
+    });
+    const totalVolumeKg = exercisesPayload.reduce((sum,ex)=> sum + ex.sets.reduce((s2,s)=> s2 + s.weightKg*s.reps, 0), 0);
+    lastWorkoutPayload = {
+      date: lastWorkout.date,
+      durationMin: lastWorkout.durationMin || null,
+      totalVolumeKg: Math.round(totalVolumeKg),
+      exercises: exercisesPayload,
+    };
+  }
+  renderDashboardAiSummary(lastWorkoutPayload, lastWorkout ? lastWorkout.id : null);
 
   fitDashboardToScreen();
 }
 
-/* AI asystent — Krok 1: narracyjne podsumowanie tygodnia (czarna karta
-   między .dash-hero i .dash-grid2). Guests and empty weeks never call the
-   backend — no session to auth with, and nothing worth summarising. Cached
-   per-week in localStorage (fingerprinted on the numbers that would change
-   the text) so re-entering the dashboard doesn't re-spend the daily AI
-   quota. AI_SUMMARY_PROMPT_VERSION is part of the fingerprint so a prompt
-   change (see ai-proxy's FEATURES.weekly_summary) invalidates old cached
-   text instead of showing stale wording until the numbers next change. */
-const LS_AI_WEEKLY_SUMMARY = 'fitlog_ai_weekly_summary_v1';
-const AI_SUMMARY_PROMPT_VERSION = 'v4';
+/* AI asystent — Krok 1: narracyjne podsumowanie OSTATNIEGO TRENINGU (czarna
+   karta między .dash-hero i .dash-grid2) — przepisane z tygodnia na
+   pojedynczy trening 2026-09-16. Guests and "never trained" users never
+   call the backend — no session to auth with, and nothing to summarise.
+   Cached in localStorage keyed on the workout's own id (unique, stable per
+   session — regenerating only when a NEW workout becomes "the last one",
+   not on every dashboard visit) so re-entering the dashboard doesn't
+   re-spend the daily AI quota. AI_SUMMARY_PROMPT_VERSION is part of the
+   fingerprint so a prompt change (see ai-proxy's FEATURES.last_workout_summary)
+   invalidates old cached text instead of showing stale wording forever. */
+const LS_AI_LAST_WORKOUT_SUMMARY = 'fitlog_ai_last_workout_summary_v1';
+const AI_SUMMARY_PROMPT_VERSION = 'v5';
 function toggleDashAiCard(){
   const card = document.getElementById('dashAiCard');
   const textEl = document.getElementById('dashAiText');
@@ -9075,17 +9096,17 @@ function showDashAiCardCollapsed(card){
   document.getElementById('dashAiToggle').setAttribute('aria-expanded', 'false');
   fitDashboardToScreen();
 }
-async function renderDashboardAiSummary(payload, hasData, weekStartIso){
+async function renderDashboardAiSummary(payload, workoutId){
   const card = document.getElementById('dashAiCard');
   const textEl = document.getElementById('dashAiText');
-  if(!cloudSession || !hasData){
+  if(!cloudSession || !workoutId){
     card.hidden = true;
     return;
   }
 
-  const fingerprint = [AI_SUMMARY_PROMPT_VERSION, weekStartIso, payload.workouts, payload.totalVolumeKg, payload.durationMinTotal].join('|');
+  const fingerprint = [AI_SUMMARY_PROMPT_VERSION, workoutId].join('|');
   let cached = null;
-  try { cached = JSON.parse(localStorage.getItem(LS_AI_WEEKLY_SUMMARY) || 'null'); } catch(e){}
+  try { cached = JSON.parse(localStorage.getItem(LS_AI_LAST_WORKOUT_SUMMARY) || 'null'); } catch(e){}
   if(cached && cached.userId === cloudSession.user.id && cached.fingerprint === fingerprint && cached.text){
     textEl.textContent = cached.text;
     if(card.hidden) showDashAiCardCollapsed(card);
@@ -9095,19 +9116,19 @@ async function renderDashboardAiSummary(payload, hasData, weekStartIso){
   // Fresh fetch needed. The card stays collapsed either way (its whole
   // point is "hidden until tapped"), so the loading placeholder is only
   // ever seen if the user opens it before the request resolves.
-  textEl.textContent = t('dashAiLoading', 'Analizuję Twój tydzień…');
+  textEl.textContent = t('dashAiLoading', 'Analizuję Twój ostatni trening…');
   if(card.hidden) showDashAiCardCollapsed(card);
 
-  const res = await callAI('weekly_summary', payload);
+  const res = await callAI('last_workout_summary', payload);
   if(res.error || !res.text){
-    console.error('weekly_summary AI call failed', res.error);
+    console.error('last_workout_summary AI call failed', res.error);
     card.hidden = true;
     fitDashboardToScreen();
     return;
   }
   textEl.textContent = res.text;
   try {
-    localStorage.setItem(LS_AI_WEEKLY_SUMMARY, JSON.stringify({ userId: cloudSession.user.id, fingerprint, text: res.text }));
+    localStorage.setItem(LS_AI_LAST_WORKOUT_SUMMARY, JSON.stringify({ userId: cloudSession.user.id, fingerprint, text: res.text }));
   } catch(e){}
   fitDashboardToScreen();
 }

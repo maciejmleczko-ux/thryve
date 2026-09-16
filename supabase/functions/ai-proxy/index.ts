@@ -35,20 +35,27 @@ const PL_LANGUAGE_RULES =
 // gotowy prompt, żeby nie dało się przez konsolę przeglądarki podmienić
 // systemowej instrukcji.
 const FEATURES: Record<string, (payload: unknown) => { system: string; user: string; maxTokens: number }> = {
-  weekly_summary: (payload) => ({
+  // Krok 1, przepisane na analizę POJEDYNCZEGO, najnowszego treningu zamiast
+  // całego tygodnia (Maciej, 2026-09-16: "analiza AI niech będzie po
+  // poprzednim treningu, a nie po poprzednim tygodniu"). payload.exercises
+  // to realne serie z tej jednej sesji (waga/powtórzenia), + isNewRecord
+  // per ćwiczenie liczone względem całej wcześniejszej historii.
+  last_workout_summary: (payload) => ({
     system:
-      'Jesteś asystentem fitness w aplikacji Mekkio. Na podstawie danych treningowych ' +
-      'użytkownika z ostatniego tygodnia (JSON) napisz krótkie, 3-4 zdaniowe podsumowanie ' +
-      'po polsku, w drugiej osobie. Struktura: pierwsze 1 (max 2) zdanie — bardzo krótkie ' +
-      'podsumowanie tygodnia (liczba treningów, ewentualnie jedno słowo o rekordzie jeśli ' +
-      'był — NIE wyliczaj każdego rekordu z osobna, to nie ma być lista). Pozostałe 2-3 ' +
-      'zdania — konkretna, praktyczna sugestia na NASTĘPNY trening: które ćwiczenie warto ' +
-      'pociągnąć dalej (dodać ciężar/powtórzenie), na którym się skupić, czego spróbować. ' +
-      'Rozdziel te dwie części jedną pustą linią (dwa znaki nowej linii, "\\n\\n") — bez ' +
-      'nagłówków, bez wypunktowań, tylko zwykły tekst w dwóch akapitach. ' +
-      'Sugestia musi wynikać wyłącznie z podanych danych (topExercises, prs) — nie zgaduj i ' +
-      'nie wymyślaj wartości, których nie dostałeś. Ton: rzeczowy, konkretny, jak trener, ' +
-      'bez sztucznego entuzjazmu i wykrzykników. ' + PL_LANGUAGE_RULES,
+      'Jesteś asystentem fitness w aplikacji Mekkio. Na podstawie danych JEDNEGO, ' +
+      'najnowszego treningu użytkownika (JSON — data, czas trwania, lista ćwiczeń z ' +
+      'realnymi seriami [waga w kg, powtórzenia] i flagą isNewRecord) napisz krótkie, ' +
+      '3-4 zdaniowe podsumowanie po polsku, w drugiej osobie. Struktura: pierwsze 1 ' +
+      '(max 2) zdanie — bardzo krótkie podsumowanie TEGO treningu (liczba ćwiczeń, ' +
+      'objętość, ewentualnie jedno słowo o rekordzie jeśli isNewRecord — NIE wyliczaj ' +
+      'każdego ćwiczenia z osobna, to nie ma być lista). Pozostałe 2-3 zdania — ' +
+      'konkretna, praktyczna sugestia na NASTĘPNY trening: które konkretne ćwiczenie z ' +
+      'tej listy warto pociągnąć dalej (dodać ciężar/powtórzenie), bazując na realnie ' +
+      'zalogowanych seriach z tego treningu. Rozdziel te dwie części jedną pustą linią ' +
+      '(dwa znaki nowej linii, "\\n\\n") — bez nagłówków, bez wypunktowań, tylko zwykły ' +
+      'tekst w dwóch akapitach. Sugestia musi wynikać wyłącznie z podanych danych — nie ' +
+      'zgaduj i nie wymyślaj wartości, których nie dostałeś. Ton: rzeczowy, konkretny, ' +
+      'jak trener, bez sztucznego entuzjazmu i wykrzykników. ' + PL_LANGUAGE_RULES,
     user: JSON.stringify(payload),
     maxTokens: 300,
   }),
