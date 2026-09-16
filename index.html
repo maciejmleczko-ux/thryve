@@ -9067,11 +9067,15 @@ function renderDashboard(){
     }
   });
 
-  // AI asystent — Krok 1: analiza OSTATNIEGO treningu, nie całego tygodnia
-  // (Maciej, 2026-09-16). workouts.push()-uje zawsze na koniec i nic w tym
-  // pliku nigdy nie sortuje/reorderuje tę tablicę, więc ostatni element
-  // faktycznie jest ostatnio zapisanym treningiem (id/'w_'+Date.now() też
-  // rosnący, ale array order jest prostsze i już się na nim polega saveWorkout()).
+  // AI asystent — Krok 1: analiza OSTATNIEGO treningu (2026-09-16), z
+  // "pro tip"-owym kontekstem policzonym W KODZIE (nie zostawionym modelowi
+  // do zgadywania z surowych liczb) — balans partii mięśniowych, zaniedbane
+  // grupy, push/pull, fade powtórzeń. Reużywa istniejącą taksonomię
+  // PLAN_EX_GROUPS/muscleGroupBucket zamiast wymyślać nową. workouts.push()
+  // zawsze na koniec i nic w tym pliku nigdy nie sortuje/reorderuje tę
+  // tablicę, więc ostatni element faktycznie jest ostatnio zapisanym
+  // treningiem (id/'w_'+Date.now() też rosnący, ale array order jest
+  // prostsze i już się na nim polega saveWorkout()).
   const lastWorkout = workouts.length ? workouts[workouts.length - 1] : null;
   let lastWorkoutPayload = null;
   if(lastWorkout){
@@ -9091,14 +9095,63 @@ function renderDashboard(){
       const sets = ex.sets.filter(s=>s.reps>0).map(s=>({weightKg: s.weight||0, reps: s.reps}));
       const prior = priorBest[ex.name];
       const isNewRecord = sets.some(s=> !prior || s.weightKg > prior.weight || (s.weightKg===prior.weight && s.reps>prior.reps));
-      return { name: ex.name, sets, isNewRecord };
+      // Fade: how many reps you lost from the first set to the last — a
+      // rough "how close to failure" signal that doesn't need per-set RPE.
+      let repFadePercent = null;
+      if(sets.length >= 2 && sets[0].reps > 0){
+        repFadePercent = Math.round((1 - sets[sets.length-1].reps / sets[0].reps) * 100);
+      }
+      return { name: ex.name, group: muscleGroupBucket(ex.group).key, sets, rpe: ex.rpe || null, isNewRecord, repFadePercent };
     });
     const totalVolumeKg = exercisesPayload.reduce((sum,ex)=> sum + ex.sets.reduce((s2,s)=> s2 + s.weightKg*s.reps, 0), 0);
+
+    // Muscle-group volume for THIS workout — flags a group getting a lot of
+    // direct sets in one sitting. >10 direct sets for one muscle group in a
+    // single session is a common "diminishing returns" threshold in
+    // strength-training programming (not something to invent per-user).
+    const groupSetsThisWorkout = {};
+    exercisesPayload.forEach(ex=>{ groupSetsThisWorkout[ex.group] = (groupSetsThisWorkout[ex.group]||0) + ex.sets.length; });
+    const muscleGroupsThisWorkout = Object.entries(groupSetsThisWorkout).map(([group,sets])=>({ group, sets, highVolume: sets > 10 }));
+
+    // Rolling 7-day window (not the calendar week) — coverage/balance only
+    // mean something with more than just today in view.
+    const ROLLING_DAYS = 7;
+    const today = todayStr();
+    const daysBetween = (a,b) => Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 86400000);
+    const cutoffDate = new Date(today+'T00:00:00'); cutoffDate.setDate(cutoffDate.getDate()-ROLLING_DAYS);
+    const recentWorkouts = workouts.filter(w=> new Date(w.date+'T00:00:00') >= cutoffDate);
+
+    const lastTrainedDate = {}; // group -> most recent date trained, across ALL history
+    workouts.forEach(w=> w.exercises.forEach(ex=>{
+      const g = muscleGroupBucket(ex.group).key;
+      if(!lastTrainedDate[g] || w.date > lastTrainedDate[g]) lastTrainedDate[g] = w.date;
+    }));
+    const neglectedGroups = PLAN_EX_GROUPS.filter(g=>g.key!=='Wlasne').map(g=>g.key)
+      .map(group => ({ group, daysSinceLastTrained: lastTrainedDate[group] ? daysBetween(lastTrainedDate[group], today) : null }))
+      .filter(g => g.daysSinceLastTrained === null || g.daysSinceLastTrained > ROLLING_DAYS);
+
+    const PUSH_GROUPS = ['Klatka','Barki','Triceps'], PULL_GROUPS = ['Plecy','Biceps'];
+    let pushSets = 0, pullSets = 0;
+    recentWorkouts.forEach(w=> w.exercises.forEach(ex=>{
+      const g = muscleGroupBucket(ex.group).key;
+      const setCount = ex.sets.filter(s=>s.reps>0).length;
+      if(PUSH_GROUPS.includes(g)) pushSets += setCount;
+      else if(PULL_GROUPS.includes(g)) pullSets += setCount;
+    }));
+    // Skip the flag entirely on a near-empty week — not enough sets to mean
+    // anything, and we don't want the model inventing a skew out of noise.
+    const pushPullBalance = (pushSets+pullSets) >= 6
+      ? { pushSets, pullSets, skewed: pushSets > pullSets*1.5 || pullSets > pushSets*1.5 }
+      : null;
+
     lastWorkoutPayload = {
       date: lastWorkout.date,
       durationMin: lastWorkout.durationMin || null,
       totalVolumeKg: Math.round(totalVolumeKg),
       exercises: exercisesPayload,
+      muscleGroupsThisWorkout,
+      neglectedGroups,
+      pushPullBalance,
     };
   }
   lastAiWorkoutPayload = lastWorkoutPayload; // read by the popup's stat tiles when opened
@@ -9118,7 +9171,7 @@ function renderDashboard(){
    fingerprint so a prompt change (see ai-proxy's FEATURES.last_workout_summary)
    invalidates old cached text instead of showing stale wording forever. */
 const LS_AI_LAST_WORKOUT_SUMMARY = 'fitlog_ai_last_workout_summary_v1';
-const AI_SUMMARY_PROMPT_VERSION = 'v5';
+const AI_SUMMARY_PROMPT_VERSION = 'v6';
 let lastAiWorkoutPayload = null; // set in renderDashboard(), read by the popup's stat tiles
 // Reveal the (always-collapsed) teaser card. Only called the first time it
 // appears in a page load — see the `if(card.hidden)` call sites below —
