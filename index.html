@@ -647,6 +647,29 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .onboard-actions .save{background:var(--orange);color:#fff;}
 .onboard-actions button:disabled{opacity:.5;cursor:default;}
 .onboard-box textarea{width:100%;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:var(--m-fs-base);line-height:1.5;color:var(--text-dark);font-family:inherit;margin-bottom:16px;resize:vertical;min-height:100px;}
+
+/* Trener AI popup — same black/gradient-border/glow identity as .dash-ai-card
+   (the collapsed dashboard card it opens from), inside the app's standard
+   .onboard-overlay backdrop/centering. */
+.ai-popup-box{position:relative;width:100%;max-width:360px;box-sizing:border-box;max-height:calc(100dvh - 84px);overflow-y:auto;
+  border-radius:var(--m-r-md);padding:20px;color:#fff;
+  border:2px solid transparent;
+  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
+  box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,1), 0 20px 50px rgba(0,0,0,.5);
+}
+.ai-popup-close{position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.12);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+.ai-popup-close .ph{width:14px;height:14px;color:#fff;}
+.ai-popup-head{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.ai-popup-head .ph{width:20px;height:20px;flex-shrink:0;color:#fff;}
+.ai-popup-head .dash-eyebrow{margin:0;font-size:var(--m-fs-base);}
+.ai-popup-date{margin:0 0 16px;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.55);}
+.ai-popup-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.ai-popup-stat{background:rgba(255,255,255,.08);border-radius:var(--m-r-sm);padding:10px 12px;}
+.ai-popup-stat-k{margin:0 0 4px;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.6);}
+.ai-popup-stat-v{margin:0;font-size:var(--m-fs-lg);font-weight:400;color:#fff;}
+.ai-popup-stat.ai-popup-stat--record{grid-column:1 / -1;display:flex;align-items:center;gap:10px;background:rgba(255,51,0,.16);}
+.ai-popup-stat--record .ph{width:22px;height:22px;color:var(--m-orange);flex-shrink:0;}
+.ai-popup-text{margin:0;font-size:var(--m-fs-xs);font-weight:300;line-height:1.55;color:rgba(255,255,255,.92);white-space:pre-line;}
 .feedback-type-row{display:flex;gap:8px;margin-bottom:14px;}
 .feedback-type{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:9px 4px;font-size:var(--m-fs-xs);font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
 .feedback-type.active{background:var(--orange);border-color:var(--orange);color:#fff;}
@@ -1036,12 +1059,15 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
 .dash-week-day.today.has-ring span:first-child{outline:1.5px solid #fff;outline-offset:2px;}
 .dash-week-day em{font-style:normal;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.85);}
 
-/* AI asystent — "Trener AI" accordion (Figma node 320:16638, "AI BOX").
-   Black fill + a gradient border painted with the classic two-layer trick
-   (border:solid transparent, two background layers clipped to padding-box
-   / border-box) since CSS can't put a gradient directly on border-color,
-   plus the design's inset purple glow. Closed by default (header row
-   only); toggleDashAiCard() reveals dashAiText below it. */
+/* AI asystent — "Trener AI" card (Figma node 320:16638, "AI BOX" — originally
+   an inline accordion; Maciej 2026-09-16 moved the actual content into a
+   popup, see .ai-popup-* below, since right after a workout you want to
+   rest, not read a critique — this stays a quiet, collapsed teaser on the
+   Dashboard until tapped on your own terms). Black fill + a gradient border
+   painted with the classic two-layer trick (border:solid transparent, two
+   background layers clipped to padding-box / border-box) since CSS can't
+   put a gradient directly on border-color, plus the design's inset purple
+   glow — same treatment reused on .ai-popup-box for a consistent identity. */
 .dash-ai-card{border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:8px;
   border:2px solid transparent;
   background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
@@ -1053,9 +1079,7 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
 .dash-ai-head-left{display:flex;align-items:center;gap:15px;}
 .dash-ai-head-left .ph{width:16px;height:16px;flex-shrink:0;color:#fff;}
 .dash-ai-head .dash-eyebrow{margin:0;}
-.dash-ai-caret{width:12px;height:12px;flex-shrink:0;color:#fff;transform:rotate(-90deg);transition:transform .25s cubic-bezier(.16,1,.3,1);}
-.dash-ai-card.open .dash-ai-caret{transform:rotate(0deg);}
-.dash-ai-text{margin:20px 0 0;font-size:var(--m-fs-2xs);font-weight:300;line-height:1.27;color:#fff;white-space:pre-line;}
+.dash-ai-caret{width:12px;height:12px;flex-shrink:0;color:#fff;transform:rotate(-90deg);}
 
 /* Short phones: the 390×844 tuning + a real ~50px notch inset tips a 3-line
    greeting past one screen on an iPhone 13 mini / SE, so renderDashboard()
@@ -2270,13 +2294,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <div class="dash-ai-card" id="dashAiCard" hidden>
-        <button type="button" class="dash-ai-head" id="dashAiToggle" onclick="toggleDashAiCard()" aria-expanded="false">
+        <button type="button" class="dash-ai-head" id="dashAiToggle" onclick="openAiPopup()" aria-haspopup="dialog">
           <span class="dash-ai-head-left">
             <span class="ph" data-ph="sparks"></span>
             <p class="dash-eyebrow">Trener AI</p>
           </span>
           <span class="ph dash-ai-caret" data-ph="caret-down"></span>
         </button>
+        <!-- data holder for the fetched/cached text — the popup reads it, never shown inline -->
         <p class="dash-ai-text" id="dashAiText" hidden></p>
       </div>
 
@@ -2893,6 +2918,23 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button class="skip" onclick="dismissCloudReminder()">Później</button>
       <button class="save" onclick="dismissCloudReminder(); openAuthSheet('signup');">Załóż konto</button>
     </div>
+  </div>
+</div>
+
+<!-- Trener AI popup (mockup, 2026-09-16) — opened from the collapsed
+     .dash-ai-card on the Dashboard instead of expanding it in place.
+     Maciej: right after a workout you want to rest, not read a critique —
+     this lives on the Dashboard so you open it later, on your own terms. -->
+<div class="onboard-overlay hidden" id="aiPopupOverlay">
+  <div class="ai-popup-box">
+    <button type="button" class="ai-popup-close" onclick="closeAiPopup()" aria-label="Zamknij"><span class="ph" data-ph="x"></span></button>
+    <div class="ai-popup-head">
+      <span class="ph" data-ph="sparks"></span>
+      <p class="dash-eyebrow">Trener AI</p>
+    </div>
+    <p class="ai-popup-date" id="aiPopupDate"></p>
+    <div class="ai-popup-stats" id="aiPopupStats"></div>
+    <p class="ai-popup-text" id="aiPopupText"></p>
   </div>
 </div>
 
@@ -9059,6 +9101,7 @@ function renderDashboard(){
       exercises: exercisesPayload,
     };
   }
+  lastAiWorkoutPayload = lastWorkoutPayload; // read by the popup's stat tiles when opened
   renderDashboardAiSummary(lastWorkoutPayload, lastWorkout ? lastWorkout.id : null);
 
   fitDashboardToScreen();
@@ -9076,25 +9119,35 @@ function renderDashboard(){
    invalidates old cached text instead of showing stale wording forever. */
 const LS_AI_LAST_WORKOUT_SUMMARY = 'fitlog_ai_last_workout_summary_v1';
 const AI_SUMMARY_PROMPT_VERSION = 'v5';
-function toggleDashAiCard(){
-  const card = document.getElementById('dashAiCard');
-  const textEl = document.getElementById('dashAiText');
-  const willOpen = !card.classList.contains('open');
-  card.classList.toggle('open', willOpen);
-  textEl.hidden = !willOpen;
-  document.getElementById('dashAiToggle').setAttribute('aria-expanded', String(willOpen));
+let lastAiWorkoutPayload = null; // set in renderDashboard(), read by the popup's stat tiles
+// Reveal the (always-collapsed) teaser card. Only called the first time it
+// appears in a page load — see the `if(card.hidden)` call sites below —
+// harmless to call again since it's idempotent.
+function showDashAiCard(card){
+  card.hidden = false;
   fitDashboardToScreen();
 }
-// Reveal the card collapsed (header row only) — matches the Figma spec's
-// "closed" state. Only forces this the first time the card appears in a
-// page load; if the user already expanded it and fresh data comes in
-// (e.g. after logging another set), a re-render won't yank it shut.
-function showDashAiCardCollapsed(card){
-  card.hidden = false;
-  card.classList.remove('open');
-  document.getElementById('dashAiText').hidden = true;
-  document.getElementById('dashAiToggle').setAttribute('aria-expanded', 'false');
-  fitDashboardToScreen();
+function openAiPopup(){
+  if(!lastAiWorkoutPayload) return;
+  const p = lastAiWorkoutPayload;
+  const setCount = p.exercises.reduce((sum,ex)=> sum + ex.sets.length, 0);
+  const recordEx = p.exercises.find(ex=>ex.isNewRecord);
+  document.getElementById('aiPopupDate').textContent = fmtDateHuman(p.date);
+  document.getElementById('aiPopupStats').innerHTML = `
+    <div class="ai-popup-stat"><p class="ai-popup-stat-k">Objętość</p><p class="ai-popup-stat-v">${p.totalVolumeKg} kg</p></div>
+    <div class="ai-popup-stat"><p class="ai-popup-stat-k">Ćwiczenia</p><p class="ai-popup-stat-v">${p.exercises.length}</p></div>
+    <div class="ai-popup-stat"><p class="ai-popup-stat-k">Serie</p><p class="ai-popup-stat-v">${setCount}</p></div>
+    <div class="ai-popup-stat"><p class="ai-popup-stat-k">Czas</p><p class="ai-popup-stat-v">${p.durationMin ? p.durationMin+' min' : '—'}</p></div>
+    ${recordEx ? `<div class="ai-popup-stat ai-popup-stat--record"><span class="ph" data-ph="trophy"></span><div><p class="ai-popup-stat-k">Nowy rekord</p><p class="ai-popup-stat-v">${recordEx.name}</p></div></div>` : ''}
+  `;
+  hydratePhIcons();
+  document.getElementById('aiPopupText').textContent = document.getElementById('dashAiText').textContent;
+  document.getElementById('aiPopupOverlay').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+}
+function closeAiPopup(){
+  document.getElementById('aiPopupOverlay').classList.add('hidden');
+  document.documentElement.classList.remove('modal-lock');
 }
 async function renderDashboardAiSummary(payload, workoutId){
   const card = document.getElementById('dashAiCard');
@@ -9109,15 +9162,16 @@ async function renderDashboardAiSummary(payload, workoutId){
   try { cached = JSON.parse(localStorage.getItem(LS_AI_LAST_WORKOUT_SUMMARY) || 'null'); } catch(e){}
   if(cached && cached.userId === cloudSession.user.id && cached.fingerprint === fingerprint && cached.text){
     textEl.textContent = cached.text;
-    if(card.hidden) showDashAiCardCollapsed(card);
+    if(card.hidden) showDashAiCard(card);
     return;
   }
 
-  // Fresh fetch needed. The card stays collapsed either way (its whole
-  // point is "hidden until tapped"), so the loading placeholder is only
-  // ever seen if the user opens it before the request resolves.
+  // Fresh fetch needed. The card stays collapsed either way (it's a teaser
+  // that opens the popup, never shows text inline), so the loading
+  // placeholder is only ever seen if the user opens the popup before the
+  // request resolves.
   textEl.textContent = t('dashAiLoading', 'Analizuję Twój ostatni trening…');
-  if(card.hidden) showDashAiCardCollapsed(card);
+  if(card.hidden) showDashAiCard(card);
 
   const res = await callAI('last_workout_summary', payload);
   if(res.error || !res.text){
