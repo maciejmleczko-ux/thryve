@@ -675,8 +675,11 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    hairline between entries (not per-row cards) — divider sits BETWEEN
    entries via a top border on every entry but the first. */
 .ai-popup-action{display:flex;flex-direction:column;gap:2px;padding:10px 0;}
-.ai-popup-action:first-child{padding-top:0;}
-.ai-popup-action:not(:first-child){border-top:1px solid rgba(255,255,255,.15);}
+/* :first-of-type, not :first-child — the label <p> above these <div>s
+   occupies the actual first-child slot, so :first-child never matched
+   the first exercise row and it wrongly got a divider too. */
+.ai-popup-action:first-of-type{padding-top:0;}
+.ai-popup-action:not(:first-of-type){border-top:1px solid rgba(255,255,255,.15);}
 .ai-popup-action-ex{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:#fff;}
 .ai-popup-action-do{font-size:var(--m-fs-sm);font-weight:300;line-height:1.4;color:rgba(255,255,255,.92);}
 .feedback-type-row{display:flex;gap:8px;margin-bottom:14px;}
