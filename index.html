@@ -869,17 +869,25 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .wnv2-card-list li{margin-bottom:4px;}
 .wnv2-card-list li:last-child{margin-bottom:0;}
 .wnv2-card-text + .wnv2-card-list{margin-top:8px;}
-/* One-off: the "Trener AI" changelog card gets the same black/gradient/glow
-   treatment as the box itself (Maciej, 2026-09-16: "w stylu boxa AI tylko
-   ten jeden raz") — scoped to this exact version so it never recurs for a
-   future "hero" (newest) entry. Text stays white via the existing .hero
-   rules above (same specificity, this block just needs to sit after them
-   so its background/border/glow wins the background tie). */
-.wnv2-card[data-version="4.37.0"]{
+/* Stacked title — when a card holds MORE THAN ONE featured entry (e.g. two
+   AI items in the same version), each one after the first gets its own
+   title + divider instead of just concatenating text. */
+.wnv2-card-title--stacked{margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08);}
+.wnv2-card.hero .wnv2-card-title--stacked,.wnv2-card--ai .wnv2-card-title--stacked{border-top-color:rgba(255,255,255,.15);}
+/* AI changelog entries get the same black/gradient/glow identity as the
+   Trener AI card/popup/account-panel section — driven by entry.ai:true in
+   CHANGELOG (Maciej, 2026-09-17: every AI-related entry, not a one-off for
+   a single version), rendered as its OWN card, separate from non-AI items
+   in the same version (see renderWhatsNewCard()). */
+.wnv2-card--ai{
   background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
-  border:2px solid transparent;
-  box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,1);
+  border:1px solid transparent;
+  box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,.5);
 }
+.wnv2-card--ai .wnv2-card-version{color:rgba(255,255,255,.7);}
+.wnv2-card--ai .wnv2-card-title{color:#fff;}
+.wnv2-card--ai .wnv2-card-text{color:#fff;}
+.wnv2-card--ai .wnv2-card-list{color:#fff;}
 .backup-hint{padding:0 20px;margin-top:10px;font-size:var(--m-fs-2xs);line-height:1.5;color:rgba(255,255,255,.5);}
 
 /* ---------- "Historia zmian" sheet — full numbered CHANGELOG, reached
@@ -5174,26 +5182,26 @@ const DASH_REST_DAY_PL = [
 const CHANGELOG = {
   "4.39.0": {
     pl: [
-      {featured:true, icon:'sparks', badge:'Nowość', title:'Sugestie Trenera AI przy ćwiczeniach w GYM', text:'Jeśli Trener AI wskazał dla danego ćwiczenia konkretną wskazówkę na następny trening, zobaczysz ją teraz od razu w oknie logowania serii — fioletowa etykieta „Sugestia Trenera AI” zamiast zwykłej wskazówki. Dla pozostałych ćwiczeń bez zmian.'},
+      {featured:true, ai:true, icon:'sparks', badge:'Nowość', title:'Sugestie Trenera AI przy ćwiczeniach w GYM', text:'Jeśli Trener AI wskazał dla danego ćwiczenia konkretną wskazówkę na następny trening, zobaczysz ją teraz od razu w oknie logowania serii — fioletowa etykieta „Sugestia Trenera AI” zamiast zwykłej wskazówki. Dla pozostałych ćwiczeń bez zmian.'},
     ],
     en: [
-      {featured:true, icon:'sparks', badge:'New', title:'AI Trainer tips in the GYM exercise popup', text:'If the AI Trainer flagged a specific tip for an exercise for your next session, you\'ll now see it right in the set-logging popup — a purple "AI Trainer tip" label instead of the usual one. Other exercises are unchanged.'},
+      {featured:true, ai:true, icon:'sparks', badge:'New', title:'AI Trainer tips in the GYM exercise popup', text:'If the AI Trainer flagged a specific tip for an exercise for your next session, you\'ll now see it right in the set-logging popup — a purple "AI Trainer tip" label instead of the usual one. Other exercises are unchanged.'},
     ],
   },
   "4.38.0": {
     pl: [
-      {featured:true, icon:'sparks', badge:'Aktualizacja', title:'Trener AI: pełny widok i głębsza analiza', text:'Karta „Trener AI” otwiera teraz pełny widok zamiast rozwijania w miejscu — krótkie podsumowanie treningu, komentarz o ćwiczeniach ze spadkiem sił lub realnym postępem, i czytelna lista konkretnych wskazówek na następny trening, jedna pod drugą. W panelu konta możesz ustawić swój cel treningowy i czego unikać (np. kontuzje) — Trener AI dopasuje sugestie do tego.'},
+      {featured:true, ai:true, icon:'sparks', badge:'Aktualizacja', title:'Trener AI: pełny widok i głębsza analiza', text:'Karta „Trener AI” otwiera teraz pełny widok zamiast rozwijania w miejscu — krótkie podsumowanie treningu, komentarz o ćwiczeniach ze spadkiem sił lub realnym postępem, i czytelna lista konkretnych wskazówek na następny trening, jedna pod drugą. W panelu konta możesz ustawić swój cel treningowy i czego unikać (np. kontuzje) — Trener AI dopasuje sugestie do tego.'},
     ],
     en: [
-      {featured:true, icon:'sparks', badge:'Update', title:'AI Trainer: full view and deeper analysis', text:'The "Trener AI" card now opens a full view instead of expanding in place — a short workout recap, a note on exercises that faded or genuinely progressed, and a clear list of specific tips for your next session. You can also set your training goal and what to avoid (e.g. injuries) in the account panel — the AI Trainer tailors its suggestions to that.'},
+      {featured:true, ai:true, icon:'sparks', badge:'Update', title:'AI Trainer: full view and deeper analysis', text:'The "Trener AI" card now opens a full view instead of expanding in place — a short workout recap, a note on exercises that faded or genuinely progressed, and a clear list of specific tips for your next session. You can also set your training goal and what to avoid (e.g. injuries) in the account panel — the AI Trainer tailors its suggestions to that.'},
     ],
   },
   "4.37.0": {
     pl: [
-      {featured:true, icon:'sparks', badge:'Nowość', title:'Trener AI na Dashboardzie', text:'Nowa czarna karta „Trener AI”, zaraz pod podsumowaniem tygodnia. Rozwiń ją, żeby zobaczyć krótkie podsumowanie ostatniego treningu i konkretną sugestię na następny — na przykład ile dorzucić do konkretnego ćwiczenia. Widoczna tylko po zalogowaniu.'},
+      {featured:true, ai:true, icon:'sparks', badge:'Nowość', title:'Trener AI na Dashboardzie', text:'Nowa czarna karta „Trener AI”, zaraz pod podsumowaniem tygodnia. Rozwiń ją, żeby zobaczyć krótkie podsumowanie ostatniego treningu i konkretną sugestię na następny — na przykład ile dorzucić do konkretnego ćwiczenia. Widoczna tylko po zalogowaniu.'},
     ],
     en: [
-      {featured:true, icon:'sparks', badge:'New', title:'AI Trainer on the Dashboard', text:'A new black "Trener AI" card, right under the weekly summary. Expand it for a short recap of your last workout and a concrete suggestion for the next one — like how much to add to a specific exercise. Only visible when signed in.'},
+      {featured:true, ai:true, icon:'sparks', badge:'New', title:'AI Trainer on the Dashboard', text:'A new black "Trener AI" card, right under the weekly summary. Expand it for a short recap of your last workout and a concrete suggestion for the next one — like how much to add to a specific exercise. Only visible when signed in.'},
     ],
   },
   "4.36.0": {
@@ -5616,19 +5624,54 @@ function pendingChangelogItems(){
 // featured. A featured entry's title/text drives the card; any plain-
 // string entries in the same version render as a bullet list under it
 // (or ARE the whole card body, for a version with no featured entry).
+// One featured entry -> one title+text block; ties multiple entries in the
+// same card together with a divider instead of only ever showing the first.
+function renderFeaturedBlock(f, isFirstInCard){
+  const titleCls = isFirstInCard ? 'wnv2-card-title' : 'wnv2-card-title wnv2-card-title--stacked';
+  return `<p class="${titleCls}">${f.title}</p><p class="wnv2-card-text">${f.text}</p>`;
+}
+// AI-related changelog entries (entry.ai:true) render in their OWN black
+// "Trener AI"-styled card, separate from whatever else shipped in the same
+// version (Maciej, 2026-09-17: "tylko zmiany, dodatki w aplikacji związane
+// z AI" na czarnym boxie, "jeśli... jedna z AI i jedna bez, rozbijemy na
+// dwa boxy") — so a version can render 0, 1, or 2 cards depending on what's
+// in it, instead of always exactly one.
 function renderWhatsNewCard(v, isFirst){
   const items = changelogEntries(v);
-  const featured = items.find(i => i && typeof i === 'object' && i.featured);
-  const strings = items.filter(i => typeof i === 'string');
-  const listHtml = strings.length ? `<ul class="wnv2-card-list">${strings.map(s=>`<li>${s}</li>`).join('')}</ul>` : '';
-  const title = featured ? featured.title : t('whatsnewVersion','Wersja ' + v, v);
-  const bodyHtml = featured ? `<p class="wnv2-card-text">${featured.text}</p>${listHtml}` : listHtml;
-  return `
-    <div class="wnv2-card${isFirst?' hero':''}" data-version="${v}">
-      <p class="wnv2-card-version">v.${v}</p>
-      <p class="wnv2-card-title">${title}</p>
-      ${bodyHtml}
-    </div>`;
+  const featuredItems = items.filter(i => i && typeof i === 'object' && i.featured);
+  const stringItems = items.filter(i => typeof i === 'string');
+  const aiFeatured = featuredItems.filter(f => f.ai);
+  const restFeatured = featuredItems.filter(f => !f.ai);
+  const cards = [];
+
+  if(aiFeatured.length){
+    cards.push(`
+      <div class="wnv2-card wnv2-card--ai" data-version="${v}">
+        <p class="wnv2-card-version">v.${v}</p>
+        ${aiFeatured.map((f,i)=>renderFeaturedBlock(f, i===0)).join('')}
+      </div>`);
+  }
+
+  if(restFeatured.length || stringItems.length){
+    const listHtml = stringItems.length ? `<ul class="wnv2-card-list">${stringItems.map(s=>`<li>${s}</li>`).join('')}</ul>` : '';
+    const bodyHtml = restFeatured.length
+      ? restFeatured.map((f,i)=>renderFeaturedBlock(f, i===0)).join('') + listHtml
+      : `<p class="wnv2-card-title">${t('whatsnewVersion','Wersja ' + v, v)}</p>${listHtml}`;
+    cards.push(`
+      <div class="wnv2-card${isFirst?' hero':''}" data-version="${v}">
+        <p class="wnv2-card-version">v.${v}</p>
+        ${bodyHtml}
+      </div>`);
+  }
+
+  if(!cards.length){
+    cards.push(`
+      <div class="wnv2-card${isFirst?' hero':''}" data-version="${v}">
+        <p class="wnv2-card-version">v.${v}</p>
+        <p class="wnv2-card-title">${t('whatsnewVersion','Wersja ' + v, v)}</p>
+      </div>`);
+  }
+  return cards.join('');
 }
 function renderWhatsNew(){
   const list = document.getElementById('whatsnewList');
