@@ -3192,6 +3192,13 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
             <button type="button" class="plansv2-choice-chip" data-compound="0" onclick="setNewExType(0)">Izolowane</button>
           </div>
         </div>
+        <div class="plansv2-customize-section">
+          <p class="plansv2-customize-label">Sprzęt</p>
+          <div class="plansv2-choice-row" id="newExEquipRowV2">
+            <button type="button" class="plansv2-choice-chip active" data-bodyweight="0" onclick="setNewExEquip(0)">Z obciążeniem</button>
+            <button type="button" class="plansv2-choice-chip" data-bodyweight="1" onclick="setNewExEquip(1)">Kalistenika</button>
+          </div>
+        </div>
         <div class="newex-v2-bento">
           <div class="newex-v2-bento-row">
             <p class="newex-v2-bento-label">Serie</p>
@@ -4110,8 +4117,8 @@ const GYM_PLAN = {
 const GYM_PLAN_C_EXTRA = [
   {name:"Preacher Curl", group:"Biceps", sets:2, repLow:10, repHigh:12, rest:"60s", icon:"preacher_curl", equipment:"maszyny"},
   {name:"Overhead Triceps", group:"Triceps", sets:2, repLow:10, repHigh:12, rest:"60s", icon:"overhead_triceps", equipment:"hantle"},
-  {name:"Hanging Leg Raise", group:"Brzuch", sets:3, repLow:10, repHigh:15, rest:"45-60s", icon:"hanging_leg_raise", equipment:"maszyny"},
-  {name:"Captain's Chair Raise", group:"Brzuch", sets:3, repLow:10, repHigh:15, rest:"45-60s", icon:"captains_chair_raise", equipment:"maszyny"},
+  {name:"Hanging Leg Raise", group:"Brzuch", sets:3, repLow:10, repHigh:15, rest:"45-60s", icon:"hanging_leg_raise", equipment:"masa ciała"},
+  {name:"Captain's Chair Raise", group:"Brzuch", sets:3, repLow:10, repHigh:15, rest:"45-60s", icon:"captains_chair_raise", equipment:"masa ciała"},
   {name:"Dumbbell Shoulder Press", group:"Barki", sets:3, repLow:8, repHigh:12, rest:"75-90s", icon:"dumbbell_shoulder_press", equipment:"hantle"},
   {name:"Dumbbell Walking Lunge", group:"Nogi (uda, pośladki)", sets:3, repLow:10, repHigh:12, rest:"75-90s", icon:"walking_lunge", equipment:"hantle"},
   {name:"Back Extension", group:"Plecy (dół, całość)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"back_extension", equipment:"maszyny"},
@@ -4157,6 +4164,7 @@ const GYM_PLAN_KALISTENIKA = [
   {name:"Handstand Push-up", group:"Barki", sets:3, repLow:5, repHigh:8, rest:"90-120s", icon:"handstand_push_up", equipment:"masa ciała"},
   {name:"Plank", group:"Brzuch", sets:3, repLow:30, repHigh:60, rest:"45-60s", icon:"plank", equipment:"masa ciała"},
   {name:"Crunch", group:"Brzuch", sets:3, repLow:15, repHigh:20, rest:"45-60s", icon:"crunch", equipment:"masa ciała"},
+  {name:"Dead Hang", group:"Brzuch", sets:3, repLow:20, repHigh:40, rest:"45-60s", icon:"pull_up", equipment:"masa ciała"},
   {name:"Glute Bridge", group:"Pośladki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"glute_bridge", equipment:"masa ciała"},
   {name:"Calf Raise (Bodyweight)", group:"Łydki", sets:3, repLow:15, repHigh:20, rest:"45-60s", icon:"calf_raise_bodyweight", equipment:"masa ciała"},
 ];
@@ -5131,7 +5139,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.39.0";
+const APP_VERSION = "4.39.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6481,6 +6489,15 @@ function todayPlanExerciseNames(){
   const list = plan.schedule[dayKeyFromDate(todayStr())];
   return (list && list.length) ? list : null;
 }
+// Same shape as todayPlanExerciseNames() (list of {name,...}), but reflects
+// what's actually on today's GYM grid — in "Powtórz ostatni trening" mode
+// that's repeatMode.names, not the starred plan (which may be unrelated to
+// what's being repeated). Used anywhere we need "today's other exercises"
+// for swap/picker exclusion logic.
+function todayGridExerciseNames(){
+  if(repeatMode) return repeatMode.names.map(name=>({name}));
+  return todayPlanExerciseNames();
+}
 /* Old #view-gym grid + inline set-logging popup were deleted in the L5
    teardown. Every "session changed, repaint" caller still calls
    renderGymGrid() / renderExercisePanels(); both are now aliases to the
@@ -6494,8 +6511,8 @@ function renderExercisePanels(){ renderGymDoneV2(); }
    sessionExercises / saveWorkout data layer.
    ============================================================ */
 function onTileTapV2(ex){
-  markGymActivity();
   if(ex.type === 'checklist'){
+    markGymActivity(); // toggling a checklist tile IS the logged action, unlike opening a regular popup below
     const already = sessionExercises.find(e=>e.name===ex.name);
     if(already) removeExerciseFromSession(ex.name);
     else { sessionExercises.push({...ex, done:true}); persistGymSession(); renderGymGrid(); renderExercisePanels(); }
@@ -6514,8 +6531,10 @@ function removeExerciseFromSession(name){
 }
 let exv2CloseTimer = null; // pending hide from a close animation still playing, see closeExercisePopupV2()
 function openExercisePopupV2(ex){
-  // Same fix as openExercisePopup() above — see comment there.
-  markGymActivity();
+  // Opening the popup is just a preview (e.g. checking the AI trainer tip)
+  // until sets are actually logged — markGymActivity() fires from
+  // confirmExercisePopupV2() instead, so browsing tiles pre-workout can't
+  // start/freeze the session clock (Maciej, 2026-09-17).
   if(exv2CloseTimer){ clearTimeout(exv2CloseTimer); exv2CloseTimer = null; } // reopening mid-close-animation — cut it short
   const already = sessionExercises.find(e=>e.name===ex.name);
   // "Powtórz ostatni trening": a not-yet-logged exercise opens with that
@@ -6666,7 +6685,7 @@ function swapEquipLabel(key){
 }
 function swapAlternatives(){
   const lib = orderedExerciseLibrary();
-  const planEx = todayPlanExerciseNames() || [];
+  const planEx = todayGridExerciseNames() || [];
   const origin = lib.find(e=>e.name===swapOriginName)
     || planEx.find(e=>e.name===swapOriginName) || null;
   if(!origin) return { origin:null, bucket:null, list:[] };
@@ -6764,7 +6783,7 @@ function setSwapEquipV2(key){
   refreshSwapListArea();
 }
 function openSwapSheetV2(originName){
-  const planEx = todayPlanExerciseNames() || [];
+  const planEx = todayGridExerciseNames() || [];
   if(!planEx.some(e=>e.name===originName)) return;
   if(sessionExercises.some(e=>{
     const disp = todaySwaps[originName] ? todaySwaps[originName].name : originName;
@@ -6776,7 +6795,6 @@ function openSwapSheetV2(originName){
   swapOriginName = originName;
   swapEquipFilter = 'all';
   swapPickName = todaySwaps[originName] ? todaySwaps[originName].name : null;
-  markGymActivity();
   renderSwapSheetV2();
   mSheetOpenReset('swapExerciseOverlayV2');
   document.getElementById('swapExerciseOverlayV2').classList.remove('hidden');
@@ -6906,8 +6924,10 @@ function confirmExercisePopupV2(){
     }
   } else if(idx===-1){
     sessionExercises.push(popupExercise);
+    markGymActivity(); // real logged data — this is what should start/extend the session clock, not opening the popup
   } else {
     sessionExercises[idx] = popupExercise;
+    markGymActivity();
   }
   persistGymSession();
   closeExercisePopupV2();
@@ -7030,15 +7050,26 @@ function renderExercisePopupV2(animate){
    completely untouched. */
 let newExerciseContextV2 = 'gym';
 let _newExCompound = true;
+let _newExBodyweight = false;
 function setNewExType(c){
   _newExCompound = Number(c) === 1;
   document.querySelectorAll('#newExTypeRowV2 .plansv2-choice-chip')
     .forEach(b => b.classList.toggle('active', Number(b.dataset.compound) === Number(c)));
 }
+// "Kalistenika" here is exactly isBodyweightEx's equipment:"masa ciała" check
+// (see confirmExercisePopupV2 / renderExercisePopupV2's series cards) — picking
+// it means the set-logging popup shows reps only, no kg field, same as the
+// built-in bodyweight exercises.
+function setNewExEquip(bw){
+  _newExBodyweight = Number(bw) === 1;
+  document.querySelectorAll('#newExEquipRowV2 .plansv2-choice-chip')
+    .forEach(b => b.classList.toggle('active', Number(b.dataset.bodyweight) === Number(bw)));
+}
 function openNewExerciseFormV2(prefillGroup, context){
   newExerciseContextV2 = context || 'gym';
   document.getElementById('newExTitleV2').value = '';
   setNewExType(1);
+  setNewExEquip(0);
   // prefillGroup comes from PLAN_EX_GROUPS' own pl label (see
   // buildAddCustomExerciseTile()), which is exactly the <option> value
   // set — a direct match, no fallback needed. Falls back to the
@@ -7068,7 +7099,7 @@ function saveNewExerciseV2(){
   const sets = Math.max(1, parseInt(document.getElementById('newExSetsV2').value) || 3);
   let repLow = Math.max(1, parseInt(document.getElementById('newExRepLowV2').value) || 8);
   let repHigh = Math.max(repLow, parseInt(document.getElementById('newExRepHighV2').value) || 12);
-  const newEx = {name, group, sets, repLow, repHigh, rest:t('asNeeded',"wg uznania"), icon: null, compound: _newExCompound};
+  const newEx = {name, group, sets, repLow, repHigh, rest:t('asNeeded',"wg uznania"), icon: null, compound: _newExCompound, equipment: _newExBodyweight ? 'masa ciała' : null};
   customExercises.push(newEx);
   saveCustomExercises(customExercises);
   trackEvent('/event/add-custom-exercise', 'Dodano własne ćwiczenie');
@@ -7140,7 +7171,7 @@ function togglePickerExerciseV2(ex){
 function renderExercisePickerGridV2(animate){
   const container = document.getElementById('pickExerciseGridV2');
   if(!container) return;
-  const planEx = todayPlanExerciseNames() || [];
+  const planEx = todayGridExerciseNames() || [];
   const alreadyVisible = new Set([...planEx.map(e=>e.name), ...extraGymTiles.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
   let lib = orderedExerciseLibrary().filter(ex=>!alreadyVisible.has(ex.name));
   if(pickExerciseEquipFilterV2 !== 'all'){
@@ -9703,10 +9734,15 @@ function renderGymGridV2(animate){
       .map(e=>({ ex: byName.get(e.name) || e, swapOrigin: null, swapped: false, bookend: true }));
     const repeatSlots = repeatMode.names
       .filter(name=> !BOOKEND_EX_NAMES.has(name))
-      .map(name=>({
-        ex: byName.get(name) || { name, group:'', sets: (repeatMode.prefill[name]||[]).length || 3, repLow: 8, repHigh: 12, rest: '90s' },
-        swapOrigin: null, swapped: false, bookend: false
-      }));
+      .map(name=>{
+        const sw = todaySwaps[name];
+        const fallback = byName.get(name) || { name, group:'', sets: (repeatMode.prefill[name]||[]).length || 3, repLow: 8, repHigh: 12, rest: '90s' };
+        if(sw){
+          const repl = byName.get(sw.name) || sw;
+          return { ex: repl, swapOrigin: name, swapped: true, bookend: false };
+        }
+        return { ex: fallback, swapOrigin: name, swapped: false, bookend: false };
+      });
     planSlots = [...bookends, ...repeatSlots];
   } else {
     const planEx = todayPlanExerciseNames() || [];
@@ -9737,8 +9773,9 @@ function renderGymGridV2(animate){
     const state = inSession ? 'added' : (isExtra ? 'picked' : 'plain');
     // swap control only on a plain plan exercise not yet logged, and not a
     // warm-up / stretch bookend (Maciej Q4: once it has logged sets you've
-    // committed to it, so no swap then). Not in "Powtórz" mode either.
-    const canSwap = !repeatMode && slot.swapOrigin && !slot.bookend && ex.type !== 'checklist' && !inSession;
+    // committed to it, so no swap then). Available in "Powtórz" mode too —
+    // slot.swapOrigin is set for repeat slots as well (see repeatSlots above).
+    const canSwap = slot.swapOrigin && !slot.bookend && ex.type !== 'checklist' && !inSession;
     const btn = buildExerciseTileV2(ex, state, canSwap ? { swapOrigin: slot.swapOrigin, swapped: slot.swapped } : null);
     btn.classList.add('gymv2-tile');
     btn.onclick = ()=> onTileTapV2(ex);
