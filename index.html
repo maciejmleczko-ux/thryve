@@ -750,6 +750,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-rows--ai .acct-row .acct-v{color:rgba(255,255,255,.6);}
 .acct-rows--ai .acct-row:active{background:rgba(255,255,255,.08);}
 .acct-hint{margin:7px 3px 0;font-size:var(--m-fs-2xs);color:var(--m-muted);}
+.acct-row.danger,.acct-row.danger .acct-lead .ph{color:#c00;}
 .acct-foot{margin:auto 0 0;padding-top:18px;font-size:var(--m-fs-2xs);color:var(--m-muted);text-align:center;line-height:1.5;}
 /* above the account panel (95) AND the GYM finish screen (9500) — weight /
    edit-kcal sheets can be opened straight from the finish screen. */
@@ -2733,6 +2734,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="acct-rows">
       <button type="button" class="acct-row" onclick="closeAccountPanel(); openFeedbackV2();"><span class="acct-lead"><span class="ph" data-ph="chat-dots"></span>Podziel się opinią</span><span class="acct-v"></span></button>
       <button type="button" class="acct-row" onclick="openChangelogHistorySheet()"><span class="acct-lead"><span class="ph" data-ph="clock-counter-clockwise"></span>Historia zmian</span><span class="acct-v" id="acctChlVer"></span></button>
+    </div>
+    <div id="acctDangerZone" hidden>
+      <p class="acct-sec">Usuwanie konta</p>
+      <div class="acct-rows">
+        <button type="button" class="acct-row danger" onclick="deleteAccountV2()"><span class="acct-lead"><span class="ph" data-ph="trash"></span>Usuń konto</span><span class="acct-v"></span></button>
+      </div>
     </div>
     <p class="acct-foot">Mekkio <span id="acctVer"></span> · <span id="acctFootData">dane treningowe tylko na tym urządzeniu</span></p>
   </div>
@@ -4845,20 +4852,24 @@ function dismissCloudReminder(){
 function renderAcctCloudCard(){
   const cta = document.getElementById('acctCloudCta');
   const signedBox = document.getElementById('acctCloudSignedIn');
+  const danger = document.getElementById('acctDangerZone');
   if(!cta || !signedBox) return;
   if(!SUPABASE_CONFIGURED){
     cta.hidden = true;
     signedBox.hidden = true;
+    if(danger) danger.hidden = true;
     return;
   }
   if(cloudSession && cloudSession.user){
     cta.hidden = true;
     signedBox.hidden = false;
+    if(danger) danger.hidden = false;
     const emailEl = document.getElementById('acctCloudEmail');
     if(emailEl) emailEl.textContent = cloudSession.user.email || '';
   } else {
     cta.hidden = false;
     signedBox.hidden = true;
+    if(danger) danger.hidden = true;
   }
 }
 
@@ -4983,6 +4994,45 @@ async function signOutCloud(){
   await supabaseClient.auth.signOut();
   renderAccountPanel();
   toast('Wylogowano');
+}
+
+/* ---------- Usuwanie konta (RODO — prawo do bycia zapomnianym) ----------
+   Kasuje auth.users przez Edge Function z service_role (klient nie ma i nie
+   może mieć tego klucza) — cascade w supabase-schema.sql zabiera przy okazji
+   profiles/plans/workouts/ai_usage. Po sukcesie czyścimy też lokalny cache,
+   bo inaczej apka po restarcie pokazałaby dane usuniętego konta jako "dane
+   gościa". Pełny reload zamiast ręcznego resetu ~15 tablic w pamięci —
+   prostsze i bezpieczniejsze niż dorenderowywanie każdego widoku z osobna. */
+const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/delete-account';
+
+async function deleteAccountV2(){
+  if(!cloudSession || !cloudSession.access_token) return;
+  if(!confirm('Na pewno usunąć konto? Tego nie da się cofnąć. Stracisz dostęp do historii i planów w chmurze na wszystkich urządzeniach.')) return;
+  try {
+    const res = await fetch(DELETE_ACCOUNT_URL, {
+      method: 'POST',
+      headers: { 'authorization': 'Bearer ' + cloudSession.access_token },
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok){
+      toast(data.error === 'invalid_auth' ? 'Sesja wygasła, zaloguj się ponownie' : 'Nie udało się usunąć konta');
+      return;
+    }
+    await supabaseClient.auth.signOut();
+    clearAllLocalUserData();
+    location.reload();
+  } catch(e){
+    console.error('deleteAccountV2 failed', e);
+    toast('Błąd sieci, spróbuj ponownie');
+  }
+}
+
+function clearAllLocalUserData(){
+  [LS_WORKOUTS, LS_RUNS, LS_CUSTOM_EX, LS_PROFILE_NAME, LS_TRAINING_PLANS, LS_STARRED_PLAN,
+   LS_DELETED_BUILTIN_PLANS, LS_WEIGHT_LOG, LS_BODY_DATA, LS_AVATAR, LS_EXERCISE_NOTES,
+   LS_FAVORITE_EXERCISES, LS_EXERCISE_ORDER, LS_KCAL_FACTOR, LS_GYM_SESSION_TIMING,
+   LS_GYM_SESSION_DRAFT, LS_GYM_TODAY_SWAPS, LS_AI_LAST_WORKOUT_SUMMARY, LS_CLOUD_REMINDER_LAST,
+  ].forEach(k => localStorage.removeItem(k));
 }
 
 /* ---------- "Historia zmian" sheet (account panel → Aplikacja) ----------
@@ -5139,7 +5189,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.39.1";
+const APP_VERSION = "4.40.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5188,6 +5238,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.40.0": {
+    pl: [
+      'W panelu konta jest teraz opcja usunięcia konta — kasuje Twoje dane w chmurze (treningi, plany, profil) bezpowrotnie, na wszystkich urządzeniach.',
+    ],
+    en: [
+      'The account panel now has an option to delete your account — this permanently removes your cloud data (workouts, plans, profile) on every device.',
+    ],
+  },
   "4.39.0": {
     pl: [
       {featured:true, ai:true, icon:'sparks', badge:'Nowość', title:'Sugestie Trenera AI przy ćwiczeniach w GYM', text:'Jeśli Trener AI wskazał dla danego ćwiczenia konkretną wskazówkę na następny trening, zobaczysz ją teraz od razu w oknie logowania serii — fioletowa etykieta „Sugestia Trenera AI” zamiast zwykłej wskazówki. Dla pozostałych ćwiczeń bez zmian.'},
