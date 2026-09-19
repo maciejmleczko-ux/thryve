@@ -5191,7 +5191,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.41.1";
+const APP_VERSION = "4.41.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -9797,10 +9797,11 @@ function renderGymGridV2(animate){
   let planSlots;
   if(repeatMode){
     // "Powtórz ostatni trening": the grid is exactly that workout's
-    // exercises (in order) plus the plan's warm-up/stretch bookends —
-    // nothing else from the plan.
-    const bookends = (todayPlanExerciseNames() || []).filter(e=> BOOKEND_EX_NAMES.has(e.name))
-      .map(e=>({ ex: byName.get(e.name) || e, swapOrigin: null, swapped: false, bookend: true }));
+    // exercises (in order), always wrapped in warm-up first / stretching
+    // last (Maciej, 2026-09-19) — regardless of whether the starred plan
+    // has them, or there is a plan at all.
+    const mkBookend = e=>({ ex: byName.get(e.name) || e, swapOrigin: null, swapped: false, bookend: true });
+    const warmupSlot = mkBookend(WARMUP_EXERCISE), stretchSlot = mkBookend(STRETCH_EXERCISE);
     const repeatSlots = repeatMode.names
       .filter(name=> !BOOKEND_EX_NAMES.has(name))
       .map(name=>{
@@ -9812,7 +9813,7 @@ function renderGymGridV2(animate){
         }
         return { ex: fallback, swapOrigin: name, swapped: false, bookend: false };
       });
-    planSlots = [...bookends, ...repeatSlots];
+    planSlots = [warmupSlot, ...repeatSlots, stretchSlot];
   } else {
     const planEx = todayPlanExerciseNames() || [];
     // Resolve any "Zamień na dziś" swaps: a swapped plan slot shows the
