@@ -5191,7 +5191,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.41.0";
+const APP_VERSION = "4.41.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6606,11 +6606,12 @@ function openExercisePopupV2(ex){
   if(exv2CloseTimer){ clearTimeout(exv2CloseTimer); exv2CloseTimer = null; } // reopening mid-close-animation — cut it short
   const already = sessionExercises.find(e=>e.name===ex.name);
   // "Powtórz ostatni trening": a not-yet-logged exercise opens with that
-  // workout's weights/reps already filled in.
+  // workout's set count but EMPTY fields — filled values also lit every
+  // series' tick, so the exercise looked already done (Maciej, 2026-09-19).
+  // The previous weights/reps still show as greyed placeholders (lastSets
+  // in renderExercisePopupV2).
   const pre = (!already && repeatMode && repeatMode.prefill[ex.name]) || null;
-  const freshSets = (pre && pre.length)
-    ? pre.map(s=>({ weight: String(s.weight ?? ''), reps: String(s.reps ?? '') }))
-    : Array.from({length:ex.sets},()=>({weight:'',reps:''}));
+  const freshSets = Array.from({length: (pre && pre.length) || ex.sets},()=>({weight:'',reps:''}));
   popupExercise = already
     ? {...already, setValues: already.setValues.map(s=>({...s}))}
     : {...ex, sets: freshSets.length || ex.sets, setValues: freshSets, rpe:'', notes:''};
