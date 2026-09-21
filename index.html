@@ -5191,7 +5191,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.41.3";
+const APP_VERSION = "4.41.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6158,6 +6158,26 @@ function goRoute(route){
       nav.style.display = currentRoute==='welcome' ? 'none' : 'flex';
     }, 60);
   });
+})();
+/* ---------- status-bar tint follows the open popup ----------
+   iOS 27 (standalone PWA) draws its own soft edge under the status bar in
+   the page's theme-color, so a dark popup over the light app left a pale
+   strip along the top (Maciej, 2026-09-21). While html.modal-lock is set
+   (every overlay/sheet sets it), swap theme-color to the backdrop's rough
+   colour, and restore it when the last popup closes. Device-only behaviour
+   — can't be reproduced in a desktop browser. */
+(function statusBarTintForModals(){
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(!meta) return;
+  const LIGHT = meta.getAttribute('content');
+  const root = document.documentElement;
+  function sync(){
+    if(!root.classList.contains('modal-lock')){ meta.setAttribute('content', LIGHT); return; }
+    // sheets/"Co nowego" use a slate blurred backdrop; the rest is near-black
+    const slate = document.querySelector('.m-sheet-overlay:not(.hidden), .wnv2-overlay:not(.hidden)');
+    meta.setAttribute('content', slate ? '#4a4d53' : '#232324');
+  }
+  new MutationObserver(sync).observe(root, {attributes:true, attributeFilter:['class']});
 })();
 /* ---------- keep .onboard-overlay pinned to the real visible area ----------
    position:fixed + inset:0 can still misbehave on iOS when the keyboard
