@@ -48,6 +48,8 @@
 }
 
 :root{
+  /* top inset + 5px extra so headers sit clear of the iOS 27 status-bar blur band (one knob) */
+  --top-inset:calc(env(safe-area-inset-top, 0px) + 5px);
   --bg:#2c2727;
   --card:#5d5b5b;
   --card-2:#3e3939;
@@ -180,11 +182,11 @@ button{font-family:inherit;}
 .app{max-width:440px;margin:0 auto;position:relative;min-height:100vh;padding-bottom:110px;}
 
 /* ---------- header ---------- */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(16px + env(safe-area-inset-top, 0px)) 20px 0;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(16px + var(--top-inset)) 20px 0;}
 .topbar.hidden{display:none;}
 .brand-mark{display:flex;align-items:center;}
 .logo-svg{height:53px;width:auto;display:block;color:#fff;}
-.topbar.topbar-light{background:var(--light);margin:0;padding:calc(16px + env(safe-area-inset-top, 0px)) 20px 0;border-radius:0;}
+.topbar.topbar-light{background:var(--light);margin:0;padding:calc(16px + var(--top-inset)) 20px 0;border-radius:0;}
 .topbar.topbar-light .logo-svg{color:var(--orange);}
 .plan-pill{background:var(--orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:11px 16px;max-width:210px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:var(--m-fs-base);letter-spacing:.32px;font-weight:700;cursor:pointer;transition:transform .12s ease;flex-shrink:0;}
 .plan-pill:active{transform:scale(.94);}
@@ -287,7 +289,7 @@ button{font-family:inherit;}
 /* panel is now a flex column: topbar / body (centred) / CTA — the old
    absolute .gymfin-center + full-screen .gymfin-fx confetti image are gone,
    replaced by the Lottie "success" animation + a session summary. */
-.gymfin-panel{position:absolute;inset:0;background:var(--m-panel);border-radius:0 0 26px 26px;overflow:hidden;display:flex;flex-direction:column;padding:calc(20px + env(safe-area-inset-top,0px)) 20px 24px;}
+.gymfin-panel{position:absolute;inset:0;background:var(--m-panel);border-radius:0 0 26px 26px;overflow:hidden;display:flex;flex-direction:column;padding:calc(20px + var(--top-inset)) 20px 24px;}
 .gymfin-topbar{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .gymfin-brand{display:flex;align-items:center;gap:14px;}
 .gymfin-brand .ph{width:34px;height:34px;color:var(--m-orange);display:block;}
@@ -580,7 +582,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 
 /* ---------- calendar (history) ---------- */
 .cal-wrap{background:var(--orange);border-radius:0 0 24px 24px;margin:0 0 32px;padding:20px;}
-.topbar.topbar-orange{background:var(--orange);margin:0;padding:calc(16px + env(safe-area-inset-top, 0px)) 20px 0;border-radius:0;}
+.topbar.topbar-orange{background:var(--orange);margin:0;padding:calc(16px + var(--top-inset)) 20px 0;border-radius:0;}
 .topbar.topbar-orange .plan-pill{background:#fff;color:var(--orange);}
 .header-row.on-orange{background:var(--orange);margin:0;padding:32px 20px 4px;}
 .cal-head{display:flex;align-items:center;justify-content:space-between;color:#fff;}
@@ -689,7 +691,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 /* ---------- account panel (guest, no backend) ---------- */
 .acct-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:95;display:flex;justify-content:flex-end;}
 .acct-overlay.hidden{display:none;}
-.acct-panel{background:var(--m-panel);width:min(420px,100%);height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(14px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;}
+.acct-panel{background:var(--m-panel);width:min(420px,100%);height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(14px + var(--top-inset)) 18px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;}
 /* every block keeps its natural height — otherwise flexbox shrinks the tall
    cards to fit the viewport (rows clip under .acct-rows overflow:hidden) and
    the panel never scrolls. flex-shrink:0 makes overflow-y:auto do its job. */
@@ -975,7 +977,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    20px bottom offset + ~82px height + 24px breathing room, so the week
    card's bottom line sits 24px above the menu. renderDashboard() sizes its
    scroll check off the natural content height, not this padded box. */
-.dash-root{position:relative;display:flex;flex-direction:column;min-height:100dvh;box-sizing:border-box;padding:calc(16px + env(safe-area-inset-top,0px)) 10px 126px;}
+.dash-root{position:relative;display:flex;flex-direction:column;min-height:100dvh;box-sizing:border-box;padding:calc(16px + var(--top-inset)) 10px 126px;}
 /* Scrollable state only (content genuinely overflows, e.g. "Trener AI"
    expanded on a short phone): .dash-root's own 126px was tuned for the
    PINNED case above (margin-top:auto collapses the slack, last tile
@@ -1003,7 +1005,7 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
   width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);
   display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;flex-shrink:0;
 }
-.dash-chat-btn{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:10px;}
+.dash-chat-btn{position:absolute;top:calc(16px + var(--top-inset));right:10px;}
 .gymv2-chat-btn, .histv2-chat-btn{margin-left:auto;}
 .dash-chat-btn:active, .gymv2-chat-btn:active, .plansv2-chat-btn:active, .histv2-chat-btn:active, .statsv2-chat-btn:active{transform:scale(.9);}
 .dash-chat-btn .ph, .gymv2-chat-btn .ph, .plansv2-chat-btn .ph, .histv2-chat-btn .ph, .statsv2-chat-btn .ph{width:24px;height:24px;color:var(--m-orange);}
@@ -1121,7 +1123,7 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
    viewport height while its URL bar is up, so a media query fires this on
    big phones too (17 Pro in a browser tab). renderDashboard() adds
    .dash-compact only when the real content actually overflows. */
-html.dash-compact .dash-root{padding-top:calc(12px + env(safe-area-inset-top,0px));}
+html.dash-compact .dash-root{padding-top:calc(12px + var(--top-inset));}
 html.dash-compact .dash-header{margin-bottom:18px;}
 html.dash-compact .dash-headline{font-size:var(--m-fs-xl);line-height:1.1;}
 html.dash-compact .dash-hero{padding:12px;}
@@ -1166,7 +1168,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    it has far more content than fits one iPhone screen.
    ============================================================ */
 #view-gym-v2{min-height:100vh;background:var(--m-panel);}
-.gymv2-panel{background:var(--m-panel);border-radius:0 0 26px 26px;padding:calc(16px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
+.gymv2-panel{background:var(--m-panel);border-radius:0 0 26px 26px;padding:calc(16px + var(--top-inset)) 10px 28px;position:relative;}
 /* Screen header — one spec for GYM / Plans / History / Stats (audit W5).
    Plans + Stats wrap the icon+h1 in a .*-header-title (their .*-header is a
    space-between row); GYM + History put it straight on .*-header.
@@ -1351,7 +1353,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 #view-plans-v2{min-height:100vh;background:var(--m-panel);}
 .plansv2-root .ph{display:block;}
 .plansv2-root .ph svg{display:block;width:100%;height:100%;}
-.plansv2-panel{padding:calc(16px + env(safe-area-inset-top,0px)) 10px 28px;position:relative;}
+.plansv2-panel{padding:calc(16px + var(--top-inset)) 10px 28px;position:relative;}
 .plansv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
 .plansv2-close{width:24px;height:24px;color:var(--m-ink);cursor:pointer;flex-shrink:0;}
 .plansv2-actions{display:flex;gap:10px;width:100%;margin-bottom:24px;}
@@ -1874,7 +1876,7 @@ body.pev2-bg{background:var(--m-panel);}
    256 viewBox instead of duplicating new ones at the Figma export's
    24 viewBox. */
 .histv2-root{background:var(--m-panel);}
-.histv2-panel{padding:calc(16px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
+.histv2-panel{padding:calc(16px + var(--top-inset)) 10px 40px;position:relative;}
 /* Aligned to GYM v2/Plans v2's header exactly (40px icon, 30.654px
    title, -.02em tracking) — the Figma export's own 55.18px/30px/+1.2px
    for History read as an outlier from that specific export rather than
@@ -2015,7 +2017,7 @@ body.pev2-bg{background:var(--m-panel);}
    running-best WEIGHT over time, not volume — relabeled "PROGRES
    CIĘŻARU" to match what the chart actually shows. */
 .statsv2-root{background:var(--m-panel);}
-.statsv2-panel{padding:calc(16px + env(safe-area-inset-top,0px)) 10px 40px;position:relative;}
+.statsv2-panel{padding:calc(16px + var(--top-inset)) 10px 40px;position:relative;}
 .statsv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .statsv2-cards{display:flex;flex-direction:column;gap:8px;}
 /* overview chart carousel — a transform track dragged with the finger
@@ -5191,7 +5193,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.41.8";
+const APP_VERSION = "4.41.9";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
