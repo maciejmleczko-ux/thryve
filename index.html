@@ -5191,7 +5191,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.41.4";
+const APP_VERSION = "4.41.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6171,13 +6171,19 @@ function goRoute(route){
   if(!meta) return;
   const LIGHT = meta.getAttribute('content');
   const root = document.documentElement;
+  const splash = document.getElementById('loadScreenV2');
   function sync(){
+    // the full-screen orange load screen (its own layer above everything)
+    if(splash && splash.classList.contains('visible')){ meta.setAttribute('content', '#ff3300'); return; }
     if(!root.classList.contains('modal-lock')){ meta.setAttribute('content', LIGHT); return; }
     // sheets/"Co nowego" use a slate blurred backdrop; the rest is near-black
     const slate = document.querySelector('.m-sheet-overlay:not(.hidden), .wnv2-overlay:not(.hidden)');
     meta.setAttribute('content', slate ? '#4a4d53' : '#232324');
   }
-  new MutationObserver(sync).observe(root, {attributes:true, attributeFilter:['class']});
+  const mo = new MutationObserver(sync);
+  mo.observe(root, {attributes:true, attributeFilter:['class']});
+  if(splash) mo.observe(splash, {attributes:true, attributeFilter:['class']});
+  sync();
 })();
 /* ---------- keep .onboard-overlay pinned to the real visible area ----------
    position:fixed + inset:0 can still misbehave on iOS when the keyboard
