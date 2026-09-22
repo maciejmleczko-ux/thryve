@@ -7541,6 +7541,10 @@ function confirmExercisePickerV2(){
       extraGymTiles.push({...ex});
     }
   });
+  // Same auto-order BUILDER applies to a plan's day — building today's
+  // session ad hoc (no plan, or extras on top of one) shouldn't leave
+  // exercises sitting in whatever order they were tapped.
+  extraGymTiles = sortExercisesByKey(extraGymTiles);
   pickerSelectedV2 = new Set();
   persistGymSession();
   closeExercisePickerV2();
