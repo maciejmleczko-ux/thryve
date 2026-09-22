@@ -3497,9 +3497,9 @@ const T_EN = {
   importChoiceReplace: 'Replace everything',
   imageSaved: 'Image saved to device',
   imageGenFailed: "Couldn't generate the image",
-  noPriorResults: 'No previous results yet — pick a weight so your last set finishes with 1-2 reps in reserve (RPE 7-8), toward the low end of the range.',
-  noPriorResultsVersion: 'First time at this intensity level — pick a weight so your last set finishes with 1-2 reps in reserve (RPE 7-8), toward the low end of the range.',
-  noPriorResultsVersionEst: (kg) => `First time at this intensity level — based on your history, try around ${kg} kg, with 1-2 reps in reserve (RPE 7-8).`,
+  noPriorResults: 'No previous results yet — pick a weight so your last set finishes 1-2 reps before failure (RPE 7-8), toward the low end of the range.',
+  noPriorResultsVersion: 'First time at this intensity level — pick a weight so your last set finishes 1-2 reps before failure (RPE 7-8), toward the low end of the range.',
+  noPriorResultsVersionEst: (kg) => `First time at this intensity level — based on your history, try around ${kg} kg, finishing 1-2 reps before failure (RPE 7-8).`,
   noCompletePriorData: 'No complete data from the last session.',
   suggestUpVersion: (w, target, rl) => `Last time at this intensity level: ${w} kg — add at least 1.25 kg (${target} kg) and drop back to ${rl} reps.`,
   suggestUp: (w, rh, rl) => `Last time ${w} kg × ${rh}+ across all sets — add 2.5–5 kg and drop back to ${rl} reps.`,
@@ -6642,12 +6642,12 @@ function buildSuggestion(exMeta, history){
     const atVersion = history.find(h => h.version === exMeta.version);
     if(!atVersion){
       if(isBodyweightEx){
-        return {cls:'', text:t('noPriorResultsVersionBw','Pierwszy raz na tym poziomie intensywności — zacznij w dolnej granicy zakresu, zostawiając 1-2 powtórzenia w zapasie (RPE 7-8).')};
+        return {cls:'', text:t('noPriorResultsVersionBw','Pierwszy raz na tym poziomie intensywności — zacznij w dolnej granicy zakresu, kończąc 1-2 powtórzenia przed upadkiem mięśniowym (RPE 7-8).')};
       }
       const est = estimateStartingWeight(exMeta.name, exMeta.repLow);
       return {cls:'', text: est
-        ? t('noPriorResultsVersionEst', `Pierwszy raz na tym poziomie intensywności — na podstawie Twoich wyników spróbuj ok. ${est} kg, z zapasem 1-2 powtórzeń (RPE 7-8).`, est)
-        : t('noPriorResultsVersion','Pierwszy raz na tym poziomie intensywności — dobierz ciężar tak, by ostatnia seria kończyła się z zapasem 1-2 powtórzeń (RPE 7-8), w dolnej granicy zakresu.')};
+        ? t('noPriorResultsVersionEst', `Pierwszy raz na tym poziomie intensywności — na podstawie Twoich wyników spróbuj ok. ${est} kg, kończąc 1-2 powtórzenia przed upadkiem mięśniowym (RPE 7-8).`, est)
+        : t('noPriorResultsVersion','Pierwszy raz na tym poziomie intensywności — dobierz ciężar tak, by ostatnia seria kończyła się 1-2 powtórzenia przed upadkiem mięśniowym (RPE 7-8), w dolnej granicy zakresu.')};
     }
     const validSets = atVersion.sets.filter(s=> s.weight>0 || s.reps>0);
     if(!validSets.length){
@@ -6670,8 +6670,8 @@ function buildSuggestion(exMeta, history){
   }
   if(!history.length){
     return {cls:'', text: isBodyweightEx
-      ? t('noPriorResultsBw','Brak wcześniejszych wyników — zacznij w dolnej granicy zakresu powtórzeń, zostawiając 1-2 powtórzenia w zapasie (RPE 7-8).')
-      : t('noPriorResults','Brak wcześniejszych wyników — dobierz ciężar tak, by ostatnia seria kończyła się z zapasem 1-2 powtórzeń (RPE 7-8), w dolnej granicy zakresu.')};
+      ? t('noPriorResultsBw','Brak wcześniejszych wyników — zacznij w dolnej granicy zakresu powtórzeń, kończąc 1-2 powtórzenia przed upadkiem mięśniowym (RPE 7-8).')
+      : t('noPriorResults','Brak wcześniejszych wyników — dobierz ciężar tak, by ostatnia seria kończyła się 1-2 powtórzenia przed upadkiem mięśniowym (RPE 7-8), w dolnej granicy zakresu.')};
   }
   const last = history[0];
   const validSets = last.sets.filter(s=> s.weight>0 || s.reps>0);
