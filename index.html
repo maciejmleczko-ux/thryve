@@ -3498,10 +3498,11 @@ const T_EN = {
   imageSaved: 'Image saved to device',
   imageGenFailed: "Couldn't generate the image",
   noPriorResults: 'No previous results yet — pick a weight so your last set finishes 1-2 reps before failure (RPE 7-8), toward the low end of the range.',
-  noPriorResultsVersion: 'First time at this intensity level — pick a weight so your last set finishes 1-2 reps before failure (RPE 7-8), toward the low end of the range.',
-  noPriorResultsVersionEst: (kg) => `First time at this intensity level — based on your history, try around ${kg} kg, finishing 1-2 reps before failure (RPE 7-8).`,
+  noPriorResultsVersion: "First time at this intensity level — not enough history yet to estimate a weight. Start conservatively, around RPE 7-8.",
+  noPriorResultsVersionEst: (kg) => `First time at this intensity level — based on your history, try around ${kg} kg (RPE 7-8).`,
   noCompletePriorData: 'No complete data from the last session.',
-  suggestUpVersion: (w, target, rl) => `Last time at this intensity level: ${w} kg — add at least 1.25 kg (${target} kg) and drop back to ${rl} reps.`,
+  suggestUpVersion: (w, target) => `Last time at this intensity level: ${w} kg — add at least 1.25 kg (${target} kg).`,
+  suggestDownVersion: (w) => `Last time you didn't reach the low end of the range on a few sets — consider cutting the weight by about 10% (from ${w} kg).`,
   suggestUp: (w, rh, rl) => `Last time ${w} kg × ${rh}+ across all sets — add 2.5–5 kg and drop back to ${rl} reps.`,
   suggestDown: (rl, n, w) => `Last time you missed ${rl} reps on ${n} set${n===1?'':'s'} — consider cutting the weight by about 10% (from ${w} kg).`,
   suggestHold: (w, rh) => `Stay at ${w} kg and try to reach ${rh} reps on every set.`,
@@ -6639,15 +6640,20 @@ function buildSuggestion(exMeta, history){
     // Undulating periodization: progression is pinned to the last time THIS
     // exact execution version was trained, not to the last session overall
     // — a light VD day says nothing about how heavy the previous HD day was.
+    // Rep target always lives in the stats row under the exercise name —
+    // never restated here as a number, so there's only one place to read
+    // "how many reps" and it can never look like it disagrees with itself
+    // (Maciej, 2026-09-22: "1-2 powtórzeń" next to "6-8 powt." read like
+    // two conflicting targets). This tip box speaks only to weight + RPE.
     const atVersion = history.find(h => h.version === exMeta.version);
     if(!atVersion){
       if(isBodyweightEx){
-        return {cls:'', text:t('noPriorResultsVersionBw','Pierwszy raz na tym poziomie intensywności — zacznij w dolnej granicy zakresu, kończąc 1-2 powtórzenia przed upadkiem mięśniowym (RPE 7-8).')};
+        return {cls:'', text:t('noPriorResultsVersionBw','Pierwszy raz na tym poziomie intensywności — zacznij w dolnej granicy zakresu, przy RPE 7-8.')};
       }
       const est = estimateStartingWeight(exMeta.name, exMeta.repLow);
       return {cls:'', text: est
-        ? t('noPriorResultsVersionEst', `Pierwszy raz na tym poziomie intensywności — na podstawie Twoich wyników spróbuj ok. ${est} kg, kończąc 1-2 powtórzenia przed upadkiem mięśniowym (RPE 7-8).`, est)
-        : t('noPriorResultsVersion','Pierwszy raz na tym poziomie intensywności — dobierz ciężar tak, by ostatnia seria kończyła się 1-2 powtórzenia przed upadkiem mięśniowym (RPE 7-8), w dolnej granicy zakresu.')};
+        ? t('noPriorResultsVersionEst', `Pierwszy raz na tym poziomie intensywności — na podstawie Twoich wyników spróbuj ok. ${est} kg (RPE 7-8).`, est)
+        : t('noPriorResultsVersion','Pierwszy raz na tym poziomie intensywności — brak wystarczających danych, żeby oszacować ciężar. Zacznij ostrożnie, przy RPE 7-8.')};
     }
     const validSets = atVersion.sets.filter(s=> s.weight>0 || s.reps>0);
     if(!validSets.length){
@@ -6656,17 +6662,17 @@ function buildSuggestion(exMeta, history){
     const lowFails = validSets.filter(s => s.reps < exMeta.repLow).length;
     if(lowFails>=2){
       if(isBodyweightEx){
-        return {cls:'down', text:t('suggestDownBw', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach — rozważ łatwiejszy wariant albo krótszy odpoczynek między seriami.`, exMeta.repLow, lowFails)};
+        return {cls:'down', text:t('suggestDownVersionBw', 'Ostatnio nie domknąłeś dołu zakresu w kilku seriach — rozważ łatwiejszy wariant albo krótszy odpoczynek między seriami.')};
       }
       const lastWeightDown = Math.max(...validSets.map(s=>s.weight||0));
-      return {cls:'down', text:t('suggestDown', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach — rozważ zmniejszenie ciężaru o ok. 10% (z ${lastWeightDown} kg).`, exMeta.repLow, lowFails, lastWeightDown)};
+      return {cls:'down', text:t('suggestDownVersion', `Ostatnio nie domknąłeś dołu zakresu w kilku seriach — rozważ zmniejszenie ciężaru o ok. 10% (z ${lastWeightDown} kg).`, lastWeightDown)};
     }
     if(isBodyweightEx){
-      return {cls:'', text:t('suggestHoldVersionBw', `Wróciłeś do tego poziomu intensywności — spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, exMeta.repHigh)};
+      return {cls:'', text:t('suggestHoldVersionBw', 'Wróciłeś do tego poziomu intensywności — spróbuj dobić do górnej granicy zakresu w każdej serii.')};
     }
     const lastWeightVersion = Math.max(...validSets.map(s=>s.weight||0));
     const targetWeightVersion = Math.round((lastWeightVersion + 1.25) * 100) / 100;
-    return {cls:'up', text:t('suggestUpVersion', `Ostatnio przy tym poziomie intensywności: ${lastWeightVersion} kg — dodaj min. 1,25 kg (${targetWeightVersion} kg) i wróć do ${exMeta.repLow} powt.`, lastWeightVersion, targetWeightVersion, exMeta.repLow)};
+    return {cls:'up', text:t('suggestUpVersion', `Ostatnio przy tym poziomie intensywności: ${lastWeightVersion} kg — dodaj min. 1,25 kg (${targetWeightVersion} kg).`, lastWeightVersion, targetWeightVersion)};
   }
   if(!history.length){
     return {cls:'', text: isBodyweightEx
