@@ -467,7 +467,6 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 
 /* ---------- views ---------- */
 .view-stack{position:relative;overflow-x:hidden;}
-.view-stack.view-stack-sliding{transition:height .38s cubic-bezier(.16,1,.3,1);}
 .view{display:none;}
 .view.active{display:block;}
 .view.view-slide{display:block;position:absolute;top:0;left:0;width:100%;}
@@ -921,8 +920,9 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 
 /* ---------- misc ---------- */
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:#fff;color:var(--text-dark);
-  padding:10px 18px;border-radius:10px;font-size:var(--m-fs-sm);font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:50;}
+  padding:10px 18px;border-radius:10px;font-size:var(--m-fs-sm);font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .25s cubic-bezier(.16,1,.3,1);z-index:50;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media (prefers-reduced-motion: reduce){ .toast,.toast.show{transform:translateX(-50%);} }
 
 .rotate-lock-overlay{display:none;position:fixed;inset:0;z-index:99999;background:var(--bg);color:var(--light);
   flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:0 40px;}
@@ -1491,7 +1491,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .plansv2-slider-input::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--m-orange);box-shadow:0 1px 4px rgba(44,39,39,.25);cursor:pointer;}
 .plansv2-slider-input::-moz-range-track{height:6px;border-radius:var(--m-r-pill);background:#c7c6cb;}
 .plansv2-slider-ticks{display:flex;justify-content:space-between;margin-top:10px;}
-.plansv2-slider-ticks span{font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted);transition:color .15s ease,font-weight .15s ease;}
+.plansv2-slider-ticks span{font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted);transition:color .15s ease;}
 .plansv2-slider-ticks span.active{color:var(--m-orange);font-weight:700;}
 .plansv2-customize-freq-hint{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:#2c2727;}
 .plansv2-customize-actions{display:flex;gap:10px;}
@@ -2050,8 +2050,8 @@ body.pev2-bg{background:var(--m-panel);}
 .statsv2-caro-arw .ph{width:16px;height:16px;display:block;}
 .statsv2-caro-arw.disabled{opacity:.28;pointer-events:none;}
 .statsv2-caro-dots{display:flex;align-items:center;gap:8px;}
-.statsv2-caro-dots i{width:7px;height:7px;border-radius:50%;background:var(--m-muted);opacity:.45;transition:width .2s ease,height .2s ease,opacity .2s ease,background .2s ease;}
-.statsv2-caro-dots i.on{width:8.4px;height:8.4px;opacity:1;background:var(--m-orange);}
+.statsv2-caro-dots i{width:7px;height:7px;border-radius:50%;background:var(--m-muted);opacity:.45;transition:transform .2s cubic-bezier(.16,1,.3,1),opacity .2s ease,background .2s ease;}
+.statsv2-caro-dots i.on{transform:scale(1.2);opacity:1;background:var(--m-orange);}
 .statsv2-scard{background:var(--m-card);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;}
 .statsv2-scard-eyebrow{margin:0 0 8px;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--m-muted);}
 .statsv2-scard-num{margin:0;font-size:var(--m-fs-2xl);font-weight:600;color:var(--m-ink);letter-spacing:-.02em;line-height:1;}
@@ -6006,13 +6006,9 @@ function fmtDate(iso){
    ROUTER
    ============================================================ */
 let currentRoute = 'dashboard';
-/* v2 ("Mekkio") screens in bottom-nav order (dashboard, plans, GYM,
-   history, stats) — so goRoute()'s slide direction matches which way you
-   moved along the nav. plan-editor-v2 is button-driven, not on the bar. */
-const V2_ROUTE_ORDER = ['dashboard', 'plans-v2', 'gym-v2', 'history-v2', 'stats-v2'];
 let viewTransitioning = false, viewTransitionCleanup = null;
 let pendingTransition = null;
-function beginViewTransition(newRoute, forward){
+function beginViewTransition(newRoute, forward, instant){
   const stack = document.getElementById('viewStack');
   if(viewTransitioning && viewTransitionCleanup) viewTransitionCleanup();
   const oldEl = document.querySelector('.view.active');
@@ -6020,7 +6016,7 @@ function beginViewTransition(newRoute, forward){
   if(oldEl === newEl){ pendingTransition = null; return; }
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(!oldEl || reduceMotion){
+  if(!oldEl || reduceMotion || instant){
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     newEl.classList.add('active');
     pendingTransition = null;
@@ -6036,25 +6032,25 @@ function beginViewTransition(newRoute, forward){
   newEl.classList.add('view-slide', 'active');
   oldEl.style.transform = 'translateX(0)';
   newEl.style.transform = forward ? 'translateX(100%)' : 'translateX(-100%)';
-  pendingTransition = {stack, oldEl, newEl, forward};
+  pendingTransition = {stack, oldEl, newEl, forward, oldHeight};
 }
 function commitViewTransition(){
   const t = pendingTransition;
   pendingTransition = null;
   if(!t) return;
-  const {stack, oldEl, newEl, forward} = t;
+  const {stack, oldEl, newEl, forward, oldHeight} = t;
   // Now that the route's content has been rendered into newEl, its true
-  // height is measurable — animate the stack to it in sync with the slide
-  // instead of snapping at the end.
+  // height is measurable. Hold the stack at the taller of the two for the
+  // slide — set once, not transitioned (animating height re-lays-out
+  // every frame).
   const newHeight = newEl.getBoundingClientRect().height;
+  stack.style.height = Math.max(oldHeight, newHeight) + 'px';
   newEl.offsetWidth; // force reflow so the starting transform applies before transitioning
-  stack.classList.add('view-stack-sliding');
   oldEl.classList.add('view-sliding');
   newEl.classList.add('view-sliding');
   const rafId = requestAnimationFrame(()=>{
     oldEl.style.transform = forward ? 'translateX(-100%)' : 'translateX(100%)';
     newEl.style.transform = 'translateX(0)';
-    stack.style.height = newHeight + 'px';
   });
 
   viewTransitioning = true;
@@ -6066,7 +6062,6 @@ function commitViewTransition(){
     oldEl.style.transform = '';
     newEl.classList.remove('view-slide', 'view-sliding');
     newEl.style.transform = '';
-    stack.classList.remove('view-stack-sliding');
     stack.style.height = '';
     newEl.removeEventListener('transitionend', onEnd);
     clearTimeout(fallbackTimer);
@@ -6149,15 +6144,15 @@ function positionNavBlob(animate){
 }
 window.addEventListener('resize', ()=> positionNavBlob(false));
 function goRoute(route){
-  // Slide direction follows the bottom-nav order (V2_ROUTE_ORDER). Routes
-  // not on the bar (plan-editor-v2) fall through to a neutral forward slide.
-  const v2Old = V2_ROUTE_ORDER.indexOf(currentRoute);
-  const v2New = V2_ROUTE_ORDER.indexOf(route);
-  const bothOnBar = v2Old !== -1 && v2New !== -1;
-  const forward = bothOnBar ? v2New >= v2Old : true;
+  // Tab switches swap instantly, like a native tab bar; the incoming
+  // screen's own tile entrance is the only motion. A slide is kept
+  // only for drilling into / back out of the plan editor (push/pop).
+  const drill = (currentRoute === 'plans-v2' && route === 'plan-editor-v2')
+             || (currentRoute === 'plan-editor-v2' && route === 'plans-v2');
+  const forward = route === 'plan-editor-v2';
   currentRoute = route;
   trackEvent('/' + route, route);
-  beginViewTransition(route, forward);
+  beginViewTransition(route, forward, !drill);
   const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2' || route==='history-v2' || route==='stats-v2';
   document.getElementById('bottomNav').style.display = 'flex';
   document.getElementById('bottomNav').classList.toggle('bottom-nav-light', isV3);
