@@ -48,6 +48,10 @@
 }
 
 :root{
+  /* press feedback (iOS feel): finger-down lands fast, release eases back softer */
+  --press-in:.1s;
+  --press-out:.16s;
+  --press-ease:cubic-bezier(.16,1,.3,1);
   /* top inset + 5px extra so headers sit clear of the iOS 27 status-bar blur band (one knob) */
   --top-inset:calc(env(safe-area-inset-top, 0px) + 5px);
   --bg:#2c2727;
@@ -105,7 +109,7 @@
 }
 
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;touch-action:manipulation;}
+html,body{margin:0;padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 body{
   background:var(--bg);
   color:var(--text);
@@ -188,11 +192,11 @@ button{font-family:inherit;}
 .logo-svg{height:53px;width:auto;display:block;color:#fff;}
 .topbar.topbar-light{background:var(--light);margin:0;padding:calc(16px + var(--top-inset)) 20px 0;border-radius:0;}
 .topbar.topbar-light .logo-svg{color:var(--orange);}
-.plan-pill{background:var(--orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:11px 16px;max-width:210px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:var(--m-fs-base);letter-spacing:.32px;font-weight:700;cursor:pointer;transition:transform .12s ease;flex-shrink:0;}
+.plan-pill{background:var(--orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:11px 16px;max-width:210px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:var(--m-fs-base);letter-spacing:.32px;font-weight:700;cursor:pointer;transition:transform var(--press-out) var(--press-ease);flex-shrink:0;}
 .plan-pill:active{transform:scale(.94);}
 .plan-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .plan-pill .ph{width:15px;height:15px;flex-shrink:0;}
-.topbar-icon-btn{background:none;border:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--light);flex-shrink:0;}
+.topbar-icon-btn{background:none;border:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--light);flex-shrink:0;transition:transform var(--press-out) var(--press-ease);}
 .topbar-icon-btn .ph{width:26px;height:26px;}
 .topbar-icon-btn:active{transform:scale(.9);}
 .topbar.topbar-light .topbar-icon-btn{color:var(--orange);}
@@ -269,9 +273,9 @@ button{font-family:inherit;}
    all done well inside the 1.5s the splash is shown. */
 @media (prefers-reduced-motion: no-preference){
   @keyframes loadv2Rise{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
-  .loadv2-root.visible .loadv2-logo{animation:loadv2Rise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.09s;}
-  .loadv2-root.visible .loadv2-tagline{animation:loadv2Rise .6s cubic-bezier(.16,1,.3,1) both;animation-delay:.26s;}
-  .loadv2-root.visible .loadv2-footer{animation:loadv2Rise .55s cubic-bezier(.16,1,.3,1) both;animation-delay:.42s;}
+  .loadv2-root.visible .loadv2-logo{animation:loadv2Rise .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.09s;}
+  .loadv2-root.visible .loadv2-tagline{animation:loadv2Rise .6s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.26s;}
+  .loadv2-root.visible .loadv2-footer{animation:loadv2Rise .55s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.42s;}
 }
 @media (prefers-reduced-motion: reduce){ .loadv2-root{transition:none;} }
 
@@ -357,7 +361,7 @@ button{font-family:inherit;}
 .gymfin-record-k{margin:0;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--m-muted);}
 .gymfin-record-v{margin:1px 0 0;font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);}
 
-.gymfin-cta{width:100%;flex-shrink:0;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;padding:16px;font-family:inherit;font-size:var(--m-fs-base);font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:4px;transition:transform .12s ease;}
+.gymfin-cta{width:100%;flex-shrink:0;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;padding:16px;font-family:inherit;font-size:var(--m-fs-base);font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:4px;transition:transform var(--press-out) var(--press-ease);}
 .gymfin-cta:active{transform:scale(.97);}
 .gymfin-link{width:100%;flex-shrink:0;border:0;background:none;color:var(--m-orange);font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;padding:9px 0 2px;cursor:pointer;}
 .gymfin-link[hidden]{display:none;}
@@ -375,18 +379,18 @@ button{font-family:inherit;}
   /* Lottie (loaded on demand, sped up ×1.6) plays the check + confetti once
      and holds the last frame. The summary then rises in staggered — same
      loadv2Rise keyframe + curve as the load screen / dashboard tiles. */
-  .gymfin-root.visible .gymfin-anim.is-fallback .gymfin-check{animation:gymfinPop .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.06s;}
-  .gymfin-root.anim-in .gymfin-heads{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.14s;}
-  .gymfin-root.anim-in .gymfin-progress:not([hidden]){animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.22s;}
-  .gymfin-root.anim-in .gymfin-stats .gymfin-stat{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;}
+  .gymfin-root.visible .gymfin-anim.is-fallback .gymfin-check{animation:gymfinPop .5s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.06s;}
+  .gymfin-root.anim-in .gymfin-heads{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.14s;}
+  .gymfin-root.anim-in .gymfin-progress:not([hidden]){animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.22s;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) backwards;}
   .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(1){animation-delay:.32s;}
   .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(2){animation-delay:.4s;}
   .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(3){animation-delay:.48s;}
   .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(4){animation-delay:.56s;}
-  .gymfin-root.anim-in .gymfin-record:not([hidden]){animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) both;animation-delay:.64s;}
-  .gymfin-root.anim-in .gymfin-cap:not([hidden]){animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.72s;}
-  .gymfin-root.anim-in .gymfin-cta{animation:loadv2Rise .45s cubic-bezier(.16,1,.3,1) both;animation-delay:.76s;}
-  .gymfin-root.anim-in .gymfin-link:not([hidden]){animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.82s;}
+  .gymfin-root.anim-in .gymfin-record:not([hidden]){animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.64s;}
+  .gymfin-root.anim-in .gymfin-cap:not([hidden]){animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.72s;}
+  .gymfin-root.anim-in .gymfin-cta{animation:loadv2Rise .45s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.76s;}
+  .gymfin-root.anim-in .gymfin-link:not([hidden]){animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.82s;}
 }
 @media (prefers-reduced-motion: reduce){ .gymfin-root{transition:none;} }
 html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow, html.statsv2-bg .app-glow, html.histv2-bg .app-glow{display:none;}
@@ -450,7 +454,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .bottom-nav.bottom-nav-light .nav-item.active{background:transparent;}
 .bottom-nav.bottom-nav-light .nav-item.active .ph{color:#fff;}
 .bottom-nav .nav-blob{display:none;}
-.bottom-nav.bottom-nav-light .nav-blob{display:block;position:absolute;top:50%;left:0;width:52px;height:52px;border-radius:50%;background:var(--m-orange);transform:translateY(-50%);pointer-events:none;z-index:0;transition:left .42s cubic-bezier(.16,1,.3,1),width .42s cubic-bezier(.16,1,.3,1),height .42s cubic-bezier(.16,1,.3,1);}
+.bottom-nav.bottom-nav-light .nav-blob{display:block;position:absolute;top:50%;left:0;width:69px;height:69px;margin-top:-34.5px;border-radius:50%;background:var(--m-orange);transform-origin:50% 50%;will-change:transform;pointer-events:none;z-index:0;transition:transform .42s cubic-bezier(.16,1,.3,1);}
 @media (prefers-reduced-motion: no-preference){
   /* the freshly-selected tab's icon spins into place as the blob arrives */
   .bottom-nav.bottom-nav-light .nav-item.nav-spin .ph{animation:navIconSpin .5s cubic-bezier(.16,1,.3,1);}
@@ -474,7 +478,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 
 /* ---------- exercise grid ---------- */
 .ex-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
-.ex-tile{position:relative;border-radius:var(--m-r-sm);aspect-ratio:1/1;border:1px solid #e5e7eb;padding:0;cursor:pointer;overflow:hidden;background:#fff;transition:transform .12s ease;
+.ex-tile{position:relative;border-radius:var(--m-r-sm);aspect-ratio:1/1;border:1px solid #e5e7eb;padding:0;cursor:pointer;overflow:hidden;background:#fff;transition:transform var(--press-out) var(--press-ease);
   -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;}
 .ex-tile:active{transform:scale(.93);}
 .ex-tile img{width:100%;height:100%;display:block;object-fit:cover;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;pointer-events:none;}
@@ -545,7 +549,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 
 .save-btn{display:block;width:calc(100% - 40px);margin:20px auto 0;background:var(--orange);border:none;
   border-radius:var(--m-r-pill);padding:16px;color:#fff;font-size:var(--m-fs-base);font-weight:700;letter-spacing:.42px;
-  text-align:center;cursor:pointer;text-transform:uppercase;transition:transform .12s ease;}
+  text-align:center;cursor:pointer;text-transform:uppercase;transition:transform var(--press-out) var(--press-ease);}
 .save-btn:active{transform:scale(.97);}
 @media (prefers-reduced-motion: no-preference){
   .save-btn.success{animation:saveSuccess .5s ease;}
@@ -602,7 +606,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .cal-day:disabled{cursor:not-allowed;}
 .hist-detail-wrap{padding:0 12px;margin-top:20px;display:flex;flex-direction:column;gap:12px;}
 .hist-card{background:var(--light);border-radius:var(--m-r-sm);padding:20px;color:var(--text-dark);}
-.hist-card.collapsed{cursor:pointer;}
+.hist-card.collapsed{cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
 .hist-card.collapsed:active{transform:scale(.99);}
 .hist-right{display:flex;align-items:center;gap:14px;}
 .hist-date{font-size:var(--m-fs-2xs);color:rgba(44,39,39,.6);}
@@ -721,7 +725,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-photo-preview{width:56px;height:56px;flex-shrink:0;border-radius:50%;overflow:hidden;background:var(--m-panel);display:flex;align-items:center;justify-content:center;}
 .acct-photo-preview .ph{width:56px;height:56px;display:block;}
 .acct-photo-btns{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
-.acct-photo-pick{display:inline-block;background:var(--m-orange);color:#fff;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;transition:transform .12s ease;}
+.acct-photo-pick{display:inline-block;background:var(--m-orange);color:#fff;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
 .acct-photo-pick:active{transform:scale(.96);}
 .acct-photo-clear{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);font-weight:600;cursor:pointer;padding:2px 0;font-family:inherit;}
 .acct-photo-clear[hidden]{display:none;}
@@ -791,12 +795,12 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-cloud-signed{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
 .acct-cloud-signed[hidden],.acct-cloud-cta[hidden]{display:none;}
 .acct-cloud-email{font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.acct-cloud-cta{display:inline-block;margin-top:10px;background:var(--m-orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
+.acct-cloud-cta{display:inline-block;margin-top:10px;background:var(--m-orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;font-family:inherit;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
 .acct-cloud-cta:active{transform:scale(.96);}
 .acct-cloud-mode-link{display:block;width:100%;background:none;border:0;color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;padding:4px 0;font-family:inherit;text-align:center;}
 .acct-cloud-forgot{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);cursor:pointer;padding:6px 0 0;font-family:inherit;align-self:flex-end;}
 .acct-auth-error{margin:6px 0 0;font-size:var(--m-fs-2xs);color:#c00;line-height:1.4;}
-.acct-oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;border:1px solid #dadce0;border-radius:var(--m-r-pill);padding:12px;font-size:var(--m-fs-base);font-weight:500;color:#3c4043;font-family:inherit;cursor:pointer;transition:transform .12s ease,background .12s ease;}
+.acct-oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;border:1px solid #dadce0;border-radius:var(--m-r-pill);padding:12px;font-size:var(--m-fs-base);font-weight:500;color:#3c4043;font-family:inherit;cursor:pointer;transition:transform var(--press-out) var(--press-ease),background .12s ease;}
 .acct-oauth-btn:active{transform:scale(.97);background:#f7f7f8;}
 .acct-oauth-divider{display:flex;align-items:center;gap:12px;margin:14px 0 0;}
 .acct-oauth-divider::before,.acct-oauth-divider::after{content:'';flex:1;height:1px;background:#e6e2ec;}
@@ -1003,7 +1007,7 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
    header row, so it sits on one line with the back arrow + title. */
 .dash-chat-btn, .gymv2-chat-btn, .plansv2-chat-btn, .histv2-chat-btn, .statsv2-chat-btn{
   width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s ease;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--press-out) var(--press-ease);flex-shrink:0;
 }
 .dash-chat-btn{position:absolute;top:calc(16px + var(--top-inset));right:10px;}
 .gymv2-chat-btn, .histv2-chat-btn{margin-left:auto;}
@@ -1056,7 +1060,7 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
 .dash-badge.fill .ph{width:16px;height:16px;}
 
 .dash-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-.dash-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:14px;cursor:pointer;transition:transform .12s ease;}
+.dash-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:14px;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
 .dash-plan-card:active{transform:scale(.97);}
 .dash-plan-name{margin:0 0 4px;font-size:var(--m-fs-lg);font-weight:500;line-height:1.2;letter-spacing:.02em;text-transform:uppercase;}
 .dash-plan-count{margin:0;font-size:var(--m-fs-base);font-weight:300;color:rgba(255,255,255,.85);}
@@ -1140,24 +1144,24 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
   .gymv2-chat-btn,.gymv2-header,
   .plansv2-chat-btn,.plansv2-header,
   .histv2-chat-btn,.histv2-header,
-  .statsv2-chat-btn,.statsv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;}
+  .statsv2-chat-btn,.statsv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) backwards;}
   /* Each "tile" card fades in on its own — renderDashboard() sets a slightly
      randomized animation-delay per element so the stagger feels alive
      instead of a mechanically identical sequence every time. Longer travel
      + duration than dashRise above so the deceleration at the tail end
      actually reads instead of flashing by. */
   @keyframes dashTileRise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
-  .dash-hero,.dash-plan-card,.dash-mini-card,.dash-week-card,.dash-ai-card{animation:dashTileRise .8s cubic-bezier(.16,1,.3,1) both;}
+  .dash-hero,.dash-plan-card,.dash-mini-card,.dash-week-card,.dash-ai-card{animation:dashTileRise .8s cubic-bezier(.16,1,.3,1) backwards;}
 
   /* Weekly-progress day circles fade in one after another, timed to start
      only once the .dash-week-card itself has mostly finished revealing —
      renderDashboard() sets --day-base on #dashWeekDays to the card's own
      (randomized) delay + a buffer, and --i on each circle for the stagger. */
   @keyframes dashDayIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-  .dash-week-day{animation:dashDayIn .45s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--day-base,650ms) + var(--i,0) * 70ms);}
+  .dash-week-day{animation:dashDayIn .45s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(var(--day-base,650ms) + var(--i,0) * 70ms);}
 
   @keyframes dashBarGrow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
-  .dash-trend span{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 18ms + .2s);}
+  .dash-trend span{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(var(--i,0) * 18ms + .2s);}
 
 }
 
@@ -1185,18 +1189,18 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    as navigation chrome rather than part of the title lockup. 40px hit
    target for thumbs, nudged left so the 26px glyph lands near the screen
    edge like a native back control (barely shifts the title). */
-.v2-hdr-back{background:none;border:none;padding:0;margin:0 0 0 -6px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform .12s ease;}
+.v2-hdr-back{background:none;border:none;padding:0;margin:0 0 0 -6px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform var(--press-out) var(--press-ease);}
 .v2-hdr-back:active{transform:scale(.88);}
 .v2-hdr-back .ph{width:26px;height:26px;color:var(--m-ink);}
 /* right-side control cluster (chat button + a close X) for the two headers
    that carry both — plan-editor-v2 and Stats detail. */
 .v2-hdr-actions{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
 
-.gymv2-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:transform .12s ease;}
+.gymv2-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
 .gymv2-plan-card:active{transform:scale(.98);}
 /* #1 — "Powtórz ostatni trening": shortcut sitting between the plan card
    and the exercise grid, prefills the session from the last saved workout. */
-.gymv2-repeat{display:flex;align-items:center;gap:12px;width:100%;border:1px solid #d8d5e2;background:#fff;border-radius:var(--m-r-md);padding:12px 14px;font-family:inherit;cursor:pointer;text-align:left;margin:-4px 0 20px;transition:transform .12s ease;}
+.gymv2-repeat{display:flex;align-items:center;gap:12px;width:100%;border:1px solid #d8d5e2;background:#fff;border-radius:var(--m-r-md);padding:12px 14px;font-family:inherit;cursor:pointer;text-align:left;margin:-4px 0 20px;transition:transform var(--press-out) var(--press-ease);}
 .gymv2-repeat:active{transform:scale(.98);}
 .gymv2-repeat[hidden]{display:none;}
 .gymv2-repeat-ico{width:34px;height:34px;flex-shrink:0;border-radius:var(--m-r-pill);background:#eae2fb;display:flex;align-items:center;justify-content:center;color:var(--m-orange);}
@@ -1242,11 +1246,11 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .gymv2-rest-note{margin:0 0 12px;font-size:var(--m-fs-sm);color:var(--m-muted);line-height:1.45;}
 .gymv2-rest-note.hidden{display:none;}
 .gymv2-section-head p{margin:0;}
-.gymv2-edit-plan{background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:6px 20px;width:140px;color:#fff;font-size:var(--m-fs-xs);font-weight:500;letter-spacing:.04em;text-align:center;cursor:pointer;transition:transform .12s ease;}
+.gymv2-edit-plan{background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:6px 20px;width:140px;color:#fff;font-size:var(--m-fs-xs);font-weight:500;letter-spacing:.04em;text-align:center;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
 .gymv2-edit-plan:active{transform:scale(.95);}
 
 .gymv2-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
-.gymv2-tile{position:relative;border-radius:var(--m-r-md);overflow:hidden;background:#fff;aspect-ratio:115.667/122;padding:0;border:none;cursor:pointer;transition:transform .12s ease;}
+.gymv2-tile{position:relative;border-radius:var(--m-r-md);overflow:hidden;background:#fff;aspect-ratio:115.667/122;padding:0;border:none;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
 .gymv2-tile:active{transform:scale(.95);}
 /* "Assigned to the active plan day" state — plan editor v2 only, see
    buildExerciseTileV2()'s 'selected' state. */
@@ -1254,7 +1258,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .gymv2-tile-check{position:absolute;top:6px;right:6px;width:18px;height:18px;z-index:1;}
 .gymv2-tile-check svg{display:block;width:100%;height:100%;}
 /* "Zamień na dziś" corner control on a GYM plan tile */
-.gymv2-tile-swap{position:absolute;top:3px;right:3px;width:26px;height:26px;z-index:2;display:flex;align-items:center;justify-content:center;background:none;color:#5b5555;cursor:pointer;transition:transform .12s ease,color .12s ease;}
+.gymv2-tile-swap{position:absolute;top:3px;right:3px;width:26px;height:26px;z-index:2;display:flex;align-items:center;justify-content:center;background:none;color:#5b5555;cursor:pointer;transition:transform var(--press-out) var(--press-ease),color .12s ease;}
 .gymv2-tile-swap svg{display:block;width:19px;height:19px;}
 .gymv2-tile-swap:hover{color:#2c2727;}
 .gymv2-tile-swap:active{transform:scale(.85);}
@@ -1312,7 +1316,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .gymv2-done-head{margin:40px 0 12px;}
 .gymv2-done-head.hidden{display:none;}
 .gymv2-done-list{display:flex;flex-direction:column;gap:4px;}
-.gymv2-done-row{background:#fff;border-radius:var(--m-r-md);height:50px;padding:9px 13px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:none;width:100%;font-family:inherit;transition:transform .12s ease;}
+.gymv2-done-row{background:#fff;border-radius:var(--m-r-md);height:50px;padding:9px 13px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:none;width:100%;font-family:inherit;transition:transform var(--press-out) var(--press-ease);}
 .gymv2-done-row:active{transform:scale(.98);}
 .gymv2-done-row-info{display:flex;align-items:center;gap:7px;}
 .gymv2-done-row-info .ph{width:24px;height:24px;color:var(--m-orange);flex-shrink:0;}
@@ -1327,7 +1331,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    ikonki)". Success feedback is the shared toast() saveWorkout()
    already fires ("Trening zapisany") — same as how savePlanEditor()
    confirms a save, no per-button animation needed. */
-.gymv2-save{display:flex;align-items:center;justify-content:center;background:var(--m-orange);border:none;border-radius:var(--m-r-pill);width:100%;max-width:217px;padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:#fff;cursor:pointer;font-family:inherit;transition:transform .12s ease;}
+.gymv2-save{display:flex;align-items:center;justify-content:center;background:var(--m-orange);border:none;border-radius:var(--m-r-pill);width:100%;max-width:217px;padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:#fff;cursor:pointer;font-family:inherit;transition:transform var(--press-out) var(--press-ease);}
 .gymv2-save:active{transform:scale(.97);}
 
 /* Entrance motion — same idiom as the Dashboard: header fades/rises in,
@@ -1338,8 +1342,8 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    rebuild from logging a set — see renderGymGridV2()/renderGymDoneV2())
    keeps this from replaying on every in-session tile/list refresh. */
 @media (prefers-reduced-motion: no-preference){
-  .gymv2-plan-card,.gymv2-no-plan{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.08s;}
-  .gymv2-anim-in, .plansv2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;}
+  .gymv2-plan-card,.gymv2-no-plan{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.08s;}
+  .gymv2-anim-in, .plansv2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) backwards;}
 }
 
 /* ============================================================
@@ -1357,9 +1361,9 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .plansv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
 .plansv2-close{width:24px;height:24px;color:var(--m-ink);cursor:pointer;flex-shrink:0;}
 .plansv2-actions{display:flex;gap:10px;width:100%;margin-bottom:24px;}
-.plansv2-btn-outline{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s ease;}
+.plansv2-btn-outline{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform var(--press-out) var(--press-ease);}
 .plansv2-btn-outline .ph{width:24px;height:24px;color:var(--m-plan-c-easy);}
-.plansv2-btn-fill{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s ease;}
+.plansv2-btn-fill{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform var(--press-out) var(--press-ease);}
 .plansv2-btn-fill .ph{width:24px;height:24px;color:#fff;}
 .plansv2-btn-outline:active,.plansv2-btn-fill:active{transform:scale(.95);}
 .plansv2-section-label{margin:0 2px 12px;}
@@ -1381,7 +1385,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .plansv2-card-share{position:absolute;inset:0;border-radius:var(--m-r-md);background:#f5b942;display:flex;align-items:center;justify-content:flex-start;padding-left:28px;color:#2c2727;cursor:pointer;opacity:0;pointer-events:none;}
 .plansv2-card-share .ph{width:32px;height:32px;transition:transform .15s ease;}
 .plansv2-card-wrap.plansv2-will-share .plansv2-card-share .ph{transform:scale(1.35);}
-.plansv2-card{border-radius:var(--m-r-md);padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform .12s ease;touch-action:pan-y;}
+.plansv2-card{border-radius:var(--m-r-md);padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform var(--press-out) var(--press-ease);touch-action:pan-y;}
 .plansv2-card:active{transform:scale(.98);}
 .plansv2-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
 .plansv2-card-name{margin:0;font-size:var(--m-fs-md);font-weight:500;line-height:1.1;letter-spacing:.64px;text-transform:uppercase;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1414,7 +1418,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 @media (prefers-reduced-motion: no-preference){
   .plansv2-customize-overlay{animation:mSheetBackdropIn .24s ease-out;}
   .plansv2-customize-overlay.plansv2-customize-closing{animation:mSheetBackdropOut .24s ease-in forwards;}
-  .plansv2-customize-overlay:not(.m-sheet-dragging) .plansv2-customize-stack{animation:mSheetUp .4s cubic-bezier(.22,1,.36,1);}
+  .plansv2-customize-overlay:not(.m-sheet-entered) .plansv2-customize-stack{animation:mSheetUp .4s cubic-bezier(.22,1,.36,1);}
   .plansv2-customize-overlay.plansv2-customize-closing .plansv2-customize-stack{animation:mSheetDown .26s cubic-bezier(.4,0,1,1) forwards;}
 }
 .plansv2-customize-card{flex:1;min-height:0;display:flex;flex-direction:column;gap:20px;background:transparent;border-radius:0;padding:4px 16px 4px;width:100%;box-sizing:border-box;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
@@ -1472,7 +1476,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .plansv2-customize-dni-value{margin:0;font-size:var(--m-fs-sm);font-weight:700;color:var(--m-orange);}
 .plansv2-customize-divider{height:1px;background:rgba(0,0,0,.08);width:100%;}
 .plansv2-choice-row{display:flex;gap:7px;flex-wrap:wrap;}
-.plansv2-choice-chip{border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 10px;background:var(--m-card);font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);font-family:inherit;cursor:pointer;transition:transform .12s ease;flex:1;text-align:center;}
+.plansv2-choice-chip{border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 10px;background:var(--m-card);font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);font-family:inherit;cursor:pointer;transition:transform var(--press-out) var(--press-ease);flex:1;text-align:center;}
 .plansv2-choice-chip:active{transform:scale(.95);}
 .plansv2-choice-chip.active{background:var(--m-orange);border-color:var(--m-orange);color:#fff;}
 /* Trudność/Dni w tygodniu are genuine ordered scales — a slider reads
@@ -1495,8 +1499,8 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .plansv2-slider-ticks span.active{color:var(--m-orange);font-weight:700;}
 .plansv2-customize-freq-hint{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:#2c2727;}
 .plansv2-customize-actions{display:flex;gap:10px;}
-.plansv2-customize-cancel{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;font-size:var(--m-fs-base);font-weight:600;color:var(--m-ink);font-family:inherit;cursor:pointer;transition:transform .12s ease;}
-.plansv2-customize-apply{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);font-size:var(--m-fs-base);font-weight:600;color:#fff;font-family:inherit;cursor:pointer;transition:transform .12s ease;}
+.plansv2-customize-cancel{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;font-size:var(--m-fs-base);font-weight:600;color:var(--m-ink);font-family:inherit;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
+.plansv2-customize-apply{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);font-size:var(--m-fs-base);font-weight:600;color:#fff;font-family:inherit;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
 .plansv2-customize-apply:disabled{opacity:.4;cursor:not-allowed;}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active{transform:scale(.97);}
 
@@ -1552,7 +1556,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    never to overlap the card since it's no longer independently
    positioned against the viewport. Same width/sizing as
    .pev2-save-fab. */
-.newex-v2-add-fab{width:100%;max-width:217px;background:#fff;border:none;border-radius:var(--m-r-pill);padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:var(--m-ink);cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,.12);transition:transform .12s ease;flex-shrink:0;}
+.newex-v2-add-fab{width:100%;max-width:217px;background:#fff;border:none;border-radius:var(--m-r-pill);padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:var(--m-ink);cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,.12);transition:transform var(--press-out) var(--press-ease);flex-shrink:0;}
 .newex-v2-add-fab:active{transform:scale(.97);}
 
 /* "Podziel się opinią" v2 (#feedbackOverlayV2, Figma node 175:9818) —
@@ -1612,7 +1616,7 @@ body.pev2-bg{background:var(--m-panel);}
 .pev2-periodize-toggle-switch.active::after{transform:translateX(16px);}
 .pev2-fork-hint.hidden{display:none;}
 .pev2-day-row{display:flex;gap:4px;}
-.pev2-day-chip{position:relative;flex:1;min-width:0;text-align:center;background:var(--m-card);border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 0 15px;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);cursor:pointer;font-family:inherit;transition:transform .12s ease;}
+.pev2-day-chip{position:relative;flex:1;min-width:0;text-align:center;background:var(--m-card);border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 0 15px;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);cursor:pointer;font-family:inherit;transition:transform var(--press-out) var(--press-ease);}
 .pev2-day-chip:active{transform:scale(.95);}
 .pev2-day-chip.active{background:var(--m-orange);border-color:var(--m-orange);color:#fff;}
 .pev2-day-chip.has-ex::after{content:'';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--m-orange);}
@@ -1643,7 +1647,7 @@ body.pev2-bg{background:var(--m-panel);}
    simplest thing: each chip just fades its own background/icon color
    on .active, no shared moving element. */
 .equip-row{display:flex;gap:8px;}
-.equip-chip{flex:none;width:52px;height:52px;border-radius:50%;background:var(--m-card);border:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform .12s ease,background-color .25s cubic-bezier(.16,1,.3,1),border-color .25s cubic-bezier(.16,1,.3,1);}
+.equip-chip{flex:none;width:52px;height:52px;border-radius:50%;background:var(--m-card);border:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform var(--press-out) var(--press-ease),background-color .25s cubic-bezier(.16,1,.3,1),border-color .25s cubic-bezier(.16,1,.3,1);}
 .equip-chip:active{transform:scale(.93);}
 .equip-chip .ic{width:26px;height:26px;display:block;}
 .equip-chip .ic path,.equip-chip .ic circle,.equip-chip .ic rect{fill:var(--m-orange);transition:fill .25s cubic-bezier(.16,1,.3,1);}
@@ -1663,7 +1667,7 @@ body.pev2-bg{background:var(--m-panel);}
 .pev2-section-num{background:var(--m-plan-c-easy);border-radius:6px;padding:4px 8px;color:#fff;}
 .pev2-section-header .ph{width:24px;height:24px;color:var(--m-ink);transition:transform .2s ease;flex-shrink:0;}
 .pev2-section-header .ph.collapsed{transform:rotate(-90deg);}
-.pev2-save-fab{position:fixed;left:50%;bottom:118px;transform:translateX(-50%);width:calc(100% - 40px);max-width:217px;background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:#fff;cursor:pointer;font-family:inherit;transition:transform .12s ease;z-index:15;}
+.pev2-save-fab{position:fixed;left:50%;bottom:118px;transform:translateX(-50%);width:calc(100% - 40px);max-width:217px;background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:#fff;cursor:pointer;font-family:inherit;transition:transform var(--press-out) var(--press-ease);z-index:15;}
 .pev2-save-fab:active{transform:translateX(-50%) scale(.97);}
 
 /* Entrance motion — same idiom as GYM v2/Dashboard: header fades/rises
@@ -1674,7 +1678,7 @@ body.pev2-bg{background:var(--m-panel);}
    after starring/sharing a plan mid-browse doesn't replay the whole
    entrance. */
 @media (prefers-reduced-motion: no-preference){
-  .plansv2-actions{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.08s;}
+  .plansv2-actions{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.08s;}
 }
 
 /* Plan editor v2's own entrance (Maciej, 2026-08-31: "Dodaj jeszcze
@@ -1689,11 +1693,11 @@ body.pev2-bg{background:var(--m-panel);}
    equipment filter, or toggling an exercise mid-session doesn't replay
    the whole entrance. */
 @media (prefers-reduced-motion: no-preference){
-  .pev2-anim-tile{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;}
+  .pev2-anim-tile{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;}
   .pev2-anim-tile-1{animation-delay:.08s;}
   .pev2-anim-tile-2{animation-delay:.14s;}
   .pev2-anim-tile-3{animation-delay:.2s;}
-  .pev2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.26s + var(--i,0) * 60ms);}
+  .pev2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.26s + var(--i,0) * 60ms);}
 }
 
 /* GYM v2 set-logging popup (node 112:1872) — separate from .ex-popup-box/.set-row
@@ -1743,7 +1747,7 @@ body.pev2-bg{background:var(--m-panel);}
 @media (prefers-reduced-motion: no-preference){
   .m-sheet-overlay{animation:mSheetBackdropIn .24s ease-out;}
   .m-sheet-overlay.m-sheet-closing{animation:mSheetBackdropOut .24s ease-in forwards;}
-  .m-sheet-overlay:not(.m-sheet-dragging) .m-sheet{animation:mSheetUp .4s cubic-bezier(.22,1,.36,1);}
+  .m-sheet-overlay:not(.m-sheet-entered) .m-sheet{animation:mSheetUp .4s cubic-bezier(.22,1,.36,1);}
   .m-sheet-overlay.m-sheet-closing .m-sheet{animation:mSheetDown .26s cubic-bezier(.4,0,1,1) forwards;}
   @keyframes mSheetBackdropIn{from{opacity:0;}to{opacity:1;}}
   @keyframes mSheetBackdropOut{from{opacity:1;}to{opacity:0;}}
@@ -1794,7 +1798,7 @@ body.pev2-bg{background:var(--m-panel);}
 .exv2-note-cancel{background:rgba(44,63,174,.12);color:#2c3fae;}
 .exv2-note-save{background:#2c3fae;color:#fff;}
 .exv2-note-hint{margin:0;font-size:var(--m-fs-2xs);color:#6f78b8;line-height:1.4;}
-.exv2-note-add{display:flex;align-items:center;gap:8px;width:100%;background:none;border:1px dashed #b9c2ef;border-radius:var(--m-r-sm);padding:10px 14px;font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#2c3fae;cursor:pointer;text-align:left;}
+.exv2-note-add{display:flex;align-items:center;gap:8px;width:100%;background:none;border:1px dashed #b9c2ef;border-radius:var(--m-r-sm);padding:10px 14px;font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#2c3fae;cursor:pointer;text-align:left;transition:transform var(--press-out) var(--press-ease);}
 .exv2-note-add .ph,.exv2-note-add svg{width:15px;height:15px;flex-shrink:0;}
 .exv2-note-add:active{transform:scale(.99);}
 .exv2-series-section{display:flex;flex-direction:column;gap:16px;}
@@ -1825,7 +1829,7 @@ body.pev2-bg{background:var(--m-panel);}
 .exv2-btn-outline:disabled{opacity:.4;cursor:default;}
 .exv2-btn-fill{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);font-size:var(--m-fs-base);font-weight:500;color:#fff;font-family:inherit;cursor:pointer;text-align:center;}
 .exv2-warn{color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;line-height:1.4;text-align:center;}
-.exv2-submit{border:none;border-radius:var(--m-r-pill);height:49px;width:100%;max-width:275px;background:var(--m-orange);color:#fff;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;font-family:inherit;cursor:pointer;text-align:center;text-transform:uppercase;flex-shrink:0;}
+.exv2-submit{border:none;border-radius:var(--m-r-pill);height:49px;width:100%;max-width:275px;background:var(--m-orange);color:#fff;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;font-family:inherit;cursor:pointer;text-align:center;text-transform:uppercase;flex-shrink:0;transition:transform var(--press-out) var(--press-ease);}
 .exv2-submit:active{transform:scale(.97);}
 /* Internal reveal, on top of the popup's own exv2SlideUp entrance — header
    and tip fade/rise in first, then each series card cascades in one after
@@ -1839,13 +1843,13 @@ body.pev2-bg{background:var(--m-panel);}
    make already-entered values flash out and back in. */
 @media (prefers-reduced-motion: no-preference){
   @keyframes exv2FadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-  .exv2-anim-in.exv2-header-group{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.28s;}
-  .exv2-anim-in.exv2-note,.exv2-anim-in.exv2-note-add{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.3s;}
-  .exv2-anim-in.exv2-tip{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.34s;}
-  .exv2-anim-in.exv2-series-controls,.exv2-anim-in.exv2-submit{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) both;} /* delay set inline, depends on set count */
+  .exv2-anim-in.exv2-header-group{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.28s;}
+  .exv2-anim-in.exv2-note,.exv2-anim-in.exv2-note-add{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.3s;}
+  .exv2-anim-in.exv2-tip{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.34s;}
+  .exv2-anim-in.exv2-series-controls,.exv2-anim-in.exv2-submit{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) backwards;} /* delay set inline, depends on set count */
 
   @keyframes exv2CardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-  .exv2-anim-in.exv2-series-card{animation:exv2CardIn .35s cubic-bezier(.16,1,.3,1) both;} /* delay set inline per card */
+  .exv2-anim-in.exv2-series-card{animation:exv2CardIn .35s cubic-bezier(.16,1,.3,1) backwards;} /* delay set inline per card */
 }
 
 /* "Zamień ćwiczenie" sheet body (rides the shared .m-sheet) */
@@ -1864,7 +1868,7 @@ body.pev2-bg{background:var(--m-panel);}
 .swapv2-empty{font-size:var(--m-fs-sm);color:#6c6b78;text-align:center;padding:18px 4px;}
 .swapv2-revert{border:0;background:none;font:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#5b5555;text-decoration:underline;cursor:pointer;padding:2px 4px;}
 .swapv2-foot{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;flex-shrink:0;padding:0 18px;box-sizing:border-box;}
-.swapv2-submit{border:0;border-radius:var(--m-r-pill);height:49px;width:100%;background:var(--m-orange);color:#fff;font:inherit;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;}
+.swapv2-submit{border:0;border-radius:var(--m-r-pill);height:49px;width:100%;background:var(--m-orange);color:#fff;font:inherit;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
 .swapv2-submit:disabled{opacity:.4;cursor:default;}
 .swapv2-submit:not(:disabled):active{transform:scale(.97);}
 .swapv2-restore{border:0;background:none;font:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#5b5555;cursor:pointer;text-decoration:underline;}
@@ -1992,19 +1996,19 @@ body.pev2-bg{background:var(--m-panel);}
 .histv2-run-notes{margin-top:12px;font-size:var(--m-fs-sm);color:var(--m-ink);}
 
 @media (prefers-reduced-motion: no-preference){
-  .histv2-cal-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:.1s;}
+  .histv2-cal-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.1s;}
   /* month change (swipe on the calendar, or the ‹ › arrows): the grid
      slides in from the direction you swiped, like the stats carousel */
   @keyframes histCalSlide{from{opacity:.3;transform:translateX(var(--sd,0));}to{opacity:1;transform:translateX(0);}}
-  .histv2-section-label{animation:dashRise .45s cubic-bezier(.16,1,.3,1) both;animation-delay:.2s;}
-  .histv2-anim-in{animation:dashDayIn .45s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.24s + var(--i,0) * 70ms);}
+  .histv2-section-label{animation:dashRise .45s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.2s;}
+  .histv2-anim-in{animation:dashDayIn .45s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.24s + var(--i,0) * 70ms);}
   /* the summary + exercise rows rise in when a card is EXPANDED (hist-reveal
      set by toggleHistExpandV2 for that one card only — short delays so
      content is never parked invisible, same idiom as the finish screen). */
-  .histv2-card.hist-reveal .histv2-wprogress{animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) both;}
-  .histv2-card.hist-reveal .histv2-wstat{animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.05s;}
-  .histv2-card.hist-reveal .histv2-wrecord{animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) both;animation-delay:.1s;}
-  .histv2-card.hist-reveal .histv2-ex-item{animation:histExRow .34s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.1s + var(--i,0) * 40ms);}
+  .histv2-card.hist-reveal .histv2-wprogress{animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) backwards;}
+  .histv2-card.hist-reveal .histv2-wstat{animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.05s;}
+  .histv2-card.hist-reveal .histv2-wrecord{animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.1s;}
+  .histv2-card.hist-reveal .histv2-ex-item{animation:histExRow .34s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.1s + var(--i,0) * 40ms);}
   @keyframes histExRow{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 }
 .histv2-root .ph{display:block;}
@@ -2195,12 +2199,12 @@ body.pev2-bg{background:var(--m-panel);}
   /* Card / tile entrances play on screen entry (staggered). Only the SVG
      line/ring draw-in is deferred until the element scrolls into view —
      see statsV2SetupDrawReveal(). */
-  .statsv2-anim-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.08s + var(--i,0) * 70ms);}
-  .statsv2-anim-tile{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.2s + var(--i,0) * 40ms);}
+  .statsv2-anim-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.08s + var(--i,0) * 70ms);}
+  .statsv2-anim-tile{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.2s + var(--i,0) * 40ms);}
   /* "slupki animowac" — dashBarGrow, same keyframe as the Dashboard trend
      bars. .5s base so the bars start once the bar CARD's own rise
      (--i:1 → .15s delay + .7s) has essentially landed. */
-  .statsv2-bar-anim{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.5s + var(--i,0) * 40ms);}
+  .statsv2-bar-anim{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.5s + var(--i,0) * 40ms);}
   /* dots/PR tags fade in near the end of the ~1s line draw so they stay
      in sync with the line reaching them rather than popping early. */
   .statsv2-chart-dot,.statsv2-pr-tag{animation:statsv2DotIn .3s ease both;animation-delay:.85s;}
@@ -2208,12 +2212,31 @@ body.pev2-bg{background:var(--m-panel);}
 }
 .statsv2-root .ph{display:block;}
 .statsv2-root .ph svg{display:block;width:100%;height:100%;}
+/* Asymmetric press (iOS feel): the finger-down scale lands in
+   --press-in, the release eases back over the base rule's slower
+   --press-out. Transitions take their timing from the destination
+   style, so only the duration needs overriding here. Deliberately a
+   list, not a global :active — :active also matches ancestors, which
+   would speed up the view slide / sheet snapback mid-touch. */
+.plan-pill:active,.topbar-icon-btn:active,.gymfin-cta:active,.ex-tile:active,.save-btn:active,
+.hist-card.collapsed:active,.acct-photo-pick:active,.acct-cloud-cta:active,.acct-oauth-btn:active,
+.dash-chat-btn:active,.gymv2-chat-btn:active,.plansv2-chat-btn:active,.histv2-chat-btn:active,.statsv2-chat-btn:active,
+.dash-plan-card:active,.v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-edit-plan:active,
+.gymv2-tile:active,.gymv2-tile-swap:active,.gymv2-done-row:active,.gymv2-save:active,
+.plansv2-btn-outline:active,.plansv2-btn-fill:active,.plansv2-card:active,.plansv2-choice-chip:active,
+.plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
+.pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
+.exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active{transition-duration:var(--press-in);}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <script>
+// iOS Safari only applies :active when a touchstart listener exists
+// on the element or an ancestor — this empty passive one turns on
+// every :active press state in the app. Never preventDefault here.
+document.addEventListener('touchstart', ()=>{}, {passive:true});
 document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
 document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 </script>
@@ -4466,6 +4489,7 @@ function acctSheetClose(id, viaDrag){
   const finish = ()=>{
     overlay.classList.add('hidden');
     overlay.classList.remove('plansv2-customize-closing');
+    overlay.classList.remove('m-sheet-entered'); // next opening plays the entrance again
     overlay.style.opacity = '';
     if(mover){ mover.classList.remove('m-sheet-snapback'); mover.style.transform = ''; }
     _acctSheetT[id] = null;
@@ -6122,25 +6146,27 @@ function renderBottomNavForContext(){
 // that tab — GYM's circle is bigger). animate=false jumps instantly
 // (first paint, resize, nav rebuild); true glides.
 let navBlobReady = false, lastNavActiveRoute = null;
+const NAV_BLOB_BASE = 69;   // == .nav-item-lg; blob only ever scales DOWN from this (stays crisp)
 function positionNavBlob(animate){
   const nav = document.getElementById('bottomNav');
   if(!nav || !nav.classList.contains('bottom-nav-light')) return;
   const blob = nav.querySelector('.nav-blob');
   const act = nav.querySelector('.nav-item.active');
   if(!blob || !act) return;
+  // Transform-only (GPU): translate the blob's centre onto the active
+  // item's centre, scale to its size. No left/width/height = no layout.
+  const s = act.offsetWidth / NAV_BLOB_BASE;
+  const x = act.offsetLeft + (act.offsetWidth - NAV_BLOB_BASE) / 2;
+  const tf = 'translateX(' + x.toFixed(2) + 'px) scale(' + s.toFixed(4) + ')';
   if(!animate){
     const keep = blob.style.transition;
     blob.style.transition = 'none';
-    blob.style.left = act.offsetLeft + 'px';
-    blob.style.width = act.offsetWidth + 'px';
-    blob.style.height = act.offsetHeight + 'px';
+    blob.style.transform = tf;
     blob.getBoundingClientRect();          // commit before restoring the glide
     blob.style.transition = keep;
     return;
   }
-  blob.style.left = act.offsetLeft + 'px';
-  blob.style.width = act.offsetWidth + 'px';
-  blob.style.height = act.offsetHeight + 'px';
+  blob.style.transform = tf;
 }
 window.addEventListener('resize', ()=> positionNavBlob(false));
 function goRoute(route){
@@ -6893,6 +6919,7 @@ function openExercisePopupV2(ex){
   const overlay = document.getElementById('exercisePopupOverlayV2');
   const sheet = document.getElementById('exercisePopupSheetV2');
   overlay.classList.remove('m-sheet-closing');
+  overlay.classList.remove('m-sheet-entered'); // next opening plays the entrance again
   sheet.classList.remove('m-sheet-snapback');
   sheet.style.transform = '';
   overlay.style.opacity = '';
@@ -6908,6 +6935,7 @@ function closeExercisePopupV2(viaDrag){
   const finish = ()=>{
     overlay.classList.add('hidden');
     overlay.classList.remove('m-sheet-closing');
+    overlay.classList.remove('m-sheet-entered'); // next opening plays the entrance again
     sheet.classList.remove('m-sheet-snapback');
     sheet.style.transform = '';
     overlay.style.opacity = '';
@@ -6946,9 +6974,11 @@ function closeExercisePopupV2(viaDrag){
    family, which now rides the same shell) — bind once per overlay to the
    static grabber. Tracks the pointer, moves the panel with the finger,
    and on release closes if it's been pulled past 40% of its height or
-   flicked down fast; otherwise snaps back. Inner scroll is untouched
-   (the handle is its own element, above the scroll body). closeFn is
-   called with `true` so it can skip its own slide-down animation. */
+   flicked down (fast last sample, or a quick short pull overall);
+   otherwise snaps back. A close carries the finger's motion off-screen
+   (WAAPI, roughly release speed) and only then calls closeFn(true), so
+   closeFn can skip its own slide-down animation. Inner scroll is
+   untouched (the handle is its own element, above the scroll body). */
 function mSheetDrag(overlayId, closeFn){
   const overlay = document.getElementById(overlayId);
   if(!overlay) return;
@@ -6956,7 +6986,7 @@ function mSheetDrag(overlayId, closeFn){
   if(!mover) return;
   const handle = mover.querySelector('.m-sheet-grab');
   if(!handle) return;
-  let startY = 0, dy = 0, lastY = 0, lastT = 0, vY = 0, dragging = false;
+  let startY = 0, dy = 0, lastY = 0, lastT = 0, startT = 0, vY = 0, dragging = false;
   const move = e=>{
     if(!dragging) return;
     dy = Math.max(0, e.clientY - startY);
@@ -6966,7 +6996,7 @@ function mSheetDrag(overlayId, closeFn){
     overlay.style.opacity = Math.max(0.15, 1 - (dy / h) * 1.15).toFixed(3);
     e.preventDefault();
   };
-  const up = ()=>{
+  const up = e=>{
     if(!dragging) return;
     dragging = false;
     overlay.classList.remove('m-sheet-dragging');
@@ -6974,10 +7004,35 @@ function mSheetDrag(overlayId, closeFn){
     window.removeEventListener('pointerup', up);
     window.removeEventListener('pointercancel', up);
     const h = mover.offsetHeight || 1;
-    if(dy > h * 0.4 || vY > 0.6){
-      overlay.style.opacity = '';
-      mover.style.transform = 'translateY(100%)';
-      closeFn(true);
+    const elapsed = Math.max(1, (e ? e.timeStamp : lastT) - startT);
+    const flick = dy > 24 && vY > 0 && (dy / elapsed) > 0.11;
+    if(dy > h * 0.4 || vY > 0.6 || flick){
+      // Carry the finger's motion off-screen instead of teleporting:
+      // continue from the current offset at roughly release speed.
+      const fromOpacity = getComputedStyle(overlay).opacity;
+      const dur = Math.round(Math.min(300, Math.max(160, (h - dy) / Math.max(vY, 1.5))));
+      overlay.style.pointerEvents = 'none';
+      const aSheet = mover.animate(
+        [{transform:'translateY(' + dy.toFixed(1) + 'px)'}, {transform:'translateY(100%)'}],
+        {duration:dur, easing:'cubic-bezier(.32,.72,0,1)', fill:'forwards'});
+      const aDim = overlay.animate(
+        [{opacity:fromOpacity}, {opacity:0}],
+        {duration:dur, easing:'linear', fill:'forwards'});
+      let landed = false;
+      const land = ()=>{
+        if(landed) return;
+        landed = true;
+        // Pin the end state inline, drop the WAAPI fills, then let the
+        // sheet's own close() hide it (its finish() clears these inline
+        // styles only after the overlay is already hidden, so no flash).
+        mover.style.transform = 'translateY(100%)';
+        overlay.style.opacity = '0';
+        aSheet.cancel(); aDim.cancel();
+        overlay.style.pointerEvents = '';
+        closeFn(true);
+      };
+      aSheet.onfinish = land;
+      setTimeout(land, dur + 60);
     } else {
       mover.classList.add('m-sheet-snapback');
       mover.style.transform = '';
@@ -6987,9 +7042,17 @@ function mSheetDrag(overlayId, closeFn){
   };
   handle.addEventListener('pointerdown', e=>{
     dragging = true;
-    dy = 0;
-    startY = lastY = e.clientY;
-    lastT = e.timeStamp;
+    // If the entrance is still running, pick the sheet up where it
+    // visually is; then retire the entrance for this opening so
+    // releasing never replays it (see .m-sheet-entered in CSS).
+    const tf = getComputedStyle(mover).transform;
+    const cur = tf && tf !== 'none' ? Math.max(0, new DOMMatrixReadOnly(tf).m42) : 0;
+    overlay.classList.add('m-sheet-entered');
+    mover.style.transform = cur ? 'translateY(' + cur.toFixed(1) + 'px)' : '';
+    dy = cur;
+    startY = e.clientY - cur;
+    lastY = e.clientY;
+    lastT = startT = e.timeStamp;
     vY = 0;
     overlay.classList.add('m-sheet-dragging');
     mover.classList.remove('m-sheet-snapback');
@@ -7014,6 +7077,7 @@ function mSheetOpenReset(overlayId){
   const m = o.querySelector('.m-sheet');
   clearTimeout(_mSheetTimers[overlayId]);
   o.classList.remove('m-sheet-closing');
+  o.classList.remove('m-sheet-entered'); // next opening plays the entrance again
   o.style.opacity = '';
   if(m){ m.classList.remove('m-sheet-snapback'); m.style.transform = ''; }
   const body = o.querySelector('.m-sheet-body');
@@ -7026,6 +7090,7 @@ function mSheetClose(overlayId, viaDrag, onFinish){
   const finish = ()=>{
     o.classList.add('hidden');
     o.classList.remove('m-sheet-closing');
+    o.classList.remove('m-sheet-entered'); // next opening plays the entrance again
     o.style.opacity = '';
     if(m){ m.classList.remove('m-sheet-snapback'); m.style.transform = ''; }
     document.documentElement.classList.remove('modal-lock');
@@ -7185,6 +7250,7 @@ function resetPlansCustomizeSheet(overlayId){
   const mover = overlay.querySelector('.plansv2-customize-stack');
   clearTimeout(_plansSheetTimers[overlayId]);
   overlay.classList.remove('plansv2-customize-closing');
+  overlay.classList.remove('m-sheet-entered'); // next opening plays the entrance again
   overlay.style.opacity = '';
   if(mover){ mover.classList.remove('m-sheet-snapback'); mover.style.transform = ''; }
   const body = overlay.querySelector('.plansv2-customize-card');
@@ -7198,6 +7264,7 @@ function closePlansCustomizeSheet(overlayId, viaDrag){
   const finish = ()=>{
     overlay.classList.add('hidden');
     overlay.classList.remove('plansv2-customize-closing');
+    overlay.classList.remove('m-sheet-entered'); // next opening plays the entrance again
     overlay.style.opacity = '';
     if(mover){ mover.classList.remove('m-sheet-snapback'); mover.style.transform = ''; }
     document.documentElement.classList.remove('modal-lock');
