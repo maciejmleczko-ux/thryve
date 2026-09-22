@@ -3730,19 +3730,26 @@ const GROUP_LABELS_EN = {
   'Barki (tylne)':'Shoulders (rear)', 'Nogi (całość)':'Legs (overall)',
   'Klatka piersiowa (dół)':'Chest (lower)', 'Brzuch (skos)':'Abs (obliques)',
 };
-// Order = biggest muscle groups first, small isolation + core last. The
-// BUILDER's section list and the exercise picker both render in this order,
-// so picking top-to-bottom already lays a day out sensibly; togglePlanExercise
-// then slots each pick at its exerciseOrderKey position so tap order doesn't
-// matter. Same priority the auto plan generator uses (PLANSV2_MUSCLE_BUCKETS).
+// Order = legs first (biggest muscle mass), then antagonist pairs kept
+// adjacent — Klatka (push) right before Plecy (pull), Biceps right before
+// Triceps — so a session naturally alternates push/pull instead of
+// grouping "everything big" before "everything small" regardless of which
+// side of a joint it works (Maciej, 2026-09-22: heard about the
+// agonist-antagonist approach, wanted BUILDER to lay days out that way).
+// Barki/Brzuch have no antagonist counterpart in this group taxonomy, so
+// they just keep trailing. The BUILDER's section list and the exercise
+// picker both render in this order, so picking top-to-bottom already lays
+// a day out sensibly; togglePlanExercise then slots each pick at its
+// exerciseOrderKey position so tap order doesn't matter. Same priority the
+// auto plan generator uses (PLANSV2_MUSCLE_BUCKETS).
 const PLAN_EX_GROUPS = [
   {key:'Nogi', match:['nog','uda','czworogł','dwugł','łydk','pośladk'], pl:'Nogi', en:'Legs'},
-  {key:'Plecy', match:['plecy'], pl:'Plecy', en:'Back'},
   {key:'Klatka', match:['klatka'], pl:'Klatka', en:'Chest'},
-  {key:'Barki', match:['bark'], pl:'Barki', en:'Shoulders'},
-  {key:'Brzuch', match:['brzuch'], pl:'Brzuch', en:'Abs'},
+  {key:'Plecy', match:['plecy'], pl:'Plecy', en:'Back'},
   {key:'Biceps', match:['biceps'], pl:'Biceps', en:'Biceps'},
   {key:'Triceps', match:['triceps'], pl:'Triceps', en:'Triceps'},
+  {key:'Barki', match:['bark'], pl:'Barki', en:'Shoulders'},
+  {key:'Brzuch', match:['brzuch'], pl:'Brzuch', en:'Abs'},
   {key:'Wlasne', match:[], pl:'Własne', en:'Custom'}, // fallback — always last, matches anything unrecognized
 ];
 function muscleGroupBucket(group){
@@ -8271,20 +8278,21 @@ const PLANSV2_FREQUENCY_DAYS = {
   3: ['mon','wed','fri'],
   4: ['mon','tue','thu','fri'],
 };
-// Round-robin priority: biggest compound groups first, isolated arm
-// work and core last — so a low target count (easy) still covers every
-// major muscle group once, and only the higher counts add isolation
-// work on a second pass. Matched against the real `group` strings in
-// the exercise library by prefix, not exact match (many groups carry a
-// parenthetical, e.g. "Nogi (uda, pośladki)").
+// Round-robin priority: legs first (biggest compound group), then
+// antagonist pairs kept adjacent (Klatka/push right before Plecy/pull,
+// Biceps right before Triceps) — see PLAN_EX_GROUPS, which mirrors this
+// exact order and explains the reasoning. Isolated core/shoulder work
+// last, no antagonist counterpart tracked in this taxonomy. Matched
+// against the real `group` strings in the exercise library by prefix, not
+// exact match (many groups carry a parenthetical, e.g. "Nogi (uda, pośladki)").
 const PLANSV2_MUSCLE_BUCKETS = [
   {label:'Nogi', match: g => /^(Nogi|Uda|Pośladki|Łydki)/.test(g)},
-  {label:'Plecy', match: g => /^Plecy/.test(g)},
   {label:'Klatka piersiowa', match: g => /^Klatka piersiowa/.test(g)},
-  {label:'Barki', match: g => /^Barki/.test(g)},
-  {label:'Brzuch', match: g => /^Brzuch/.test(g)},
+  {label:'Plecy', match: g => /^Plecy/.test(g)},
   {label:'Biceps', match: g => g==='Biceps'},
   {label:'Triceps', match: g => g==='Triceps'},
+  {label:'Barki', match: g => /^Barki/.test(g)},
+  {label:'Brzuch', match: g => /^Brzuch/.test(g)},
 ];
 function planv2MatchesEquipment(ex, equipment){
   return equipment==='mix' || ex.equipment===equipment;
