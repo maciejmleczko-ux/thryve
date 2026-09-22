@@ -3504,6 +3504,7 @@ const T_EN = {
   suggestUpVersion: (w, target) => `Last time at this intensity level: ${w} kg — add at least 1.25 kg (${target} kg).`,
   suggestDownVersion: (w) => `Last time you didn't reach the low end of the range on a few sets — consider cutting the weight by about 10% (from ${w} kg).`,
   suggestUp: (w, rh, rl) => `Last time ${w} kg × ${rh}+ across all sets — add 2.5–5 kg and drop back to ${rl} reps.`,
+  suggestUpMixed: (w, rh) => `Last time you hit ${rh}+ reps on every set, heaviest at ${w} kg — try bringing the lighter sets up to that, or add 2.5–5 kg on your heaviest.`,
   suggestDown: (rl, n, w) => `Last time you missed ${rl} reps on ${n} set${n===1?'':'s'} — consider cutting the weight by about 10% (from ${w} kg).`,
   suggestHold: (w, rh) => `Stay at ${w} kg and try to reach ${rh} reps on every set.`,
   exMeta: (group, sets, rl, rh, rest) => `${group} · ${sets} sets x ${rl}-${rh} reps · rest ${rest}`,
@@ -4236,15 +4237,21 @@ const BUILTIN_EXERCISES = [
 
 /* ---------- undulating periodization ("wersje wykonania", Szostek Balance FBW) ----------
    Opt-in per plan (plan.periodized). Each execution "version" is its own
-   rep-range/rest pair; compounds cycle through all 4, isolations only
-   alternate the two moderate ones (never HD/HC — no near-max isolation
-   work). See versionCycleFor()/resolvePeriodizedVersion() below for how a
-   plan exercise's cycle + today's version are derived. */
+   rest time + a menu of book-defined rep-range options (the source
+   material offers several per version, e.g. Gęstość is "6-8 / 8-10 /
+   10-20" — it's never just one fixed range); compounds cycle through all
+   4 versions, isolations only alternate the two moderate ones (never
+   HD/HC — no near-max isolation work). Which specific range option
+   applies to a given exercise/lifter is picked dynamically by
+   pickSubRange() (below resolvePeriodizedVersion()), not hardcoded —
+   otherwise the widest option (e.g. Gęstość's 10-20) shows up regardless
+   of what the lifter can actually do (Maciej, 2026-09-22: flagged this
+   exact mismatch after a 25kg×10 Preacher Curl got told to do 10-20). */
 const EXECUTION_VERSIONS = {
-  HD: {label:'Max',      repLow:1,  repHigh:3,  rest:'2-3 min'},
-  VC: {label:'Objętość', repLow:6,  repHigh:8,  rest:'1-2 min'},
-  HC: {label:'Siła',     repLow:3,  repHigh:6,  rest:'2-3 min'},
-  VD: {label:'Gęstość',  repLow:10, repHigh:20, rest:'1 min'},
+  HD: {label:'Max',      ranges:[[0,1],[1,3],[1,5]],    rest:'2-3 min'},
+  VC: {label:'Objętość', ranges:[[6,8],[8,10]],         rest:'1-2 min'},
+  HC: {label:'Siła',     ranges:[[1,3],[3,6]],          rest:'2-3 min'},
+  VD: {label:'Gęstość',  ranges:[[6,8],[8,10],[10,20]], rest:'1 min'},
 };
 const MAIN_LIFT_CYCLE = ['HD','VC','HC','VD'];
 const ISOLATION_CYCLE = ['VC','VD'];
@@ -6584,6 +6591,39 @@ function versionCycleFor(ex, indexAmongSameType){
   const off = indexAmongSameType % cycle.length;
   return [...cycle.slice(off), ...cycle.slice(0, off)];
 }
+// Which of a version's book-defined rep-range options actually fits this
+// exercise/lifter, instead of always defaulting to the widest one. Picks
+// by continuity first — if this exact exercise was already trained at
+// this exact version, reuse whichever range its logged reps landed in, so
+// the target doesn't jump around session to session. First time ever at
+// this version: fall back to whichever range best matches the rep count
+// behind the lifter's best estimated 1RM for this exercise (same Epley
+// data estimateStartingWeight() draws on) — reps in reserve don't apply
+// here since the range affects only the target reps, not RPE. No history
+// at all: most conservative (lowest-rep) option.
+function pickSubRange(exerciseName, tag, history){
+  const ranges = EXECUTION_VERSIONS[tag].ranges;
+  if(ranges.length === 1) return ranges[0];
+  const atVersion = history.find(h => h.version === tag);
+  let referenceReps = null;
+  if(atVersion){
+    const validSets = atVersion.sets.filter(s=> s.weight>0 || s.reps>0);
+    if(validSets.length) referenceReps = Math.max(...validSets.map(s=>s.reps||0));
+  } else {
+    const eligible = statsV2ExerciseSets(exerciseName).filter(statsV2E1rmEligible);
+    if(eligible.length){
+      const best = eligible.reduce((a,b)=> statsV2Epley(b.weight,b.reps) > statsV2Epley(a.weight,a.reps) ? b : a);
+      referenceReps = best.reps;
+    }
+  }
+  if(referenceReps == null) return ranges[0];
+  let bestIdx = 0, bestDist = Infinity;
+  ranges.forEach(([lo,hi], i)=>{
+    const dist = (referenceReps>=lo && referenceReps<=hi) ? 0 : Math.min(Math.abs(referenceReps-lo), Math.abs(referenceReps-hi));
+    if(dist < bestDist){ bestDist = dist; bestIdx = i; } // strict < — ties keep the earlier, more conservative range
+  });
+  return ranges[bestIdx];
+}
 // Given a plan exercise already tagged with versionCycleFor()'s result,
 // figures out which version comes next: one step after whatever version
 // this exact exercise last appeared with in saved history. No history (or
@@ -6596,8 +6636,8 @@ function resolvePeriodizedVersion(ex){
   const lastVersion = history.length ? history[0].version : null;
   const idx = lastVersion ? cycle.indexOf(lastVersion) : -1;
   const tag = cycle[(idx + 1 + cycle.length) % cycle.length];
-  const v = EXECUTION_VERSIONS[tag];
-  return {tag, repLow:v.repLow, repHigh:v.repHigh, rest:v.rest};
+  const [repLow, repHigh] = pickSubRange(ex.name, tag, history);
+  return {tag, repLow, repHigh, rest: EXECUTION_VERSIONS[tag].rest};
 }
 
 // Trener AI, surfaced for free in the exercise-logging tip box (Maciej,
@@ -6696,8 +6736,16 @@ function buildSuggestion(exMeta, history){
     return {cls:'', text:t('suggestHoldBw', `Zostań przy tym wariancie i spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, exMeta.repHigh)};
   }
   const lastWeight = Math.max(...validSets.map(s=>s.weight||0));
+  // "we wszystkich seriach" only claims a weight when every set actually
+  // used it — a ramped/pyramid session (e.g. 130/130/140, all ≥ repHigh)
+  // was reporting the heaviest single set as if it were used throughout
+  // (Maciej, 2026-09-22: "mam komunikat że zrobiłem 140 w każdej serii co
+  // jest nieprawdą" — only the last of 3 sets was 140, the rest were 130).
+  const weightWasUniform = validSets.every(s => (s.weight||0) === lastWeight);
   if(allTop){
-    return {cls:'up', text:t('suggestUp', `Ostatnio ${lastWeight} kg × ${exMeta.repHigh}+ we wszystkich seriach — zwiększ o 2,5–5 kg i wróć do ${exMeta.repLow} powt.`, lastWeight, exMeta.repHigh, exMeta.repLow)};
+    return weightWasUniform
+      ? {cls:'up', text:t('suggestUp', `Ostatnio ${lastWeight} kg × ${exMeta.repHigh}+ we wszystkich seriach — zwiększ o 2,5–5 kg i wróć do ${exMeta.repLow} powt.`, lastWeight, exMeta.repHigh, exMeta.repLow)}
+      : {cls:'up', text:t('suggestUpMixed', `Ostatnio dobiłeś do ${exMeta.repHigh}+ powt. w każdej serii, najciężej ${lastWeight} kg — spróbuj podciągnąć lżejsze serie do tego ciężaru albo dołóż 2,5–5 kg na najcięższej.`, lastWeight, exMeta.repHigh)};
   }
   if(lowFails>=2){
     return {cls:'down', text:t('suggestDown', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach — rozważ zmniejszenie ciężaru o ok. 10% (z ${lastWeight} kg).`, exMeta.repLow, lowFails, lastWeight)};
