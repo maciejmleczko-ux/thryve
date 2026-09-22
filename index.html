@@ -5193,7 +5193,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.41.10";
+const APP_VERSION = "4.41.11";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6243,52 +6243,67 @@ function centerFocusedSeriesCard(){
   const delta = (cardRect.top + cardRect.height / 2) - (visibleHeight / 2);
   scrollEl.scrollTop += delta;
 }
+// Named (not nested in the IIFE below) so the resume-from-background
+// handler further down can also call it, instead of duplicating this logic.
+function syncViewportPinning(){
+  if(!window.visualViewport) return;
+  const vv = window.visualViewport;
+  // Bottom sheets (.m-sheet-overlay) are excluded here — they're
+  // anchored to the true bottom via `bottom:0` + flex `justify-content:
+  // flex-end`, not by centering, so they never needed `top` pinning.
+  // Maciej found (2026-09-15) that focusing Seria 2/3 (i.e. a `scroll`
+  // event from iOS auto-scrolling a lower input into view, as opposed
+  // to the `resize` from the keyboard first opening on Seria 1) made
+  // the sheet jump toward the top of the screen — exactly what forcing
+  // `top = vv.offsetTop` on a bottom-anchored flex sheet would do the
+  // moment vv.offsetTop stops being 0 during that scroll.
+  document.querySelectorAll('.onboard-overlay:not(.m-sheet-overlay)').forEach(el=>{
+    el.style.top = vv.offsetTop + 'px';
+  });
+  syncSheetHeightToVisualViewport();
+  centerFocusedSeriesCard();
+}
 (function pinOverlaysToVisualViewport(){
   if(!window.visualViewport) return;
   const vv = window.visualViewport;
-  function sync(){
-    // Bottom sheets (.m-sheet-overlay) are excluded here — they're
-    // anchored to the true bottom via `bottom:0` + flex `justify-content:
-    // flex-end`, not by centering, so they never needed `top` pinning.
-    // Maciej found (2026-09-15) that focusing Seria 2/3 (i.e. a `scroll`
-    // event from iOS auto-scrolling a lower input into view, as opposed
-    // to the `resize` from the keyboard first opening on Seria 1) made
-    // the sheet jump toward the top of the screen — exactly what forcing
-    // `top = vv.offsetTop` on a bottom-anchored flex sheet would do the
-    // moment vv.offsetTop stops being 0 during that scroll.
-    document.querySelectorAll('.onboard-overlay:not(.m-sheet-overlay)').forEach(el=>{
-      el.style.top = vv.offsetTop + 'px';
-    });
-    syncSheetHeightToVisualViewport();
-    centerFocusedSeriesCard();
-  }
-  vv.addEventListener('resize', sync);
-  vv.addEventListener('scroll', sync);
-  sync();
+  vv.addEventListener('resize', syncViewportPinning);
+  vv.addEventListener('scroll', syncViewportPinning);
+  syncViewportPinning();
 })();
+// Forces a WebKit repaint of a fixed-position element — see the
+// resume-from-background comment below for why this is needed.
+function forceFixedReflow(el){
+  if(!el) return;
+  const d = el.style.display;
+  el.style.display = 'none';
+  void el.offsetHeight;
+  el.style.display = d;
+}
 /* ---------- resuming from background (lock screen, app-switcher) ----------
    Reported by Maciej (2026-09-22, screenshots): after backgrounding the app
-   mid-workout and unlocking the phone, three things could be stale because
+   mid-workout and unlocking the phone, several things could be stale because
    nothing ever re-syncs layout on resume — the app only ever measured/pinned
    on load, resize and visualViewport events, none of which reliably fire on
    iOS when a backgrounded PWA is restored:
    1) the bottom-nav orange blob landed at the wrong tab (its position is
       cached from `offsetLeft`/`offsetWidth` read whenever it last moved —
       stale if layout shifted while hidden);
-   2) the fixed bottom nav visually "stuck" mid-content instead of the real
-      screen bottom — a known WebKit issue where `position:fixed` elements
+   2) fixed-position elements (bottom nav, the plan-editor's floating
+      "ZAPISZ PLAN") visually "stuck" mid-content instead of their real
+      pinned spot — a known WebKit issue where `position:fixed` elements
       stop being repainted at the right place after a background/foreground
-      cycle, fixed by forcing a reflow;
-   3) the exercise-logging sheet looked cut short — its max-height is driven
-      off `visualViewport.height` (see syncSheetHeightToVisualViewport above)
-      and iOS can report a transitional/wrong value in the instant right
-      after resuming, with no later resize event to correct it. */
+      cycle, fixed by forcing a reflow (forceFixedReflow);
+   3) the exercise-logging sheet looked cut short, and any centered overlay
+      (onboarding, "Co nowego", …) could sit at a stale `top` — both driven
+      off `visualViewport`, which can report a transitional/wrong value in
+      the instant right after resuming, with no later resize/scroll event
+      to correct it — same fix as a real viewport change (syncViewportPinning). */
 document.addEventListener('visibilitychange', function(){
   if(document.visibilityState !== 'visible') return;
   positionNavBlob(false);
-  const nav = document.getElementById('bottomNav');
-  if(nav){ const d = nav.style.display; nav.style.display = 'none'; void nav.offsetHeight; nav.style.display = d; }
-  syncSheetHeightToVisualViewport();
+  forceFixedReflow(document.getElementById('bottomNav'));
+  document.querySelectorAll('.pev2-save-fab').forEach(forceFixedReflow);
+  syncViewportPinning();
 });
 /* ============================================================
    GYM — icon grid + session
@@ -6704,8 +6719,14 @@ function closeExercisePopupV2(viaDrag){
   }
   // Closing without confirming ("Dodaj do treningu") used to just drop
   // whatever was typed — save it as a draft so reopening this exercise
-  // picks up where it was left, instead of starting blank again.
+  // picks up where it was left, instead of starting blank again. A note
+  // being actively edited (its own two-step "Dodaj notatkę" -> type ->
+  // save flow) is a separate, live-only variable (popupNoteDraft) that
+  // popupExercise.notes never sees until commitPopupNote() runs — same
+  // fix confirmExercisePopupV2 already applies, so an in-progress note
+  // isn't silently dropped here too.
   if(popupExercise){
+    if(popupNoteEditing) commitPopupNote();
     if(sessionExercises.some(e=>e.name===popupExercise.name)){
       delete popupDrafts[popupExercise.name]; // confirmExercisePopupV2 already logged it
     } else {
