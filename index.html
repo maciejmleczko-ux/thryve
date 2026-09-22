@@ -3499,6 +3499,7 @@ const T_EN = {
   imageGenFailed: "Couldn't generate the image",
   noPriorResults: 'No previous results yet — pick a weight so your last set finishes with 1-2 reps in reserve (RPE 7-8), toward the low end of the range.',
   noPriorResultsVersion: 'First time at this intensity level — pick a weight so your last set finishes with 1-2 reps in reserve (RPE 7-8), toward the low end of the range.',
+  noPriorResultsVersionEst: (kg) => `First time at this intensity level — based on your history, try around ${kg} kg, with 1-2 reps in reserve (RPE 7-8).`,
   noCompletePriorData: 'No complete data from the last session.',
   suggestUpVersion: (w, target, rl) => `Last time at this intensity level: ${w} kg — add at least 1.25 kg (${target} kg) and drop back to ${rl} reps.`,
   suggestUp: (w, rh, rl) => `Last time ${w} kg × ${rh}+ across all sets — add 2.5–5 kg and drop back to ${rl} reps.`,
@@ -5288,10 +5289,10 @@ const DASH_REST_DAY_PL = [
 const CHANGELOG = {
   "4.42.0": {
     pl: [
-      {featured:true, icon:'arrow-clockwise', badge:'Nowość', title:'Periodyzacja falująca w Kreatorze', text:'Nowy przełącznik przy nazwie planu — „Periodyzacja falująca”. Włączony, każde ćwiczenie w dniu rotuje między czterema poziomami intensywności (Max / Objętość / Siła / Gęstość) zamiast trzymać jeden stały zakres powtórzeń. Ćwiczenia złożone w tym samym dniu startują cykl z innego miejsca, więc nie wszystkie wypadają ciężko naraz. W oknie logowania zobaczysz etykietę dzisiejszego poziomu i dopasowaną do niego podpowiedź ciężaru.'},
+      {featured:true, icon:'arrow-clockwise', badge:'Nowość', title:'Periodyzacja falująca w Kreatorze', text:'Nowy przełącznik przy nazwie planu — „Periodyzacja falująca”. Włączony, każde ćwiczenie w dniu rotuje między czterema poziomami intensywności (Max / Objętość / Siła / Gęstość) zamiast trzymać jeden stały zakres powtórzeń. Ćwiczenia złożone w tym samym dniu startują cykl z innego miejsca, więc nie wszystkie wypadają ciężko naraz. W oknie logowania zobaczysz etykietę dzisiejszego poziomu i dopasowaną do niego podpowiedź ciężaru — pierwszy raz na danym poziomie appka szacuje ciężar startowy na podstawie Twoich wyników na innych poziomach.'},
     ],
     en: [
-      {featured:true, icon:'arrow-clockwise', badge:'New', title:'Undulating periodization in the Builder', text:'A new toggle next to the plan name — "Undulating periodization". Turned on, every exercise in a day rotates through four intensity levels (Max / Volume / Strength / Density) instead of one fixed rep range, and the compound lifts in that same day start the cycle from a different point, so they\'re never all maximally heavy at once. The set-logging popup shows today\'s level and a weight suggestion matched to it.'},
+      {featured:true, icon:'arrow-clockwise', badge:'New', title:'Undulating periodization in the Builder', text:'A new toggle next to the plan name — "Undulating periodization". Turned on, every exercise in a day rotates through four intensity levels (Max / Volume / Strength / Density) instead of one fixed rep range, and the compound lifts in that same day start the cycle from a different point, so they\'re never all maximally heavy at once. The set-logging popup shows today\'s level and a weight suggestion matched to it — the first time at a given level, it estimates a starting weight from your history at the others.'},
     ],
   },
   "4.41.0": {
@@ -6608,6 +6609,23 @@ function getAiActionFor(exerciseName){
   return hit ? hit.action : null;
 }
 
+// First time at a given execution version, there's no history AT that
+// version to suggest from — but there's very likely history at some OTHER
+// version of the same exercise. Back it out through the same Epley e1RM
+// Stats already uses for records (statsV2Epley, below) to land on a real
+// number instead of leaving the lifter to guess cold. Epley gets unreliable
+// much past ~12 reps (see STATSV2_E1RM_REP_CAP), so this only fires when
+// the target rep count is still in Epley's reliable range, and only draws
+// from historical sets that are themselves e1RM-eligible.
+function estimateStartingWeight(exerciseName, targetReps){
+  if(targetReps > STATSV2_E1RM_REP_CAP) return null;
+  const eligible = statsV2ExerciseSets(exerciseName).filter(statsV2E1rmEligible);
+  if(!eligible.length) return null;
+  const bestE1rm = Math.max(...eligible.map(s=>statsV2Epley(s.weight, s.reps)));
+  const est = bestE1rm / (1 + targetReps/30);
+  return Math.round(est / 1.25) * 1.25; // 1.25 kg steps — same increment the periodization progression uses
+}
+
 function buildSuggestion(exMeta, history){
   const isBodyweightEx = exMeta.equipment === 'masa ciała';
   if(exMeta.version){
@@ -6616,8 +6634,12 @@ function buildSuggestion(exMeta, history){
     // — a light VD day says nothing about how heavy the previous HD day was.
     const atVersion = history.find(h => h.version === exMeta.version);
     if(!atVersion){
-      return {cls:'', text: isBodyweightEx
-        ? t('noPriorResultsVersionBw','Pierwszy raz na tym poziomie intensywności — zacznij w dolnej granicy zakresu, zostawiając 1-2 powtórzenia w zapasie (RPE 7-8).')
+      if(isBodyweightEx){
+        return {cls:'', text:t('noPriorResultsVersionBw','Pierwszy raz na tym poziomie intensywności — zacznij w dolnej granicy zakresu, zostawiając 1-2 powtórzenia w zapasie (RPE 7-8).')};
+      }
+      const est = estimateStartingWeight(exMeta.name, exMeta.repLow);
+      return {cls:'', text: est
+        ? t('noPriorResultsVersionEst', `Pierwszy raz na tym poziomie intensywności — na podstawie Twoich wyników spróbuj ok. ${est} kg, z zapasem 1-2 powtórzeń (RPE 7-8).`, est)
         : t('noPriorResultsVersion','Pierwszy raz na tym poziomie intensywności — dobierz ciężar tak, by ostatnia seria kończyła się z zapasem 1-2 powtórzeń (RPE 7-8), w dolnej granicy zakresu.')};
     }
     const validSets = atVersion.sets.filter(s=> s.weight>0 || s.reps>0);
