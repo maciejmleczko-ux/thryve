@@ -1603,6 +1603,13 @@ body.pev2-bg{background:var(--m-panel);}
 .pev2-name-input{width:100%;box-sizing:border-box;background:var(--m-card);border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 20px;font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);font-family:inherit;}
 .pev2-name-input::placeholder{color:var(--m-muted);font-weight:500;}
 .pev2-fork-hint{margin:8px 2px 0;font-size:var(--m-fs-xs);line-height:1.5;color:#2c2727;}
+.pev2-periodize-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-top:10px;background:var(--m-card);border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:12px 14px;font-family:inherit;cursor:pointer;text-align:left;}
+.pev2-periodize-toggle-title{display:block;font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);}
+.pev2-periodize-toggle-desc{display:block;margin-top:2px;font-size:var(--m-fs-2xs);color:var(--m-muted);line-height:1.35;}
+.pev2-periodize-toggle-switch{flex:none;width:40px;height:24px;border-radius:var(--m-r-pill);background:rgba(0,0,0,.12);position:relative;transition:background .15s ease;}
+.pev2-periodize-toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s ease;}
+.pev2-periodize-toggle-switch.active{background:var(--m-orange);}
+.pev2-periodize-toggle-switch.active::after{transform:translateX(16px);}
 .pev2-fork-hint.hidden{display:none;}
 .pev2-day-row{display:flex;gap:4px;}
 .pev2-day-chip{position:relative;flex:1;min-width:0;text-align:center;background:var(--m-card);border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 0 15px;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);cursor:pointer;font-family:inherit;transition:transform .12s ease;}
@@ -1751,6 +1758,10 @@ body.pev2-bg{background:var(--m-panel);}
 .exv2-title-block{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;}
 .exv2-pill{display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 12px;border-radius:var(--m-r-pill);background:#a4bdff;}
 .exv2-pill span{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:#0e267b;white-space:nowrap;}
+/* Periodized plans only — which execution version (Max/Objętość/Siła/
+   Gęstość) today's set of this exercise is, next to the muscle-group pill. */
+.exv2-pill--version{background:var(--m-orange);}
+.exv2-pill--version span{color:#fff;}
 .exv2-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;width:100%;}
 .exv2-title{font-size:var(--m-fs-xl);font-weight:400;letter-spacing:.88px;text-transform:uppercase;color:#2c2727;line-height:1.15;}
 .exv2-close{width:24px;height:24px;flex-shrink:0;color:#2c2727;cursor:pointer;}
@@ -2567,6 +2578,13 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <p class="plansv2-section-label" data-i18n="peV2NameLabel">NAZWA PLANU</p>
           <input type="text" class="pev2-name-input" id="planNameInputV2" oninput="editingPlan.name=this.value" placeholder="np. Full Body A" data-i18n-ph="peV2NamePh" autocomplete="off">
           <p class="pev2-fork-hint hidden" id="planEditorV2ForkHint" data-i18n="planEditorForkHint">Zmiany zapiszesz jako swoją kopię tego planu — oryginał zostaje bez zmian.</p>
+          <button type="button" class="pev2-periodize-toggle" id="planPeriodizeToggleV2" onclick="togglePlanPeriodization()">
+            <span>
+              <span class="pev2-periodize-toggle-title" data-i18n="peV2PeriodizeTitle">Periodyzacja falująca</span>
+              <span class="pev2-periodize-toggle-desc" data-i18n="peV2PeriodizeDesc">Zakres powtórzeń i odpoczynku rotuje między treningami (Max / Objętość / Siła / Gęstość), zamiast trzymać jeden stały zakres.</span>
+            </span>
+            <span class="pev2-periodize-toggle-switch" id="planPeriodizeSwitchV2"></span>
+          </button>
         </div>
 
         <div class="pev2-anim-tile pev2-anim-tile-2">
@@ -3480,7 +3498,9 @@ const T_EN = {
   imageSaved: 'Image saved to device',
   imageGenFailed: "Couldn't generate the image",
   noPriorResults: 'No previous results yet — pick a weight so your last set finishes with 1-2 reps in reserve (RPE 7-8), toward the low end of the range.',
+  noPriorResultsVersion: 'First time at this intensity level — pick a weight so your last set finishes with 1-2 reps in reserve (RPE 7-8), toward the low end of the range.',
   noCompletePriorData: 'No complete data from the last session.',
+  suggestUpVersion: (w, target, rl) => `Last time at this intensity level: ${w} kg — add at least 1.25 kg (${target} kg) and drop back to ${rl} reps.`,
   suggestUp: (w, rh, rl) => `Last time ${w} kg × ${rh}+ across all sets — add 2.5–5 kg and drop back to ${rl} reps.`,
   suggestDown: (rl, n, w) => `Last time you missed ${rl} reps on ${n} set${n===1?'':'s'} — consider cutting the weight by about 10% (from ${w} kg).`,
   suggestHold: (w, rh) => `Stay at ${w} kg and try to reach ${rh} reps on every set.`,
@@ -3601,6 +3621,12 @@ const T_EN = {
   peV2NameLabel: 'PLAN NAME',
   peV2NamePh: 'e.g. Full Body A',
   peV2ForkHint: 'Your changes save as your own copy of this plan — the original stays as is.',
+  peV2PeriodizeTitle: 'Undulating periodization',
+  peV2PeriodizeDesc: 'Rep range and rest rotate between sessions (Max / Volume / Strength / Density) instead of staying fixed.',
+  execVersionHD: 'Max',
+  execVersionVC: 'Volume',
+  execVersionHC: 'Strength',
+  execVersionVD: 'Density',
   peV2DaysLabel: 'DAYS OF THE WEEK',
   peV2DayHint: 'Pick a weekday and assign it exercises',
   peV2SelectDays: 'Select days',
@@ -4198,6 +4224,24 @@ const BUILTIN_EXERCISES = [
   ...GYM_PLAN_C_EXTRA.map(e => ({...e, day:'C', compound: COMPOUND_EXERCISES.has(e.name)})),
   ...GYM_PLAN_KALISTENIKA.map(e => ({...e, day:'D', compound: COMPOUND_EXERCISES.has(e.name)})),
 ];
+
+/* ---------- undulating periodization ("wersje wykonania", Szostek Balance FBW) ----------
+   Opt-in per plan (plan.periodized). Each execution "version" is its own
+   rep-range/rest pair; compounds cycle through all 4, isolations only
+   alternate the two moderate ones (never HD/HC — no near-max isolation
+   work). See versionCycleFor()/resolvePeriodizedVersion() below for how a
+   plan exercise's cycle + today's version are derived. */
+const EXECUTION_VERSIONS = {
+  HD: {label:'Max',      repLow:1,  repHigh:3,  rest:'2-3 min'},
+  VC: {label:'Objętość', repLow:6,  repHigh:8,  rest:'1-2 min'},
+  HC: {label:'Siła',     repLow:3,  repHigh:6,  rest:'2-3 min'},
+  VD: {label:'Gęstość',  repLow:10, repHigh:20, rest:'1 min'},
+};
+const MAIN_LIFT_CYCLE = ['HD','VC','HC','VD'];
+const ISOLATION_CYCLE = ['VC','VD'];
+// Behind one function so a future paywall only has to change this, not every
+// call site that shows the BUILDER toggle.
+function canUsePeriodization(){ return true; }
 function getExerciseLibrary(){
   return [...BUILTIN_EXERCISES, ...customExercises.map(e => ({...e, day:'Własne'}))];
 }
@@ -5193,7 +5237,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.41.11";
+const APP_VERSION = "4.42.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5242,6 +5286,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.42.0": {
+    pl: [
+      {featured:true, icon:'arrow-clockwise', badge:'Nowość', title:'Periodyzacja falująca w Kreatorze', text:'Nowy przełącznik przy nazwie planu — „Periodyzacja falująca”. Włączony, każde ćwiczenie w dniu rotuje między czterema poziomami intensywności (Max / Objętość / Siła / Gęstość) zamiast trzymać jeden stały zakres powtórzeń. Ćwiczenia złożone w tym samym dniu startują cykl z innego miejsca, więc nie wszystkie wypadają ciężko naraz. W oknie logowania zobaczysz etykietę dzisiejszego poziomu i dopasowaną do niego podpowiedź ciężaru.'},
+    ],
+    en: [
+      {featured:true, icon:'arrow-clockwise', badge:'New', title:'Undulating periodization in the Builder', text:'A new toggle next to the plan name — "Undulating periodization". Turned on, every exercise in a day rotates through four intensity levels (Max / Volume / Strength / Density) instead of one fixed rep range, and the compound lifts in that same day start the cycle from a different point, so they\'re never all maximally heavy at once. The set-logging popup shows today\'s level and a weight suggestion matched to it.'},
+    ],
+  },
   "4.41.0": {
     pl: [
       'Sekcje mają nowe nazwy: GYM to teraz Trening, HISTORY to Dziennik, BUILDER to Kreator, a STATS to Postępy.',
@@ -6512,6 +6564,33 @@ function lastSessionsFor(exerciseName){
     .map(w => w.exercises.find(e => e.name === exerciseName));
 }
 
+// Which execution-version cycle a plan exercise gets, purely from its
+// position among same-type (compound/isolation) exercises in that day —
+// nothing is stored, so reordering/adding/removing exercises in BUILDER
+// just recomputes this on the next render. Mirrors Szostek's own layout:
+// the Nth compound in a day starts N steps into HD>VC>HC>VD>, the Nth
+// isolation alternates VC>VD>/VD>VC>.
+function versionCycleFor(ex, indexAmongSameType){
+  const cycle = ex.compound ? MAIN_LIFT_CYCLE : ISOLATION_CYCLE;
+  const off = indexAmongSameType % cycle.length;
+  return [...cycle.slice(off), ...cycle.slice(0, off)];
+}
+// Given a plan exercise already tagged with versionCycleFor()'s result,
+// figures out which version comes next: one step after whatever version
+// this exact exercise last appeared with in saved history. No history (or
+// no version on the last entry, e.g. periodization was just turned on) —
+// start the cycle from its first step.
+function resolvePeriodizedVersion(ex){
+  const cycle = ex.versionCycle;
+  if(!cycle || !cycle.length) return null;
+  const history = lastSessionsFor(ex.name);
+  const lastVersion = history.length ? history[0].version : null;
+  const idx = lastVersion ? cycle.indexOf(lastVersion) : -1;
+  const tag = cycle[(idx + 1 + cycle.length) % cycle.length];
+  const v = EXECUTION_VERSIONS[tag];
+  return {tag, repLow:v.repLow, repHigh:v.repHigh, rest:v.rest};
+}
+
 // Trener AI, surfaced for free in the exercise-logging tip box (Maciej,
 // 2026-09-16/17): reuses the action already generated for this exact
 // exercise by the LAST workout's "Trener AI" analysis (cached in
@@ -6531,6 +6610,35 @@ function getAiActionFor(exerciseName){
 
 function buildSuggestion(exMeta, history){
   const isBodyweightEx = exMeta.equipment === 'masa ciała';
+  if(exMeta.version){
+    // Undulating periodization: progression is pinned to the last time THIS
+    // exact execution version was trained, not to the last session overall
+    // — a light VD day says nothing about how heavy the previous HD day was.
+    const atVersion = history.find(h => h.version === exMeta.version);
+    if(!atVersion){
+      return {cls:'', text: isBodyweightEx
+        ? t('noPriorResultsVersionBw','Pierwszy raz na tym poziomie intensywności — zacznij w dolnej granicy zakresu, zostawiając 1-2 powtórzenia w zapasie (RPE 7-8).')
+        : t('noPriorResultsVersion','Pierwszy raz na tym poziomie intensywności — dobierz ciężar tak, by ostatnia seria kończyła się z zapasem 1-2 powtórzeń (RPE 7-8), w dolnej granicy zakresu.')};
+    }
+    const validSets = atVersion.sets.filter(s=> s.weight>0 || s.reps>0);
+    if(!validSets.length){
+      return {cls:'', text:t('noCompletePriorData','Brak kompletnych danych z poprzedniej sesji.')};
+    }
+    const lowFails = validSets.filter(s => s.reps < exMeta.repLow).length;
+    if(lowFails>=2){
+      if(isBodyweightEx){
+        return {cls:'down', text:t('suggestDownBw', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach — rozważ łatwiejszy wariant albo krótszy odpoczynek między seriami.`, exMeta.repLow, lowFails)};
+      }
+      const lastWeightDown = Math.max(...validSets.map(s=>s.weight||0));
+      return {cls:'down', text:t('suggestDown', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach — rozważ zmniejszenie ciężaru o ok. 10% (z ${lastWeightDown} kg).`, exMeta.repLow, lowFails, lastWeightDown)};
+    }
+    if(isBodyweightEx){
+      return {cls:'', text:t('suggestHoldVersionBw', `Wróciłeś do tego poziomu intensywności — spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, exMeta.repHigh)};
+    }
+    const lastWeightVersion = Math.max(...validSets.map(s=>s.weight||0));
+    const targetWeightVersion = Math.round((lastWeightVersion + 1.25) * 100) / 100;
+    return {cls:'up', text:t('suggestUpVersion', `Ostatnio przy tym poziomie intensywności: ${lastWeightVersion} kg — dodaj min. 1,25 kg (${targetWeightVersion} kg) i wróć do ${exMeta.repLow} powt.`, lastWeightVersion, targetWeightVersion, exMeta.repLow)};
+  }
   if(!history.length){
     return {cls:'', text: isBodyweightEx
       ? t('noPriorResultsBw','Brak wcześniejszych wyników — zacznij w dolnej granicy zakresu powtórzeń, zostawiając 1-2 powtórzenia w zapasie (RPE 7-8).')
@@ -6616,7 +6724,17 @@ function todayPlanExerciseNames(){
   const plan = trainingPlans.find(p=>p.id===starredPlanId);
   if(!plan) return null;
   const list = plan.schedule[dayKeyFromDate(todayStr())];
-  return (list && list.length) ? list : null;
+  if(!list || !list.length) return null;
+  if(!plan.periodized) return list;
+  // Periodized plan: tag each non-bookend exercise with the cycle its
+  // position in the day earns it — a new array, the plan's own stored
+  // schedule is never mutated, so this recomputes cleanly on every render.
+  let compoundI = 0, isolationI = 0;
+  return list.map(e=>{
+    if(e.type === 'checklist') return e;
+    const idx = e.compound ? compoundI++ : isolationI++;
+    return {...e, versionCycle: versionCycleFor(e, idx)};
+  });
 }
 // Same shape as todayPlanExerciseNames() (list of {name,...}), but reflects
 // what's actually on today's GYM grid — in "Powtórz ostatni trening" mode
@@ -6660,6 +6778,13 @@ function removeExerciseFromSession(name){
 }
 let exv2CloseTimer = null; // pending hide from a close animation still playing, see closeExercisePopupV2()
 function openExercisePopupV2(ex){
+  // Periodized plan: swap in today's execution version before anything
+  // downstream reads repLow/repHigh/rest, so the whole popup (and whatever
+  // gets logged from it) is built on the resolved values from here on.
+  if(ex.versionCycle){
+    const resolved = resolvePeriodizedVersion(ex);
+    if(resolved) ex = {...ex, repLow:resolved.repLow, repHigh:resolved.repHigh, rest:resolved.rest, version:resolved.tag};
+  }
   // Opening the popup is just a preview (e.g. checking the AI trainer tip)
   // until sets are actually logged — markGymActivity() fires from
   // confirmExercisePopupV2() instead, so browsing tiles pre-workout can't
@@ -7166,6 +7291,7 @@ function renderExercisePopupV2(animate){
       <div class="exv2-header-group${animCls}">
         <div class="exv2-title-block">
           <span class="exv2-pill"><span>${groupLabel(ex.group)}</span></span>
+          ${ex.version ? `<span class="exv2-pill exv2-pill--version"><span>${escHtml(t('execVersion'+ex.version, EXECUTION_VERSIONS[ex.version].label))}</span></span>` : ''}
           <div class="exv2-title-row">
             <div class="exv2-title">${ex.name}</div>
             <span class="exv2-close" onclick="closeExercisePopupV2()">${ph('x')}</span>
@@ -7421,7 +7547,8 @@ function saveWorkout(){
       .filter(s => String(s.weight).trim() !== '' || String(s.reps).trim() !== '')
       .map(s=>({weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0})),
     rpe: ex.rpe || null,
-    notes: ex.notes || ''
+    notes: ex.notes || '',
+    version: ex.version || null // execution-version tag, periodized plans only — see resolvePeriodizedVersion()
   })).filter(e => e.sets.length); // drop exercises left with no filled sets at all
   const hasAny = result.some(e => e.sets.some(s => s.weight>0 || s.reps>0));
   if(!hasAny){ showEmptyWorkoutPopup(t('enterAtLeastOneResult','Wpisz przynajmniej jeden wynik przed zapisem')); return; }
@@ -8648,17 +8775,28 @@ function openPlanEditorV2(id){
     id: existing ? existing.id : null,
     name: existing ? existing.name : '',
     builtin: existing ? !!existing.builtin : false,
+    periodized: existing ? !!existing.periodized : false,
     schedule,
     activeDay: dayKeyFromDate(todayStr()),
   };
   document.getElementById('planNameInputV2').value = editingPlan.name;
   document.getElementById('planEditorV2ForkHint').classList.toggle('hidden', !editingPlan.builtin);
+  renderPlanPeriodizeToggleV2();
   planEditorEquipmentFilter = 'all';
   planEditorV2Collapsed = new Set(); // every muscle-group section starts expanded on a fresh visit
   renderPlanEquipFilterRowV2();
   renderPlanDayRowV2();
   renderPlanEditorGridV2(true);
   goRoute('plan-editor-v2');
+}
+function renderPlanPeriodizeToggleV2(){
+  const sw = document.getElementById('planPeriodizeSwitchV2');
+  if(sw) sw.classList.toggle('active', !!editingPlan.periodized);
+}
+function togglePlanPeriodization(){
+  if(!canUsePeriodization()) return;
+  editingPlan.periodized = !editingPlan.periodized;
+  renderPlanPeriodizeToggleV2();
 }
 // Day-selection mode (Maciej, 2026-08-29) — replaces the old two
 // separate "Kopiuj do innych dni" / "Usuń z dni" modals with one
@@ -8973,15 +9111,15 @@ function savePlanEditor(){
       // (2026-08-29). See PLANSV2_CUSTOMIZABLE_IDS / planIsDostosujable()
       // for the equivalent fork done by "Dostosuj plan".
       savedId = 'plan_' + Date.now();
-      trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, schedule: editingPlan.schedule});
+      trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule});
       if(starredPlanId === original.id){ starredPlanId = savedId; localStorage.setItem(LS_STARRED_PLAN, savedId); }
     } else {
-      trainingPlans[idx] = {...original, name: editingPlan.name, schedule: editingPlan.schedule};
+      trainingPlans[idx] = {...original, name: editingPlan.name, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule};
       savedId = editingPlan.id;
     }
   } else {
     savedId = 'plan_'+Date.now();
-    trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, schedule: editingPlan.schedule});
+    trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule});
   }
   saveTrainingPlansList();
   toast(t('planSaved','Plan zapisany'));
@@ -9909,11 +10047,15 @@ function renderGymGridV2(animate){
     // for (swapOrigin), so its tile still carries the swap control.
     planSlots = planEx.map(e=>{
       const sw = todaySwaps[e.name];
+      // byName.get() swaps in the live library definition (fresh icon/rest/
+      // etc.), which would otherwise silently drop the versionCycle just
+      // computed in todayPlanExerciseNames() — carry it over explicitly.
       if(sw){
         const repl = byName.get(sw.name) || sw;
-        return { ex: repl, swapOrigin: e.name, swapped: true, bookend: BOOKEND_EX_NAMES.has(e.name) };
+        return { ex: e.versionCycle ? {...repl, versionCycle:e.versionCycle} : repl, swapOrigin: e.name, swapped: true, bookend: BOOKEND_EX_NAMES.has(e.name) };
       }
-      return { ex: byName.get(e.name) || e, swapOrigin: e.name, swapped: false, bookend: BOOKEND_EX_NAMES.has(e.name) };
+      const base = byName.get(e.name) || e;
+      return { ex: e.versionCycle ? {...base, versionCycle:e.versionCycle} : base, swapOrigin: e.name, swapped: false, bookend: BOOKEND_EX_NAMES.has(e.name) };
     });
   }
   const shown = new Set(planSlots.map(s=>s.ex.name));
