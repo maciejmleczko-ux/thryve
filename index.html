@@ -6970,41 +6970,56 @@ function closeExercisePopupV2(viaDrag){
   popupExercise = null;
   popupShowWarning = false;
 }
-/* Simplified drag-to-dismiss for a .m-sheet (or the .plansv2-customize-*
-   family, which now rides the same shell) — bind once per overlay to the
-   static grabber. Tracks the pointer, moves the panel with the finger,
-   and on release closes if it's been pulled past 40% of its height or
-   flicked down (fast last sample, or a quick short pull overall);
-   otherwise snaps back. A close carries the finger's motion off-screen
-   (WAAPI, roughly release speed) and only then calls closeFn(true), so
-   closeFn can skip its own slide-down animation. Inner scroll is
-   untouched (the handle is its own element, above the scroll body). */
+/* Drag-to-dismiss for a .m-sheet (or the .plansv2-customize-* family,
+   which rides the same shell) — bind once per overlay.
+   Touch: like a native iOS sheet, a downward pull ANYWHERE on the panel
+   drags it, as long as whatever is under the finger isn't scrolled down
+   (then it's a normal scroll; scroll back to the top and pull again).
+   The call is made on the very first touchmove, because that's the only
+   one iOS lets us cancel — later ones are already committed to scroll.
+   Mouse/pen: the grabber only (desktop testing).
+   On release it closes if pulled past 40% of its height or flicked down
+   (fast last sample, or a quick short pull overall); otherwise snaps
+   back. A close carries the finger's motion off-screen (WAAPI, roughly
+   release speed) and only then calls closeFn(true), so closeFn can skip
+   its own slide-down animation. */
 function mSheetDrag(overlayId, closeFn){
   const overlay = document.getElementById(overlayId);
   if(!overlay) return;
   const mover = overlay.querySelector('.m-sheet, .plansv2-customize-stack');
   if(!mover) return;
   const handle = mover.querySelector('.m-sheet-grab');
-  if(!handle) return;
   let startY = 0, dy = 0, lastY = 0, lastT = 0, startT = 0, vY = 0, dragging = false;
-  const move = e=>{
-    if(!dragging) return;
-    dy = Math.max(0, e.clientY - startY);
-    if(e.timeStamp !== lastT){ vY = (e.clientY - lastY) / (e.timeStamp - lastT); lastY = e.clientY; lastT = e.timeStamp; }
+  const begin = (y, t)=>{
+    dragging = true;
+    // If the entrance is still running, pick the sheet up where it
+    // visually is; then retire the entrance for this opening so
+    // releasing never replays it (see .m-sheet-entered in CSS).
+    const tf = getComputedStyle(mover).transform;
+    const cur = tf && tf !== 'none' ? Math.max(0, new DOMMatrixReadOnly(tf).m42) : 0;
+    overlay.classList.add('m-sheet-entered');
+    mover.style.transform = cur ? 'translateY(' + cur.toFixed(1) + 'px)' : '';
+    dy = cur;
+    startY = y - cur;
+    lastY = y;
+    lastT = startT = t;
+    vY = 0;
+    overlay.classList.add('m-sheet-dragging');
+    mover.classList.remove('m-sheet-snapback');
+  };
+  const track = (y, t)=>{
+    dy = Math.max(0, y - startY);
+    if(t !== lastT){ vY = (y - lastY) / (t - lastT); lastY = y; lastT = t; }
     mover.style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
     const h = mover.offsetHeight || 1;
     overlay.style.opacity = Math.max(0.15, 1 - (dy / h) * 1.15).toFixed(3);
-    e.preventDefault();
   };
-  const up = e=>{
+  const release = t=>{
     if(!dragging) return;
     dragging = false;
     overlay.classList.remove('m-sheet-dragging');
-    window.removeEventListener('pointermove', move);
-    window.removeEventListener('pointerup', up);
-    window.removeEventListener('pointercancel', up);
     const h = mover.offsetHeight || 1;
-    const elapsed = Math.max(1, (e ? e.timeStamp : lastT) - startT);
+    const elapsed = Math.max(1, t - startT);
     const flick = dy > 24 && vY > 0 && (dy / elapsed) > 0.11;
     if(dy > h * 0.4 || vY > 0.6 || flick){
       // Carry the finger's motion off-screen instead of teleporting:
@@ -7040,26 +7055,57 @@ function mSheetDrag(overlayId, closeFn){
       setTimeout(()=>mover.classList.remove('m-sheet-snapback'), 320);
     }
   };
+
+  // ---- touch: whole panel ----
+  let tState = null, tX = 0, tY = 0;   // tState: null | 'pending' | 'drag' | 'scroll'
+  const scrolledUnder = el=>{
+    for(let n = el; n && n !== overlay; n = n.parentElement){ if(n.scrollTop > 0) return true; }
+    return false;
+  };
+  mover.addEventListener('touchstart', e=>{
+    if(e.touches.length !== 1 || dragging){ tState = null; return; }
+    const t = e.touches[0];
+    tX = t.clientX; tY = t.clientY;
+    tState = scrolledUnder(e.target) ? 'scroll' : 'pending';
+  }, {passive:true});
+  mover.addEventListener('touchmove', e=>{
+    if(tState !== 'pending' && tState !== 'drag') return;
+    const t = e.touches[0];
+    if(tState === 'pending'){
+      const ddx = t.clientX - tX, ddy = t.clientY - tY;
+      if(ddy > 0 && ddy >= Math.abs(ddx) && e.cancelable){ tState = 'drag'; begin(tY, e.timeStamp); }
+      else { tState = 'scroll'; return; }
+    }
+    e.preventDefault();   // non-passive: keeps iOS from scrolling/bouncing under the drag
+    track(t.clientY, e.timeStamp);
+  }, {passive:false});
+  const touchEnd = e=>{
+    if(tState === 'drag') release(e.timeStamp);
+    tState = null;
+  };
+  mover.addEventListener('touchend', touchEnd);
+  mover.addEventListener('touchcancel', touchEnd);
+
+  // ---- mouse / pen: grabber only (touch is handled above) ----
+  if(!handle) return;
+  const pMove = e=>{
+    if(!dragging) return;
+    track(e.clientY, e.timeStamp);
+    e.preventDefault();
+  };
+  const pUp = e=>{
+    window.removeEventListener('pointermove', pMove);
+    window.removeEventListener('pointerup', pUp);
+    window.removeEventListener('pointercancel', pUp);
+    release(e.timeStamp);
+  };
   handle.addEventListener('pointerdown', e=>{
-    dragging = true;
-    // If the entrance is still running, pick the sheet up where it
-    // visually is; then retire the entrance for this opening so
-    // releasing never replays it (see .m-sheet-entered in CSS).
-    const tf = getComputedStyle(mover).transform;
-    const cur = tf && tf !== 'none' ? Math.max(0, new DOMMatrixReadOnly(tf).m42) : 0;
-    overlay.classList.add('m-sheet-entered');
-    mover.style.transform = cur ? 'translateY(' + cur.toFixed(1) + 'px)' : '';
-    dy = cur;
-    startY = e.clientY - cur;
-    lastY = e.clientY;
-    lastT = startT = e.timeStamp;
-    vY = 0;
-    overlay.classList.add('m-sheet-dragging');
-    mover.classList.remove('m-sheet-snapback');
+    if(e.pointerType === 'touch') return;
+    begin(e.clientY, e.timeStamp);
     try{ handle.setPointerCapture(e.pointerId); }catch(_){}
-    window.addEventListener('pointermove', move, {passive:false});
-    window.addEventListener('pointerup', up);
-    window.addEventListener('pointercancel', up);
+    window.addEventListener('pointermove', pMove, {passive:false});
+    window.addEventListener('pointerup', pUp);
+    window.addEventListener('pointercancel', pUp);
   });
 }
 mSheetDrag('exercisePopupOverlayV2', closeExercisePopupV2);
