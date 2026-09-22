@@ -5193,7 +5193,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.41.9";
+const APP_VERSION = "4.41.10";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6209,14 +6209,24 @@ function syncSheetHeightToVisualViewport(){
    browser's own scroll-into-view only guarantees the focused INPUT is
    visible, often right at the bottom edge just above the keyboard, so
    reaching it (or seeing its label/tick) still needed a manual scroll.
-   `pendingSeriesCenterInput` is set on focusin and only acted on the next
-   visualViewport resize/scroll — acting immediately on focus would
+   `pendingSeriesCenterInput` is set on focusin and normally acted on the
+   next visualViewport resize/scroll (keyboard opening, or iOS auto-
+   scrolling a lower field into view) — acting immediately on focus would
    measure against the keyboard-closed viewport, since the resize hasn't
-   happened yet at that point. */
+   happened yet at that point.
+   Fallback (Maciej, 2026-09-22: "seria 2 zasłonięta przez klawiaturę") —
+   tapping straight into a later Seria while the keyboard is ALREADY open
+   (no resize coming) sometimes gets neither event: iOS can judge the field
+   "visible enough" on its own and skip its native auto-scroll too, leaving
+   it right at the keyboard's edge. The timeout below centers it regardless
+   after the keyboard-move animation would have settled; centerFocusedSeriesCard()
+   is a no-op if the event-driven path already consumed pendingSeriesCenterInput
+   first, so this never double-corrects. */
 let pendingSeriesCenterInput = null;
 document.addEventListener('focusin', function(e){
   if(e.target && e.target.matches && e.target.matches('.exv2-series-fields input')){
     pendingSeriesCenterInput = e.target;
+    setTimeout(centerFocusedSeriesCard, 350);
   }
 });
 function centerFocusedSeriesCard(){
@@ -6256,6 +6266,30 @@ function centerFocusedSeriesCard(){
   vv.addEventListener('scroll', sync);
   sync();
 })();
+/* ---------- resuming from background (lock screen, app-switcher) ----------
+   Reported by Maciej (2026-09-22, screenshots): after backgrounding the app
+   mid-workout and unlocking the phone, three things could be stale because
+   nothing ever re-syncs layout on resume — the app only ever measured/pinned
+   on load, resize and visualViewport events, none of which reliably fire on
+   iOS when a backgrounded PWA is restored:
+   1) the bottom-nav orange blob landed at the wrong tab (its position is
+      cached from `offsetLeft`/`offsetWidth` read whenever it last moved —
+      stale if layout shifted while hidden);
+   2) the fixed bottom nav visually "stuck" mid-content instead of the real
+      screen bottom — a known WebKit issue where `position:fixed` elements
+      stop being repainted at the right place after a background/foreground
+      cycle, fixed by forcing a reflow;
+   3) the exercise-logging sheet looked cut short — its max-height is driven
+      off `visualViewport.height` (see syncSheetHeightToVisualViewport above)
+      and iOS can report a transitional/wrong value in the instant right
+      after resuming, with no later resize event to correct it. */
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState !== 'visible') return;
+  positionNavBlob(false);
+  const nav = document.getElementById('bottomNav');
+  if(nav){ const d = nav.style.display; nav.style.display = 'none'; void nav.offsetHeight; nav.style.display = d; }
+  syncSheetHeightToVisualViewport();
+});
 /* ============================================================
    GYM — icon grid + session
    ============================================================ */
@@ -6267,6 +6301,14 @@ let extraGymTiles = []; // exercises picked via "Wybierz inne ćwiczenie" for to
    with that workout's weights/reps when you open each one. Cleared on
    save or when the user taps the button again to go back to the plan. */
 let repeatMode = null; // { date, names:[], prefill:{name:[{weight,reps}]} }
+// Typed-but-not-confirmed sets, keyed by exercise name — set when the popup
+// is closed (backdrop tap, swipe-down, accidental nav) without tapping
+// "Dodaj do treningu". Restores on reopen instead of starting blank
+// (Maciej, 2026-09-22: closing mid-entry was silently discarding the first
+// series). Cleared once the exercise is actually confirmed/logged, and on
+// every saved workout — see confirmExercisePopupV2 / closeExercisePopupV2 /
+// saveWorkout.
+let popupDrafts = {};
 
 /* Workout duration tracking — Maciej's request: start counting on the first
    tile tap (any tile, plan exercise or one-off), stop at save. Rather than
@@ -6355,9 +6397,10 @@ const LS_GYM_SESSION_DRAFT = "fitlog_gym_session_draft_v1";
 const GYM_DRAFT_MAX_AGE_H = 24;
 function persistGymSession(){
   try{
-    if(sessionExercises.length || extraGymTiles.length || repeatMode){
+    const hasDrafts = Object.keys(popupDrafts).length > 0;
+    if(sessionExercises.length || extraGymTiles.length || repeatMode || hasDrafts){
       localStorage.setItem(LS_GYM_SESSION_DRAFT, JSON.stringify({
-        savedAt: Date.now(), date: todayStr(), sessionExercises, extraGymTiles, repeatMode
+        savedAt: Date.now(), date: todayStr(), sessionExercises, extraGymTiles, repeatMode, popupDrafts
       }));
     } else {
       localStorage.removeItem(LS_GYM_SESSION_DRAFT);
@@ -6378,6 +6421,7 @@ function restoreGymSession(){
     if(Array.isArray(obj.sessionExercises)) sessionExercises = obj.sessionExercises;
     if(Array.isArray(obj.extraGymTiles)) extraGymTiles = obj.extraGymTiles;
     if(obj.repeatMode && Array.isArray(obj.repeatMode.names)) repeatMode = obj.repeatMode;
+    if(obj.popupDrafts && typeof obj.popupDrafts === 'object') popupDrafts = obj.popupDrafts;
   }catch(e){}
 }
 restoreGymSession();
@@ -6607,16 +6651,23 @@ function openExercisePopupV2(ex){
   // start/freeze the session clock (Maciej, 2026-09-17).
   if(exv2CloseTimer){ clearTimeout(exv2CloseTimer); exv2CloseTimer = null; } // reopening mid-close-animation — cut it short
   const already = sessionExercises.find(e=>e.name===ex.name);
+  // Typed-but-never-confirmed sets from an earlier open this session (closed
+  // by backdrop tap / swipe-down / accidentally leaving GYM) — restored
+  // ahead of the "Powtórz" prefill so real half-entered data always wins
+  // over a suggestion.
+  const draft = !already ? popupDrafts[ex.name] : null;
   // "Powtórz ostatni trening": a not-yet-logged exercise opens with that
   // workout's set count but EMPTY fields — filled values also lit every
   // series' tick, so the exercise looked already done (Maciej, 2026-09-19).
   // The previous weights/reps still show as greyed placeholders (lastSets
   // in renderExercisePopupV2).
-  const pre = (!already && repeatMode && repeatMode.prefill[ex.name]) || null;
+  const pre = (!already && !draft && repeatMode && repeatMode.prefill[ex.name]) || null;
   const freshSets = Array.from({length: (pre && pre.length) || ex.sets},()=>({weight:'',reps:''}));
   popupExercise = already
     ? {...already, setValues: already.setValues.map(s=>({...s}))}
-    : {...ex, sets: freshSets.length || ex.sets, setValues: freshSets, rpe:'', notes:''};
+    : draft
+      ? {...ex, sets: draft.setValues.length || ex.sets, setValues: draft.setValues.map(s=>({...s})), rpe: draft.rpe || '', notes: draft.notes || ''}
+      : {...ex, sets: freshSets.length || ex.sets, setValues: freshSets, rpe:'', notes:''};
   popupShowWarning = false;
   popupNoteEditing = false;
   popupNoteDraft = exerciseNotes[ex.name] || '';
@@ -6650,6 +6701,19 @@ function closeExercisePopupV2(viaDrag){
   } else {
     overlay.classList.add('m-sheet-closing'); // plays the slide-down/fade-out
     exv2CloseTimer = setTimeout(finish, 260);
+  }
+  // Closing without confirming ("Dodaj do treningu") used to just drop
+  // whatever was typed — save it as a draft so reopening this exercise
+  // picks up where it was left, instead of starting blank again.
+  if(popupExercise){
+    if(sessionExercises.some(e=>e.name===popupExercise.name)){
+      delete popupDrafts[popupExercise.name]; // confirmExercisePopupV2 already logged it
+    } else {
+      const hasData = popupExercise.setValues.some(s=>s.weight!=='' || s.reps!=='') || popupExercise.rpe || popupExercise.notes;
+      if(hasData) popupDrafts[popupExercise.name] = {setValues: popupExercise.setValues.map(s=>({...s})), rpe: popupExercise.rpe||'', notes: popupExercise.notes||''};
+      else delete popupDrafts[popupExercise.name];
+    }
+    persistGymSession();
   }
   popupExercise = null;
   popupShowWarning = false;
@@ -7356,6 +7420,7 @@ function saveWorkout(){
   sessionExercises = [];
   extraGymTiles = [];
   repeatMode = null;
+  popupDrafts = {};
   persistGymSession(); // clears the autosaved in-progress draft
   todaySwaps = {};
   persistTodaySwaps(); // today's swaps don't carry past a saved workout
