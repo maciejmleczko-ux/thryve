@@ -4,7 +4,7 @@ Cała aplikacja to jeden plik `index.html` (CSS w `<style>`, JS w `<script>`). P
 
 ## Animacje: obowiązkowy wzorzec dla KAŻDEGO nowego ekranu, popupu i komponentu
 
-Cel: apka ma sprawiać wrażenie natywnej aplikacji iOS. Ruch pomaga zrozumieć, co się stało, a nie jest ozdobą, na którą trzeba czekać. Wszystkie animacje biorą wartości z jednego miejsca: tokenów `--m-ease-*` / `--m-dur-*` w `:root`. Dzięki temu ruch jest identyczny na każdym ekranie, a zmiana tokenu zmienia go wszędzie. Wizualny podgląd: Mekkio Design Guide, sekcja Motion.
+Cel: apka ma sprawiać wrażenie natywnej aplikacji iOS. Ruch pomaga zrozumieć, co się stało, a nie jest ozdobą, na którą trzeba czekać. Wszystkie animacje biorą wartości z jednego miejsca: tokenów `--m-ease-*` / `--m-dur-*` w `:root`. Dzięki temu ruch jest identyczny na każdym ekranie, a zmiana tokenu zmienia go wszędzie. Wizualny podgląd z działającymi przykładami: [Mekkio Design Guide → Motion](https://claude.ai/artifact/35fnMV3RPQfMPU72EFibWU#motion). Przy każdej zmianie tokenów zaktualizuj też tę stronę.
 
 ### 1. Czy to ma się ruszać?
 
