@@ -4,7 +4,7 @@ Cała aplikacja to jeden plik `index.html` (CSS w `<style>`, JS w `<script>`). P
 
 ## Animacje: obowiązkowy wzorzec dla KAŻDEGO nowego ekranu, popupu i komponentu
 
-Cel: apka ma sprawiać wrażenie natywnej aplikacji iOS. Ruch pomaga zrozumieć, co się stało, a nie jest ozdobą, na którą trzeba czekać. Nie wymyślaj nowych krzywych ani czasów. Używaj tych poniżej (ustalone i sprawdzone w wersjach 4.42.2–4.42.4, szczegóły w `plans/001–007`).
+Cel: apka ma sprawiać wrażenie natywnej aplikacji iOS. Ruch pomaga zrozumieć, co się stało, a nie jest ozdobą, na którą trzeba czekać. Wszystkie animacje biorą wartości z jednego miejsca: tokenów `--m-ease-*` / `--m-dur-*` w `:root`. Dzięki temu ruch jest identyczny na każdym ekranie, a zmiana tokenu zmienia go wszędzie. Wizualny podgląd: Mekkio Design Guide, sekcja Motion.
 
 ### 1. Czy to ma się ruszać?
 
@@ -16,54 +16,54 @@ Cel: apka ma sprawiać wrażenie natywnej aplikacji iOS. Ruch pomaga zrozumieć,
 
 Jeśli nie da się powiedzieć, po co coś się rusza, to się nie rusza.
 
-### 2. Krzywe: tylko te
+### 2. Tokeny ruchu: jedyne dozwolone wartości
 
-| Do czego | Wartość |
+Wszystkie krzywe i czasy siedzą w `:root` w `index.html` (blok „Mekkio motion system”). **Nigdy nie wpisuj `cubic-bezier(...)` ani czasu w sekundach na sztywno.** Zawsze `var(--m-…)`. W JS (WAAPI nie czyta `var()`) używaj obiektu `MOTION`, który czyta te same zmienne z CSS.
+
+| Krzywa | Do czego | JS |
+|---|---|---|
+| `--m-ease` | domyślna: wejścia, press, wszystko co się rusza | `MOTION.ease` |
+| `--m-ease-sheet` | wjazd sheetu / szuflady, snapback | `MOTION.sheet` |
+| `--m-ease-exit` | zamknięcie przyciskiem, wylot przy swipe | `MOTION.exit` |
+| `--m-ease-throw` | zamknięcie sheetu rzutem palca | `MOTION.throw` |
+| `--m-ease-land` | wlot przy swipe (wpada szybko, miękko ląduje) | `MOTION.land` |
+| `--m-ease-spring` | mały overshoot: dociągnięcie strony, ptaszek, tagi | `MOTION.spring` |
+| `ease` (słowo kluczowe) | zmiany koloru / tła / opacity | — |
+
+| Czas | Wartość | Do czego |
+|---|---|---|
+| `--m-dur-press-in` / `--m-dur-press-out` | .1s / .16s | wciśnięcie / puszczenie |
+| `--m-dur-quick` | .15s | zmiana koloru, małe przełączniki |
+| `--m-dur-fade` | .24s | backdrop, fade, toast, małe ruchy |
+| `--m-dur-exit` | .26s | zamknięcie sheetu/szuflady (zawsze krócej niż wejście) |
+| `--m-dur-snap` | .3s | snapback, szybkie odsłonięcia |
+| `--m-dur-in` | .4s | wejście elementu, wjazd sheetu, slide ekranu, kulka menu |
+| `--m-dur-pop` | .5s | „sukces”, obrót ikony, elementy ekranu końca treningu |
+| `--m-dur-tile` | .7s | duże kafle / hero |
+| `--m-dur-draw` | .9s | rysowanie linii wykresu |
+
+Potrzebujesz innej wartości? Najpierw zapytaj, czy na pewno. Jeśli tak, dodaj nowy token do `:root` i do tej tabeli, nigdy lokalnej liczby.
+
+### 3. Gotowe klasy dla nowego kodu
+
+| Klasa | Co robi |
 |---|---|
-| **Główna**: wejścia elementów, press, wszystko domyślnie | `cubic-bezier(.16,1,.3,1)` |
-| Wjazd modala / sheetu (`mSheetUp`) | `cubic-bezier(.22,1,.36,1)` |
-| Zamknięcie sheetu rzutem palca (WAAPI) | `cubic-bezier(.32,.72,0,1)` |
-| Zamknięcie przyciskiem (sheet/szuflada) | `cubic-bezier(.4,0,1,1)`, krócej niż wejście (np. .26s vs .4s) |
-| Zmiana koloru / przezroczystości | `ease` |
+| `.m-press` | efekt wciśnięcia: scale .97, szybko w dół, miękko w górę |
+| `.m-rise` | wejście małego elementu (8px, `--m-dur-in`) |
+| `.m-rise-tile` | wejście dużego kafla (18px, `--m-dur-tile`) |
 
-Nigdy wolnego startu (`ease-in`) na wejściu elementu.
+Kolejność wchodzenia: `style="--i:N"` (60ms na krok) + opcjonalnie `--m-delay`. Klasy `.m-rise*` dodawaj tylko przy renderze „ekran/popup właśnie otwarty” (`animate=true`), nigdy przy zwykłym re-renderze (zalogowanie serii, edycja).
 
-### 3. Czasy
+### 4. Zasady wejścia (reveal), jeśli nie używasz `.m-rise`
 
-| Element | Czas |
-|---|---|
-| Wciśnięcie przycisku | `--press-in` .1s / powrót `--press-out` .16s |
-| Małe elementy (nagłówek, pole, wskazówka) | .35–.45s |
-| Duże kafle | .7–.8s (dłużej = „cięższe”) |
-| Backdrop modala | ~.24s |
-| Zwykłe UI poza wejściami | ≤ .3s |
+- Kształt: zawsze `opacity 0→1` + `translateY(Npx)→0`. Nigdy sam fade i nigdy `scale(0)`. N = 8–10px dla małych elementów, 14–18px dla kafli.
+- **Fill-mode: `backwards`, NIGDY `both` ani `forwards`.** `both` po zakończeniu przypina `transform` i po cichu wyłącza efekt wciśnięcia na tym elemencie.
+- Stagger dla list: `calc(var(--i,0) * 40–80ms + base)`. Kafle bez naturalnej kolejności: losowe opóźnienie w JS (`i*80 + Math.random()*100` ms). Element wewnątrz animowanego rodzica zaczyna dopiero, gdy rodzic prawie wylądował. Nigdy dwa niezależne ruchy naraz.
+- Każde `@keyframes` z ruchem idzie do `@media (prefers-reduced-motion: no-preference){…}`.
 
-### 4. Wejście elementu (reveal)
+### 5. Wciśnięcie w istniejących komponentach
 
-```css
-@media (prefers-reduced-motion: no-preference){
-  .moj-kafel{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;}
-}
-```
-
-- Kształt: zawsze `opacity 0→1` + `translateY(Npx)→0`. Nigdy sam fade i nigdy `scale(0)`. N = 8–10px dla małych elementów, 14–18px dla kafli. Korzystaj z istniejących keyframes: `dashRise`, `dashTileRise`, `dashDayIn`, `exv2FadeIn`, `exv2CardIn`, `loadv2Rise`.
-- **Fill-mode: `backwards`, NIGDY `both` ani `forwards`.** `both` po zakończeniu przypina `transform` i po cichu wyłącza `:active` (efekt wciśnięcia) na tym elemencie.
-- **Gating:** animacja wejścia gra tylko przy realnym otwarciu ekranu/popupu. Klasa z `animation` (np. `.gymv2-anim-in`) jest dodawana tylko, gdy render dostaje `animate=true` z miejsca „wejście na ekran”. Zwykły re-render (zalogowanie serii, edycja) woła render bez argumentu, bez animacji. Wzór: `renderGymGridV2(animate)`, `renderExercisePopupV2(animate)`.
-- **Stagger:**
-  - listy jednakowych elementów: deterministycznie, `animation-delay: calc(var(--i,0) * 40–80ms + base)`;
-  - kafle bez naturalnej kolejności: losowo w JS (`i*80 + Math.random()*100` ms);
-  - element wewnątrz animowanego rodzica zaczyna dopiero, gdy rodzic prawie wylądował. Nigdy dwa niezależne ruchy naraz.
-
-### 5. Wciśnięcie (press)
-
-Każdy nowy klikalny element:
-
-```css
-.moj-btn{transition:transform var(--press-out) var(--press-ease);}
-.moj-btn:active{transform:scale(.97);}   /* .95–.98; małe ikony do .9 */
-```
-
-**oraz** dopisz `.moj-btn:active` do zbiorczej reguły `…:active{transition-duration:var(--press-in);}` na końcu `<style>`. Ta reguła celowo ma postać listy: globalne `:active` łapie też rodziców wciśniętego elementu i skraca slide ekranu. Tap-highlight jest wyłączony globalnie, a pasywny `touchstart` (początek pierwszego `<script>`) włącza `:active` na iOS. Nie usuwaj ich.
+Najprościej dodać klasę `.m-press`. Jeśli element ma własną regułę `:active` (inna skala), daj mu `transition:transform var(--m-dur-press-out) var(--m-ease)` i dopisz jego `:active` do zbiorczej reguły `…:active{transition-duration:var(--m-dur-press-in);}` na końcu `<style>`. Ta reguła celowo ma postać listy: globalne `:active` łapie też rodziców i skraca slide ekranu. Tap-highlight jest wyłączony globalnie, a pasywny `touchstart` (początek pierwszego `<script>`) włącza `:active` na iOS. Nie usuwaj ich.
 
 ### 6. Nawigacja między ekranami
 
@@ -96,7 +96,7 @@ Nie wymyślaj nowego. Kopiuj wzór z `wireHistCalSwipeV2` / `statsV2CaroGoTo`: t
 ### Checklista przed pokazaniem / commitem
 
 1. Czy element w ogóle musi się ruszać (pkt 1)?
-2. Tylko krzywe i czasy z tego pliku? Fill `backwards`? Reduced-motion?
+2. Tylko `var(--m-…)` / `MOTION.*`, żadnych liczb na sztywno? Fill `backwards`? Reduced-motion?
 3. Klikalne rzeczy mają press i są w zbiorczej regule `:active`?
 4. Re-render (np. zalogowanie serii) nie odpala ponownie animacji wejścia?
 5. Test w przeglądarce: DevTools → Animations 10% (skoki, mignięcia), szybkie wielokrotne tapnięcia, przerwanie gestu w połowie.

@@ -48,10 +48,26 @@
 }
 
 :root{
-  /* press feedback (iOS feel): finger-down lands fast, release eases back softer */
-  --press-in:.1s;
-  --press-out:.16s;
-  --press-ease:cubic-bezier(.16,1,.3,1);
+  /* ---- Mekkio motion system ----------------------------------------
+     The ONLY easing curves and durations in the app. Every animation /
+     transition (CSS, inline styles, and WAAPI via MOTION in JS) uses
+     these, so motion feels identical on every screen. Rules: CLAUDE.md. */
+  --m-ease:cubic-bezier(.16,1,.3,1);           /* standard: entrances, press, anything that moves */
+  --m-ease-sheet:cubic-bezier(.22,1,.36,1);    /* sheet / drawer entrance + snap-back */
+  --m-ease-exit:cubic-bezier(.4,0,1,1);        /* sheet / drawer closed by a button; swipe fly-out */
+  --m-ease-throw:cubic-bezier(.32,.72,0,1);    /* sheet closed by a finger throw */
+  --m-ease-land:cubic-bezier(0,0,.3,1);        /* swipe fly-in: arrives at speed, lands softly */
+  --m-ease-spring:cubic-bezier(.22,1.2,.36,1); /* tiny overshoot: snap-to-page, check tick, tags */
+  --m-dur-press-in:.1s;    /* finger down */
+  --m-dur-press-out:.16s;  /* finger up (slower, soft) */
+  --m-dur-quick:.15s;      /* colour / background state, small toggles */
+  --m-dur-fade:.24s;       /* backdrops, fades, toast, small moves */
+  --m-dur-exit:.26s;       /* closing a sheet / drawer (always faster than its entrance) */
+  --m-dur-snap:.3s;        /* snap-back, quick reveals */
+  --m-dur-in:.4s;          /* element entrance, sheet/drawer entrance, page slide, nav blob */
+  --m-dur-pop:.5s;         /* success pop, icon spin, finish-screen items */
+  --m-dur-tile:.7s;        /* big tiles / hero */
+  --m-dur-draw:.9s;        /* chart line draw */
   /* top inset + 5px extra so headers sit clear of the iOS 27 status-bar blur band (one knob) */
   --top-inset:calc(env(safe-area-inset-top, 0px) + 5px);
   --bg:#2c2727;
@@ -192,11 +208,11 @@ button{font-family:inherit;}
 .logo-svg{height:53px;width:auto;display:block;color:#fff;}
 .topbar.topbar-light{background:var(--light);margin:0;padding:calc(16px + var(--top-inset)) 20px 0;border-radius:0;}
 .topbar.topbar-light .logo-svg{color:var(--orange);}
-.plan-pill{background:var(--orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:11px 16px;max-width:210px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:var(--m-fs-base);letter-spacing:.32px;font-weight:700;cursor:pointer;transition:transform var(--press-out) var(--press-ease);flex-shrink:0;}
+.plan-pill{background:var(--orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:11px 16px;max-width:210px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:var(--m-fs-base);letter-spacing:.32px;font-weight:700;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);flex-shrink:0;}
 .plan-pill:active{transform:scale(.94);}
 .plan-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .plan-pill .ph{width:15px;height:15px;flex-shrink:0;}
-.topbar-icon-btn{background:none;border:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--light);flex-shrink:0;transition:transform var(--press-out) var(--press-ease);}
+.topbar-icon-btn{background:none;border:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--light);flex-shrink:0;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .topbar-icon-btn .ph{width:26px;height:26px;}
 .topbar-icon-btn:active{transform:scale(.9);}
 .topbar.topbar-light .topbar-icon-btn{color:var(--orange);}
@@ -255,7 +271,7 @@ button{font-family:inherit;}
    pixel box, so it always fills the whole screen regardless of the
    real device's height. */
 .loadv2-root{display:none;position:fixed;inset:0;z-index:9999;overflow:hidden;
-  background:var(--m-orange);flex-direction:column;align-items:center;opacity:1;transition:opacity .35s ease;}
+  background:var(--m-orange);flex-direction:column;align-items:center;opacity:1;transition:opacity var(--m-dur-in) ease;}
 .loadv2-root.visible{display:flex;}
 .loadv2-root.hiding{opacity:0;}
 .loadv2-effects{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.3;}
@@ -267,15 +283,15 @@ button{font-family:inherit;}
 .loadv2-copyright{margin:4px 0 0;color:#fff;font-size:var(--m-fs-2xs);font-weight:300;}
 /* Entrance: logo slides up + fades in when the splash appears, tagline and
    footer follow on the same staggered rise (reuses the app-wide
-   cubic-bezier(.16,1,.3,1) / translateY vocabulary — see
+   var(--m-ease) / translateY vocabulary — see
    [[feedback_thryve_animation_vocabulary]]). Scoped to .visible so it
    replays on every launch (the display:none -> flex toggle restarts it);
    all done well inside the 1.5s the splash is shown. */
 @media (prefers-reduced-motion: no-preference){
   @keyframes loadv2Rise{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
-  .loadv2-root.visible .loadv2-logo{animation:loadv2Rise .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.09s;}
-  .loadv2-root.visible .loadv2-tagline{animation:loadv2Rise .6s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.26s;}
-  .loadv2-root.visible .loadv2-footer{animation:loadv2Rise .55s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.42s;}
+  .loadv2-root.visible .loadv2-logo{animation:loadv2Rise var(--m-dur-tile) var(--m-ease) backwards;animation-delay:.09s;}
+  .loadv2-root.visible .loadv2-tagline{animation:loadv2Rise var(--m-dur-tile) var(--m-ease) backwards;animation-delay:.26s;}
+  .loadv2-root.visible .loadv2-footer{animation:loadv2Rise var(--m-dur-pop) var(--m-ease) backwards;animation-delay:.42s;}
 }
 @media (prefers-reduced-motion: reduce){ .loadv2-root{transition:none;} }
 
@@ -287,7 +303,7 @@ button{font-family:inherit;}
    display, .hiding fades out). Mirrors GYM v2's red-under-lilac panel
    treatment: var(--m-red-page) page with a var(--m-panel) panel whose 26px
    bottom corners let a sliver of red through. */
-.gymfin-root{display:none;position:fixed;inset:0;z-index:9500;overflow:hidden;background:var(--m-red-page);opacity:1;transition:opacity .35s ease;}
+.gymfin-root{display:none;position:fixed;inset:0;z-index:9500;overflow:hidden;background:var(--m-red-page);opacity:1;transition:opacity var(--m-dur-in) ease;}
 .gymfin-root.visible{display:block;}
 .gymfin-root.hiding{opacity:0;}
 /* panel is now a flex column: topbar / body (centred) / CTA — the old
@@ -361,7 +377,7 @@ button{font-family:inherit;}
 .gymfin-record-k{margin:0;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--m-muted);}
 .gymfin-record-v{margin:1px 0 0;font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);}
 
-.gymfin-cta{width:100%;flex-shrink:0;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;padding:16px;font-family:inherit;font-size:var(--m-fs-base);font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:4px;transition:transform var(--press-out) var(--press-ease);}
+.gymfin-cta{width:100%;flex-shrink:0;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;padding:16px;font-family:inherit;font-size:var(--m-fs-base);font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:4px;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymfin-cta:active{transform:scale(.97);}
 .gymfin-link{width:100%;flex-shrink:0;border:0;background:none;color:var(--m-orange);font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;padding:9px 0 2px;cursor:pointer;}
 .gymfin-link[hidden]{display:none;}
@@ -379,18 +395,18 @@ button{font-family:inherit;}
   /* Lottie (loaded on demand, sped up ×1.6) plays the check + confetti once
      and holds the last frame. The summary then rises in staggered — same
      loadv2Rise keyframe + curve as the load screen / dashboard tiles. */
-  .gymfin-root.visible .gymfin-anim.is-fallback .gymfin-check{animation:gymfinPop .5s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.06s;}
-  .gymfin-root.anim-in .gymfin-heads{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.14s;}
-  .gymfin-root.anim-in .gymfin-progress:not([hidden]){animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.22s;}
-  .gymfin-root.anim-in .gymfin-stats .gymfin-stat{animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) backwards;}
+  .gymfin-root.visible .gymfin-anim.is-fallback .gymfin-check{animation:gymfinPop var(--m-dur-pop) var(--m-ease) backwards;animation-delay:.06s;}
+  .gymfin-root.anim-in .gymfin-heads{animation:loadv2Rise var(--m-dur-pop) var(--m-ease) backwards;animation-delay:.14s;}
+  .gymfin-root.anim-in .gymfin-progress:not([hidden]){animation:loadv2Rise var(--m-dur-pop) var(--m-ease) backwards;animation-delay:.22s;}
+  .gymfin-root.anim-in .gymfin-stats .gymfin-stat{animation:loadv2Rise var(--m-dur-pop) var(--m-ease) backwards;}
   .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(1){animation-delay:.32s;}
   .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(2){animation-delay:.4s;}
   .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(3){animation-delay:.48s;}
   .gymfin-root.anim-in .gymfin-stats .gymfin-stat:nth-child(4){animation-delay:.56s;}
-  .gymfin-root.anim-in .gymfin-record:not([hidden]){animation:loadv2Rise .5s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.64s;}
-  .gymfin-root.anim-in .gymfin-cap:not([hidden]){animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.72s;}
-  .gymfin-root.anim-in .gymfin-cta{animation:loadv2Rise .45s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.76s;}
-  .gymfin-root.anim-in .gymfin-link:not([hidden]){animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.82s;}
+  .gymfin-root.anim-in .gymfin-record:not([hidden]){animation:loadv2Rise var(--m-dur-pop) var(--m-ease) backwards;animation-delay:.64s;}
+  .gymfin-root.anim-in .gymfin-cap:not([hidden]){animation:loadv2Rise var(--m-dur-in) var(--m-ease) backwards;animation-delay:.72s;}
+  .gymfin-root.anim-in .gymfin-cta{animation:loadv2Rise var(--m-dur-in) var(--m-ease) backwards;animation-delay:.76s;}
+  .gymfin-root.anim-in .gymfin-link:not([hidden]){animation:loadv2Rise var(--m-dur-in) var(--m-ease) backwards;animation-delay:.82s;}
 }
 @media (prefers-reduced-motion: reduce){ .gymfin-root{transition:none;} }
 html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow, html.statsv2-bg .app-glow, html.histv2-bg .app-glow{display:none;}
@@ -447,17 +463,17 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .bottom-nav.bottom-nav-light{background:rgba(253,251,255,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
 .bottom-nav.bottom-nav-light::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.74) 50.48%,#fff 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
 .bottom-nav.bottom-nav-light .nav-item{width:52px;height:52px;background:rgba(150,149,155,.3);position:relative;z-index:1;}
-.bottom-nav.bottom-nav-light .nav-item .ph{color:rgba(52,57,65,.77);transition:color .3s cubic-bezier(.16,1,.3,1);}
+.bottom-nav.bottom-nav-light .nav-item .ph{color:rgba(52,57,65,.77);transition:color var(--m-dur-snap) var(--m-ease);}
 /* one orange indicator that glides between tabs and grows/shrinks to the
    target's size (GYM is bigger) — positioned by positionNavBlob(). The
    per-item .active background is now transparent; the blob is the orange. */
 .bottom-nav.bottom-nav-light .nav-item.active{background:transparent;}
 .bottom-nav.bottom-nav-light .nav-item.active .ph{color:#fff;}
 .bottom-nav .nav-blob{display:none;}
-.bottom-nav.bottom-nav-light .nav-blob{display:block;position:absolute;top:50%;left:0;width:69px;height:69px;margin-top:-34.5px;border-radius:50%;background:var(--m-orange);transform-origin:50% 50%;will-change:transform;pointer-events:none;z-index:0;transition:transform .42s cubic-bezier(.16,1,.3,1);}
+.bottom-nav.bottom-nav-light .nav-blob{display:block;position:absolute;top:50%;left:0;width:69px;height:69px;margin-top:-34.5px;border-radius:50%;background:var(--m-orange);transform-origin:50% 50%;will-change:transform;pointer-events:none;z-index:0;transition:transform var(--m-dur-in) var(--m-ease);}
 @media (prefers-reduced-motion: no-preference){
   /* the freshly-selected tab's icon spins into place as the blob arrives */
-  .bottom-nav.bottom-nav-light .nav-item.nav-spin .ph{animation:navIconSpin .5s cubic-bezier(.16,1,.3,1);}
+  .bottom-nav.bottom-nav-light .nav-item.nav-spin .ph{animation:navIconSpin var(--m-dur-pop) var(--m-ease);}
   @keyframes navIconSpin{0%{transform:rotate(-165deg) scale(.55);}100%{transform:rotate(0) scale(1);}}
 }
 @media (prefers-reduced-motion: reduce){ .bottom-nav.bottom-nav-light .nav-blob{transition:none;} .bottom-nav.bottom-nav-light .nav-item .ph{transition:none;} }
@@ -474,17 +490,17 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .view{display:none;}
 .view.active{display:block;}
 .view.view-slide{display:block;position:absolute;top:0;left:0;width:100%;}
-.view.view-sliding{transition:transform .38s cubic-bezier(.16,1,.3,1);}
+.view.view-sliding{transition:transform var(--m-dur-in) var(--m-ease);}
 
 /* ---------- exercise grid ---------- */
 .ex-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
-.ex-tile{position:relative;border-radius:var(--m-r-sm);aspect-ratio:1/1;border:1px solid #e5e7eb;padding:0;cursor:pointer;overflow:hidden;background:#fff;transition:transform var(--press-out) var(--press-ease);
+.ex-tile{position:relative;border-radius:var(--m-r-sm);aspect-ratio:1/1;border:1px solid #e5e7eb;padding:0;cursor:pointer;overflow:hidden;background:#fff;transition:transform var(--m-dur-press-out) var(--m-ease);
   -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;}
 .ex-tile:active{transform:scale(.93);}
 .ex-tile img{width:100%;height:100%;display:block;object-fit:cover;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;pointer-events:none;}
 .ex-tile.custom-tile{background:#fff;color:var(--text-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
 .ex-tile-placeholder{opacity:.35;}
-.ex-tile-ghost{transition:box-shadow .15s ease;}
+.ex-tile-ghost{transition:box-shadow var(--m-dur-quick) ease;}
 .ex-tile.custom-tile .ph{width:24px;height:24px;color:var(--orange);}
 .ex-tile.custom-tile .t{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;padding:0 3px;line-height:1.15;}
 .ex-tile.custom-tile.added{filter:grayscale(1);opacity:.5;}
@@ -549,15 +565,15 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 
 .save-btn{display:block;width:calc(100% - 40px);margin:20px auto 0;background:var(--orange);border:none;
   border-radius:var(--m-r-pill);padding:16px;color:#fff;font-size:var(--m-fs-base);font-weight:700;letter-spacing:.42px;
-  text-align:center;cursor:pointer;text-transform:uppercase;transition:transform var(--press-out) var(--press-ease);}
+  text-align:center;cursor:pointer;text-transform:uppercase;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .save-btn:active{transform:scale(.97);}
 @media (prefers-reduced-motion: no-preference){
-  .save-btn.success{animation:saveSuccess .5s ease;}
+  .save-btn.success{animation:saveSuccess var(--m-dur-pop) ease;}
   @keyframes saveSuccess{0%{transform:scale(1);}35%{transform:scale(1.04);background:#3ecf8e;}100%{transform:scale(1);}}
 }
 .share-btn{display:none;} /* temporarily disabled until the share-card template is ready, was: display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 40px);margin:12px auto 0;
   background:var(--light-2);border:1px solid var(--border);border-radius:var(--m-r-sm);padding:14px;color:var(--text-dark);
-  font-size:var(--m-fs-sm);font-weight:700;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;font-family:inherit;transition:transform .12s ease; */
+  font-size:var(--m-fs-sm);font-weight:700;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;font-family:inherit;transition:transform var(--m-dur-quick) ease; */
 .share-btn.hidden{display:none;}
 .share-btn .ph{width:18px;height:18px;}
 .share-btn:active{transform:scale(.97);}
@@ -606,7 +622,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .cal-day:disabled{cursor:not-allowed;}
 .hist-detail-wrap{padding:0 12px;margin-top:20px;display:flex;flex-direction:column;gap:12px;}
 .hist-card{background:var(--light);border-radius:var(--m-r-sm);padding:20px;color:var(--text-dark);}
-.hist-card.collapsed{cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
+.hist-card.collapsed{cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .hist-card.collapsed:active{transform:scale(.99);}
 .hist-right{display:flex;align-items:center;gap:14px;}
 .hist-date{font-size:var(--m-fs-2xs);color:rgba(44,39,39,.6);}
@@ -702,10 +718,10 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 /* right drawer — same backdrop fade + slide-in curve as the bottom sheets,
    just on the X axis (mSheetBackdropIn/Out reused) */
 @media (prefers-reduced-motion: no-preference){
-  .acct-overlay{animation:mSheetBackdropIn .24s ease-out;}
-  .acct-overlay.acct-closing{animation:mSheetBackdropOut .24s ease-in forwards;}
-  .acct-overlay .acct-panel{animation:acctDrawerIn .4s cubic-bezier(.22,1,.36,1);}
-  .acct-overlay.acct-closing .acct-panel{animation:acctDrawerOut .26s cubic-bezier(.4,0,1,1) forwards;}
+  .acct-overlay{animation:mSheetBackdropIn var(--m-dur-fade) ease-out;}
+  .acct-overlay.acct-closing{animation:mSheetBackdropOut var(--m-dur-fade) ease-in forwards;}
+  .acct-overlay .acct-panel{animation:acctDrawerIn var(--m-dur-in) var(--m-ease-sheet);}
+  .acct-overlay.acct-closing .acct-panel{animation:acctDrawerOut var(--m-dur-exit) var(--m-ease-exit) forwards;}
   @keyframes acctDrawerIn{from{transform:translateX(100%);}to{transform:translateX(0);}}
   @keyframes acctDrawerOut{from{transform:translateX(0);}to{transform:translateX(100%);}}
 }
@@ -725,7 +741,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-photo-preview{width:56px;height:56px;flex-shrink:0;border-radius:50%;overflow:hidden;background:var(--m-panel);display:flex;align-items:center;justify-content:center;}
 .acct-photo-preview .ph{width:56px;height:56px;display:block;}
 .acct-photo-btns{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
-.acct-photo-pick{display:inline-block;background:var(--m-orange);color:#fff;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
+.acct-photo-pick{display:inline-block;background:var(--m-orange);color:#fff;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .acct-photo-pick:active{transform:scale(.96);}
 .acct-photo-clear{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);font-weight:600;cursor:pointer;padding:2px 0;font-family:inherit;}
 .acct-photo-clear[hidden]{display:none;}
@@ -795,12 +811,12 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-cloud-signed{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
 .acct-cloud-signed[hidden],.acct-cloud-cta[hidden]{display:none;}
 .acct-cloud-email{font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.acct-cloud-cta{display:inline-block;margin-top:10px;background:var(--m-orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;font-family:inherit;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
+.acct-cloud-cta{display:inline-block;margin-top:10px;background:var(--m-orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;font-family:inherit;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .acct-cloud-cta:active{transform:scale(.96);}
 .acct-cloud-mode-link{display:block;width:100%;background:none;border:0;color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;padding:4px 0;font-family:inherit;text-align:center;}
 .acct-cloud-forgot{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);cursor:pointer;padding:6px 0 0;font-family:inherit;align-self:flex-end;}
 .acct-auth-error{margin:6px 0 0;font-size:var(--m-fs-2xs);color:#c00;line-height:1.4;}
-.acct-oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;border:1px solid #dadce0;border-radius:var(--m-r-pill);padding:12px;font-size:var(--m-fs-base);font-weight:500;color:#3c4043;font-family:inherit;cursor:pointer;transition:transform var(--press-out) var(--press-ease),background .12s ease;}
+.acct-oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;border:1px solid #dadce0;border-radius:var(--m-r-pill);padding:12px;font-size:var(--m-fs-base);font-weight:500;color:#3c4043;font-family:inherit;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),background var(--m-dur-quick) ease;}
 .acct-oauth-btn:active{transform:scale(.97);background:#f7f7f8;}
 .acct-oauth-divider{display:flex;align-items:center;gap:12px;margin:14px 0 0;}
 .acct-oauth-divider::before,.acct-oauth-divider::after{content:'';flex:1;height:1px;background:#e6e2ec;}
@@ -924,7 +940,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 
 /* ---------- misc ---------- */
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:#fff;color:var(--text-dark);
-  padding:10px 18px;border-radius:10px;font-size:var(--m-fs-sm);font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .25s cubic-bezier(.16,1,.3,1);z-index:50;}
+  padding:10px 18px;border-radius:10px;font-size:var(--m-fs-sm);font-weight:600;opacity:0;pointer-events:none;transition:opacity var(--m-dur-fade) ease,transform var(--m-dur-fade) var(--m-ease);z-index:50;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 @media (prefers-reduced-motion: reduce){ .toast,.toast.show{transform:translateX(-50%);} }
 
@@ -1007,7 +1023,7 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
    header row, so it sits on one line with the back arrow + title. */
 .dash-chat-btn, .gymv2-chat-btn, .plansv2-chat-btn, .histv2-chat-btn, .statsv2-chat-btn{
   width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.5);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--press-out) var(--press-ease);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);flex-shrink:0;
 }
 .dash-chat-btn{position:absolute;top:calc(16px + var(--top-inset));right:10px;}
 .gymv2-chat-btn, .histv2-chat-btn{margin-left:auto;}
@@ -1060,7 +1076,7 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
 .dash-badge.fill .ph{width:16px;height:16px;}
 
 .dash-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-.dash-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:14px;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
+.dash-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:14px;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .dash-plan-card:active{transform:scale(.97);}
 .dash-plan-name{margin:0 0 4px;font-size:var(--m-fs-lg);font-weight:500;line-height:1.2;letter-spacing:.02em;text-transform:uppercase;}
 .dash-plan-count{margin:0;font-size:var(--m-fs-base);font-weight:300;color:rgba(255,255,255,.85);}
@@ -1144,24 +1160,24 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
   .gymv2-chat-btn,.gymv2-header,
   .plansv2-chat-btn,.plansv2-header,
   .histv2-chat-btn,.histv2-header,
-  .statsv2-chat-btn,.statsv2-header{animation:dashRise .45s cubic-bezier(.16,1,.3,1) backwards;}
+  .statsv2-chat-btn,.statsv2-header{animation:dashRise var(--m-dur-in) var(--m-ease) backwards;}
   /* Each "tile" card fades in on its own — renderDashboard() sets a slightly
      randomized animation-delay per element so the stagger feels alive
      instead of a mechanically identical sequence every time. Longer travel
      + duration than dashRise above so the deceleration at the tail end
      actually reads instead of flashing by. */
   @keyframes dashTileRise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
-  .dash-hero,.dash-plan-card,.dash-mini-card,.dash-week-card,.dash-ai-card{animation:dashTileRise .8s cubic-bezier(.16,1,.3,1) backwards;}
+  .dash-hero,.dash-plan-card,.dash-mini-card,.dash-week-card,.dash-ai-card{animation:dashTileRise var(--m-dur-tile) var(--m-ease) backwards;}
 
   /* Weekly-progress day circles fade in one after another, timed to start
      only once the .dash-week-card itself has mostly finished revealing —
      renderDashboard() sets --day-base on #dashWeekDays to the card's own
      (randomized) delay + a buffer, and --i on each circle for the stagger. */
   @keyframes dashDayIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-  .dash-week-day{animation:dashDayIn .45s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(var(--day-base,650ms) + var(--i,0) * 70ms);}
+  .dash-week-day{animation:dashDayIn var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(var(--day-base,650ms) + var(--i,0) * 70ms);}
 
   @keyframes dashBarGrow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
-  .dash-trend span{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(var(--i,0) * 18ms + .2s);}
+  .dash-trend span{animation:dashBarGrow var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(var(--i,0) * 18ms + .2s);}
 
 }
 
@@ -1189,18 +1205,18 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    as navigation chrome rather than part of the title lockup. 40px hit
    target for thumbs, nudged left so the 26px glyph lands near the screen
    edge like a native back control (barely shifts the title). */
-.v2-hdr-back{background:none;border:none;padding:0;margin:0 0 0 -6px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform var(--press-out) var(--press-ease);}
+.v2-hdr-back{background:none;border:none;padding:0;margin:0 0 0 -6px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .v2-hdr-back:active{transform:scale(.88);}
 .v2-hdr-back .ph{width:26px;height:26px;color:var(--m-ink);}
 /* right-side control cluster (chat button + a close X) for the two headers
    that carry both — plan-editor-v2 and Stats detail. */
 .v2-hdr-actions{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
 
-.gymv2-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
+.gymv2-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymv2-plan-card:active{transform:scale(.98);}
 /* #1 — "Powtórz ostatni trening": shortcut sitting between the plan card
    and the exercise grid, prefills the session from the last saved workout. */
-.gymv2-repeat{display:flex;align-items:center;gap:12px;width:100%;border:1px solid #d8d5e2;background:#fff;border-radius:var(--m-r-md);padding:12px 14px;font-family:inherit;cursor:pointer;text-align:left;margin:-4px 0 20px;transition:transform var(--press-out) var(--press-ease);}
+.gymv2-repeat{display:flex;align-items:center;gap:12px;width:100%;border:1px solid #d8d5e2;background:#fff;border-radius:var(--m-r-md);padding:12px 14px;font-family:inherit;cursor:pointer;text-align:left;margin:-4px 0 20px;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymv2-repeat:active{transform:scale(.98);}
 .gymv2-repeat[hidden]{display:none;}
 .gymv2-repeat-ico{width:34px;height:34px;flex-shrink:0;border-radius:var(--m-r-pill);background:#eae2fb;display:flex;align-items:center;justify-content:center;color:var(--m-orange);}
@@ -1246,11 +1262,11 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .gymv2-rest-note{margin:0 0 12px;font-size:var(--m-fs-sm);color:var(--m-muted);line-height:1.45;}
 .gymv2-rest-note.hidden{display:none;}
 .gymv2-section-head p{margin:0;}
-.gymv2-edit-plan{background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:6px 20px;width:140px;color:#fff;font-size:var(--m-fs-xs);font-weight:500;letter-spacing:.04em;text-align:center;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
+.gymv2-edit-plan{background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:6px 20px;width:140px;color:#fff;font-size:var(--m-fs-xs);font-weight:500;letter-spacing:.04em;text-align:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymv2-edit-plan:active{transform:scale(.95);}
 
 .gymv2-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
-.gymv2-tile{position:relative;border-radius:var(--m-r-md);overflow:hidden;background:#fff;aspect-ratio:115.667/122;padding:0;border:none;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
+.gymv2-tile{position:relative;border-radius:var(--m-r-md);overflow:hidden;background:#fff;aspect-ratio:115.667/122;padding:0;border:none;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymv2-tile:active{transform:scale(.95);}
 /* "Assigned to the active plan day" state — plan editor v2 only, see
    buildExerciseTileV2()'s 'selected' state. */
@@ -1258,7 +1274,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .gymv2-tile-check{position:absolute;top:6px;right:6px;width:18px;height:18px;z-index:1;}
 .gymv2-tile-check svg{display:block;width:100%;height:100%;}
 /* "Zamień na dziś" corner control on a GYM plan tile */
-.gymv2-tile-swap{position:absolute;top:3px;right:3px;width:26px;height:26px;z-index:2;display:flex;align-items:center;justify-content:center;background:none;color:#5b5555;cursor:pointer;transition:transform var(--press-out) var(--press-ease),color .12s ease;}
+.gymv2-tile-swap{position:absolute;top:3px;right:3px;width:26px;height:26px;z-index:2;display:flex;align-items:center;justify-content:center;background:none;color:#5b5555;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),color var(--m-dur-quick) ease;}
 .gymv2-tile-swap svg{display:block;width:19px;height:19px;}
 .gymv2-tile-swap:hover{color:#2c2727;}
 .gymv2-tile-swap:active{transform:scale(.85);}
@@ -1316,7 +1332,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .gymv2-done-head{margin:40px 0 12px;}
 .gymv2-done-head.hidden{display:none;}
 .gymv2-done-list{display:flex;flex-direction:column;gap:4px;}
-.gymv2-done-row{background:#fff;border-radius:var(--m-r-md);height:50px;padding:9px 13px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:none;width:100%;font-family:inherit;transition:transform var(--press-out) var(--press-ease);}
+.gymv2-done-row{background:#fff;border-radius:var(--m-r-md);height:50px;padding:9px 13px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:none;width:100%;font-family:inherit;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymv2-done-row:active{transform:scale(.98);}
 .gymv2-done-row-info{display:flex;align-items:center;gap:7px;}
 .gymv2-done-row-info .ph{width:24px;height:24px;color:var(--m-orange);flex-shrink:0;}
@@ -1331,7 +1347,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    ikonki)". Success feedback is the shared toast() saveWorkout()
    already fires ("Trening zapisany") — same as how savePlanEditor()
    confirms a save, no per-button animation needed. */
-.gymv2-save{display:flex;align-items:center;justify-content:center;background:var(--m-orange);border:none;border-radius:var(--m-r-pill);width:100%;max-width:217px;padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:#fff;cursor:pointer;font-family:inherit;transition:transform var(--press-out) var(--press-ease);}
+.gymv2-save{display:flex;align-items:center;justify-content:center;background:var(--m-orange);border:none;border-radius:var(--m-r-pill);width:100%;max-width:217px;padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:#fff;cursor:pointer;font-family:inherit;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymv2-save:active{transform:scale(.97);}
 
 /* Entrance motion — same idiom as the Dashboard: header fades/rises in,
@@ -1342,8 +1358,8 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    rebuild from logging a set — see renderGymGridV2()/renderGymDoneV2())
    keeps this from replaying on every in-session tile/list refresh. */
 @media (prefers-reduced-motion: no-preference){
-  .gymv2-plan-card,.gymv2-no-plan{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.08s;}
-  .gymv2-anim-in, .plansv2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) backwards;}
+  .gymv2-plan-card,.gymv2-no-plan{animation:dashTileRise var(--m-dur-tile) var(--m-ease) backwards;animation-delay:.08s;}
+  .gymv2-anim-in, .plansv2-anim-in{animation:dashDayIn var(--m-dur-in) var(--m-ease) backwards;}
 }
 
 /* ============================================================
@@ -1361,9 +1377,9 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .plansv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
 .plansv2-close{width:24px;height:24px;color:var(--m-ink);cursor:pointer;flex-shrink:0;}
 .plansv2-actions{display:flex;gap:10px;width:100%;margin-bottom:24px;}
-.plansv2-btn-outline{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform var(--press-out) var(--press-ease);}
+.plansv2-btn-outline{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .plansv2-btn-outline .ph{width:24px;height:24px;color:var(--m-plan-c-easy);}
-.plansv2-btn-fill{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform var(--press-out) var(--press-ease);}
+.plansv2-btn-fill{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .plansv2-btn-fill .ph{width:24px;height:24px;color:#fff;}
 .plansv2-btn-outline:active,.plansv2-btn-fill:active{transform:scale(.95);}
 .plansv2-section-label{margin:0 2px 12px;}
@@ -1378,14 +1394,14 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    a time, toggled by attachPlanSwipeV2() from the live drag direction. */
 .plansv2-card-wrap{position:relative;overflow:hidden;border-radius:var(--m-r-md);touch-action:pan-y;}
 .plansv2-card-delete{position:absolute;inset:0;border-radius:var(--m-r-md);background:#f00;display:flex;align-items:center;justify-content:flex-end;padding-right:28px;color:#fff;cursor:pointer;opacity:0;pointer-events:none;}
-.plansv2-card-delete .ph{width:32px;height:32px;transition:transform .15s ease;}
+.plansv2-card-delete .ph{width:32px;height:32px;transition:transform var(--m-dur-quick) ease;}
 /* Past the full-swipe threshold: bump the icon so it's obvious that
    releasing now deletes, rather than just snapping open to the reveal. */
 .plansv2-card-wrap.plansv2-will-delete .plansv2-card-delete .ph{transform:scale(1.35);}
 .plansv2-card-share{position:absolute;inset:0;border-radius:var(--m-r-md);background:#f5b942;display:flex;align-items:center;justify-content:flex-start;padding-left:28px;color:#2c2727;cursor:pointer;opacity:0;pointer-events:none;}
-.plansv2-card-share .ph{width:32px;height:32px;transition:transform .15s ease;}
+.plansv2-card-share .ph{width:32px;height:32px;transition:transform var(--m-dur-quick) ease;}
 .plansv2-card-wrap.plansv2-will-share .plansv2-card-share .ph{transform:scale(1.35);}
-.plansv2-card{border-radius:var(--m-r-md);padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform var(--press-out) var(--press-ease);touch-action:pan-y;}
+.plansv2-card{border-radius:var(--m-r-md);padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform var(--m-dur-press-out) var(--m-ease);touch-action:pan-y;}
 .plansv2-card:active{transform:scale(.98);}
 .plansv2-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
 .plansv2-card-name{margin:0;font-size:var(--m-fs-md);font-weight:500;line-height:1.1;letter-spacing:.64px;text-transform:uppercase;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1414,12 +1430,12 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    .plansv2-customize-card is its scrolling body. */
 .plansv2-customize-overlay{flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden;gap:0;background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
 .plansv2-customize-stack{width:100%;max-width:520px;margin:0 auto;background:var(--m-panel);border-radius:22px 22px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:92dvh;display:flex;flex-direction:column;align-items:center;overflow:hidden;font-family:var(--m-font);will-change:transform;}
-.plansv2-customize-stack.m-sheet-snapback{transition:transform .3s cubic-bezier(.22,1,.36,1);}
+.plansv2-customize-stack.m-sheet-snapback{transition:transform var(--m-dur-snap) var(--m-ease-sheet);}
 @media (prefers-reduced-motion: no-preference){
-  .plansv2-customize-overlay{animation:mSheetBackdropIn .24s ease-out;}
-  .plansv2-customize-overlay.plansv2-customize-closing{animation:mSheetBackdropOut .24s ease-in forwards;}
-  .plansv2-customize-overlay:not(.m-sheet-entered) .plansv2-customize-stack{animation:mSheetUp .4s cubic-bezier(.22,1,.36,1);}
-  .plansv2-customize-overlay.plansv2-customize-closing .plansv2-customize-stack{animation:mSheetDown .26s cubic-bezier(.4,0,1,1) forwards;}
+  .plansv2-customize-overlay{animation:mSheetBackdropIn var(--m-dur-fade) ease-out;}
+  .plansv2-customize-overlay.plansv2-customize-closing{animation:mSheetBackdropOut var(--m-dur-fade) ease-in forwards;}
+  .plansv2-customize-overlay:not(.m-sheet-entered) .plansv2-customize-stack{animation:mSheetUp var(--m-dur-in) var(--m-ease-sheet);}
+  .plansv2-customize-overlay.plansv2-customize-closing .plansv2-customize-stack{animation:mSheetDown var(--m-dur-exit) var(--m-ease-exit) forwards;}
 }
 .plansv2-customize-card{flex:1;min-height:0;display:flex;flex-direction:column;gap:20px;background:transparent;border-radius:0;padding:4px 16px 4px;width:100%;box-sizing:border-box;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
 /* picker: the "DODAJ" button is now a pinned sibling of the card inside
@@ -1457,7 +1473,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    (always the custom/red palette — Dostosuj always forks or updates a
    fork, see applyPlanCustomizeV2()), recomputed on every difficulty
    slider move by updatePlanCustomizeSliderVisual(). */
-.plansv2-customize-hero{background:var(--m-plan-mid);border-radius:var(--m-r-sm);padding:18px;box-shadow:0 8px 12px rgba(38,66,164,.11);display:flex;flex-direction:column;gap:8px;transition:background .15s ease;}
+.plansv2-customize-hero{background:var(--m-plan-mid);border-radius:var(--m-r-sm);padding:18px;box-shadow:0 8px 12px rgba(38,66,164,.11);display:flex;flex-direction:column;gap:8px;transition:background var(--m-dur-quick) ease;}
 .plansv2-customize-hero-eyebrow{margin:0;}
 .plansv2-customize-hero-name{margin:0;font-size:var(--m-fs-2xl);font-weight:700;letter-spacing:-.02em;line-height:1.1;text-transform:uppercase;color:#fff;}
 .plansv2-customize-options{display:flex;flex-direction:column;gap:16px;}
@@ -1476,7 +1492,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .plansv2-customize-dni-value{margin:0;font-size:var(--m-fs-sm);font-weight:700;color:var(--m-orange);}
 .plansv2-customize-divider{height:1px;background:rgba(0,0,0,.08);width:100%;}
 .plansv2-choice-row{display:flex;gap:7px;flex-wrap:wrap;}
-.plansv2-choice-chip{border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 10px;background:var(--m-card);font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);font-family:inherit;cursor:pointer;transition:transform var(--press-out) var(--press-ease);flex:1;text-align:center;}
+.plansv2-choice-chip{border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 10px;background:var(--m-card);font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);font-family:inherit;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);flex:1;text-align:center;}
 .plansv2-choice-chip:active{transform:scale(.95);}
 .plansv2-choice-chip.active{background:var(--m-orange);border-color:var(--m-orange);color:#fff;}
 /* Trudność/Dni w tygodniu are genuine ordered scales — a slider reads
@@ -1495,12 +1511,12 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
 .plansv2-slider-input::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--m-orange);box-shadow:0 1px 4px rgba(44,39,39,.25);cursor:pointer;}
 .plansv2-slider-input::-moz-range-track{height:6px;border-radius:var(--m-r-pill);background:#c7c6cb;}
 .plansv2-slider-ticks{display:flex;justify-content:space-between;margin-top:10px;}
-.plansv2-slider-ticks span{font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted);transition:color .15s ease;}
+.plansv2-slider-ticks span{font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted);transition:color var(--m-dur-quick) ease;}
 .plansv2-slider-ticks span.active{color:var(--m-orange);font-weight:700;}
 .plansv2-customize-freq-hint{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:#2c2727;}
 .plansv2-customize-actions{display:flex;gap:10px;}
-.plansv2-customize-cancel{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;font-size:var(--m-fs-base);font-weight:600;color:var(--m-ink);font-family:inherit;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
-.plansv2-customize-apply{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);font-size:var(--m-fs-base);font-weight:600;color:#fff;font-family:inherit;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
+.plansv2-customize-cancel{flex:1;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px;background:none;font-size:var(--m-fs-base);font-weight:600;color:var(--m-ink);font-family:inherit;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.plansv2-customize-apply{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);font-size:var(--m-fs-base);font-weight:600;color:#fff;font-family:inherit;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .plansv2-customize-apply:disabled{opacity:.4;cursor:not-allowed;}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active{transform:scale(.97);}
 
@@ -1556,7 +1572,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    never to overlap the card since it's no longer independently
    positioned against the viewport. Same width/sizing as
    .pev2-save-fab. */
-.newex-v2-add-fab{width:100%;max-width:217px;background:#fff;border:none;border-radius:var(--m-r-pill);padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:var(--m-ink);cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,.12);transition:transform var(--press-out) var(--press-ease);flex-shrink:0;}
+.newex-v2-add-fab{width:100%;max-width:217px;background:#fff;border:none;border-radius:var(--m-r-pill);padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:var(--m-ink);cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,.12);transition:transform var(--m-dur-press-out) var(--m-ease);flex-shrink:0;}
 .newex-v2-add-fab:active{transform:scale(.97);}
 
 /* "Podziel się opinią" v2 (#feedbackOverlayV2, Figma node 175:9818) —
@@ -1610,13 +1626,13 @@ body.pev2-bg{background:var(--m-panel);}
 .pev2-periodize-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-top:10px;background:var(--m-card);border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:12px 14px;font-family:inherit;cursor:pointer;text-align:left;}
 .pev2-periodize-toggle-title{display:block;font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);}
 .pev2-periodize-toggle-desc{display:block;margin-top:2px;font-size:var(--m-fs-2xs);color:var(--m-muted);line-height:1.35;}
-.pev2-periodize-toggle-switch{flex:none;width:40px;height:24px;border-radius:var(--m-r-pill);background:rgba(0,0,0,.12);position:relative;transition:background .15s ease;}
-.pev2-periodize-toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s ease;}
+.pev2-periodize-toggle-switch{flex:none;width:40px;height:24px;border-radius:var(--m-r-pill);background:rgba(0,0,0,.12);position:relative;transition:background var(--m-dur-quick) ease;}
+.pev2-periodize-toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform var(--m-dur-quick) ease;}
 .pev2-periodize-toggle-switch.active{background:var(--m-orange);}
 .pev2-periodize-toggle-switch.active::after{transform:translateX(16px);}
 .pev2-fork-hint.hidden{display:none;}
 .pev2-day-row{display:flex;gap:4px;}
-.pev2-day-chip{position:relative;flex:1;min-width:0;text-align:center;background:var(--m-card);border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 0 15px;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);cursor:pointer;font-family:inherit;transition:transform var(--press-out) var(--press-ease);}
+.pev2-day-chip{position:relative;flex:1;min-width:0;text-align:center;background:var(--m-card);border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:11px 0 15px;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);cursor:pointer;font-family:inherit;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .pev2-day-chip:active{transform:scale(.95);}
 .pev2-day-chip.active{background:var(--m-orange);border-color:var(--m-orange);color:#fff;}
 .pev2-day-chip.has-ex::after{content:'';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--m-orange);}
@@ -1647,11 +1663,11 @@ body.pev2-bg{background:var(--m-panel);}
    simplest thing: each chip just fades its own background/icon color
    on .active, no shared moving element. */
 .equip-row{display:flex;gap:8px;}
-.equip-chip{flex:none;width:52px;height:52px;border-radius:50%;background:var(--m-card);border:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform var(--press-out) var(--press-ease),background-color .25s cubic-bezier(.16,1,.3,1),border-color .25s cubic-bezier(.16,1,.3,1);}
+.equip-chip{flex:none;width:52px;height:52px;border-radius:50%;background:var(--m-card);border:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-fade) var(--m-ease),border-color var(--m-dur-fade) var(--m-ease);}
 .equip-chip:active{transform:scale(.93);}
 .equip-chip .ic{width:26px;height:26px;display:block;}
-.equip-chip .ic path,.equip-chip .ic circle,.equip-chip .ic rect{fill:var(--m-orange);transition:fill .25s cubic-bezier(.16,1,.3,1);}
-.equip-chip .ic.icon-stroke path{fill:none;stroke:var(--m-orange);transition:stroke .25s cubic-bezier(.16,1,.3,1);}
+.equip-chip .ic path,.equip-chip .ic circle,.equip-chip .ic rect{fill:var(--m-orange);transition:fill var(--m-dur-fade) var(--m-ease);}
+.equip-chip .ic.icon-stroke path{fill:none;stroke:var(--m-orange);transition:stroke var(--m-dur-fade) var(--m-ease);}
 .equip-chip.active{background:var(--m-orange);border-color:var(--m-orange);}
 .equip-chip.active .ic path,.equip-chip.active .ic circle,.equip-chip.active .ic rect{fill:#fff;}
 .equip-chip.active .ic.icon-stroke path{stroke:#fff !important;}
@@ -1665,9 +1681,9 @@ body.pev2-bg{background:var(--m-panel);}
 .pev2-section-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
 .pev2-section-heading{display:flex;align-items:center;gap:8px;}
 .pev2-section-num{background:var(--m-plan-c-easy);border-radius:6px;padding:4px 8px;color:#fff;}
-.pev2-section-header .ph{width:24px;height:24px;color:var(--m-ink);transition:transform .2s ease;flex-shrink:0;}
+.pev2-section-header .ph{width:24px;height:24px;color:var(--m-ink);transition:transform var(--m-dur-fade) ease;flex-shrink:0;}
 .pev2-section-header .ph.collapsed{transform:rotate(-90deg);}
-.pev2-save-fab{position:fixed;left:50%;bottom:118px;transform:translateX(-50%);width:calc(100% - 40px);max-width:217px;background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:#fff;cursor:pointer;font-family:inherit;transition:transform var(--press-out) var(--press-ease);z-index:15;}
+.pev2-save-fab{position:fixed;left:50%;bottom:118px;transform:translateX(-50%);width:calc(100% - 40px);max-width:217px;background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:14px;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;color:#fff;cursor:pointer;font-family:inherit;transition:transform var(--m-dur-press-out) var(--m-ease);z-index:15;}
 .pev2-save-fab:active{transform:translateX(-50%) scale(.97);}
 
 /* Entrance motion — same idiom as GYM v2/Dashboard: header fades/rises
@@ -1678,7 +1694,7 @@ body.pev2-bg{background:var(--m-panel);}
    after starring/sharing a plan mid-browse doesn't replay the whole
    entrance. */
 @media (prefers-reduced-motion: no-preference){
-  .plansv2-actions{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.08s;}
+  .plansv2-actions{animation:dashTileRise var(--m-dur-tile) var(--m-ease) backwards;animation-delay:.08s;}
 }
 
 /* Plan editor v2's own entrance (Maciej, 2026-08-31: "Dodaj jeszcze
@@ -1693,11 +1709,11 @@ body.pev2-bg{background:var(--m-panel);}
    equipment filter, or toggling an exercise mid-session doesn't replay
    the whole entrance. */
 @media (prefers-reduced-motion: no-preference){
-  .pev2-anim-tile{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;}
+  .pev2-anim-tile{animation:dashTileRise var(--m-dur-tile) var(--m-ease) backwards;}
   .pev2-anim-tile-1{animation-delay:.08s;}
   .pev2-anim-tile-2{animation-delay:.14s;}
   .pev2-anim-tile-3{animation-delay:.2s;}
-  .pev2-anim-in{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.26s + var(--i,0) * 60ms);}
+  .pev2-anim-in{animation:dashDayIn var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(.26s + var(--i,0) * 60ms);}
 }
 
 /* GYM v2 set-logging popup (node 112:1872) — separate from .ex-popup-box/.set-row
@@ -1722,7 +1738,7 @@ body.pev2-bg{background:var(--m-panel);}
    Simplified drag-to-dismiss is wired in JS (mSheetDrag): drag the
    grabber down, release past ~40% or on a downward flick to close,
    otherwise snap back — inner scroll is left alone. Reuses the app's
-   established slide-up curve (cubic-bezier(.22,1,.36,1)) rather than
+   established slide-up curve (var(--m-ease-sheet)) rather than
    a new one, per [[feedback_thryve_animation_vocabulary]]. */
 .m-sheet-overlay{flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden;background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
 .m-sheet{width:100%;max-width:520px;margin:0 auto;background:var(--m-panel);border-radius:22px 22px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:92dvh;display:flex;flex-direction:column;overflow:hidden;font-family:var(--m-font);will-change:transform;}
@@ -1743,12 +1759,12 @@ body.pev2-bg{background:var(--m-panel);}
    can ever sit on top of it) instead. .exv2-card's own 24px gap + this
    16px margin = the 40px spacing he asked for before the button. */
 .exv2-card .exv2-submit{margin-top:16px;align-self:center;}
-.m-sheet-snapback{transition:transform .3s cubic-bezier(.22,1,.36,1);}
+.m-sheet-snapback{transition:transform var(--m-dur-snap) var(--m-ease-sheet);}
 @media (prefers-reduced-motion: no-preference){
-  .m-sheet-overlay{animation:mSheetBackdropIn .24s ease-out;}
-  .m-sheet-overlay.m-sheet-closing{animation:mSheetBackdropOut .24s ease-in forwards;}
-  .m-sheet-overlay:not(.m-sheet-entered) .m-sheet{animation:mSheetUp .4s cubic-bezier(.22,1,.36,1);}
-  .m-sheet-overlay.m-sheet-closing .m-sheet{animation:mSheetDown .26s cubic-bezier(.4,0,1,1) forwards;}
+  .m-sheet-overlay{animation:mSheetBackdropIn var(--m-dur-fade) ease-out;}
+  .m-sheet-overlay.m-sheet-closing{animation:mSheetBackdropOut var(--m-dur-fade) ease-in forwards;}
+  .m-sheet-overlay:not(.m-sheet-entered) .m-sheet{animation:mSheetUp var(--m-dur-in) var(--m-ease-sheet);}
+  .m-sheet-overlay.m-sheet-closing .m-sheet{animation:mSheetDown var(--m-dur-exit) var(--m-ease-exit) forwards;}
   @keyframes mSheetBackdropIn{from{opacity:0;}to{opacity:1;}}
   @keyframes mSheetBackdropOut{from{opacity:1;}to{opacity:0;}}
   @keyframes mSheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
@@ -1798,7 +1814,7 @@ body.pev2-bg{background:var(--m-panel);}
 .exv2-note-cancel{background:rgba(44,63,174,.12);color:#2c3fae;}
 .exv2-note-save{background:#2c3fae;color:#fff;}
 .exv2-note-hint{margin:0;font-size:var(--m-fs-2xs);color:#6f78b8;line-height:1.4;}
-.exv2-note-add{display:flex;align-items:center;gap:8px;width:100%;background:none;border:1px dashed #b9c2ef;border-radius:var(--m-r-sm);padding:10px 14px;font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#2c3fae;cursor:pointer;text-align:left;transition:transform var(--press-out) var(--press-ease);}
+.exv2-note-add{display:flex;align-items:center;gap:8px;width:100%;background:none;border:1px dashed #b9c2ef;border-radius:var(--m-r-sm);padding:10px 14px;font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#2c3fae;cursor:pointer;text-align:left;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .exv2-note-add .ph,.exv2-note-add svg{width:15px;height:15px;flex-shrink:0;}
 .exv2-note-add:active{transform:scale(.99);}
 .exv2-series-section{display:flex;flex-direction:column;gap:16px;}
@@ -1821,7 +1837,7 @@ body.pev2-bg{background:var(--m-panel);}
 /* right-side tick: solid green disc + white check, appears once both
    weight AND reps are filled. align-self:flex-end + margin-bottom centres
    it on the input box, not the whole (taller) card. */
-.exv2-series-tick{width:22px;height:22px;flex-shrink:0;align-self:flex-end;margin-bottom:8px;opacity:0;transform:scale(.5);transition:opacity .16s ease,transform .22s cubic-bezier(.22,1.3,.36,1);}
+.exv2-series-tick{width:22px;height:22px;flex-shrink:0;align-self:flex-end;margin-bottom:8px;opacity:0;transform:scale(.5);transition:opacity var(--m-dur-quick) ease,transform var(--m-dur-fade) var(--m-ease-spring);}
 .exv2-series-tick svg{display:block;width:100%;height:100%;}
 .exv2-series-card.is-done .exv2-series-tick{opacity:1;transform:scale(1);}
 .exv2-series-controls{display:flex;gap:10px;width:100%;}
@@ -1829,7 +1845,7 @@ body.pev2-bg{background:var(--m-panel);}
 .exv2-btn-outline:disabled{opacity:.4;cursor:default;}
 .exv2-btn-fill{flex:1;border:none;border-radius:var(--m-r-pill);padding:12px;background:var(--m-plan-c-easy);font-size:var(--m-fs-base);font-weight:500;color:#fff;font-family:inherit;cursor:pointer;text-align:center;}
 .exv2-warn{color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;line-height:1.4;text-align:center;}
-.exv2-submit{border:none;border-radius:var(--m-r-pill);height:49px;width:100%;max-width:275px;background:var(--m-orange);color:#fff;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;font-family:inherit;cursor:pointer;text-align:center;text-transform:uppercase;flex-shrink:0;transition:transform var(--press-out) var(--press-ease);}
+.exv2-submit{border:none;border-radius:var(--m-r-pill);height:49px;width:100%;max-width:275px;background:var(--m-orange);color:#fff;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.64px;font-family:inherit;cursor:pointer;text-align:center;text-transform:uppercase;flex-shrink:0;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .exv2-submit:active{transform:scale(.97);}
 /* Internal reveal, on top of the popup's own exv2SlideUp entrance — header
    and tip fade/rise in first, then each series card cascades in one after
@@ -1843,13 +1859,13 @@ body.pev2-bg{background:var(--m-panel);}
    make already-entered values flash out and back in. */
 @media (prefers-reduced-motion: no-preference){
   @keyframes exv2FadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-  .exv2-anim-in.exv2-header-group{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.28s;}
-  .exv2-anim-in.exv2-note,.exv2-anim-in.exv2-note-add{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.3s;}
-  .exv2-anim-in.exv2-tip{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.34s;}
-  .exv2-anim-in.exv2-series-controls,.exv2-anim-in.exv2-submit{animation:exv2FadeIn .4s cubic-bezier(.16,1,.3,1) backwards;} /* delay set inline, depends on set count */
+  .exv2-anim-in.exv2-header-group{animation:exv2FadeIn var(--m-dur-in) var(--m-ease) backwards;animation-delay:.28s;}
+  .exv2-anim-in.exv2-note,.exv2-anim-in.exv2-note-add{animation:exv2FadeIn var(--m-dur-in) var(--m-ease) backwards;animation-delay:.3s;}
+  .exv2-anim-in.exv2-tip{animation:exv2FadeIn var(--m-dur-in) var(--m-ease) backwards;animation-delay:.34s;}
+  .exv2-anim-in.exv2-series-controls,.exv2-anim-in.exv2-submit{animation:exv2FadeIn var(--m-dur-in) var(--m-ease) backwards;} /* delay set inline, depends on set count */
 
   @keyframes exv2CardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-  .exv2-anim-in.exv2-series-card{animation:exv2CardIn .35s cubic-bezier(.16,1,.3,1) backwards;} /* delay set inline per card */
+  .exv2-anim-in.exv2-series-card{animation:exv2CardIn var(--m-dur-in) var(--m-ease) backwards;} /* delay set inline per card */
 }
 
 /* "Zamień ćwiczenie" sheet body (rides the shared .m-sheet) */
@@ -1868,7 +1884,7 @@ body.pev2-bg{background:var(--m-panel);}
 .swapv2-empty{font-size:var(--m-fs-sm);color:#6c6b78;text-align:center;padding:18px 4px;}
 .swapv2-revert{border:0;background:none;font:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#5b5555;text-decoration:underline;cursor:pointer;padding:2px 4px;}
 .swapv2-foot{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;flex-shrink:0;padding:0 18px;box-sizing:border-box;}
-.swapv2-submit{border:0;border-radius:var(--m-r-pill);height:49px;width:100%;background:var(--m-orange);color:#fff;font:inherit;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:transform var(--press-out) var(--press-ease);}
+.swapv2-submit{border:0;border-radius:var(--m-r-pill);height:49px;width:100%;background:var(--m-orange);color:#fff;font:inherit;font-size:var(--m-fs-md);font-weight:500;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .swapv2-submit:disabled{opacity:.4;cursor:default;}
 .swapv2-submit:not(:disabled):active{transform:scale(.97);}
 .swapv2-restore{border:0;background:none;font:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#5b5555;cursor:pointer;text-decoration:underline;}
@@ -1996,19 +2012,19 @@ body.pev2-bg{background:var(--m-panel);}
 .histv2-run-notes{margin-top:12px;font-size:var(--m-fs-sm);color:var(--m-ink);}
 
 @media (prefers-reduced-motion: no-preference){
-  .histv2-cal-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.1s;}
+  .histv2-cal-card{animation:dashTileRise var(--m-dur-tile) var(--m-ease) backwards;animation-delay:.1s;}
   /* month change (swipe on the calendar, or the ‹ › arrows): the grid
      slides in from the direction you swiped, like the stats carousel */
   @keyframes histCalSlide{from{opacity:.3;transform:translateX(var(--sd,0));}to{opacity:1;transform:translateX(0);}}
-  .histv2-section-label{animation:dashRise .45s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.2s;}
-  .histv2-anim-in{animation:dashDayIn .45s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.24s + var(--i,0) * 70ms);}
+  .histv2-section-label{animation:dashRise var(--m-dur-in) var(--m-ease) backwards;animation-delay:.2s;}
+  .histv2-anim-in{animation:dashDayIn var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(.24s + var(--i,0) * 70ms);}
   /* the summary + exercise rows rise in when a card is EXPANDED (hist-reveal
      set by toggleHistExpandV2 for that one card only — short delays so
      content is never parked invisible, same idiom as the finish screen). */
-  .histv2-card.hist-reveal .histv2-wprogress{animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) backwards;}
-  .histv2-card.hist-reveal .histv2-wstat{animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.05s;}
-  .histv2-card.hist-reveal .histv2-wrecord{animation:loadv2Rise .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.1s;}
-  .histv2-card.hist-reveal .histv2-ex-item{animation:histExRow .34s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.1s + var(--i,0) * 40ms);}
+  .histv2-card.hist-reveal .histv2-wprogress{animation:loadv2Rise var(--m-dur-in) var(--m-ease) backwards;}
+  .histv2-card.hist-reveal .histv2-wstat{animation:loadv2Rise var(--m-dur-in) var(--m-ease) backwards;animation-delay:.05s;}
+  .histv2-card.hist-reveal .histv2-wrecord{animation:loadv2Rise var(--m-dur-in) var(--m-ease) backwards;animation-delay:.1s;}
+  .histv2-card.hist-reveal .histv2-ex-item{animation:histExRow var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(.1s + var(--i,0) * 40ms);}
   @keyframes histExRow{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 }
 .histv2-root .ph{display:block;}
@@ -2054,7 +2070,7 @@ body.pev2-bg{background:var(--m-panel);}
 .statsv2-caro-arw .ph{width:16px;height:16px;display:block;}
 .statsv2-caro-arw.disabled{opacity:.28;pointer-events:none;}
 .statsv2-caro-dots{display:flex;align-items:center;gap:8px;}
-.statsv2-caro-dots i{width:7px;height:7px;border-radius:50%;background:var(--m-muted);opacity:.45;transition:transform .2s cubic-bezier(.16,1,.3,1),opacity .2s ease,background .2s ease;}
+.statsv2-caro-dots i{width:7px;height:7px;border-radius:50%;background:var(--m-muted);opacity:.45;transition:transform var(--m-dur-fade) var(--m-ease),opacity var(--m-dur-fade) ease,background var(--m-dur-fade) ease;}
 .statsv2-caro-dots i.on{transform:scale(1.2);opacity:1;background:var(--m-orange);}
 .statsv2-scard{background:var(--m-card);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;}
 .statsv2-scard-eyebrow{margin:0 0 8px;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--m-muted);}
@@ -2086,13 +2102,13 @@ body.pev2-bg{background:var(--m-panel);}
 .statsv2-ring-legend-value{margin:0;font-size:var(--m-fs-2xl);color:#fff;letter-spacing:1.2px;font-weight:400;line-height:1.1;font-variant-numeric:tabular-nums;}
 @media (prefers-reduced-motion: no-preference){
   /* the ring "draws" tail→head — each segment fades in on a --s stagger */
-  .statsv2-ring-seg{animation:statsv2SegIn .3s ease both;animation-delay:calc(.18s + var(--s,0) * 10ms);}
-  .statsv2-ring-head{animation:statsv2SegIn .3s ease both;animation-delay:1.1s;}
+  .statsv2-ring-seg{animation:statsv2SegIn var(--m-dur-snap) ease both;animation-delay:calc(.18s + var(--s,0) * 10ms);}
+  .statsv2-ring-head{animation:statsv2SegIn var(--m-dur-snap) ease both;animation-delay:1.1s;}
   @keyframes statsv2SegIn{from{opacity:0;}to{opacity:1;}}
   /* the comet wave line draws the same way — --p is 0..1 tail→head so the
      whole line lands in ~.8s regardless of how many segments it has */
-  .statsv2-comet-seg{animation:statsv2SegIn .3s ease both;animation-delay:calc(var(--p,0) * .8s);}
-  .statsv2-chart-head{animation:statsv2SegIn .3s ease both;animation-delay:.9s;}
+  .statsv2-comet-seg{animation:statsv2SegIn var(--m-dur-snap) ease both;animation-delay:calc(var(--p,0) * .8s);}
+  .statsv2-chart-head{animation:statsv2SegIn var(--m-dur-snap) ease both;animation-delay:.9s;}
 }
 /* glowing "head" of the comet line, sitting on the latest point */
 .statsv2-chart-head{position:absolute;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;background:#ffc07a;box-shadow:0 0 9px 3px rgba(255,176,120,.85);}
@@ -2131,7 +2147,7 @@ body.pev2-bg{background:var(--m-panel);}
 .statsv2-ex-all-btn{background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:6px 20px;font-size:var(--m-fs-xs);font-weight:500;color:#fff;letter-spacing:.48px;font-family:inherit;cursor:pointer;}
 .statsv2-ex-row{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;}
 .statsv2-ex-row::-webkit-scrollbar{display:none;}
-.statsv2-ex-tile{flex-shrink:0;width:76px;height:84px;border-radius:var(--m-r-sm);background:#fff;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;box-sizing:border-box;cursor:pointer;opacity:.5;transition:opacity .12s ease;}
+.statsv2-ex-tile{flex-shrink:0;width:76px;height:84px;border-radius:var(--m-r-sm);background:#fff;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;box-sizing:border-box;cursor:pointer;opacity:.5;transition:opacity var(--m-dur-quick) ease;}
 .statsv2-ex-tile.active{opacity:1;border-color:var(--m-orange);}
 .statsv2-ex-tile .icn{width:40px;height:40px;color:var(--m-orange);flex-shrink:0;}
 .statsv2-ex-tile .icn svg{display:block;width:100%;height:100%;}
@@ -2199,22 +2215,37 @@ body.pev2-bg{background:var(--m-panel);}
   /* Card / tile entrances play on screen entry (staggered). Only the SVG
      line/ring draw-in is deferred until the element scrolls into view —
      see statsV2SetupDrawReveal(). */
-  .statsv2-anim-card{animation:dashTileRise .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.08s + var(--i,0) * 70ms);}
-  .statsv2-anim-tile{animation:dashDayIn .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.2s + var(--i,0) * 40ms);}
+  .statsv2-anim-card{animation:dashTileRise var(--m-dur-tile) var(--m-ease) backwards;animation-delay:calc(.08s + var(--i,0) * 70ms);}
+  .statsv2-anim-tile{animation:dashDayIn var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(.2s + var(--i,0) * 40ms);}
   /* "slupki animowac" — dashBarGrow, same keyframe as the Dashboard trend
      bars. .5s base so the bars start once the bar CARD's own rise
      (--i:1 → .15s delay + .7s) has essentially landed. */
-  .statsv2-bar-anim{animation:dashBarGrow .4s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(.5s + var(--i,0) * 40ms);}
+  .statsv2-bar-anim{animation:dashBarGrow var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(.5s + var(--i,0) * 40ms);}
   /* dots/PR tags fade in near the end of the ~1s line draw so they stay
      in sync with the line reaching them rather than popping early. */
-  .statsv2-chart-dot,.statsv2-pr-tag{animation:statsv2DotIn .3s ease both;animation-delay:.85s;}
+  .statsv2-chart-dot,.statsv2-pr-tag{animation:statsv2DotIn var(--m-dur-snap) ease both;animation-delay:.85s;}
   @keyframes statsv2DotIn{from{opacity:0;}to{opacity:1;}}
 }
 .statsv2-root .ph{display:block;}
 .statsv2-root .ph svg{display:block;width:100%;height:100%;}
+/* ---- Mekkio motion utilities — use these on NEW screens/components ----
+   .m-press       press feedback (scale .97, fast down / soft up)
+   .m-rise        small element entrance (8px, --m-dur-in)
+   .m-rise-tile   big tile entrance (18px, --m-dur-tile)
+   Stagger: set style="--i:N" (N = index) — 60ms per step on top of an
+   optional --m-delay. Add the rise classes only on a real "screen/popup
+   opened" render (animate=true), never on incidental re-renders. */
+.m-press{transition:transform var(--m-dur-press-out) var(--m-ease);}
+.m-press:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
+@media (prefers-reduced-motion: no-preference){
+  .m-rise{animation:mRise var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(var(--m-delay,0ms) + var(--i,0) * 60ms);}
+  .m-rise-tile{animation:mRiseTile var(--m-dur-tile) var(--m-ease) backwards;animation-delay:calc(var(--m-delay,0ms) + var(--i,0) * 60ms);}
+  @keyframes mRise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes mRiseTile{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+}
 /* Asymmetric press (iOS feel): the finger-down scale lands in
-   --press-in, the release eases back over the base rule's slower
-   --press-out. Transitions take their timing from the destination
+   --m-dur-press-in, the release eases back over the base rule's slower
+   --m-dur-press-out. Transitions take their timing from the destination
    style, so only the duration needs overriding here. Deliberately a
    list, not a global :active — :active also matches ancestors, which
    would speed up the view slide / sheet snapback mid-touch. */
@@ -2226,13 +2257,21 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-btn-outline:active,.plansv2-btn-fill:active,.plansv2-card:active,.plansv2-choice-chip:active,
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
-.exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active{transition-duration:var(--press-in);}
+.exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active{transition-duration:var(--m-dur-press-in);}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <script>
+/* Mekkio motion tokens for JS (WAAPI can't read var()): pulled from the
+   :root --m-ease-* custom properties so CSS stays the single source. */
+const MOTION = (()=>{
+  const cs = getComputedStyle(document.documentElement);
+  const v = n => cs.getPropertyValue(n).trim();
+  return { ease:v('--m-ease'), sheet:v('--m-ease-sheet'), exit:v('--m-ease-exit'),
+           throw:v('--m-ease-throw'), land:v('--m-ease-land'), spring:v('--m-ease-spring') };
+})();
 // iOS Safari only applies :active when a touchstart listener exists
 // on the element or an ancestor — this empty passive one turns on
 // every :active press state in the app. Never preventDefault here.
@@ -7029,7 +7068,7 @@ function mSheetDrag(overlayId, closeFn){
       overlay.style.pointerEvents = 'none';
       const aSheet = mover.animate(
         [{transform:'translateY(' + dy.toFixed(1) + 'px)'}, {transform:'translateY(100%)'}],
-        {duration:dur, easing:'cubic-bezier(.32,.72,0,1)', fill:'forwards'});
+        {duration:dur, easing:MOTION.throw, fill:'forwards'});
       const aDim = overlay.animate(
         [{opacity:fromOpacity}, {opacity:0}],
         {duration:dur, easing:'linear', fill:'forwards'});
@@ -7898,7 +7937,7 @@ function showGymFinishV2(summary, onDone){
     gymFinDismissT = setTimeout(()=>{
       el.classList.remove('visible', 'hiding', 'anim-in');
       if(gymFinAnim){ try{ gymFinAnim.destroy(); }catch(e){} gymFinAnim = null; }
-    }, 350); // matches .gymfin-root's opacity transition
+    }, 400); // matches .gymfin-root's opacity transition (--m-dur-in)
   };
   document.getElementById('gymFinCta').onclick = ()=> dismiss();
   document.getElementById('gymFinHistoryLink').onclick = ()=> dismiss(()=>{
@@ -10358,7 +10397,7 @@ function showLoadScreenV2(onDone){
   setTimeout(()=>{
     el.classList.add('hiding');
     onDone();
-    setTimeout(()=>{ el.classList.remove('visible'); }, 350); // matches .loadv2-root's opacity transition
+    setTimeout(()=>{ el.classList.remove('visible'); }, 400); // matches .loadv2-root's opacity transition (--m-dur-in)
   }, 1500);
 }
 
@@ -10428,7 +10467,7 @@ function histCalSlideV2(delta){
   grid.style.animation = 'none';
   grid.style.setProperty('--sd', (delta > 0 ? 18 : -18) + 'px');
   grid.getBoundingClientRect();               // reflow so the replay takes
-  grid.style.animation = 'histCalSlide .26s cubic-bezier(.16,1,.3,1)';
+  grid.style.animation = 'histCalSlide var(--m-dur-exit) var(--m-ease)';
 }
 // Maciej: "swipe na miesiącach" → "cała karta się przesuwa, coś jak
 // drag'n'drop" → "niech się też niebieski blok przesuwa" — the whole blue
@@ -10466,7 +10505,7 @@ function wireHistCalSwipeV2(){
     const outDur = Math.min(300, Math.max(120, Math.abs(outX - curT) / speed));
     const aOut = card.animate(
       [{ transform:`translateX(${curT}px)` }, { transform:`translateX(${outX}px)` }],
-      { duration: outDur, easing:'cubic-bezier(.4,0,1,.5)', fill:'forwards' }     // ease-in: accelerates away
+      { duration: outDur, easing:MOTION.exit, fill:'forwards' }     // ease-in: accelerates away
     );
     let swapped = false;
     const swap = ()=>{
@@ -10477,7 +10516,7 @@ function wireHistCalSwipeV2(){
       card.getBoundingClientRect();
       const aIn = card.animate(
         [{ transform:`translateX(${inFrom}px)` }, { transform:'translateX(0)' }],
-        { duration: inDur, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' }  // ease-out: settles in
+        { duration: inDur, easing:MOTION.land, fill:'forwards' }  // ease-out: settles in
       );
       const done = ()=>{ if(!busy) return; settle(); killAnims(); busy = false; };
       aIn.onfinish = done;
@@ -10491,7 +10530,7 @@ function wireHistCalSwipeV2(){
     busy = true;
     const a = card.animate(
       [{ transform:`translateX(${curT}px)` }, { transform:'translateX(0)' }],
-      { duration: 260, easing:'cubic-bezier(.22,1.2,.36,1)' }       // slight overshoot = spring
+      { duration: 260, easing:MOTION.spring }       // slight overshoot = spring
     );
     const done = ()=>{ if(!busy) return; settle(); killAnims(); busy = false; };
     a.onfinish = done;
@@ -11712,7 +11751,7 @@ function statsV2AnimateDrawPaths(container){
     path.style.strokeDashoffset = len;
     path.getBoundingClientRect(); // force reflow so the transition below actually animates
     setTimeout(()=>{
-      path.style.transition = 'stroke-dashoffset 1s cubic-bezier(.16,1,.3,1)';
+      path.style.transition = 'stroke-dashoffset var(--m-dur-draw) var(--m-ease)';
       path.style.strokeDashoffset = drawTo;
     }, delay);
   });
@@ -11795,7 +11834,7 @@ function statsV2SetupDrawReveal(body){
       const popAt = (DOT_BASE + dots.length * 0.06 + 0.1).toFixed(2);
       el.querySelectorAll('.statsv2-pr-tag').forEach(tag=>{
         tag.getBoundingClientRect();
-        tag.style.transition = 'opacity .2s ease, transform .34s cubic-bezier(.22,1.2,.36,1)';
+        tag.style.transition = 'opacity var(--m-dur-fade) ease, transform var(--m-dur-in) var(--m-ease-spring)';
         tag.style.transitionDelay = popAt + 's';
         tag.style.transform = 'translate(-50%,-100%) scale(1)';
         tag.style.opacity = '1';
@@ -11970,7 +12009,7 @@ function statsV2CaroGoTo(page, opts){
     const dur = Math.min(300, Math.max(190, dist / 1.4));
     const a = track.animate(
       [{ transform:`translateX(${fromPx}px)` }, { transform:`translateX(${toPx}px)` }],
-      { duration: dur, easing:'cubic-bezier(.22,1.2,.36,1)', fill:'forwards' }
+      { duration: dur, easing:MOTION.spring, fill:'forwards' }
     );
     a.onfinish = land;
     setTimeout(land, dur + 60);
@@ -11987,14 +12026,14 @@ function statsV2CaroGoTo(page, opts){
     track.style.transform = `translateX(${midPx}px)`; killAnims();
     const aIn = track.animate(
       [{ transform:`translateX(${midPx}px)` }, { transform:`translateX(${toPx}px)` }],
-      { duration: d2, easing:'cubic-bezier(0,0,.3,1)', fill:'forwards' }   // enters at speed, eases to rest
+      { duration: d2, easing:MOTION.land, fill:'forwards' }   // enters at speed, eases to rest
     );
     aIn.onfinish = land;
     setTimeout(land, d2 + 60);
   };
   const aOut = track.animate(
     [{ transform:`translateX(${fromPx}px)` }, { transform:`translateX(${midPx}px)` }],
-    { duration: d1, easing:'cubic-bezier(.4,0,1,1)', fill:'forwards' }     // slow start, exits at speed
+    { duration: d1, easing:MOTION.exit, fill:'forwards' }     // slow start, exits at speed
   );
   aOut.onfinish = flyIn;
   setTimeout(flyIn, d1 + 40);
@@ -12051,7 +12090,7 @@ function statsV2AnimateSlide(slide){
     let len; try{ len = path.getTotalLength(); }catch(e){ return; }
     if(!len) return;
     path.getBoundingClientRect();
-    path.style.transition = 'stroke-dashoffset .9s cubic-bezier(.16,1,.3,1)';
+    path.style.transition = 'stroke-dashoffset var(--m-dur-draw) var(--m-ease)';
     path.style.strokeDashoffset = '0';
   });
   // comet wave line (YTD slide): replay its tail→head CSS --p stagger
@@ -12064,7 +12103,7 @@ function statsV2AnimateSlide(slide){
   bars.forEach((b,i)=>{
     b.style.transform = '';
     b.getBoundingClientRect();
-    b.style.animation = 'dashBarGrow .42s cubic-bezier(.16,1,.3,1) both';
+    b.style.animation = 'dashBarGrow var(--m-dur-in) var(--m-ease) backwards';
     b.style.animationDelay = (i*55) + 'ms';
   });
   const settleMs = bars.length ? bars.length*55 + 120 : 620;
