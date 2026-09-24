@@ -791,7 +791,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 #weightSheet .plansv2-customize-stack,
 #bodyDataSheet .plansv2-customize-stack,
 #editKcalSheet .plansv2-customize-stack,
-#authSheet .plansv2-customize-stack{min-height:52dvh;}
+#authSheet .plansv2-customize-stack{min-height:52%;}
 #nameEditOverlay .plansv2-customize-card,
 #weightSheet .plansv2-customize-card,
 #bodyDataSheet .plansv2-customize-card,
@@ -1429,7 +1429,8 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    .plansv2-customize-stack is the moving panel (== .m-sheet),
    .plansv2-customize-card is its scrolling body. */
 .plansv2-customize-overlay{flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden;gap:0;background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
-.plansv2-customize-stack{width:100%;max-width:520px;margin:0 auto;background:var(--m-panel);border-radius:22px 22px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:92dvh;display:flex;flex-direction:column;align-items:center;overflow:hidden;font-family:var(--m-font);will-change:transform;}
+.plansv2-customize-stack{width:100%;max-width:520px;margin:0 auto;background:var(--m-panel);border-radius:22px 22px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:92%;display:flex;flex-direction:column;align-items:center;overflow:hidden;font-family:var(--m-font);will-change:transform;}
+.plansv2-customize-overlay.m-kb .plansv2-customize-stack{padding-bottom:14px;}
 .plansv2-customize-stack.m-sheet-snapback{transition:transform var(--m-dur-snap) var(--m-ease-sheet);}
 @media (prefers-reduced-motion: no-preference){
   .plansv2-customize-overlay{animation:mSheetBackdropIn var(--m-dur-fade) ease-out;}
@@ -1741,17 +1742,21 @@ body.pev2-bg{background:var(--m-panel);}
    established slide-up curve (var(--m-ease-sheet)) rather than
    a new one, per [[feedback_thryve_animation_vocabulary]]. */
 .m-sheet-overlay{flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden;background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
-.m-sheet{width:100%;max-width:520px;margin:0 auto;background:var(--m-panel);border-radius:22px 22px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:92dvh;display:flex;flex-direction:column;overflow:hidden;font-family:var(--m-font);will-change:transform;}
+.m-sheet{width:100%;max-width:520px;margin:0 auto;background:var(--m-panel);border-radius:22px 22px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:92%;display:flex;flex-direction:column;overflow:hidden;font-family:var(--m-font);will-change:transform;}
+/* % = of the overlay's content box, which syncSheetsToVisualViewport() pads
+   down to the visible band — so the sheet always fits above the keyboard.
+   With the keyboard up, the home-indicator inset is under it: drop it. */
+.m-sheet-overlay.m-kb .m-sheet{padding-bottom:14px;}
 .m-sheet-grab{flex-shrink:0;width:40px;height:5px;border-radius:3px;background:rgba(44,39,39,.22);margin:8px auto 10px;cursor:grab;touch-action:none;}
 .m-sheet-grab:active{cursor:grabbing;}
 .m-sheet-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:24px;overflow:hidden;}
 /* Exercise-logging popup only (Figma node 305:582, 2026-09-15) — Maciej's
    redesign: sheet rides much higher (~30px from the top, not the shared
-   .m-sheet's 92dvh). Scoped to THIS popup's ids only, not the shared
+   .m-sheet's 92%). Scoped to THIS popup's ids only, not the shared
    .m-sheet/.m-sheet-body classes — swapExerciseSheetV2 and everything
    else stay as they were until Maciej confirms this look and asks to
    roll it out everywhere. */
-#exercisePopupSheetV2{max-height:calc(100dvh - 30px);}
+#exercisePopupSheetV2{max-height:calc(100% - 30px);}
 /* Maciej (2026-09-15, live iteration on the above): the submit button
    sitting outside/below .exv2-card's own scroll as a sticky footer could
    still read as covering content near the bottom on some layouts — moved
@@ -5316,7 +5321,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.42.5";
+const APP_VERSION = "4.42.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6300,76 +6305,92 @@ function goRoute(route){
    page behind it (setting an explicit height from vv.height caused
    exactly that gap, since vv.height excludes the area under the
    keyboard). */
-/* Bottom sheets (.m-sheet-overlay, e.g. the exercise-logging popup) are a
-   different case from the centered .onboard-box popups above: they rely
-   on .m-sheet's own `max-height:92dvh` to size the sheet, and `dvh` does
-   NOT shrink for the on-screen keyboard on iOS (only for browser chrome
-   like the address bar) — so with the keyboard open, the sheet can still
-   claim up to 92% of the FULL device height, no smaller. If that's more
-   than what's actually visible above the keyboard, the excess renders
-   past the true bottom edge of the screen; reported by Maciej (2026-09-15,
-   screenshot) as the submit button floating with the (intentionally
-   translucent) backdrop and the screen behind it visible below it instead
-   of the button sitting right above the keyboard. Fix: while any
-   .m-sheet-overlay is open, cap its .m-sheet's max-height to the live
-   visualViewport height (minus a small margin) via inline style, so the
-   sheet always fits the actually-visible area and scrolls internally
-   (.m-sheet-body/.exv2-card already have overflow-y:auto) instead of
-   extending past it. Cleared back to the CSS default when no sheet is
-   open, so this never fights the keyboard-closed 92dvh sizing. */
-function syncSheetHeightToVisualViewport(){
-  if(!window.visualViewport) return;
+/* Bottom sheets vs the iOS keyboard (4th pass, 2026-09-24 — reproduced in
+   the iOS 27 simulator before fixing). The keyboard does NOT shrink the
+   layout viewport, so a position:fixed inset:0 overlay keeps its bottom
+   edge BEHIND the keyboard, and a flex-end sheet sits there too. The old
+   fix only capped the sheet's max-height to visualViewport.height, which
+   shrinks the sheet but leaves it anchored behind the keyboard — whether
+   the focused Seria was visible then depended on how far iOS happened to
+   pan the visual viewport (sometimes fully = "wskakiwało normalnie",
+   sometimes barely = tiny visible sliver / field under the keyboard). The
+   inline max-height was also never cleared, so a value read with the
+   keyboard up (or transitional, right after unlocking) stuck as a small
+   sheet on the next open.
+   Now: the overlay (fixed, inset:0 = the layout viewport) is padded so its
+   content box equals exactly the visible band: padding-top = vv.offsetTop,
+   padding-bottom = what's left under vv.height. Uses only the overlay's own
+   height, never mixes client coordinates with vv.offsetTop — measured in
+   the iOS 27 simulator, client coords there are relative to the VISUAL
+   viewport (overlay rect.top = -offsetTop, innerHeight = vv.height), so
+   the first version of this, which assumed layout coords, pushed the sheet
+   down by the pan twice over. The sheet's bottom lands on the keyboard's
+   top edge whatever iOS panned, its CSS max-height is a % of that band, so
+   nothing is ever pinned inline. The backdrop still covers the whole
+   screen (padding, not height), so no gap shows while the keyboard slides. */
+function syncSheetsToVisualViewport(){
   const vv = window.visualViewport;
-  const openSheets = document.querySelectorAll('.m-sheet-overlay:not(.hidden) > .m-sheet');
-  openSheets.forEach(el=>{ el.style.maxHeight = Math.max(200, vv.height - 16) + 'px'; });
-  // The hide-.exv2-submit-while-keyboard-open follow-up that used to live
-  // here is gone (2026-09-15): now that the button lives INSIDE .exv2-card
-  // as plain scrollable content (not a sticky footer outside it), toggling
-  // its display caused a layout reflow that lagged behind the keyboard's
-  // own close animation — Maciej saw the button (and everything below the
-  // fold) go missing for a beat right after dismissing the keyboard. It's
-  // no longer squeezed against the keyboard either way now that it just
-  // scrolls with the rest of the content, so there was nothing left for
-  // this to fix.
+  document.querySelectorAll('.m-sheet-overlay, .plansv2-customize-overlay').forEach(ov=>{
+    const sheet = ov.querySelector('.m-sheet, .plansv2-customize-stack');
+    if(sheet) sheet.style.maxHeight = '';
+    if(!vv || ov.classList.contains('hidden')){
+      ov.style.paddingTop = ov.style.paddingBottom = '';
+      ov.classList.remove('m-kb');
+      return;
+    }
+    const top = vv.offsetTop;
+    const bottom = ov.getBoundingClientRect().height - vv.offsetTop - vv.height;
+    ov.style.paddingTop = top > 1 ? top + 'px' : '';
+    ov.style.paddingBottom = bottom > 1 ? bottom + 'px' : '';
+    ov.classList.toggle('m-kb', bottom > 80);
+  });
 }
-/* Center the currently-focused Seria card in the space between the top of
-   the screen and the top of the keyboard (Maciej, 2026-09-15) — the
-   browser's own scroll-into-view only guarantees the focused INPUT is
-   visible, often right at the bottom edge just above the keyboard, so
-   reaching it (or seeing its label/tick) still needed a manual scroll.
-   `pendingSeriesCenterInput` is set on focusin and normally acted on the
-   next visualViewport resize/scroll (keyboard opening, or iOS auto-
-   scrolling a lower field into view) — acting immediately on focus would
-   measure against the keyboard-closed viewport, since the resize hasn't
-   happened yet at that point.
-   Fallback (Maciej, 2026-09-22: "seria 2 zasłonięta przez klawiaturę") —
-   tapping straight into a later Seria while the keyboard is ALREADY open
-   (no resize coming) sometimes gets neither event: iOS can judge the field
-   "visible enough" on its own and skip its native auto-scroll too, leaving
-   it right at the keyboard's edge. The timeout below centers it regardless
-   after the keyboard-move animation would have settled; centerFocusedSeriesCard()
-   is a no-op if the event-driven path already consumed pendingSeriesCenterInput
-   first, so this never double-corrects. */
-let pendingSeriesCenterInput = null;
+/* Center the focused field (its Seria card, for series) inside the part of
+   the sheet's scroll area that's actually visible (scroll box ∩ visual
+   viewport, located via the fixed overlay's rect). The old version
+   centered on vv.height/2, ignoring iOS's pan (vv.offsetTop), which put
+   the card too low, often right under the keyboard. The keyboard's geometry settles over several vv
+   resize/scroll events, so re-center on each of them for a short window
+   after focus (plus two timeouts for when iOS sends none), instead of
+   acting once on the first, mid-animation event. Idempotent: once
+   centered the delta is ~0, and the user's own scrolling never triggers it
+   (inner scroll isn't a visualViewport event). */
+// Any text field in either bottom-sheet family (series, weight, login,
+// new-exercise form…) — the sheet now fits above the keyboard, so a field
+// low in the form sits under the sheet's own fold unless scrolled to.
+const SHEET_TEXT_FIELD = ':is(.m-sheet-overlay, .plansv2-customize-overlay) :is(textarea, input:not([type=button],[type=checkbox],[type=radio],[type=range],[type=submit],[type=file]))';
+let pendingSheetField = null, pendingSheetFieldUntil = 0;
 document.addEventListener('focusin', function(e){
-  if(e.target && e.target.matches && e.target.matches('.exv2-series-fields input')){
-    pendingSeriesCenterInput = e.target;
-    setTimeout(centerFocusedSeriesCard, 350);
+  if(e.target && e.target.matches && e.target.matches(SHEET_TEXT_FIELD)){
+    pendingSheetField = e.target;
+    pendingSheetFieldUntil = Date.now() + 900;
+    setTimeout(centerFocusedSheetField, 350);
+    setTimeout(centerFocusedSheetField, 900);
   }
 });
-function centerFocusedSeriesCard(){
-  if(!pendingSeriesCenterInput) return;
-  const input = pendingSeriesCenterInput;
-  pendingSeriesCenterInput = null;
-  if(document.activeElement !== input) return; // blurred again before this ran
-  const card = input.closest('.exv2-series-card');
-  const scrollEl = input.closest('.exv2-card');
-  if(!card || !scrollEl) return;
+function centerFocusedSheetField(){
+  const input = pendingSheetField;
+  if(!input) return;
+  if(Date.now() > pendingSheetFieldUntil + 50 || document.activeElement !== input){
+    pendingSheetField = null;
+    return;
+  }
+  const ov = input.closest('.m-sheet-overlay, .plansv2-customize-overlay');
+  const card = input.closest('.exv2-series-card') || input;
+  let scrollEl = input.parentElement;
+  while(scrollEl && scrollEl !== ov && !/(auto|scroll)/.test(getComputedStyle(scrollEl).overflowY)) scrollEl = scrollEl.parentElement;
+  if(!ov || !scrollEl || scrollEl === ov) return;
   const vv = window.visualViewport;
-  const visibleHeight = vv ? vv.height : window.innerHeight;
-  const cardRect = card.getBoundingClientRect();
-  const delta = (cardRect.top + cardRect.height / 2) - (visibleHeight / 2);
-  scrollEl.scrollTop += delta;
+  // Visible band in client coords, derived from the fixed overlay (whose top
+  // is the layout viewport's top) so it holds whichever viewport client
+  // coordinates are relative to — see syncSheetsToVisualViewport().
+  const bandTop = (ov ? ov.getBoundingClientRect().top : 0) + (vv ? vv.offsetTop : 0);
+  const bandBottom = bandTop + (vv ? vv.height : window.innerHeight);
+  const box = scrollEl.getBoundingClientRect();
+  const top = Math.max(box.top, bandTop), bottom = Math.min(box.bottom, bandBottom);
+  if(bottom - top < 40) return;
+  const c = card.getBoundingClientRect();
+  scrollEl.scrollTop += (c.top + c.height / 2) - (top + bottom) / 2;
 }
 // Named (not nested in the IIFE below) so the resume-from-background
 // handler further down can also call it, instead of duplicating this logic.
@@ -6385,11 +6406,13 @@ function syncViewportPinning(){
   // the sheet jump toward the top of the screen — exactly what forcing
   // `top = vv.offsetTop` on a bottom-anchored flex sheet would do the
   // moment vv.offsetTop stops being 0 during that scroll.
-  document.querySelectorAll('.onboard-overlay:not(.m-sheet-overlay)').forEach(el=>{
+  // Both bottom-sheet families are pinned by padding in
+  // syncSheetsToVisualViewport() instead.
+  document.querySelectorAll('.onboard-overlay:not(.m-sheet-overlay):not(.plansv2-customize-overlay)').forEach(el=>{
     el.style.top = vv.offsetTop + 'px';
   });
-  syncSheetHeightToVisualViewport();
-  centerFocusedSeriesCard();
+  syncSheetsToVisualViewport();
+  centerFocusedSheetField();
 }
 (function pinOverlaysToVisualViewport(){
   if(!window.visualViewport) return;
@@ -6426,13 +6449,28 @@ function forceFixedReflow(el){
       off `visualViewport`, which can report a transitional/wrong value in
       the instant right after resuming, with no later resize/scroll event
       to correct it — same fix as a real viewport change (syncViewportPinning). */
-document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState !== 'visible') return;
+function onAppResume(){
   positionNavBlob(false);
   forceFixedReflow(document.getElementById('bottomNav'));
   document.querySelectorAll('.pev2-save-fab').forEach(forceFixedReflow);
   syncViewportPinning();
+  // iOS reports transitional viewport values for a moment after unlock and
+  // may send no further event once they settle — re-read after that.
+  setTimeout(syncViewportPinning, 300);
+  setTimeout(syncViewportPinning, 800);
+}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'hidden'){
+    // Locking the phone kills the keyboard but can leave the field focused;
+    // back in the app, tapping it again then gives iOS nothing to react to.
+    // Values are already saved on every keystroke (popupSetLiveV2).
+    const a = document.activeElement;
+    if(a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) a.blur();
+    return;
+  }
+  onAppResume();
 });
+window.addEventListener('pageshow', e=>{ if(e.persisted) onAppResume(); });
 /* ============================================================
    GYM — icon grid + session
    ============================================================ */
@@ -6963,6 +7001,7 @@ function openExercisePopupV2(ex){
   sheet.style.transform = '';
   overlay.style.opacity = '';
   overlay.classList.remove('hidden');
+  syncSheetsToVisualViewport();
   document.getElementById('exercisePopupBoxV2').scrollTop = 0;
   document.documentElement.classList.add('modal-lock');
 }
@@ -6978,6 +7017,7 @@ function closeExercisePopupV2(viaDrag){
     sheet.classList.remove('m-sheet-snapback');
     sheet.style.transform = '';
     overlay.style.opacity = '';
+    syncSheetsToVisualViewport();
     document.documentElement.classList.remove('modal-lock');
     exv2CloseTimer = null;
   };
@@ -7167,6 +7207,7 @@ function mSheetOpenReset(overlayId){
   if(m){ m.classList.remove('m-sheet-snapback'); m.style.transform = ''; }
   const body = o.querySelector('.m-sheet-body');
   if(body) body.scrollTop = 0;
+  syncSheetsToVisualViewport();
 }
 function mSheetClose(overlayId, viaDrag, onFinish){
   const o = document.getElementById(overlayId);
@@ -7340,6 +7381,7 @@ function resetPlansCustomizeSheet(overlayId){
   if(mover){ mover.classList.remove('m-sheet-snapback'); mover.style.transform = ''; }
   const body = overlay.querySelector('.plansv2-customize-card');
   if(body) body.scrollTop = 0;
+  syncSheetsToVisualViewport();
 }
 function closePlansCustomizeSheet(overlayId, viaDrag){
   const overlay = document.getElementById(overlayId);
