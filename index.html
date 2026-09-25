@@ -3460,8 +3460,6 @@ const T_EN = {
   daySelectClearConfirm: n => `Clear all exercises from ${n} day${n===1?'':'s'}? This can't be undone.`,
   daySelectCopyDone: n => `Copied to ${n} day${n===1?'':'s'}`,
   daySelectClearDone: n => `Cleared ${n} day${n===1?'':'s'}`,
-  favFilterAll: 'All',
-  favFilterFavorites: 'Favorites',
   skipPlanOnboarding: "Skip for now, I'll decide later",
   shareIconTitle: 'Share',
   importTitle: 'Import backup',
@@ -5469,7 +5467,7 @@ async function deleteAccountV2(){
 function clearAllLocalUserData(){
   [LS_WORKOUTS, LS_RUNS, LS_CUSTOM_EX, LS_PROFILE_NAME, LS_TRAINING_PLANS, LS_STARRED_PLAN,
    LS_DELETED_BUILTIN_PLANS, LS_WEIGHT_LOG, LS_BODY_DATA, LS_AVATAR, LS_EXERCISE_NOTES,
-   LS_FAVORITE_EXERCISES, LS_EXERCISE_ORDER, LS_KCAL_FACTOR, LS_GYM_SESSION_TIMING,
+   LS_EXERCISE_ORDER, LS_KCAL_FACTOR, LS_GYM_SESSION_TIMING,
    LS_GYM_SESSION_DRAFT, LS_GYM_TODAY_SWAPS, LS_AI_LAST_WORKOUT_SUMMARY, LS_CLOUD_REMINDER_LAST,
    LS_CLOUD_SYNC_STATE,
   ].forEach(k => localStorage.removeItem(k));
@@ -5629,7 +5627,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.44.0";
+const APP_VERSION = "4.44.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7003,17 +7001,9 @@ function cleanPlanInPlace(p){
   return p;
 }
 
-const LS_FAVORITE_EXERCISES = "fitlog_favorite_exercises_v1";
-function loadFavoriteExercises(){
-  try{ return new Set(JSON.parse(localStorage.getItem(LS_FAVORITE_EXERCISES)) || []); }catch(e){ return new Set(); }
-}
-function saveFavoriteExercises(){ localStorage.setItem(LS_FAVORITE_EXERCISES, JSON.stringify([...favoriteExercises])); }
-let favoriteExercises = loadFavoriteExercises();
-function toggleFavoriteExercise(name){
-  if(favoriteExercises.has(name)) favoriteExercises.delete(name);
-  else favoriteExercises.add(name);
-  saveFavoriteExercises();
-}
+// Favorite exercises (heart in the old GYM grid) went away with that
+// screen in 4.10.26 — drop the orphaned key left on older installs.
+try{ localStorage.removeItem('fitlog_favorite_exercises_v1'); }catch(e){}
 // Exercise logging happens in a centered popup, not inline in the page flow
 // — with a long grid, an inline panel could scroll out of view and get
 // missed entirely. popupExercise is a draft copy; nothing touches
@@ -12936,7 +12926,6 @@ function exportData(){
   const data = {
     workouts, runs, profileName,
     trainingPlans, customExercises,
-    favoriteExercises: [...favoriteExercises],
     starredPlanId, exerciseOrder,
     weightLog, bodyData, exerciseNotes,
     avatar: avatarDataUrl || null,
@@ -13010,7 +12999,6 @@ function applyImport(mode){
       const existingCNames = new Set(customExercises.map(e=>e.name));
       data.customExercises.forEach(e=>{ if(!existingCNames.has(e.name)) customExercises.push(e); });
     }
-    if(Array.isArray(data.favoriteExercises)) data.favoriteExercises.forEach(n=> favoriteExercises.add(n));
     if(!starredPlanId && data.starredPlanId) starredPlanId = data.starredPlanId;
     if(Array.isArray(data.weightLog)){
       const seenDates = new Set(weightLog.map(e=>e.date));
@@ -13030,7 +13018,6 @@ function applyImport(mode){
     runs = data.runs;
     if(Array.isArray(data.trainingPlans)) trainingPlans = data.trainingPlans;
     if(Array.isArray(data.customExercises)) customExercises = data.customExercises;
-    if(Array.isArray(data.favoriteExercises)) favoriteExercises = new Set(data.favoriteExercises);
     if(Array.isArray(data.exerciseOrder)) exerciseOrder = data.exerciseOrder;
     starredPlanId = data.starredPlanId || null;
     if(Array.isArray(data.weightLog)){
@@ -13047,7 +13034,6 @@ function applyImport(mode){
   saveRuns(runs);
   saveTrainingPlansList();
   saveCustomExercises(customExercises);
-  saveFavoriteExercises();
   if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId); else localStorage.removeItem(LS_STARRED_PLAN);
   saveExerciseOrderList(exerciseOrder);
   saveWeightLog(weightLog);
