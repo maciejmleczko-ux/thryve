@@ -15,6 +15,8 @@ create table if not exists public.profiles (
 alter table public.profiles add column if not exists weight_log jsonb not null default '[]'::jsonb;
 alter table public.profiles add column if not exists body_data jsonb not null default '{}'::jsonb;
 alter table public.profiles add column if not exists ai_preferences jsonb not null default '{}'::jsonb; -- {goal, avoid}, Trener AI
+alter table public.profiles add column if not exists custom_exercises jsonb not null default '[]'::jsonb; -- [{name, group, sets, ...}], mirrors fitlog_custom_exercises_v1
+alter table public.profiles add column if not exists exercise_notes jsonb not null default '{}'::jsonb;  -- {nazwa ćwiczenia: notatka}, mirrors fitlog_exercise_notes_v1
 
 alter table public.profiles enable row level security;
 

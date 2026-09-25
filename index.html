@@ -4368,7 +4368,7 @@ function saveWorkouts(arr){ arr.forEach(w=> w && cleanExerciseList(w.exercises))
 function loadRuns(){ try{ return JSON.parse(localStorage.getItem(LS_RUNS)) || []; }catch(e){ return []; } }
 function saveRuns(arr){ localStorage.setItem(LS_RUNS, JSON.stringify(arr)); }
 function loadCustomExercises(){ try{ return cleanExerciseList(JSON.parse(localStorage.getItem(LS_CUSTOM_EX)) || []); }catch(e){ return []; } }
-function saveCustomExercises(arr){ localStorage.setItem(LS_CUSTOM_EX, JSON.stringify(cleanExerciseList(arr))); }
+function saveCustomExercises(arr){ localStorage.setItem(LS_CUSTOM_EX, JSON.stringify(cleanExerciseList(arr))); scheduleCloudPush(); }
 
 /* ---------- local profile (no account, no backend) ---------- */
 const LS_PROFILE_NAME = "fitlog_profile_name_v1";
@@ -4872,7 +4872,44 @@ function cloudWorkoutRow(w, uid){
 const planSig = p => { const r = cloudPlanRow(p, ''); delete r.owner_id; return syncSig(r); };
 const workoutSig = w => { const r = cloudWorkoutRow(w, ''); delete r.user_id; return syncSig(r); };
 function localProfileFields(){
-  return { weight_log: weightLog, body_data: bodyData || {}, display_name: profileName || null };
+  return { weight_log: weightLog, body_data: bodyData || {}, display_name: profileName || null,
+    custom_exercises: customExercises, exercise_notes: exerciseNotes };
+}
+// Profile fields that are really collections — merged entry by entry
+// instead of last-write-wins, so two devices adding different weight
+// entries / notes / custom exercises don't overwrite each other. Each is
+// turned into a {key: entry} object for merging and back.
+const MERGED_PROFILE_FIELDS = {
+  weight_log: {
+    toObj: a => { const o = {}; (Array.isArray(a) ? a : []).forEach(e=>{ if(e && e.date) o[e.date] = e; }); return o; },
+    fromObj: o => Object.values(o).sort((x, y)=> String(x.date).localeCompare(String(y.date))),
+    apply: v => { weightLog = v; localStorage.setItem(LS_WEIGHT_LOG, JSON.stringify(v)); },
+  },
+  custom_exercises: {
+    toObj: a => { const o = {}; (Array.isArray(a) ? a : []).forEach(e=>{ if(e && typeof e.name === 'string' && e.name) o[e.name] = e; }); return o; },
+    fromObj: o => cleanExerciseList(Object.values(o)),
+    apply: v => { customExercises = v; localStorage.setItem(LS_CUSTOM_EX, JSON.stringify(v)); },
+  },
+  exercise_notes: {
+    toObj: o => { const r = {}; if(o && typeof o === 'object' && !Array.isArray(o)) for(const k in o){ if(typeof o[k] === 'string' && o[k]) r[k] = o[k]; } return r; },
+    fromObj: o => o,
+    apply: v => { exerciseNotes = v; try{ localStorage.setItem(LS_EXERCISE_NOTES, JSON.stringify(v)); }catch(e){} },
+  },
+};
+// Three-way merge against what this device last synced (base): an entry
+// changed or deleted locally since then takes the local side, everything
+// else takes the cloud side. Without a base (first sync, or state from
+// 4.43.1) it's a union where `winner` decides same-key conflicts.
+function mergeProfileField(field, base, local, cloud, winner){
+  const F = MERGED_PROFILE_FIELDS[field];
+  const L = F.toObj(local), C = F.toObj(cloud);
+  if(base === undefined) return F.fromObj(winner === 'cloud' ? {...L, ...C} : {...C, ...L});
+  const B = F.toObj(base), out = {...C};
+  new Set([...Object.keys(B), ...Object.keys(L)]).forEach(k=>{
+    if(JSON.stringify(L[k]) === JSON.stringify(B[k])) return; // untouched here
+    if(k in L) out[k] = L[k]; else delete out[k];
+  });
+  return F.fromObj(out);
 }
 // Fetch every row, page by page, until an empty page — robust to whatever
 // "max rows" the Supabase API is configured with (default 1000, which used
@@ -4918,7 +4955,16 @@ async function pushCloudChanges(uid, state, cloudIds){
     // Signatures taken BEFORE the await: an edit made while the request is
     // in flight must still look dirty afterwards.
     const sigs = dirtyPlans.map(planSig);
-    const err = await upsertChunked('plans', dirtyPlans.map(p => cloudPlanRow(p, uid)), 'owner_id,local_id');
+    // First sync into an account that already has an active plan: the
+    // account's choice stays (same rule as other conflicts) — otherwise two
+    // rows would be is_active and the pull would pick one at random. The
+    // guest's own plans are still uploaded, just not starred.
+    const keepCloudActive = firstRun && cloudIds && cloudIds.activePlan;
+    const err = await upsertChunked('plans', dirtyPlans.map(p => {
+      const row = cloudPlanRow(p, uid);
+      if(keepCloudActive) row.is_active = false;
+      return row;
+    }), 'owner_id,local_id');
     if(err){ console.error('cloud push plans', err); res.plansOk = false; }
     else { dirtyPlans.forEach((p, i)=>{ state.plans[String(p.id)] = sigs[i]; }); res.pushed = true; }
   }
@@ -4935,17 +4981,41 @@ async function pushCloudChanges(uid, state, cloudIds){
     else { dirtyWorkouts.forEach((w, i)=>{ state.workouts[String(w.id)] = sigs[i]; }); res.pushed = true; }
   }
 
-  // Profile: on this device's first run only fill fields the cloud has
-  // empty (old behavior, see cloudIds note); after that, push any field
-  // that changed locally since the last sync.
+  // Profile (after this device's first full sync — that one is handled in
+  // syncCloudData): push every field that changed locally since the last
+  // sync. Collection fields are merged with the cloud's current value.
   if(state.profile){
     const local = localProfileFields();
-    const patch = {}, sigs = {};
-    for(const k in local){ const sig = syncSig(local[k]); if(state.profile[k] !== sig){ patch[k] = local[k]; sigs[k] = sig; } }
-    if(Object.keys(patch).length){
+    const dirty = Object.keys(local).filter(k => state.profile[k] !== syncSig(local[k]));
+    if(dirty.length){
+      const patch = {};
+      let cloudRow = null;
+      if(dirty.some(k => MERGED_PROFILE_FIELDS[k])){
+        const { data, error } = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
+        if(error){ console.error('cloud push profile: read', error); res.profileOk = false; saveCloudSyncState(state); return res; }
+        cloudRow = data;
+      }
+      state.base = state.base || {};
+      // A collection column missing from the row = the SQL migration adding
+      // it hasn't run yet: leave that field local-only for now.
+      if(cloudRow) for(let i = dirty.length - 1; i >= 0; i--){ if(MERGED_PROFILE_FIELDS[dirty[i]] && !(dirty[i] in cloudRow)) dirty.splice(i, 1); }
+      dirty.forEach(k=>{
+        patch[k] = MERGED_PROFILE_FIELDS[k]
+          ? mergeProfileField(k, state.base[k], local[k], cloudRow[k], 'local')
+          : local[k];
+      });
       const { error } = await supabaseClient.from('profiles').update(patch).eq('id', uid);
       if(error){ console.error('cloud push profile', error); res.profileOk = false; }
-      else { Object.assign(state.profile, sigs); res.pushed = true; }
+      else {
+        for(const k in patch){
+          // The merged value may hold entries from other devices — adopt
+          // it locally, unless the user changed this field again meanwhile.
+          if(MERGED_PROFILE_FIELDS[k] && syncSig(localProfileFields()[k]) === syncSig(local[k])) MERGED_PROFILE_FIELDS[k].apply(patch[k]);
+          if(MERGED_PROFILE_FIELDS[k]) state.base[k] = patch[k];
+          state.profile[k] = syncSig(MERGED_PROFILE_FIELDS[k] ? patch[k] : local[k]);
+        }
+        res.pushed = true;
+      }
     }
   }
   saveCloudSyncState(state);
@@ -5017,7 +5087,9 @@ async function syncCloudData(){
         selectAllRows('workouts', 'user_id', uid, 'date')
       ]);
       if(pIds.error || wIds.error){ console.error('syncCloudData: read', pIds.error || wIds.error); return; }
-      cloudIds = { plans: new Set(pIds.data.map(r => r.local_id)), workouts: new Set(wIds.data.map(r => r.local_id)) };
+      const activeRow = pIds.data.find(r => r.is_active);
+      cloudIds = { plans: new Set(pIds.data.map(r => r.local_id)), workouts: new Set(wIds.data.map(r => r.local_id)),
+        activePlan: activeRow ? (activeRow.local_id || activeRow.id) : null };
     }
 
     // Profile before the push: the first run needs the cloud row to decide
@@ -5028,14 +5100,13 @@ async function syncCloudData(){
     if(profileRow && !state.profile){
       const local = localProfileFields();
       const patch = {};
-      // Weight log: merge by date instead of "only if cloud is empty" — a
-      // guest who logs into an existing account keeps the entries made on
-      // this device. Same date on both sides → the cloud's value wins.
-      if(local.weight_log.length){
-        const cloudLog = Array.isArray(profileRow.weight_log) ? profileRow.weight_log : [];
-        const cloudDates = new Set(cloudLog.map(e => e && e.date));
-        const extra = local.weight_log.filter(e => e && e.date && !cloudDates.has(e.date));
-        if(extra.length) patch.weight_log = cloudLog.concat(extra).sort((x, y)=> String(x.date).localeCompare(String(y.date)));
+      // Collections (weight, custom exercises, notes): union, so a guest
+      // who logs into an existing account keeps what they added on this
+      // device. Same key on both sides → the account's value wins.
+      for(const k in MERGED_PROFILE_FIELDS){
+        if(!(k in profileRow)) continue; // column not migrated yet
+        const merged = mergeProfileField(k, undefined, local[k], profileRow[k], 'cloud');
+        if(syncSig(merged) !== syncSig(MERGED_PROFILE_FIELDS[k].fromObj(MERGED_PROFILE_FIELDS[k].toObj(profileRow[k])))) patch[k] = merged;
       }
       if((!profileRow.body_data || !Object.keys(profileRow.body_data).length) && Object.keys(local.body_data).length) patch.body_data = local.body_data;
       if(!profileRow.display_name && local.display_name) patch.display_name = local.display_name;
@@ -5109,7 +5180,14 @@ async function syncCloudData(){
     if(profileRow && push.profileOk){
       const { data: fresh } = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
       const row = fresh || profileRow;
-      if(row.weight_log && row.weight_log.length){ weightLog = row.weight_log; localStorage.setItem(LS_WEIGHT_LOG, JSON.stringify(weightLog)); }
+      state.base = {};
+      for(const k in MERGED_PROFILE_FIELDS){
+        if(!(k in row)) continue; // column not migrated yet — keep local as is
+        const F = MERGED_PROFILE_FIELDS[k];
+        const v = F.fromObj(F.toObj(row[k]));
+        F.apply(v);
+        state.base[k] = v;
+      }
       if(row.body_data && Object.keys(row.body_data).length){ bodyData = row.body_data; localStorage.setItem(LS_BODY_DATA, JSON.stringify(bodyData)); }
       // ai_preferences: pull-only — saveAiPrefsSheet() pushes straight to
       // Supabase on every save.
@@ -5120,7 +5198,7 @@ async function syncCloudData(){
       }
       const local = localProfileFields();
       state.profile = {};
-      for(const k in local) state.profile[k] = syncSig(local[k]);
+      for(const k in local){ if(k in row) state.profile[k] = syncSig(local[k]); }
     }
     saveCloudSyncState(state);
 
@@ -5551,7 +5629,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.43.1";
+const APP_VERSION = "4.44.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5600,6 +5678,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.44.0": {
+    pl: [
+      {featured:true, icon:'arrow-clockwise', badge:'Nowość', title:'Ćwiczenia i notatki na koncie', text:'Własne ćwiczenia i notatki do ćwiczeń zapisują się teraz na koncie, więc zobaczysz je na każdym telefonie, na którym się zalogujesz. Jeśli wcześniej używałeś apki bez konta, po zalogowaniu nic nie przepada: ćwiczenia, notatki, waga i własne plany dołączą do konta.'},
+    ],
+    en: [
+      {featured:true, icon:'arrow-clockwise', badge:'New', title:'Exercises and notes in your account', text:'Custom exercises and exercise notes now save to your account, so they show up on every phone you sign in on. If you used the app without an account before, nothing gets lost when you sign in: exercises, notes, weight and your own plans join your account.'},
+    ],
+  },
   "4.43.1": {
     pl: [
       'Edycje planów, nowe wpisy wagi, zmiany w profilu i ręczne korekty kalorii zapisują się teraz w chmurze. Wcześniej po ponownym otwarciu apki potrafiły wrócić do starszej wersji.',
@@ -6888,6 +6974,7 @@ function loadExerciseNotes(){
 }
 function saveExerciseNotes(){
   try{ localStorage.setItem(LS_EXERCISE_NOTES, JSON.stringify(exerciseNotes)); }catch(e){}
+  scheduleCloudPush();
 }
 loadExerciseNotes();
 function escHtml(s){
