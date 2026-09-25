@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.45.1 (2026-09-25)
-- **Liczba wersji:** 221 · **commitów:** 544
+- **Aktualna wersja:** 4.45.2 (2026-09-25)
+- **Liczba wersji:** 222 · **commitów:** 550
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -112,6 +112,14 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.45.2 · PATCH · 2026-09-25
+
+Bez wpisu „Co nowego” (dokończenie podmiany ikon z 4.43.0).
+
+Statystyki (kafle „Progres ćwiczeń”, 40 px) i lista ćwiczeń w Historii (30 px) pokazywały jeszcze stare płaskie SVG. `statsV2ExerciseIconSvg()` → `statsV2ExerciseIconHtml()`: ta sama kolejność co `buildExerciseTileV2()` (PNG z `icons/exercises/`, potem stare SVG, własne ćwiczenie → `own_excercise.png` zamiast `PH.barbell`), plus jawne wymiary `<img>` w obu kontenerach. Zmiana funkcji trafiła przypadkiem już do `f9a9892` (commit z 4.45.1 zrobiony z równoległej sesji), CSS rozmiarów dopiero tutaj.
+
+**Commity:** wpis dodany w tym samym commicie co zmiana (hash w kolejnej wersji).
+
 ### 4.45.1 · PATCH · 2026-09-25
 
 **Dla użytkownika (wpis „Co nowego”):**
@@ -120,7 +128,9 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 Zdjęcie jest trzymane w nowej kolumnie `profiles.avatar` (data URL JPEG 160×160, ~10 KB, limit 200 KB w bazie) i działa jak imię: ostatnia zmiana wygrywa, usunięcie zdjęcia na jednym telefonie usuwa je też na drugim. Apka zapamiętuje, jakie kolumny ma profil w chmurze (`profileCols` w stanie synchronizacji), więc pole dodane w nowszej wersji apki, zanim uruchomiono migrację SQL, zostaje tylko lokalnie zamiast blokować synchronizację wagi i reszty profilu.
 
-**Commity:** wpis dodany w tym samym commicie co zmiana (hash w kolejnej wersji).
+**Commity (1):**
+
+- `f9a9892` 2026-09-25 — Synchronizacja zdjęcia profilowego z chmurą (4.45.1) — zawiera też funkcję ikon Statystyk/Historii z 4.45.2
 
 ### 4.45.0 · MINOR · 2026-09-25
 
