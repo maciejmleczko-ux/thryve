@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.44.0 (2026-09-25)
+- **Aktualna wersja:** 4.45.1 (2026-09-25)
 - **Liczba wersji:** 221 · **commitów:** 544
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -80,7 +80,7 @@ Stan na 4.44.0.
 
 **Dane lokalne (localStorage, prefiks `fitlog_`, sufiks `_v1`):** `workouts`, `runs`, `training_plans`, `starred_plan`, `deleted_builtin_plans`, `custom_exercises`, `exercise_notes`, `exercise_order`, `weight_log`, `body_data`, `avatar`, `kcal_factor`, `profile_name`, `gym_session_draft`, `gym_session_timing`, `gym_today_swaps`, `onboard_seen`, `install_prompt_dismissed`, `last_seen_version`.
 
-**Chmura (Supabase, od 4.35.0):** tabele `profiles` (plus kolumny JSON: `weight_log`, `body_data`, `ai_preferences`, `custom_exercises`, `exercise_notes`), `plans`, `workouts`, `ai_usage`. RLS włączone na wszystkich. Logowanie: e-mail + hasło, Google. Tryb gościa działa bez konta. Nie synchronizują się jeszcze: biegi (`runs`) i ulubione.
+**Chmura (Supabase, od 4.35.0):** tabele `profiles` (plus kolumny JSON: `weight_log`, `body_data`, `ai_preferences`, `custom_exercises`, `exercise_notes`; tekst: `avatar`), `plans`, `workouts`, `ai_usage`. RLS włączone na wszystkich. Logowanie: e-mail + hasło, Google. Tryb gościa działa bez konta. Nie synchronizują się: biegi (`runs`, tylko odczyt, nowych nie da się dodać) i lista usuniętych wbudowanych planów. Ulubione ćwiczenia usunięte w 4.44.1.
 
 ---
 
@@ -111,6 +111,36 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.45.1 · PATCH · 2026-09-25
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Zdjęcie profilowe zapisuje się teraz na koncie, więc po zalogowaniu na innym telefonie zobaczysz je od razu.
+
+Zdjęcie jest trzymane w nowej kolumnie `profiles.avatar` (data URL JPEG 160×160, ~10 KB, limit 200 KB w bazie) i działa jak imię: ostatnia zmiana wygrywa, usunięcie zdjęcia na jednym telefonie usuwa je też na drugim. Apka zapamiętuje, jakie kolumny ma profil w chmurze (`profileCols` w stanie synchronizacji), więc pole dodane w nowszej wersji apki, zanim uruchomiono migrację SQL, zostaje tylko lokalnie zamiast blokować synchronizację wagi i reszty profilu.
+
+**Commity:** wpis dodany w tym samym commicie co zmiana (hash w kolejnej wersji).
+
+### 4.45.0 · MINOR · 2026-09-25
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> **Nowa ikona aplikacji i ekran startowy.** Ikona na ekranie głównym i w Safari to teraz znak Mekkio na pomarańczowym tle. Ekran startowy po uruchomieniu dostał ten sam branding — pełny logotyp zamiast starego znaku, bez hasła pod spodem.
+
+**Commity (2):**
+
+- `6238172` 2026-09-25 — Nowa ikona aplikacji + przeprojektowany ekran startowy (Figma 379:8548)
+- `9f88790` 2026-09-25 — Test: 12 ikon z akcentem pomarańczowym (PNG_ORANGE)
+
+### 4.44.1 · PATCH · 2026-09-25
+
+Bez wpisu „Co nowego” (zmiana niewidoczna dla użytkownika).
+
+**Commity (2):**
+
+- `b2fef0b` 2026-09-25 — Dodaj dziennik techniczny docs/CHANGELOG.md (wszystkie wersje od 2.1.1) + zasada w CLAUDE.md
+- `ecfe0c2` 2026-09-25 — Usuń martwy kod ulubionych ćwiczeń (4.44.1)
 
 ### 4.44.0 · MINOR · 2026-09-25
 

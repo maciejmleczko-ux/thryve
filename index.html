@@ -4672,6 +4672,7 @@ function setAvatarFromFile(file){
         avatarDataUrl = c.toDataURL('image/jpeg', 0.85);
         localStorage.setItem(LS_AVATAR, avatarDataUrl);
       }catch(e){ toast(t('avatarTooBig','Nie udało się zapisać zdjęcia')); return; }
+      scheduleCloudPush();
       applyAvatarEverywhere();
       toast(t('avatarSaved','Zdjęcie ustawione'));
     };
@@ -4684,6 +4685,7 @@ function clearAvatar(){
   avatarDataUrl = '';
   localStorage.removeItem(LS_AVATAR);
   applyAvatarEverywhere();
+  scheduleCloudPush();
 }
 
 /* ---------- weight sheet ---------- */
@@ -4874,7 +4876,7 @@ const planSig = p => { const r = cloudPlanRow(p, ''); delete r.owner_id; return 
 const workoutSig = w => { const r = cloudWorkoutRow(w, ''); delete r.user_id; return syncSig(r); };
 function localProfileFields(){
   return { weight_log: weightLog, body_data: bodyData || {}, display_name: profileName || null,
-    custom_exercises: customExercises, exercise_notes: exerciseNotes };
+    custom_exercises: customExercises, exercise_notes: exerciseNotes, avatar: avatarDataUrl || null };
 }
 // Profile fields that are really collections — merged entry by entry
 // instead of last-write-wins, so two devices adding different weight
@@ -4987,7 +4989,11 @@ async function pushCloudChanges(uid, state, cloudIds){
   // sync. Collection fields are merged with the cloud's current value.
   if(state.profile){
     const local = localProfileFields();
-    const dirty = Object.keys(local).filter(k => state.profile[k] !== syncSig(local[k]));
+    // state.profileCols = columns the profile row had at the last pull; a
+    // field added in a newer app version whose SQL migration hasn't run yet
+    // stays local-only instead of failing the whole profile update.
+    const dirty = Object.keys(local).filter(k => state.profile[k] !== syncSig(local[k])
+      && (!state.profileCols || state.profileCols.includes(k)));
     if(dirty.length){
       const patch = {};
       let cloudRow = null;
@@ -5097,6 +5103,7 @@ async function syncCloudData(){
     // which fields are still empty there.
     const { data: profileRow, error: profileErr } = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
     if(profileErr) console.error('syncCloudData: profile read', profileErr);
+    if(profileRow) state.profileCols = Object.keys(profileRow);
     let firstProfilePush = false;
     if(profileRow && !state.profile){
       const local = localProfileFields();
@@ -5111,6 +5118,7 @@ async function syncCloudData(){
       }
       if((!profileRow.body_data || !Object.keys(profileRow.body_data).length) && Object.keys(local.body_data).length) patch.body_data = local.body_data;
       if(!profileRow.display_name && local.display_name) patch.display_name = local.display_name;
+      if(('avatar' in profileRow) && !profileRow.avatar && local.avatar) patch.avatar = local.avatar;
       if(Object.keys(patch).length){
         const { error } = await supabaseClient.from('profiles').update(patch).eq('id', uid);
         if(error) console.error('syncCloudData: push profile', error);
@@ -5193,6 +5201,17 @@ async function syncCloudData(){
       // ai_preferences: pull-only — saveAiPrefsSheet() pushes straight to
       // Supabase on every save.
       if(row.ai_preferences && Object.keys(row.ai_preferences).length){ aiPrefs = row.ai_preferences; }
+      // Avatar: last write wins like the name. Pulled even when the cloud
+      // value is empty — that means it was removed on another device (a
+      // local change would have been pushed above first).
+      if('avatar' in row){
+        const av = isImageDataUrl(row.avatar) ? row.avatar : '';
+        if(av !== avatarDataUrl){
+          avatarDataUrl = av;
+          if(av) localStorage.setItem(LS_AVATAR, av); else localStorage.removeItem(LS_AVATAR);
+          applyAvatarEverywhere();
+        }
+      }
       if(row.display_name && row.display_name !== profileName){
         profileName = cleanName(row.display_name);
         localStorage.setItem(LS_PROFILE_NAME, profileName);
@@ -5200,6 +5219,7 @@ async function syncCloudData(){
       const local = localProfileFields();
       state.profile = {};
       for(const k in local){ if(k in row) state.profile[k] = syncSig(local[k]); }
+      state.profileCols = Object.keys(row);
     }
     saveCloudSyncState(state);
 
@@ -5630,7 +5650,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.45.0";
+const APP_VERSION = "4.45.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5679,6 +5699,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.45.1": {
+    pl: [
+      'Zdjęcie profilowe zapisuje się teraz na koncie, więc po zalogowaniu na innym telefonie zobaczysz je od razu.',
+    ],
+    en: [
+      'Your profile photo now saves to your account, so it shows up right away when you sign in on another phone.',
+    ],
+  },
   "4.45.0": {
     pl: [
       {featured:true, icon:'sparkle', badge:'Zmiana', title:'Nowa ikona aplikacji i ekran startowy', text:'Ikona na ekranie głównym i w Safari to teraz znak Mekkio na pomarańczowym tle. Ekran startowy po uruchomieniu dostał ten sam branding — pełny logotyp zamiast starego znaku, bez hasła pod spodem.'},
@@ -11273,7 +11301,7 @@ function histWorkoutCardInner(w){
     <div class="histv2-ex-list">
       ${w.exercises.map((e,i)=>`
         <div class="histv2-ex-item" style="--i:${i}">
-          <span class="histv2-ex-ico">${statsV2ExerciseIconSvg(e.name)}</span>
+          <span class="histv2-ex-ico">${statsV2ExerciseIconHtml(e.name)}</span>
           <div class="histv2-ex-meta">
             <p class="histv2-ex-name">${escHtml(e.name)}</p>
             <p class="histv2-ex-sets">${e.sets.map(s=> s.weight > 0 ? `${s.weight}kg×${s.reps}` : `${s.reps}`).join(' · ')}</p>
@@ -11489,12 +11517,15 @@ function statsV2RecentExerciseNames(){
 // aren't in that map, so most tiles silently fell back to a generic
 // barbell. Fixed by looking the name up in the real library (built-in
 // + custom) first, matching buildExerciseTileV2's exact precedence.
-// Genuinely custom exercises (icon:null, see saveNewExerciseV2()) are
-// the one case that's supposed to fall back to barbell — not a bug.
-function statsV2ExerciseIconSvg(name){
+// Same PNG-first order as buildExerciseTileV2(): 3D render, then the old
+// SVG, and custom exercises (icon:null) get OWN_EXERCISE_ICON_PNG.
+function statsV2ExerciseIconHtml(name){
   const found = getExerciseLibrary().find(e=>e.name===name);
   const slug = EXERCISE_ICON_MAP[name] || (found && found.icon);
-  return slug ? iconSvgV3(slug) : PH.barbell;
+  const png = slug ? iconPngUrl(slug) : '';
+  if(png) return `<img src="${png}" alt="" loading="lazy">`;
+  const svg = slug ? iconSvgV3(slug) : '';
+  return svg || `<img src="${OWN_EXERCISE_ICON_PNG}" alt="" loading="lazy">`;
 }
 function statsV2Epley(weight, reps){ return weight * (1 + reps/30); }
 // masa ciała exercises log reps only — no kg ever gets typed for them, so
@@ -11733,7 +11764,7 @@ function renderStatsV2ExerciseRow(activeName){
   if(!names.length) return '';
   const tiles = names.map((name,i)=>`
     <div class="statsv2-ex-tile statsv2-anim-tile${name===activeName?' active':''}" style="--i:${i}" onclick="selectStatsExerciseV2(${jsArg(name)})">
-      <span class="icn">${statsV2ExerciseIconSvg(name)}</span>
+      <span class="icn">${statsV2ExerciseIconHtml(name)}</span>
       <span>${escHtml(name)}</span>
     </div>`).join('');
   return `
