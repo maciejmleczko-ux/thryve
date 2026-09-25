@@ -5028,7 +5028,15 @@ async function syncCloudData(){
     if(profileRow && !state.profile){
       const local = localProfileFields();
       const patch = {};
-      if((!profileRow.weight_log || !profileRow.weight_log.length) && local.weight_log.length) patch.weight_log = local.weight_log;
+      // Weight log: merge by date instead of "only if cloud is empty" — a
+      // guest who logs into an existing account keeps the entries made on
+      // this device. Same date on both sides → the cloud's value wins.
+      if(local.weight_log.length){
+        const cloudLog = Array.isArray(profileRow.weight_log) ? profileRow.weight_log : [];
+        const cloudDates = new Set(cloudLog.map(e => e && e.date));
+        const extra = local.weight_log.filter(e => e && e.date && !cloudDates.has(e.date));
+        if(extra.length) patch.weight_log = cloudLog.concat(extra).sort((x, y)=> String(x.date).localeCompare(String(y.date)));
+      }
       if((!profileRow.body_data || !Object.keys(profileRow.body_data).length) && Object.keys(local.body_data).length) patch.body_data = local.body_data;
       if(!profileRow.display_name && local.display_name) patch.display_name = local.display_name;
       if(Object.keys(patch).length){
