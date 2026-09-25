@@ -183,3 +183,6 @@ alter table public.ai_usage enable row level security;
 -- Edge Function dostaje 403 "permission denied for table ai_usage".
 grant usage on schema public to service_role;
 grant select, insert on public.ai_usage to service_role;
+-- delete: ai-proxy rezerwuje wiersz PRZED wywołaniem AI (odporność na
+-- równoległe zapytania) i oddaje go, gdy wywołanie się nie uda.
+grant delete on public.ai_usage to service_role;

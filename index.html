@@ -2285,7 +2285,8 @@ body.pev2-bg{background:var(--m-panel);}
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active{transition-duration:var(--m-dur-press-in);}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
 </head>
 <body>
 <script>
@@ -4362,12 +4363,12 @@ function getExerciseLibrary(){
 const LS_WORKOUTS = "fitlog_workouts_v1";
 const LS_RUNS = "fitlog_runs_v1";
 const LS_CUSTOM_EX = "fitlog_custom_exercises_v1";
-function loadWorkouts(){ try{ return JSON.parse(localStorage.getItem(LS_WORKOUTS)) || []; }catch(e){ return []; } }
-function saveWorkouts(arr){ localStorage.setItem(LS_WORKOUTS, JSON.stringify(arr)); }
+function loadWorkouts(){ try{ const a = JSON.parse(localStorage.getItem(LS_WORKOUTS)) || []; a.forEach(w=> w && cleanExerciseList(w.exercises)); return a; }catch(e){ return []; } }
+function saveWorkouts(arr){ arr.forEach(w=> w && cleanExerciseList(w.exercises)); localStorage.setItem(LS_WORKOUTS, JSON.stringify(arr)); scheduleCloudPush(); }
 function loadRuns(){ try{ return JSON.parse(localStorage.getItem(LS_RUNS)) || []; }catch(e){ return []; } }
 function saveRuns(arr){ localStorage.setItem(LS_RUNS, JSON.stringify(arr)); }
-function loadCustomExercises(){ try{ return JSON.parse(localStorage.getItem(LS_CUSTOM_EX)) || []; }catch(e){ return []; } }
-function saveCustomExercises(arr){ localStorage.setItem(LS_CUSTOM_EX, JSON.stringify(arr)); }
+function loadCustomExercises(){ try{ return cleanExerciseList(JSON.parse(localStorage.getItem(LS_CUSTOM_EX)) || []); }catch(e){ return []; } }
+function saveCustomExercises(arr){ localStorage.setItem(LS_CUSTOM_EX, JSON.stringify(cleanExerciseList(arr))); }
 
 /* ---------- local profile (no account, no backend) ---------- */
 const LS_PROFILE_NAME = "fitlog_profile_name_v1";
@@ -4380,10 +4381,11 @@ function updateWelcomeGreeting(){
   else { el.classList.remove('visible'); }
 }
 function saveOnboarding(){
-  const val = document.getElementById('onboardNick').value.trim();
+  const val = cleanName(document.getElementById('onboardNick').value).trim();
   if(val){
     profileName = val;
     localStorage.setItem(LS_PROFILE_NAME, profileName);
+    scheduleCloudPush();
     updateWelcomeGreeting();
   }
   localStorage.setItem(LS_ONBOARD_SEEN, '1');
@@ -4414,9 +4416,9 @@ const LS_WEIGHT_LOG = "fitlog_weight_log_v1";   // [{kg:Number, date:"YYYY-MM-DD
 const LS_BODY_DATA  = "fitlog_body_data_v1";    // {heightCm, age, sex:"f"|"m"}
 const KCAL_MODEL_VERSION = 2;
 function loadWeightLog(){ try{ const a = JSON.parse(localStorage.getItem(LS_WEIGHT_LOG)); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
-function saveWeightLog(a){ localStorage.setItem(LS_WEIGHT_LOG, JSON.stringify(a)); }
+function saveWeightLog(a){ localStorage.setItem(LS_WEIGHT_LOG, JSON.stringify(a)); scheduleCloudPush(); }
 function loadBodyData(){ try{ return JSON.parse(localStorage.getItem(LS_BODY_DATA)) || {}; }catch(e){ return {}; } }
-function saveBodyDataLS(o){ localStorage.setItem(LS_BODY_DATA, JSON.stringify(o)); }
+function saveBodyDataLS(o){ localStorage.setItem(LS_BODY_DATA, JSON.stringify(o)); scheduleCloudPush(); }
 let weightLog = loadWeightLog();
 let bodyData = loadBodyData();
 // AI asystent preferences ({goal, avoid}) — cloud-only, unlike weightLog/
@@ -4621,10 +4623,11 @@ function openNameEdit(){
 }
 function closeNameEdit(viaDrag){ acctSheetClose('nameEditOverlay', viaDrag); }
 function saveNameEdit(){
-  const val = document.getElementById('nameEditInput').value.trim();
+  const val = cleanName(document.getElementById('nameEditInput').value).trim();
   profileName = val;
   if(val) localStorage.setItem(LS_PROFILE_NAME, val);
   else localStorage.removeItem(LS_PROFILE_NAME);
+  scheduleCloudPush();
   updateWelcomeGreeting();
   if(typeof renderDashboard === 'function') renderDashboard();
   renderAccountPanel();
@@ -4801,18 +4804,23 @@ function initSupabaseAuth(){
   });
 }
 
-/* ---------- cloud sync (push-unsynced, then pull-authoritative) ----------
-   Runs on every fresh login / restored session. Two phases:
-   1) push — any local plan/workout whose id isn't already in the cloud
-      (matched by local_id) gets inserted. Covers first-ever login (cloud
-      empty, everything local gets pushed) AND catching up anything saved
-      locally while offline.
-   2) pull — the full cloud set is fetched back and REPLACES the local
-      trainingPlans[]/workouts[] arrays, then persisted + re-rendered.
-      Safe because phase 1 already guaranteed nothing local-only is lost.
-   No per-field conflict resolution: plans have one owner/editor, workouts
-   are append-only, so "cloud after phase 1" is simply correct — matches
-   the "last write wins per record" call in the original spec. */
+/* ---------- cloud sync (push-changed, then pull-authoritative) ----------
+   Runs on every fresh login / restored session (syncCloudData), plus a
+   debounced push-only pass after every local save (scheduleCloudPush).
+   1) push — every local plan/workout/profile field whose content differs
+      from what this device last synced (a per-record signature kept in
+      LS_CLOUD_SYNC_STATE) gets upserted. That covers new records AND edits
+      (plan rename, starred plan, kcal correction, new weight entry…).
+      The old "push only ids the cloud doesn't have yet" rule never sent
+      edits, so the pull below silently reverted them on the next launch.
+   2) pull — the full cloud set (paginated, no 1000-row cap) REPLACES the
+      local trainingPlans[]/workouts[], merged over the local objects so
+      local-only fields survive. Skipped per resource if its push failed.
+   A record that was synced before (signature present), is unchanged
+   locally and is missing from the cloud was deleted on another device —
+   it is not re-pushed, so the pull removes it here too.
+   Last write wins per record: plans have one owner, workouts are
+   effectively append-only. */
 /* ---------- delete propagation ----------
    syncCloudData() only ever adds rows (push-unsynced, pull-authoritative)
    — it has no concept of "this used to exist and was removed", so on its
@@ -4838,6 +4846,146 @@ function deleteCloudWorkout(id){
     .then(({error})=>{ if(error) console.error('deleteCloudWorkout', error); });
 }
 
+const LS_CLOUD_SYNC_STATE = 'fitlog_cloud_sync_state_v1'; // {uid, plans:{id:sig}, workouts:{id:sig}, profile:{field:sig}}
+function loadCloudSyncState(){
+  try{ const s = JSON.parse(localStorage.getItem(LS_CLOUD_SYNC_STATE)); if(s && typeof s === 'object') return s; }catch(e){}
+  return null;
+}
+function saveCloudSyncState(s){
+  try{ localStorage.setItem(LS_CLOUD_SYNC_STATE, JSON.stringify(s)); }catch(e){ console.error('saveCloudSyncState', e); }
+}
+// FNV-1a — only needs to notice "this record changed since last sync",
+// not be cryptographic; keeps the state small (workouts can be large).
+function syncSig(v){
+  const str = JSON.stringify(v === undefined ? null : v);
+  let h = 0x811c9dc5;
+  for(let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return (h >>> 0).toString(36) + ':' + str.length.toString(36);
+}
+function cloudPlanRow(p, uid){
+  return { owner_id: uid, local_id: String(p.id), name: p.name, schedule: p.schedule || {}, is_active: p.id === starredPlanId };
+}
+function cloudWorkoutRow(w, uid){
+  return { user_id: uid, local_id: String(w.id), date: w.date, duration_min: w.durationMin || null,
+    exercises: w.exercises || [], kcal_estimated: w.kcalEstimated ?? null, kcal_user: w.kcalUser ?? null };
+}
+const planSig = p => { const r = cloudPlanRow(p, ''); delete r.owner_id; return syncSig(r); };
+const workoutSig = w => { const r = cloudWorkoutRow(w, ''); delete r.user_id; return syncSig(r); };
+function localProfileFields(){
+  return { weight_log: weightLog, body_data: bodyData || {}, display_name: profileName || null };
+}
+// Fetch every row, page by page, until an empty page — robust to whatever
+// "max rows" the Supabase API is configured with (default 1000, which used
+// to silently truncate the pull and then delete the newest local workouts).
+async function selectAllRows(table, ownerCol, uid, orderCol){
+  const PAGE = 1000;
+  let rows = [];
+  for(let from = 0; ; ){
+    const { data, error } = await supabaseClient.from(table).select('*').eq(ownerCol, uid)
+      .order(orderCol, { ascending: true }).order('id', { ascending: true })
+      .range(from, from + PAGE - 1);
+    if(error) return { error };
+    if(!data || !data.length) break;
+    rows = rows.concat(data);
+    from += data.length;
+  }
+  return { data: rows };
+}
+async function upsertChunked(table, rows, onConflict){
+  for(let i = 0; i < rows.length; i += 200){
+    const { error } = await supabaseClient.from(table).upsert(rows.slice(i, i + 200), { onConflict });
+    if(error) return error;
+  }
+  return null;
+}
+
+// Push phase, shared by the full sync and the debounced after-save push.
+// cloudIds (full sync only, first run on this device): ids already in the
+// cloud are treated as synced, so a device with no sync state yet doesn't
+// overwrite newer edits from another device with its stale copies.
+async function pushCloudChanges(uid, state, cloudIds){
+  const res = { plansOk: true, workoutsOk: true, profileOk: true, pushed: false };
+  const firstRun = !state.plans;
+  state.plans = state.plans || {};
+  state.workouts = state.workouts || {};
+
+  const dirtyPlans = (trainingPlans || []).filter(p=>{
+    const id = String(p.id);
+    if(firstRun && cloudIds && cloudIds.plans.has(id)) return false;
+    return state.plans[id] !== planSig(p);
+  });
+  if(dirtyPlans.length){
+    // Signatures taken BEFORE the await: an edit made while the request is
+    // in flight must still look dirty afterwards.
+    const sigs = dirtyPlans.map(planSig);
+    const err = await upsertChunked('plans', dirtyPlans.map(p => cloudPlanRow(p, uid)), 'owner_id,local_id');
+    if(err){ console.error('cloud push plans', err); res.plansOk = false; }
+    else { dirtyPlans.forEach((p, i)=>{ state.plans[String(p.id)] = sigs[i]; }); res.pushed = true; }
+  }
+
+  const dirtyWorkouts = (workouts || []).filter(w=>{
+    const id = String(w.id);
+    if(firstRun && cloudIds && cloudIds.workouts.has(id)) return false;
+    return state.workouts[id] !== workoutSig(w);
+  });
+  if(dirtyWorkouts.length){
+    const sigs = dirtyWorkouts.map(workoutSig);
+    const err = await upsertChunked('workouts', dirtyWorkouts.map(w => cloudWorkoutRow(w, uid)), 'user_id,local_id');
+    if(err){ console.error('cloud push workouts', err); res.workoutsOk = false; }
+    else { dirtyWorkouts.forEach((w, i)=>{ state.workouts[String(w.id)] = sigs[i]; }); res.pushed = true; }
+  }
+
+  // Profile: on this device's first run only fill fields the cloud has
+  // empty (old behavior, see cloudIds note); after that, push any field
+  // that changed locally since the last sync.
+  if(state.profile){
+    const local = localProfileFields();
+    const patch = {}, sigs = {};
+    for(const k in local){ const sig = syncSig(local[k]); if(state.profile[k] !== sig){ patch[k] = local[k]; sigs[k] = sig; } }
+    if(Object.keys(patch).length){
+      const { error } = await supabaseClient.from('profiles').update(patch).eq('id', uid);
+      if(error){ console.error('cloud push profile', error); res.profileOk = false; }
+      else { Object.assign(state.profile, sigs); res.pushed = true; }
+    }
+  }
+  saveCloudSyncState(state);
+  return res;
+}
+
+let _cloudPushTimer = null, _cloudPushInFlight = false, _cloudPushAgain = false;
+function scheduleCloudPush(delay){
+  // Called from save*() helpers that also run during startup, possibly
+  // before the `let`s above are initialized (TDZ) — nothing to push then.
+  try{
+    if(!supabaseClient || !cloudSession || !cloudSession.user) return;
+    clearTimeout(_cloudPushTimer);
+    _cloudPushTimer = setTimeout(runCloudPush, delay == null ? 1500 : delay);
+  }catch(e){}
+}
+async function runCloudPush(){
+  _cloudPushTimer = null;
+  if(!supabaseClient || !cloudSession || !cloudSession.user) return;
+  // A full sync pushes too — just queue another pass for after it.
+  if(_cloudSyncInFlight || _cloudPushInFlight){ _cloudPushAgain = true; return; }
+  const uid = cloudSession.user.id;
+  const state = loadCloudSyncState();
+  // No state for this account yet → the full sync hasn't finished once;
+  // it will push everything itself, with the first-run safeguards.
+  if(!state || state.uid !== uid || !state.plans) return;
+  _cloudPushInFlight = true;
+  try{ await pushCloudChanges(uid, state, null); }
+  catch(e){ console.error('runCloudPush failed', e); }
+  finally{
+    _cloudPushInFlight = false;
+    if(_cloudPushAgain){ _cloudPushAgain = false; scheduleCloudPush(); }
+  }
+}
+// iOS can kill a backgrounded PWA at any time — flush pending edits the
+// moment the app is hidden instead of waiting out the debounce.
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'hidden' && _cloudPushTimer){ clearTimeout(_cloudPushTimer); runCloudPush(); }
+});
+
 let _cloudSyncInFlight = false;
 async function syncCloudData(){
   if(!supabaseClient || !cloudSession || !cloudSession.user) return;
@@ -4845,118 +4993,137 @@ async function syncCloudData(){
   _cloudSyncInFlight = true;
   const uid = cloudSession.user.id;
   try{
-    const [{ data: cloudPlans, error: cloudPlansErr }, { data: cloudWorkouts, error: cloudWorkoutsErr }] = await Promise.all([
-      supabaseClient.from('plans').select('local_id').eq('owner_id', uid),
-      supabaseClient.from('workouts').select('local_id').eq('user_id', uid)
-    ]);
-    if(cloudPlansErr || cloudWorkoutsErr){ console.error('syncCloudData: read', cloudPlansErr || cloudWorkoutsErr); return; }
+    let state = loadCloudSyncState();
+    // Local data was last synced with a DIFFERENT account (someone signed
+    // out and another person signed in here) — never push it into this one.
+    // With the user's OK wipe it and start clean; the reload re-runs this
+    // sync with empty local state, which just pulls this account's data.
+    if(state && state.uid && state.uid !== uid){
+      if(!confirm('Na tym urządzeniu są dane innego konta. Zastąpić je danymi konta, na które się logujesz? Jeśli nie, zostaniesz wylogowany.')){
+        await supabaseClient.auth.signOut();
+        return;
+      }
+      clearAllLocalUserData();
+      saveCloudSyncState({ uid });
+      location.reload();
+      return;
+    }
+    if(!state || !state.uid) state = { uid };
 
-    // plansPushOk/workoutsPushOk guard the destructive pull-replace below:
-    // if a push fails (network hiccup, or the DB is missing the unique
-    // constraint upsert needs — see supabase-schema.sql), the cloud read
-    // right after would be missing whatever failed to push. Blindly
-    // replacing trainingPlans[]/workouts[] with that incomplete read would
-    // DELETE local data instead of just failing to back it up. Skipping
-    // the pull for that resource this round is the safe failure mode —
-    // local stays exactly as it was, and the next successful sync catches
-    // up normally.
-    let plansPushOk = true, workoutsPushOk = true;
-
-    const cloudPlanIds = new Set((cloudPlans || []).map(p => p.local_id));
-    const newPlans = (trainingPlans || []).filter(p => !cloudPlanIds.has(String(p.id)));
-    if(newPlans.length){
-      // upsert (not insert): two tabs/devices syncing at nearly the same
-      // moment could both decide the same plan is "new" before either has
-      // written it — onConflict makes the second write a harmless update
-      // instead of a duplicate row. Needs the (owner_id, local_id) unique
-      // constraint from supabase-schema.sql.
-      const { error } = await supabaseClient.from('plans').upsert(newPlans.map(p => ({
-        owner_id: uid, local_id: String(p.id), name: p.name,
-        schedule: p.schedule || {}, is_active: p.id === starredPlanId
-      })), { onConflict: 'owner_id,local_id' });
-      if(error){ console.error('syncCloudData: push plans', error); plansPushOk = false; }
+    let cloudIds = null;
+    if(!state.plans){
+      const [pIds, wIds] = await Promise.all([
+        selectAllRows('plans', 'owner_id', uid, 'created_at'),
+        selectAllRows('workouts', 'user_id', uid, 'date')
+      ]);
+      if(pIds.error || wIds.error){ console.error('syncCloudData: read', pIds.error || wIds.error); return; }
+      cloudIds = { plans: new Set(pIds.data.map(r => r.local_id)), workouts: new Set(wIds.data.map(r => r.local_id)) };
     }
 
-    const cloudWorkoutIds = new Set((cloudWorkouts || []).map(w => w.local_id));
-    const newWorkouts = (workouts || []).filter(w => !cloudWorkoutIds.has(String(w.id)));
-    if(newWorkouts.length){
-      const { error } = await supabaseClient.from('workouts').upsert(newWorkouts.map(w => ({
-        user_id: uid, local_id: String(w.id), date: w.date, duration_min: w.durationMin || null,
-        exercises: w.exercises || [], kcal_estimated: w.kcalEstimated ?? null, kcal_user: w.kcalUser ?? null
-      })), { onConflict: 'user_id,local_id' });
-      if(error){ console.error('syncCloudData: push workouts', error); workoutsPushOk = false; }
+    // Profile before the push: the first run needs the cloud row to decide
+    // which fields are still empty there.
+    const { data: profileRow, error: profileErr } = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
+    if(profileErr) console.error('syncCloudData: profile read', profileErr);
+    let firstProfilePush = false;
+    if(profileRow && !state.profile){
+      const local = localProfileFields();
+      const patch = {};
+      if((!profileRow.weight_log || !profileRow.weight_log.length) && local.weight_log.length) patch.weight_log = local.weight_log;
+      if((!profileRow.body_data || !Object.keys(profileRow.body_data).length) && Object.keys(local.body_data).length) patch.body_data = local.body_data;
+      if(!profileRow.display_name && local.display_name) patch.display_name = local.display_name;
+      if(Object.keys(patch).length){
+        const { error } = await supabaseClient.from('profiles').update(patch).eq('id', uid);
+        if(error) console.error('syncCloudData: push profile', error);
+        else { Object.assign(profileRow, patch); firstProfilePush = true; }
+      }
     }
 
-    const [{ data: allPlans, error: allPlansErr }, { data: allWorkouts, error: allWorkoutsErr }] = await Promise.all([
-      supabaseClient.from('plans').select('*').eq('owner_id', uid).order('created_at', { ascending: true }),
-      supabaseClient.from('workouts').select('*').eq('user_id', uid).order('date', { ascending: true })
-    ]);
-    if(allPlansErr || allWorkoutsErr){ console.error('syncCloudData: pull', allPlansErr || allWorkoutsErr); return; }
+    const push = await pushCloudChanges(uid, state, cloudIds);
 
-    if(allPlans && plansPushOk){
+    const [allPlans, allWorkouts] = await Promise.all([
+      selectAllRows('plans', 'owner_id', uid, 'created_at'),
+      selectAllRows('workouts', 'user_id', uid, 'date')
+    ]);
+    if(allPlans.error || allWorkouts.error){ console.error('syncCloudData: pull', allPlans.error || allWorkouts.error); return; }
+
+    if(push.plansOk){
       const builtinIds = new Set(defaultTrainingPlans().map(p => p.id));
-      trainingPlans = allPlans.map(row => {
+      const localById = new Map((trainingPlans || []).map(p => [String(p.id), p]));
+      // Never synced + not in the cloud = created locally while this sync
+      // was in flight: keep it (the queued push sends it next).
+      const cloudPlanIds = new Set(allPlans.data.map(r => String(r.local_id || r.id)));
+      const keptPlans = (trainingPlans || []).filter(p => !cloudPlanIds.has(String(p.id)) && !(String(p.id) in state.plans));
+      trainingPlans = allPlans.data.map(row => {
         const id = row.local_id || row.id;
         return {
+          ...(localById.get(String(id)) || {}),
           id,
           name: row.name,
           schedule: row.schedule && Object.keys(row.schedule).length ? row.schedule : emptySchedule(),
           builtin: builtinIds.has(id)
         };
-      });
-      const activeRow = allPlans.find(r => r.is_active);
+      }).concat(keptPlans);
+      const activeRow = allPlans.data.find(r => r.is_active);
       starredPlanId = activeRow ? (activeRow.local_id || activeRow.id) : null;
-      saveTrainingPlansList();
       if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId);
       else localStorage.removeItem(LS_STARRED_PLAN);
+      trainingPlans.forEach(cleanPlanInPlace);
+      localStorage.setItem(LS_TRAINING_PLANS, JSON.stringify(trainingPlans));
+      state.plans = {};
+      trainingPlans.forEach(p=>{ if(!keptPlans.includes(p)) state.plans[String(p.id)] = planSig(p); });
+      if(keptPlans.length) _cloudPushAgain = true;
     }
-    if(allWorkouts && workoutsPushOk){
-      workouts = allWorkouts.map(row => ({
-        id: row.local_id || row.id,
-        date: row.date,
-        exercises: row.exercises || [],
-        durationMin: row.duration_min,
-        kcalEstimated: row.kcal_estimated,
-        kcalUser: row.kcal_user
-      }));
-      saveWorkouts(workouts);
+    if(push.workoutsOk){
+      const localById = new Map((workouts || []).map(w => [String(w.id), w]));
+      const cloudWorkoutIds = new Set(allWorkouts.data.map(r => String(r.local_id || r.id)));
+      const keptWorkouts = (workouts || []).filter(w => !cloudWorkoutIds.has(String(w.id)) && !(String(w.id) in state.workouts));
+      workouts = allWorkouts.data.map(row => {
+        const id = row.local_id || row.id;
+        return {
+          ...(localById.get(String(id)) || {}),
+          id,
+          date: row.date,
+          exercises: row.exercises || [],
+          durationMin: row.duration_min,
+          kcalEstimated: row.kcal_estimated,
+          kcalUser: row.kcal_user
+        };
+      }).concat(keptWorkouts);
+      workouts.forEach(w=> cleanExerciseList(w.exercises));
+      localStorage.setItem(LS_WORKOUTS, JSON.stringify(workouts));
+      state.workouts = {};
+      workouts.forEach(w=>{ if(!keptWorkouts.includes(w)) state.workouts[String(w.id)] = workoutSig(w); });
+      if(keptWorkouts.length) _cloudPushAgain = true;
     }
 
-    // profile fields (waga, wzrost/wiek/płeć, imię) — one row, not a list:
-    // push local up only where the cloud is still empty for that field,
-    // then pull whatever the cloud now has as the authoritative value.
-    let pushedProfile = false;
-    const { data: profileRow, error: profileErr } = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
-    if(profileErr){ console.error('syncCloudData: profile read', profileErr); }
-    else if(profileRow){
-      const patch = {};
-      if((!profileRow.weight_log || !profileRow.weight_log.length) && weightLog.length) patch.weight_log = weightLog;
-      if((!profileRow.body_data || !Object.keys(profileRow.body_data).length) && bodyData && Object.keys(bodyData).length) patch.body_data = bodyData;
-      if(!profileRow.display_name && profileName) patch.display_name = profileName;
-      if(Object.keys(patch).length){
-        const { error } = await supabaseClient.from('profiles').update(patch).eq('id', uid);
-        if(error) console.error('syncCloudData: push profile', error);
-        else { Object.assign(profileRow, patch); pushedProfile = true; }
-      }
-      if(profileRow.weight_log && profileRow.weight_log.length){ weightLog = profileRow.weight_log; saveWeightLog(weightLog); }
-      if(profileRow.body_data && Object.keys(profileRow.body_data).length){ bodyData = profileRow.body_data; saveBodyDataLS(bodyData); }
-      // ai_preferences: pull-only, no "push if cloud empty" patch above —
-      // saveAiPrefsSheet() pushes straight to Supabase on every save instead,
-      // so edits after the first one aren't silently dropped by that pattern.
-      if(profileRow.ai_preferences && Object.keys(profileRow.ai_preferences).length){ aiPrefs = profileRow.ai_preferences; }
-      if(profileRow.display_name && profileRow.display_name !== profileName){
-        profileName = profileRow.display_name;
+    // Profile pull: the cloud value is authoritative once local changes
+    // were pushed above (skip if that push failed, so they aren't lost).
+    if(profileRow && push.profileOk){
+      const { data: fresh } = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
+      const row = fresh || profileRow;
+      if(row.weight_log && row.weight_log.length){ weightLog = row.weight_log; localStorage.setItem(LS_WEIGHT_LOG, JSON.stringify(weightLog)); }
+      if(row.body_data && Object.keys(row.body_data).length){ bodyData = row.body_data; localStorage.setItem(LS_BODY_DATA, JSON.stringify(bodyData)); }
+      // ai_preferences: pull-only — saveAiPrefsSheet() pushes straight to
+      // Supabase on every save.
+      if(row.ai_preferences && Object.keys(row.ai_preferences).length){ aiPrefs = row.ai_preferences; }
+      if(row.display_name && row.display_name !== profileName){
+        profileName = cleanName(row.display_name);
         localStorage.setItem(LS_PROFILE_NAME, profileName);
       }
+      const local = localProfileFields();
+      state.profile = {};
+      for(const k in local) state.profile[k] = syncSig(local[k]);
     }
+    saveCloudSyncState(state);
 
     goRoute(currentRoute); // re-render whatever screen is currently on-screen with the synced data
     if(!document.getElementById('accountOverlay').classList.contains('hidden')) renderAccountPanel(); // it's an overlay, not part of currentRoute
-    if((newPlans.length && plansPushOk) || (newWorkouts.length && workoutsPushOk) || pushedProfile) toast('Zsynchronizowano z chmurą');
+    if(push.pushed || firstProfilePush) toast('Zsynchronizowano z chmurą');
   } catch(e){
     console.error('syncCloudData failed', e);
   } finally {
     _cloudSyncInFlight = false;
+    if(_cloudPushAgain){ _cloudPushAgain = false; scheduleCloudPush(); }
   }
 }
 
@@ -5148,11 +5315,37 @@ async function requestPasswordReset(){
   toast(error ? 'Nie udało się wysłać maila' : 'Wysłaliśmy link do resetu hasła');
 }
 
+// Local data stays on the device after sign-out (runs, notes and custom
+// exercises aren't in the cloud, so wiping would lose them). What stops it
+// leaking into ANOTHER account is the uid check in syncCloudData(): the
+// sync state remembers which account this data belongs to. Pending edits
+// are pushed first so the cloud is current.
 async function signOutCloud(){
   if(!supabaseClient) return;
+  if(cloudSession && cloudSession.user){
+    clearTimeout(_cloudPushTimer); _cloudPushTimer = null;
+    try{
+      const state = loadCloudSyncState();
+      if(state && state.uid === cloudSession.user.id && state.plans) await pushCloudChanges(cloudSession.user.id, state, null);
+    }catch(e){ console.error('signOutCloud: push', e); }
+  }
   await supabaseClient.auth.signOut();
+  await clearCachedCloudResponses();
   renderAccountPanel();
   toast('Wylogowano');
+}
+// Older service-worker versions cached Supabase API responses (user data)
+// in Cache Storage. Drop them on sign-out / account deletion.
+async function clearCachedCloudResponses(){
+  try{
+    if(!('caches' in window)) return;
+    for(const key of await caches.keys()){
+      const cache = await caches.open(key);
+      for(const req of await cache.keys()){
+        if(new URL(req.url).origin !== location.origin) await cache.delete(req);
+      }
+    }
+  }catch(e){ console.error('clearCachedCloudResponses', e); }
 }
 
 /* ---------- Usuwanie konta (RODO — prawo do bycia zapomnianym) ----------
@@ -5179,6 +5372,7 @@ async function deleteAccountV2(){
     }
     await supabaseClient.auth.signOut();
     clearAllLocalUserData();
+    await clearCachedCloudResponses();
     location.reload();
   } catch(e){
     console.error('deleteAccountV2 failed', e);
@@ -5191,6 +5385,7 @@ function clearAllLocalUserData(){
    LS_DELETED_BUILTIN_PLANS, LS_WEIGHT_LOG, LS_BODY_DATA, LS_AVATAR, LS_EXERCISE_NOTES,
    LS_FAVORITE_EXERCISES, LS_EXERCISE_ORDER, LS_KCAL_FACTOR, LS_GYM_SESSION_TIMING,
    LS_GYM_SESSION_DRAFT, LS_GYM_TODAY_SWAPS, LS_AI_LAST_WORKOUT_SUMMARY, LS_CLOUD_REMINDER_LAST,
+   LS_CLOUD_SYNC_STATE,
   ].forEach(k => localStorage.removeItem(k));
 }
 
@@ -5348,7 +5543,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.43.0";
+const APP_VERSION = "4.43.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5397,6 +5592,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.43.1": {
+    pl: [
+      'Edycje planów, nowe wpisy wagi, zmiany w profilu i ręczne korekty kalorii zapisują się teraz w chmurze. Wcześniej po ponownym otwarciu apki potrafiły wrócić do starszej wersji.',
+    ],
+    en: [
+      'Plan edits, new weight entries, profile changes and manual calorie corrections now save to the cloud. Before, reopening the app could roll them back to an older version.',
+    ],
+  },
   "4.43.0": {
     pl: [
       {featured:true, icon:'barbell', badge:'Zmiana', title:'Nowe ikony ćwiczeń', text:'Ikony ćwiczeń w BUILDERZE i GYM to teraz renderowane grafiki 3D, nie płaskie linie jak wcześniej — zmiana obejmuje całą bibliotekę, ok. 60 ćwiczeń.'},
@@ -6682,6 +6885,28 @@ loadExerciseNotes();
 function escHtml(s){
   return String(s).replace(/[&<>"']/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+// A value passed as a JS argument inside an inline onclick="…" attribute:
+// JSON-quoted for the JS parser, then HTML-escaped for the attribute.
+// Replaces the old name.replace(/'/g,"\\'") pattern, which broke on " and \.
+function jsArg(v){ return escHtml(JSON.stringify(v)); }
+// Names (plans, exercises) come from typing, shared plan links, backups and
+// the cloud, and get rendered into innerHTML all over the app. Stripping the
+// few characters that can break out of HTML/attribute/JS-string contexts at
+// every load + save is the safety net under escHtml() at the render sites.
+function cleanName(s){
+  return String(s == null ? '' : s).replace(/[<>"`\\]/g, '').replace(/[\u0000-\u001f]/g, ' ').slice(0, 80);
+}
+function cleanExerciseList(list){
+  if(!Array.isArray(list)) return [];
+  list.forEach(ex=>{ if(ex && typeof ex === 'object' && 'name' in ex) ex.name = cleanName(ex.name); });
+  return list;
+}
+function cleanPlanInPlace(p){
+  if(!p || typeof p !== 'object') return p;
+  p.name = cleanName(p.name);
+  if(p.schedule && typeof p.schedule === 'object') Object.values(p.schedule).forEach(cleanExerciseList);
+  return p;
+}
 
 const LS_FAVORITE_EXERCISES = "fitlog_favorite_exercises_v1";
 function loadFavoriteExercises(){
@@ -6929,11 +7154,11 @@ function buildExerciseTileV2(ex, state, opts){
   }
   if(png || ownPng){
     btn.classList.add('png-icon');
-    btn.innerHTML += `<span class="gymv2-tile-icon"><img src="${png || ownPng}" alt="" loading="lazy"></span><span class="gymv2-tile-label">${ex.name}</span>`;
+    btn.innerHTML += `<span class="gymv2-tile-icon"><img src="${png || ownPng}" alt="" loading="lazy"></span><span class="gymv2-tile-label">${escHtml(ex.name)}</span>`;
   } else if(svg){
-    btn.innerHTML += `<span class="gymv2-tile-icon">${svg}</span><span class="gymv2-tile-label">${ex.name}</span>`;
+    btn.innerHTML += `<span class="gymv2-tile-icon">${svg}</span><span class="gymv2-tile-label">${escHtml(ex.name)}</span>`;
   } else {
-    btn.innerHTML += `${ph('barbell')}<span class="t">${ex.name}</span>`;
+    btn.innerHTML += `${ph('barbell')}<span class="t">${escHtml(ex.name)}</span>`;
   }
   if(opts && opts.swapOrigin){
     const safe = opts.swapOrigin.replace(/'/g, "\\'");
@@ -7317,7 +7542,7 @@ function renderSwapSheetV2(){
           <h3>${t('swapV2Title','Zamień ćwiczenie')}</h3>
           <button type="button" class="swapv2-close" aria-label="${t('cancel','Anuluj')}" onclick="closeSwapSheetV2()">${PH['x'] || '✕'}</button>
         </div>
-        <p class="swapv2-instead">${t('swapV2Instead','Zamiast')}: <b>${swapOriginName}</b></p>
+        <p class="swapv2-instead">${t('swapV2Instead','Zamiast')}: <b>${escHtml(swapOriginName)}</b></p>
         <span class="swapv2-group-chip">${t('swapV2SameGroup','Ta sama grupa')}: ${LANG==='en' ? bucket.en : bucket.pl}</span>
       </div>
       <div class="equip-row" id="swapEquipRowV2">${equipRowInnerHtml(swapEquipFilter, 'setSwapEquipV2')}</div>
@@ -7608,7 +7833,7 @@ function renderExercisePopupV2(animate){
           <span class="exv2-pill"><span>${groupLabel(ex.group)}</span></span>
           ${ex.version ? `<span class="exv2-pill exv2-pill--version"><span>${escHtml(t('execVersion'+ex.version, EXECUTION_VERSIONS[ex.version].label))}</span></span>` : ''}
           <div class="exv2-title-row">
-            <div class="exv2-title">${ex.name}</div>
+            <div class="exv2-title">${escHtml(ex.name)}</div>
             <span class="exv2-close" onclick="closeExercisePopupV2()">${ph('x')}</span>
           </div>
         </div>
@@ -7684,7 +7909,7 @@ function closeNewExerciseFormV2(viaDrag){
   closePlansCustomizeSheet('newExerciseOverlayV2', viaDrag);
 }
 function saveNewExerciseV2(){
-  const name = document.getElementById('newExTitleV2').value.trim();
+  const name = cleanName(document.getElementById('newExTitleV2').value).trim();
   if(!name){ toast(t('enterExerciseName','Podaj nazwę ćwiczenia')); return; }
   const existing = getExerciseLibrary().find(e => e.name.toLowerCase() === name.toLowerCase());
   if(existing){
@@ -8369,6 +8594,7 @@ function migratePlan(p){
     (plan.days||[]).forEach(d=>{ if(s[d]) s[d] = (plan.exercises||[]).map(e=>({...e})); });
     plan = {id: plan.id, name: plan.name, builtin: !!plan.builtin, schedule: s};
   }
+  cleanPlanInPlace(plan);
   applyExerciseRenames(plan.schedule); // fixes stale name/icon on exercises renamed after the plan was saved
   ensureWarmupStretch(plan.schedule); // retroactively adds bookends to plans saved before this feature existed
   return plan;
@@ -8428,7 +8654,7 @@ function loadTrainingPlans(){
   }catch(e){}
   return defaultTrainingPlans();
 }
-function saveTrainingPlansList(){ localStorage.setItem(LS_TRAINING_PLANS, JSON.stringify(trainingPlans)); }
+function saveTrainingPlansList(){ trainingPlans.forEach(cleanPlanInPlace); localStorage.setItem(LS_TRAINING_PLANS, JSON.stringify(trainingPlans)); scheduleCloudPush(); }
 let trainingPlans = loadTrainingPlans();
 let starredPlanId = localStorage.getItem(LS_STARRED_PLAN) || null;
 let planOnboardingActive = false; // true while a brand-new user is being forced to pick/create their first plan
@@ -8788,6 +9014,7 @@ function toggleStarredPlan(id){
   starredPlanId = (starredPlanId === id) ? null : id;
   if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId);
   else localStorage.removeItem(LS_STARRED_PLAN);
+  scheduleCloudPush();
   renderPlansList();
   updateTodayPlanBanner();
   updatePlanPillLabel();
@@ -9005,7 +9232,7 @@ function buildPlanCardV2(p, isCustom, animate, i){
   card.style.background = color;
   card.innerHTML = `
     <div class="plansv2-card-info">
-      <p class="plansv2-card-name">${p.name}</p>
+      <p class="plansv2-card-name">${escHtml(p.name)}</p>
       <div class="plansv2-card-stats">
         <div class="plansv2-stat">${ph('barbell')}<span>${planExCountText(exCount)}</span></div>
         <div class="plansv2-stat">${ph('clock-countdown')}<span>~${Math.max(15, exCount*5)} min</span></div>
@@ -9562,10 +9789,56 @@ function showImportPlanConfirmation(payload){
   document.getElementById('importPlanMeta').textContent = `${days.length ? days.map(planDayLabel).join(', ') : t('planNoDays','Brak przypisanych dni')} · ${planExCountText(exCount)}`;
   document.getElementById('importPlanOverlay').classList.remove('hidden');
 }
+// A shared plan link/code is untrusted input from someone else — rebuild it
+// into a strictly whitelisted shape (known days, bounded lists, only the
+// exercise fields a plan actually uses, numbers clamped) instead of passing
+// the decoded JSON through. Unknown fields never reach trainingPlans[].
+function sanitizeImportedExercise(entry){
+  if(typeof entry === 'string'){
+    const name = cleanName(entry).trim();
+    if(!name) throw new Error('bad exercise');
+    return name;
+  }
+  if(!entry || typeof entry !== 'object' || typeof entry.name !== 'string') throw new Error('bad exercise');
+  const name = cleanName(entry.name).trim();
+  if(!name) throw new Error('bad exercise');
+  const int = (v, lo, hi, dflt)=>{ const n = parseInt(v, 10); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : dflt; };
+  const out = {name};
+  if(typeof entry.group === 'string') out.group = cleanName(entry.group);
+  out.sets = int(entry.sets, 1, 20, 3);
+  out.repLow = int(entry.repLow, 1, 100, 8);
+  out.repHigh = Math.max(out.repLow, int(entry.repHigh, 1, 100, 12));
+  if(typeof entry.rest === 'string') out.rest = cleanName(entry.rest).slice(0, 30);
+  if(typeof entry.icon === 'string' && (EXERCISE_ICON_B64[entry.icon] || EXERCISE_ICON_SVG_V3[entry.icon])) out.icon = entry.icon;
+  if(typeof entry.equipment === 'string') out.equipment = cleanName(entry.equipment).slice(0, 30);
+  if(typeof entry.compound === 'boolean') out.compound = entry.compound;
+  if(typeof entry.version === 'string' && Object.prototype.hasOwnProperty.call(EXECUTION_VERSIONS, entry.version)) out.version = entry.version;
+  return out;
+}
 function decodePlanPayload(code){
-  const payload = JSON.parse(b64urlDecode(code));
-  if(!payload || typeof payload.n !== 'string' || typeof payload.s !== 'object') throw new Error('bad shape');
-  return payload;
+  const raw = JSON.parse(b64urlDecode(code));
+  if(!raw || typeof raw.n !== 'string' || !raw.s || typeof raw.s !== 'object') throw new Error('bad shape');
+  const name = cleanName(raw.n).trim();
+  if(!name) throw new Error('bad name');
+  let d = null;
+  if(raw.d !== undefined){
+    if(!Array.isArray(raw.d) || raw.d.length > 200) throw new Error('bad dict');
+    d = raw.d.map(sanitizeImportedExercise);
+  }
+  const s = {};
+  PLAN_DAYS.forEach(day=>{
+    const list = raw.s[day];
+    if(list === undefined) return;
+    if(!Array.isArray(list) || list.length > 40) throw new Error('bad day');
+    s[day] = list.map(entry=>{
+      if(d){
+        if(!Number.isInteger(entry) || entry < 0 || entry >= d.length) throw new Error('bad index');
+        return entry;
+      }
+      return sanitizeImportedExercise(entry);
+    });
+  });
+  return d ? {n: name, d, s} : {n: name, s};
 }
 function checkForImportedPlan(){
   const encoded = new URLSearchParams(location.search).get('importPlan');
@@ -9612,7 +9885,7 @@ function resolveImportedExercise(entry){
     const found = byName.get(entry);
     return found ? {...found} : {name: entry, group: t('customGroupFallback','Własne'), sets:3, repLow:8, repHigh:12, rest:t('asNeeded','wg uznania')};
   }
-  return {...entry};
+  return {group: t('customGroupFallback','Własne'), rest: t('asNeeded','wg uznania'), ...entry};
 }
 function confirmImportPlan(){
   if(!pendingImportPlan) return;
@@ -10438,16 +10711,16 @@ function renderGymDoneV2(animate){
   area.innerHTML = '';
   document.getElementById('gymDoneV2Section').classList.toggle('hidden', sessionExercises.length===0);
   sessionExercises.forEach(ex=>{
-    const safeName = ex.name.replace(/'/g,"\\'");
+    const nameArg = jsArg(ex.name);
     const row = document.createElement('button');
     row.type = 'button';
     row.className = 'gymv2-done-row';
     row.onclick = ()=> openExercisePopupV2(ex);
     row.innerHTML = `
-      <div class="gymv2-done-row-info">${ph('check-circle')}<span>${ex.name}</span></div>
+      <div class="gymv2-done-row-info">${ph('check-circle')}<span>${escHtml(ex.name)}</span></div>
       <div class="gymv2-done-row-actions">
         ${ph('pencil')}
-        <span onclick="event.stopPropagation();removeExerciseFromSession('${safeName}')">${ph('trash')}</span>
+        <span onclick="event.stopPropagation();removeExerciseFromSession(${nameArg})">${ph('trash')}</span>
       </div>
     `;
     area.appendChild(row);
@@ -10739,12 +11012,6 @@ function renderCalendarV2(animate){
 // selectedHistDateV2 null (see renderCalendarV2) — this used to just
 // show a "pick a day" placeholder; now it shows an aggregate card for
 // the whole visible month instead, reusing .histv2-card's exact look.
-function plTreningWord(n){
-  const mod10 = n % 10, mod100 = n % 100;
-  if(n === 1) return 'trening';
-  if(mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return 'treningi';
-  return 'treningów';
-}
 function plBiegWord(n){
   const mod10 = n % 10, mod100 = n % 100;
   if(n === 1) return 'bieg';
@@ -10902,17 +11169,17 @@ function histWorkoutCardInner(w){
     })()}
     ${rec ? `<div class="histv2-wrecord">${ph('trophy')}<div>
       <p class="histv2-wrecord-k">${t('gymFinRecordLabel','Nowy rekord')}</p>
-      <p class="histv2-wrecord-v">${rec.name} — ${fmtGymWeight(rec.weight)} kg</p>
+      <p class="histv2-wrecord-v">${escHtml(rec.name)} — ${fmtGymWeight(rec.weight)} kg</p>
     </div></div>` : volRec ? `<div class="histv2-wrecord">${ph('trophy')}<div>
       <p class="histv2-wrecord-k">${t('gymFinRecordVolume','Nowy rekord objętości')}</p>
-      <p class="histv2-wrecord-v">${volRec.name} · ${formatDashNum(Math.round(volRec.vol),0)} kg</p>
+      <p class="histv2-wrecord-v">${escHtml(volRec.name)} · ${formatDashNum(Math.round(volRec.vol),0)} kg</p>
     </div></div>` : ''}
     <div class="histv2-ex-list">
       ${w.exercises.map((e,i)=>`
         <div class="histv2-ex-item" style="--i:${i}">
           <span class="histv2-ex-ico">${statsV2ExerciseIconSvg(e.name)}</span>
           <div class="histv2-ex-meta">
-            <p class="histv2-ex-name">${e.name}</p>
+            <p class="histv2-ex-name">${escHtml(e.name)}</p>
             <p class="histv2-ex-sets">${e.sets.map(s=> s.weight > 0 ? `${s.weight}kg×${s.reps}` : `${s.reps}`).join(' · ')}</p>
           </div>
         </div>`).join('')}
@@ -10935,7 +11202,7 @@ function histRunCardInner(r){
       <div class="histv2-run-tile"><div class="v">${r.time}</div><div class="l">${t('histMinutes','Minuty')}</div></div>
       <div class="histv2-run-tile"><div class="v">${min}:${sec.toString().padStart(2,'0')}</div><div class="l">${t('paceMinKm','Tempo (min/km)')}</div></div>
     </div>
-    ${r.notes?`<p class="histv2-run-notes">${r.notes}</p>`:''}`:''}`;
+    ${r.notes?`<p class="histv2-run-notes">${escHtml(r.notes)}</p>`:''}`:''}`;
 }
 function buildHistCardV2(kind, item, orderIdx, animate){
   const id = item.id;
@@ -11369,15 +11636,15 @@ function renderStatsV2ExerciseRow(activeName){
   const names = statsV2RecentExerciseNames();
   if(!names.length) return '';
   const tiles = names.map((name,i)=>`
-    <div class="statsv2-ex-tile statsv2-anim-tile${name===activeName?' active':''}" style="--i:${i}" onclick="selectStatsExerciseV2('${name.replace(/'/g,"\\'")}')">
+    <div class="statsv2-ex-tile statsv2-anim-tile${name===activeName?' active':''}" style="--i:${i}" onclick="selectStatsExerciseV2(${jsArg(name)})">
       <span class="icn">${statsV2ExerciseIconSvg(name)}</span>
-      <span>${name}</span>
+      <span>${escHtml(name)}</span>
     </div>`).join('');
   return `
     <div class="statsv2-ex-section">
       <div class="statsv2-ex-head">
         <p>${t('stV2ExProgress','Progres ćwiczeń')}</p>
-        ${activeName?'':`<button type="button" class="statsv2-ex-all-btn" onclick="selectStatsExerciseV2('${names[0].replace(/'/g,"\\'")}')">${t('stV2All','WSZYSTKIE')}</button>`}
+        ${activeName?'':`<button type="button" class="statsv2-ex-all-btn" onclick="selectStatsExerciseV2(${jsArg(names[0])})">${t('stV2All','WSZYSTKIE')}</button>`}
       </div>
       <div class="statsv2-ex-row">${tiles}</div>
     </div>`;
@@ -11767,7 +12034,7 @@ function renderStatsV2Detail(name){
     ${renderStatsV2ExerciseRow(name)}
     <div class="statsv2-cards" style="margin-top:24px;">
       <div class="statsv2-record-card statsv2-anim-card" style="--i:0">
-        <p class="statsv2-record-eyebrow">${t('stV2CurrentRecord', `Aktualny rekord - ${name}`, name)}</p>
+        <p class="statsv2-record-eyebrow">${t('stV2CurrentRecord', `Aktualny rekord - ${escHtml(name)}`, escHtml(name))}</p>
         <div class="statsv2-record-num-row">
           ${ph('trophy','statsv2-record-trophy')}
           <span class="statsv2-record-num">${headNum}</span>
@@ -12623,6 +12890,9 @@ function importData(evt){
   };
   reader.readAsText(file);
 }
+// Backup files can come from anywhere — only accept an avatar that is an
+// inline image, never a remote URL (tracking pixel) or other scheme.
+function isImageDataUrl(v){ return typeof v === 'string' && /^data:image\/(png|jpe?g|webp|gif);base64,/.test(v); }
 function closeImportChoice(){
   pendingImportData = null;
   document.getElementById('importChoiceOverlay').classList.add('hidden');
@@ -12658,7 +12928,7 @@ function applyImport(mode){
     if(data.exerciseNotes && typeof data.exerciseNotes === 'object'){
       for(const k in data.exerciseNotes){ if(!(k in exerciseNotes)) exerciseNotes[k] = data.exerciseNotes[k]; }
     }
-    if(!avatarDataUrl && typeof data.avatar === 'string' && data.avatar) avatarDataUrl = data.avatar;
+    if(!avatarDataUrl && isImageDataUrl(data.avatar)) avatarDataUrl = data.avatar;
     if(Array.isArray(data.deletedBuiltinPlans)) data.deletedBuiltinPlans.forEach(id=> deletedBuiltinPlans.add(id));
   } else {
     workouts = data.workouts;
@@ -12673,10 +12943,11 @@ function applyImport(mode){
     }
     if(data.bodyData && typeof data.bodyData === 'object') bodyData = data.bodyData;
     if(data.exerciseNotes && typeof data.exerciseNotes === 'object') exerciseNotes = data.exerciseNotes;
-    if('avatar' in data) avatarDataUrl = (typeof data.avatar === 'string' && data.avatar) ? data.avatar : '';
+    if('avatar' in data) avatarDataUrl = isImageDataUrl(data.avatar) ? data.avatar : '';
     if(Array.isArray(data.deletedBuiltinPlans)) deletedBuiltinPlans = new Set(data.deletedBuiltinPlans);
   }
-  trainingPlans.forEach(p=> ensureWarmupStretch(p.schedule));
+  workouts = workouts.filter(w=> w && typeof w === 'object' && Array.isArray(w.exercises));
+  trainingPlans = trainingPlans.filter(p=> p && typeof p === 'object').map(migratePlan);
   saveWorkouts(workouts);
   saveRuns(runs);
   saveTrainingPlansList();

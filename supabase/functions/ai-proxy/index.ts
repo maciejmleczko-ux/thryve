@@ -10,6 +10,10 @@ const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 // Ile wywołań danej funkcji AI może zrobić jeden user w ciągu doby.
 // Startowo nisko — łatwiej podnieść limit niż odzyskać przepalone kredyty.
 const DAILY_LIMIT = 25;
+// Payload is our own compact workout summary (a few KB). Anything much
+// bigger is abuse: input tokens are billed too, and max_tokens only caps
+// the output.
+const MAX_BODY_BYTES = 32 * 1024;
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -129,7 +133,11 @@ Deno.serve(async (req) => {
 
   let body: { feature?: string; payload?: unknown };
   try {
-    body = await req.json();
+    const raw = await req.text();
+    if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) {
+      return json({ error: 'payload_too_large' }, 413);
+    }
+    body = JSON.parse(raw);
   } catch {
     return json({ error: 'invalid_json' }, 400);
   }
@@ -139,6 +147,26 @@ Deno.serve(async (req) => {
   if (!buildPrompt) {
     return json({ error: 'unknown_feature' }, 400);
   }
+
+  // Reserve first, count second: with "count, then insert after the AI
+  // call", N parallel requests all saw the same count and all got through.
+  // Inserting before counting means every request's count includes every
+  // concurrent one, so at most DAILY_LIMIT can ever pass.
+  const { data: reservation, error: reserveErr } = await supabase
+    .from('ai_usage')
+    .insert({ user_id: userId, feature })
+    .select('id')
+    .single();
+  if (reserveErr || !reservation) {
+    console.error('rate reserve failed', reserveErr);
+    return json({ error: 'rate_check_failed' }, 500);
+  }
+  // Failed calls give their slot back (needs the delete grant from
+  // supabase-schema.sql; without it the slot is just kept).
+  const release = async () => {
+    const { error } = await supabase.from('ai_usage').delete().eq('id', reservation.id);
+    if (error) console.error('rate release failed', error);
+  };
 
   const since = new Date();
   since.setUTCHours(0, 0, 0, 0);
@@ -151,38 +179,48 @@ Deno.serve(async (req) => {
 
   if (countErr) {
     console.error('rate check failed', countErr);
+    await release();
     return json({ error: 'rate_check_failed' }, 500);
   }
-  if ((count ?? 0) >= DAILY_LIMIT) {
+  if ((count ?? 0) > DAILY_LIMIT) {
+    await release();
     return json({ error: 'rate_limited' }, 429);
   }
 
   const { system, user, maxTokens, jsonResponse } = buildPrompt(body.payload);
 
-  const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-5',
-      max_tokens: maxTokens,
-      // Sonnet 5 runs adaptive thinking by default, and thinking tokens
-      // count against max_tokens — with a short budget like ours, thinking
-      // alone can eat the whole thing (stop_reason "max_tokens" before any
-      // real text) and also bills like output. This task is short-form
-      // writing from signals we already computed, not multi-step reasoning,
-      // so it doesn't need thinking — turn it off.
-      thinking: { type: 'disabled' },
-      system,
-      messages: [{ role: 'user', content: user }],
-    }),
-  });
+  let aiRes: Response;
+  try {
+    aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-5',
+        max_tokens: maxTokens,
+        // Sonnet 5 runs adaptive thinking by default, and thinking tokens
+        // count against max_tokens — with a short budget like ours, thinking
+        // alone can eat the whole thing (stop_reason "max_tokens" before any
+        // real text) and also bills like output. This task is short-form
+        // writing from signals we already computed, not multi-step reasoning,
+        // so it doesn't need thinking — turn it off.
+        thinking: { type: 'disabled' },
+        system,
+        messages: [{ role: 'user', content: user }],
+      }),
+    });
+  } catch (e) {
+    console.error('anthropic fetch failed', e);
+    await release();
+    return json({ error: 'ai_call_failed' }, 502);
+  }
 
   if (!aiRes.ok) {
     console.error('anthropic error', aiRes.status, await aiRes.text());
+    await release();
     return json({ error: 'ai_call_failed' }, 502);
   }
 
@@ -204,14 +242,11 @@ Deno.serve(async (req) => {
       parsed = JSON.parse(cleaned);
     } catch (e) {
       console.error('ai json parse failed', e, text);
+      await release();
       return json({ error: 'invalid_ai_response' }, 502);
     }
-    await supabase.from('ai_usage').insert({ user_id: userId, feature });
     return json(parsed);
   }
-
-  // Log dopiero po sukcesie — nieudane wywołanie nie zjada limitu usera.
-  await supabase.from('ai_usage').insert({ user_id: userId, feature });
 
   return json({ text });
 });
