@@ -2,6 +2,24 @@
 
 Cała aplikacja to jeden plik `index.html` (CSS w `<style>`, JS w `<script>`). PWA na iPhone'a.
 
+## Dziennik techniczny: `docs/CHANGELOG.md`
+
+Pełna historia wersji (także PATCH) z commitami. **Przy każdym bumpie `APP_VERSION`** dopisz w tym samym commicie nowy wpis na górze sekcji „Dziennik wersji” (pod znacznikiem `<!-- NOWE WPISY… -->`):
+
+```
+### 4.45.0 · MINOR · 2026-09-26
+
+**Dla użytkownika (wpis „Co nowego”):**   ← tylko jeśli wersja ma wpis w CHANGELOG
+
+> tekst z obiektu CHANGELOG (pl)
+
+**Commity (N):**
+
+- `abc1234` 2026-09-26 — opis commita
+```
+
+Hash commita, który sam dodaje wpis, jest znany dopiero po commicie, więc ten jeden commit wpisz przy następnej wersji albo pomiń. Zaktualizuj też „Aktualna wersja” w nagłówku. Przy większym etapie dopisz wiersz w „Oś czasu”, a przy nowym pliku, kluczu localStorage albo tabeli Supabase zaktualizuj „Architektura w skrócie”.
+
 ## Animacje: obowiązkowy wzorzec dla KAŻDEGO nowego ekranu, popupu i komponentu
 
 Cel: apka ma sprawiać wrażenie natywnej aplikacji iOS. Ruch pomaga zrozumieć, co się stało, a nie jest ozdobą, na którą trzeba czekać. Wszystkie animacje biorą wartości z jednego miejsca: tokenów `--m-ease-*` / `--m-dur-*` w `:root`. Dzięki temu ruch jest identyczny na każdym ekranie, a zmiana tokenu zmienia go wszędzie. Wizualny podgląd z działającymi przykładami: [Mekkio Design Guide → Motion](https://claude.ai/artifact/35fnMV3RPQfMPU72EFibWU#motion). Przy każdej zmianie tokenów zaktualizuj też tę stronę.
