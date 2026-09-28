@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.1 (2026-09-28)
+- **Aktualna wersja:** 4.47.2 (2026-09-28)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -113,6 +113,19 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.2 · PATCH · 2026-09-28
+
+Bez wpisu „Co nowego” (w wersji web nic się nie zmienia).
+
+Natywne logowanie w apce iOS (TestFlight build **1.0 (3)**, przetestowane na iPhonie). Apple: systemowe okno przez `@capacitor-community/apple-sign-in`, nonce SHA-256, `signInWithIdToken` (client ID `app.mekkio`). Google: in-app Safari (`@capacitor/browser`) + deep link `app.mekkio://auth-callback` (dodany w Supabase Redirect URLs), klient Supabase w trybie PKCE tylko w apce natywnej, `exchangeCodeForSession` w listenerze `appUrlOpen`. Pluginy przez `Capacitor.Plugins` (`capPlugin()`), bo bez bundlera nie ma `Capacitor.registerPlugin`. Entitlement Sign in with Apple, schemat URL `app.mekkio`. Build 2 miał tymczasowo ukryte przyciski OAuth w apce natywnej (`917518f`), build 3 je przywraca. Do poprawy: okno „dane innego konta” (`confirm()`) ma w apce natywnej angielskie „Cancel/Ok”.
+
+**Commity:**
+
+- `98716d6` 2026-09-28 — Powłoka natywna iOS w repo (4.47.1)
+- `917518f` 2026-09-28 — Natywna apka: ukryte logowanie Apple/Google do czasu wersji natywnej (build 2)
+- `46364db` 2026-09-28 — Natywne logowanie Apple i Google w apce iOS (build 3)
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.47.1 · PATCH · 2026-09-28
 
