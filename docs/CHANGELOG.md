@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.9 (2026-09-29)
+- **Aktualna wersja:** 4.47.10 (2026-09-29)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.10 · PATCH · 2026-09-29
+
+Bez wpisu „Co nowego” (build diagnostyczny, do usunięcia po znalezieniu przyczyny).
+
+`await` z 4.47.9 nie pomógł — logi Edge Functions pokazują **zero** żądań do `apple-store-token` mimo potwierdzonego, świeżego logowania Apple (dialog „Dane innego konta” + `last_sign_in_at` zgodny co do sekundy). Skoro żądanie nigdy nie wychodzi z klienta, podejrzenie pada na `response.authorizationCode` — być może puste przy ponownym uwierzytelnieniu tym samym Apple ID, którego apka już wcześniej używała. Dodane tymczasowe `toast()` (oznaczone `// TYMCZASOWE` w kodzie): brak kodu → komunikat od razu; obecny kod → wynik zapisu (status HTTP + treść odpowiedzi) 2,4 s po zamknięciu arkusza logowania, żeby nie nadpisał się z innym komunikatem. **Do usunięcia w następnej wersji, gdy przyczyna się potwierdzi.**
+
+**Commity:**
+
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
+- poprzedni wpis (4.47.9): `682ac1b` 2026-09-29 — Napraw ucinany zapis tokenu Apple przy przeładowaniu
 
 ### 4.47.9 · PATCH · 2026-09-29
 

@@ -5645,7 +5645,12 @@ async function nativeSignInWithApple(){
     // authorizationCode is one-time-use and otherwise discarded, so this is
     // the only chance to capture it. Lets delete-account later revoke this
     // Apple authorization if the user deletes their account (5.1.1(v)).
+    // TYMCZASOWA DIAGNOSTYKA (usunąć po znalezieniu przyczyny pustego
+    // apple_tokens — zero żądań do apple-store-token w logach mimo
+    // udanego logowania, więc podejrzenie pada na brak authorizationCode
+    // w odpowiedzi wtyczki przy ponownym uwierzytelnieniu tym samym Apple ID).
     if(response.authorizationCode) await storeAppleToken(response.authorizationCode);
+    else toast('debug: BRAK authorizationCode w odpowiedzi Apple');
     closeAuthSheet();
   }catch(e){
     // Code 1001 = the user closed the Apple sheet; nothing to report.
@@ -5658,13 +5663,15 @@ async function storeAppleToken(authorizationCode){
   try{
     const { data } = await supabaseClient.auth.getSession();
     const accessToken = data && data.session && data.session.access_token;
-    if(!accessToken) return;
-    await fetch(SUPABASE_URL + '/functions/v1/apple-store-token', {
+    if(!accessToken){ toast('debug: brak sesji przy zapisie tokenu'); return; } // TYMCZASOWE
+    const res = await fetch(SUPABASE_URL + '/functions/v1/apple-store-token', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + accessToken },
       body: JSON.stringify({ authorizationCode })
     });
-  }catch(e){ console.error('storeAppleToken', e); } // never blocks sign-in
+    const body = await res.text();
+    setTimeout(()=> toast('debug: ' + res.status + ' ' + body.slice(0, 80)), 2400); // TYMCZASOWE — po zniknięciu ewentualnego "Zalogowano"
+  }catch(e){ console.error('storeAppleToken', e); setTimeout(()=> toast('debug: fetch rzucił — ' + e.message), 2400); } // TYMCZASOWE
 }
 async function nativeBrowserOAuth(provider){
   const { data, error } = await supabaseClient.auth.signInWithOAuth({
@@ -6047,7 +6054,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.9";
+const APP_VERSION = "4.47.10";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
