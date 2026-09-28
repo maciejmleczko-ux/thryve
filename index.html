@@ -2317,7 +2317,17 @@ if(IS_NATIVE) document.documentElement.classList.add('native-app');
 function haptic(kind){
   const H = IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
   if(!H) return;
-  (kind === 'success' ? H.notification({ type: 'SUCCESS' }) : H.impact({ style: kind === 'medium' ? 'MEDIUM' : 'LIGHT' })).catch(()=>{});
+  if(kind === 'record'){
+    // A PR is rarer and bigger than an ordinary finish, so it gets its own
+    // two-part pattern (heavy thud, then the success chime) instead of the
+    // same single success used for every workout.
+    H.impact({ style: 'HEAVY' }).catch(()=>{});
+    setTimeout(()=> H.notification({ type: 'SUCCESS' }).catch(()=>{}), 150);
+    return;
+  }
+  (kind === 'success' ? H.notification({ type: 'SUCCESS' })
+    : kind === 'warning' ? H.notification({ type: 'WARNING' })
+    : H.impact({ style: kind === 'medium' ? 'MEDIUM' : 'LIGHT' })).catch(()=>{});
 }
 /* Mekkio motion tokens for JS (WAAPI can't read var()): pulled from the
    :root --m-ease-* custom properties so CSS stays the single source. */
@@ -8416,10 +8426,10 @@ function fmtGymWeight(w){
 }
 let gymFinDismissT = null;
 function showGymFinishV2(summary, onDone){
-  haptic('success');
   const el = document.getElementById('gymFinishV2');
   if(!el){ onDone(); return; }
   summary = summary || {};
+  haptic(summary.record ? 'record' : 'success');
   clearTimeout(gymFinDismissT); // a prior dismiss's cleanup must not clobber this show
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -9346,6 +9356,7 @@ function confirmPlanDeleteV2(plan){
 function performPlanDeleteV2(id){
   const plan = trainingPlans.find(p=>p.id===id);
   if(!plan) return;
+  haptic('warning');
   trainingPlans = trainingPlans.filter(p=>p.id!==id);
   if(plan.builtin){ deletedBuiltinPlans.add(id); saveDeletedBuiltinPlans(); } // otherwise loadTrainingPlans() re-adds it next launch
   if(starredPlanId===id){ starredPlanId=null; localStorage.removeItem(LS_STARRED_PLAN); }
@@ -11321,6 +11332,7 @@ function confirmActivityDeleteV2(){
   return confirm(t('activityDeleteConfirmV2', 'Usunąć ten wpis z historii? Tego nie da się cofnąć.'));
 }
 function performHistWorkoutDeleteV2(id){
+  haptic('warning');
   workouts = workouts.filter(w=>w.id!==id);
   saveWorkouts(workouts);
   deleteCloudWorkout(id); // best-effort — otherwise the next sync's pull resurrects it
@@ -11329,6 +11341,7 @@ function performHistWorkoutDeleteV2(id){
   renderCalendarV2(); // repaints the day panel + the calendar's has-log dots
 }
 function performHistRunDeleteV2(id){
+  haptic('warning');
   runs = runs.filter(r=>r.id!==id);
   saveRuns(runs);
   delete histExpandedV2[id];
