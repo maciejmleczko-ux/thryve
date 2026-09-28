@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.2 (2026-09-28)
+- **Aktualna wersja:** 4.47.3 (2026-09-28)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -68,6 +68,7 @@ Stan na 4.44.0.
 
 | Element | Gdzie | Uwagi |
 |---|---|---|
+| Biblioteki | `vendor/supabase-2.117.2.js` | od 4.47.3 lokalnie zamiast CDN |
 | Aplikacja | `index.html` | jeden plik: CSS w `<style>`, JS w `<script>`. PWA na iPhone'a |
 | Service worker | `sw.js` | network-first, tylko własna domena, bez cache'owania Supabase |
 | Manifest / ikony | `manifest.json`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon.png` | |
@@ -113,6 +114,22 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.3 · PATCH · 2026-09-28
+
+Bez wpisu „Co nowego” (drobne poprawki).
+
+- `mConfirm({title,text,ok,cancel,danger})`: własne okno tak/nie (`#mConfirmOverlay`, wzór `.onboard-box`) zamiast `confirm()` przy zmianie konta i usuwaniu konta. W apce natywnej iOS `confirm()` pokazywało angielskie „Cancel/Ok”. Pozostałe `confirm()` (usuwanie planu, wpisu, czyszczenie dni) jeszcze systemowe.
+- Nieaktualne teksty „dane tylko na tym urządzeniu”: `onboardNote` (PL+EN) zachęca do konta; `#acctBackupHint` zależy od `cloudSession`.
+- supabase-js 2.117.2 w `vendor/` (bajt w bajt jak z jsDelivr, sha384 zgodny z poprzednim SRI), ładowany lokalnie; `build-web.sh` kopiuje `vendor/`.
+- `haptic(kind)` przez `@capacitor/haptics` (tylko apka natywna): medium przy pierwszym zapisie ćwiczenia, light przy edycji, success na ekranie końca treningu. TestFlight build **1.0 (4)**.
+
+**Commity:**
+
+- `52a7322` 2026-09-28 — Natywne logowanie Apple i Google w repo (4.47.2)
+- `7ca46a1` 2026-09-28 — Polskie okna potwierdzenia konta, aktualne teksty o chmurze, supabase-js lokalnie
+- `2e1e6bf` 2026-09-28 — Haptyki w apce natywnej (build 4)
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.47.2 · PATCH · 2026-09-28
 
