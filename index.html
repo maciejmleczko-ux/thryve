@@ -3090,6 +3090,41 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<!-- "Nowe hasło" — opens after the user returns from the reset-password email
+     link (Supabase fires PASSWORD_RECOVERY and signs them in with a
+     recovery session); submitNewPassword() sets the password via updateUser. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="newPasswordSheet" onclick="if(event.target===this) closeNewPasswordSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-header">
+        <div class="fbv2-title-row">
+          <h1>NOWE HASŁO</h1>
+          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeNewPasswordSheet()"></span>
+        </div>
+        <p class="fbv2-subtitle">Ustaw hasło do swojego konta w Mekkio.</p>
+      </div>
+      <div class="plansv2-customize-section">
+        <div class="acct-num-row name" style="flex-direction:column;">
+          <div class="exv2-field">
+            <label>Nowe hasło</label>
+            <input type="password" id="newPwInput" placeholder="min. 6 znaków" autocomplete="new-password">
+          </div>
+          <div class="exv2-field">
+            <label>Powtórz hasło</label>
+            <input type="password" id="newPwInput2" placeholder="to samo hasło" autocomplete="new-password">
+          </div>
+        </div>
+        <p class="acct-auth-error" id="newPwError" hidden></p>
+      </div>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-cancel" onclick="closeNewPasswordSheet()">ANULUJ</button>
+        <button type="button" class="plansv2-customize-apply" id="newPwSubmitBtn" onclick="submitNewPassword()">ZAPISZ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- "Historia zmian" (account panel → Aplikacja) — every CHANGELOG version
      ever shipped, numbered, newest first. Unlike the "Co nowego" popup
      (only pending/unseen versions, one hero card), this is the full log,
@@ -4591,7 +4626,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet'];
+const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -4865,6 +4900,10 @@ function initSupabaseAuth(){
     cloudSession = session;
     renderAcctCloudCard();
     if(cloudSession && hadNoSession) syncCloudData(); // only on a fresh sign-in, not every token refresh
+    // Back from the reset-password email link: the user is signed in with a
+    // recovery session and must now choose the new password. Delayed so the
+    // auth sheet / account panel can finish closing first.
+    if(_event === 'PASSWORD_RECOVERY') setTimeout(openNewPasswordSheet, 350);
   });
 }
 
@@ -5408,6 +5447,50 @@ function openAuthSheet(mode){
 }
 function closeAuthSheet(viaDrag){ acctSheetClose('authSheet', viaDrag); }
 
+function openNewPasswordSheet(){
+  const a = document.getElementById('newPwInput'), b = document.getElementById('newPwInput2');
+  const err = document.getElementById('newPwError');
+  if(a) a.value = '';
+  if(b) b.value = '';
+  if(err){ err.hidden = true; err.textContent = ''; }
+  const btn = document.getElementById('newPwSubmitBtn');
+  if(btn){ btn.disabled = false; btn.textContent = 'ZAPISZ'; }
+  closeAccountPanel();
+  acctSheetOpen('newPasswordSheet');
+}
+function closeNewPasswordSheet(viaDrag){ acctSheetClose('newPasswordSheet', viaDrag); }
+async function submitNewPassword(){
+  if(!supabaseClient) return;
+  const p1 = document.getElementById('newPwInput').value;
+  const p2 = document.getElementById('newPwInput2').value;
+  const errEl = document.getElementById('newPwError');
+  const btn = document.getElementById('newPwSubmitBtn');
+  const fail = msg=>{ errEl.textContent = msg; errEl.hidden = false; };
+  errEl.hidden = true;
+  if(p1.length < 6){ fail('Hasło musi mieć min. 6 znaków.'); return; }
+  if(p1 !== p2){ fail('Hasła się różnią.'); return; }
+  btn.disabled = true;
+  btn.textContent = '…';
+  try{
+    const { error } = await supabaseClient.auth.updateUser({ password: p1 });
+    if(error){
+      const m = error.message || '';
+      fail(/different from the old password|same_password/i.test(m) ? 'Wybierz hasło inne niż dotychczasowe.'
+        : /session.*missing|jwt|expired/i.test(m) ? 'Link wygasł. Poproś o nowy w oknie logowania („Zapomniałeś hasła?”).'
+        : authErrorMessage(error));
+      return;
+    }
+    closeNewPasswordSheet();
+    toast('Hasło zmienione');
+  }catch(e){
+    console.error('submitNewPassword', e);
+    fail('Coś poszło nie tak. Spróbuj ponownie.');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'ZAPISZ';
+  }
+}
+
 function authErrorMessage(err){
   const msg = (err && err.message) || '';
   if(/already registered|already exists|user_already_exists/i.test(msg)) return 'To konto już istnieje — zaloguj się.';
@@ -5532,7 +5615,11 @@ async function requestPasswordReset(){
   if(!supabaseClient) return;
   const email = document.getElementById('authEmailInput').value.trim();
   if(!email){ toast('Podaj najpierw e-mail'); return; }
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+  // Native: the link must come back into the app (deep link, PKCE code is
+  // exchanged in the appUrlOpen listener). Web: back to this page.
+  const redirectTo = IS_NATIVE ? NATIVE_AUTH_CALLBACK : window.location.origin + window.location.pathname;
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+  if(error) console.error('resetPasswordForEmail', error);
   toast(error ? 'Nie udało się wysłać maila' : 'Wysłaliśmy link do resetu hasła');
 }
 
@@ -5785,7 +5872,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.4";
+const APP_VERSION = "4.47.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7737,7 +7824,7 @@ mSheetDrag('exercisePopupOverlayV2', closeExercisePopupV2);
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet']
+['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 
 /* ---- "Zamień ćwiczenie" sheet (stage 3, idea #5) — rides .m-sheet ---- */
