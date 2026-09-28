@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.46.0 (2026-09-28)
+- **Aktualna wersja:** 4.47.0 (2026-09-28)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -113,6 +113,26 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.0 · MINOR · 2026-09-28
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> **Logowanie przez Apple.** Zalogujesz się teraz przez Apple: jedno dotknięcie i Face ID. Możesz też ukryć swój e-mail. Apple poda nam wtedy losowy adres, a treningi i tak zobaczysz na każdym swoim urządzeniu.
+
+Czarny przycisk „Kontynuuj z Apple” nad Google w `#authSheet` (Apple wymaga co najmniej równej widoczności). `signInWithGoogle()` → `signInWithOAuthProvider(provider)`. Adres przekaźnikowy `@privaterelay.appleid.com` pokazany w panelu konta jako „Ukryty e-mail (Apple)”. Konfiguracja: Services ID `app.mekkio.web` (domena i callback Supabase), klucz `CYPKZ2CHPZ` (.p8 poza repo, `*.p8` w `.gitignore`), Team `RRFD32759F`, Supabase Apple provider z Client IDs `app.mekkio.web,app.mekkio`. **Client secret (JWT z .p8) wygasa 2027-03-30**, trzeba go wygenerować ponownie i podmienić w Supabase. Unieważnianie tokenu Apple przy usuwaniu konta (5.1.1(v)) jeszcze niezrobione, potrzebne przed App Store.
+
+Przy okazji (bez zmiany wersji): hosting przeniesiony na Cloudflare Workers, **app.mekkio.app** (repo `mekkio`, `wrangler.jsonc`, `scripts/build-web.sh`); `mekkio.app` i `www` przekierowują tam 302; `github.io/thryve` zostaje lustrem dla starych ikon; meta tagi podglądu linków wskazują na app.mekkio.app.
+
+**Commity:**
+
+- `32d7823` 2026-09-28 — Skrypt budujący dla Cloudflare Pages (app.mekkio.app)
+- `3ebe639` 2026-09-28 — Konfiguracja Cloudflare Workers (static assets) dla app.mekkio.app
+- `ab5f1b8` 2026-09-28 — CHANGELOG: hosting na app.mekkio.app + lustro github.io/thryve
+- `1827be4` 2026-09-28 — Meta tagi podglądu linków wskazują na app.mekkio.app
+- `bdbcbb2` 2026-09-28 — Logowanie przez Apple w arkuszu logowania
+- `a920b9f` 2026-09-28 — Zrobione ćwiczenie: ptaszek w rogu + mocniejsze wyszarzenie (4.46.0)
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.46.0 · MINOR · 2026-09-28
 
