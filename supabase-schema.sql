@@ -60,6 +60,20 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- ---------------------------------------------------------------------
+-- apple_tokens — refresh token z Sign in with Apple, TYLKO do unieważnienia
+-- autoryzacji przy usuwaniu konta (guideline 5.1.1(v)). Celowo bez żadnej
+-- policy dla anon/authenticated — klient (nawet własny wiersz) nigdy tego
+-- nie czyta ani nie pisze bezpośrednio; jedyny dostęp ma service_role
+-- (Edge Functions apple-store-token / delete-account), który omija RLS.
+-- ---------------------------------------------------------------------
+create table if not exists public.apple_tokens (
+  user_id uuid primary key references public.profiles(id) on delete cascade,
+  refresh_token text not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.apple_tokens enable row level security;
+
+-- ---------------------------------------------------------------------
 -- plans — odpowiednik trainingPlans[] z localStorage
 -- ---------------------------------------------------------------------
 create table if not exists public.plans (

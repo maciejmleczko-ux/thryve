@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.6 (2026-09-28)
+- **Aktualna wersja:** 4.47.7 (2026-09-28)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -76,14 +76,14 @@ Stan na 4.44.0.
 | Ikony ćwiczeń | `icons/exercises/` | render 3D od 4.43.0 |
 | Polityka prywatności | `polityka-prywatnosci.html` | od 4.40.0 (RODO) |
 | Schemat bazy | `supabase-schema.sql` | idempotentny, można puszczać ponownie |
-| Edge Functions | `supabase/functions/ai-proxy`, `supabase/functions/delete-account` | proxy do Claude (model `claude-sonnet-5`) i usuwanie konta |
+| Edge Functions | `supabase/functions/ai-proxy`, `supabase/functions/delete-account`, `supabase/functions/apple-store-token`, `supabase/functions/_shared/apple.ts` | proxy do Claude, usuwanie konta (unieważnia też token Apple), zapis tokenu Apple po logowaniu; sekrety `APPLE_TEAM_ID`/`APPLE_KEY_ID`/`APPLE_PRIVATE_KEY` |
 | Zasady ruchu / animacji | `CLAUDE.md` + tokeny `--m-*` w `:root` | od 4.42.4 |
 | Hosting (główny) | Cloudflare Workers (static assets): **app.mekkio.app** | od 2026-09-28; repo `mekkio`, build `sh scripts/build-web.sh` → `dist/` (tylko pliki apki), `wrangler.jsonc` |
 | Hosting (lustro) | GitHub Pages: `maciejmleczko-ux.github.io/thryve/` | stare ikony na pulpicie; jeden `git push` idzie do obu repo (`origin` ma dwa push URL). Inny adres = osobny localStorage |
 
 **Dane lokalne (localStorage, prefiks `fitlog_`, sufiks `_v1`):** `workouts`, `runs`, `training_plans`, `starred_plan`, `deleted_builtin_plans`, `custom_exercises`, `exercise_notes`, `exercise_order`, `weight_log`, `body_data`, `avatar`, `kcal_factor`, `profile_name`, `gym_session_draft`, `gym_session_timing`, `gym_today_swaps`, `onboard_seen`, `install_prompt_dismissed`, `last_seen_version`.
 
-**Chmura (Supabase, od 4.35.0):** tabele `profiles` (plus kolumny JSON: `weight_log`, `body_data`, `ai_preferences`, `custom_exercises`, `exercise_notes`; tekst: `avatar`), `plans`, `workouts`, `ai_usage`. RLS włączone na wszystkich. Logowanie: e-mail + hasło, Google. Tryb gościa działa bez konta. Nie synchronizują się: biegi (`runs`, tylko odczyt, nowych nie da się dodać) i lista usuniętych wbudowanych planów. Ulubione ćwiczenia usunięte w 4.44.1.
+**Chmura (Supabase, od 4.35.0):** tabele `profiles` (plus kolumny JSON: `weight_log`, `body_data`, `ai_preferences`, `custom_exercises`, `exercise_notes`; tekst: `avatar`), `plans`, `workouts`, `ai_usage`, `apple_tokens` (refresh token z Sign in with Apple, tylko `service_role`, klient nigdy nie czyta — do unieważnienia przy usuwaniu konta). RLS włączone na wszystkich. Logowanie: e-mail + hasło, Google, Apple (natywnie w apce iOS od 4.47.2). Tryb gościa działa bez konta. Nie synchronizują się: biegi (`runs`, tylko odczyt, nowych nie da się dodać) i lista usuniętych wbudowanych planów. Ulubione ćwiczenia usunięte w 4.44.1.
 
 ---
 
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.7 · PATCH · 2026-09-28
+
+Bez wpisu „Co nowego” (wymóg App Store, niewidoczny dla użytkownika).
+
+Guideline 5.1.1(v): usuwanie konta musi też unieważniać autoryzację Sign in with Apple, inaczej Mekkio zostaje widoczne w „Apps Using Your Apple ID” mimo skasowanego konta. Nowa tabela `apple_tokens` (`supabase-schema.sql`) — refresh token Apple, bez żadnej policy dla `anon`/`authenticated`, czyta/pisze go wyłącznie `service_role`. `supabase/functions/_shared/apple.ts`: podpisuje świeży ES256 `client_secret` (JWT) do endpointów Apple przy każdym wywołaniu — bez 6-miesięcznej rotacji, w przeciwieństwie do sekretu Supabase; wymaga sekretów `APPLE_TEAM_ID`/`APPLE_KEY_ID`/`APPLE_PRIVATE_KEY` (ten sam klucz `.p8` co provider Apple w Supabase). Nowa funkcja `apple-store-token`: po natywnym logowaniu Apple `nativeSignInWithApple()` wysyła jednorazowy `authorizationCode` (wcześniej odrzucany), funkcja wymienia go u Apple na `refresh_token` i zapisuje w `apple_tokens`. `delete-account`: przed skasowaniem konta odczytuje ten token i woła `POST /auth/revoke` u Apple; błąd niekrytyczny — usunięcie konta (RODO) i tak przechodzi dalej. Całość bez wpływu na konta logujące się e-mailem albo Google. **Wymaga ręcznej konfiguracji w Supabase (sekrety Edge Functions) i weryfikacji na prawdziwym Apple ID przed wysłaniem do App Review — patrz notatka w pamięci projektu.**
+
+**Commity:**
+
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
+- poprzedni wpis (4.47.6): `6dba7c3` 2026-09-28 — Napraw niewidoczny toast pod arkuszami konta
 
 ### 4.47.6 · PATCH · 2026-09-28
 
