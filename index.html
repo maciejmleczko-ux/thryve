@@ -2303,6 +2303,12 @@ body.pev2-bg{background:var(--m-panel);}
 </head>
 <body>
 <script>
+/* Running inside the Capacitor iOS shell (app.mekkio)? The native bridge
+   injects window.Capacitor before page scripts run. Native builds serve the
+   files from the app bundle, so no service worker and no "add to home
+   screen" prompt. */
+const IS_NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+if(IS_NATIVE) document.documentElement.classList.add('native-app');
 /* Mekkio motion tokens for JS (WAAPI can't read var()): pulled from the
    :root --m-ease-* custom properties so CSS stays the single source. */
 const MOTION = (()=>{
@@ -10074,6 +10080,7 @@ function confirmImportPlan(){
   }
 }
 function isStandaloneApp(){
+  if(IS_NATIVE) return true;
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
 function closeImportPlanBrowserNotice(){
@@ -13177,7 +13184,7 @@ setTimeout(maybeShowCloudReminder, 400); // after any of the above have had thei
 if(screen.orientation && screen.orientation.lock){
   screen.orientation.lock('portrait').catch(()=>{});
 }
-if('serviceWorker' in navigator){
+if('serviceWorker' in navigator && !IS_NATIVE){
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('sw.js').then(reg=>{
       // Browsers only re-check sw.js for changes on their own schedule
