@@ -2311,6 +2311,14 @@ body.pev2-bg{background:var(--m-panel);}
    screen" prompt. */
 const IS_NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 if(IS_NATIVE) document.documentElement.classList.add('native-app');
+/* Taptic feedback in the native app only (iOS Safari has no vibration API).
+   Reserved for moments that mean "done": an exercise saved, a workout
+   finished. Never on plain navigation or typing. */
+function haptic(kind){
+  const H = IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
+  if(!H) return;
+  (kind === 'success' ? H.notification({ type: 'SUCCESS' }) : H.impact({ style: kind === 'medium' ? 'MEDIUM' : 'LIGHT' })).catch(()=>{});
+}
 /* Mekkio motion tokens for JS (WAAPI can't read var()): pulled from the
    :root --m-ease-* custom properties so CSS stays the single source. */
 const MOTION = (()=>{
@@ -8001,9 +8009,11 @@ function confirmExercisePopupV2(){
     }
   } else if(idx===-1){
     sessionExercises.push(popupExercise);
+    haptic('medium');
     markGymActivity(); // real logged data — this is what should start/extend the session clock, not opening the popup
   } else {
     sessionExercises[idx] = popupExercise;
+    haptic('light');
     markGymActivity();
   }
   persistGymSession();
@@ -8406,6 +8416,7 @@ function fmtGymWeight(w){
 }
 let gymFinDismissT = null;
 function showGymFinishV2(summary, onDone){
+  haptic('success');
   const el = document.getElementById('gymFinishV2');
   if(!el){ onDone(); return; }
   summary = summary || {};
