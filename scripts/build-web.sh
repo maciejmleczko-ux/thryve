@@ -1,7 +1,7 @@
 #!/bin/sh
-# Build for Cloudflare Pages (app.mekkio.app): copies only the files the app
+# Build for Cloudflare Workers static assets (app.mekkio.app): copies only the files the app
 # serves into dist/, so supabase/, docs/, SQL and prototypes stay unpublished.
-# Cloudflare Pages settings: build command `sh scripts/build-web.sh`, output `dist`.
+# Cloudflare build command: `sh scripts/build-web.sh`; wrangler.jsonc serves dist/.
 # GitHub Pages (github.io/thryve mirror) still serves the repo root as before.
 set -e
 cd "$(dirname "$0")/.."
