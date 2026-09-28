@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.45.2 (2026-09-25)
-- **Liczba wersji:** 222 · **commitów:** 550
+- **Aktualna wersja:** 4.46.0 (2026-09-28)
+- **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -112,13 +112,28 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.46.0 · MINOR · 2026-09-28
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> **Ptaszek przy zrobionym ćwiczeniu.** Na ekranie GYM zrobione ćwiczenie ma teraz pomarańczowy ptaszek w rogu kafla, a jego ikona i nazwa są mocniej wyszarzone. Od razu widać, co masz już za sobą.
+
+Stan `added` w `buildExerciseTileV2()` (jedyne źródło: siatka GYM, ćwiczenie w bieżącej sesji) nie przyciemnia już całego kafla (`grayscale` + `opacity:.5`), tylko ikonę i etykietę (`opacity:.28`). Białe tło kafla zostaje, więc nie zlewa się z lawendowym panelem. W rogu `.gymv2-tile-done` z `PLAN_EX_CHECK_SVG` (22 px), wybrany wariant D z symulacji. Przy okazji 12 ikon z testu `PNG_ORANGE` wróciło do szarych.
+
+**Commity:**
+
+- `c6f204a` 2026-09-28 — Przywróć szare ikony zamiast testowych pomarańczowych
+- wpis dodany w tym samym commicie co zmiana stanu „zrobione” (hash w kolejnej wersji)
+
 ### 4.45.2 · PATCH · 2026-09-25
 
 Bez wpisu „Co nowego” (dokończenie podmiany ikon z 4.43.0).
 
 Statystyki (kafle „Progres ćwiczeń”, 40 px) i lista ćwiczeń w Historii (30 px) pokazywały jeszcze stare płaskie SVG. `statsV2ExerciseIconSvg()` → `statsV2ExerciseIconHtml()`: ta sama kolejność co `buildExerciseTileV2()` (PNG z `icons/exercises/`, potem stare SVG, własne ćwiczenie → `own_excercise.png` zamiast `PH.barbell`), plus jawne wymiary `<img>` w obu kontenerach. Zmiana funkcji trafiła przypadkiem już do `f9a9892` (commit z 4.45.1 zrobiony z równoległej sesji), CSS rozmiarów dopiero tutaj.
 
-**Commity:** wpis dodany w tym samym commicie co zmiana (hash w kolejnej wersji).
+**Commity (1):**
+
+- `eb63741` 2026-09-25 — Nowe ikony PNG także w Statystykach i Historii (4.45.2)
 
 ### 4.45.1 · PATCH · 2026-09-25
 

@@ -506,7 +506,12 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .ex-tile-ghost{transition:box-shadow var(--m-dur-quick) ease;}
 .ex-tile.custom-tile .ph{width:24px;height:24px;color:var(--orange);}
 .ex-tile.custom-tile .t{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;padding:0 3px;line-height:1.15;}
-.ex-tile.custom-tile.added{filter:grayscale(1);opacity:.5;}
+/* Done exercise: fade only the content, not the tile — fading the whole
+   white tile blended it into the lilac panel and made it read smaller.
+   The full-colour check carries the "done" signal instead. */
+.ex-tile.custom-tile.added :is(.gymv2-tile-icon,.gymv2-tile-label,.ph,.t){filter:grayscale(1);opacity:.28;}
+.gymv2-tile-done{position:absolute;top:6px;right:6px;width:22px;height:22px;z-index:1;pointer-events:none;}
+.gymv2-tile-done svg{display:block;width:22px;height:22px;}
 /* Per-section "add your own exercise" tile in the old grouped exercise
    grid (renderGroupedExerciseGrid) — Maciej's own design, dashed
    border + plus baked into the SVG, appended once at the end of every
@@ -5652,7 +5657,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.45.2";
+const APP_VERSION = "4.46.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -5701,6 +5706,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.46.0": {
+    pl: [
+      {featured:true, icon:'check-circle', badge:'Zmiana', title:'Ptaszek przy zrobionym ćwiczeniu', text:'Na ekranie GYM zrobione ćwiczenie ma teraz pomarańczowy ptaszek w rogu kafla, a jego ikona i nazwa są mocniej wyszarzone. Od razu widać, co masz już za sobą.'},
+    ],
+    en: [
+      {featured:true, icon:'check-circle', badge:'Change', title:'Check mark on finished exercises', text:'In GYM, a finished exercise now shows an orange check in the corner of its tile, and its icon and name are greyed out more. You can see at a glance what you have already done.'},
+    ],
+  },
   "4.45.1": {
     pl: [
       'Zdjęcie profilowe zapisuje się teraz na koncie, więc po zalogowaniu na innym telefonie zobaczysz je od razu.',
@@ -7273,7 +7286,10 @@ function buildExerciseTileV2(ex, state, opts){
   const btn = document.createElement('button');
   btn.className = 'ex-tile custom-tile';
   btn.dataset.name = ex.name;
-  if(state==='added') btn.classList.add('added');
+  if(state==='added'){
+    btn.classList.add('added');
+    btn.insertAdjacentHTML('beforeend', `<span class="gymv2-tile-done">${PLAN_EX_CHECK_SVG}</span>`);
+  }
   if(state==='selected'){
     btn.classList.add('gymv2-tile-selected');
     btn.insertAdjacentHTML('beforeend', `<span class="gymv2-tile-check">${PLAN_EX_CHECK_SVG}</span>`);
