@@ -77,6 +77,8 @@ Stan na 4.44.0.
 | Schemat bazy | `supabase-schema.sql` | idempotentny, można puszczać ponownie |
 | Edge Functions | `supabase/functions/ai-proxy`, `supabase/functions/delete-account` | proxy do Claude (model `claude-sonnet-5`) i usuwanie konta |
 | Zasady ruchu / animacji | `CLAUDE.md` + tokeny `--m-*` w `:root` | od 4.42.4 |
+| Hosting (główny) | Cloudflare Workers (static assets): **app.mekkio.app** | od 2026-09-28; repo `mekkio`, build `sh scripts/build-web.sh` → `dist/` (tylko pliki apki), `wrangler.jsonc` |
+| Hosting (lustro) | GitHub Pages: `maciejmleczko-ux.github.io/thryve/` | stare ikony na pulpicie; jeden `git push` idzie do obu repo (`origin` ma dwa push URL). Inny adres = osobny localStorage |
 
 **Dane lokalne (localStorage, prefiks `fitlog_`, sufiks `_v1`):** `workouts`, `runs`, `training_plans`, `starred_plan`, `deleted_builtin_plans`, `custom_exercises`, `exercise_notes`, `exercise_order`, `weight_log`, `body_data`, `avatar`, `kcal_factor`, `profile_name`, `gym_session_draft`, `gym_session_timing`, `gym_today_swaps`, `onboard_seen`, `install_prompt_dismissed`, `last_seen_version`.
 
