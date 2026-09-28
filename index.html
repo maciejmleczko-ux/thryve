@@ -716,6 +716,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .ai-popup-action:not(:first-of-type){border-top:1px solid rgba(255,255,255,.15);}
 .ai-popup-action-ex{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:#fff;}
 .ai-popup-action-do{font-size:var(--m-fs-sm);font-weight:300;line-height:1.4;color:rgba(255,255,255,.92);}
+.ai-popup-note{margin:18px 0 0;font-size:var(--m-fs-2xs);line-height:1.45;color:rgba(255,255,255,.55);}
 .feedback-type-row{display:flex;gap:8px;margin-bottom:14px;}
 .feedback-type{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:9px 4px;font-size:var(--m-fs-xs);font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
 .feedback-type.active{background:var(--orange);border-color:var(--orange);color:#fff;}
@@ -2871,6 +2872,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button type="button" class="acct-row" onclick="openAiPrefsSheet()"><span>Cel treningowy</span><span class="acct-v" id="acctAiGoalV">Uzupełnij</span></button>
       <button type="button" class="acct-row" onclick="openAiPrefsSheet()"><span>Czego unikać</span><span class="acct-v" id="acctAiAvoidV">Uzupełnij</span></button>
     </div>
+    <p class="acct-hint">Trener AI patrzy na Twoje treningi i preferencje. To nie porada medyczna.</p>
     <p class="acct-sec">Kopia zapasowa</p>
     <div class="acct-rows">
       <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="upload-simple"></span>Twórz kopię zapasową</span><span class="acct-v">Plik .json</span></button>
@@ -3128,6 +3130,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
         <button type="button" class="acct-revert" id="kcalRevertBtn" hidden onclick="revertKcal()"></button>
         <p class="acct-hint" id="kcalLearnHint" hidden></p>
+        <p class="acct-hint">Kalorie to szacunek, nie pomiar. To nie porada medyczna ani dietetyczna.</p>
       </div>
       <div class="plansv2-customize-actions">
         <button type="button" class="plansv2-customize-cancel" onclick="closeEditKcal()">ANULUJ</button>
@@ -3180,6 +3183,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <p class="ai-popup-summary" id="aiPopupSummary"></p>
     <p class="ai-popup-text" id="aiPopupAnalysis"></p>
     <div class="ai-popup-actions" id="aiPopupActions" hidden></div>
+    <p class="ai-popup-note">Sugestie tworzy AI na podstawie Twoich treningów. To nie porada medyczna i nie zastąpi trenera.</p>
   </div>
 </div>
 
@@ -5781,7 +5785,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.3";
+const APP_VERSION = "4.47.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at

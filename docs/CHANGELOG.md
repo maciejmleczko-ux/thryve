@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.3 (2026-09-28)
+- **Aktualna wersja:** 4.47.4 (2026-09-28)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.4 · PATCH · 2026-09-28
+
+Bez wpisu „Co nowego” (drobny druk).
+
+Zastrzeżenia zdrowotne pod wymagania App Store (kalorie i porady AI): `.ai-popup-note` pod analizą w oknie Trenera AI, `.acct-hint` pod sekcją „Trener AI” w panelu konta i pod polem kalorii w `#editKcalSheet`. Teksty PL, bez wersji EN (te ekrany jeszcze bez `T_EN`). TestFlight build **1.0 (5)** poszedł bez tych zmian, następny build (6) je zawiera.
+
+**Commity:**
+
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
+- poprzedni wpis (4.47.3): `ff14f75` 2026-09-28 — Haptyka: nowy rekord osobno od zwykłego końca, ostrzeżenie przy usuwaniu (build 5)
 
 ### 4.47.3 · PATCH · 2026-09-28
 
