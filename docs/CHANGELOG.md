@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.0 (2026-09-28)
+- **Aktualna wersja:** 4.47.1 (2026-09-28)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -113,6 +113,19 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.1 · PATCH · 2026-09-28
+
+Bez wpisu „Co nowego” (w wersji web nic się nie zmienia).
+
+Powłoka natywna iOS (Capacitor 8, SPM) w `native/`, bundle `app.mekkio`, team `RRFD32759F`. `npm run sync` (w `native/`) buduje `dist/`, kopiuje do `native/www` i synchronizuje projekt Xcode. `IS_NATIVE` (`window.Capacitor`) w `index.html` wyłącza service worker i prompt instalacji (`isStandaloneApp()` zwraca true). Ikona 1024 z `icon-512.png`, splash #FF3300 z wordmarkiem, tło webview #FF3300, tylko iPhone w pionie, `ITSAppUsesNonExemptEncryption=false`. Pierwszy build **1.0 (1)** wysłany do App Store Connect (TestFlight). W apce natywnej działa na razie tylko logowanie e-mailem.
+
+**Commity:**
+
+- `ce7e720` 2026-09-28 — Logowanie przez Apple (4.47.0)
+- `0663aca` 2026-09-28 — Powłoka Capacitor 8 (iOS, app.mekkio) w native/
+- `93846d4` 2026-09-28 — Natywna apka: ikona, pomarańczowy ekran startowy, podpisywanie
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.47.0 · MINOR · 2026-09-28
 
