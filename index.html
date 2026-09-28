@@ -830,9 +830,6 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-auth-error{margin:6px 0 0;font-size:var(--m-fs-2xs);color:#c00;line-height:1.4;}
 .acct-oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;border:1px solid #dadce0;border-radius:var(--m-r-pill);padding:12px;font-size:var(--m-fs-base);font-weight:500;color:#3c4043;font-family:inherit;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),background var(--m-dur-quick) ease;}
 .acct-oauth-btn:active{transform:scale(.97);background:#f7f7f8;}
-/* Native shell: web OAuth redirects can't return into the app yet, so only
-   email + password until native Apple/Google sign-in lands. */
-html.native-app .acct-oauth-section{display:none;}
 .acct-oauth-btn.apple{background:#000;border-color:#000;color:#fff;}
 .acct-oauth-btn.apple:active{background:#1c1c1e;}
 .acct-oauth-btn.apple svg{width:20px;height:20px;flex:0 0 20px;fill:currentColor;position:relative;top:-2px;}
@@ -4809,7 +4806,8 @@ const SUPABASE_ANON_KEY = 'sb_publishable_GV1qHi1JDzQgVbz6c5OGgw_b7UGktTZ';
 
 const SUPABASE_CONFIGURED = !SUPABASE_URL.includes('YOUR-') && !SUPABASE_ANON_KEY.includes('YOUR-');
 let supabaseClient = (SUPABASE_CONFIGURED && window.supabase)
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY,
+      IS_NATIVE ? { auth: { flowType: 'pkce', detectSessionInUrl: false } } : undefined)
   : null;
 
 let cloudSession = null;
@@ -5427,6 +5425,7 @@ async function submitAuthForm(){
 
 async function signInWithOAuthProvider(provider){
   if(!supabaseClient) return;
+  if(IS_NATIVE) return provider === 'apple' ? nativeSignInWithApple() : nativeBrowserOAuth(provider);
   // signInWithOAuth navigates the whole page away to Google's consent
   // screen — there's nothing to await here. On return, Supabase's own
   // detectSessionInUrl (default on) parses the tokens from the redirect
@@ -5438,6 +5437,52 @@ async function signInWithOAuthProvider(provider){
     options: { redirectTo: window.location.origin + window.location.pathname }
   });
   if(error){ console.error('signInWithOAuthProvider', provider, error); toast('Nie udało się połączyć z ' + (provider === 'apple' ? 'Apple' : 'Google')); }
+}
+// Native shell (Capacitor): Apple uses the system sheet (Face ID) and hands
+// Supabase the identity token; Google opens in an in-app Safari view and
+// comes back through the app.mekkio://auth-callback deep link (PKCE code).
+const NATIVE_AUTH_CALLBACK = 'app.mekkio://auth-callback';
+// No bundler here, so native plugins come from the bridge's Capacitor.Plugins.
+const capPlugin = name => (window.Capacitor && window.Capacitor.Plugins || {})[name];
+async function nativeSignInWithApple(){
+  try{
+    const rawNonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), b=>b.toString(16).padStart(2,'0')).join('');
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawNonce));
+    const hashedNonce = Array.from(new Uint8Array(digest), b=>b.toString(16).padStart(2,'0')).join('');
+    const { response } = await capPlugin('SignInWithApple').authorize({
+      clientId: 'app.mekkio',
+      redirectURI: SUPABASE_URL + '/auth/v1/callback',
+      scopes: 'email name',
+      nonce: hashedNonce
+    });
+    const { error } = await supabaseClient.auth.signInWithIdToken({ provider: 'apple', token: response.identityToken, nonce: rawNonce });
+    if(error) throw error;
+    closeAuthSheet();
+  }catch(e){
+    // Code 1001 = the user closed the Apple sheet; nothing to report.
+    if(String(e && (e.code || e.message)).includes('1001')) return;
+    console.error('nativeSignInWithApple', e);
+    toast('Nie udało się połączyć z Apple');
+  }
+}
+async function nativeBrowserOAuth(provider){
+  const { data, error } = await supabaseClient.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: NATIVE_AUTH_CALLBACK, skipBrowserRedirect: true }
+  });
+  if(error || !data || !data.url){ console.error('nativeBrowserOAuth', provider, error); toast('Nie udało się połączyć z Google'); return; }
+  await capPlugin('Browser').open({ url: data.url, presentationStyle: 'popover' });
+}
+if(IS_NATIVE && supabaseClient && capPlugin('App')){
+  capPlugin('App').addListener('appUrlOpen', async ({ url })=>{
+    if(!url || !url.startsWith(NATIVE_AUTH_CALLBACK)) return;
+    capPlugin('Browser').close().catch(()=>{});
+    const code = new URL(url.replace('app.mekkio://', 'https://x/')).searchParams.get('code');
+    if(!code){ toast('Logowanie przerwane'); return; }
+    const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+    if(error){ console.error('exchangeCodeForSession', error); toast('Nie udało się zalogować'); return; }
+    closeAuthSheet();
+  });
 }
 async function requestPasswordReset(){
   if(!supabaseClient) return;
