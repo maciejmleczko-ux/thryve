@@ -11,5 +11,6 @@ cp index.html manifest.json sw.js lottie.min.js success.json \
    polityka-prywatnosci.html favicon.png apple-touch-icon.png \
    icon-192.png icon-512.png dist/
 cp -R icons dist/icons
+cp -R vendor dist/vendor
 find dist -name .DS_Store -delete
 echo "dist/ ready: $(find dist -type f | wc -l | tr -d ' ') files"

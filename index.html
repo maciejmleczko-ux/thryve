@@ -678,6 +678,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .onboard-actions button{flex:1;border:none;border-radius:var(--m-r-pill);padding:13px;font-weight:700;font-size:var(--m-fs-sm);cursor:pointer;font-family:inherit;}
 .onboard-actions .skip{background:var(--light-2);color:var(--text-dark);}
 .onboard-actions .save{background:var(--orange);color:#fff;}
+.onboard-actions .save.danger{background:#c00;}
 .onboard-actions button:disabled{opacity:.5;cursor:default;}
 .onboard-box textarea{width:100%;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:var(--m-fs-base);line-height:1.5;color:var(--text-dark);font-family:inherit;margin-bottom:16px;resize:vertical;min-height:100px;}
 
@@ -2299,7 +2300,8 @@ body.pev2-bg{background:var(--m-panel);}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
+<!-- supabase-js 2.117.2 vendored (byte-identical to the jsDelivr UMD build, sha384-Rj26LVGv…) so the native app starts without a CDN round-trip. -->
+<script src="vendor/supabase-2.117.2.js"></script>
 </head>
 <body>
 <script>
@@ -2856,7 +2858,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="upload-simple"></span>Twórz kopię zapasową</span><span class="acct-v">Plik .json</span></button>
       <button type="button" class="acct-row" onclick="closeAccountPanel(); document.getElementById('importFile').click();"><span class="acct-lead"><span class="ph" data-ph="download-simple"></span>Import kopii zapasowej</span><span class="acct-v"></span></button>
     </div>
-    <p class="acct-hint">Dane treningowe trzymamy tylko na tym urządzeniu. Warto co jakiś czas zrobić kopię.</p>
+    <p class="acct-hint" id="acctBackupHint">Bez konta treningi są tylko na tym telefonie. Warto co jakiś czas zrobić kopię.</p>
     <p class="acct-sec">Aplikacja</p>
     <div class="acct-rows">
       <button type="button" class="acct-row" onclick="closeAccountPanel(); openFeedbackV2();"><span class="acct-lead"><span class="ph" data-ph="chat-dots"></span>Podziel się opinią</span><span class="acct-v"></span></button>
@@ -3132,6 +3134,19 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<!-- Our own yes/no dialog: in the native iOS shell window.confirm() shows
+     system-English "Cancel/Ok", so account-level questions use this. -->
+<div class="onboard-overlay hidden" id="mConfirmOverlay">
+  <div class="onboard-box">
+    <h3 id="mConfirmTitle"></h3>
+    <p id="mConfirmText"></p>
+    <div class="onboard-actions">
+      <button class="skip" id="mConfirmCancel"></button>
+      <button class="save" id="mConfirmOk"></button>
+    </div>
+  </div>
+</div>
+
 <!-- Trener AI popup (mockup, 2026-09-16) — opened from the collapsed
      .dash-ai-card on the Dashboard instead of expanding it in place.
      Maciej: right after a workout you want to rest, not read a critique —
@@ -3155,7 +3170,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <h3 data-i18n="onboardTitle">Cześć! Jak Cię nazywać?</h3>
     <p data-i18n="onboardBody">Podpiszemy Twoim imieniem kopie zapasowe treningów. Możesz to pominąć.</p>
     <input type="text" id="onboardNick" data-i18n-ph="onboardNamePh" placeholder="np. Maciek" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false">
-    <div class="onboard-note" data-i18n="onboardNote">Dane treningowe trzymamy tylko na tym urządzeniu — nie w chmurze. Jeśli zmienisz telefon albo wyczyścisz dane przeglądarki, stracisz historię. Warto od czasu do czasu zrobić kopię zapasową — ikona pobierania na ekranie Dziennik.</div>
+    <div class="onboard-note" data-i18n="onboardNote">Bez konta treningi zapisują się tylko na tym telefonie. Załóż darmowe konto (ikona w prawym górnym rogu), a będą bezpieczne w chmurze i dostępne na każdym urządzeniu.</div>
     <div class="onboard-actions">
       <button class="skip" onclick="skipOnboarding()" data-i18n="skip">Pomiń</button>
       <button class="save" onclick="saveOnboarding()" data-i18n="save">Zapisz</button>
@@ -3537,7 +3552,7 @@ const T_EN = {
   onboardTitle: 'Hey! What should we call you?',
   onboardBody: "We'll label your workout backups with your name. You can skip this.",
   onboardNamePh: 'e.g. Alex',
-  onboardNote: "We only keep your training data on this device — never in the cloud. If you switch phones or clear your browser data, you'll lose your history. Back it up now and then — download icon on the History screen.",
+  onboardNote: "Without an account your workouts stay on this phone only. Create a free account (icon in the top right) to keep them safe in the cloud and on all your devices.",
   skip: 'Skip',
   save: 'Save',
   whatsnewVersion: v => `Version ${v}`,
@@ -4606,6 +4621,9 @@ function renderAccountPanel(){
   set('acctVer', APP_VERSION);
   set('acctChlVer', 'v' + APP_VERSION);
   set('acctFootData', inCloud ? 'dane zsynchronizowane z chmurą' : 'dane treningowe tylko na tym urządzeniu');
+  set('acctBackupHint', inCloud
+    ? 'Treningi są bezpieczne w chmurze. Kopia w pliku to dodatkowe zabezpieczenie.'
+    : 'Bez konta treningi są tylko na tym telefonie. Warto co jakiś czas zrobić kopię.');
   const cw = currentWeightKg();
   set('acctWeightV', cw != null ? fmtKg(cw) + ' kg' : 'Uzupełnij');
   set('acctHeightV', bodyData.heightCm ? bodyData.heightCm + ' cm' : 'Uzupełnij');
@@ -5097,7 +5115,11 @@ async function syncCloudData(){
     // With the user's OK wipe it and start clean; the reload re-runs this
     // sync with empty local state, which just pulls this account's data.
     if(state && state.uid && state.uid !== uid){
-      if(!confirm('Na tym urządzeniu są dane innego konta. Zastąpić je danymi konta, na które się logujesz? Jeśli nie, zostaniesz wylogowany.')){
+      if(!await mConfirm({
+        title: 'Dane innego konta',
+        text: 'Na tym telefonie są dane z innego konta. Zastąpić je danymi konta, na które się logujesz? Jeśli nie, zostaniesz wylogowany.',
+        ok: 'Zastąp', cancel: 'Wyloguj'
+      })){
         await supabaseClient.auth.signOut();
         return;
       }
@@ -5534,9 +5556,30 @@ async function clearCachedCloudResponses(){
    prostsze i bezpieczniejsze niż dorenderowywanie każdego widoku z osobna. */
 const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/delete-account';
 
+function mConfirm({ title, text, ok, cancel = 'Anuluj', danger = false }){
+  return new Promise(resolve=>{
+    const ov = document.getElementById('mConfirmOverlay');
+    const okBtn = document.getElementById('mConfirmOk');
+    const cancelBtn = document.getElementById('mConfirmCancel');
+    document.getElementById('mConfirmTitle').textContent = title;
+    document.getElementById('mConfirmText').textContent = text;
+    okBtn.textContent = ok;
+    cancelBtn.textContent = cancel;
+    okBtn.classList.toggle('danger', danger);
+    const done = v=>{ ov.classList.add('hidden'); okBtn.onclick = cancelBtn.onclick = null; resolve(v); };
+    okBtn.onclick = ()=>done(true);
+    cancelBtn.onclick = ()=>done(false);
+    ov.classList.remove('hidden');
+  });
+}
+
 async function deleteAccountV2(){
   if(!cloudSession || !cloudSession.access_token) return;
-  if(!confirm('Na pewno usunąć konto? Tego nie da się cofnąć. Stracisz dostęp do historii i planów w chmurze na wszystkich urządzeniach.')) return;
+  if(!await mConfirm({
+    title: 'Usunąć konto?',
+    text: 'Tego nie da się cofnąć. Stracisz historię i plany zapisane w chmurze, na wszystkich urządzeniach.',
+    ok: 'Usuń konto', danger: true
+  })) return;
   try {
     const res = await fetch(DELETE_ACCOUNT_URL, {
       method: 'POST',
