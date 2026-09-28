@@ -5635,11 +5635,17 @@ async function nativeSignInWithApple(){
     });
     const { error } = await supabaseClient.auth.signInWithIdToken({ provider: 'apple', token: response.identityToken, nonce: rawNonce });
     if(error) throw error;
-    // Fire-and-forget, never blocks sign-in: lets delete-account later
-    // revoke this Apple authorization if the user deletes their account
-    // (guideline 5.1.1(v)). authorizationCode is one-time-use and otherwise
-    // discarded, so this is the only chance to capture it.
-    if(response.authorizationCode) storeAppleToken(response.authorizationCode);
+    // AWAITED, not fire-and-forget: signInWithIdToken's SIGNED_IN event can
+    // synchronously lead to syncCloudData()'s "different account" dialog and
+    // a location.reload() the moment the user taps through it (see
+    // syncCloudData()) — a reload aborts any still-in-flight fetch, so an
+    // unawaited call here could silently lose the token on a fast tap.
+    // Swallows its own errors (see storeAppleToken) so a failed exchange
+    // still lets sign-in complete normally — this just delays it slightly.
+    // authorizationCode is one-time-use and otherwise discarded, so this is
+    // the only chance to capture it. Lets delete-account later revoke this
+    // Apple authorization if the user deletes their account (5.1.1(v)).
+    if(response.authorizationCode) await storeAppleToken(response.authorizationCode);
     closeAuthSheet();
   }catch(e){
     // Code 1001 = the user closed the Apple sheet; nothing to report.
@@ -6041,7 +6047,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.8";
+const APP_VERSION = "4.47.9";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at

@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.8 (2026-09-28)
+- **Aktualna wersja:** 4.47.9 (2026-09-29)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.9 · PATCH · 2026-09-29
+
+Bez wpisu „Co nowego” (poprawka niewidocznego błędu z 4.47.7).
+
+Testowe logowanie na buildzie 8 wykazało, że `apple_tokens` zostawało puste mimo poprawnie działającego logowania Apple — `storeAppleToken()` był wywołany jako fire-and-forget (bez `await`), a `signInWithIdToken()`'s zdarzenie `SIGNED_IN` potrafi natychmiast doprowadzić do dialogu „Dane innego konta” (`syncCloudData()`) i `location.reload()` w reakcji na „Zastąp” — przeładowanie strony ucina każde niedokończone żądanie sieciowe, w tym wysyłkę tokenu do `apple-store-token`. `nativeSignInWithApple()` teraz robi `await storeAppleToken(...)` przed `closeAuthSheet()`, więc zapis tokenu (albo jego udokumentowana porażka w logach) kończy się, zanim cokolwiek innego może przeładować stronę. `storeAppleToken()` nadal połyka własne błędy, więc `await` niczego nie blokuje poza opóźnieniem zamknięcia arkusza o czas jednej wymiany z Apple.
+
+**Commity:**
+
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
+- poprzedni wpis (4.47.8): `fb44c05` 2026-09-28 — Przypomnienie o treningu — lokalne powiadomienia (guideline 4.2)
 
 ### 4.47.8 · PATCH · 2026-09-28
 
