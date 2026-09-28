@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.5 (2026-09-28)
+- **Aktualna wersja:** 4.47.6 (2026-09-28)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.6 · PATCH · 2026-09-28
+
+Bez wpisu „Co nowego” (poprawka widoczności).
+
+Toast (`.toast`, potwierdzenia typu „Wysłaliśmy link do resetu hasła”) miał `z-index:50`, a arkusze panelu konta (`#authSheet`, `#weightSheet` itd.) są celowo podniesione na `z-index:9600`. Każdy toast wywołany przy otwartym arkuszu konta renderował się pod nim, więc był niewidoczny — złapane przy teście resetu hasła (4.47.5): po kliknięciu „Zapomniałeś hasła?” nic nie było widać, mimo że mail poszedł. `.toast` → `z-index:9700`. Przy okazji `#newPasswordSheet` (nowy w 4.47.5) dopisany do listy arkuszy z `z-index:9600` — wcześniej pominięty.
+
+**Commity:**
+
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
+- poprzedni wpis (4.47.5): `f2ec4a8` 2026-09-28 — Reset hasła: ekran „Nowe hasło” po powrocie z linku, redirectTo
 
 ### 4.47.5 · PATCH · 2026-09-28
 
