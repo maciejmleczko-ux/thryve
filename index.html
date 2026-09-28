@@ -830,6 +830,9 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-auth-error{margin:6px 0 0;font-size:var(--m-fs-2xs);color:#c00;line-height:1.4;}
 .acct-oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;border:1px solid #dadce0;border-radius:var(--m-r-pill);padding:12px;font-size:var(--m-fs-base);font-weight:500;color:#3c4043;font-family:inherit;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),background var(--m-dur-quick) ease;}
 .acct-oauth-btn:active{transform:scale(.97);background:#f7f7f8;}
+.acct-oauth-btn.apple{background:#000;border-color:#000;color:#fff;}
+.acct-oauth-btn.apple:active{background:#1c1c1e;}
+.acct-oauth-btn.apple svg{width:20px;height:20px;flex:0 0 20px;fill:currentColor;position:relative;top:-2px;}
 .acct-oauth-divider{display:flex;align-items:center;gap:12px;margin:14px 0 0;}
 .acct-oauth-divider::before,.acct-oauth-divider::after{content:'';flex:1;height:1px;background:#e6e2ec;}
 .acct-oauth-divider span{font-size:var(--m-fs-2xs);color:var(--m-muted);text-transform:uppercase;letter-spacing:.06em;}
@@ -3022,7 +3025,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <p class="fbv2-subtitle" id="authSheetSubtitle">Twoje treningi i plany będą dostępne na każdym urządzeniu.</p>
       </div>
       <div class="plansv2-customize-section">
-        <button type="button" class="acct-oauth-btn" onclick="signInWithGoogle()">
+        <button type="button" class="acct-oauth-btn apple" onclick="signInWithOAuthProvider('apple')">
+          <svg viewBox="0 0 814 1000" width="20" height="20" aria-hidden="true"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>
+          <span>Kontynuuj z Apple</span>
+        </button>
+        <button type="button" class="acct-oauth-btn" onclick="signInWithOAuthProvider('google')">
           <svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
           <span>Kontynuuj przez Google</span>
         </button>
@@ -5305,7 +5312,9 @@ function renderAcctCloudCard(){
     signedBox.hidden = false;
     if(danger) danger.hidden = false;
     const emailEl = document.getElementById('acctCloudEmail');
-    if(emailEl) emailEl.textContent = cloudSession.user.email || '';
+    // "Hide My Email" on Sign in with Apple gives a random relay address.
+    const email = cloudSession.user.email || '';
+    if(emailEl) emailEl.textContent = /@privaterelay\.appleid\.com$/i.test(email) ? 'Ukryty e-mail (Apple)' : email;
   } else {
     cta.hidden = false;
     signedBox.hidden = true;
@@ -5407,7 +5416,7 @@ async function submitAuthForm(){
   }
 }
 
-async function signInWithGoogle(){
+async function signInWithOAuthProvider(provider){
   if(!supabaseClient) return;
   // signInWithOAuth navigates the whole page away to Google's consent
   // screen — there's nothing to await here. On return, Supabase's own
@@ -5416,10 +5425,10 @@ async function signInWithGoogle(){
   // listens to (renders the account panel, runs syncCloudData()) — no
   // extra handling needed on this end.
   const { error } = await supabaseClient.auth.signInWithOAuth({
-    provider: 'google',
+    provider,
     options: { redirectTo: window.location.origin + window.location.pathname }
   });
-  if(error){ console.error('signInWithGoogle', error); toast('Nie udało się połączyć z Google'); }
+  if(error){ console.error('signInWithOAuthProvider', provider, error); toast('Nie udało się połączyć z ' + (provider === 'apple' ? 'Apple' : 'Google')); }
 }
 async function requestPasswordReset(){
   if(!supabaseClient) return;
