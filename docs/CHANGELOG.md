@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.7 (2026-09-28)
+- **Aktualna wersja:** 4.47.8 (2026-09-28)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.8 · PATCH · 2026-09-28
+
+Bez wpisu „Co nowego” (w wersji web nic się nie zmienia — funkcja tylko w apce natywnej).
+
+Druga funkcja natywna pod guideline 4.2 (po haptyce): **przypomnienie o treningu**, lokalne powiadomienie przez `@capacitor/local-notifications`. Panel konta → nowa sekcja „Powiadomienia” (widoczna tylko gdy `IS_NATIVE`, ukryta na web/PWA) → `#reminderSheet` (wzorzec `editKcalSheet`): przełącznik + godzina. Dni bierze z `planActiveDays()` aktywnego planu, mapowane na konwencję iOS (`weekday`, 1 = niedziela). `scheduleWorkoutReminders()` przelicza wszystko od zera (cancel-all + reschedule) przy starcie apki i przy zapisie arkusza — celowo NIE na żywo przy każdej zmianie planu (dużo miejsc mutuje `starredPlanId`/`schedule`; hint w arkuszu mówi, że dni są z obecnego planu). Zgoda systemowa proszona dopiero przy włączeniu przełącznika (`requestPermissions()`); odmowa → toast z odesłaniem do Ustawień. Nowy toggle CSS (`.acct-toggle*`) zgodny z tokenami ruchu: kolor przez `ease`, pozycja gałki przez `var(--m-dur-quick) var(--m-ease)`.
+
+**Commity:**
+
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
+- poprzedni wpis (4.47.7): `fbb5177` 2026-09-28 — Unieważnianie Sign in with Apple przy usuwaniu konta (5.1.1(v))
 
 ### 4.47.7 · PATCH · 2026-09-28
 
