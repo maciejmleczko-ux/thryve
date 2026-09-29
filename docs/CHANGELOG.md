@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.11 (2026-09-29)
+- **Aktualna wersja:** 4.47.12 (2026-09-29)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.12 · PATCH · 2026-09-29
+
+Bez wpisu „Co nowego” (poprawka warstw).
+
+„Usuń konto” w panelu konta „nic nie robiło”: `mConfirm()` otwierał `#mConfirmOverlay` (`.onboard-overlay`, `z-index:90`) **pod** panelem konta (`.acct-overlay`, `z-index:95`), więc dialog „Usunąć konto?” był niewidoczny. Ten sam rodzaj błędu co toast w 4.47.6. `#mConfirmOverlay{z-index:9650}` — nad arkuszami konta (9600), pod toastem (9700). Przy okazji potwierdzona przyczyna pustego `apple_tokens`: log diagnostyczny z 4.47.11 pokazał `db_upsert_failed` — projekt nie nadaje automatycznie uprawnień DML nowym tabelom, `service_role` nie miał `SELECT/INSERT/UPDATE/DELETE` na `apple_tokens`. Naprawione `GRANT` w bazie i w `supabase-schema.sql` (`b8b550f`); zapis tokenu potwierdzony na żywo (`{"ok":true}`, wiersz w bazie). Tymczasowy „🐞 Debug Apple” zostaje do końca testu usuwania konta.
+
+**Commity:**
+
+- `b8b550f` 2026-09-29 — apple_tokens: GRANT dla service_role
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.47.11 · PATCH · 2026-09-29
 

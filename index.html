@@ -796,6 +796,9 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
 #nameEditOverlay,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet{z-index:9600;}
+/* mConfirm() is opened from inside the account panel (z 95) and its sheets
+   (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
+#mConfirmOverlay{z-index:9650;}
 .acct-num-row{display:flex;gap:12px;}
 .acct-num-row.solo{max-width:172px;}
 .acct-num-row.name{max-width:260px;}
@@ -6081,7 +6084,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.11";
+const APP_VERSION = "4.47.12";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
