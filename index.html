@@ -5669,6 +5669,18 @@ async function signInWithOAuthProvider(provider){
 const NATIVE_AUTH_CALLBACK = 'app.mekkio://auth-callback';
 // No bundler here, so native plugins come from the bridge's Capacitor.Plugins.
 const capPlugin = name => (window.Capacitor && window.Capacitor.Plugins || {})[name];
+// WKWebView silently ignores target="_blank" (no new windows in the native
+// shell), so e.g. "Polityka Prywatności" did nothing. Open such links in the
+// in-app Safari view instead, resolved against the live site.
+if(IS_NATIVE){
+  document.addEventListener('click', e=>{
+    const a = e.target.closest && e.target.closest('a[target="_blank"]');
+    const B = capPlugin('Browser');
+    if(!a || !B) return;
+    e.preventDefault();
+    B.open({ url: new URL(a.getAttribute('href'), 'https://app.mekkio.app/').href, presentationStyle: 'popover' });
+  });
+}
 async function nativeSignInWithApple(){
   try{
     const rawNonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), b=>b.toString(16).padStart(2,'0')).join('');
@@ -6248,7 +6260,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.14";
+const APP_VERSION = "4.47.15";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6880,7 +6892,28 @@ function closeWhatsNew(){
 }
 
 /* ---------- feedback ---------- */
-const FEEDBACK_ENDPOINT = 'https://formspree.io/f/xkjwaqpo';
+const FEEDBACK_ENDPOINT = 'https://formspree.io/f/xkjwaqpo';   // Formspree delivers to support@mekkio.app (target set in the Formspree dashboard)
+// Shared body for both feedback forms. `_subject` becomes the email subject;
+// `email` is what Formspree uses as Reply-To, so answering from the inbox goes
+// straight to the user — only sent when they're signed in (we don't ask
+// guests for an address).
+function feedbackPayload(type, message){
+  const label = { bug:'Błąd', idea:'Pomysł', other:'Inne' }[type] || type;
+  const body = {
+    _subject: 'Mekkio · ' + label + ' · v' + APP_VERSION,
+    typ: type,
+    wiadomosc: message,
+    wersja: APP_VERSION,
+    platforma: IS_NATIVE ? 'iOS (apka)' : 'przeglądarka',
+    ekran: currentRoute,
+    jezyk: LANG,
+    imie: (typeof profileName !== 'undefined' && profileName) ? profileName : '',
+    userAgent: navigator.userAgent,
+  };
+  const email = cloudSession && cloudSession.user && cloudSession.user.email;
+  if(email) body.email = email;
+  return body;
+}
 let feedbackType = 'bug';
 function setFeedbackType(btn){
   feedbackType = btn.dataset.type;
@@ -6905,15 +6938,7 @@ async function submitFeedback(){
     const res = await fetch(FEEDBACK_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        typ: feedbackType,
-        wiadomosc: message,
-        wersja: APP_VERSION,
-        ekran: currentRoute,
-        jezyk: LANG,
-        imie: (typeof profileName !== 'undefined' && profileName) ? profileName : '',
-        userAgent: navigator.userAgent,
-      }),
+      body: JSON.stringify(feedbackPayload(feedbackType, message)),
     });
     if(!res.ok) throw new Error('bad status');
     closeFeedback();
@@ -6956,15 +6981,7 @@ async function submitFeedbackV2(){
     const res = await fetch(FEEDBACK_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        typ: feedbackTypeV2,
-        wiadomosc: message,
-        wersja: APP_VERSION,
-        ekran: currentRoute,
-        jezyk: LANG,
-        imie: (typeof profileName !== 'undefined' && profileName) ? profileName : '',
-        userAgent: navigator.userAgent,
-      }),
+      body: JSON.stringify(feedbackPayload(feedbackTypeV2, message)),
     });
     if(!res.ok) throw new Error('bad status');
     closeFeedbackV2();

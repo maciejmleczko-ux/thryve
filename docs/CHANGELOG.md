@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.14 (2026-09-29)
+- **Aktualna wersja:** 4.47.15 (2026-09-29)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,19 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.15 · PATCH · 2026-09-29
+
+Bez wpisu „Co nowego” (poprawki).
+
+- **Linki `target="_blank"` w apce natywnej nic nie robiły** (WKWebView nie otwiera nowych okien) — dotyczyło „Polityka Prywatności” w panelu konta i w oknie logowania. Globalny handler kliknięć (tylko `IS_NATIVE`) otwiera takie linki w in-app Safari (`@capacitor/browser`), adres rozwiązywany względem `https://app.mekkio.app/`.
+- **Opinie → support@mekkio.app:** wspólny `feedbackPayload()` dla obu formularzy; `_subject` „Mekkio · {Błąd|Pomysł|Inne} · v{wersja}”, nowe pole `platforma`, a u zalogowanego `email` (Formspree używa go jako Reply-To, więc odpowiedź z Gmaila idzie wprost do użytkownika). Adres docelowy ustawia się w panelu Formspree (formularz `xkjwaqpo`), nie w kodzie.
+- Polityka Prywatności: Formspree dopisany do podmiotów przetwarzających.
+
+**Commity:**
+
+- `b546057` 2026-09-29 — Apple Zdrowie: waga i kalorie z zegarka (4.47.14, build 14)
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.47.14 · PATCH · 2026-09-29
 
