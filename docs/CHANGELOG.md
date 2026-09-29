@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.12 (2026-09-29)
+- **Aktualna wersja:** 4.47.13 (2026-09-29)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.13 · PATCH · 2026-09-29
+
+Bez wpisu „Co nowego” (sprzątanie po diagnostyce).
+
+**5.1.1(v) potwierdzone na żywo (build 13):** logowanie Apple → wiersz w `apple_tokens` → „Usuń konto” → `delete-account` unieważnił token u Apple (mail od Apple „Aplikacja Mekkio odrzuciła funkcję Zaloguj się, używając konta Apple”, Mekkio zniknęło z „Aplikacje korzystające z Apple ID”), w bazie zero wierszy w `auth.users`/`apple_tokens`/`plans` dla tego konta. Usunięte tymczasowe `appleDebugLog()`, `showAppleDebugLog()` i wiersz „🐞 Debug Apple” z 4.47.10–4.47.11; `storeAppleToken()` przy nieudanym zapisie loguje teraz do konsoli treść odpowiedzi (`{ok:false, reason}`), `await` przed `closeAuthSheet()` zostaje. Klucz `fitlog_apple_debug_v1` może zostać w localStorage testerów builda 12–13 (nieszkodliwy).
+
+**Commity:**
+
+- `4aad8ac` 2026-09-29 — Dialog „Usunąć konto?” nad panelem konta (4.47.12)
+- `255044c` 2026-09-29 — Build 13
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.47.12 · PATCH · 2026-09-29
 
