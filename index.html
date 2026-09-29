@@ -2885,6 +2885,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="acct-rows" id="acctReminderRows" hidden>
       <button type="button" class="acct-row" onclick="openReminderSheet()"><span>Przypomnienie o treningu</span><span class="acct-v" id="acctReminderV">Wyłączone</span></button>
     </div>
+    <!-- TYMCZASOWE — do usunięcia po znalezieniu przyczyny pustego apple_tokens -->
+    <div class="acct-rows" style="margin-top:8px;">
+      <button type="button" class="acct-row" onclick="showAppleDebugLog()"><span>🐞 Debug Apple</span><span class="acct-v"></span></button>
+    </div>
     <p class="acct-sec">Kopia zapasowa</p>
     <div class="acct-rows">
       <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="upload-simple"></span>Twórz kopię zapasową</span><span class="acct-v">Plik .json</span></button>
@@ -5622,6 +5626,29 @@ async function signInWithOAuthProvider(provider){
 const NATIVE_AUTH_CALLBACK = 'app.mekkio://auth-callback';
 // No bundler here, so native plugins come from the bridge's Capacitor.Plugins.
 const capPlugin = name => (window.Capacitor && window.Capacitor.Plugins || {})[name];
+// TYMCZASOWA DIAGNOSTYKA (cały blok do usunięcia po znalezieniu przyczyny
+// pustego apple_tokens): loguje do localStorage zamiast toastów, bo te
+// potrafią zniknąć/zgubić się pod dialogiem "Dane innego konta" albo zostać
+// ucięte przez location.reload() zanim użytkownik zdąży je przeczytać.
+// localStorage.setItem jest synchroniczny, więc przeżywa nawet reload zaraz
+// potem. Podejrzenie: response.authorizationCode puste przy ponownym
+// uwierzytelnieniu tym samym Apple ID, którego apka już wcześniej użyła —
+// zero żądań do apple-store-token w logach mimo udanego logowania.
+function appleDebugLog(step, extra){
+  try{
+    const log = JSON.parse(localStorage.getItem('fitlog_apple_debug_v1') || '[]');
+    log.push({ t: new Date().toISOString().slice(11,19), step, extra: String(extra == null ? '' : extra) });
+    localStorage.setItem('fitlog_apple_debug_v1', JSON.stringify(log.slice(-12)));
+  }catch(e){}
+}
+function showAppleDebugLog(){
+  let log = [];
+  try{ log = JSON.parse(localStorage.getItem('fitlog_apple_debug_v1') || '[]'); }catch(e){}
+  const text = log.length
+    ? log.map(l=> l.t + ' ' + l.step + (l.extra ? ' — ' + l.extra : '')).join('\n')
+    : '(pusto — jeszcze żadnej próby logowania Apple od instalacji tego builda)';
+  alert(text); // celowo alert(), nie toast — blokujący, nie da się przegapić ani ubić reloadem
+}
 async function nativeSignInWithApple(){
   try{
     const rawNonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), b=>b.toString(16).padStart(2,'0')).join('');
@@ -5633,8 +5660,10 @@ async function nativeSignInWithApple(){
       scopes: 'email name',
       nonce: hashedNonce
     });
+    appleDebugLog('authorize_ok', 'code=' + (response.authorizationCode ? response.authorizationCode.length + 'zn' : 'BRAK') + ' idTok=' + (response.identityToken ? response.identityToken.length + 'zn' : 'BRAK'));
     const { error } = await supabaseClient.auth.signInWithIdToken({ provider: 'apple', token: response.identityToken, nonce: rawNonce });
     if(error) throw error;
+    appleDebugLog('signin_ok');
     // AWAITED, not fire-and-forget: signInWithIdToken's SIGNED_IN event can
     // synchronously lead to syncCloudData()'s "different account" dialog and
     // a location.reload() the moment the user taps through it (see
@@ -5645,14 +5674,11 @@ async function nativeSignInWithApple(){
     // authorizationCode is one-time-use and otherwise discarded, so this is
     // the only chance to capture it. Lets delete-account later revoke this
     // Apple authorization if the user deletes their account (5.1.1(v)).
-    // TYMCZASOWA DIAGNOSTYKA (usunąć po znalezieniu przyczyny pustego
-    // apple_tokens — zero żądań do apple-store-token w logach mimo
-    // udanego logowania, więc podejrzenie pada na brak authorizationCode
-    // w odpowiedzi wtyczki przy ponownym uwierzytelnieniu tym samym Apple ID).
     if(response.authorizationCode) await storeAppleToken(response.authorizationCode);
-    else toast('debug: BRAK authorizationCode w odpowiedzi Apple');
+    else appleDebugLog('skip_store', 'brak authorizationCode');
     closeAuthSheet();
   }catch(e){
+    appleDebugLog('outer_catch', (e && (e.code || e.message)) || String(e));
     // Code 1001 = the user closed the Apple sheet; nothing to report.
     if(String(e && (e.code || e.message)).includes('1001')) return;
     console.error('nativeSignInWithApple', e);
@@ -5660,18 +5686,19 @@ async function nativeSignInWithApple(){
   }
 }
 async function storeAppleToken(authorizationCode){
+  appleDebugLog('store_start');
   try{
     const { data } = await supabaseClient.auth.getSession();
     const accessToken = data && data.session && data.session.access_token;
-    if(!accessToken){ toast('debug: brak sesji przy zapisie tokenu'); return; } // TYMCZASOWE
+    if(!accessToken){ appleDebugLog('store_no_session'); return; }
     const res = await fetch(SUPABASE_URL + '/functions/v1/apple-store-token', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + accessToken },
       body: JSON.stringify({ authorizationCode })
     });
     const body = await res.text();
-    setTimeout(()=> toast('debug: ' + res.status + ' ' + body.slice(0, 80)), 2400); // TYMCZASOWE — po zniknięciu ewentualnego "Zalogowano"
-  }catch(e){ console.error('storeAppleToken', e); setTimeout(()=> toast('debug: fetch rzucił — ' + e.message), 2400); } // TYMCZASOWE
+    appleDebugLog('store_fetch_done', res.status + ' ' + body.slice(0, 100));
+  }catch(e){ appleDebugLog('store_fetch_threw', e && e.message); console.error('storeAppleToken', e); }
 }
 async function nativeBrowserOAuth(provider){
   const { data, error } = await supabaseClient.auth.signInWithOAuth({
@@ -6054,7 +6081,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.10";
+const APP_VERSION = "4.47.11";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at

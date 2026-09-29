@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.10 (2026-09-29)
+- **Aktualna wersja:** 4.47.11 (2026-09-29)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.11 · PATCH · 2026-09-29
+
+Bez wpisu „Co nowego” (build diagnostyczny, do usunięcia po znalezieniu przyczyny).
+
+Toasty z 4.47.10 nie zadziałały — użytkownik nie zobaczył żadnego, mimo potwierdzonego świeżego logowania (Edge Function logi pokazują zero wywołań `apple-store-token`, ale sam system logów Supabase też nie pokazywał ŻADNEJ aktywności z ostatniej godziny, więc podejrzenie o opóźnienie w logach, nie tylko o brakujące żądanie). Toast mógł zniknąć pod pełnoekranowym dialogiem „Dane innego konta” albo zostać ucięty przez `location.reload()` zanim zdążył się pokazać. Zamiana na trwalszy mechanizm: `appleDebugLog(step, extra)` zapisuje każdy krok (`authorize_ok` z długością `authorizationCode`/`identityToken`, `signin_ok`, `store_start`, `store_no_session`, `store_fetch_done` ze statusem HTTP i treścią odpowiedzi, `store_fetch_threw`, `outer_catch`) do `localStorage` (`fitlog_apple_debug_v1`, ostatnie 12 wpisów) — zapis jest synchroniczny, więc przeżywa reload. Nowy tymczasowy wiersz „🐞 Debug Apple” w panelu konta (`showAppleDebugLog()`) pokazuje log przez `alert()` — blokujący, nie znika sam, nie da się go przegapić ani ubić reloadem.
+
+**Commity:**
+
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
+- poprzedni wpis (4.47.10): `02a1f52` 2026-09-29 — Build diagnostyczny: toast pokazujący status zapisu tokenu Apple
 
 ### 4.47.10 · PATCH · 2026-09-29
 
