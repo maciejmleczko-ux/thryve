@@ -795,7 +795,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    straight from the finish screen too. Only the few genuinely new bits
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
-#nameEditOverlay,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet{z-index:9600;}
+#nameEditOverlay,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet{z-index:9600;}
 /* mConfirm() is opened from inside the account panel (z 95) and its sheets
    (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
 #mConfirmOverlay{z-index:9650;}
@@ -2888,6 +2888,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="acct-rows" id="acctReminderRows" hidden>
       <button type="button" class="acct-row" onclick="openReminderSheet()"><span>Przypomnienie o treningu</span><span class="acct-v" id="acctReminderV">Wyłączone</span></button>
     </div>
+    <p class="acct-sec" id="acctHealthSec" hidden>Apple Zdrowie</p>
+    <div class="acct-rows" id="acctHealthRows" hidden>
+      <button type="button" class="acct-row" onclick="openHealthSheet()"><span>Waga i kalorie z zegarka</span><span class="acct-v" id="acctHealthV">Wyłączone</span></button>
+    </div>
     <p class="acct-sec">Kopia zapasowa</p>
     <div class="acct-rows">
       <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="upload-simple"></span>Twórz kopię zapasową</span><span class="acct-v">Plik .json</span></button>
@@ -3179,6 +3183,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           </div>
         </div>
         <button type="button" class="acct-revert" id="kcalRevertBtn" hidden onclick="revertKcal()"></button>
+        <p class="acct-hint" id="kcalWatchHint" hidden></p>
         <p class="acct-hint" id="kcalLearnHint" hidden></p>
         <p class="acct-hint">Kalorie to szacunek, nie pomiar. To nie porada medyczna ani dietetyczna.</p>
       </div>
@@ -3223,6 +3228,39 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="plansv2-customize-actions">
         <button type="button" class="plansv2-customize-cancel" onclick="closeReminderSheet()">ANULUJ</button>
         <button type="button" class="plansv2-customize-apply" onclick="saveReminderSheet()">ZAPISZ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Apple Zdrowie (HealthKit, read-only, native only — capacitor-health).
+     Reads body weight into the weight log and watch workouts' calories into
+     matching Mekkio workouts (see syncHealthData()). Nothing is written to
+     Health and none of it is sent to the AI proxy. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="healthSheet" onclick="if(event.target===this) closeHealthSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-header">
+        <div class="fbv2-title-row">
+          <h1>APPLE ZDROWIE</h1>
+          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeHealthSheet()"></span>
+        </div>
+        <p class="fbv2-subtitle">Mekkio weźmie ze Zdrowia Twoją wagę i spalone kalorie z zegarka.</p>
+      </div>
+      <div class="plansv2-customize-section">
+        <button type="button" class="acct-toggle-row" id="healthToggleRow" onclick="toggleHealthEnabled()">
+          <span>Wyłączone</span>
+          <span class="acct-toggle" id="healthToggle"><span class="acct-toggle-knob"></span></span>
+        </button>
+        <p class="acct-hint">Czytamy wagę (np. z wagi łazienkowej) i treningi z kaloriami z zegarka: Apple Watcha, Garmina, Polara albo każdego innego, który zapisuje do Zdrowia. Waga trafia do dziennika. Kalorie z zegarka zastępują szacunek, jeśli trening pasuje czasem.</p>
+        <p class="acct-hint">To dane o zdrowiu. Waga ląduje w dzienniku wagi, a jeśli masz konto, także w chmurze. Nie wysyłamy ich do Trenera AI ani nikomu innemu. Dostęp odbierzesz w Ustawieniach: Zdrowie → Dostęp do danych i urządzenia → Mekkio.</p>
+        <p class="acct-hint">Masz Garmina albo Polara? Włącz w ich aplikacji zapis do Apple Zdrowie. Z takich zegarków dane przychodzą z opóźnieniem, więc kalorie mogą się pojawić dopiero po kilku minutach.</p>
+        <p class="acct-hint" id="healthStatus" hidden></p>
+      </div>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-cancel" onclick="closeHealthSheet()">ANULUJ</button>
+        <button type="button" class="plansv2-customize-apply" onclick="saveHealthSheet()">ZAPISZ</button>
       </div>
     </div>
   </div>
@@ -4625,9 +4663,13 @@ function rawWorkoutKcal(w){   // the pure formula, before any personal factor
 function kcalEditRatios(){
   const out = [];
   (Array.isArray(workouts) ? workouts : []).forEach(w=>{
-    if(!(w.kcalUser > 0)) return;
+    // A watch reading is as good a "real" value as a manual correction, so
+    // it trains the personal factor too — sessions without the watch get
+    // better estimates from the ones with it.
+    const real = w.kcalUser > 0 ? w.kcalUser : (w.kcalWatch > 0 ? w.kcalWatch : null);
+    if(real == null) return;
     const raw = rawWorkoutKcal(w);
-    if(raw > 0) out.push(w.kcalUser / raw);
+    if(raw > 0) out.push(real / raw);
   });
   return out;
 }
@@ -4653,6 +4695,7 @@ function computeWorkoutKcal(w){
 }
 function workoutKcalShown(w){
   if(w.kcalUser != null) return w.kcalUser;
+  if(w.kcalWatch != null) return w.kcalWatch;   // HealthKit — see syncHealthData()
   if(w.kcalEstimated != null) return w.kcalEstimated;
   return computeWorkoutKcal(w).kcalEstimated;   // lazy for pre-feature workouts
 }
@@ -4679,7 +4722,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet'];
+const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -4746,6 +4789,7 @@ function renderAccountPanel(){
   if(upd){ const d = lastWeightDate(); upd.textContent = d ? 'Ostatnia aktualizacja wagi: ' + fmtDate(d) : ''; upd.hidden = !d; }
   renderAcctCloudCard();
   renderReminderRow();
+  renderHealthRow();
 }
 let _acctPanelCloseT = null;
 function openAccountPanel(){
@@ -5833,11 +5877,19 @@ function openEditKcal(wid){
   if(!w){ return; }
   editKcalWorkoutId = wid;
   const est = (w.kcalEstimated != null) ? w.kcalEstimated : computeWorkoutKcal(w).kcalEstimated;
-  const cur = (w.kcalUser != null) ? w.kcalUser : est;
+  const base = (w.kcalWatch != null) ? w.kcalWatch : est;   // what "revert" falls back to
+  const cur = (w.kcalUser != null) ? w.kcalUser : base;
   document.getElementById('kcalInput').value = (cur != null) ? cur : '';
   const rb = document.getElementById('kcalRevertBtn');
-  if(est != null && w.kcalUser != null){ rb.hidden = false; rb.textContent = 'Wróć do szacunku (' + est + ')'; }
-  else rb.hidden = true;
+  if(base != null && w.kcalUser != null){
+    rb.hidden = false;
+    rb.textContent = w.kcalWatch != null ? 'Wróć do odczytu z zegarka (' + base + ')' : 'Wróć do szacunku (' + base + ')';
+  } else rb.hidden = true;
+  const wh = document.getElementById('kcalWatchHint');
+  if(wh){
+    wh.hidden = w.kcalWatch == null;
+    if(w.kcalWatch != null) wh.textContent = 'Odczyt z Apple Zdrowie: ' + w.kcalWatch + ' kcal' + (w.kcalWatchSrc ? ' (' + w.kcalWatchSrc + ')' : '') + '.';
+  }
   const hint = document.getElementById('kcalLearnHint');
   if(hint){
     const n = kcalEditCount();
@@ -5978,6 +6030,155 @@ async function scheduleWorkoutReminders(){
   try{ await LN.schedule({ notifications }); }catch(e){ console.error('scheduleWorkoutReminders: schedule', e); }
 }
 
+/* ---------- Apple Zdrowie (HealthKit, read-only, native only) ----------
+   capacitor-health ("HealthPlugin"). Two reads, both from ANY source that
+   writes to Health (Apple Watch, Garmin Connect, Polar Flow…):
+   1) body weight → weightLog, one entry per day, never overwriting a day the
+      user already logged by hand;
+   2) watch workouts → kcalWatch on the Mekkio workout they overlap in time
+      (kcalUser still wins; kcalWatch also trains the personal kcal factor).
+   Non-Apple watches sync to Health late (minutes to hours), so this runs on
+   launch, on return to the app and a moment after saving a workout, and
+   keeps retrying recent unmatched workouts for HEALTH_MATCH_DAYS.
+   iOS never tells us whether READ access was granted — "no data" is a normal
+   state, not an error. kcalWatch/startedAt/endedAt stay local (not in
+   cloudWorkoutRow). None of this goes into the AI payload (5.1.3). */
+const LS_HEALTH = "fitlog_health_v1";   // {enabled, lastSync (ms), weightSince (YYYY-MM-DD)}
+const HEALTH_MATCH_DAYS = 14;
+const HEALTH_WEIGHT_FIRST_DAYS = 90;
+let healthState = (()=>{ try{ const v = JSON.parse(localStorage.getItem(LS_HEALTH)); return (v && typeof v === 'object') ? v : { enabled:false }; }catch(e){ return { enabled:false }; } })();
+function saveHealthState(){ localStorage.setItem(LS_HEALTH, JSON.stringify(healthState)); }
+function renderHealthRow(){
+  const sec = document.getElementById('acctHealthSec'), rows = document.getElementById('acctHealthRows');
+  if(!sec || !rows) return;
+  const show = IS_NATIVE && !!capPlugin('HealthPlugin');
+  sec.hidden = !show; rows.hidden = !show;
+  const v = document.getElementById('acctHealthV');
+  if(v) v.textContent = healthState.enabled ? 'Włączone' : 'Wyłączone';
+}
+function setHealthToggleUI(on){
+  document.getElementById('healthToggle').classList.toggle('on', on);
+  document.getElementById('healthToggleRow').querySelector('span').textContent = on ? 'Włączone' : 'Wyłączone';
+}
+function openHealthSheet(){
+  closeAccountPanel();
+  setHealthToggleUI(!!healthState.enabled);
+  const st = document.getElementById('healthStatus');
+  st.hidden = !healthState.lastSync;
+  if(healthState.lastSync){
+    const d = new Date(healthState.lastSync);
+    st.textContent = 'Ostatnie sprawdzenie: ' + (dateStr(d) === todayStr() ? 'dziś' : fmtDate(dateStr(d))) + ', ' + d.toTimeString().slice(0,5) + '.';
+  }
+  setTimeout(()=> acctSheetOpen('healthSheet'), 200); // po animacji zamykania panelu konta
+}
+function closeHealthSheet(viaDrag){ acctSheetClose('healthSheet', viaDrag); }
+function toggleHealthEnabled(){ setHealthToggleUI(!document.getElementById('healthToggle').classList.contains('on')); }
+async function saveHealthSheet(){
+  const enabled = document.getElementById('healthToggle').classList.contains('on');
+  if(enabled && !healthState.enabled){
+    const H = capPlugin('HealthPlugin');
+    try{
+      const av = H && await H.isHealthAvailable();
+      if(!av || !av.available){ toast('Apple Zdrowie jest niedostępne na tym urządzeniu'); return; }
+      await H.requestHealthPermissions({ permissions: ['READ_WEIGHT', 'READ_WORKOUTS'] });
+    }catch(e){ console.error('saveHealthSheet: permissions', e); toast('Nie udało się połączyć ze Zdrowiem'); return; }
+  }
+  healthState.enabled = enabled;
+  saveHealthState();
+  renderHealthRow();
+  closeHealthSheet();
+  if(enabled){
+    const r = await syncHealthData(true);
+    toast(r && (r.weights || r.kcal) ? 'Połączono ze Zdrowiem' + healthSyncSummary(r) : 'Połączono ze Zdrowiem');
+  } else toast('Zapisano');
+}
+function healthSyncSummary(r){
+  const parts = [];
+  if(r.weights) parts.push(r.weights === 1 ? '1 pomiar wagi' : r.weights + ' pomiarów wagi');
+  if(r.kcal) parts.push(r.kcal === 1 ? 'kalorie z 1 treningu' : 'kalorie z ' + r.kcal + ' treningów');
+  return parts.length ? ': ' + parts.join(', ') : '';
+}
+// Mekkio workout → [startMs, endMs] or null. New workouts carry real
+// startedAt/endedAt; older ones fall back to save time (id = 'w_' + ms) minus
+// the active duration.
+function workoutTimeWindow(w){
+  if(w.startedAt && w.endedAt && w.endedAt > w.startedAt) return [w.startedAt, w.endedAt];
+  const saved = parseInt(String(w.id).replace(/^w_/, ''), 10);
+  if(!(saved > 0) || !(w.durationMin > 0)) return null;
+  if(dateStr(new Date(saved)) !== w.date) return null;   // edited/imported — can't trust the timestamp
+  return [saved - w.durationMin * 60000, saved];
+}
+let _healthSyncAt = 0, _healthSyncing = false;
+async function syncHealthData(force){
+  if(!IS_NATIVE || !healthState.enabled || _healthSyncing) return null;
+  const H = capPlugin('HealthPlugin');
+  if(!H) return null;
+  if(!force && Date.now() - _healthSyncAt < 60000) return null;
+  _healthSyncing = true; _healthSyncAt = Date.now();
+  const res = { weights: 0, kcal: 0 };
+  try{
+    // 1) weight
+    const from = healthState.weightSince || dateStr(new Date(Date.now() - HEALTH_WEIGHT_FIRST_DAYS * 86400000));
+    try{
+      const wr = await H.queryRecords({ dataType: 'weight', startDate: new Date(from + 'T00:00:00').toISOString(), endDate: new Date().toISOString() });
+      const byDay = {};   // latest reading per local day
+      (wr && wr.records || []).forEach(r=>{
+        if(!(r.value > 20 && r.value < 400)) return;
+        const d = dateStr(new Date(r.startDate));
+        if(!byDay[d] || r.startDate > byDay[d].startDate) byDay[d] = r;
+      });
+      const have = new Set(weightLog.map(e=> e.date));
+      Object.keys(byDay).forEach(d=>{
+        if(have.has(d)) return;   // a hand-logged (or already imported) day wins
+        weightLog.push({ kg: Math.round(byDay[d].value * 10) / 10, date: d });
+        res.weights++;
+      });
+      if(res.weights){
+        weightLog.sort((a,b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+        saveWeightLog(weightLog);
+      }
+      healthState.weightSince = dateStr(new Date(Date.now() - 2 * 86400000)); // small overlap for late syncs
+    }catch(e){ console.error('syncHealthData: weight', e); }
+
+    // 2) calories from watch workouts
+    const cutoff = dateStr(new Date(Date.now() - HEALTH_MATCH_DAYS * 86400000));
+    const todo = workouts.filter(w=> w.date >= cutoff && w.kcalWatch == null && workoutTimeWindow(w));
+    if(todo.length){
+      const wins = todo.map(workoutTimeWindow);
+      const qStart = Math.min(...wins.map(x=> x[0])) - 2 * 3600000;
+      const qEnd = Math.max(...wins.map(x=> x[1])) + 2 * 3600000;
+      try{
+        const hr = await H.queryWorkouts({ startDate: new Date(qStart).toISOString(), endDate: new Date(Math.min(qEnd, Date.now())).toISOString(), includeHeartRate:false, includeRoute:false, includeSteps:false });
+        const hks = (hr && hr.workouts || []).filter(h=> h.calories > 0)
+          .map(h=> ({ s: new Date(h.startDate).getTime(), e: new Date(h.endDate).getTime(), kcal: Math.round(h.calories), src: h.sourceName || '' }));
+        todo.forEach((w, i)=>{
+          const [ws, we] = wins[i];
+          let best = null, bestOv = 0;
+          hks.forEach(h=>{
+            const ov = Math.min(we, h.e) - Math.max(ws, h.s);
+            if(ov > bestOv){ bestOv = ov; best = h; }
+          });
+          // Must genuinely be the same session: overlap ≥ half of the shorter
+          // one, so a run earlier the same day doesn't get picked.
+          if(best && bestOv >= 0.5 * Math.min(we - ws, best.e - best.s)){
+            w.kcalWatch = best.kcal; w.kcalWatchSrc = best.src;
+            res.kcal++;
+          }
+        });
+        if(res.kcal){ saveWorkouts(workouts); recomputeWorkoutCalories(); }
+      }catch(e){ console.error('syncHealthData: workouts', e); }
+    }
+    if(res.weights && !res.kcal) recomputeWorkoutCalories();   // new weights change the estimates
+    healthState.lastSync = Date.now();
+    saveHealthState();
+    if(res.weights || res.kcal){
+      if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
+      if(document.getElementById('histDetailV2') && typeof selectedHistDateV2 !== 'undefined' && selectedHistDateV2) renderHistDetailV2(false);
+    }
+  }finally{ _healthSyncing = false; }
+  return res;
+}
+
 /* ---------- GYM finish — calories row ---------- */
 let gymFinWorkoutId = null;
 let gymFinKcalMode = null;   // 'edit' | 'noweight'
@@ -6047,7 +6248,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.13";
+const APP_VERSION = "4.47.14";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7999,7 +8200,7 @@ mSheetDrag('exercisePopupOverlayV2', closeExercisePopupV2);
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet']
+['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 
 /* ---- "Zamień ćwiczenie" sheet (stage 3, idea #5) — rides .m-sheet ---- */
@@ -8644,7 +8845,12 @@ function saveWorkout(){
     date: todayStr(),
     day: cls.label,
     exercises: result,
-    durationMin: computeGymSessionDurationMin() // null if no tile was ever tapped this session
+    durationMin: computeGymSessionDurationMin(), // null if no tile was ever tapped this session
+    // Real start/end of the active window (ms epoch) — lets syncHealthData()
+    // match this session to a watch workout in Apple Health by time overlap.
+    // Local-only (not in cloudWorkoutRow); the pull keeps local fields.
+    startedAt: gymSessionStartAt || null,
+    endedAt: gymSessionActiveEndAt || null
   };
   workouts.push(workout);
   saveWorkouts(workouts);
@@ -8660,6 +8866,9 @@ function saveWorkout(){
   persistTodaySwaps(); // today's swaps don't carry past a saved workout
   renderGymGridV2();
   renderGymDoneV2();
+  // A watch workout usually ends (and lands in Health) around the time you
+  // save here — look for it shortly after, forced past the 60 s throttle.
+  if(IS_NATIVE && healthState.enabled) setTimeout(()=> syncHealthData(true), 10000);
   return true;
 }
 /* GYM finish screen (Figma node 185:14366) — Lottie "success" animation over
@@ -13537,6 +13746,11 @@ function applyImport(mode){
 showLoadScreenV2(()=>{}); // production boot splash — the "Mekkio" load screen (name + version) covers every launch for ~1.5s
 initSupabaseAuth();
 if(IS_NATIVE) scheduleWorkoutReminders();
+if(IS_NATIVE){
+  syncHealthData();
+  // Garmin/Polar reach Health minutes-to-hours late — retry on every return.
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') syncHealthData(); });
+}
 updatePlanPillLabel();
 goRoute('dashboard'); // v3 "Mekkio" redesign is now the main layout — boot straight into it
 updateWelcomeGreeting();
