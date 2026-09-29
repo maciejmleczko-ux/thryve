@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.16 (2026-09-29)
+- **Aktualna wersja:** 4.47.17 (2026-09-29)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.17 · PATCH · 2026-09-29
+
+Bez wpisu „Co nowego” (funkcja natywna).
+
+- **Kalorie z zegarka nie są już podpisane „szacunek”.** Karta treningu w Historii pokazuje ikonę zegarka (nowa ikona `watch` z Phosphora w `PH`) i „z zegarka”; przy ręcznej poprawce przekreślona wartość bazowa to „zegarek N” zamiast „szac. N”. Ekran gratulacji (`refreshGymFinKcal`) po dopasowaniu: „Kalorie · z zegarka” z ikoną. Okno edycji kalorii zmienia podtytuł i zastrzeżenie, gdy trening ma `kcalWatch`.
+
+**Commity:**
+
+- `9f612db` 2026-09-29 — Apple Zdrowie: waga czytana zawsze z 90 dni, wpisy oznaczone src:health (4.47.16, build 16)
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.47.16 · PATCH · 2026-09-29
 
