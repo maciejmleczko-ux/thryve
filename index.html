@@ -4621,7 +4621,7 @@ function weightAtDate(d){
 function logWeight(kg, date){
   kg = Math.round(kg*10)/10;
   const i = weightLog.findIndex(e=> e.date === date);
-  if(i >= 0) weightLog[i].kg = kg;
+  if(i >= 0){ weightLog[i].kg = kg; delete weightLog[i].src; }   // hand edit — Health won't touch this day again
   else weightLog.push({kg, date});
   weightLog.sort((a,b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
   saveWeightLog(weightLog);
@@ -6045,7 +6045,7 @@ async function scheduleWorkoutReminders(){
 /* ---------- Apple Zdrowie (HealthKit, read-only, native only) ----------
    capacitor-health ("HealthPlugin"). Two reads, both from ANY source that
    writes to Health (Apple Watch, Garmin Connect, Polar Flow…):
-   1) body weight → weightLog, one entry per day, never overwriting a day the
+   1) body weight → weightLog, one entry per day (marked src:"health"), never overwriting a day the
       user already logged by hand;
    2) watch workouts → kcalWatch on the Mekkio workout they overlap in time
       (kcalUser still wins; kcalWatch also trains the personal kcal factor).
@@ -6055,9 +6055,9 @@ async function scheduleWorkoutReminders(){
    iOS never tells us whether READ access was granted — "no data" is a normal
    state, not an error. kcalWatch/startedAt/endedAt stay local (not in
    cloudWorkoutRow). None of this goes into the AI payload (5.1.3). */
-const LS_HEALTH = "fitlog_health_v1";   // {enabled, lastSync (ms), weightSince (YYYY-MM-DD)}
+const LS_HEALTH = "fitlog_health_v1";   // {enabled, lastSync (ms)}
 const HEALTH_MATCH_DAYS = 14;
-const HEALTH_WEIGHT_FIRST_DAYS = 90;
+const HEALTH_WEIGHT_DAYS = 90;
 let healthState = (()=>{ try{ const v = JSON.parse(localStorage.getItem(LS_HEALTH)); return (v && typeof v === 'object') ? v : { enabled:false }; }catch(e){ return { enabled:false }; } })();
 function saveHealthState(){ localStorage.setItem(LS_HEALTH, JSON.stringify(healthState)); }
 function renderHealthRow(){
@@ -6100,7 +6100,8 @@ async function saveHealthSheet(){
   renderHealthRow();
   closeHealthSheet();
   if(enabled){
-    const r = await syncHealthData(true);
+    let r = null;
+    try{ r = await syncHealthData(true); }catch(e){ console.error('saveHealthSheet: sync', e); }
     toast(r && (r.weights || r.kcal) ? 'Połączono ze Zdrowiem' + healthSyncSummary(r) : 'Połączono ze Zdrowiem');
   } else toast('Zapisano');
 }
@@ -6129,8 +6130,10 @@ async function syncHealthData(force){
   _healthSyncing = true; _healthSyncAt = Date.now();
   const res = { weights: 0, kcal: 0 };
   try{
-    // 1) weight
-    const from = healthState.weightSince || dateStr(new Date(Date.now() - HEALTH_WEIGHT_FIRST_DAYS * 86400000));
+    // 1) weight — always the whole HEALTH_WEIGHT_DAYS window (a few dozen
+    // records): scales like Xiaomi deliver readings late and sometimes with
+    // an old timestamp, so a moving "since" cursor silently skipped them.
+    const from = dateStr(new Date(Date.now() - HEALTH_WEIGHT_DAYS * 86400000));
     try{
       const wr = await H.queryRecords({ dataType: 'weight', startDate: new Date(from + 'T00:00:00').toISOString(), endDate: new Date().toISOString() });
       const byDay = {};   // latest reading per local day
@@ -6139,17 +6142,17 @@ async function syncHealthData(force){
         const d = dateStr(new Date(r.startDate));
         if(!byDay[d] || r.startDate > byDay[d].startDate) byDay[d] = r;
       });
-      const have = new Set(weightLog.map(e=> e.date));
       Object.keys(byDay).forEach(d=>{
-        if(have.has(d)) return;   // a hand-logged (or already imported) day wins
-        weightLog.push({ kg: Math.round(byDay[d].value * 10) / 10, date: d });
-        res.weights++;
+        const kg = Math.round(byDay[d].value * 10) / 10;
+        const cur = weightLog.find(e=> e.date === d);
+        if(!cur){ weightLog.push({ kg, date: d, src: 'health' }); res.weights++; }
+        else if(cur.src === 'health' && cur.kg !== kg){ cur.kg = kg; res.weights++; }   // newer reading that day
+        // no src = logged by hand — that day always wins
       });
       if(res.weights){
         weightLog.sort((a,b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
         saveWeightLog(weightLog);
       }
-      healthState.weightSince = dateStr(new Date(Date.now() - 2 * 86400000)); // small overlap for late syncs
     }catch(e){ console.error('syncHealthData: weight', e); }
 
     // 2) calories from watch workouts
@@ -6184,8 +6187,10 @@ async function syncHealthData(force){
     healthState.lastSync = Date.now();
     saveHealthState();
     if(res.weights || res.kcal){
-      if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
-      if(document.getElementById('histDetailV2') && typeof selectedHistDateV2 !== 'undefined' && selectedHistDateV2) renderHistDetailV2(false);
+      try{
+        if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
+        if(document.getElementById('histDetailV2') && typeof selectedHistDateV2 !== 'undefined' && selectedHistDateV2) renderHistDetailV2(false);
+      }catch(e){ console.error('syncHealthData: refresh', e); }
     }
   }finally{ _healthSyncing = false; }
   return res;
@@ -6260,7 +6265,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.15";
+const APP_VERSION = "4.47.16";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
