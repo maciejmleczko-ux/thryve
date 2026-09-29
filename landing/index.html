@@ -365,7 +365,7 @@ section{position:relative;}
     transition:opacity var(--m-dur-in) ease, transform var(--m-dur-pop) var(--m-ease-spring);
     transition-delay:calc(.35s + var(--j,0) * 45ms);}
 }
-.fcell.c5{grid-column:span 5;} .c5{grid-column:span 5;} .c7{grid-column:span 7;} .c4{grid-column:span 4;} .c6{grid-column:span 6;}
+.c5{grid-column:span 5;} .c7{grid-column:span 7;} .c4{grid-column:span 4;} .c6{grid-column:span 6;}
 .fcard.blue{background:var(--m-plan-mid); color:#fff; box-shadow:none;}
 .fcard.blue p{color:rgba(255,255,255,.9);}
 .rec-list{list-style:none; margin:auto 0 0; padding-top:18px !important; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:8px;}
@@ -390,7 +390,11 @@ section{position:relative;}
 .more h3{font-size:1.1rem;}
 .more p{color:var(--m-muted); font-size:15px;}
 @media (max-width:980px){
-  .c5,.c7,.c4,.c6{grid-column:span 6;}
+  /* records + year chart each get a full row (side by side the short records card stretched to the chart's height) */
+  .c5,.c7{grid-column:span 12;}
+  .c4,.c6{grid-column:span 6;}
+  .fcell.c4:last-child{grid-column:span 12;}
+  .rec-list{margin-top:6px;}
   .more{grid-template-columns:1fr 1fr;}
   .more article{border-left:0 !important; border-top:1px solid var(--m-line) !important;}
   .more article:nth-child(-n+2){border-top:0 !important;}
