@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="img/r-hero.webp">
+<link rel="preload" as="image" href="img/r-orbit.webp">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 <style>
 /* ---------- tokens: motion + palette mirror index.html :root (Mekkio) ---------- */
@@ -178,8 +178,6 @@ section{position:relative;}
 .gl-canvas{position:absolute; z-index:2; pointer-events:none; opacity:0; transition:opacity var(--m-dur-tile) ease;}
 .gl-on .gl-canvas{opacity:1;}
 .gl-on .gl-poster{opacity:0; visibility:hidden; transition:opacity var(--m-dur-fade) ease, visibility 0s linear var(--m-dur-fade);}
-.phone-shadow{position:absolute; left:50%; bottom:-2%; width:78%; height:5%; transform:translateX(-50%); pointer-events:none;
-  background:radial-gradient(closest-side, rgba(40,6,0,.5), rgba(40,6,0,0)); filter:blur(8px);}
 
 /* ---------- HERO (per Figma 2026-09-29) ---------- */
 .hero{padding:var(--frame) var(--frame) 0;}
@@ -198,7 +196,7 @@ section{position:relative;}
   content:""; position:absolute; inset:0; z-index:-1; opacity:.16; mix-blend-mode:soft-light; pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.hero-stage{position:relative; height:clamp(620px,62vw,900px);}
+.hero-stage{position:relative; height:clamp(620px,62vw,900px); --pw:clamp(250px,27.4vw,400px); --ptop:76px;}
 .hero-giant{
   position:absolute; z-index:0; left:calc(-1 * clamp(20px,4vw,56px)); right:calc(-1 * clamp(20px,4vw,56px)); top:clamp(210px,20.8vw,300px);
   display:grid; justify-items:center; font-weight:500; letter-spacing:-.03em; line-height:.8; white-space:nowrap;
@@ -206,8 +204,12 @@ section{position:relative;}
 }
 .hero-giant .l1{font-size:clamp(4.2rem,18vw,16.25rem);}
 .hero-giant .l2{font-size:clamp(3.2rem,13.9vw,12.5rem); display:flex; gap:clamp(90px,12.6vw,182px); margin-top:-.02em;}
-.hero-phone{position:absolute; z-index:2; left:50%; top:clamp(76px,4.6vw,66px); width:clamp(250px,27.4vw,400px); transform:translateX(-50%);}
-.hero-phone .gl-canvas{inset:-6% -45%; width:190%; height:112%;}
+/* three phones on an invisible orbit; the box is sized from the front phone's width (--pw) so the poster
+   render and the live canvas line up at every viewport. The front phone is centred in it, --ptop from the stage top. */
+.hero-orbit{position:absolute; z-index:2; left:50%; top:calc(var(--ptop) - var(--pw) * .275); width:calc(var(--pw) * 3.6); height:calc(var(--pw) * 2.6);
+  transform:translateX(-50%); touch-action:pan-y; -webkit-user-select:none; user-select:none;}
+.hero-orbit .gl-canvas,.hero-orbit .orbit-poster{position:absolute; inset:0; width:100%; height:100%;}
+.hero-orbit .orbit-poster{object-fit:contain; -webkit-user-drag:none;}
 .hero-copy{
   position:relative; z-index:3; display:grid; grid-template-columns:1fr auto; align-items:end; gap:32px;
   margin-top:clamp(-141px,-9.8vw,-24px); color:#1f2329;
@@ -235,9 +237,8 @@ section{position:relative;}
 .soon.ink{background:#1f2329; box-shadow:none;}                       /* on the light bottom of the hero: readable */
 .soon.white{background:#fff; color:var(--m-ink); box-shadow:none;}
 @media (max-width:900px){
-  .hero-stage{--pw:min(64vw,300px); height:calc(84px + var(--pw) * 2.09 + 24px);}
+  .hero-stage{--pw:min(64vw,300px); --ptop:84px; height:calc(84px + var(--pw) * 2.09 + 24px);}
   .hero-giant{top:clamp(150px,40vw,260px);}
-  .hero-phone{width:var(--pw); top:84px;}
   .hero-copy{grid-template-columns:1fr; margin-top:0;}
   .hero-panel::before{background-size:cover; background-position:50% 50%;}
 }
@@ -539,7 +540,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
   /* hero entrance (plays once on load) */
   .js .hero-copy > *{animation:m-reveal var(--m-dur-tile) var(--m-ease) backwards; animation-delay:calc(.15s + var(--i,0) * 90ms);}
   .js .hero-giant{animation:m-giant var(--m-dur-hero) var(--m-ease) .35s backwards;}
-  .js .hero-phone{animation:m-phone-in var(--m-dur-hero) var(--m-ease) .3s backwards;}
+  .js .hero-orbit{animation:m-phone-in var(--m-dur-hero) var(--m-ease) .3s backwards;}
   .js .nav{animation:m-fade var(--m-dur-tile) ease .1s backwards;}
 
   /* touch screens can't hover: the hero phone breathes instead */
@@ -582,10 +583,9 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 
     <div class="hero-stage" id="stage">
       <div class="hero-giant" aria-hidden="true"><span class="l1">każda seria</span><span class="l2"><span>jest</span><span>ważna</span></span></div>
-      <div class="hero-phone" id="heroPhone">
-        <img class="phone-img gl-poster" src="img/r-hero.webp" data-screen="img/scr-dashboard.webp" alt="iPhone z aplikacją Mekkio: pulpit z podsumowaniem tygodnia 14 658 kg, planem na dziś, rekordem i postępem tygodniowym" width="638" height="1335" fetchpriority="high">
+      <div class="hero-orbit" id="heroOrbit" data-screens="img/scr-dashboard.webp img/scr-gym.webp img/scr-stats.webp">
+        <img class="orbit-poster gl-poster" src="img/r-orbit.webp" alt="Trzy iPhone'y z aplikacją Mekkio: pulpit z podsumowaniem tygodnia i planem na dziś, ekran treningu z ćwiczeniami z planu oraz statystyki z rekordami" width="1440" height="1040" fetchpriority="high">
         <canvas class="gl-canvas" id="heroGL" aria-hidden="true"></canvas>
-        <div class="phone-shadow"></div>
       </div>
     </div>
 
@@ -1117,30 +1117,86 @@ document.documentElement.classList.add('js');
   var fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   var cssVar = function(el, name, def){ var s = parseFloat(el.style.getPropertyValue(name)); return isNaN(s) ? def : s; };
 
-  /* HERO — pointer tilt, gentle sway on touch, turns further while the hero scrolls away */
+  /* HERO — three phones on an invisible, slightly tilted orbit. Each faces outward, so only the front one shows
+     its screen. Mouse movement turns the orbit (relative, like dragging without a click); when the mouse stops,
+     the nearest phone is pulled to the front. Touch: swipe. Idle for a few seconds: the next phone comes round. */
   (async function(){
-    var hero = document.getElementById('hero'), box = document.getElementById('heroPhone'), canvas = document.getElementById('heroGL');
+    var hero = document.getElementById('hero'), box = document.getElementById('heroOrbit'), canvas = document.getElementById('heroGL');
     if(!box || !canvas) return;
-    var v = makeView(canvas), ph = await makePhone(box.querySelector('img').dataset.screen);
-    v.scene.add(ph.pivot);
-    var BASE = { x: .14, y: -.38 }, cur = { x: BASE.x, y: BASE.y }, tgt = { x: BASE.x, y: BASE.y }, intro = 0, scrollTurn = 0;
-    if(fine){
-      hero.addEventListener('pointermove', function(e){
-        var r = canvas.getBoundingClientRect();
-        var nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (innerWidth / 2)));
-        var ny = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (innerHeight / 2)));
-        tgt.y = BASE.y + nx * .55; tgt.x = BASE.x + ny * .25;
-      });
-      hero.addEventListener('pointerleave', function(){ tgt.x = BASE.x; tgt.y = BASE.y; });
+    var D = Math.PI / 180;
+    var ANG = [0, 135 * D, 235 * D];                        // uneven gaps on the orbit: 135° / 100° / 125°
+    var srcs = box.dataset.screens.split(' ');
+    var v = makeView(canvas); v.cam.fov = 36; v.fit();      // wider lens than the other views: stronger depth on the orbit
+    var phones = await Promise.all(srcs.map(function(s){ return makePhone(s); }));
+    var orbit = new THREE.Group(); phones.forEach(function(p){ orbit.add(p.pivot); }); v.scene.add(orbit);
+    v.scene.fog = new THREE.Fog(0xee4a1c, 1, 2);            // back phones sink into the hero's orange
+
+    var phi = 0, target = 0, rate = 2.6;                    // orbit angle; starts on the poster pose so the cross-fade has no ghosting
+    var tilt = { x: 0, y: 0 }, tiltT = { x: 0, y: 0 }, scrollTurn = 0, lastT = 0, lastInput = performance.now();
+    var settleTimer = 0, AUTO_MS = 4200;
+    function fronts(){ return ANG.map(function(a){ return -a; }); }
+    // the orbit angle (in any turn) that brings a phone to the front, closest to `from`
+    function nearest(from){
+      var best = 0, bd = 1e9;
+      fronts().forEach(function(f){ var c = f + Math.round((from - f) / (2 * Math.PI)) * 2 * Math.PI, d = Math.abs(c - from); if(d < bd){ bd = d; best = c; } });
+      return best;
     }
-    addEventListener('scroll', function(){ var r = hero.getBoundingClientRect(); scrollTurn = Math.max(0, Math.min(1, -r.top / r.height)) * .9; }, { passive: true });
+    function nextFront(from){                               // next phone comes round from the right (angle decreases)
+      var best = -1e9;
+      fronts().forEach(function(f){ for(var n = -2; n <= 2; n++){ var c = f + n * 2 * Math.PI; if(c < from - .05 && c > best) best = c; } });
+      return best;
+    }
+    function settle(){ target = nearest(target); rate = 5; }
+    function touched(){ lastInput = performance.now(); }
+
+    if(fine){
+      var lx = null;
+      hero.addEventListener('pointermove', function(e){
+        if(e.pointerType !== 'mouse') return;
+        if(lx !== null){ target += (e.clientX - lx) * 3.2 / innerWidth; rate = 9; }
+        lx = e.clientX; touched();
+        var r = box.getBoundingClientRect();
+        tiltT.x = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (innerHeight / 2))) * .07;
+        tiltT.y = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (innerWidth / 2))) * .12;
+        clearTimeout(settleTimer); settleTimer = setTimeout(settle, 160);
+      });
+      hero.addEventListener('pointerleave', function(){ lx = null; tiltT.x = tiltT.y = 0; clearTimeout(settleTimer); settle(); });
+    }
+    // swipe (touch / pen): the orbit follows the finger, then lands on a phone with the throw's momentum
+    var sx = null, sy = null, st = 0, axis = null, vx = 0, px = 0, pt = 0;
+    box.addEventListener('pointerdown', function(e){ if(e.pointerType === 'mouse') return; sx = px = e.clientX; sy = e.clientY; st = target; axis = null; vx = 0; pt = e.timeStamp; touched(); });
+    box.addEventListener('pointermove', function(e){
+      if(sx === null || e.pointerType === 'mouse') return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if(!axis && Math.abs(dx) + Math.abs(dy) > 8) axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      if(axis !== 'x') return;
+      var dt = Math.max(1, e.timeStamp - pt); vx = (e.clientX - px) / dt; px = e.clientX; pt = e.timeStamp;
+      target = st + dx * 3.2 / innerWidth; rate = 14; touched();
+    });
+    function release(){ if(sx === null) return; if(axis === 'x'){ target = nearest(target + vx * 180 * 3.2 / innerWidth); rate = 5; } sx = null; touched(); }
+    box.addEventListener('pointerup', release); box.addEventListener('pointercancel', release);
+
+    addEventListener('scroll', function(){ var r = hero.getBoundingClientRect(); scrollTurn = Math.max(0, Math.min(1, -r.top / r.height)) * .7; }, { passive: true });
+
     v.update = function(t){
-      sizePhone(v, ph, box.clientHeight * .982);              // same size as the poster render
-      intro = Math.min(1, intro + .02); var e = 1 - Math.pow(1 - intro, 3);
-      cur.x += (tgt.x - cur.x) * .07; cur.y += (tgt.y - cur.y) * .07;
-      var sway = fine ? 0 : Math.sin(t * .9) * .12;
-      ph.pivot.rotation.set(cur.x, cur.y + sway + scrollTurn + (1 - e) * .35, .03);
-      ph.pivot.position.y = Math.sin(t * 1.1) * box.clientHeight * v.pxToWorld * .008;
+      var dt = Math.min(.05, lastT ? t - lastT : 0); lastT = t;
+      if(performance.now() - lastInput > AUTO_MS && sx === null && !document.hidden){ target = nextFront(nearest(target)); rate = 2.4; touched(); }
+      phi += (target - phi) * (1 - Math.exp(-dt * rate));
+      tilt.x += (tiltT.x - tilt.x) * (1 - Math.exp(-dt * 4)); tilt.y += (tiltT.y - tilt.y) * (1 - Math.exp(-dt * 4));
+
+      var k = v.pxToWorld, pw = box.clientWidth / 3.6, H = pw * 2.05, RX = H * 1.15, R = H * 1.25, TILT = .19 + tilt.x;   // oval: deeper than wide
+      // orbit centre sits R behind the front phone; lift it so the front phone stays centred after the tilt
+      orbit.position.set(0, R * Math.sin(TILT) * k, (-R + R * (1 - Math.cos(TILT))) * k);
+      orbit.rotation.set(TILT, tilt.y, 0);
+      var a0 = phi + scrollTurn;
+      phones.forEach(function(p, i){
+        var ang = ANG[i] + a0;
+        p.pivot.position.set(Math.sin(ang) * RX * k, Math.sin(t * 1.1 + i * 2.1) * H * .008 * k, Math.cos(ang) * R * k);
+        p.pivot.rotation.set(0, ang - .3, .03);              // faces outward, turned a little: 3/4 view at the front
+        sizePhone(v, p, H);
+      });
+      var near = v.cam.position.z;                          // fog: nothing at the front, ~half at the back of the orbit
+      v.scene.fog.near = near + R * .2 * k; v.scene.fog.far = near + R * 2 * k / .5;
     };
     v.fit(); v.update(0); v.r.render(v.scene, v.cam);
     box.classList.add('gl-on'); kick();
