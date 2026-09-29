@@ -208,6 +208,9 @@ section{position:relative;}
    render and the live canvas line up at every viewport. The front phone is centred in it, --ptop from the stage top. */
 .hero-orbit{position:absolute; z-index:2; left:50%; top:calc(var(--ptop) - var(--pw) * .275); width:calc(var(--pw) * 3.6); height:calc(var(--pw) * 2.6);
   transform:translateX(-50%); touch-action:pan-y; -webkit-user-select:none; user-select:none;}
+.hero-orbit.gl-on{cursor:grab;}
+.hero-orbit.dragging{cursor:grabbing;}
+.hero-orbit .gl-canvas{will-change:filter;}   /* one canvas per phone: the ones going back get a CSS blur */
 .hero-orbit .gl-canvas,.hero-orbit .orbit-poster{position:absolute; inset:0; width:100%; height:100%;}
 .hero-orbit .orbit-poster{object-fit:contain; -webkit-user-drag:none;}
 .hero-copy{
@@ -585,7 +588,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
       <div class="hero-giant" aria-hidden="true"><span class="l1">każda seria</span><span class="l2"><span>jest</span><span>ważna</span></span></div>
       <div class="hero-orbit" id="heroOrbit" data-screens="img/scr-dashboard.webp img/scr-gym.webp img/scr-stats.webp">
         <img class="orbit-poster gl-poster" src="img/r-orbit.webp" alt="Trzy iPhone'y z aplikacją Mekkio: pulpit z podsumowaniem tygodnia i planem na dziś, ekran treningu z ćwiczeniami z planu oraz statystyki z rekordami" width="1440" height="1040" fetchpriority="high">
-        <canvas class="gl-canvas" id="heroGL" aria-hidden="true"></canvas>
+        <canvas class="gl-canvas" aria-hidden="true"></canvas><canvas class="gl-canvas" aria-hidden="true"></canvas><canvas class="gl-canvas" aria-hidden="true"></canvas>
       </div>
     </div>
 
@@ -1118,87 +1121,103 @@ document.documentElement.classList.add('js');
   var cssVar = function(el, name, def){ var s = parseFloat(el.style.getPropertyValue(name)); return isNaN(s) ? def : s; };
 
   /* HERO — three phones on an invisible, slightly tilted orbit. Each faces outward, so only the front one shows
-     its screen. Mouse movement turns the orbit (relative, like dragging without a click); when the mouse stops,
-     the nearest phone is pulled to the front. Touch: swipe. Idle for a few seconds: the next phone comes round. */
+     its screen. Drag (mouse or finger) turns the orbit; on release it lands on the nearest phone, with the
+     throw's momentum. No automatic rotation. Each phone has its own canvas so the ones going back can be
+     blurred (CSS filter) and stacked by depth. */
   (async function(){
-    var hero = document.getElementById('hero'), box = document.getElementById('heroOrbit'), canvas = document.getElementById('heroGL');
-    if(!box || !canvas) return;
+    var hero = document.getElementById('hero'), box = document.getElementById('heroOrbit');
+    if(!box) return;
+    var canvases = box.querySelectorAll('canvas'), srcs = box.dataset.screens.split(' ');
     var D = Math.PI / 180;
     var ANG = [0, 135 * D, 235 * D];                        // uneven gaps on the orbit: 135° / 100° / 125°
-    var srcs = box.dataset.screens.split(' ');
-    var v = makeView(canvas); v.cam.fov = 36; v.fit();      // wider lens than the other views: stronger depth on the orbit
-    var phones = await Promise.all(srcs.map(function(s){ return makePhone(s); }));
-    var orbit = new THREE.Group(); phones.forEach(function(p){ orbit.add(p.pivot); }); v.scene.add(orbit);
-    v.scene.fog = new THREE.Fog(0xee4a1c, 1, 2);            // back phones sink into the hero's orange
+    var items = await Promise.all(srcs.map(async function(src, i){
+      var v = makeView(canvases[i]); v.cam.fov = 36; v.fit();   // wider lens than the other views: stronger depth
+      var ph = await makePhone(src), orbit = new THREE.Group();
+      orbit.add(ph.pivot); v.scene.add(orbit);
+      v.scene.fog = new THREE.Fog(0xee4a1c, 1, 2);          // back phones also sink into the hero's orange
+      return { v: v, ph: ph, orbit: orbit, canvas: canvases[i], blur: -1, z: -1 };
+    }));
 
-    var phi = 0, target = 0, rate = 2.6;                    // orbit angle; starts on the poster pose so the cross-fade has no ghosting
-    var tilt = { x: 0, y: 0 }, tiltT = { x: 0, y: 0 }, scrollTurn = 0, lastT = 0, lastInput = performance.now();
-    var settleTimer = 0, AUTO_MS = 4200;
-    function fronts(){ return ANG.map(function(a){ return -a; }); }
-    // the orbit angle (in any turn) that brings a phone to the front, closest to `from`
-    function nearest(from){
+    var phi = 0, target = 0, rate = 5;                      // orbit angle (starts on the poster pose: no ghosting on the cross-fade)
+    var tilt = { x: 0, y: 0 }, tiltT = { x: 0, y: 0 }, scrollTurn = 0, lastT = 0;
+    function nearest(from){                                 // orbit angle (in any turn) that brings a phone to the front
       var best = 0, bd = 1e9;
-      fronts().forEach(function(f){ var c = f + Math.round((from - f) / (2 * Math.PI)) * 2 * Math.PI, d = Math.abs(c - from); if(d < bd){ bd = d; best = c; } });
+      ANG.forEach(function(a){ var f = -a, c = f + Math.round((from - f) / (2 * Math.PI)) * 2 * Math.PI, d = Math.abs(c - from); if(d < bd){ bd = d; best = c; } });
       return best;
     }
-    function nextFront(from){                               // next phone comes round from the right (angle decreases)
-      var best = -1e9;
-      fronts().forEach(function(f){ for(var n = -2; n <= 2; n++){ var c = f + n * 2 * Math.PI; if(c < from - .05 && c > best) best = c; } });
-      return best;
-    }
-    function settle(){ target = nearest(target); rate = 5; }
-    function touched(){ lastInput = performance.now(); }
 
-    if(fine){
-      var lx = null;
+    // drag: the orbit follows the pointer 1:1, then lands on a phone with the throw's momentum
+    var drag = null, K = function(){ return 4 / Math.max(innerWidth, 600); };
+    box.addEventListener('pointerdown', function(e){
+      if(e.button > 0) return;
+      drag = { x: e.clientX, y: e.clientY, start: target, axis: e.pointerType === 'mouse' ? 'x' : null, vx: 0, px: e.clientX, pt: e.timeStamp, id: e.pointerId };
+      if(e.pointerType === 'mouse'){ e.preventDefault(); box.setPointerCapture(e.pointerId); box.classList.add('dragging'); }
+    });
+    box.addEventListener('pointermove', function(e){
+      if(!drag || e.pointerId !== drag.id) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if(!drag.axis && Math.abs(dx) + Math.abs(dy) > 8){
+        drag.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        if(drag.axis === 'x') box.setPointerCapture(e.pointerId);
+      }
+      if(drag.axis !== 'x') return;
+      var dt = Math.max(1, e.timeStamp - drag.pt);
+      drag.vx = drag.vx * .6 + (e.clientX - drag.px) / dt * .4; drag.px = e.clientX; drag.pt = e.timeStamp;
+      target = drag.start + dx * K(); rate = 16;
+    });
+    function release(e){
+      if(!drag || (e && e.pointerId !== drag.id)) return;
+      if(drag.axis === 'x'){
+        var fresh = e && e.timeStamp - drag.pt < 80 ? drag.vx : 0;      // a pause before letting go = no throw
+        target = nearest(target + fresh * 220 * K()); rate = 5;
+      }
+      drag = null; box.classList.remove('dragging');
+    }
+    box.addEventListener('pointerup', release); box.addEventListener('pointercancel', release);
+    box.addEventListener('lostpointercapture', function(){ release(); });
+
+    if(fine){                                               // gentle parallax tilt only, no turning
       hero.addEventListener('pointermove', function(e){
         if(e.pointerType !== 'mouse') return;
-        if(lx !== null){ target += (e.clientX - lx) * 3.2 / innerWidth; rate = 9; }
-        lx = e.clientX; touched();
         var r = box.getBoundingClientRect();
-        tiltT.x = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (innerHeight / 2))) * .07;
-        tiltT.y = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (innerWidth / 2))) * .12;
-        clearTimeout(settleTimer); settleTimer = setTimeout(settle, 160);
+        tiltT.x = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (innerHeight / 2))) * .05;
+        tiltT.y = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (innerWidth / 2))) * .08;
       });
-      hero.addEventListener('pointerleave', function(){ lx = null; tiltT.x = tiltT.y = 0; clearTimeout(settleTimer); settle(); });
+      hero.addEventListener('pointerleave', function(){ tiltT.x = tiltT.y = 0; });
     }
-    // swipe (touch / pen): the orbit follows the finger, then lands on a phone with the throw's momentum
-    var sx = null, sy = null, st = 0, axis = null, vx = 0, px = 0, pt = 0;
-    box.addEventListener('pointerdown', function(e){ if(e.pointerType === 'mouse') return; sx = px = e.clientX; sy = e.clientY; st = target; axis = null; vx = 0; pt = e.timeStamp; touched(); });
-    box.addEventListener('pointermove', function(e){
-      if(sx === null || e.pointerType === 'mouse') return;
-      var dx = e.clientX - sx, dy = e.clientY - sy;
-      if(!axis && Math.abs(dx) + Math.abs(dy) > 8) axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      if(axis !== 'x') return;
-      var dt = Math.max(1, e.timeStamp - pt); vx = (e.clientX - px) / dt; px = e.clientX; pt = e.timeStamp;
-      target = st + dx * 3.2 / innerWidth; rate = 14; touched();
-    });
-    function release(){ if(sx === null) return; if(axis === 'x'){ target = nearest(target + vx * 180 * 3.2 / innerWidth); rate = 5; } sx = null; touched(); }
-    box.addEventListener('pointerup', release); box.addEventListener('pointercancel', release);
+    addEventListener('scroll', function(){ var r = hero.getBoundingClientRect(); scrollTurn = Math.max(0, Math.min(1, -r.top / r.height)) * .6; }, { passive: true });
 
-    addEventListener('scroll', function(){ var r = hero.getBoundingClientRect(); scrollTurn = Math.max(0, Math.min(1, -r.top / r.height)) * .7; }, { passive: true });
-
-    v.update = function(t){
+    // the first view drives the shared motion; every view then places its own phone
+    items[0].v.update = function(t){
       var dt = Math.min(.05, lastT ? t - lastT : 0); lastT = t;
-      if(performance.now() - lastInput > AUTO_MS && sx === null && !document.hidden){ target = nextFront(nearest(target)); rate = 2.4; touched(); }
       phi += (target - phi) * (1 - Math.exp(-dt * rate));
       tilt.x += (tiltT.x - tilt.x) * (1 - Math.exp(-dt * 4)); tilt.y += (tiltT.y - tilt.y) * (1 - Math.exp(-dt * 4));
-
-      var k = v.pxToWorld, pw = box.clientWidth / 3.6, H = pw * 2.05, RX = H * 1.15, R = H * 1.25, TILT = .19 + tilt.x;   // oval: deeper than wide
-      // orbit centre sits R behind the front phone; lift it so the front phone stays centred after the tilt
-      orbit.position.set(0, R * Math.sin(TILT) * k, (-R + R * (1 - Math.cos(TILT))) * k);
-      orbit.rotation.set(TILT, tilt.y, 0);
-      var a0 = phi + scrollTurn;
-      phones.forEach(function(p, i){
-        var ang = ANG[i] + a0;
-        p.pivot.position.set(Math.sin(ang) * RX * k, Math.sin(t * 1.1 + i * 2.1) * H * .008 * k, Math.cos(ang) * R * k);
-        p.pivot.rotation.set(0, ang - .3, .03);              // faces outward, turned a little: 3/4 view at the front
-        sizePhone(v, p, H);
-      });
-      var near = v.cam.position.z;                          // fog: nothing at the front, ~half at the back of the orbit
-      v.scene.fog.near = near + R * .2 * k; v.scene.fog.far = near + R * 2 * k / .5;
+      place(t);
     };
-    v.fit(); v.update(0); v.r.render(v.scene, v.cam);
+    function place(t){
+      var pw = box.clientWidth / 3.6, H = pw * 2.05, RX = H * .98, R = H * 1.05, TILT = .19 + tilt.x;   // oval: deeper than wide
+      var a0 = phi + scrollTurn, maxBlur = pw * .02;
+      items.forEach(function(it, i){
+        var k = it.v.pxToWorld, ang = ANG[i] + a0;
+        // orbit centre sits R behind the front phone, lifted so the front phone stays centred after the tilt
+        it.orbit.position.set(0, R * Math.sin(TILT) * k, (-R + R * (1 - Math.cos(TILT))) * k);
+        it.orbit.rotation.set(TILT, tilt.y, 0);
+        // levitation: each phone floats on its own slow rhythm, with a slight sway
+        var fl = t * 1.25 + i * 2.1;
+        it.ph.pivot.position.set(Math.sin(ang) * RX * k, Math.sin(fl) * H * .022 * k, Math.cos(ang) * R * k);
+        it.ph.pivot.rotation.set(Math.sin(fl + 1.2) * .035, ang - .3, .03 + Math.sin(fl * .8 + .5) * .03);   // faces outward, 3/4 view at the front
+        sizePhone(it.v, it.ph, H);
+        var near = it.v.cam.position.z;                     // fog: nothing at the front, ~40% at the back
+        it.v.scene.fog.near = near + R * .2 * k; it.v.scene.fog.far = near + R * 2 * k / .4;
+        // depth 0 (front) … 1 (back): blur grows as the phone goes back; nearer phones stack on top
+        var depth = (1 - Math.cos(ang)) / 2, b = Math.round(Math.max(0, depth - .08) / .92 * maxBlur * 4) / 4;
+        if(b !== it.blur){ it.blur = b; it.canvas.style.filter = b ? 'blur(' + b + 'px)' : ''; }
+        var z = 3 - Math.round(depth * 2.99);
+        if(z !== it.z){ it.z = z; it.canvas.style.zIndex = z; }
+      });
+    }
+    items.forEach(function(it){ it.v.fit(); }); place(0);
+    items.forEach(function(it){ it.v.r.render(it.v.scene, it.v.cam); });
     box.classList.add('gl-on'); kick();
   })();
 
