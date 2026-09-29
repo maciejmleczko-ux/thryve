@@ -6064,6 +6064,43 @@ async function scheduleWorkoutReminders(){
   try{ await LN.schedule({ notifications }); }catch(e){ console.error('scheduleWorkoutReminders: schedule', e); }
 }
 
+/* ---------- "Update available" prompt (native only) ----------
+   version.json on app.mekkio.app holds the newest uploaded iOS build and
+   where to get it (TestFlight now, App Store later). Checked on launch and
+   on every return to the app; "Później" silences that build for 12 h.
+   Fetched via CapacitorHttp — the web origin has no CORS for
+   capacitor://localhost. Bump version.json's build in the same push that
+   follows an upload, so the prompt never points at a build still being
+   processed. */
+const LS_UPDATE_SNOOZE = "fitlog_update_snooze_v1";   // {build, until (ms)}
+let _updateCheckAt = 0, _updatePromptOpen = false;
+async function checkNativeUpdate(){
+  if(!IS_NATIVE || _updatePromptOpen || Date.now() - _updateCheckAt < 5 * 60000) return;
+  const AppP = capPlugin('App'), Http = capPlugin('CapacitorHttp'), Dlg = capPlugin('Dialog');
+  if(!AppP || !Http || !Dlg) return;
+  _updateCheckAt = Date.now();
+  try{
+    const info = await AppP.getInfo();
+    const res = await Http.get({ url: 'https://app.mekkio.app/version.json?t=' + Date.now(), responseType: 'json' });
+    const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+    const latest = data && data.ios;
+    const have = parseInt(info.build, 10);
+    if(!latest || !(latest.build > have) || !latest.url) return;
+    let snooze = null; try{ snooze = JSON.parse(localStorage.getItem(LS_UPDATE_SNOOZE)); }catch(e){}
+    if(snooze && snooze.build === latest.build && Date.now() < snooze.until) return;
+    _updatePromptOpen = true;
+    const r = await Dlg.confirm({
+      title: 'Nowa wersja Mekkio',
+      message: 'Jest nowsza wersja apki. Zaktualizuj ją w TestFlight, żeby mieć najnowsze poprawki.',
+      okButtonTitle: 'Aktualizuj',
+      cancelButtonTitle: 'Później'
+    });
+    _updatePromptOpen = false;
+    if(r && r.value) location.href = latest.url;   // non-app scheme → Capacitor hands it to iOS (opens TestFlight)
+    else localStorage.setItem(LS_UPDATE_SNOOZE, JSON.stringify({ build: latest.build, until: Date.now() + 12 * 3600000 }));
+  }catch(e){ _updatePromptOpen = false; console.error('checkNativeUpdate', e); }
+}
+
 /* ---------- Apple Zdrowie (HealthKit, read-only, native only) ----------
    capacitor-health ("HealthPlugin"). Two reads, both from ANY source that
    writes to Health (Apple Watch, Garmin Connect, Polar Flow…):
@@ -6289,7 +6326,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.20";
+const APP_VERSION = "4.47.21";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -13813,7 +13850,8 @@ if(IS_NATIVE) scheduleWorkoutReminders();
 if(IS_NATIVE){
   syncHealthData();
   // Garmin/Polar reach Health minutes-to-hours late — retry on every return.
-  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') syncHealthData(); });
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible'){ syncHealthData(); checkNativeUpdate(); } });
+  setTimeout(checkNativeUpdate, 3000);   // after the load screen
 }
 updatePlanPillLabel();
 goRoute('dashboard'); // v3 "Mekkio" redesign is now the main layout — boot straight into it
