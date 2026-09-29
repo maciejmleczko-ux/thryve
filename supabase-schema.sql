@@ -72,6 +72,10 @@ create table if not exists public.apple_tokens (
   updated_at timestamptz not null default now()
 );
 alter table public.apple_tokens enable row level security;
+-- Ten projekt NIE nadaje automatycznie uprawnień DML nowym tabelom — bez tego
+-- service_role (Edge Functions) dostaje "permission denied" przy upsert/select,
+-- mimo że omija RLS. Celowo tylko service_role, nie anon/authenticated.
+grant select, insert, update, delete on public.apple_tokens to service_role;
 
 -- ---------------------------------------------------------------------
 -- plans — odpowiednik trainingPlans[] z localStorage
