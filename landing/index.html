@@ -371,43 +371,41 @@ section{position:relative;}
 .c5{grid-column:span 5;} .c7{grid-column:span 7;} .c4{grid-column:span 4;} .c6{grid-column:span 6;}
 .fcard.blue{background:var(--m-plan-mid); color:#fff; box-shadow:none;}
 .fcard.blue p{color:rgba(255,255,255,.9);}
-/* four record cards (app's record tiles) fanned like a hand of cards; they deal out when the card scrolls in,
-   spread wider on hover, and the hovered one lifts out of the hand */
-/* fills the card from the text down to the bottom edge; card size comes from the fan's own box
-   (size container query), so the whole hand always fits inside the card */
+/* four record cards (app's record tiles) as a loose stack, top to bottom: landscape cards, each a little
+   turned and shifted, the lower one covering the bottom of the one above, so every card's content sits on its top row.
+   Sized from the stack's own box (size container query), so it always fits inside the card. */
 .rec-fan{container-type:size; flex:1 1 auto; min-height:260px; position:relative; list-style:none; margin:14px 0 0; padding:0;}
 .rec-card{
-  --cw:min(170px, 25cqw);
-  position:absolute; bottom:calc(var(--cw) * .2); left:50%; width:var(--cw); height:calc(100cqh - var(--cw) * .42); margin-left:calc(var(--cw) / -2);
-  border-radius:var(--m-r-md); padding:calc(var(--cw) * .09); display:flex; flex-direction:column; gap:2px;
-  transform-origin:50% 125%;
-  transform:translateX(calc(var(--x) * var(--cw) * var(--spread,1))) rotate(calc(var(--r) * var(--spread,1))) translateY(var(--lift,0px));
-  box-shadow:-10px 14px 30px -16px rgba(31,35,41,.5), 0 0 0 1px rgba(31,35,41,.06);
+  --h:min(100cqh / 2.95, 64cqw / 1.62, 150px); --w:calc(var(--h) * 1.62); --step:calc(var(--h) * .6);
+  position:absolute; left:50%; width:var(--w); height:var(--h); margin-left:calc(var(--w) / -2);
+  top:calc(50% - var(--h) / 2);
+  border-radius:var(--m-r-md); padding:calc(var(--h) * .13) calc(var(--h) * .15);
+  display:grid; grid-template-columns:auto 1fr auto; column-gap:8px; align-content:start; align-items:center;
+  transform:translate(calc(var(--x) * var(--w)), calc((var(--k) - 1.5) * var(--step) * var(--spread,1))) rotate(var(--r)) translateY(var(--lift,0px));
+  box-shadow:0 18px 34px -18px rgba(31,35,41,.55), 0 0 0 1px rgba(31,35,41,.06);
   transition:transform var(--m-dur-in) var(--m-ease);
 }
-.rec-card svg{width:22px; height:22px; display:block; margin-bottom:auto;}
-.rec-card .k{font-size:10.5px; font-weight:500; letter-spacing:.09em; text-transform:uppercase; opacity:.82; white-space:nowrap;}
-.rec-card .v{font-size:calc(var(--cw) * .2); font-weight:300; letter-spacing:-.04em; line-height:1.05; font-variant-numeric:tabular-nums; white-space:nowrap;}
+.rec-card svg{width:20px; height:20px; display:block;}
+.rec-card .k{font-size:11px; font-weight:500; letter-spacing:.09em; text-transform:uppercase; opacity:.85; white-space:nowrap;}
+.rec-card .v{grid-row:span 2; font-size:clamp(1.5rem, calc(var(--h) * .26), 2.2rem); font-weight:300; letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; white-space:nowrap;}
 .rec-card .v small{font-size:.45em; letter-spacing:0; margin-left:3px; opacity:.85;}
-.rec-card .f{font-size:11px; line-height:1.35; opacity:.8;}
-/* a hand of cards: each one covers the right part of the previous, so the content sits on the left */
-.rc-seria{--x:-.95; --r:-7deg; background:#fff; color:var(--m-ink);} .rc-seria svg{color:var(--m-orange);}
-.rc-obj{--x:-.32; --r:-2.3deg; background:var(--m-plan-mid); color:#fff;}
-.rc-ciez{--x:.32; --r:2.3deg; background:var(--m-ink); color:#fff;}
-.rc-sila{--x:.95; --r:7deg; background:var(--m-orange); color:#fff;} .rc-sila .f{color:#ffd885; opacity:1;}
-@media (max-width:560px){   /* narrow hand: wider cards, label + number only */
-  .rec-card{--cw:30cqw; padding:10px;}
-  .rec-card .f{display:none;}
-  .rec-card .k{font-size:9.5px; letter-spacing:.06em;}
-  .rec-card .v{font-size:calc(var(--cw) * .22);}
+.rec-card .f{grid-column:1 / 3; font-size:12px; line-height:1.3; opacity:.8; margin-top:4px;}
+.rc-sila{--x:-.07; --r:7deg; background:var(--m-orange); color:#fff;} .rc-sila .f{color:#ffd885; opacity:1;}
+.rc-obj{--x:.05; --r:0deg; background:var(--m-plan-mid); color:#fff;}
+.rc-seria{--x:.1; --r:3deg; background:#f3f1f8; color:var(--m-ink);} .rc-seria svg{color:var(--m-orange);}
+.rc-ciez{--x:-.06; --r:-10deg; background:#0b0b0f; color:#fff;}
+@media (max-width:560px){   /* phone: wider cards so label + number share the top row */
+  .rec-card{--w:min(calc(var(--h) * 1.95), 84cqw); column-gap:6px;}
+  .rec-card .k{letter-spacing:.05em;}
+  .rec-card .v{font-size:calc(var(--h) * .24);}
 }
 @media (hover:hover) and (pointer:fine){
-  .fcell:hover .rec-card{--spread:1.12;}
-  .rec-fan .rec-card:hover{--lift:-18px;}
+  .fcell:hover .rec-card{--spread:1.1;}
+  .rec-fan .rec-card:hover{--lift:-10px;}
 }
 @media (prefers-reduced-motion: no-preference){
-  /* dealt from a closed stack when the card scrolls in */
-  .js .fcell:not(.in) .rec-card{--spread:0; --lift:30px;}
+  /* dealt from one pile when the card scrolls in */
+  .js .fcell:not(.in) .rec-card{--spread:0; --lift:24px;}
   .js .fcell.in .rec-card{transition:transform var(--m-dur-pop) var(--m-ease-spring); transition-delay:calc(.35s + var(--k,0) * 70ms);}
   .js .fcell.in:hover .rec-card{transition-delay:0s; transition-duration:var(--m-dur-in);}
 }
@@ -434,7 +432,7 @@ section{position:relative;}
   .c5,.c7{grid-column:span 12;}
   .c4,.c6{grid-column:span 6;}
   .fcell.c4:last-child{grid-column:span 12;}
-  .rec-fan{flex:none; height:clamp(270px,64vw,360px);}   /* not stretched here: size queries need a definite height */
+  .rec-fan{flex:none; height:clamp(320px,100vw,440px);}   /* not stretched here: size queries need a definite height */
   .more{grid-template-columns:1fr 1fr;}
   .more article{border-left:0 !important; border-top:1px solid var(--m-line) !important;}
   .more article:nth-child(-n+2){border-top:0 !important;}
@@ -698,10 +696,10 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
         <h3>Cztery rodzaje rekordów</h3>
         <p>Dorzucone powtórzenie przy tym samym ciężarze też jest postępem. Mekkio liczy rekordy przez szacowany ciężar maksymalny (e1RM), więc widzi i to.</p>
         <ul class="rec-fan" aria-label="Rodzaje rekordów na przykładzie Chest Press">
-          <li class="rec-card rc-seria" style="--k:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Seria</span><span class="v">15<small>powt.</small></span><span class="f">najwięcej powtórzeń</span></li>
-          <li class="rec-card rc-obj" style="--k:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Objętość</span><span class="v">1 120<small>kg</small></span><span class="f">najwięcej w jednej sesji</span></li>
-          <li class="rec-card rc-ciez" style="--k:2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Ciężar</span><span class="v">35<small>kg × 8</small></span><span class="f">najcięższa seria</span></li>
-          <li class="rec-card rc-sila" style="--k:3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Siła · e1RM</span><span class="v">44<small>kg</small></span><span class="f">≈ 1RM z 35 kg × 8</span></li>
+          <li class="rec-card rc-sila" style="--k:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Siła · e1RM</span><span class="v">44<small>kg</small></span><span class="f">≈ 1RM z 35 kg × 8</span></li>
+          <li class="rec-card rc-obj" style="--k:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Objętość</span><span class="v">1 120<small>kg</small></span><span class="f">najwięcej w sesji</span></li>
+          <li class="rec-card rc-seria" style="--k:2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Seria</span><span class="v">15<small>powt.</small></span><span class="f">najwięcej powtórzeń</span></li>
+          <li class="rec-card rc-ciez" style="--k:3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Ciężar</span><span class="v">35<small>kg × 8</small></span><span class="f">najcięższa seria</span></li>
         </ul>
       </article></div>
 
