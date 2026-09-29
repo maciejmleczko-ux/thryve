@@ -373,13 +373,14 @@ section{position:relative;}
 .fcard.blue p{color:rgba(255,255,255,.9);}
 /* four record cards (app's record tiles) fanned like a hand of cards; they deal out when the card scrolls in,
    spread wider on hover, and the hovered one lifts out of the hand */
-/* sized from its own width (container query), so the whole hand always fits inside the card */
-.rec-fan{container-type:inline-size; position:relative; list-style:none; margin:auto 0 0; padding:0; aspect-ratio:2.05; max-height:243px;}
+/* fills the card from the text down to the bottom edge; card size comes from the fan's own box
+   (size container query), so the whole hand always fits inside the card */
+.rec-fan{container-type:size; flex:1 1 auto; min-height:260px; position:relative; list-style:none; margin:14px 0 0; padding:0;}
 .rec-card{
-  --cw:min(150px, 27.5cqw);
-  position:absolute; bottom:calc(var(--cw) * .16); left:50%; width:var(--cw); height:calc(var(--cw) * 1.3); margin-left:calc(var(--cw) / -2);
+  --cw:min(170px, 25cqw);
+  position:absolute; bottom:calc(var(--cw) * .2); left:50%; width:var(--cw); height:calc(100cqh - var(--cw) * .42); margin-left:calc(var(--cw) / -2);
   border-radius:var(--m-r-md); padding:calc(var(--cw) * .09); display:flex; flex-direction:column; gap:2px;
-  transform-origin:50% 220%;
+  transform-origin:50% 125%;
   transform:translateX(calc(var(--x) * var(--cw) * var(--spread,1))) rotate(calc(var(--r) * var(--spread,1))) translateY(var(--lift,0px));
   box-shadow:-10px 14px 30px -16px rgba(31,35,41,.5), 0 0 0 1px rgba(31,35,41,.06);
   transition:transform var(--m-dur-in) var(--m-ease);
@@ -390,10 +391,16 @@ section{position:relative;}
 .rec-card .v small{font-size:.45em; letter-spacing:0; margin-left:3px; opacity:.85;}
 .rec-card .f{font-size:11px; line-height:1.35; opacity:.8;}
 /* a hand of cards: each one covers the right part of the previous, so the content sits on the left */
-.rc-seria{--x:-.93; --r:-11deg; background:#fff; color:var(--m-ink);} .rc-seria svg{color:var(--m-orange);}
-.rc-obj{--x:-.31; --r:-3.5deg; background:var(--m-plan-mid); color:#fff;}
-.rc-ciez{--x:.31; --r:3.5deg; background:var(--m-ink); color:#fff;}
-.rc-sila{--x:.93; --r:11deg; background:var(--m-orange); color:#fff;} .rc-sila .f{color:#ffd885; opacity:1;}
+.rc-seria{--x:-.95; --r:-7deg; background:#fff; color:var(--m-ink);} .rc-seria svg{color:var(--m-orange);}
+.rc-obj{--x:-.32; --r:-2.3deg; background:var(--m-plan-mid); color:#fff;}
+.rc-ciez{--x:.32; --r:2.3deg; background:var(--m-ink); color:#fff;}
+.rc-sila{--x:.95; --r:7deg; background:var(--m-orange); color:#fff;} .rc-sila .f{color:#ffd885; opacity:1;}
+@media (max-width:560px){   /* narrow hand: wider cards, label + number only */
+  .rec-card{--cw:30cqw; padding:10px;}
+  .rec-card .f{display:none;}
+  .rec-card .k{font-size:9.5px; letter-spacing:.06em;}
+  .rec-card .v{font-size:calc(var(--cw) * .22);}
+}
 @media (hover:hover) and (pointer:fine){
   .fcell:hover .rec-card{--spread:1.12;}
   .rec-fan .rec-card:hover{--lift:-18px;}
@@ -427,7 +434,7 @@ section{position:relative;}
   .c5,.c7{grid-column:span 12;}
   .c4,.c6{grid-column:span 6;}
   .fcell.c4:last-child{grid-column:span 12;}
-  .rec-fan{margin-top:10px;}
+  .rec-fan{flex:none; height:clamp(270px,64vw,360px);}   /* not stretched here: size queries need a definite height */
   .more{grid-template-columns:1fr 1fr;}
   .more article{border-left:0 !important; border-top:1px solid var(--m-line) !important;}
   .more article:nth-child(-n+2){border-top:0 !important;}
