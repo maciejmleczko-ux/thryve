@@ -205,12 +205,6 @@ section{position:relative;}
 /* Figma 21:238: ExtraLight, #FFA390; the second line is one piece, pushed right of centre */
 .hero-giant .l1{font-size:clamp(4.2rem,18.4vw,16.25rem);}
 .hero-giant .l2{font-size:clamp(3.2rem,14.2vw,12.53rem); margin-top:-.06em; position:relative; left:min(10.7vw,151px);}
-/* small meta labels at the sides of the giant line (Figma "Meta label") */
-.hero-meta{position:absolute; z-index:3; display:grid; gap:2px; font-size:13px; line-height:1.4; color:#fff; pointer-events:none;}
-.hero-meta b{font-weight:400; letter-spacing:.06em;}
-.hero-meta span{font-weight:400;}
-.hero-meta.l{left:0; top:calc(clamp(210px,20.8vw,300px) + min(18.4vw,260px));}
-.hero-meta.r{right:0; text-align:right; top:calc(clamp(210px,20.8vw,300px) + min(14.2vw,200px));}
 /* three phones on an invisible orbit; the box is sized from the front phone's width (--pw) so the poster
    render and the live canvas line up at every viewport. The front phone is centred in it, --ptop from the stage top. */
 .hero-orbit{position:absolute; z-index:2; left:50%; top:calc(var(--ptop) - var(--pw) * .275); width:calc(var(--pw) * 3.6); height:calc(var(--pw) * 2.6);
@@ -249,7 +243,6 @@ section{position:relative;}
 @media (max-width:900px){
   .hero-stage{--pw:min(64vw,300px); --ptop:84px; height:calc(84px + var(--pw) * 2.09 + 24px);}
   .hero-giant{top:clamp(150px,40vw,260px);}
-  .hero-meta{display:none;}
   .hero-copy{grid-template-columns:1fr; margin-top:0;}
   .hero-panel::before{background-size:cover; background-position:50% 50%;}
 }
@@ -622,8 +615,6 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 
     <div class="hero-stage" id="stage">
       <div class="hero-giant" aria-hidden="true"><span class="l1">każda seria</span><span class="l2">jest ważna</span></div>
-      <p class="hero-meta l"><b>Dziennik treningowy</b><span>na iPhone'a</span></p>
-      <p class="hero-meta r"><b>Wkrótce</b><span>w App Store</span></p>
       <div class="hero-orbit" id="heroOrbit" data-screens="img/scr-dashboard.webp img/scr-gym.webp img/scr-stats.webp">
         <img class="orbit-poster gl-poster" src="img/r-orbit.webp" alt="Trzy iPhone'y z aplikacją Mekkio: pulpit z podsumowaniem tygodnia i planem na dziś, ekran treningu z ćwiczeniami z planu oraz statystyki z rekordami" width="1440" height="1040" fetchpriority="high">
         <canvas class="gl-canvas" aria-hidden="true"></canvas><canvas class="gl-canvas" aria-hidden="true"></canvas><canvas class="gl-canvas" aria-hidden="true"></canvas>
