@@ -310,17 +310,14 @@ section{position:relative;}
 .caro-cap.swap > *{opacity:0; transform:translateY(6px);}
 .caro-ctrl{display:flex; justify-content:center; align-items:center; gap:10px; margin-top:22px;}
 .sq-btn{
-  width:52px; height:52px; border-radius:16px; border:0; display:grid; place-items:center; cursor:pointer;
+  width:52px; height:52px; border-radius:50%; border:0; display:grid; place-items:center; cursor:pointer;
   transition:transform var(--m-dur-press-out) var(--m-ease), background-color var(--m-dur-quick) ease;
 }
 .sq-btn:active{transform:scale(.94);}
 .sq-btn svg{width:20px; height:20px; display:block;}
 .sq-prev{background:#fff; color:var(--m-ink-2);}
 .sq-next{background:var(--m-cta); color:#fff;}
-.sq-play{width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.1); color:#fff; margin-left:6px;}
-.sq-play svg{width:16px; height:16px;}
-.sq-play .i-play{display:none;} .sq-play.paused .i-play{display:block;} .sq-play.paused .i-pause{display:none;}
-@media (hover:hover) and (pointer:fine){ .sq-next:hover{background:var(--m-cta-hover);} .sq-play:hover{background:rgba(255,255,255,.18);} }
+@media (hover:hover) and (pointer:fine){ .sq-next:hover{background:var(--m-cta-hover);} }
 .dots{display:flex; gap:10px; margin:0 14px;}
 .dots button{
   position:relative; width:8px; height:8px; padding:0; border:0; border-radius:50%; cursor:pointer;
@@ -374,9 +371,39 @@ section{position:relative;}
 .c5{grid-column:span 5;} .c7{grid-column:span 7;} .c4{grid-column:span 4;} .c6{grid-column:span 6;}
 .fcard.blue{background:var(--m-plan-mid); color:#fff; box-shadow:none;}
 .fcard.blue p{color:rgba(255,255,255,.9);}
-.rec-list{list-style:none; margin:auto 0 0; padding-top:18px !important; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:8px;}
-.rec-list li{background:var(--m-panel); border-radius:var(--m-r-sm); padding:12px 14px; font-size:13px; color:var(--m-muted);}
-.rec-list b{display:block; color:var(--m-ink); font-size:17px; font-weight:300; letter-spacing:-.02em;}
+/* four record cards (app's record tiles) fanned like a hand of cards; they deal out when the card scrolls in,
+   spread wider on hover, and the hovered one lifts out of the hand */
+/* sized from its own width (container query), so the whole hand always fits inside the card */
+.rec-fan{container-type:inline-size; position:relative; list-style:none; margin:auto 0 0; padding:0; aspect-ratio:2.05; max-height:243px;}
+.rec-card{
+  --cw:min(150px, 27.5cqw);
+  position:absolute; bottom:calc(var(--cw) * .16); left:50%; width:var(--cw); height:calc(var(--cw) * 1.3); margin-left:calc(var(--cw) / -2);
+  border-radius:var(--m-r-md); padding:calc(var(--cw) * .09); display:flex; flex-direction:column; gap:2px;
+  transform-origin:50% 220%;
+  transform:translateX(calc(var(--x) * var(--cw) * var(--spread,1))) rotate(calc(var(--r) * var(--spread,1))) translateY(var(--lift,0px));
+  box-shadow:-10px 14px 30px -16px rgba(31,35,41,.5), 0 0 0 1px rgba(31,35,41,.06);
+  transition:transform var(--m-dur-in) var(--m-ease);
+}
+.rec-card svg{width:22px; height:22px; display:block; margin-bottom:auto;}
+.rec-card .k{font-size:10.5px; font-weight:500; letter-spacing:.09em; text-transform:uppercase; opacity:.82; white-space:nowrap;}
+.rec-card .v{font-size:calc(var(--cw) * .2); font-weight:300; letter-spacing:-.04em; line-height:1.05; font-variant-numeric:tabular-nums; white-space:nowrap;}
+.rec-card .v small{font-size:.45em; letter-spacing:0; margin-left:3px; opacity:.85;}
+.rec-card .f{font-size:11px; line-height:1.35; opacity:.8;}
+/* a hand of cards: each one covers the right part of the previous, so the content sits on the left */
+.rc-seria{--x:-.93; --r:-11deg; background:#fff; color:var(--m-ink);} .rc-seria svg{color:var(--m-orange);}
+.rc-obj{--x:-.31; --r:-3.5deg; background:var(--m-plan-mid); color:#fff;}
+.rc-ciez{--x:.31; --r:3.5deg; background:var(--m-ink); color:#fff;}
+.rc-sila{--x:.93; --r:11deg; background:var(--m-orange); color:#fff;} .rc-sila .f{color:#ffd885; opacity:1;}
+@media (hover:hover) and (pointer:fine){
+  .fcell:hover .rec-card{--spread:1.12;}
+  .rec-fan .rec-card:hover{--lift:-18px;}
+}
+@media (prefers-reduced-motion: no-preference){
+  /* dealt from a closed stack when the card scrolls in */
+  .js .fcell:not(.in) .rec-card{--spread:0; --lift:30px;}
+  .js .fcell.in .rec-card{transition:transform var(--m-dur-pop) var(--m-ease-spring); transition-delay:calc(.35s + var(--k,0) * 70ms);}
+  .js .fcell.in:hover .rec-card{transition-delay:0s; transition-duration:var(--m-dur-in);}
+}
 .wave{display:grid; grid-template-columns:auto repeat(4,1fr); gap:6px; align-items:center; font-size:12px; margin-top:auto; padding-top:18px;}
 .wave em{font-style:normal; opacity:.85; padding-right:6px;}
 .wave em.wk{text-align:center; padding:0; font-size:11px;}
@@ -400,7 +427,7 @@ section{position:relative;}
   .c5,.c7{grid-column:span 12;}
   .c4,.c6{grid-column:span 6;}
   .fcell.c4:last-child{grid-column:span 12;}
-  .rec-list{margin-top:6px;}
+  .rec-fan{margin-top:10px;}
   .more{grid-template-columns:1fr 1fr;}
   .more article{border-left:0 !important; border-top:1px solid var(--m-line) !important;}
   .more article:nth-child(-n+2){border-top:0 !important;}
@@ -642,7 +669,6 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
           <button class="sq-btn sq-prev" id="caroPrev" type="button" aria-label="Poprzedni ekran"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
           <div class="dots" id="caroDots"></div>
           <button class="sq-btn sq-next" id="caroNext" type="button" aria-label="Następny ekran"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-          <button class="sq-btn sq-play" id="caroPlay" type="button" aria-label="Zatrzymaj automatyczne przewijanie"><svg class="i-pause" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><svg class="i-play" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></button>
         </div>
       </div>
     </div>
@@ -664,11 +690,11 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
       <div class="fcell c5 rv"><article class="fcard">
         <h3>Cztery rodzaje rekordów</h3>
         <p>Dorzucone powtórzenie przy tym samym ciężarze też jest postępem. Mekkio liczy rekordy przez szacowany ciężar maksymalny (e1RM), więc widzi i to.</p>
-        <ul class="rec-list" aria-label="Rodzaje rekordów">
-          <li class="pop"><b>Siła</b>szacowany 1RM</li>
-          <li class="pop"><b>Ciężar</b>najcięższa seria</li>
-          <li class="pop"><b>Objętość</b>najwięcej w sesji</li>
-          <li class="pop"><b>Seria</b>najwięcej powtórzeń</li>
+        <ul class="rec-fan" aria-label="Rodzaje rekordów na przykładzie Chest Press">
+          <li class="rec-card rc-seria" style="--k:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Seria</span><span class="v">15<small>powt.</small></span><span class="f">najwięcej powtórzeń</span></li>
+          <li class="rec-card rc-obj" style="--k:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Objętość</span><span class="v">1 120<small>kg</small></span><span class="f">najwięcej w jednej sesji</span></li>
+          <li class="rec-card rc-ciez" style="--k:2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Ciężar</span><span class="v">35<small>kg × 8</small></span><span class="f">najcięższa seria</span></li>
+          <li class="rec-card rc-sila" style="--k:3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7"/></svg><span class="k">Siła · e1RM</span><span class="v">44<small>kg</small></span><span class="f">≈ 1RM z 35 kg × 8</span></li>
         </ul>
       </article></div>
 
@@ -958,7 +984,6 @@ document.documentElement.classList.add('js');
   var DELAY = 3000;
   var caro = document.getElementById('caro'), track = document.getElementById('caroTrack');
   var slides = track.children, dotsBox = document.getElementById('caroDots'), cap = document.getElementById('caroCap');
-  var playBtn = document.getElementById('caroPlay');
   var idx = 1, timer = null, userPaused = reduce, hovering = false, visible = false;
   for(var d=0; d<slides.length; d++){
     (function(i){
@@ -988,12 +1013,8 @@ document.documentElement.classList.add('js');
   }
   function running(){ return !userPaused && !hovering && visible && !document.hidden; }
   function schedule(){ clearTimeout(timer); if(running()) timer = setTimeout(function(){ go(idx+1); schedule(); }, DELAY); }
-  function restart(){ schedule(); }
-  function syncPlay(){
-    playBtn.classList.toggle('paused', userPaused);
-    playBtn.setAttribute('aria-label', userPaused ? 'Włącz automatyczne przewijanie' : 'Zatrzymaj automatyczne przewijanie');
-  }
-  playBtn.addEventListener('click', function(){ userPaused = !userPaused; syncPlay(); schedule(); });
+  // no pause button: once someone steers the carousel themselves, autoplay stops for good (WCAG 2.2.2)
+  function restart(){ userPaused = true; schedule(); }
   document.getElementById('caroPrev').addEventListener('click', function(){ go(idx-1); restart(); });
   document.getElementById('caroNext').addEventListener('click', function(){ go(idx+1); restart(); });
   caro.addEventListener('keydown', function(e){ if(e.key==='ArrowLeft'){ go(idx-1); restart(); } if(e.key==='ArrowRight'){ go(idx+1); restart(); } });
@@ -1012,7 +1033,7 @@ document.documentElement.classList.add('js');
     if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)){ go(idx + (dx < 0 ? 1 : -1)); restart(); }
   });
   window.addEventListener('resize', layout);
-  syncPlay(); go(idx, true); schedule();
+  go(idx, true); schedule();
 })();
 </script>
 <script type="module">
