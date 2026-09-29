@@ -90,6 +90,8 @@ create table if not exists public.plans (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+-- 4.47.19: undulating periodization flag (plan.periodized) — was local-only and got lost on re-login / other device.
+alter table public.plans add column if not exists periodized boolean not null default false;
 
 create index if not exists plans_owner_id_idx on public.plans(owner_id);
 

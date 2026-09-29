@@ -5078,7 +5078,7 @@ function syncSig(v){
   return (h >>> 0).toString(36) + ':' + str.length.toString(36);
 }
 function cloudPlanRow(p, uid){
-  return { owner_id: uid, local_id: String(p.id), name: p.name, schedule: p.schedule || {}, is_active: p.id === starredPlanId };
+  return { owner_id: uid, local_id: String(p.id), name: p.name, schedule: p.schedule || {}, is_active: p.id === starredPlanId, periodized: !!p.periodized };
 }
 function cloudWorkoutRow(w, uid){
   return { user_id: uid, local_id: String(w.id), date: w.date, duration_min: w.durationMin || null,
@@ -5364,6 +5364,7 @@ async function syncCloudData(){
           id,
           name: row.name,
           schedule: row.schedule && Object.keys(row.schedule).length ? row.schedule : emptySchedule(),
+          periodized: !!row.periodized,   // column since 4.47.19 — before that the flag never left the device
           builtin: builtinIds.has(id)
         };
       }).concat(keptPlans);
@@ -6288,7 +6289,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.18";
+const APP_VERSION = "4.47.19";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at

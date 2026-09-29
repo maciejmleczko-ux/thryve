@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.18 (2026-09-29)
+- **Aktualna wersja:** 4.47.19 (2026-09-29)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -83,7 +83,7 @@ Stan na 4.44.0.
 
 **Dane lokalne (localStorage, prefiks `fitlog_`, sufiks `_v1`):** `workouts`, `runs`, `training_plans`, `starred_plan`, `deleted_builtin_plans`, `custom_exercises`, `exercise_notes`, `exercise_order`, `weight_log`, `body_data`, `avatar`, `kcal_factor`, `profile_name`, `gym_session_draft`, `gym_session_timing`, `gym_today_swaps`, `onboard_seen`, `install_prompt_dismissed`, `last_seen_version`, `workout_reminder` (4.47.8), `health` (4.47.14, Apple Zdrowie: enabled/lastSync). Wpisy wagi ze Zdrowia mają `src:"health"` (4.47.16). Pola treningu tylko lokalne: `startedAt`, `endedAt`, `kcalWatch`, `kcalWatchSrc`.
 
-**Chmura (Supabase, od 4.35.0):** tabele `profiles` (plus kolumny JSON: `weight_log`, `body_data`, `ai_preferences`, `custom_exercises`, `exercise_notes`; tekst: `avatar`), `plans`, `workouts`, `ai_usage`, `apple_tokens` (refresh token z Sign in with Apple, tylko `service_role`, klient nigdy nie czyta — do unieważnienia przy usuwaniu konta). RLS włączone na wszystkich. Logowanie: e-mail + hasło, Google, Apple (natywnie w apce iOS od 4.47.2). Tryb gościa działa bez konta. Nie synchronizują się: biegi (`runs`, tylko odczyt, nowych nie da się dodać) i lista usuniętych wbudowanych planów. Ulubione ćwiczenia usunięte w 4.44.1.
+**Chmura (Supabase, od 4.35.0):** tabele `profiles` (plus kolumny JSON: `weight_log`, `body_data`, `ai_preferences`, `custom_exercises`, `exercise_notes`; tekst: `avatar`), `plans` (od 4.47.19 z kolumną `periodized`), `workouts`, `ai_usage`, `apple_tokens` (refresh token z Sign in with Apple, tylko `service_role`, klient nigdy nie czyta — do unieważnienia przy usuwaniu konta). RLS włączone na wszystkich. Logowanie: e-mail + hasło, Google, Apple (natywnie w apce iOS od 4.47.2). Tryb gościa działa bez konta. Nie synchronizują się: biegi (`runs`, tylko odczyt, nowych nie da się dodać) i lista usuniętych wbudowanych planów. Ulubione ćwiczenia usunięte w 4.44.1.
 
 ---
 
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.19 · PATCH · 2026-09-29
+
+Bez wpisu „Co nowego” (poprawka).
+
+- **Periodyzacja falująca sama się wyłączała.** Flaga `plan.periodized` nigdy nie trafiała do chmury: `cloudPlanRow()` jej nie wysyłał, tabela `plans` nie miała kolumny, a pull budował plan z wiersza bez niej. Na tym samym urządzeniu ratował ją spread lokalnego planu, ale po wylogowaniu i zalogowaniu albo na drugim urządzeniu (PWA ↔ apka natywna mają osobne dane) plan wracał bez periodyzacji. Nowa kolumna `plans.periodized boolean not null default false` (migracja na produkcji + `supabase-schema.sql`), wysyłana w `cloudPlanRow()` (więc wchodzi też do `planSig` i sam przełącznik oznacza plan do wysłania) i czytana przy pullu. Starsze wersje apki wysyłają upsert bez tej kolumny, więc jej nie zerują.
+
+**Commity:**
+
+- `cd50200` 2026-09-29 — Dymki według Figmy, „Pobierz moje dane” dla zalogowanych, eksport przez arkusz udostępniania, PrivacyInfo, Geist lokalnie (4.47.18, build 18)
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.47.18 · PATCH · 2026-09-29
 
