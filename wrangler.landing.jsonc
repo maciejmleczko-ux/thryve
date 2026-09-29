@@ -1,0 +1,17 @@
+// Cloudflare Worker (static assets only) for the marketing landing on mekkio.app + www.mekkio.app.
+// Separate from the app Worker ("mekkio", wrangler.jsonc → app.mekkio.app).
+// Deploy: npx wrangler deploy -c wrangler.landing.jsonc
+// 3D sources (Blender file, 8K textures) live in assets-src/ and are NOT part of this upload.
+{
+  "name": "mekkio-landing",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": false,
+  "assets": {
+    "directory": "./landing"
+  },
+  // Routes (not custom domains) so the existing proxied DNS records for mekkio.app / www stay untouched.
+  "routes": [
+    { "pattern": "mekkio.app/*", "zone_name": "mekkio.app" },
+    { "pattern": "www.mekkio.app/*", "zone_name": "mekkio.app" }
+  ]
+}
