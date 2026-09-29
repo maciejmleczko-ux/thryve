@@ -16,9 +16,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.png">
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="vendor/geist/geist.css" rel="stylesheet"><!-- Geist vendored (latin + latin-ext) — works offline and in the native app without Google Fonts -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -770,6 +768,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-rows{display:flex;flex-direction:column;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-md);overflow:hidden;}
 .acct-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;font-size:var(--m-fs-base);color:var(--m-ink);background:none;border:0;border-top:1px solid #e6e2ec;font-family:inherit;text-align:left;cursor:pointer;width:100%;text-decoration:none;box-sizing:border-box;}
 .acct-row:first-child{border-top:0;}
+.acct-row[hidden]{display:none;}
 .acct-row:active{background:var(--m-panel);}
 .acct-row .acct-v{color:var(--m-muted);font-size:var(--m-fs-xs);flex-shrink:0;}
 .acct-row .acct-lead{display:flex;align-items:center;gap:11px;}
@@ -970,8 +969,12 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .chl-end{text-align:center;font-size:var(--m-fs-2xs);color:var(--m-muted);padding:14px 0 2px;}
 
 /* ---------- misc ---------- */
-.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:#fff;color:var(--text-dark);
-  padding:10px 18px;border-radius:10px;font-size:var(--m-fs-sm);font-weight:600;opacity:0;pointer-events:none;transition:opacity var(--m-dur-fade) ease,transform var(--m-dur-fade) var(--m-ease);z-index:9700;}
+/* Figma 448:5703 — black bubble, full width minus 20px gutters, left-aligned
+   12px Geist. Line-height loosened from Figma's 12.12px so a wrapped
+   message stays readable; vertical padding trimmed to keep the 1-line
+   height at ~36px like the design. */
+.toast{position:fixed;left:50%;bottom:110px;width:min(349px, calc(100% - 40px));box-sizing:border-box;transform:translateX(-50%) translateY(20px);background:#000;color:#fdfbff;
+  padding:10px 16px;border-radius:8.65px;font-family:'Geist',sans-serif;font-size:var(--m-fs-xs);font-weight:400;line-height:1.35;text-align:left;opacity:0;pointer-events:none;transition:opacity var(--m-dur-fade) ease,transform var(--m-dur-fade) var(--m-ease);z-index:9700;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 @media (prefers-reduced-motion: reduce){ .toast,.toast.show{transform:translateX(-50%);} }
 
@@ -2895,10 +2898,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="acct-rows" id="acctHealthRows" hidden>
       <button type="button" class="acct-row" onclick="openHealthSheet()"><span>Waga i kalorie z zegarka</span><span class="acct-v" id="acctHealthV">Wyłączone</span></button>
     </div>
-    <p class="acct-sec">Kopia zapasowa</p>
+    <p class="acct-sec" id="acctBackupSec">Kopia zapasowa</p>
     <div class="acct-rows">
-      <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="upload-simple"></span>Twórz kopię zapasową</span><span class="acct-v">Plik .json</span></button>
-      <button type="button" class="acct-row" onclick="closeAccountPanel(); document.getElementById('importFile').click();"><span class="acct-lead"><span class="ph" data-ph="download-simple"></span>Import kopii zapasowej</span><span class="acct-v"></span></button>
+      <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="upload-simple"></span><span id="acctExportLabel">Twórz kopię zapasową</span></span><span class="acct-v">Plik .json</span></button>
+      <button type="button" class="acct-row" id="acctImportRow" onclick="closeAccountPanel(); document.getElementById('importFile').click();"><span class="acct-lead"><span class="ph" data-ph="download-simple"></span>Import kopii zapasowej</span><span class="acct-v"></span></button>
     </div>
     <p class="acct-hint" id="acctBackupHint">Bez konta treningi są tylko na tym telefonie. Warto co jakiś czas zrobić kopię.</p>
     <p class="acct-sec">Aplikacja</p>
@@ -4778,8 +4781,15 @@ function renderAccountPanel(){
   set('acctVer', APP_VERSION);
   set('acctChlVer', 'v' + APP_VERSION);
   set('acctFootData', inCloud ? 'dane zsynchronizowane z chmurą' : 'dane treningowe tylko na tym urządzeniu');
+  // With an account the cloud is the backup, so the section becomes a plain
+  // RODO art. 20 data export; import (the guest → other device path) is
+  // only offered to guests.
+  set('acctBackupSec', inCloud ? 'Twoje dane' : 'Kopia zapasowa');
+  set('acctExportLabel', inCloud ? 'Pobierz moje dane' : 'Twórz kopię zapasową');
+  const impRow = document.getElementById('acctImportRow');
+  if(impRow) impRow.hidden = !!inCloud;
   set('acctBackupHint', inCloud
-    ? 'Treningi są bezpieczne w chmurze. Kopia w pliku to dodatkowe zabezpieczenie.'
+    ? 'Treningi są bezpieczne w chmurze. Tu pobierzesz wszystkie swoje dane w jednym pliku.'
     : 'Bez konta treningi są tylko na tym telefonie. Warto co jakiś czas zrobić kopię.');
   const cw = currentWeightKg();
   set('acctWeightV', cw != null ? fmtKg(cw) + ' kg' : 'Uzupełnij');
@@ -6278,7 +6288,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.17";
+const APP_VERSION = "4.47.18";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -13643,12 +13653,28 @@ function exportData(){
     deletedBuiltinPlans: [...deletedBuiltinPlans],
     exportedAt: new Date().toISOString(),
   };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const json = JSON.stringify(data, null, 2);
+  const namePart = profileName ? profileName.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') + '-' : '';
+  const fileName = 'mekkio-backup-' + namePart + todayStr() + '.json';
+  // WKWebView ignores <a download>, so the native app writes the file to
+  // the cache dir and hands it to the iOS share sheet (Files, iCloud, mail).
+  const FS = capPlugin('Filesystem'), SH = capPlugin('Share');
+  if(IS_NATIVE && FS && SH){
+    (async()=>{
+      try{
+        const w = await FS.writeFile({ path: fileName, data: json, directory: 'CACHE', encoding: 'utf8' });
+        await SH.share({ title: 'Kopia zapasowa Mekkio', files: [w.uri] });
+      }catch(e){
+        if(!/cancel/i.test(String(e && e.message || e))){ console.error('exportData', e); toast('Nie udało się zapisać pliku'); }
+      }
+    })();
+    return;
+  }
+  const blob = new Blob([json], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const namePart = profileName ? profileName.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') + '-' : '';
-  a.download = 'mekkio-backup-' + namePart + todayStr() + '.json';
+  a.download = fileName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

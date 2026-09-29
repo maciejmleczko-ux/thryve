@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.17 (2026-09-29)
+- **Aktualna wersja:** 4.47.18 (2026-09-29)
 - **Liczba wersji:** 223 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -114,6 +114,21 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.47.18 · PATCH · 2026-09-29
+
+Bez wpisu „Co nowego” (poprawki wyglądu i apki natywnej).
+
+- **Dymek `toast()` według Figmy 448:5703:** czarne tło, tekst #fdfbff Geist 12 px do lewej, promień 8,65 px, szerokość `min(349px, 100% − 40px)`. Interlinia 1,35 zamiast figmowych 12,12 px, żeby dłuższy komunikat w dwóch liniach był czytelny.
+- **Kopia zapasowa zależna od konta:** zalogowany widzi sekcję „Twoje dane” z „Pobierz moje dane” (eksport, RODO art. 20), bez importu; gość bez zmian (kopia + import). `.acct-row[hidden]` naprawione (display:flex nadpisywał `hidden`). Polityka prywatności zaktualizowana.
+- **Eksport w apce natywnej:** WKWebView ignorował `<a download>`, a apka i tak pokazywała „Kopia zapasowa pobrana”. Teraz plik idzie przez `@capacitor/filesystem` (katalog cache) do systemowego arkusza udostępniania (`@capacitor/share`).
+- **`PrivacyInfo.xcprivacy`** w targecie App: brak śledzenia, FileTimestamp C617.1 (Filesystem nie ma własnego manifestu), zbierane dane zgodne z App Privacy (e-mail, imię, ID, zdrowie, fitness, treści użytkownika; wszystko App Functionality).
+- **Geist lokalnie** (`vendor/geist/`, latin + latin-ext, font zmienny 300–900) zamiast Google Fonts: poprawna czcionka offline i w apce natywnej bez żądania sieciowego.
+
+**Commity:**
+
+- `2ff1e40` 2026-09-29 — Kalorie z zegarka: ikona zegarka i etykieta „z zegarka” zamiast „szacunek” (4.47.17, build 17)
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.47.17 · PATCH · 2026-09-29
 
