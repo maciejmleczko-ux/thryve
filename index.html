@@ -461,9 +461,10 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    90%" — first read as 90% see-through (opacity .1), but his follow-up
    SVG makes the actual meaning explicit: fill-opacity="0.9" — i.e.
    90% opaque, up from the earlier .51. */
-.bottom-nav.bottom-nav-light{background:rgba(253,251,255,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
+.bottom-nav.bottom-nav-light{background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(1.44px);backdrop-filter:blur(1.44px);box-shadow:0 8px 24px rgba(0,0,0,.08);padding:9.74px 24px;}
 .bottom-nav.bottom-nav-light::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.74) 50.48%,#fff 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
-.bottom-nav.bottom-nav-light .nav-item{width:52px;height:52px;background:rgba(150,149,155,.3);position:relative;z-index:1;}
+.bottom-nav.bottom-nav-light .nav-item{width:37.52px;height:37.52px;background:transparent;position:relative;z-index:1;}
+.bottom-nav.bottom-nav-light .nav-item .ph{width:24px;height:24px;}
 .bottom-nav.bottom-nav-light .nav-item .ph{color:rgba(52,57,65,.77);transition:color var(--m-dur-snap) var(--m-ease);}
 /* one orange indicator that glides between tabs and grows/shrinks to the
    target's size (GYM is bigger) — positioned by positionNavBlob(). The
@@ -471,7 +472,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .bottom-nav.bottom-nav-light .nav-item.active{background:transparent;}
 .bottom-nav.bottom-nav-light .nav-item.active .ph{color:#fff;}
 .bottom-nav .nav-blob{display:none;}
-.bottom-nav.bottom-nav-light .nav-blob{display:block;position:absolute;top:50%;left:0;width:69px;height:69px;margin-top:-34.5px;border-radius:50%;background:var(--m-orange);transform-origin:50% 50%;will-change:transform;pointer-events:none;z-index:0;transition:transform var(--m-dur-in) var(--m-ease);}
+.bottom-nav.bottom-nav-light .nav-blob{display:block;position:absolute;top:50%;left:0;width:49.78px;height:49.78px;margin-top:-24.89px;border-radius:50%;background:var(--m-orange);transform-origin:50% 50%;will-change:transform;pointer-events:none;z-index:0;transition:transform var(--m-dur-in) var(--m-ease);}
 @media (prefers-reduced-motion: no-preference){
   /* the freshly-selected tab's icon spins into place as the blob arrives */
   .bottom-nav.bottom-nav-light .nav-item.nav-spin .ph{animation:navIconSpin var(--m-dur-pop) var(--m-ease);}
@@ -483,8 +484,8 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    flex-line footprint identical to its 52px siblings, so it visually
    pops above/below the pill without inflating the whole bar's height —
    a permanent size treatment, not tied to .active. */
-.bottom-nav.bottom-nav-light .nav-item-lg{width:69px;height:69px;margin-top:-8.5px;margin-bottom:-8.5px;}
-.bottom-nav.bottom-nav-light .nav-item-lg .ph{width:52px;height:52px;}
+.bottom-nav.bottom-nav-light .nav-item-lg{width:49.78px;height:49.78px;margin-top:-6.13px;margin-bottom:-6.13px;}
+.bottom-nav.bottom-nav-light .nav-item-lg .ph{width:37px;height:37px;}
 
 /* ---------- views ---------- */
 .view-stack{position:relative;overflow-x:hidden;}
@@ -2318,9 +2319,15 @@ body.pev2-bg{background:var(--m-panel);}
 .gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active,.lg-set:active{transition-duration:var(--m-dur-press-in);}
 /* ==== GYM 5.0 — workout in progress (Figma 459:6092) + set logging (Figma 461:7553) ==== */
 :root{--m-fs-display:108px;--m-fs-display-sm:60px;}
-html.gymv2-bg, body.gymv2-bg{background:#f3e7e0 linear-gradient(180deg,#fbece3 0%,#efe4de 58%,#e2e2e1 100%) no-repeat;background-attachment:scroll;}
+html.gymv2-bg{background:#e2e2e1;}
+body.gymv2-bg{background:transparent;}
+.gy-bg{display:none;position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;}
+body.gymv2-bg .gy-bg{display:block;}
+.gy-bg-photo{position:absolute;left:-41px;top:-1px;width:458px;height:813px;background:url(icons/backgrounds/gym.jpg) center top/100% 100% no-repeat;}
+.gy-bg-blur{position:absolute;left:-265px;top:300px;width:772px;height:772px;border-radius:50%;background:rgba(255,255,255,.01);-webkit-backdrop-filter:blur(19.55px);backdrop-filter:blur(19.55px);}
+.gy-bg-fade{position:absolute;left:0;right:0;top:214px;bottom:0;background:linear-gradient(180deg,rgba(251,236,227,0) 94px,#fbece3 375px,#e2e2e1 4694px);}
 #view-gym-v2{background:transparent;}
-#view-gym-v2 .gymv2-panel{background:transparent;border-radius:0;padding:calc(20px + var(--top-inset)) 10px 12px;}
+#view-gym-v2 .gymv2-panel{background:transparent;border-radius:0;padding:max(14px, calc(var(--top-inset) - 8px)) 10px 12px;}
 .gy-topbar{position:relative;display:flex;align-items:center;justify-content:space-between;height:40px;margin:0 0 26px;}
 .gy-title{position:absolute;left:50%;transform:translateX(-50%);font-size:var(--m-fs-xs);font-weight:600;letter-spacing:.0833em;text-transform:uppercase;color:var(--m-ink);}
 .gy-circ{width:40px;height:40px;border-radius:50%;border:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--m-ink);background:transparent;transition:transform var(--m-dur-press-out) var(--m-ease);}
@@ -2329,7 +2336,7 @@ html.gymv2-bg, body.gymv2-bg{background:#f3e7e0 linear-gradient(180deg,#fbece3 0
 .gy-ok svg{width:24px;height:24px;}
 .gy-plan-name{margin:0 0 14px;font-size:var(--m-fs-2xl);font-weight:200;letter-spacing:.04em;text-transform:uppercase;color:var(--m-orange);line-height:1;}
 .gy-plan-name[hidden]{display:none;}
-.gy-pills{display:flex;gap:4px;margin:0 0 10px;}
+.gy-pills{display:flex;gap:4px;margin:0 0 16px;}
 .gy-pill{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:34px;padding:6px 14px;box-sizing:border-box;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);font-size:var(--m-fs-2xs);font-weight:600;color:var(--m-ink);white-space:nowrap;font-variant-numeric:tabular-nums;}
 .gy-pill svg,.gy-pill .ph,.gy-pill .ph svg{width:16px;height:16px;flex:none;display:block;}
 .gy-pill-time{flex:1;min-width:0;background:var(--m-orange);border-color:transparent;color:#fff;transition:background-color var(--m-dur-quick) ease;}
@@ -2342,7 +2349,7 @@ html.gymv2-bg, body.gymv2-bg{background:#f3e7e0 linear-gradient(180deg,#fbece3 0
 #view-gym-v2 .gymv2-repeat.is-active{background:rgba(255,51,0,.82);border-color:#f1d7cb;}
 #view-gym-v2 .gymv2-repeat.is-active .gymv2-repeat-ico{background:#cd1200;}
 #view-gym-v2 .gymv2-repeat.is-active .gymv2-repeat-t{color:#fff;}
-#view-gym-v2 .gymv2-tile:not(.gymv2-search-tile):not(.gymv2-add-tile){background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);aspect-ratio:116/128;}
+#view-gym-v2 .gymv2-tile:not(.gymv2-search-tile):not(.gymv2-add-tile){background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);}
 #view-gym-v2 .gymv2-tile.is-partial{border:1px solid var(--m-orange);}
 #view-gym-v2 .gymv2-tile-done{top:9px;right:9px;width:14px;height:14px;}
 #view-gym-v2 .gymv2-tile-done svg{width:14px;height:14px;}
@@ -2351,7 +2358,9 @@ html.gymv2-bg, body.gymv2-bg{background:#f3e7e0 linear-gradient(180deg,#fbece3 0
 #view-gym-v2 .gymv2-save{height:55px;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;}
 
 /* --- set-logging sheet --- */
-#exercisePopupSheetV2{background:#fff;border-radius:34px 34px 0 0;}
+#exercisePopupOverlayV2{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+#exercisePopupSheetV2{width:calc(100% - 20px);max-width:500px;margin:0 auto;height:calc(100% - max(30px, calc(var(--top-inset) - 20px)));max-height:none;padding-bottom:0;background:#fff;border-radius:34px 34px 0 0;}
+#exercisePopupSheetV2 > .m-sheet-grab{display:none;}
 #exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2{align-items:stretch;gap:0;}
 .lg-sub-overlay{z-index:95;}
 #exNoteSheetV2, #exHowtoSheetV2{background:#fff;border-radius:34px 34px 0 0;}
@@ -2362,15 +2371,16 @@ html.gymv2-bg, body.gymv2-bg{background:#f3e7e0 linear-gradient(180deg,#fbece3 0
 .lg-circ.fill{background:var(--m-orange);color:#fff;border-color:#dadada;}
 .lg-circ.fill svg{width:20px;height:20px;}
 .lg-circ.ghost{border-color:transparent;pointer-events:none;}
-.lg-scroll{flex:1;min-height:0;width:100%;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:14px 16px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:26px;}
+.lg-scroll{scrollbar-width:none;flex:1;min-height:0;width:100%;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:14px 16px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:26px;}
+.lg-scroll::-webkit-scrollbar{display:none;}
 .lg-head{display:flex;flex-direction:column;gap:8px;}
 .lg-tags{display:flex;gap:4px;flex-wrap:wrap;}
 .lg-tag{display:inline-flex;align-items:center;height:20px;padding:0 12px;border-radius:var(--m-r-pill);background:#a4bdff;color:#0e267b;font-size:var(--m-fs-2xs);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
 .lg-tag--v{background:var(--m-orange);color:#fff;}
-.lg-name-row{display:flex;align-items:center;gap:8px;min-height:28px;}
+.lg-name-row{display:flex;align-items:center;gap:10px;min-height:32px;}
 .lg-name{flex:1;min-width:0;font-size:var(--m-fs-xl);font-weight:300;letter-spacing:.0367em;text-transform:uppercase;color:#2c2727;line-height:1.15;}
-.lg-ic{position:relative;width:24px;height:24px;border-radius:50%;flex:none;border:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
-.lg-ic svg{width:12px;height:12px;display:block;}
+.lg-ic{position:relative;width:32px;height:32px;border-radius:50%;flex:none;border:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.lg-ic svg{width:16px;height:16px;display:block;}
 .lg-ic.bulb{background:#dcdcdc;color:#2c2727;}
 .lg-ic.note{background:var(--m-plan-hard);color:#fff;}
 .lg-ic.has-note::after{content:"";position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--m-orange);border:1.5px solid #fff;box-sizing:border-box;}
@@ -2450,6 +2460,7 @@ html.gymv2-bg, body.gymv2-bg{background:#f3e7e0 linear-gradient(180deg,#fbece3 0
 <script src="vendor/supabase-2.117.2.js"></script>
 </head>
 <body>
+<div class="gy-bg" aria-hidden="true"><div class="gy-bg-photo"></div><div class="gy-bg-blur"></div><div class="gy-bg-fade"></div></div>
 <script>
 /* Running inside the Capacitor iOS shell (app.mekkio)? The native bridge
    injects window.Capacitor before page scripts run. Native builds serve the
@@ -2703,7 +2714,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
       <div class="gymv2-section-head" id="gymV2SectionHead">
         <p id="gymV2SectionLabel" data-i18n="gymV2YourExercises">Twoje ćwiczenia</p>
-        <button type="button" class="gymv2-edit-plan" id="gymV2EditPlanBtn" onclick="openPlanEditorV2(starredPlanId)" data-i18n="gymV2EditPlan">Edytuj plan</button>
       </div>
       <p class="gymv2-rest-note hidden" id="gymV2RestNote" data-i18n="gymV2RestDay">Dziś nie masz zaplanowanego treningu. Możesz i tak coś zalogować.</p>
       <div class="gymv2-grid" id="gymGridV2"></div>
@@ -3715,7 +3725,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 </div>
 
 <!-- GYM set-logging popup — see openExercisePopupV2(). -->
-<div class="onboard-overlay hidden m-sheet-overlay" id="exercisePopupOverlayV2" onclick="if(event.target===this) closeExercisePopupV2()">
+<div class="onboard-overlay hidden m-sheet-overlay" id="exercisePopupOverlayV2">
   <div class="m-sheet" id="exercisePopupSheetV2">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="m-sheet-body" id="exercisePopupBoxV2"></div>
@@ -3798,6 +3808,7 @@ const T_EN = {
   gymTitleTraining: 'WORKOUT', gymAbortTitle: 'Abort workout', gymFinishTitle: 'Finish workout',
   gymV2YourExercises: 'Your exercises', gymV2FinishWorkout: 'FINISH WORKOUT', gymPillExercises: 'exercises', gymPaused: 'Paused',
   gymAbortTitleDlg: 'Abort workout?', gymAbortBody: 'Everything you logged in this workout today will be deleted.', gymAbortYes: 'Abort', gymAbortNo: 'Back to workout',
+  gymFinishDlgTitle: 'Finish workout?', gymFinishBody: (n, kg)=>`We'll save ${n} and ${kg} kg.`, gymFinishPartial: 'Some exercises have incomplete sets; we will save them as they are.', gymFinishYes: 'Finish and save', gymFinishNo: 'Back',
   gymEmptyTitle: 'The workout is empty', gymEmptyBody: "You haven't logged an exercise yet. Add the first one?", gymEmptyYes: 'Add exercise',
   gymLeaveLogging: 'Leave logging', gymAddExerciseDone: 'Add exercise to workout', gymSwipeHint: 'Swipe a set left to delete it', gymLogWarn: 'Log at least one set to add the exercise.', gymExtraSet: 'Extra set',
   trainerAi: 'AI COACH', exNoteSheetTitle: 'NOTE', exHowtoTitle: 'How to do it', exHowtoSheetTitle: 'HOW TO DO IT', exHowtoSetup: 'SETUP', exHowtoMove: 'MOVEMENT', exHowtoMistake: 'COMMON MISTAKE',
@@ -7422,7 +7433,7 @@ function renderBottomNavForContext(){
 // that tab — GYM's circle is bigger). animate=false jumps instantly
 // (first paint, resize, nav rebuild); true glides.
 let navBlobReady = false, lastNavActiveRoute = null;
-const NAV_BLOB_BASE = 69;   // == .nav-item-lg; blob only ever scales DOWN from this (stays crisp)
+const NAV_BLOB_BASE = 49.78;   // == .nav-item-lg; blob only ever scales DOWN from this (stays crisp)
 function positionNavBlob(animate){
   const nav = document.getElementById('bottomNav');
   if(!nav || !nav.classList.contains('bottom-nav-light')) return;
@@ -8251,6 +8262,7 @@ function openExercisePopupV2(ex){
       ? {...ex, sets: draft.setValues.length || ex.sets, setValues: draft.setValues.map(s=>({...s})), rpe: draft.rpe || '', notes: draft.notes || ''}
       : {...ex, sets: freshSets.length || ex.sets, setValues: freshSets, rpe:'', notes:''};
   popupShowWarning = false;
+  popupExercise.planned = already ? (already.planned || already.sets) : (draft && draft.planned) ? draft.planned : (freshSets.length || ex.sets);
   popupInitLg();
   liveActivity(); // first tile tap starts the on-screen workout clock (resumes it if it had paused)
   renderExercisePopupV2(true);
@@ -8297,7 +8309,7 @@ function closeExercisePopupV2(viaDrag){
     } else {
       const bw = popupExercise.equipment === 'masa ciała';
       const hasData = popupExercise.setValues.some(s=>setIsLogged(s, bw)) || popupExercise.notes;
-      if(hasData) popupDrafts[popupExercise.name] = {setValues: popupExercise.setValues.map(s=>({...s})), rpe: popupExercise.rpe||'', notes: popupExercise.notes||''};
+      if(hasData) popupDrafts[popupExercise.name] = {setValues: popupExercise.setValues.map(s=>({...s})), rpe: popupExercise.rpe||'', notes: popupExercise.notes||'', planned: popupExercise.planned};
       else delete popupDrafts[popupExercise.name];
     }
     persistGymSession();
@@ -8446,7 +8458,7 @@ function mSheetDrag(overlayId, closeFn){
     window.addEventListener('pointercancel', pUp);
   });
 }
-mSheetDrag('exercisePopupOverlayV2', closeExercisePopupV2);
+// The set-logging sheet is fixed (no drag-to-dismiss, no backdrop close): only X leaves, so a slipping thumb can't drop it.
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
@@ -8780,7 +8792,7 @@ function lgBuildRuler(host, step, value, onUser){
 
 /* ---- current-set composer state ---- */
 let lg = null; // { editIdx, timer, ruler, step, w, r, wt, rt, wPre, rPre }
-const LG_COMMIT_MS = 1400;
+const LG_COMMIT_MS = 2000;
 function lgBw(){ return !!popupExercise && popupExercise.equipment === 'masa ciała'; }
 function lgFirstBlank(){
   const sv = popupExercise.setValues, bw = lgBw();
@@ -8832,9 +8844,13 @@ function lgPaint(){
 function lgReady(){
   if(!lg) return false;
   const bw = lgBw();
-  const wOk = bw || (lg.w !== '' && (lg.wt || lg.wPre));
-  const rOk = lg.r !== '' && lg.r >= 1 && (lg.rt || lg.rPre);
-  return wOk && rOk && (lg.wt || lg.rt);
+  if(lg.w === '' && !bw) return false;
+  if(lg.r === '' || lg.r < 1) return false;
+  // Editing a logged set: any change counts. A NEW set needs the user to have
+  // set the weight AND the reps themselves; suggestions from the last workout
+  // never add a set on their own.
+  if(lg.editIdx !== null) return lg.wt || lg.rt;
+  return lg.rt && (bw || lg.wt);
 }
 function lgSchedule(delay){
   clearTimeout(lg.timer);
@@ -8873,7 +8889,7 @@ function lgTypeR(inp){
   lg.r = Math.min(999, v); lg.rt = true;
   inp.classList.remove('is-pale');
 }
-function lgNumBlur(){ if(!lg) return; lgPaint(); lgSchedule(250); }
+function lgNumBlur(which){ if(!lg) return; if(which === 'w') lg.wt = true; else if(which === 'r') lg.rt = true; lgPaint(); lgSchedule(); }
 function lgNumKey(ev){ if(ev.key === 'Enter'){ ev.preventDefault(); ev.target.blur(); } }
 function lgFlush(){
   if(!lg) return;
@@ -8883,7 +8899,7 @@ function lgFlush(){
 function lgPersistDraft(){
   if(!popupExercise) return;
   if(sessionExercises.some(e => e.name === popupExercise.name)) return;
-  popupDrafts[popupExercise.name] = { setValues: popupExercise.setValues.map(s => ({...s})), rpe: popupExercise.rpe || '', notes: popupExercise.notes || '' };
+  popupDrafts[popupExercise.name] = { setValues: popupExercise.setValues.map(s => ({...s})), rpe: popupExercise.rpe || '', notes: popupExercise.notes || '', planned: popupExercise.planned };
   persistGymSession();
 }
 function lgCommit(){
@@ -9058,14 +9074,14 @@ function renderExercisePopupV2(animate){
       ${bw ? '' : `
       <div class="lg-block${rise(3)}">
         <span class="lg-lab">${t('weightLabel','Ciężar').toUpperCase()}</span>
-        <div class="lg-wval is-pale"><input class="lg-num" id="lgW" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" oninput="lgTypeW(this)" onblur="lgNumBlur()" onkeydown="lgNumKey(event)" aria-label="${escHtml(t('weightLabel','Ciężar'))}"><span class="lg-unit">kg</span></div>
+        <div class="lg-wval is-pale"><input class="lg-num" id="lgW" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" oninput="lgTypeW(this)" onblur="lgNumBlur('w')" onkeydown="lgNumKey(event)" aria-label="${escHtml(t('weightLabel','Ciężar'))}"><span class="lg-unit">kg</span></div>
         <div class="lg-ruler" id="lgRuler"></div>
       </div>`}
       <div class="lg-block${rise(4)}">
         <span class="lg-lab">${t('repsLabel','Powtórzenia').toUpperCase()}</span>
         <div class="lg-reps">
           <button type="button" class="lg-step" onclick="lgStepR(-1)" aria-label="−1">${LG_ICONS.minus}</button>
-          <input class="lg-num lg-num-r is-pale" id="lgR" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" oninput="lgTypeR(this)" onblur="lgNumBlur()" onkeydown="lgNumKey(event)" aria-label="${escHtml(t('repsLabel','Powtórzenia'))}">
+          <input class="lg-num lg-num-r is-pale" id="lgR" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" oninput="lgTypeR(this)" onblur="lgNumBlur('r')" onkeydown="lgNumKey(event)" aria-label="${escHtml(t('repsLabel','Powtórzenia'))}">
           <button type="button" class="lg-step" onclick="lgStepR(1)" aria-label="+1">${LG_ICONS.plus}</button>
         </div>
       </div>
@@ -9105,6 +9121,13 @@ function confirmExercisePopupV2(){
       haptic('warning');
       return;
     }
+  } else if(logged.length < (ex.planned || ex.sets)){
+    // Not every planned set is logged: the exercise is NOT done — it stays a
+    // draft and its tile shows "2/3" (closeExercisePopupV2 stores the draft).
+    if(idx !== -1) sessionExercises.splice(idx, 1);
+    haptic('light');
+    markGymActivity();
+    liveActivity();
   } else {
     ex.setValues = logged.map(s => ({...s}));
     ex.sets = ex.setValues.length;
@@ -9117,8 +9140,8 @@ function confirmExercisePopupV2(){
     }
     markGymActivity();
     liveActivity();
+    delete popupDrafts[ex.name];
   }
-  delete popupDrafts[ex.name];
   persistGymSession();
   closeExercisePopupV2();
   renderGymGrid();
@@ -11832,21 +11855,17 @@ function renderGymV2(){
   const hasWork = sessionExercises.length || extraGymTiles.length;
   const head = document.getElementById('gymV2SectionHead');
   const label = document.getElementById('gymV2SectionLabel');
-  const editBtn = document.getElementById('gymV2EditPlanBtn');
   const restNote = document.getElementById('gymV2RestNote');
   const grid = document.getElementById('gymGridV2');
   if(repeatMode){
     head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
     label.textContent = t('gymV2ExercisesRepeat', 'Ćwiczenia z tego treningu');
-    editBtn.classList.add('hidden');
   } else if(planToday > 0){
     head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
     label.textContent = t('gymV2YourExercises', 'Twoje ćwiczenia');
-    editBtn.classList.toggle('hidden', !plan);
   } else if(hasWork){
     head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
     label.textContent = t('gymV2ExercisesToday', 'Ćwiczenia na dziś');
-    editBtn.classList.add('hidden');
   } else {
     // clean rest day — nothing planned, nothing logged. Keep the grid (it
     // still holds "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie"), drop the
@@ -12004,7 +12023,7 @@ function renderGymGridV2(animate){
     const dr = (!inSession && ex.type !== 'checklist') ? popupDrafts[ex.name] : null;
     const bwEx = ex.equipment === 'masa ciała';
     const nLogged = dr ? (dr.setValues||[]).filter(sv=>setIsLogged(sv, bwEx)).length : 0;
-    const partial = nLogged > 0 ? { done: nLogged, total: Math.max(nLogged, (dr.setValues||[]).length) } : null;
+    const partial = nLogged > 0 ? { done: nLogged, total: Math.max(nLogged, dr.planned || (dr.setValues||[]).length) } : null;
     const canSwap = slot.swapOrigin && !slot.bookend && ex.type !== 'checklist' && !inSession && !partial;
     const tileOpts = {};
     if(canSwap){ tileOpts.swapOrigin = slot.swapOrigin; tileOpts.swapped = slot.swapped; }
@@ -12190,14 +12209,28 @@ function gymAdoptDrafts(){
     delete popupDrafts[name];
   });
 }
-/* ✓ / ZAKOŃCZ TRENING — same action from both places. */
+/* ✓ / ZAKOŃCZ TRENING — same action from both places. Always asks first and
+   says what will be saved; nothing changes until the user confirms. */
+function gymFinishSummary(){
+  let exercises = 0, partial = 0;
+  sessionExercises.forEach(e=>{
+    if(e.type === 'checklist') return;
+    if((e.setValues || []).some(sv => setIsLogged(sv, e.equipment === 'masa ciała'))) exercises++;
+  });
+  const lib = orderedExerciseLibrary();
+  Object.keys(popupDrafts).forEach(name=>{
+    if(sessionExercises.some(e => e.name === name)) return;
+    const def = lib.find(e => e.name === name) || extraGymTiles.find(e => e.name === name);
+    const bw = !!def && def.equipment === 'masa ciała';
+    const n = (popupDrafts[name].setValues || []).filter(sv => setIsLogged(sv, bw)).length;
+    if(n > 0){ exercises++; if(n < (popupDrafts[name].planned || n)) partial++; }
+  });
+  return { exercises, partial, kg: gymSessionVolumeKg() };
+}
 function gymFinishTapV2(){
   if(popupExercise) return;
-  gymAdoptDrafts();
-  persistGymSession();
-  renderGymGridV2();
-  const anyLogged = sessionExercises.some(e => e.type !== 'checklist' && (e.setValues || []).some(sv => setIsLogged(sv, e.equipment === 'masa ciała')));
-  if(!anyLogged){
+  const sum = gymFinishSummary();
+  if(!sum.exercises){
     gymConfirmV2({
       title: t('gymEmptyTitle','Trening jest pusty'),
       body: t('gymEmptyBody','Nie ma jeszcze ani jednego ćwiczenia. Dodać pierwsze?'),
@@ -12207,7 +12240,20 @@ function gymFinishTapV2(){
     });
     return;
   }
-  saveWorkoutV2();
+  const body = t('gymFinishBody', `Zapiszemy ${planExCountText(sum.exercises)} i ${sum.kg} kg.`, planExCountText(sum.exercises), sum.kg)
+    + (sum.partial ? ' ' + t('gymFinishPartial','Niektóre ćwiczenia mają niepełne serie. Zapiszemy je tak, jak są.') : '');
+  gymConfirmV2({
+    title: t('gymFinishDlgTitle','Zakończyć trening?'),
+    body,
+    yes: t('gymFinishYes','Zakończ i zapisz'),
+    no: t('gymFinishNo','Wróć'),
+    onYes: ()=>{
+      gymAdoptDrafts();
+      persistGymSession();
+      renderGymGridV2();
+      saveWorkoutV2();
+    }
+  });
 }
 
 // The "Mekkio" load screen (Figma node 107:329). Now that the v3 layout IS
