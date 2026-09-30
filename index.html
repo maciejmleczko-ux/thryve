@@ -10708,9 +10708,13 @@ function buildPlanCardV2(p, isCustom, animate, i){
   const color = (isCustom ? PLANSV2_CUSTOM_COLOR_BY_DIFFICULTY : PLANSV2_AUTO_COLOR_BY_DIFFICULTY)[diffKey];
   const wrap = document.createElement('div');
   wrap.className = 'plansv2-card-wrap';
-  const card = document.createElement('button');
-  card.type = 'button';
+  // A div, not a <button>: iOS WebKit re-laid the flex row out as a centred
+  // column while a <button> was pressed (:active), so the card jumped on tap.
+  const card = document.createElement('div');
+  card.setAttribute('role', 'button');
+  card.tabIndex = 0;
   card.className = 'plansv2-card';
+  card.addEventListener('keydown', e=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); card.click(); } });
   card.style.background = color;
   card.innerHTML = `
     <div class="plansv2-card-info">

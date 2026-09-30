@@ -120,6 +120,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 Bez wpisu „Co nowego”.
 
 - **Bez zaznaczania tekstu i menu obrazków w całej apce** (PWA i natywna): `html{user-select:none;-webkit-touch-callout:none}`, obrazki i SVG bez przeciągania; zaznaczanie zostaje tylko w `input`, `textarea` i `[contenteditable]`. Wcześniej przytrzymanie palca w WKWebView zaznaczało tekst i pokazywało menu „Kopiuj / Zapisz obrazek”.
+- **Karty planów nie skaczą przy dotknięciu:** karta na ekranie Plany była `<button>` i na iOS w stanie `:active` WebKit układał jej zawartość w wyśrodkowaną kolumnę (nazwa i ptaszek na środku). Teraz to `<div role="button" tabindex="0">` z obsługą Enter/Spacji.
 
 **Commity:**
 
