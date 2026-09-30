@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.48.0 (2026-09-30)
-- **Liczba wersji:** 224 · **commitów:** 552
+- **Aktualna wersja:** 4.48.1 (2026-09-30)
+- **Liczba wersji:** 225 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -114,6 +114,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.48.1 · PATCH · 2026-09-30
+
+Bez wpisu „Co nowego”.
+
+- **Bez zaznaczania tekstu i menu obrazków w całej apce** (PWA i natywna): `html{user-select:none;-webkit-touch-callout:none}`, obrazki i SVG bez przeciągania; zaznaczanie zostaje tylko w `input`, `textarea` i `[contenteditable]`. Wcześniej przytrzymanie palca w WKWebView zaznaczało tekst i pokazywało menu „Kopiuj / Zapisz obrazek”.
+
+**Commity:**
+
+- `ed2f0e5` 2026-09-30 — Build 22 (4.48.0)
+- `18ff47c` 2026-09-30 — version.json: build 22 w TestFlight
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.48.0 · MINOR · 2026-09-30
 

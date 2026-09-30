@@ -2480,6 +2480,10 @@ body.gymv2-bg .gy-bg{display:block;}
 }
 .gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active{transform:scale(.94);}
 .lg-set:active{transform:scale(.99);}
+/* App feel: no text selection / image long-press menu anywhere, except where the user types */
+html{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+img,svg{-webkit-user-drag:none;-webkit-touch-callout:none;}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -6524,7 +6528,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.48.0";
+const APP_VERSION = "4.48.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
