@@ -1480,7 +1480,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    .plansv2-customize-stack is the moving panel (== .m-sheet),
    .plansv2-customize-card is its scrolling body. */
 .plansv2-customize-overlay{flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden;gap:0;background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
-.plansv2-customize-stack{width:100%;max-width:520px;margin:0 auto;background:var(--m-panel);border-radius:22px 22px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:92%;display:flex;flex-direction:column;align-items:center;overflow:hidden;font-family:var(--m-font);will-change:transform;}
+.plansv2-customize-stack{width:calc(100% - 20px);max-width:500px;margin:0 auto;background:var(--m-panel);border-radius:34px 34px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:calc(100% - var(--m-sheet-top));display:flex;flex-direction:column;align-items:center;overflow:hidden;font-family:var(--m-font);will-change:transform;}
 .plansv2-customize-overlay.m-kb .plansv2-customize-stack{padding-bottom:14px;}
 .plansv2-customize-stack.m-sheet-snapback{transition:transform var(--m-dur-snap) var(--m-ease-sheet);}
 @media (prefers-reduced-motion: no-preference){
@@ -1793,7 +1793,7 @@ body.pev2-bg{background:var(--m-panel);}
    established slide-up curve (var(--m-ease-sheet)) rather than
    a new one, per [[feedback_thryve_animation_vocabulary]]. */
 .m-sheet-overlay{flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden;background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
-.m-sheet{width:100%;max-width:520px;margin:0 auto;background:var(--m-panel);border-radius:22px 22px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:92%;display:flex;flex-direction:column;overflow:hidden;font-family:var(--m-font);will-change:transform;}
+.m-sheet{width:calc(100% - 20px);max-width:500px;margin:0 auto;background:var(--m-panel);border-radius:34px 34px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:calc(100% - var(--m-sheet-top));position:relative;display:flex;flex-direction:column;overflow:hidden;font-family:var(--m-font);will-change:transform;}
 /* % = of the overlay's content box, which syncSheetsToVisualViewport() pads
    down to the visible band — so the sheet always fits above the keyboard.
    With the keyboard up, the home-indicator inset is under it: drop it. */
@@ -2316,9 +2316,25 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
-.gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active,.lg-set:active{transition-duration:var(--m-dur-press-in);}
+.lg-num{cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;}
+.lg-num.is-editing::after{content:"";display:inline-block;width:2px;height:.78em;margin-left:3px;background:var(--m-orange);vertical-align:-.04em;}
+@media (prefers-reduced-motion: no-preference){
+  .lg-num.is-editing::after{animation:lgCaret 1s steps(1) infinite;}
+  @keyframes lgCaret{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+}
+.lg-pad{position:absolute;left:0;right:0;bottom:0;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 12px calc(12px + env(safe-area-inset-bottom));background:var(--m-panel);border-radius:26px 26px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.08);transform:translateY(100%);transition:transform var(--m-dur-in) var(--m-ease-sheet);}
+.lg-pad[hidden]{display:none;}
+.lg-pad.is-open{transform:translateY(0);}
+@media (prefers-reduced-motion: reduce){ .lg-pad{transition:none;} }
+.lg-key{height:46px;border:.5px solid #f1d7cb;border-radius:var(--m-r-sm);background:#fff;color:var(--m-ink);font-family:inherit;font-size:var(--m-fs-xl);font-weight:300;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.lg-key svg{width:26px;height:26px;display:block;}
+.lg-key:disabled{opacity:.3;cursor:default;}
+.lg-key-ok{grid-column:1 / -1;background:var(--m-orange);border-color:transparent;color:#fff;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;}
+.lg-scroll.pad-open{padding-bottom:calc(310px + env(safe-area-inset-bottom));}
+.lg-key:active{transform:scale(.95);transition-duration:var(--m-dur-press-in);}
+.gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active,.lg-set:active,.lg-key:active{transition-duration:var(--m-dur-press-in);}
 /* ==== GYM 5.0 — workout in progress (Figma 459:6092) + set logging (Figma 461:7553) ==== */
-:root{--m-fs-display:108px;--m-fs-display-sm:60px;}
+:root{--m-fs-display:108px;--m-fs-display-sm:60px;--m-sheet-top:max(30px, calc(var(--top-inset) + 4px));}
 html.gymv2-bg{background:#e2e2e1;}
 body.gymv2-bg{background:transparent;}
 .gy-bg{display:none;position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;}
@@ -2359,12 +2375,12 @@ body.gymv2-bg .gy-bg{display:block;}
 
 /* --- set-logging sheet --- */
 #exercisePopupOverlayV2{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
-#exercisePopupSheetV2{width:calc(100% - 20px);max-width:500px;margin:0 auto;height:calc(100% - max(30px, calc(var(--top-inset) - 20px)));max-height:none;padding-bottom:0;background:#fff;border-radius:34px 34px 0 0;}
+#exercisePopupSheetV2{height:calc(100% - var(--m-sheet-top));max-height:none;padding-bottom:0;background:#fff;}
 #exercisePopupSheetV2 > .m-sheet-grab{display:none;}
 #exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2{align-items:stretch;gap:0;}
 .lg-sub-overlay{z-index:95;}
-#exNoteSheetV2, #exHowtoSheetV2{background:#fff;border-radius:34px 34px 0 0;}
-.lg-bar{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;padding:6px 16px 10px;box-sizing:border-box;}
+#exNoteSheetV2, #exHowtoSheetV2{background:#fff;}
+.lg-bar{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;padding:20px 20px 10px;box-sizing:border-box;}
 .lg-bar-title{position:absolute;left:50%;transform:translateX(-50%);max-width:58%;font-size:var(--m-fs-xs);font-weight:600;letter-spacing:.0833em;text-transform:uppercase;color:var(--m-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .lg-circ{width:34px;height:34px;border-radius:50%;border:.5px solid var(--m-orange);background:transparent;color:var(--m-orange);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex:none;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .lg-circ svg{width:18px;height:18px;display:block;}
@@ -2405,7 +2421,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-unit{font-size:var(--m-fs-hero);font-weight:200;line-height:1;}
 .lg-num-r{font-size:var(--m-fs-display-sm);color:#2c2727;transition:color var(--m-dur-quick) ease;}
 .lg-num-r.is-pale{color:#a3a3a3;}
-.lg-ruler{position:relative;width:100%;height:74px;}
+.lg-ruler{position:relative;width:calc(100% - 28px);margin:0 auto;height:74px;}
 .lg-ruler-ind{position:absolute;left:50%;top:0;width:1px;height:36px;margin-left:-.5px;background:var(--m-orange);pointer-events:none;z-index:1;}
 .lg-ruler-track{position:absolute;inset:0;display:flex;align-items:flex-end;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-x;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;}
 .lg-ruler-track::-webkit-scrollbar{display:none;}
@@ -8760,10 +8776,18 @@ function lgBuildRuler(host, step, value, onUser){
   html += '<div class="lg-ruler-sp"></div>';
   host.innerHTML = `<div class="lg-ruler-ind"></div><div class="lg-ruler-track">${html}</div>`;
   const track = host.querySelector('.lg-ruler-track');
-  let user = false, lastIdx = null, raf = null, idleT = null;
+  let user = false, down = false, lastIdx = null, raf = null, idleT = null;
   const idxOf = ()=> Math.max(0, Math.min(n, Math.round(track.scrollLeft / LG_TICK_W)));
-  const markUser = ()=>{ if(!user){ haptic('select-start'); } user = true; };
-  ['touchstart','pointerdown','wheel'].forEach(ev=> track.addEventListener(ev, markUser, {passive:true}));
+  const press = ()=>{ if(!user) haptic('select-start'); user = true; down = true; clearTimeout(idleT); };
+  const release = ()=>{ down = false; clearTimeout(idleT); idleT = setTimeout(endUser, 220); };
+  const endUser = ()=>{ if(!down && user){ user = false; haptic('select-end'); } };
+  // touchend fires even after the browser took over the scroll (pointerup would not)
+  track.addEventListener('touchstart', press, {passive:true});
+  track.addEventListener('touchend', release, {passive:true});
+  track.addEventListener('touchcancel', release, {passive:true});
+  track.addEventListener('mousedown', press);
+  window.addEventListener('mouseup', ()=>{ if(down) release(); });
+  track.addEventListener('wheel', ()=>{ user = true; clearTimeout(idleT); idleT = setTimeout(endUser, 220); }, {passive:true});
   track.addEventListener('scroll', ()=>{
     if(raf) cancelAnimationFrame(raf);
     raf = requestAnimationFrame(()=>{
@@ -8773,8 +8797,7 @@ function lgBuildRuler(host, step, value, onUser){
         if(user){ haptic('select'); onUser(Math.round(i * step * 100) / 100); }
       }
     });
-    clearTimeout(idleT);
-    idleT = setTimeout(()=>{ if(user){ user = false; haptic('select-end'); } }, 220);
+    if(!down){ clearTimeout(idleT); idleT = setTimeout(endUser, 220); }
   }, {passive:true});
   const api = {
     setValue(v){
@@ -8827,22 +8850,22 @@ function lgResetCurrent(){
   lgPaint();
   if(lg.ruler && !lgBw()) lg.ruler.setValue(lg.w);
 }
-function lgAutoWidth(inp){ inp.style.width = Math.max(1, String(inp.value).length) + 'ch'; }
 function lgPaint(){
   const w = document.getElementById('lgW'), r = document.getElementById('lgR');
+  const typing = lgPad && lgPad.buf !== '';
   if(w){
-    if(document.activeElement !== w) w.value = lg.w === '' ? '' : fmtKgLocal(lg.w);
-    lgAutoWidth(w);
+    w.textContent = (typing && lgPad.f === 'w') ? lgPad.buf : (lg.w === '' ? '' : fmtKgLocal(lg.w));
     w.closest('.lg-wval').classList.toggle('is-pale', !lg.wt && !(lg.editIdx !== null));
+    w.classList.toggle('is-editing', !!lgPad && lgPad.f === 'w');
   }
   if(r){
-    if(document.activeElement !== r) r.value = lg.r === '' ? '' : String(lg.r);
-    lgAutoWidth(r);
+    r.textContent = (typing && lgPad.f === 'r') ? lgPad.buf : (lg.r === '' ? '' : String(lg.r));
     r.classList.toggle('is-pale', !lg.rt && !(lg.editIdx !== null));
+    r.classList.toggle('is-editing', !!lgPad && lgPad.f === 'r');
   }
 }
 function lgReady(){
-  if(!lg) return false;
+  if(!lg || lgPad) return false;
   const bw = lgBw();
   if(lg.w === '' && !bw) return false;
   if(lg.r === '' || lg.r < 1) return false;
@@ -8858,6 +8881,7 @@ function lgSchedule(delay){
 }
 function lgSetW(v, src){
   if(!lg) return;
+  if(lgPad) lgPadClose();
   lg.w = v; lg.wt = true;
   if(src !== 'ruler' && lg.ruler) lg.ruler.setValue(v);
   lgPaint();
@@ -8870,29 +8894,64 @@ function lgSetR(v){
   lgSchedule();
 }
 function lgStepR(d){
+  if(lgPad) lgPadClose();
   haptic('light');
   lgSetR((parseInt(lg.r) || 0) + d);
 }
-function lgTypeW(inp){
-  const raw = inp.value.replace(',', '.').replace(/[^0-9.]/g, '');
-  const v = parseFloat(raw);
-  lgAutoWidth(inp);
-  if(isNaN(v)){ return; }
-  lg.w = Math.min(999, v); lg.wt = true;
-  if(lg.ruler) lg.ruler.setValue(lg.w);
-  inp.closest('.lg-wval').classList.remove('is-pale');
+/* In-app number pad (weight / reps). Replaces the system keyboard, whose
+   accessory bar and background looked out of place inside the sheet. */
+let lgPad = null; // { f: 'w' | 'r', buf: '' }
+function lgPadOpen(f){
+  if(!lg || !popupExercise) return;
+  if(lgPad && lgPad.f !== f) lgPadApply();
+  lgPad = { f, buf: '' };
+  const pad = document.getElementById('lgPad'), scroll = document.querySelector('#exercisePopupBoxV2 .lg-scroll');
+  if(!pad) return;
+  pad.querySelector('.lg-key-dec').disabled = (f === 'r');
+  scroll.classList.add('pad-open');
+  pad.hidden = false;
+  void pad.offsetWidth;
+  pad.classList.add('is-open');
+  haptic('light');
+  lgPaint();
+  const block = document.getElementById(f === 'w' ? 'lgW' : 'lgR').closest('.lg-block');
+  setTimeout(()=>{ if(block && scroll) scroll.scrollTo({ top: block.offsetTop - 8, behavior: 'smooth' }); }, 60);
 }
-function lgTypeR(inp){
-  const v = parseInt(inp.value.replace(/[^0-9]/g, ''));
-  lgAutoWidth(inp);
-  if(isNaN(v)) return;
-  lg.r = Math.min(999, v); lg.rt = true;
-  inp.classList.remove('is-pale');
+function lgPadApply(){
+  if(!lgPad || !lg) return;
+  const f = lgPad.f, txt = lgPad.buf.replace(',', '.');
+  lg[f === 'w' ? 'wt' : 'rt'] = true;     // opening + confirming counts as setting it, even unchanged
+  if(txt !== '' && txt !== '.'){
+    if(f === 'w'){ lg.w = Math.min(999, parseFloat(txt) || 0); if(lg.ruler) lg.ruler.setValue(lg.w); }
+    else { lg.r = Math.min(999, parseInt(txt) || 0); }
+  }
 }
-function lgNumBlur(which){ if(!lg) return; if(which === 'w') lg.wt = true; else if(which === 'r') lg.rt = true; lgPaint(); lgSchedule(); }
-function lgNumKey(ev){ if(ev.key === 'Enter'){ ev.preventDefault(); ev.target.blur(); } }
+function lgPadClose(){
+  if(!lgPad) return;
+  lgPadApply();
+  lgPad = null;
+  const pad = document.getElementById('lgPad'), scroll = document.querySelector('#exercisePopupBoxV2 .lg-scroll');
+  if(pad){ pad.classList.remove('is-open'); setTimeout(()=>{ if(!lgPad) pad.hidden = true; }, 260); }
+  if(scroll) scroll.classList.remove('pad-open');
+  lgPaint();
+  lgSchedule();
+}
+function lgPadKey(k){
+  if(!lgPad) return;
+  haptic('light');
+  let b = lgPad.buf;
+  if(k === 'del') b = b.slice(0, -1);
+  else if(k === ','){ if(lgPad.f === 'w' && !b.includes(',')) b = (b === '' ? '0' : b) + ','; }
+  else if(lgPad.f === 'w'){
+    const dec = b.split(',')[1];
+    if((b.includes(',') ? (dec || '').length < 2 : b.replace(',', '').length < 3)) b += k;
+  } else if(b.length < 3) b += k;
+  lgPad.buf = b;
+  lgPaint();
+}
 function lgFlush(){
   if(!lg) return;
+  if(lgPad){ lgPadApply(); lgPad = null; }
   clearTimeout(lg.timer);
   if(lgReady()) lgCommit();
 }
@@ -8927,6 +8986,7 @@ function lgCommit(){
 }
 function lgTapSet(i){
   if(!popupExercise || !lg) return;
+  if(lgPad) lgPadClose();
   const sv = popupExercise.setValues[i];
   if(!sv || !setIsLogged(sv, lgBw())) return;
   lgFlush();
@@ -8950,6 +9010,7 @@ function lgDeleteSet(i){
 }
 function lgAddExtra(){
   if(!popupExercise || !lg) return;
+  if(lgPad) lgPadClose();
   lgFlush();
   const ex = popupExercise;
   if(lgFirstBlank() === -1){
@@ -9056,7 +9117,7 @@ function renderExercisePopupV2(animate){
       <span class="lg-bar-title">${escHtml(popupPlanTitle())}</span>
       <button type="button" class="lg-circ fill" onclick="confirmExercisePopupV2()" aria-label="${escHtml(t('gymAddExerciseDone','Dodaj ćwiczenie do treningu'))}">${LG_ICONS.checkBig}</button>
     </div>
-    <div class="lg-scroll">
+    <div class="lg-scroll" onclick="if(lgPad && !event.target.closest('.lg-num')) lgPadClose()">
       <div class="lg-head${rise(0)}">
         <div class="lg-tags"><span class="lg-tag">${escHtml(groupLabel(ex.group))}</span>${versionPill}</div>
         <div class="lg-name-row">
@@ -9074,14 +9135,14 @@ function renderExercisePopupV2(animate){
       ${bw ? '' : `
       <div class="lg-block${rise(3)}">
         <span class="lg-lab">${t('weightLabel','Ciężar').toUpperCase()}</span>
-        <div class="lg-wval is-pale"><input class="lg-num" id="lgW" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" oninput="lgTypeW(this)" onblur="lgNumBlur('w')" onkeydown="lgNumKey(event)" aria-label="${escHtml(t('weightLabel','Ciężar'))}"><span class="lg-unit">kg</span></div>
+        <div class="lg-wval is-pale"><button type="button" class="lg-num" id="lgW" onclick="lgPadOpen('w')" aria-label="${escHtml(t('weightLabel','Ciężar'))}"></button><span class="lg-unit">kg</span></div>
         <div class="lg-ruler" id="lgRuler"></div>
       </div>`}
       <div class="lg-block${rise(4)}">
         <span class="lg-lab">${t('repsLabel','Powtórzenia').toUpperCase()}</span>
         <div class="lg-reps">
           <button type="button" class="lg-step" onclick="lgStepR(-1)" aria-label="−1">${LG_ICONS.minus}</button>
-          <input class="lg-num lg-num-r is-pale" id="lgR" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" oninput="lgTypeR(this)" onblur="lgNumBlur('r')" onkeydown="lgNumKey(event)" aria-label="${escHtml(t('repsLabel','Powtórzenia'))}">
+          <button type="button" class="lg-num lg-num-r is-pale" id="lgR" onclick="lgPadOpen('r')" aria-label="${escHtml(t('repsLabel','Powtórzenia'))}"></button>
           <button type="button" class="lg-step" onclick="lgStepR(1)" aria-label="+1">${LG_ICONS.plus}</button>
         </div>
       </div>
@@ -9091,6 +9152,13 @@ function renderExercisePopupV2(animate){
       </div>
       ${popupShowWarning ? `<div class="lg-warn">${t('gymLogWarn','Zaloguj choć jedną serię, żeby dodać ćwiczenie.')}</div>` : ''}
       <button type="button" class="lg-add${rise(6)}" onclick="lgAddExtra()">${t('gymExtraSet','Dodatkowa seria')}</button>
+    </div>
+    <div class="lg-pad" id="lgPad" hidden>
+      ${['1','2','3','4','5','6','7','8','9'].map(k=>`<button type="button" class="lg-key" onclick="lgPadKey('${k}')">${k}</button>`).join('')}
+      <button type="button" class="lg-key lg-key-dec" onclick="lgPadKey(',')">,</button>
+      <button type="button" class="lg-key" onclick="lgPadKey('0')">0</button>
+      <button type="button" class="lg-key lg-key-del" onclick="lgPadKey('del')" aria-label="⌫"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5h10a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 19 19H9l-5.5-7L9 5Zm3.5 4.5 5 5m0-5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button type="button" class="lg-key lg-key-ok" onclick="lgPadClose()">OK</button>
     </div>`;
   lgRenderSets();
   lgPaint();
@@ -11859,13 +11927,13 @@ function renderGymV2(){
   const grid = document.getElementById('gymGridV2');
   if(repeatMode){
     head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
-    label.textContent = t('gymV2ExercisesRepeat', 'Ćwiczenia z tego treningu');
+    label.textContent = t('gymV2YourExercises', 'Twoje ćwiczenia');
   } else if(planToday > 0){
     head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
     label.textContent = t('gymV2YourExercises', 'Twoje ćwiczenia');
   } else if(hasWork){
     head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
-    label.textContent = t('gymV2ExercisesToday', 'Ćwiczenia na dziś');
+    label.textContent = t('gymV2YourExercises', 'Twoje ćwiczenia');
   } else {
     // clean rest day — nothing planned, nothing logged. Keep the grid (it
     // still holds "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie"), drop the
