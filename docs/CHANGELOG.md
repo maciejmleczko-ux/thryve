@@ -120,13 +120,14 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 Bez wpisu „Co nowego”.
 
 - **Bez zaznaczania tekstu i menu obrazków w całej apce** (PWA i natywna): `html{user-select:none;-webkit-touch-callout:none}`, obrazki i SVG bez przeciągania; zaznaczanie zostaje tylko w `input`, `textarea` i `[contenteditable]`. Wcześniej przytrzymanie palca w WKWebView zaznaczało tekst i pokazywało menu „Kopiuj / Zapisz obrazek”.
-- **Karty planów nie skaczą przy dotknięciu:** karta na ekranie Plany była `<button>` i na iOS w stanie `:active` WebKit układał jej zawartość w wyśrodkowaną kolumnę (nazwa i ptaszek na środku). Teraz to `<div role="button" tabindex="0">` z obsługą Enter/Spacji.
-
+- **Elementy nie zmieniają układu przy wciśnięciu (regresja z 4.48.0):** blok stylów kafli „Wybierz inne ćwiczenie” / „Dodaj ćwiczenie” został wklejony w środek zbiorczej listy `…:active{transition-duration:var(--m-dur-press-in)}` na końcu `<style>`. Lista straciła swoje zamknięcie, więc każdy element z niej (karty planów, przyciski, kafle, chipy) na czas wciśnięcia dostawał `flex-direction:column`, wyśrodkowanie i `padding:4.5px 0 0`, a szybkie wciśnięcie przestało działać. Najbardziej widać to było na kartach planów: nazwa i ptaszek wskakiwały na środek. Lista jest znowu zamknięta i ma w niej `.lg-num:active`. Przy okazji karta planu jest teraz `<div role="button" tabindex="0">` z obsługą Enter/Spacji zamiast `<button>`.
 **Commity:**
 
 - `ed2f0e5` 2026-09-30 — Build 22 (4.48.0)
 - `18ff47c` 2026-09-30 — version.json: build 22 w TestFlight
-- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
+- `f06d9e6` 2026-09-30 — Bez zaznaczania tekstu i menu obrazków w całej apce, poza polami tekstowymi (4.48.1)
+- `ce581f1` 2026-09-30 — Plany: karta jako div role=button, bez przeskoku układu przy dotknięciu na iOS (4.48.1)
+- poprawka zbiorczej reguły `:active` (hash w kolejnej wersji)
 
 ### 4.48.0 · MINOR · 2026-09-30
 
