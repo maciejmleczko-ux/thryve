@@ -131,9 +131,17 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Menu dolne wg Figmy 461:7220:** pigułka 336×62 (padding 12/24, odstęp 20 px od boków i dołu), przezroczyste nieaktywne ikony 37,5 px bez szarych kółek w kolorze `rgba(52,57,65,.77)` (Maciej wrócił do 77% krycia po próbie z pełnym `#343941`), Trening 49,78 px (glif z dodanym obrysem `stroke-width:.9`, bo wypełniony kontur miał ~1 px i wyglądał cieniej niż pozostałe ikony ~1,5 px), tło `rgba(255,255,255,.8)`, `NAV_BLOB_BASE` = 49,78. Szerokość stała 336 (`min(336px, 100% - 40px)`), żeby odstępy między ikonami (22 px) nie rosły na szerszych telefonach. **Ikony ćwiczeń:** 67 przezroczystych PNG z `icons - 4 (3d)/PNG - TRANSPARENT` w `icons/exercises/` (dwie nazwy poprawione: `pec_deck`, `turkish_get_up`), adres z `?v=${ICON_VER}` do przebijania cache'u przy kolejnej wymianie. **Geist:** `vendor/geist/geist.css` deklaruje teraz zakres wag 100–900 (pliki woff2 i tak były zmiennymi 100–900), dzięki czemu działa ExtraLight 200 z Figmy.
 - Nowe stałe i klucze: `BARBELL_EXERCISES` (Barbell Deadlift/Curl/Bench Press/Back Squat, Hip Thrust), tokeny `--m-fs-display` / `--m-fs-display-sm`, `fitlog_gym_live_timer_v1`. Bez zmian po stronie chmury i Supabase.
 
-**Commity:**
+**Commity (8):**
 
-- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
+- `8d59e4a` 2026-09-30 — Nowy ekran Trening i popup logowania serii wg Figmy: linijka ciężaru, seria dodaje się sama, timer przerwy, żywy zegar (4.48.0)
+- `6c95e34` 2026-09-30 — Trening: menu dolne wg Figmy, tło ze zdjęciem, potwierdzenie zakończenia, seria dodaje się dopiero po ruchu użytkownika, 2/3 przy niepełnych seriach, stały popup (4.48.0)
+- `67b2fed` 2026-09-30 — Trening: własna klawiatura liczbowa, poprawka linijki, wymiary arkuszy w całej apce, nagłówek Twoje ćwiczenia (4.48.0)
+- `280208b` 2026-09-30 — Menu dolne wg Figmy 461:7220 (336x62, padding 24), przezroczyste ikony ćwiczeń (4.48.0)
+- `5a77f1c` 2026-09-30 — Menu dolne: stała szerokość 336 (odstępy 22 px), grubszy glif Treningu (4.48.0)
+- `805b2b3` 2026-09-30 — Menu dolne: przywrócone 77% krycia nieaktywnych ikon (4.48.0)
+- `9133740` 2026-09-30 — Trening: kafle „Wybierz inne ćwiczenie” i „Dodaj ćwiczenie” wg Figmy (4.48.0)
+- `8bfaac3` 2026-09-30 — Trening: poprawki po przeglądzie kodu — ostrzeżenie o niezapisanych zmianach, linijka pod palcem, zegar od nowa każdego dnia, drobne błędy (4.48.0)
+- wpis z listą commitów dodany w commicie tuż przed pushem (hash w kolejnej wersji)
 
 ### 4.47.21 · PATCH · 2026-09-29
 
