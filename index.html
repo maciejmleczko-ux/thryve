@@ -2326,15 +2326,16 @@ body.pev2-bg{background:var(--m-panel);}
 #view-gym-v2 .gymv2-tile .gy-tile-ic{width:49px;height:48px;flex:none;display:block;}
 .gy-tile-lbl{width:94px;height:40px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.04em;line-height:1.02;text-transform:uppercase;color:var(--m-ink);}
 #view-gym-v2 .gymv2-add-tile .gy-tile-lbl{color:var(--m-orange);}
-.lg-num{cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;}
+.lg-num{cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;transition:transform var(--m-dur-press-out) var(--m-ease),color var(--m-dur-quick) ease;}
+.lg-num:active{transform:scale(.97);}
 .lg-num.is-editing::after{content:"";display:inline-block;width:2px;height:.78em;margin-left:3px;background:var(--m-orange);vertical-align:-.04em;}
 @media (prefers-reduced-motion: no-preference){
   .lg-num.is-editing::after{animation:lgCaret 1s steps(1) infinite;}
   @keyframes lgCaret{0%,49%{opacity:1;}50%,100%{opacity:0;}}
 }
-.lg-pad{position:absolute;left:0;right:0;bottom:0;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 12px calc(12px + env(safe-area-inset-bottom));background:var(--m-panel);border-radius:26px 26px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.08);transform:translateY(100%);transition:transform var(--m-dur-in) var(--m-ease-sheet);}
+.lg-pad{position:absolute;left:0;right:0;bottom:0;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 12px calc(12px + env(safe-area-inset-bottom));background:var(--m-panel);border-radius:26px 26px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.08);transform:translateY(100%);transition:transform var(--m-dur-exit) var(--m-ease-exit);}
 .lg-pad[hidden]{display:none;}
-.lg-pad.is-open{transform:translateY(0);}
+.lg-pad.is-open{transform:translateY(0);transition:transform var(--m-dur-in) var(--m-ease-sheet);}
 @media (prefers-reduced-motion: reduce){ .lg-pad{transition:none;} }
 .lg-key{height:46px;border:.5px solid #f1d7cb;border-radius:var(--m-r-sm);background:#fff;color:var(--m-ink);font-family:inherit;font-size:var(--m-fs-xl);font-weight:300;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .lg-key svg{width:26px;height:26px;display:block;}
@@ -2342,7 +2343,7 @@ body.pev2-bg{background:var(--m-panel);}
 .lg-key-ok{grid-column:1 / -1;background:var(--m-orange);border-color:transparent;color:#fff;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;}
 .lg-scroll.pad-open{padding-bottom:calc(310px + env(safe-area-inset-bottom));}
 .lg-key:active{transform:scale(.95);transition-duration:var(--m-dur-press-in);}
-.gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active,.lg-set:active,.lg-key:active{transition-duration:var(--m-dur-press-in);}
+.gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active,.lg-set:active,.lg-key:active,.lg-num:active{transition-duration:var(--m-dur-press-in);}
 /* ==== GYM 5.0 — workout in progress (Figma 459:6092) + set logging (Figma 461:7553) ==== */
 :root{--m-fs-display:108px;--m-fs-display-sm:60px;--m-sheet-top:max(30px, calc(var(--top-inset) + 4px));}
 html.gymv2-bg{background:#e2e2e1;}
@@ -2429,7 +2430,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-wval.is-pale{color:#ffa390;}
 .lg-num{font-family:inherit;font-weight:200;letter-spacing:-.02em;color:inherit;background:none;border:none;outline:none;padding:0;margin:0;text-align:center;line-height:1;min-width:1ch;-webkit-appearance:none;appearance:none;border-radius:0;box-shadow:none;caret-color:var(--m-orange);font-size:var(--m-fs-display);}
 .lg-unit{font-size:var(--m-fs-hero);font-weight:200;line-height:1;}
-.lg-num-r{font-size:var(--m-fs-display-sm);color:#2c2727;transition:color var(--m-dur-quick) ease;}
+.lg-num-r{font-size:var(--m-fs-display-sm);color:#2c2727;transition:transform var(--m-dur-press-out) var(--m-ease),color var(--m-dur-quick) ease;}
 .lg-num-r.is-pale{color:#a3a3a3;}
 .lg-ruler{position:relative;width:calc(100% - 28px);margin:0 auto;height:74px;}
 .lg-ruler-ind{position:absolute;left:50%;top:0;width:1px;height:36px;margin-left:-.5px;background:var(--m-orange);pointer-events:none;z-index:1;}
@@ -3835,6 +3836,7 @@ const T_EN = {
   gymV2YourExercises: 'Your exercises', gymV2FinishWorkout: 'FINISH WORKOUT', gymPillExercises: 'exercises', gymPaused: 'Paused',
   gymAbortTitleDlg: 'Abort workout?', gymAbortBody: 'Everything you logged in this workout today will be deleted.', gymAbortYes: 'Abort', gymAbortNo: 'Back to workout',
   gymFinishDlgTitle: 'Finish workout?', gymFinishBody: (n, kg)=>`We'll save ${n} and ${kg} kg.`, gymFinishPartial: 'Some exercises have incomplete sets; we will save them as they are.', gymFinishYes: 'Finish and save', gymFinishNo: 'Back',
+  gymUnsavedTitle: 'Changes not saved', gymUnsavedBody: 'This exercise was already done. To save your changes, go back and tap ✓.', gymUnsavedYes: 'Leave without saving', gymUnsavedNo: 'Back',
   gymEmptyTitle: 'The workout is empty', gymEmptyBody: "You haven't logged an exercise yet. Add the first one?", gymEmptyYes: 'Add exercise',
   gymLeaveLogging: 'Leave logging', gymAddExerciseDone: 'Add exercise to workout', gymSwipeHint: 'Swipe a set left to delete it', gymLogWarn: 'Log at least one set to add the exercise.', gymExtraSet: 'Extra set',
   trainerAi: 'AI COACH', exNoteSheetTitle: 'NOTE', exHowtoTitle: 'How to do it', exHowtoSheetTitle: 'HOW TO DO IT', exHowtoSetup: 'SETUP', exHowtoMove: 'MOVEMENT', exHowtoMistake: 'COMMON MISTAKE',
@@ -8289,6 +8291,8 @@ function openExercisePopupV2(ex){
       ? {...ex, sets: draft.setValues.length || ex.sets, setValues: draft.setValues.map(s=>({...s})), rpe: draft.rpe || '', notes: draft.notes || ''}
       : {...ex, sets: freshSets.length || ex.sets, setValues: freshSets, rpe:'', notes:''};
   popupShowWarning = false;
+  // snapshot of what's saved for a done exercise — X compares against it
+  popupExercise._saved = already ? JSON.stringify(already.setValues.filter(s=>setIsLogged(s, ex.equipment === 'masa ciała'))) : null;
   popupExercise.planned = already ? (already.planned || already.sets) : (draft && draft.planned) ? draft.planned : (freshSets.length || ex.sets);
   popupInitLg();
   liveActivity(); // first tile tap starts the on-screen workout clock (resumes it if it had paused)
@@ -8796,8 +8800,11 @@ function lgBuildRuler(host, step, value, onUser){
   track.addEventListener('touchstart', press, {passive:true});
   track.addEventListener('touchend', release, {passive:true});
   track.addEventListener('touchcancel', release, {passive:true});
-  track.addEventListener('mousedown', press);
-  window.addEventListener('mouseup', ()=>{ if(down) release(); });
+  track.addEventListener('mousedown', ()=>{
+    press();
+    const up = ()=>{ window.removeEventListener('mouseup', up); release(); };
+    window.addEventListener('mouseup', up);
+  });
   track.addEventListener('wheel', ()=>{ user = true; clearTimeout(idleT); idleT = setTimeout(endUser, 220); }, {passive:true});
   track.addEventListener('scroll', ()=>{
     if(raf) cancelAnimationFrame(raf);
@@ -8811,7 +8818,9 @@ function lgBuildRuler(host, step, value, onUser){
     if(!down){ clearTimeout(idleT); idleT = setTimeout(endUser, 220); }
   }, {passive:true});
   const api = {
+    isDown(){ return down; },
     setValue(v){
+      if(down) return;   // never move the ruler under the finger
       user = false;
       const i = Math.max(0, Math.min(n, Math.round((Number(v)||0) / step)));
       lastIdx = i;
@@ -8888,7 +8897,10 @@ function lgReady(){
 }
 function lgSchedule(delay){
   clearTimeout(lg.timer);
-  if(lgReady()) lg.timer = setTimeout(lgCommit, delay === undefined ? LG_COMMIT_MS : delay);
+  if(lgReady()) lg.timer = setTimeout(()=>{
+    if(lg && lg.ruler && lg.ruler.isDown()){ lgSchedule(); return; }   // still dragging — wait for the release
+    lgCommit();
+  }, delay === undefined ? LG_COMMIT_MS : delay);
 }
 function lgSetW(v, src){
   if(!lg) return;
@@ -8926,7 +8938,7 @@ function lgPadOpen(f){
   haptic('light');
   lgPaint();
   const block = document.getElementById(f === 'w' ? 'lgW' : 'lgR').closest('.lg-block');
-  setTimeout(()=>{ if(block && scroll) scroll.scrollTo({ top: block.offsetTop - 8, behavior: 'smooth' }); }, 60);
+  setTimeout(()=>{ if(block && scroll) scroll.scrollTo({ top: block.getBoundingClientRect().top - scroll.getBoundingClientRect().top + scroll.scrollTop - 8, behavior: 'smooth' }); }, 60);
 }
 function lgPadApply(){
   if(!lgPad || !lg) return;
@@ -8942,7 +8954,7 @@ function lgPadClose(){
   lgPadApply();
   lgPad = null;
   const pad = document.getElementById('lgPad'), scroll = document.querySelector('#exercisePopupBoxV2 .lg-scroll');
-  if(pad){ pad.classList.remove('is-open'); setTimeout(()=>{ if(!lgPad) pad.hidden = true; }, 260); }
+  if(pad){ pad.classList.remove('is-open'); setTimeout(()=>{ if(!lgPad) pad.hidden = true; }, 260); } // == --m-dur-exit
   if(scroll) scroll.classList.remove('pad-open');
   lgPaint();
   lgSchedule();
@@ -8995,8 +9007,10 @@ function lgCommit(){
   lgResetCurrent();
   updateGymPillsV2();
 }
+let lgSwipeAt = 0;
 function lgTapSet(i){
   if(!popupExercise || !lg) return;
+  if(Date.now() - lgSwipeAt < 400) return;
   if(lgPad) lgPadClose();
   const sv = popupExercise.setValues[i];
   if(!sv || !setIsLogged(sv, lgBw())) return;
@@ -9084,12 +9098,11 @@ function lgAttachSwipe(wrap, idx){
     if(Math.abs(dx) > w * 0.35 || (Math.abs(dx) > 40 && v > 0.5)){
       row.style.transition = `transform var(--m-dur-exit) var(--m-ease-exit)`;
       row.style.transform = `translateX(-${w}px)`;
-      setTimeout(()=> lgDeleteSet(idx), 200);
+      setTimeout(()=> lgDeleteSet(idx), 260); // == --m-dur-exit
     } else {
       setX(0, true);
     }
-    // swallow the click that follows a drag
-    row.addEventListener('click', e=>{ e.stopImmediatePropagation(); e.preventDefault(); }, { capture:true, once:true });
+    lgSwipeAt = Date.now();   // the click that may follow this drag is ignored in lgTapSet
   };
   row.addEventListener('touchstart', e=> start(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
   row.addEventListener('touchmove', e=> move(e.touches[0].clientX, e.touches[0].clientY, e), {passive:false});
@@ -9102,6 +9115,27 @@ function lgAttachSwipe(wrap, idx){
   });
 }
 
+/* X in the set-logging sheet. A not-yet-done exercise keeps its sets as a
+   draft on close; a DONE one only saves through ✓, so warn before dropping
+   changes made to it. */
+function closeExercisePopupX(){
+  if(!popupExercise) return;
+  lgFlush();
+  const ex = popupExercise, bw = lgBw();
+  const inSession = sessionExercises.some(e => e.name === ex.name);
+  const now = JSON.stringify(ex.setValues.filter(s => setIsLogged(s, bw)));
+  if(inSession && ex._saved !== null && now !== ex._saved){
+    gymConfirmV2({
+      title: t('gymUnsavedTitle','Zmiany nie są zapisane'),
+      body: t('gymUnsavedBody','Ćwiczenie było już zrobione. Żeby zapisać zmiany, wróć i dotknij ✓.'),
+      yes: t('gymUnsavedYes','Wyjdź bez zapisu'),
+      no: t('gymUnsavedNo','Wróć'),
+      onYes: ()=> closeExercisePopupV2()
+    });
+    return;
+  }
+  closeExercisePopupV2();
+}
 /* ---- popup shell ---- */
 function popupPlanTitle(){
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
@@ -9124,7 +9158,7 @@ function renderExercisePopupV2(animate){
     : `<div class="lg-tip${rise(2)}"><span class="lg-tip-l">${t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><span class="lg-tip-t">${escHtml(sugg.text)}</span></div>`;
   box.innerHTML = `
     <div class="lg-bar">
-      <button type="button" class="lg-circ" onclick="closeExercisePopupV2()" aria-label="${escHtml(t('gymLeaveLogging','Wyjdź z logowania'))}">${LG_ICONS.x}</button>
+      <button type="button" class="lg-circ" onclick="closeExercisePopupX()" aria-label="${escHtml(t('gymLeaveLogging','Wyjdź z logowania'))}">${LG_ICONS.x}</button>
       <span class="lg-bar-title">${escHtml(popupPlanTitle())}</span>
       <button type="button" class="lg-circ fill" onclick="confirmExercisePopupV2()" aria-label="${escHtml(t('gymAddExerciseDone','Dodaj ćwiczenie do treningu'))}">${LG_ICONS.checkBig}</button>
     </div>
@@ -12168,12 +12202,15 @@ function renderGymDoneV2(){
    is left exactly as it was. */
 const LS_GYM_LIVE = "fitlog_gym_live_timer_v1";
 const GYM_LIVE_IDLE_MS = 12 * 60 * 1000;
-let gymLive = { started:false, running:false, accumMs:0, runStart:0, lastAct:0 };
+let gymLive = { started:false, running:false, accumMs:0, runStart:0, lastAct:0, day:'' };
 let gymGridStats = { done:0, total:0 };
 let liveIv = null;
 function liveLoad(){
   try{ const o = JSON.parse(localStorage.getItem(LS_GYM_LIVE)); if(o && o.started) gymLive = o; }catch(e){}
+  liveDayCheck();
 }
+// a workout clock never carries into the next day
+function liveDayCheck(){ if(gymLive.started && gymLive.day !== todayStr()) liveReset(); }
 function liveSave(){
   try{
     if(gymLive.started) localStorage.setItem(LS_GYM_LIVE, JSON.stringify(gymLive));
@@ -12182,14 +12219,16 @@ function liveSave(){
 }
 function liveEnsureTick(){ if(!liveIv) liveIv = setInterval(liveTick, 1000); }
 function liveActivity(){
+  liveDayCheck();
   const now = Date.now(), g = gymLive;
-  if(!g.started){ gymLive = { started:true, running:true, accumMs:0, runStart:now, lastAct:now }; }
+  if(!g.started){ gymLive = { started:true, running:true, accumMs:0, runStart:now, lastAct:now, day:todayStr() }; }
   else if(!g.running){ g.running = true; g.runStart = now; g.lastAct = now; }
   else { g.lastAct = now; }
   liveSave(); liveEnsureTick(); liveRender();
 }
 function liveReset(){
-  gymLive = { started:false, running:false, accumMs:0, runStart:0, lastAct:0 };
+  gymLive = { started:false, running:false, accumMs:0, runStart:0, lastAct:0, day:'' };
+  if(liveIv){ clearInterval(liveIv); liveIv = null; }
   liveSave(); liveRender();
 }
 function liveElapsedMs(now){
@@ -12197,6 +12236,8 @@ function liveElapsedMs(now){
   return g.started ? g.accumMs + (g.running ? Math.max(0, now - g.runStart) : 0) : 0;
 }
 function liveTick(){
+  liveDayCheck();
+  if(!gymLive.started) return;
   const g = gymLive, now = Date.now();
   if(g.started && g.running && now - g.lastAct > GYM_LIVE_IDLE_MS){
     g.accumMs += Math.max(0, g.lastAct - g.runStart);
@@ -12247,7 +12288,7 @@ function gymConfirmV2(o){
 }
 function gymConfirmCloseV2(ok){
   document.getElementById('gymConfirmOverlay').classList.add('hidden');
-  document.documentElement.classList.remove('modal-lock');
+  if(!popupExercise) document.documentElement.classList.remove('modal-lock');
   const cb = gymConfirmCb; gymConfirmCb = null;
   if(ok && cb) cb();
 }
@@ -12280,8 +12321,7 @@ function gymAdoptDrafts(){
   const lib = orderedExerciseLibrary(), planList = todayPlanExerciseNames() || [];
   Object.keys(popupDrafts).forEach(name=>{
     if(sessionExercises.some(e => e.name === name)) return;
-    const def = lib.find(e => e.name === name) || extraGymTiles.find(e => e.name === name);
-    if(!def) return;
+    const def = lib.find(e => e.name === name) || extraGymTiles.find(e => e.name === name) || { name, group:'' };
     const bw = def.equipment === 'masa ciała';
     const logged = (popupDrafts[name].setValues || []).filter(sv => setIsLogged(sv, bw));
     if(!logged.length) return;
