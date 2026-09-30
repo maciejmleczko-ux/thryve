@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.47.21 (2026-09-29)
-- **Liczba wersji:** 223 · **commitów:** 552
+- **Aktualna wersja:** 4.48.0 (2026-09-30)
+- **Liczba wersji:** 224 · **commitów:** 552
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -81,7 +81,7 @@ Stan na 4.44.0.
 | Hosting (główny) | Cloudflare Workers (static assets): **app.mekkio.app** | od 2026-09-28; repo `mekkio`, build `sh scripts/build-web.sh` → `dist/` (tylko pliki apki), `wrangler.jsonc` |
 | Hosting (lustro) | GitHub Pages: `maciejmleczko-ux.github.io/thryve/` | stare ikony na pulpicie; jeden `git push` idzie do obu repo (`origin` ma dwa push URL). Inny adres = osobny localStorage |
 
-**Dane lokalne (localStorage, prefiks `fitlog_`, sufiks `_v1`):** `workouts`, `runs`, `training_plans`, `starred_plan`, `deleted_builtin_plans`, `custom_exercises`, `exercise_notes`, `exercise_order`, `weight_log`, `body_data`, `avatar`, `kcal_factor`, `profile_name`, `gym_session_draft`, `gym_session_timing`, `gym_today_swaps`, `onboard_seen`, `install_prompt_dismissed`, `last_seen_version`, `workout_reminder` (4.47.8), `health` (4.47.14, Apple Zdrowie: enabled/lastSync), `update_snooze` (4.47.21, `{build, until}`). Wpisy wagi ze Zdrowia mają `src:"health"` (4.47.16). Pola treningu tylko lokalne: `startedAt`, `endedAt`, `kcalWatch`, `kcalWatchSrc`.
+**Dane lokalne (localStorage, prefiks `fitlog_`, sufiks `_v1`):** `workouts`, `runs`, `training_plans`, `starred_plan`, `deleted_builtin_plans`, `custom_exercises`, `exercise_notes`, `gym_live_timer`, `exercise_order`, `weight_log`, `body_data`, `avatar`, `kcal_factor`, `profile_name`, `gym_session_draft`, `gym_session_timing`, `gym_today_swaps`, `onboard_seen`, `install_prompt_dismissed`, `last_seen_version`, `workout_reminder` (4.47.8), `health` (4.47.14, Apple Zdrowie: enabled/lastSync), `update_snooze` (4.47.21, `{build, until}`). Wpisy wagi ze Zdrowia mają `src:"health"` (4.47.16). Pola treningu tylko lokalne: `startedAt`, `endedAt`, `kcalWatch`, `kcalWatchSrc`.
 
 **Chmura (Supabase, od 4.35.0):** tabele `profiles` (plus kolumny JSON: `weight_log`, `body_data`, `ai_preferences`, `custom_exercises`, `exercise_notes`; tekst: `avatar`), `plans` (od 4.47.19 z kolumną `periodized`), `workouts`, `ai_usage`, `apple_tokens` (refresh token z Sign in with Apple, tylko `service_role`, klient nigdy nie czyta — do unieważnienia przy usuwaniu konta). RLS włączone na wszystkich. Logowanie: e-mail + hasło, Google, Apple (natywnie w apce iOS od 4.47.2). Tryb gościa działa bez konta. Nie synchronizują się: biegi (`runs`, tylko odczyt, nowych nie da się dodać) i lista usuniętych wbudowanych planów. Ulubione ćwiczenia usunięte w 4.44.1.
 
@@ -114,6 +114,21 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.48.0 · MINOR · 2026-09-30
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Nowy ekran treningu. Trening wygląda inaczej. U góry masz liczbę zrobionych ćwiczeń, podniesione kilogramy i zegar. Ciężar ustawiasz suwakiem (co 1,25 kg przy sztandze, co 2,5 kg przy reszcie) albo wpisujesz z klawiatury. Seria dodaje się sama, potem rusza odliczanie przerwy, a na końcu telefon zawibruje. Pod żarówką przy ćwiczeniu jest krótka instrukcja, jak je wykonać.
+
+- **Ekran Trening wg Figmy 459:6092.** Górny pasek: X (przerwij trening, z oknem potwierdzenia, gdy jest co stracić) i ✓ (zakończ; przy pustym treningu okno „Trening jest pusty” z przejściem do wyboru ćwiczenia). Nazwa planu, trzy pastylki: `zrobione/wszystkie ćwiczenia`, suma kg z zalogowanych serii, żywy zegar. Zegar startuje po pierwszym dotknięciu kafla; po `GYM_LIVE_IDLE_MS` (12 min) bez aktywności zatrzymuje się na ostatniej aktywności i pokazuje „Wstrzymano”, następny kafel lub seria go wznawia (stan w `fitlog_gym_live_timer_v1`, osobny od silnika `markGymActivity`, który dalej liczy czas do historii). Lista „Ćwiczenia zrobione” zniknęła: zrobione ćwiczenie zostaje w siatce jako wyszarzony kafel z ptaszkiem, a ćwiczenie z częściowo zalogowanymi seriami (wyjście X z popupu) ma znaczek `2/4` i pomarańczową ramkę. Przyciski „ZAKOŃCZ TRENING” i ✓ robią to samo (`gymFinishTapV2`), przy okazji dołączając do treningu serie z niezatwierdzonych ćwiczeń (`gymAdoptDrafts`). Tło ekranu z gradientu Figmy (bez zdjęcia).
+- **Popup logowania serii wg Figmy 461:7553** (`renderExercisePopupV2` przepisany, klasy `lg-*`). Ciężar: linijka scroll-snap (mechanizm z onboardingu, `lgBuildRuler`) z krokiem 1,25 kg dla `BARBELL_EXERCISES` i 2,5 kg dla reszty albo wpis z klawiatury po dotknięciu liczby; powtórzenia: −/+ albo wpis. Seria dodaje się sama po `LG_COMMIT_MS` (1,4 s) od ostatniego ruchu, gdy ciężar i powtórzenia są ustalone (podpowiedź z poprzedniego treningu jest jaśniejsza, dopóki użytkownik jej nie dotknie). Dotknięcie zalogowanej serii = edycja (pomarańczowa ramka), przesunięcie w lewo = usunięcie. Po nowej serii rusza odliczanie przerwy w pastylce (`restStart`, górna granica z pola `rest`), na końcu haptyka `success`. ✓ dodaje ćwiczenie do treningu, X wychodzi z zapisem szkicu. Żarówka otwiera „Jak ćwiczyć” (`EXERCISE_HOWTO`, 64 teksty wygenerowane jednorazowo), ikona notatki otwiera osobny panel (`exerciseNotes` bez zmian). Karta Trenera AI w nowym stylu, bez pastylki „plan wykonany”.
+- **Haptyka.** Nowe rodzaje w `haptic()`: `select-start` / `select` / `select-end` (tyknięcia linijki, przez `Haptics.selectionChanged`, z ograniczeniem częstości). Reszta z istniejącego słownika: `light` (edycja, +/−), `medium` (nowa seria), `warning` (usunięcie serii, okna potwierdzeń), `success` (koniec przerwy).
+- Nowe stałe i klucze: `BARBELL_EXERCISES` (Barbell Deadlift/Curl/Bench Press/Back Squat, Hip Thrust), tokeny `--m-fs-display` / `--m-fs-display-sm`, `fitlog_gym_live_timer_v1`. Bez zmian po stronie chmury i Supabase.
+
+**Commity:**
+
+- wpis dodany w commicie z podbiciem wersji (hash w kolejnej wersji)
 
 ### 4.47.21 · PATCH · 2026-09-29
 

@@ -2314,7 +2314,135 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-btn-outline:active,.plansv2-btn-fill:active,.plansv2-card:active,.plansv2-choice-chip:active,
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
-.exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active{transition-duration:var(--m-dur-press-in);}
+.exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
+.gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active,.lg-set:active{transition-duration:var(--m-dur-press-in);}
+/* ==== GYM 5.0 — workout in progress (Figma 459:6092) + set logging (Figma 461:7553) ==== */
+:root{--m-fs-display:108px;--m-fs-display-sm:60px;}
+html.gymv2-bg, body.gymv2-bg{background:#f3e7e0 linear-gradient(180deg,#fbece3 0%,#efe4de 58%,#e2e2e1 100%) no-repeat;background-attachment:scroll;}
+#view-gym-v2{background:transparent;}
+#view-gym-v2 .gymv2-panel{background:transparent;border-radius:0;padding:calc(20px + var(--top-inset)) 10px 12px;}
+.gy-topbar{position:relative;display:flex;align-items:center;justify-content:space-between;height:40px;margin:0 0 26px;}
+.gy-title{position:absolute;left:50%;transform:translateX(-50%);font-size:var(--m-fs-xs);font-weight:600;letter-spacing:.0833em;text-transform:uppercase;color:var(--m-ink);}
+.gy-circ{width:40px;height:40px;border-radius:50%;border:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--m-ink);background:transparent;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.gy-circ svg{display:block;flex:none;width:28px;height:28px;}
+.gy-ok{background:var(--m-orange);color:#fff;border:.5px solid #f1d7cb;}
+.gy-ok svg{width:24px;height:24px;}
+.gy-plan-name{margin:0 0 14px;font-size:var(--m-fs-2xl);font-weight:200;letter-spacing:.04em;text-transform:uppercase;color:var(--m-orange);line-height:1;}
+.gy-plan-name[hidden]{display:none;}
+.gy-pills{display:flex;gap:4px;margin:0 0 10px;}
+.gy-pill{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:34px;padding:6px 14px;box-sizing:border-box;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);font-size:var(--m-fs-2xs);font-weight:600;color:var(--m-ink);white-space:nowrap;font-variant-numeric:tabular-nums;}
+.gy-pill svg,.gy-pill .ph,.gy-pill .ph svg{width:16px;height:16px;flex:none;display:block;}
+.gy-pill-time{flex:1;min-width:0;background:var(--m-orange);border-color:transparent;color:#fff;transition:background-color var(--m-dur-quick) ease;}
+.gy-pill-time.is-paused{background:rgba(255,51,0,.42);}
+#view-gym-v2 .gymv2-no-plan{margin-bottom:14px;}
+#view-gym-v2 .gymv2-repeat{height:60px;padding:6px 14px;gap:12px;box-sizing:border-box;background:rgba(59,99,203,.6);border:.5px solid #f1d7cb;border-radius:var(--m-r-pill);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);margin-bottom:26px;}
+#view-gym-v2 .gymv2-repeat-ico{width:34px;height:34px;background:var(--m-plan-hard);color:#fff;}
+#view-gym-v2 .gymv2-repeat-t{color:#fff;}
+#view-gym-v2 .gymv2-repeat-s{color:#f5f1fb;}
+#view-gym-v2 .gymv2-repeat.is-active{background:rgba(255,51,0,.82);border-color:#f1d7cb;}
+#view-gym-v2 .gymv2-repeat.is-active .gymv2-repeat-ico{background:#cd1200;}
+#view-gym-v2 .gymv2-repeat.is-active .gymv2-repeat-t{color:#fff;}
+#view-gym-v2 .gymv2-tile:not(.gymv2-search-tile):not(.gymv2-add-tile){background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);aspect-ratio:116/128;}
+#view-gym-v2 .gymv2-tile.is-partial{border:1px solid var(--m-orange);}
+#view-gym-v2 .gymv2-tile-done{top:9px;right:9px;width:14px;height:14px;}
+#view-gym-v2 .gymv2-tile-done svg{width:14px;height:14px;}
+.gymv2-tile-partial{position:absolute;top:7px;right:7px;z-index:1;padding:2px 8px;border-radius:54px;background:#869edc;color:#fff;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.06em;line-height:1.3;pointer-events:none;}
+.gymv2-save-wrap{padding:22px 10px 0;}
+#view-gym-v2 .gymv2-save{height:55px;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;}
+
+/* --- set-logging sheet --- */
+#exercisePopupSheetV2{background:#fff;border-radius:34px 34px 0 0;}
+#exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2{align-items:stretch;gap:0;}
+.lg-sub-overlay{z-index:95;}
+#exNoteSheetV2, #exHowtoSheetV2{background:#fff;border-radius:34px 34px 0 0;}
+.lg-bar{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;padding:6px 16px 10px;box-sizing:border-box;}
+.lg-bar-title{position:absolute;left:50%;transform:translateX(-50%);max-width:58%;font-size:var(--m-fs-xs);font-weight:600;letter-spacing:.0833em;text-transform:uppercase;color:var(--m-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lg-circ{width:34px;height:34px;border-radius:50%;border:.5px solid var(--m-orange);background:transparent;color:var(--m-orange);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex:none;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.lg-circ svg{width:18px;height:18px;display:block;}
+.lg-circ.fill{background:var(--m-orange);color:#fff;border-color:#dadada;}
+.lg-circ.fill svg{width:20px;height:20px;}
+.lg-circ.ghost{border-color:transparent;pointer-events:none;}
+.lg-scroll{flex:1;min-height:0;width:100%;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:14px 16px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:26px;}
+.lg-head{display:flex;flex-direction:column;gap:8px;}
+.lg-tags{display:flex;gap:4px;flex-wrap:wrap;}
+.lg-tag{display:inline-flex;align-items:center;height:20px;padding:0 12px;border-radius:var(--m-r-pill);background:#a4bdff;color:#0e267b;font-size:var(--m-fs-2xs);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+.lg-tag--v{background:var(--m-orange);color:#fff;}
+.lg-name-row{display:flex;align-items:center;gap:8px;min-height:28px;}
+.lg-name{flex:1;min-width:0;font-size:var(--m-fs-xl);font-weight:300;letter-spacing:.0367em;text-transform:uppercase;color:#2c2727;line-height:1.15;}
+.lg-ic{position:relative;width:24px;height:24px;border-radius:50%;flex:none;border:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.lg-ic svg{width:12px;height:12px;display:block;}
+.lg-ic.bulb{background:#dcdcdc;color:#2c2727;}
+.lg-ic.note{background:var(--m-plan-hard);color:#fff;}
+.lg-ic.has-note::after{content:"";position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--m-orange);border:1.5px solid #fff;box-sizing:border-box;}
+.lg-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.lg-chip{display:inline-flex;align-items:center;gap:10px;height:28px;padding:0 12px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;font-size:var(--m-fs-2xs);color:#2c2727;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.lg-chip .ph, .lg-chip .ph svg{width:16px;height:16px;display:block;flex:none;color:var(--m-orange);}
+.lg-chip.rest{background:var(--m-orange);color:#fff;border-color:transparent;transition:background-color var(--m-dur-quick) ease;}
+.lg-chip.rest .ph,.lg-chip.rest .ph svg{color:#fff;}
+.lg-chip.rest.is-count{background:#cd1200;}
+.lg-ai{border-radius:var(--m-r-sm);padding:16px;color:#fff;display:flex;flex-direction:column;gap:14px;background:linear-gradient(47deg,#3a0058 9%,#340050 66%,#a700ff 100%);border:.5px solid rgba(222,116,255,.55);box-shadow:inset 0 0 15px rgba(161,0,255,.9),inset 0 0 6px rgba(222,116,255,.5);}
+.lg-ai-h{display:flex;align-items:center;gap:15px;font-size:var(--m-fs-xs);font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.82);}
+.lg-ai-h .ph, .lg-ai-h .ph svg{width:16px;height:16px;display:block;flex:none;}
+.lg-ai-t{margin:0;font-size:var(--m-fs-2xs);line-height:1.35;color:#fdfbff;}
+.lg-tip{display:flex;flex-direction:column;gap:8px;border-radius:var(--m-r-sm);padding:14px 16px;background:#2c2727;}
+.lg-tip-l{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.09em;color:var(--m-orange);}
+.lg-tip-t{font-size:var(--m-fs-2xs);line-height:1.4;color:var(--m-card);}
+.lg-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.lg-lab{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-ink);}
+.lg-wval{display:flex;align-items:baseline;justify-content:center;gap:4px;line-height:1;color:var(--m-orange);transition:color var(--m-dur-quick) ease;}
+.lg-wval.is-pale{color:#ffa390;}
+.lg-num{font-family:inherit;font-weight:200;letter-spacing:-.02em;color:inherit;background:none;border:none;outline:none;padding:0;margin:0;text-align:center;line-height:1;min-width:1ch;-webkit-appearance:none;appearance:none;border-radius:0;box-shadow:none;caret-color:var(--m-orange);font-size:var(--m-fs-display);}
+.lg-unit{font-size:var(--m-fs-hero);font-weight:200;line-height:1;}
+.lg-num-r{font-size:var(--m-fs-display-sm);color:#2c2727;transition:color var(--m-dur-quick) ease;}
+.lg-num-r.is-pale{color:#a3a3a3;}
+.lg-ruler{position:relative;width:100%;height:74px;}
+.lg-ruler-ind{position:absolute;left:50%;top:0;width:1px;height:36px;margin-left:-.5px;background:var(--m-orange);pointer-events:none;z-index:1;}
+.lg-ruler-track{position:absolute;inset:0;display:flex;align-items:flex-end;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-x;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;}
+.lg-ruler-track::-webkit-scrollbar{display:none;}
+.lg-ruler-sp{flex:0 0 calc(50% - 4px);height:1px;}
+.lg-tick{position:relative;flex:none;width:8px;height:34px;scroll-snap-align:center;display:flex;align-items:flex-end;justify-content:center;}
+.lg-tick i{display:block;width:1px;height:6px;background:var(--m-orange);opacity:.85;}
+.lg-tick.major i{height:10px;}
+.lg-tick em{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-style:normal;font-size:var(--m-fs-2xs);color:var(--m-ink);white-space:nowrap;}
+.lg-reps{display:flex;align-items:center;justify-content:center;gap:34px;}
+.lg-step{width:56px;height:56px;border-radius:50%;border:.5px solid #f1d7cb;background:var(--m-orange);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex:none;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.lg-step svg{width:24px;height:24px;display:block;}
+.lg-setsec{display:flex;flex-direction:column;gap:10px;}
+.lg-sets{display:flex;flex-direction:column;gap:4px;}
+.lg-set-wrap{position:relative;border-radius:16px;overflow:hidden;}
+.lg-set-del{position:absolute;inset:0;background:var(--m-orange);display:flex;align-items:center;justify-content:flex-end;padding-right:20px;color:#fff;}
+.lg-set-del svg{width:22px;height:22px;display:block;}
+.lg-set{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box;background:#ededed;border:1.5px solid transparent;border-radius:16px;padding:10px 16px;text-align:left;font-family:inherit;cursor:pointer;touch-action:pan-y;transition:border-color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.lg-set-l{width:76px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(44,39,39,.71);}
+.lg-set-v{flex:1;min-width:0;font-size:var(--m-fs-md);color:var(--m-ink);font-variant-numeric:tabular-nums;}
+.lg-set-c{width:24px;height:24px;border-radius:50%;flex:none;background:var(--m-orange);color:#fff;display:flex;align-items:center;justify-content:center;box-sizing:border-box;}
+.lg-set-c svg{width:12px;height:12px;display:block;}
+.lg-set.is-blank{background:#f4f2f2;}
+.lg-set.is-blank .lg-set-v{color:#b8b8b8;}
+.lg-set.is-blank .lg-set-c{background:transparent;border:1.5px solid #d4d4d4;}
+.lg-set.is-blank .lg-set-c svg{display:none;}
+.lg-set.is-active{border-color:rgba(255,51,0,.32);}
+.lg-set.is-editing{border-color:var(--m-orange);}
+.lg-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);letter-spacing:.07em;text-transform:uppercase;color:#000;}
+.lg-hint[hidden]{display:none;}
+.lg-warn{font-size:var(--m-fs-xs);line-height:1.4;color:#cd1200;text-align:center;}
+.lg-add{width:100%;height:55px;border-radius:74px;border:1px solid var(--m-orange);background:transparent;color:var(--m-ink);font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;flex:none;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.lg-sub-scroll{gap:18px;}
+.lg-note-ta{width:100%;box-sizing:border-box;min-height:150px;border:1px solid #e3e1e6;border-radius:16px;padding:14px 16px;background:#f7f6f8;font-family:inherit;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);resize:none;outline:none;}
+.lg-note-ta:focus{border-color:var(--m-plan-hard);background:#fff;}
+.lg-note-meta{display:flex;justify-content:space-between;gap:12px;font-size:var(--m-fs-2xs);color:var(--m-muted);}
+.lg-how{display:flex;flex-direction:column;gap:8px;}
+.lg-how-l{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-orange);}
+.lg-how-t{margin:0;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);}
+.lg-how-ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);}
+.lg-how--warn{background:#f7f6f8;border-radius:16px;padding:14px 16px;}
+.gy-confirm-box{text-align:center;}
+@media (prefers-reduced-motion: no-preference){
+  .lg-chip.rest.is-pop{animation:lgRestPop var(--m-dur-pop) var(--m-ease-spring);}
+  @keyframes lgRestPop{0%{transform:scale(1);}35%{transform:scale(1.1);}100%{transform:scale(1);}}
+}
+.gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active{transform:scale(.94);}
+.lg-set:active{transform:scale(.99);}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -2341,6 +2469,16 @@ function haptic(kind){
     // same single success used for every workout.
     H.impact({ style: 'HEAVY' }).catch(()=>{});
     setTimeout(()=> H.notification({ type: 'SUCCESS' }).catch(()=>{}), 150);
+    return;
+  }
+  if(kind === 'select-start'){ if(H.selectionStart) H.selectionStart().catch(()=>{}); return; }
+  if(kind === 'select-end'){ if(H.selectionEnd) H.selectionEnd().catch(()=>{}); return; }
+  if(kind === 'select'){
+    // ruler ticks: the iOS "wheel" selection tick, throttled so a fast flick isn't a buzz
+    const now = Date.now();
+    if(now - (haptic._t || 0) < 35) return;
+    haptic._t = now;
+    (H.selectionChanged ? H.selectionChanged() : H.impact({ style: 'LIGHT' })).catch(()=>{});
     return;
   }
   (kind === 'success' ? H.notification({ type: 'SUCCESS' })
@@ -2537,29 +2675,17 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <!-- ===================== GYM v2 (hidden preview, see Dashboard) ===================== -->
   <section class="view gymv2-root" id="view-gym-v2">
     <div class="gymv2-panel">
-      <div class="gymv2-header">
-        <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
-        <span class="ph" data-ph="barbell"></span>
-        <h1>TRENING</h1>
-        <button type="button" class="gymv2-chat-btn gymv2-acct-btn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+      <div class="gy-topbar">
+        <button type="button" class="gy-circ gy-x" onclick="gymAbortV2()" aria-label="Przerwij trening" data-i18n-title="gymAbortTitle"><svg viewBox="0 0 28 28" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.4 6.4 6.4 22.4M6.4 6.4l16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+        <span class="gy-title" data-i18n="gymTitleTraining">TRENING</span>
+        <button type="button" class="gy-circ gy-ok" onclick="gymFinishTapV2()" aria-label="Zakończ trening" data-i18n-title="gymFinishTitle"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
 
-      <div class="gymv2-plan-card" onclick="goRoute('plans-v2')">
-        <p class="gymv2-plan-eyebrow" data-i18n="dashYourPlan">Twój plan</p>
-        <div class="gymv2-plan-body">
-          <p class="gymv2-plan-date" id="gymV2Date"></p>
-          <div class="gymv2-plan-content">
-            <div class="gymv2-plan-name-block">
-              <p class="gymv2-plan-name" id="gymV2PlanName"></p>
-              <p class="gymv2-plan-desc" id="gymV2PlanDesc"></p>
-            </div>
-            <div class="gymv2-plan-stats">
-              <div class="gymv2-plan-stat"><span class="ph" data-ph="barbell"></span><span id="gymV2Count"></span></div>
-              <div class="gymv2-plan-stat"><span class="ph" data-ph="clock-countdown"></span><span id="gymV2Duration"></span></div>
-              <div class="gymv2-plan-stat"><span class="ph" data-ph="chart-line"></span><span id="gymV2Difficulty"></span></div>
-            </div>
-          </div>
-        </div>
+      <p class="gy-plan-name" id="gymV2PlanName"></p>
+      <div class="gy-pills" id="gymV2Pills">
+        <div class="gy-pill" id="gymV2PillEx"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="gymV2PillExTxt">0/0</span></div>
+        <div class="gy-pill" id="gymV2PillKg"><span class="ph" data-ph="barbell"></span><span id="gymV2PillKgTxt">0 kg</span></div>
+        <div class="gy-pill gy-pill-time" id="gymV2PillTime"><span class="ph" data-ph="clock-countdown"></span><span id="gymV2PillTimeTxt">0:00</span></div>
       </div>
 
       <div class="gymv2-no-plan hidden" id="gymV2NoPlan">
@@ -2576,7 +2702,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </button>
 
       <div class="gymv2-section-head" id="gymV2SectionHead">
-        <p id="gymV2SectionLabel" data-i18n="gymV2ExercisesInPlan">Ćwiczenia w planie</p>
+        <p id="gymV2SectionLabel" data-i18n="gymV2YourExercises">Twoje ćwiczenia</p>
         <button type="button" class="gymv2-edit-plan" id="gymV2EditPlanBtn" onclick="openPlanEditorV2(starredPlanId)" data-i18n="gymV2EditPlan">Edytuj plan</button>
       </div>
       <p class="gymv2-rest-note hidden" id="gymV2RestNote" data-i18n="gymV2RestDay">Dziś nie masz zaplanowanego treningu. Możesz i tak coś zalogować.</p>
@@ -2587,7 +2713,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
 
     <div class="gymv2-save-wrap">
-      <button type="button" class="gymv2-save" onclick="saveWorkoutV2()" data-i18n="gymV2SaveWorkout">ZAPISZ TRENING</button>
+      <button type="button" class="gymv2-save" onclick="gymFinishTapV2()" data-i18n="gymV2FinishWorkout">ZAKOŃCZ TRENING</button>
     </div>
   </section>
 
@@ -3596,6 +3722,32 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<!-- Set-logging sub-sheets (Figma 461:7553): exercise note + "jak ćwiczyć". Sit above the logging sheet. -->
+<div class="onboard-overlay hidden m-sheet-overlay lg-sub-overlay" id="exNoteOverlayV2" onclick="if(event.target===this) closeExNoteV2()">
+  <div class="m-sheet" id="exNoteSheetV2">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="m-sheet-body" id="exNoteBoxV2"></div>
+  </div>
+</div>
+<div class="onboard-overlay hidden m-sheet-overlay lg-sub-overlay" id="exHowtoOverlayV2" onclick="if(event.target===this) closeExHowtoV2()">
+  <div class="m-sheet" id="exHowtoSheetV2">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="m-sheet-body" id="exHowtoBoxV2"></div>
+  </div>
+</div>
+
+<!-- Generic in-app confirm dialog (abort workout, empty finish) — see gymConfirmV2(). -->
+<div class="onboard-overlay hidden" id="gymConfirmOverlay" onclick="if(event.target===this) gymConfirmCloseV2(false)">
+  <div class="onboard-box new-ex-form gy-confirm-box">
+    <h3 id="gymConfirmTitle"></h3>
+    <p id="gymConfirmBody"></p>
+    <div class="btns" style="margin-top:16px;">
+      <button type="button" class="cancel" id="gymConfirmNo" onclick="gymConfirmCloseV2(false)"></button>
+      <button type="button" class="save" id="gymConfirmYes" onclick="gymConfirmCloseV2(true)"></button>
+    </div>
+  </div>
+</div>
+
 <!-- "Zamień ćwiczenie" — swap a plan exercise for today, see openSwapSheetV2(). -->
 <div class="onboard-overlay hidden m-sheet-overlay" id="swapExerciseOverlayV2" onclick="if(event.target===this) closeSwapSheetV2()">
   <div class="m-sheet" id="swapExerciseSheetV2">
@@ -3643,6 +3795,12 @@ const LANG = (navigator.language || '').toLowerCase().startsWith('pl') ? 'pl' : 
 document.title = 'Mekkio — Every rep counts. Literally.';
 document.documentElement.lang = LANG;
 const T_EN = {
+  gymTitleTraining: 'WORKOUT', gymAbortTitle: 'Abort workout', gymFinishTitle: 'Finish workout',
+  gymV2YourExercises: 'Your exercises', gymV2FinishWorkout: 'FINISH WORKOUT', gymPillExercises: 'exercises', gymPaused: 'Paused',
+  gymAbortTitleDlg: 'Abort workout?', gymAbortBody: 'Everything you logged in this workout today will be deleted.', gymAbortYes: 'Abort', gymAbortNo: 'Back to workout',
+  gymEmptyTitle: 'The workout is empty', gymEmptyBody: "You haven't logged an exercise yet. Add the first one?", gymEmptyYes: 'Add exercise',
+  gymLeaveLogging: 'Leave logging', gymAddExerciseDone: 'Add exercise to workout', gymSwipeHint: 'Swipe a set left to delete it', gymLogWarn: 'Log at least one set to add the exercise.', gymExtraSet: 'Extra set',
+  trainerAi: 'AI COACH', exNoteSheetTitle: 'NOTE', exHowtoTitle: 'How to do it', exHowtoSheetTitle: 'HOW TO DO IT', exHowtoSetup: 'SETUP', exHowtoMove: 'MOVEMENT', exHowtoMistake: 'COMMON MISTAKE',
   planPill: 'Training plans',
   planOnboardingIntro: "Before you start, pick a ready-made plan or build your own — you'll see it right away in GYM.",
   daySelectModeBtn: 'Select days',
@@ -6326,7 +6484,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.47.21";
+const APP_VERSION = "4.48.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -6375,6 +6533,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.48.0": {
+    pl: [
+      {featured:true, icon:'barbell', badge:'Nowość', title:'Nowy ekran treningu', text:'Trening wygląda inaczej. U góry masz liczbę zrobionych ćwiczeń, podniesione kilogramy i zegar. Ciężar ustawiasz suwakiem (co 1,25 kg przy sztandze, co 2,5 kg przy reszcie) albo wpisujesz z klawiatury. Seria dodaje się sama, potem rusza odliczanie przerwy, a na końcu telefon zawibruje. Pod żarówką przy ćwiczeniu jest krótka instrukcja, jak je wykonać.'}
+    ],
+    en: [
+      {featured:true, icon:'barbell', badge:'New', title:'New workout screen', text:'The workout screen has a new look. At the top you see exercises done, kilograms lifted and a clock. Set the weight with the slider (1.25 kg steps for barbells, 2.5 kg for everything else) or type it in. Sets add themselves, then the rest countdown starts and your phone buzzes when it ends. The light bulb next to an exercise opens a short how-to.'}
+    ],
+  },
   "4.47.0": {
     pl: [
       {featured:true, icon:'account', badge:'Nowość', title:'Logowanie przez Apple', text:'Zalogujesz się teraz przez Apple: jedno dotknięcie i Face ID. Możesz też ukryć swój e-mail. Apple poda nam wtedy losowy adres, a treningi i tak zobaczysz na każdym swoim urządzeniu.'},
@@ -7749,8 +7915,6 @@ let popupExercise = null;
 // easy to mistake for already-filled values, so confirming with genuinely
 // empty fields shows this warning instead of silently doing nothing.
 let popupShowWarning = false;
-let popupNoteEditing = false;   // #6 — sticky-note field expanded to a textarea
-let popupNoteDraft = '';
 
 function lastSessionsFor(exerciseName){
   return workouts
@@ -7984,6 +8148,10 @@ function buildExerciseTileV2(ex, state, opts){
   } else {
     btn.innerHTML += `${ph('barbell')}<span class="t">${escHtml(ex.name)}</span>`;
   }
+  if(opts && opts.partial){
+    btn.classList.add('is-partial');
+    btn.insertAdjacentHTML('beforeend', `<span class="gymv2-tile-partial">${opts.partial.done}/${opts.partial.total}</span>`);
+  }
   if(opts && opts.swapOrigin){
     const safe = opts.swapOrigin.replace(/'/g, "\\'");
     if(opts.swapped) btn.classList.add('gymv2-tile-swapped');
@@ -8033,6 +8201,7 @@ function renderExercisePanels(){ renderGymDoneV2(); }
 function onTileTapV2(ex){
   if(ex.type === 'checklist'){
     markGymActivity(); // toggling a checklist tile IS the logged action, unlike opening a regular popup below
+    liveActivity();
     const already = sessionExercises.find(e=>e.name===ex.name);
     if(already) removeExerciseFromSession(ex.name);
     else { sessionExercises.push({...ex, done:true}); persistGymSession(); renderGymGrid(); renderExercisePanels(); }
@@ -8082,8 +8251,8 @@ function openExercisePopupV2(ex){
       ? {...ex, sets: draft.setValues.length || ex.sets, setValues: draft.setValues.map(s=>({...s})), rpe: draft.rpe || '', notes: draft.notes || ''}
       : {...ex, sets: freshSets.length || ex.sets, setValues: freshSets, rpe:'', notes:''};
   popupShowWarning = false;
-  popupNoteEditing = false;
-  popupNoteDraft = exerciseNotes[ex.name] || '';
+  popupInitLg();
+  liveActivity(); // first tile tap starts the on-screen workout clock (resumes it if it had paused)
   renderExercisePopupV2(true);
   const overlay = document.getElementById('exercisePopupOverlayV2');
   const sheet = document.getElementById('exercisePopupSheetV2');
@@ -8119,27 +8288,25 @@ function closeExercisePopupV2(viaDrag){
     overlay.classList.add('m-sheet-closing'); // plays the slide-down/fade-out
     exv2CloseTimer = setTimeout(finish, 260);
   }
-  // Closing without confirming ("Dodaj do treningu") used to just drop
-  // whatever was typed — save it as a draft so reopening this exercise
-  // picks up where it was left, instead of starting blank again. A note
-  // being actively edited (its own two-step "Dodaj notatkę" -> type ->
-  // save flow) is a separate, live-only variable (popupNoteDraft) that
-  // popupExercise.notes never sees until commitPopupNote() runs — same
-  // fix confirmExercisePopupV2 already applies, so an in-progress note
-  // isn't silently dropped here too.
+  // Leaving with X (not ✓) keeps what was logged as a draft, so reopening
+  // this exercise picks up where it was left and its tile shows "2/4".
   if(popupExercise){
-    if(popupNoteEditing) commitPopupNote();
+    lgFlush(); // a set that was just dialled in but not yet auto-added — don't lose it
     if(sessionExercises.some(e=>e.name===popupExercise.name)){
       delete popupDrafts[popupExercise.name]; // confirmExercisePopupV2 already logged it
     } else {
-      const hasData = popupExercise.setValues.some(s=>s.weight!=='' || s.reps!=='') || popupExercise.rpe || popupExercise.notes;
+      const bw = popupExercise.equipment === 'masa ciała';
+      const hasData = popupExercise.setValues.some(s=>setIsLogged(s, bw)) || popupExercise.notes;
       if(hasData) popupDrafts[popupExercise.name] = {setValues: popupExercise.setValues.map(s=>({...s})), rpe: popupExercise.rpe||'', notes: popupExercise.notes||''};
       else delete popupDrafts[popupExercise.name];
     }
     persistGymSession();
   }
+  if(lg){ clearTimeout(lg.timer); }
   popupExercise = null;
   popupShowWarning = false;
+  renderGymGridV2(); // tiles show the "2/4" partial-progress badge
+  updateGymPillsV2();
 }
 /* Drag-to-dismiss for a .m-sheet (or the .plansv2-customize-* family,
    which rides the same shell) — bind once per overlay.
@@ -8497,89 +8664,360 @@ function closePlansCustomizeSheet(overlayId, viaDrag){
     _plansSheetTimers[overlayId] = setTimeout(finish, 260);
   }
 }
-function popupSetLiveV2(idx, field, val){
-  if(!popupExercise) return;
-  popupExercise.setValues[idx][field] = val;
-  // toggle the right-side tick live (no re-render — keeps input focus).
-  // masa ciała has no weight field at all, so it'd never flip on — done
-  // means reps alone, same rule as the initial render's setDone.
-  const sv = popupExercise.setValues[idx];
-  const isBodyweightEx = popupExercise.equipment === 'masa ciała';
-  const done = isBodyweightEx
-    ? String(sv.reps).trim() !== ''
-    : String(sv.weight).trim() !== '' && String(sv.reps).trim() !== '';
-  const card = document.querySelector(`.exv2-series-card[data-set="${idx}"]`);
-  if(card) card.classList.toggle('is-done', done);
-  if(popupShowWarning){
-    popupShowWarning = false;
-    const warnEl = document.querySelector('.exv2-warn');
-    if(warnEl) warnEl.remove();
+/* "Jak ćwiczyć" — one-off generated Polish texts for the built-in exercises (setup / movement / typical mistake). */
+const EXERCISE_HOWTO = {"Chest Press":{"setup":"Ustaw siedzisko tak, żeby uchwyty były na wysokości środka klatki, a plecy oparte, łopatki ściągnięte.","steps":["Wypchnij uchwyty przed siebie, aż ramiona prawie się wyprostują.","Wracaj powoli, dopóki nie poczujesz rozciągnięcia w klatce. Wydychaj powietrze przy wypychaniu."],"mistake":"Barki wędrują do uszu, a plecy odklejają się od oparcia, więc zmniejsz ciężar i trzymaj łopatki ściągnięte."},"Lat Pulldown":{"setup":"Usiądź, zablokuj uda pod wałkami i chwyć drążek nieco szerzej niż barki.","steps":["Odchyl tułów lekko do tyłu i ściągnij drążek do górnej części klatki.","Prowadź łokcie w dół i trochę do boków.","Wypuść drążek powoli, aż ramiona się wyprostują."],"mistake":"Ciągnięcie drążka za głowę i szarpanie tułowiem odbiera pracę plecom, więc ściągaj go do klatki i nie bujaj się."},"Leg Press Machine":{"setup":"Oprzyj plecy i pośladki o siedzisko, a stopy ustaw na platformie na szerokość barków.","steps":["Zwolnij blokadę i opuść platformę, aż kolana zegną się do wygodnego kąta.","Wypchnij platformę całymi stopami, ale nie prostuj kolan do końca."],"mistake":"Zejście tak nisko, że miednica odrywa się od siedziska, przeciąża dolny odcinek pleców, więc kończ ruch tuż przed tym momentem."},"Shoulder Press":{"setup":"Ustaw siedzisko tak, żeby uchwyty były na wysokości barków, a plecy oparte.","steps":["Wypchnij uchwyty w górę, aż ramiona się wyprostują.","Opuść je powoli do poziomu uszu."],"mistake":"Wyginanie pleców w łuk pomaga tylko pozornie, więc przyciśnij je do oparcia i napnij brzuch."},"Leg Curl":{"setup":"Ustaw wałek tuż nad piętami, a oparcie tak, żeby kolana były na osi maszyny.","steps":["Zegnij kolana i przyciągnij wałek w stronę pośladków.","Zatrzymaj się na sekundę, potem wracaj powoli, bez odkładania ciężaru."],"mistake":"Unoszenie bioder i szarpanie wałkiem to znak, że ciężar jest za duży, więc zmniejsz go, żeby pracowały same nogi."},"Triceps Pushdown":{"setup":"Stań blisko wyciągu i chwyć uchwyt na wysokości klatki, łokcie trzymaj przy bokach.","steps":["Prostuj łokcie, aż uchwyt znajdzie się przy udach.","Na dole napnij triceps, potem wracaj, aż przedramiona będą poziomo."],"mistake":"Odchodzące od tułowia łokcie przerzucają pracę na barki, więc niech zostają nieruchomo przy żebrach."},"Ab Crunch":{"setup":"Usiądź na maszynie, złap uchwyty przy klatce i zaprzyj stopy pod wałkami.","steps":["Zegnij tułów w dół, przybliżając żebra do miednicy.","Wydychaj powietrze na dole i wracaj powoli, nie odkładając ciężaru."],"mistake":"Ciągnięcie ramionami i ruch samym biodrem zabierają pracę brzuchowi, więc skup się na zwijaniu tułowia."},"Incline Chest":{"setup":"Ustaw siedzisko tak, żeby uchwyty były tuż pod barkami, plecy oparte, łopatki ściągnięte.","steps":["Wypchnij uchwyty w górę i do przodu, aż ramiona prawie się wyprostują.","Wracaj powoli, aż poczujesz rozciągnięcie w górnej części klatki."],"mistake":"Przy za wysoko ustawionym siedzisku pracują głównie barki, więc ruch ma zaczynać się na wysokości górnej klatki."},"Seated Row":{"setup":"Usiądź, oprzyj stopy i klatkę o podpórkę, a uchwyty chwyć wyprostowanymi ramionami.","steps":["Przyciągnij uchwyty do boków tułowia, ściągając łopatki.","Zatrzymaj ruch na chwilę i wyprostuj ramiona powoli."],"mistake":"Odchylanie tułowia do tyłu dla rozpędu odbiera pracę plecom, więc trzymaj klatkę przy podpórce."},"Leg Extension":{"setup":"Ustaw oparcie tak, żeby kolana były w osi maszyny, a wałek leżał tuż nad kostkami.","steps":["Wyprostuj nogi, aż uda się napną.","Zatrzymaj się na sekundę i opuść wałek wolno."],"mistake":"Wyrzucanie nóg z rozpędu obciąża kolana, więc rób ruch płynny, bez odbicia na dole."},"Hip Abduction":{"setup":"Usiądź, oprzyj plecy i ustaw nogi przy poduszkach po zewnętrznej stronie ud.","steps":["Odsuń uda na boki, aż poczujesz pracę pośladków.","Zatrzymaj się na chwilę i wracaj powoli, nie stukając ciężarem."],"mistake":"Kołysanie tułowiem wyręcza pośladki, więc przyciśnij plecy do oparcia."},"Pec Deck":{"setup":"Ustaw siedzisko tak, żeby przedramiona lub uchwyty były na wysokości klatki, a plecy oparte.","steps":["Zbliż ramiona przed sobą, jakbyś kogoś obejmował, i zatrzymaj się na sekundę.","Otwieraj powoli, aż poczujesz rozciągnięcie w klatce."],"mistake":"Zbyt głębokie otwarcie ramion obciąża przód barków, więc zatrzymaj łokcie na linii tułowia."},"Calf Raise":{"setup":"Stań przodem stóp na krawędzi platformy, barki pod poduszkami, pięty poniżej krawędzi.","steps":["Wypchnij się na palcach jak najwyżej i zatrzymaj na sekundę.","Opuść pięty głęboko, aż poczujesz rozciągnięcie łydek."],"mistake":"Krótkie, sprężynujące powtórzenia dają mało, więc pracuj w pełnym zakresie z pauzą na górze i na dole."},"Dumbbell Hammer Curl":{"setup":"Stań prosto i trzymaj hantle wzdłuż ciała chwytem neutralnym, kciukami do przodu.","steps":["Zegnij łokieć i unieś hantel do barku, nie obracając nadgarstka.","Opuść go powoli. Możesz ćwiczyć obiema rękami jednocześnie albo na przemian."],"mistake":"Bujanie tułowiem i wysuwanie łokci do przodu robią ruch za biceps, więc łokcie zostają przy bokach."},"Triceps Dip":{"setup":"Na maszynie do dipów oprzyj plecy i chwyć uchwyty, łokcie trzymaj blisko tułowia.","steps":["Wypchnij uchwyty w dół, aż ramiona się wyprostują.","Wracaj wolno, zginając łokcie mniej więcej do kąta prostego."],"mistake":"Wysunięte do przodu barki i rozchylone łokcie zmieniają obciążenie, więc trzymaj klatkę prosto, a łokcie przy ciele."},"Barbell Deadlift":{"setup":"Stań stopami na szerokość bioder, sztanga ma być nad środkiem stóp, a chwyt tuż za nogami.","steps":["Napnij brzuch, ściągnij łopatki i ustaw plecy prosto.","Wypchnij podłogę nogami i prowadź sztangę blisko goleni.","Na górze wyprostuj biodra, bez odchylania się do tyłu."],"mistake":"Zaokrąglone plecy i sztanga odsunięta od nóg psują technikę, więc dobierz ciężar, przy którym kręgosłup zostaje prosty, a sztanga blisko ciała."},"Dumbbell Row":{"setup":"Oprzyj jedną rękę i kolano o ławkę, plecy trzymaj proste, w drugiej ręce chwyć hantel.","steps":["Przyciągnij hantel do biodra, prowadząc łokieć blisko ciała.","Ściągnij łopatkę i opuść hantel powoli, aż ramię się wyprostuje."],"mistake":"Skręcanie tułowia przy podnoszeniu ciężaru odbiera pracę plecom, więc barki i biodra mają być skierowane w stronę ławki."},"Preacher Curl":{"setup":"Usiądź, oprzyj ramiona i łokcie na pulpicie i chwyć drążek lub uchwyty.","steps":["Zegnij łokcie i unieś ciężar do barków.","Opuść go powoli, prawie do pełnego wyprostu."],"mistake":"Zrywanie ciężaru na dole i odrywanie ramion od pulpitu przeciąża łokcie, więc kontroluj dolną fazę i nie odbijaj się."},"Overhead Triceps":{"setup":"Stań lub usiądź prosto, trzymaj hantel oburącz nad głową, łokcie skierowane do przodu.","steps":["Zegnij łokcie i opuść hantel za głowę.","Wyprostuj ramiona w górę, poruszając tylko przedramionami."],"mistake":"Rozchylanie łokci na boki i wyginanie pleców psują ruch, więc trzymaj łokcie blisko głowy i napnij brzuch."},"Hanging Leg Raise":{"setup":"Zawiśnij na drążku pewnym chwytem, ramiona proste, nogi razem.","steps":["Unieś nogi, zginając biodra, aż uda będą co najmniej poziomo.","Opuść je powoli, bez huśtania się."],"mistake":"Bujanie ciałem robi ruch za mięśnie brzucha, więc zatrzymaj się w dole i zaczynaj od podwinięcia miednicy."},"Captain's Chair Raise":{"setup":"Oprzyj przedramiona na podporach, plecy przy oparciu, nogi swobodnie zwisają.","steps":["Unieś kolana lub proste nogi do wysokości bioder, podwijając miednicę.","Opuść je powoli."],"mistake":"Odrywanie pleców od oparcia i machanie nogami odbiera pracę brzuchowi, więc przyciśnij plecy i ruszaj się bez rozpędu."},"Dumbbell Shoulder Press":{"setup":"Usiądź z oparciem lub stań, hantle trzymaj na wysokości barków, łokcie lekko przed ciałem.","steps":["Wypchnij hantle w górę, aż ramiona się wyprostują nad głową.","Opuść je wolno do wysokości uszu."],"mistake":"Przy ciężkich hantlach plecy łatwo uciekają w łuk, więc napnij brzuch, a gdy nie da się tego utrzymać, zmniejsz ciężar."},"Dumbbell Walking Lunge":{"setup":"Stań prosto z hantlami wzdłuż ciała, stopy na szerokość bioder.","steps":["Zrób długi krok do przodu i opuść tylne kolano tuż nad podłogę.","Odepchnij się przednią nogą i przenieś tylną do następnego kroku."],"mistake":"Zbyt krótki krok wypycha kolano daleko przed stopę, więc wydłuż krok, tak żeby przednia piszczel stała prawie pionowo."},"Back Extension":{"setup":"Ustaw wałki tak, żeby podpierały górę ud, biodra wystawały poza poduszkę, a stopy były zaparte.","steps":["Opuść tułów w dół, zginając się w biodrach.","Unieś go do jednej linii z nogami i zatrzymaj się na chwilę."],"mistake":"Wygięcie pleców za linię ciała na górze nie daje nic więcej, więc kończ ruch, gdy tułów jest prosty."},"Cable Curl":{"setup":"Stań przodem do wyciągu z uchwytem na dole, łokcie przy bokach.","steps":["Zegnij łokcie i przyciągnij uchwyt do barków.","Opuść go wolno, nie tracąc napięcia na lince."],"mistake":"Odchylanie się do tyłu przy zbyt dużym ciężarze zabiera pracę bicepsowi, więc zmniejsz ciężar i trzymaj tułów nieruchomo."},"Barbell Curl":{"setup":"Stań prosto i chwyć sztangę podchwytem na szerokość barków, ramiona wyprostowane.","steps":["Zegnij łokcie i unieś sztangę do wysokości barków.","Opuść ją powoli do pełnego wyprostu."],"mistake":"Bujanie biodrami i wysuwanie łokci do przodu robią ruch za biceps, więc łokcie zostają przy tułowiu, a ciężar może być mniejszy."},"Dumbbell Lateral Raise":{"setup":"Stań prosto, hantle trzymaj przy udach, łokcie lekko ugięte.","steps":["Unieś ramiona bokiem do wysokości barków.","Opuść je wolno, bez opadania."],"mistake":"Gdy zarzucasz hantle całym ciałem, ciężar jest za duży, więc weź lżejsze i unoś ręce płynnie."},"Cable Crossover":{"setup":"Stań w wykroku między wyciągami, uchwyty trzymaj na wysokości barków, tułów lekko pochylony.","steps":["Zbliż ręce do siebie łukiem, łokcie lekko ugięte.","Zatrzymaj się na sekundę i wracaj powoli, aż poczujesz rozciągnięcie klatki."],"mistake":"Zginanie i prostowanie łokci zamienia ćwiczenie w wyciskanie, więc utrzymuj stały kąt w łokciach."},"Cable Curl Neutral":{"setup":"Zamocuj linę na dolnym wyciągu, stań przodem do niego, chwyt neutralny, łokcie przy bokach.","steps":["Zegnij łokcie, unosząc linę do barków.","Opuść ją powoli, cały czas napinając linkę."],"mistake":"Łokcie uciekające do przodu odciążają biceps, więc trzymaj je przy żebrach."},"Cable Lateral Raise":{"setup":"Stań bokiem do dolnego wyciągu, uchwyt trzymaj dalszą ręką, łokieć lekko ugięty.","steps":["Unieś ramię bokiem do wysokości barku.","Opuść je powoli, zachowując napięcie na lince."],"mistake":"Odchylanie tułowia w przeciwną stronę wyręcza barki, więc stań stabilnie i użyj lżejszego ciężaru."},"Hack Squat Machine":{"setup":"Oprzyj plecy i barki o oparcie, a stopy ustaw na platformie na szerokość barków.","steps":["Zwolnij blokadę i zegnij kolana, schodząc głęboko.","Wypchnij się przez całe stopy, nie prostując kolan do końca."],"mistake":"Odrywanie pięt i kolana zapadające się do środka psują ruch, więc dociśnij stopy i kieruj kolana zgodnie z palcami."},"Dumbbell Bench Press":{"setup":"Połóż się na ławce, stopy oprzyj na podłodze, hantle trzymaj nad klatką, łopatki ściągnięte.","steps":["Opuść hantle łukiem do boków klatki, aż łokcie zejdą lekko poniżej poziomu ławki.","Wypchnij je w górę do wyprostu ramion."],"mistake":"Łokcie rozchylone pod kątem prostym do tułowia obciążają barki, więc ustaw je pod kątem około 45 stopni."},"Barbell Bench Press":{"setup":"Połóż się tak, żeby oczy były pod gryfem, stopy mocno na podłodze, łopatki ściągnięte, chwyt nieco szerszy niż barki.","steps":["Zdejmij sztangę ze stojaka i opuść ją do dolnej części klatki.","Wypchnij ją w górę, do wyprostu ramion."],"mistake":"Odbijanie sztangi od klatki i odrywanie pośladków od ławki psuje ruch, więc opuszczaj ciężar powoli, a przy dużym poproś o asekurację."},"Reverse Pec Deck":{"setup":"Usiądź przodem do oparcia, klatkę przyłóż do poduszki, uchwyty ustaw na wysokości barków.","steps":["Odciągnij ramiona na boki i do tyłu, ściągając łopatki.","Wracaj powoli, nie odkładając ciężaru."],"mistake":"Ciągnięcie plecami i odchylanie tułowia zabiera pracę tylnym barkom, więc zmniejsz ciężar i trzymaj klatkę przy poduszce."},"Hip Thrust":{"setup":"Oprzyj górną część pleców o ławkę, stopy postaw na podłodze, a ciężar ułóż na biodrach.","steps":["Wypchnij biodra w górę, aż tułów i uda utworzą prostą linię.","Ściśnij pośladki na górze i opuść biodra wolno."],"mistake":"Nadmierne wyginanie lędźwi na górze przenosi pracę z pośladków na plecy, więc lekko podwiń miednicę i opuść żebra."},"Straight-Arm Pulldown":{"setup":"Stań przed górnym wyciągiem, chwyć drążek szeroko, ramiona wyprostowane, tułów lekko pochylony.","steps":["Pociągnij drążek łukiem w dół do ud, nie zginając łokci.","Wróć wolno do wysokości głowy."],"mistake":"Zginanie łokci zmienia to w zwykłe ściąganie drążka, więc trzymaj ramiona prawie wyprostowane."},"Chest Dip":{"setup":"Chwyć poręcze lub uchwyty maszyny, ramiona wyprostowane, tułów pochylony do przodu.","steps":["Zegnij łokcie i opuść się, aż poczujesz rozciągnięcie klatki.","Wypchnij się w górę, zachowując pochylenie."],"mistake":"Zejście zbyt głęboko z barkami pociągniętymi do przodu przeciąża staw, więc zatrzymaj się, gdy ramiona są mniej więcej równolegle do podłogi."},"Cable Woodchopper":{"setup":"Stań bokiem do wyciągu, uchwyt trzymaj oburącz nad barkiem, stopy rozstaw szeroko.","steps":["Przeciągnij uchwyt po skosie w dół, obracając tułów.","Wróć kontrolowanym ruchem do pozycji wyjściowej."],"mistake":"Ciągnięcie samymi rękami pomija brzuch, więc obracaj tułów i trzymaj biodra stabilnie."},"Face Pull":{"setup":"Ustaw linę na wysokości twarzy, chwyć końce chwytem neutralnym i cofnij się o krok.","steps":["Przyciągnij linę do twarzy, rozchylając łokcie na boki.","Ściągnij łopatki na końcu ruchu i wracaj powoli."],"mistake":"Zbyt duży ciężar wymusza odchylanie tułowia, więc zmniejsz go i ciągnij do wysokości oczu."},"Barbell Back Squat":{"setup":"Ustaw sztangę na stojaku, połóż ją na mięśniach grzbietu, odsuń się o krok, stopy nieco szerzej niż barki.","steps":["Weź wdech, napnij brzuch i opuść biodra w dół, prowadząc kolana zgodnie z palcami.","Zejdź co najmniej do poziomu równoległego ud.","Wypchnij się z całych stóp."],"mistake":"Przy zaokrąglonych plecach i kolanach zapadających się do środka technika przestaje działać, więc zmniejsz ciężar."},"Dumbbell Fly":{"setup":"Połóż się na ławce, hantle trzymaj nad klatką, łokcie lekko ugięte, chwyt neutralny.","steps":["Rozchyl ramiona łukiem na boki, aż poczujesz rozciągnięcie klatki.","Zbliż hantle z powrotem nad klatkę."],"mistake":"Opuszczanie hantli zbyt nisko i prostowanie łokci przeciąża barki, więc zostań przy stałym ugięciu i lżejszym ciężarze."},"Kettlebell Swing":{"setup":"Stań szerzej niż biodra, kettlebell połóż na ziemi przed sobą, plecy trzymaj proste.","steps":["Odchyl kettlebell między nogi, cofając biodra.","Wystrzel biodrami do przodu, aż kettlebell poleci na wysokość klatki.","Ramiona tylko prowadzą ciężar."],"mistake":"Przysiad zamiast zawiasu w biodrach i podrzucanie kettlebella rękami psują ruch, więc ruch niech idzie z bioder, a ramiona zostają luźne."},"Kettlebell Goblet Squat":{"setup":"Trzymaj kettlebell oburącz przy klatce, stopy rozstaw szerzej niż barki.","steps":["Zejdź w dół, rozsuwając kolana na boki, tułów trzymaj prosto.","Wypchnij się przez całe stopy."],"mistake":"Pochylanie tułowia i unoszenie pięt wynikają z odsuniętego ciężaru, więc przyciśnij kettlebell do klatki, a pięty do podłogi."},"Kettlebell Deadlift":{"setup":"Stań okrakiem nad kettlebellem, stopy na szerokość bioder, chwyć go oburącz.","steps":["Napnij brzuch, ustaw plecy prosto i unieś kettlebell, prostując biodra i kolana.","Odłóż go na ziemię, cofając biodra."],"mistake":"Schylanie się zaokrąglonymi plecami zamiast cofnięcia bioder obciąża kręgosłup, więc zegnij się w biodrach, a w razie potrzeby podłóż kettlebell wyżej."},"Kettlebell Row":{"setup":"Pochyl się z prostymi plecami, jedną rękę oprzyj o ławkę lub udo, w drugiej trzymaj kettlebell.","steps":["Przyciągnij kettlebell do biodra, prowadząc łokieć blisko żeber.","Opuść go wolno do pełnego wyprostu ramienia."],"mistake":"Szarpanie ramienia i skręcanie tułowia zabierają pracę plecom, więc ciągnij łokciem i trzymaj plecy w jednej linii."},"Kettlebell Halo":{"setup":"Stań prosto i trzymaj kettlebell oburącz za rogi, dnem do góry, na wysokości klatki.","steps":["Okrąż głowę kettlebellem, prowadząc go blisko szyi.","Po kilku obrotach zmień kierunek. Żebra trzymaj opuszczone."],"mistake":"Wyginanie pleców i odchylanie głowy zabierają pracę barkom, więc napnij brzuch i okrążaj głowę spokojnym ruchem."},"Turkish Get-Up":{"setup":"Połóż się na plecach, kettlebell trzymaj wyprostowaną ręką nad barkiem, wzrok kieruj na ciężar.","steps":["Podnieś się na łokieć i dłoń, potem unieś biodra.","Przełóż nogę pod siebie, wstań na jedno kolano, a potem na dwie stopy.","Wróć tą samą drogą, wzrok zostaje cały czas na kettlebellu."],"mistake":"Ugięta ręka z kettlebellem oznacza za duży ciężar, więc naukę zacznij bez ciężaru i trzymaj ramię pionowo."},"Push-up":{"setup":"Oprzyj dłonie nieco szerzej niż barki, ciało ustaw w jednej linii od głowy do pięt.","steps":["Zegnij łokcie i opuść klatkę tuż nad podłogę.","Wypchnij ciało w górę do wyprostu ramion."],"mistake":"Opadające biodra albo wypięty pośladek rozbijają linię ciała, więc napnij brzuch i pośladki."},"Diamond Push-up":{"setup":"Oprzyj dłonie pod klatką, kciuki i palce wskazujące złącz w kształt rombu, ciało w jednej linii.","steps":["Opuść klatkę do dłoni, prowadząc łokcie wzdłuż ciała.","Wypchnij ciało w górę."],"mistake":"Rozchylanie łokci na boki zmniejsza pracę tricepsa, więc trzymaj je blisko żeber."},"Pull-up":{"setup":"Chwyć drążek nachwytem szerzej niż barki i zawiśnij z wyprostowanymi ramionami.","steps":["Ściągnij łopatki i przyciągnij się, aż broda znajdzie się nad drążkiem.","Opuść ciało wolno do pełnego zwisu."],"mistake":"Bujanie nogami i niepełny zwis na dole to skracanie ruchu, więc zaczynaj każde powtórzenie ze spokojnego zwisu."},"Chin-up":{"setup":"Chwyć drążek podchwytem na szerokość barków i zawiśnij z wyprostowanymi ramionami.","steps":["Przyciągnij się, prowadząc łokcie w stronę żeber, aż broda znajdzie się nad drążkiem.","Opuść ciało powoli."],"mistake":"Wyciąganie szyi do drążka nie pomaga w ruchu, więc unieś klatkę i ciągnij łokciami w dół."},"Inverted Row":{"setup":"Połóż się pod niskim drążkiem, chwyć go szerzej niż barki, pięty oprzyj na podłodze, ciało w jednej linii.","steps":["Przyciągnij klatkę do drążka, ściągając łopatki.","Opuść ciało powoli."],"mistake":"Zapadające się biodra rozbijają linię ciała, więc napnij pośladki i brzuch."},"Superman":{"setup":"Połóż się na brzuchu, ręce wyciągnij przed siebie, nogi wyprostuj.","steps":["Unieś jednocześnie ręce, klatkę i nogi kilka centymetrów nad podłogę.","Zatrzymaj się na dwie sekundy i opuść ciało."],"mistake":"Zadzieranie głowy do tyłu obciąża kark, więc patrz w podłogę i unoś ciało tylko tyle, żeby szyja została w linii z kręgosłupem."},"Bodyweight Squat":{"setup":"Stań na szerokość barków lub nieco szerzej, palce skieruj lekko na zewnątrz, ręce trzymaj przed sobą.","steps":["Zegnij kolana i cofnij biodra, jakbyś siadał na krześle.","Zejdź do wygodnej głębokości i wstań, dociskając stopy do podłogi."],"mistake":"Kolana zapadają się do środka, więc kieruj je w stronę palców stóp."},"Lunge":{"setup":"Stań prosto, stopy na szerokość bioder, ręce trzymaj na biodrach lub wzdłuż ciała.","steps":["Zrób krok do przodu i opuść tylne kolano tuż nad podłogę.","Odepchnij się przednią nogą i wróć do pozycji wyjściowej."],"mistake":"Krótki krok i pochylony tułów przenoszą ciężar na kolano, więc wyprostuj tułów i wydłuż krok."},"Bulgarian Split Squat":{"setup":"Ustaw tylną stopę na ławce, a przednią odsuń tak, żeby kolano nie wychodziło przed palce.","steps":["Opuść biodra pionowo w dół, aż przednie udo będzie mniej więcej równoległe do podłogi.","Wypchnij się przednią nogą."],"mistake":"Stopa ustawiona zbyt blisko ławki przerzuca ciężar na kolano, więc odsuń ją tak, żeby piszczel stała pionowo."},"Pistol Squat":{"setup":"Stań na jednej nodze, drugą wyprostowaną wysuń przed siebie, ręce trzymaj przed sobą dla równowagi.","steps":["Opuść biodra w dół, trzymając piętę na podłodze, a wolną nogę w powietrzu.","Wstań, dociskając całą stopę."],"mistake":"Opadanie bez kontroli i zaokrąglone plecy psują technikę, więc zacznij od przysiadu z podparciem, aż opanujesz cały zakres ruchu."},"Pike Push-up":{"setup":"Ustaw ciało w kształcie odwróconej litery V, dłonie szerzej niż barki, biodra wysoko.","steps":["Zegnij łokcie i opuść głowę między dłonie.","Wypchnij ciało w górę."],"mistake":"Rozchylone łokcie i opadające biodra zmieniają to w zwykłą pompkę, więc trzymaj biodra nad barkami, a łokcie prowadź lekko do tyłu."},"Handstand Push-up":{"setup":"Wejdź w stanie na rękach przodem do ściany, dłonie szerzej niż barki, ciało w jednej linii.","steps":["Zegnij łokcie i opuść głowę do podłogi.","Wypchnij ciało w górę do wyprostu ramion."],"mistake":"Wyginanie pleców w łuk i opadanie bez kontroli psuje technikę, więc napnij brzuch i schodź powoli."},"Plank":{"setup":"Oprzyj przedramiona pod barkami, ciało trzymaj w prostej linii od głowy do pięt.","steps":["Napnij brzuch i pośladki.","Oddychaj spokojnie i wytrzymaj zaplanowany czas."],"mistake":"Opadające biodra albo uniesiony pośladek to sygnał, żeby skończyć serię, gdy nie możesz utrzymać linii ciała."},"Crunch":{"setup":"Połóż się na plecach, kolana ugnij, stopy oprzyj na podłodze, dłonie połóż przy skroniach.","steps":["Unieś łopatki nad podłogę, zwijając tułów.","Wydychaj powietrze przy unoszeniu i opuść ciało powoli."],"mistake":"Ciągnięcie za głowę i unoszenie całych pleców przeciąża szyję, więc łokcie trzymaj na boki, a ruch niech będzie krótki."},"Dead Hang":{"setup":"Chwyć drążek nachwytem na szerokość barków i zawiśnij z wyprostowanymi ramionami.","steps":["Lekko ściągnij łopatki i napnij brzuch.","Oddychaj spokojnie i utrzymaj zwis zaplanowany czas."],"mistake":"Zwis na całkiem wiotkich barkach jest mniej stabilny, więc napnij je lekko, odsuwając od uszu."},"Glute Bridge":{"setup":"Połóż się na plecach, kolana ugnij, stopy postaw blisko pośladków, ramiona ułóż wzdłuż ciała.","steps":["Wypchnij biodra w górę, aż tułów i uda utworzą prostą linię.","Ściśnij pośladki i opuść biodra powoli."],"mistake":"Odpychanie się palcami przenosi pracę na przód uda, więc dociskaj do podłogi pięty."},"Calf Raise (Bodyweight)":{"setup":"Stań przodem stóp na krawędzi stopnia, pięty w powietrzu, dłonią oprzyj się o ścianę dla równowagi.","steps":["Unieś się na palcach najwyżej, jak się da, i zatrzymaj na chwilę.","Opuść pięty poniżej poziomu stopnia."],"mistake":"Sprężynowanie i krótki zakres ruchu ograniczają efekt, więc rób pełny ruch z pauzą na górze."}};
+/* ============================================================
+   GYM 5.0 — set-logging popup (Figma 461:7553).
+   Weight: precise ruler (same mechanism as the onboarding ruler) with a
+   1.25 kg step for barbell lifts, 2.5 kg for everything else, or type the
+   number. Reps: −/+ or type. A set is added AUTOMATICALLY once weight and
+   reps are both settled (idle debounce); tap a logged set to edit it (orange
+   stroke), swipe it left to delete. Rest countdown starts on a new set and
+   buzzes when it's over. X leaves (keeps a draft), ✓ adds the exercise.
+   ============================================================ */
+const BARBELL_EXERCISES = new Set(['Barbell Deadlift','Barbell Curl','Barbell Bench Press','Barbell Back Squat','Hip Thrust']);
+function weightStepFor(ex){ return BARBELL_EXERCISES.has(ex && ex.name) ? 1.25 : 2.5; }
+function parseRestSeconds(str){
+  const nums = (String(str||'').match(/\d+/g) || []).map(Number);
+  return nums.length ? Math.max(...nums) : 90;
+}
+function fmtKgLocal(n){ return String(Math.round(n * 100) / 100).replace('.', LANG==='en' ? '.' : ','); }
+function fmtRestClock(sec){ sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec/60) + ':' + String(sec%60).padStart(2,'0'); }
+function setIsLogged(sv, bw){
+  const r = String(sv.reps).trim() !== '';
+  return bw ? r : (String(sv.weight).trim() !== '' && r);
+}
+const LG_ICONS = {
+  x: '<svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  check: '<svg viewBox="0 0 12 12" fill="none"><path d="M10.78 3.36 4.78 9.36a.6.6 0 0 1-.8 0L1.36 6.74a.6.6 0 1 1 .8-.8l2.23 2.23 5.6-5.6a.6.6 0 0 1 .8.8Z" fill="currentColor"/></svg>',
+  checkBig: '<svg viewBox="0 0 24 24" fill="none"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  bulb: '<svg viewBox="0 0 12 12" fill="none"><path d="M8.25 10.88a.375.375 0 0 1-.375.375h-3.75a.375.375 0 0 1 0-.75h3.75a.375.375 0 0 1 .375.375ZM10.13 4.88a4.24 4.24 0 0 1-1.58 3.24 1.1 1.1 0 0 0-.3.6V9a.75.75 0 0 1-.75.75h-3A.75.75 0 0 1 3.75 9v-.28a.9.9 0 0 0-.29-.6 4.2 4.2 0 0 1-1.59-3.22A4.13 4.13 0 0 1 5.9.75a4.13 4.13 0 0 1 4.23 4.13Zm-.75 0a3.4 3.4 0 0 0-3.46-3.38A3.4 3.4 0 0 0 2.63 4.9c0 1.05.5 2 1.29 2.63.18.14.33.32.43.53.1.2.15.43.15.66V9h3v-.28c0-.23.05-.46.15-.66.1-.2.25-.38.44-.5a3.4 3.4 0 0 0 1.35-1.18 3.36 3.36 0 0 0 .33-1.5Z" fill="currentColor"/></svg>',
+  note: '<svg viewBox="0 0 12 12" fill="none"><path d="m10.77 2.73-1.5-1.5a.38.38 0 0 0-.54 0l-4.5 4.5a.38.38 0 0 0-.11.27v1.5c0 .2.17.37.38.37H6a.38.38 0 0 0 .27-.11l4.5-4.5a.38.38 0 0 0 0-.53ZM5.84 7.13H4.88V6.16l3-3 .97.97-3 3ZM9.38 3.6l-.97-.97L9 2.03l.97.97-.6.6ZM10.5 6v3.75c0 .2-.08.39-.22.53a.75.75 0 0 1-.53.22h-7.5a.75.75 0 0 1-.75-.75v-7.5c0-.2.08-.39.22-.53a.75.75 0 0 1 .53-.22H6a.38.38 0 0 1 0 .75H2.25v7.5h7.5V6a.38.38 0 0 1 .75 0Z" fill="currentColor"/></svg>',
+  minus: '<svg viewBox="0 0 25 25" fill="none"><path d="M21.88 12.5c0 .2-.08.4-.23.55a.78.78 0 0 1-.55.23H3.9a.78.78 0 0 1 0-1.56h17.2c.2 0 .4.08.55.23.15.15.23.35.23.55Z" fill="currentColor"/></svg>',
+  plus: '<svg viewBox="0 0 25 25" fill="none"><path d="M21.88 12.5c0 .2-.08.4-.23.55a.78.78 0 0 1-.55.23h-7.82v7.82a.78.78 0 0 1-1.56 0v-7.82H3.9a.78.78 0 0 1 0-1.56h7.82V3.9a.78.78 0 0 1 1.56 0v7.82h7.82c.2 0 .4.08.55.23.15.15.23.35.23.55Z" fill="currentColor"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none"><path d="M4.5 7h15M10 11v6M14 11v6M6.5 7l.8 11a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4l.8-11M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+/* ---- rest countdown (between sets) ---- */
+let restTimer = null; // { endAt, total, iv, exName }
+function restStop(){
+  if(restTimer){ clearInterval(restTimer.iv); restTimer = null; }
+  restPaint(null);
+}
+function restStart(ex){
+  restStop();
+  const sec = parseRestSeconds(ex.rest);
+  restTimer = { endAt: Date.now() + sec*1000, total: sec, exName: ex.name, iv: setInterval(restTick, 250) };
+  restTick();
+}
+function restTick(){
+  if(!restTimer) return;
+  const left = (restTimer.endAt - Date.now()) / 1000;
+  if(left <= 0){
+    // Came back to the app long after the rest ended → don't buzz for a stale timer.
+    const stale = left < -5;
+    restStop();
+    if(!stale){ haptic('success'); restPop(); }
+    return;
   }
+  restPaint(left);
 }
-function popupAddSetRowV2(){
-  if(!popupExercise) return;
-  popupExercise.setValues.push({weight:'', reps:''});
-  popupExercise.sets = popupExercise.setValues.length;
-  renderExercisePopupV2();
+function restPaint(left){
+  const chip = document.getElementById('lgRest');
+  if(!chip) return;
+  const txt = document.getElementById('lgRestTxt');
+  const live = left !== null && popupExercise && restTimer && restTimer.exName === popupExercise.name;
+  chip.classList.toggle('is-count', !!live);
+  if(txt) txt.textContent = live ? fmtRestClock(left) : (popupExercise ? popupExercise.rest : '');
 }
-function popupRemoveSetRowV2(){
-  if(!popupExercise || popupExercise.sets<=1) return;
-  popupExercise.setValues.pop();
-  popupExercise.sets = popupExercise.setValues.length;
-  renderExercisePopupV2();
+function restPop(){
+  const chip = document.getElementById('lgRest');
+  if(!chip) return;
+  chip.classList.remove('is-pop'); void chip.offsetWidth; chip.classList.add('is-pop');
 }
-/* #6 — sticky note in the set-logging sheet */
-function popupNoteEditV2(){
-  if(!popupExercise) return;
-  popupNoteEditing = true;
-  popupNoteDraft = exerciseNotes[popupExercise.name] || '';
-  renderExercisePopupV2();
-  const ta = document.querySelector('.exv2-note-input');
-  if(ta){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
-}
-function popupNoteCancelV2(){
-  popupNoteEditing = false;
-  renderExercisePopupV2();
-}
-function commitPopupNote(){
-  if(!popupExercise) return;
-  const v = popupNoteDraft.trim();
-  if(v) exerciseNotes[popupExercise.name] = v;
-  else delete exerciseNotes[popupExercise.name];
-  saveExerciseNotes();
-}
-function popupNoteSaveV2(){
-  commitPopupNote();
-  popupNoteEditing = false;
-  renderExercisePopupV2();
-}
-function confirmExercisePopupV2(){
-  if(!popupExercise) return;
-  if(popupNoteEditing) commitPopupNote();   // don't lose a typed-but-unsaved note
-  popupExercise.notes = exerciseNotes[popupExercise.name] || '';   // also carried into workout history
-  const idx = sessionExercises.findIndex(e=>e.name===popupExercise.name);
-  const hasData = popupExercise.setValues.some(s=>s.weight!=='' || s.reps!=='');
-  if(!hasData){
-    if(idx!==-1){
-      sessionExercises.splice(idx,1);
-    } else {
-      popupShowWarning = true;
-      renderExercisePopupV2();
-      return;
+
+/* ---- ruler (horizontal, scroll-snap, value ↔ scrollLeft on a fixed tick width) ---- */
+const LG_TICK_W = 8, LG_MAX_KG = 400;
+function lgBuildRuler(host, step, value, onUser){
+  const n = Math.round(LG_MAX_KG / step);
+  let html = '<div class="lg-ruler-sp"></div>';
+  for(let i = 0; i <= n; i++){
+    const major = i % 4 === 0;
+    html += `<div class="lg-tick${major?' major':''}">${major?`<em>${fmtKgLocal(i*step)}</em>`:''}<i></i></div>`;
+  }
+  html += '<div class="lg-ruler-sp"></div>';
+  host.innerHTML = `<div class="lg-ruler-ind"></div><div class="lg-ruler-track">${html}</div>`;
+  const track = host.querySelector('.lg-ruler-track');
+  let user = false, lastIdx = null, raf = null, idleT = null;
+  const idxOf = ()=> Math.max(0, Math.min(n, Math.round(track.scrollLeft / LG_TICK_W)));
+  const markUser = ()=>{ if(!user){ haptic('select-start'); } user = true; };
+  ['touchstart','pointerdown','wheel'].forEach(ev=> track.addEventListener(ev, markUser, {passive:true}));
+  track.addEventListener('scroll', ()=>{
+    if(raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(()=>{
+      const i = idxOf();
+      if(i !== lastIdx){
+        lastIdx = i;
+        if(user){ haptic('select'); onUser(Math.round(i * step * 100) / 100); }
+      }
+    });
+    clearTimeout(idleT);
+    idleT = setTimeout(()=>{ if(user){ user = false; haptic('select-end'); } }, 220);
+  }, {passive:true});
+  const api = {
+    setValue(v){
+      user = false;
+      const i = Math.max(0, Math.min(n, Math.round((Number(v)||0) / step)));
+      lastIdx = i;
+      track.style.scrollSnapType = 'none';
+      track.scrollLeft = i * LG_TICK_W;
+      requestAnimationFrame(()=>{ track.style.scrollSnapType = 'x mandatory'; });
     }
-  } else if(idx===-1){
-    sessionExercises.push(popupExercise);
-    haptic('medium');
-    markGymActivity(); // real logged data — this is what should start/extend the session clock, not opening the popup
+  };
+  api.setValue(value);
+  return api;
+}
+
+/* ---- current-set composer state ---- */
+let lg = null; // { editIdx, timer, ruler, step, w, r, wt, rt, wPre, rPre }
+const LG_COMMIT_MS = 1400;
+function lgBw(){ return !!popupExercise && popupExercise.equipment === 'masa ciała'; }
+function lgFirstBlank(){
+  const sv = popupExercise.setValues, bw = lgBw();
+  for(let i = 0; i < sv.length; i++) if(!setIsLogged(sv[i], bw)) return i;
+  return -1;
+}
+function lgActiveIdx(){ const b = lgFirstBlank(); return b === -1 ? popupExercise.setValues.length : b; }
+function lgPrefillFor(idx){
+  const ex = popupExercise, bw = lgBw();
+  const hist = lastSessionsFor(ex.name)[0];
+  const ls = hist ? hist.sets : [];
+  const h = ls[idx] || ls[ls.length - 1] || null;
+  if(h) return { w: bw ? '' : (h.weight > 0 ? h.weight : lg.step * 8), r: h.reps > 0 ? h.reps : (ex.repLow || 10), pre: true };
+  const logged = ex.setValues.filter(s => setIsLogged(s, bw));
+  const last = logged[logged.length - 1];
+  if(last) return { w: bw ? '' : (parseFloat(last.weight) || 20), r: parseInt(last.reps) || (ex.repLow || 10), pre: true };
+  return { w: bw ? '' : 20, r: ex.repLow || 10, pre: false };
+}
+function lgResetCurrent(){
+  if(!popupExercise || !lg) return;
+  clearTimeout(lg.timer);
+  lg.wt = lg.rt = false;
+  if(lg.editIdx !== null){
+    const s = popupExercise.setValues[lg.editIdx];
+    lg.w = lgBw() ? '' : (parseFloat(s.weight) || 0);
+    lg.r = parseInt(s.reps) || 0;
+    lg.wPre = lg.rPre = true;
   } else {
-    sessionExercises[idx] = popupExercise;
-    haptic('light');
-    markGymActivity();
+    const p = lgPrefillFor(lgActiveIdx());
+    lg.w = p.w; lg.r = p.r; lg.wPre = lg.rPre = p.pre;
   }
+  lgPaint();
+  if(lg.ruler && !lgBw()) lg.ruler.setValue(lg.w);
+}
+function lgAutoWidth(inp){ inp.style.width = Math.max(1, String(inp.value).length) + 'ch'; }
+function lgPaint(){
+  const w = document.getElementById('lgW'), r = document.getElementById('lgR');
+  if(w){
+    if(document.activeElement !== w) w.value = lg.w === '' ? '' : fmtKgLocal(lg.w);
+    lgAutoWidth(w);
+    w.closest('.lg-wval').classList.toggle('is-pale', !lg.wt && !(lg.editIdx !== null));
+  }
+  if(r){
+    if(document.activeElement !== r) r.value = lg.r === '' ? '' : String(lg.r);
+    lgAutoWidth(r);
+    r.classList.toggle('is-pale', !lg.rt && !(lg.editIdx !== null));
+  }
+}
+function lgReady(){
+  if(!lg) return false;
+  const bw = lgBw();
+  const wOk = bw || (lg.w !== '' && (lg.wt || lg.wPre));
+  const rOk = lg.r !== '' && lg.r >= 1 && (lg.rt || lg.rPre);
+  return wOk && rOk && (lg.wt || lg.rt);
+}
+function lgSchedule(delay){
+  clearTimeout(lg.timer);
+  if(lgReady()) lg.timer = setTimeout(lgCommit, delay === undefined ? LG_COMMIT_MS : delay);
+}
+function lgSetW(v, src){
+  if(!lg) return;
+  lg.w = v; lg.wt = true;
+  if(src !== 'ruler' && lg.ruler) lg.ruler.setValue(v);
+  lgPaint();
+  lgSchedule();
+}
+function lgSetR(v){
+  if(!lg) return;
+  lg.r = Math.max(0, Math.min(999, v)); lg.rt = true;
+  lgPaint();
+  lgSchedule();
+}
+function lgStepR(d){
+  haptic('light');
+  lgSetR((parseInt(lg.r) || 0) + d);
+}
+function lgTypeW(inp){
+  const raw = inp.value.replace(',', '.').replace(/[^0-9.]/g, '');
+  const v = parseFloat(raw);
+  lgAutoWidth(inp);
+  if(isNaN(v)){ return; }
+  lg.w = Math.min(999, v); lg.wt = true;
+  if(lg.ruler) lg.ruler.setValue(lg.w);
+  inp.closest('.lg-wval').classList.remove('is-pale');
+}
+function lgTypeR(inp){
+  const v = parseInt(inp.value.replace(/[^0-9]/g, ''));
+  lgAutoWidth(inp);
+  if(isNaN(v)) return;
+  lg.r = Math.min(999, v); lg.rt = true;
+  inp.classList.remove('is-pale');
+}
+function lgNumBlur(){ if(!lg) return; lgPaint(); lgSchedule(250); }
+function lgNumKey(ev){ if(ev.key === 'Enter'){ ev.preventDefault(); ev.target.blur(); } }
+function lgFlush(){
+  if(!lg) return;
+  clearTimeout(lg.timer);
+  if(lgReady()) lgCommit();
+}
+function lgPersistDraft(){
+  if(!popupExercise) return;
+  if(sessionExercises.some(e => e.name === popupExercise.name)) return;
+  popupDrafts[popupExercise.name] = { setValues: popupExercise.setValues.map(s => ({...s})), rpe: popupExercise.rpe || '', notes: popupExercise.notes || '' };
   persistGymSession();
-  closeExercisePopupV2();
-  renderGymGrid();
-  renderExercisePanels();
+}
+function lgCommit(){
+  if(!popupExercise || !lg || !lgReady()) return;
+  clearTimeout(lg.timer);
+  const ex = popupExercise, sv = ex.setValues, bw = lgBw();
+  const row = { weight: bw ? '' : String(lg.w), reps: String(lg.r) };
+  if(lg.editIdx !== null){
+    sv[lg.editIdx] = row;
+    haptic('light');
+    lg.editIdx = null;
+  } else {
+    let idx = lgFirstBlank();
+    if(idx === -1){ sv.push(row); } else { sv[idx] = row; }
+    ex.sets = sv.length;
+    haptic('medium');
+    markGymActivity();
+    liveActivity();
+    restStart(ex);
+  }
+  lgPersistDraft();
+  lgRenderSets();
+  lgResetCurrent();
+  updateGymPillsV2();
+}
+function lgTapSet(i){
+  if(!popupExercise || !lg) return;
+  const sv = popupExercise.setValues[i];
+  if(!sv || !setIsLogged(sv, lgBw())) return;
+  lgFlush();
+  lg.editIdx = (lg.editIdx === i) ? null : i;
+  haptic('light');
+  lgRenderSets();
+  lgResetCurrent();
+}
+function lgDeleteSet(i){
+  if(!popupExercise || !lg) return;
+  const ex = popupExercise;
+  ex.setValues.splice(i, 1);
+  while(ex.setValues.length < 1) ex.setValues.push({ weight:'', reps:'' });
+  ex.sets = ex.setValues.length;
+  lg.editIdx = null;
+  haptic('warning');
+  lgPersistDraft();
+  lgRenderSets();
+  lgResetCurrent();
+  updateGymPillsV2();
+}
+function lgAddExtra(){
+  if(!popupExercise || !lg) return;
+  lgFlush();
+  const ex = popupExercise;
+  if(lgFirstBlank() === -1){
+    ex.setValues.push({ weight:'', reps:'' });
+    ex.sets = ex.setValues.length;
+  }
+  lg.editIdx = null;
+  haptic('light');
+  lgRenderSets();
+  lgResetCurrent();
+}
+function lgSetsHtml(){
+  const ex = popupExercise, bw = lgBw();
+  const active = lgActiveIdx();
+  let html = '';
+  ex.setValues.forEach((sv, i)=>{
+    const logged = setIsLogged(sv, bw);
+    const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '');
+    const val = logged ? (bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}` : `${escHtml(fmtKgLocal(parseFloat(sv.weight)||0))}kg x ${escHtml(String(sv.reps))}`) : '—';
+    html += `<div class="lg-set-wrap" data-i="${i}"><div class="lg-set-del" aria-hidden="true">${LG_ICONS.trash}</div>
+      <button type="button" class="${cls}" onclick="lgTapSet(${i})"><span class="lg-set-l">${t('seriesLabel', `Seria ${i+1}`, i+1)}</span><span class="lg-set-v">${val}</span><span class="lg-set-c">${LG_ICONS.check}</span></button></div>`;
+  });
+  return html;
+}
+function lgRenderSets(){
+  const box = document.getElementById('lgSets');
+  if(!box || !popupExercise) return;
+  box.innerHTML = lgSetsHtml();
+  box.querySelectorAll('.lg-set-wrap').forEach(w=>{
+    const i = Number(w.dataset.i);
+    if(setIsLogged(popupExercise.setValues[i], lgBw())) lgAttachSwipe(w, i);
+  });
+  const hint = document.getElementById('lgHint');
+  if(hint) hint.hidden = !popupExercise.setValues.some(s => setIsLogged(s, lgBw()));
+}
+/* swipe a logged set left → it slides out and is deleted (past 35% of its width or a quick flick) */
+function lgAttachSwipe(wrap, idx){
+  const row = wrap.querySelector('.lg-set');
+  let sx = 0, sy = 0, dx = 0, axis = null, down = false, t0 = 0, moved = false;
+  const setX = (x, anim)=>{ row.style.transition = anim ? `transform var(--m-dur-snap) var(--m-ease)` : 'none'; row.style.transform = x ? `translateX(${x}px)` : ''; };
+  const start = (x, y)=>{ down = true; sx = x; sy = y; dx = 0; axis = null; moved = false; t0 = Date.now(); };
+  const move = (x, y, ev)=>{
+    if(!down) return;
+    const ddx = x - sx, ddy = y - sy;
+    if(axis === null){
+      if(Math.abs(ddx) < 6 && Math.abs(ddy) < 6) return;
+      axis = Math.abs(ddx) > Math.abs(ddy) ? 'x' : 'y';
+      if(axis === 'y'){ down = false; return; }
+    }
+    if(ev && ev.cancelable) ev.preventDefault();
+    moved = true;
+    dx = Math.min(0, ddx);
+    setX(dx, false);
+  };
+  const end = ()=>{
+    if(!down){ return; }
+    down = false;
+    if(!moved){ return; }
+    const w = wrap.offsetWidth, v = Math.abs(dx) / Math.max(1, Date.now() - t0);
+    if(Math.abs(dx) > w * 0.35 || (Math.abs(dx) > 40 && v > 0.5)){
+      row.style.transition = `transform var(--m-dur-exit) var(--m-ease-exit)`;
+      row.style.transform = `translateX(-${w}px)`;
+      setTimeout(()=> lgDeleteSet(idx), 200);
+    } else {
+      setX(0, true);
+    }
+    // swallow the click that follows a drag
+    row.addEventListener('click', e=>{ e.stopImmediatePropagation(); e.preventDefault(); }, { capture:true, once:true });
+  };
+  row.addEventListener('touchstart', e=> start(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
+  row.addEventListener('touchmove', e=> move(e.touches[0].clientX, e.touches[0].clientY, e), {passive:false});
+  row.addEventListener('touchend', end);
+  row.addEventListener('touchcancel', ()=>{ down = false; setX(0, true); });
+  row.addEventListener('mousedown', e=>{ start(e.clientX, e.clientY);
+    const mm = ev=> move(ev.clientX, ev.clientY, ev);
+    const mu = ()=>{ document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); end(); };
+    document.addEventListener('mousemove', mm); document.addEventListener('mouseup', mu);
+  });
+}
+
+/* ---- popup shell ---- */
+function popupPlanTitle(){
+  const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
+  return plan ? plan.name : t('gymTitleTraining','TRENING');
 }
 function renderExercisePopupV2(animate){
   const box = document.getElementById('exercisePopupBoxV2');
@@ -8588,101 +9026,168 @@ function renderExercisePopupV2(animate){
   const history = lastSessionsFor(ex.name);
   const sugg = buildSuggestion(ex, history);
   const aiAction = getAiActionFor(ex.name);
-  const lastSets = history[0] ? history[0].sets : [];
-  const animCls = animate ? ' exv2-anim-in' : '';
-  // Reveal timing: series cards cascade in one after another, starting
-  // once the popup's own .28s slide-up has landed; controls/submit are
-  // computed from the actual set count so they always land right after
-  // the last card instead of guessing a fixed delay.
-  const CARD_BASE_DELAY = 340, CARD_STEP = 45;
-  let seriesHtml = '';
-  const isBodyweightEx = ex.equipment === 'masa ciała';
-  for(let s=0;s<ex.sets;s++){
-    const lastW = lastSets[s] ? lastSets[s].weight : '';
-    const lastR = lastSets[s] ? lastSets[s].reps : '';
-    const setDone = isBodyweightEx
-      ? String(ex.setValues[s].reps).trim() !== ''
-      : String(ex.setValues[s].weight).trim() !== '' && String(ex.setValues[s].reps).trim() !== '';
-    seriesHtml += `
-      <div class="exv2-series-card${animCls}${setDone?' is-done':''}" data-set="${s}" style="animation-delay:${CARD_BASE_DELAY + s*CARD_STEP}ms">
-        <div class="exv2-series-label">${t('seriesLabel', `Seria ${s+1}`, s+1)}</div>
-        <div class="exv2-series-fields">
-          ${isBodyweightEx ? '' : `
-          <div class="exv2-field">
-            <label>${t('weightLabel','Ciężar')}</label>
-            <input type="number" step="0.5" min="0" placeholder="${lastW!==''?lastW:'kg'}" value="${ex.setValues[s].weight}" oninput="popupSetLiveV2(${s},'weight',this.value)">
-          </div>`}
-          <div class="exv2-field">
-            <label>${t('repsLabel','Powtórzenia')}</label>
-            <input type="number" step="1" min="0" placeholder="${lastR!==''?lastR:t('repsUnit','powt.')}" value="${ex.setValues[s].reps}" oninput="popupSetLiveV2(${s},'reps',this.value)">
-          </div>
-        </div>
-        <span class="exv2-series-tick"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1f9d63"/><path d="M6.8 12.4 10.2 15.8 17.4 8.6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      </div>`;
-  }
-  const isEdit = sessionExercises.some(e=>e.name===ex.name);
-  const btnLabel = isEdit ? t('saveChanges','Zapisz') : t('addToWorkout','Dodaj do treningu');
-  const controlsDelay = CARD_BASE_DELAY + ex.sets*CARD_STEP + 30;
-  const submitDelay = controlsDelay + 60;
-
-  // #6 — sticky note: collapsed reminder + pencil, an editable textarea,
-  // or a dashed "add note" button when there's nothing saved yet.
+  const bw = lgBw();
+  const rise = (n)=> animate ? ` m-rise" style="--i:${n}` : '';
   const noteVal = exerciseNotes[ex.name] || '';
-  let noteHtml;
-  if(popupNoteEditing){
-    noteHtml = `
-      <div class="exv2-note is-edit${animCls}">
-        <span class="exv2-note-k">${t('exNoteLabel','Twoja notatka')}</span>
-        <textarea class="exv2-note-input" rows="3" maxlength="280" placeholder="${escHtml(t('exNotePh','np. Siedzisko 4, uchwyt wąski'))}" oninput="popupNoteDraft=this.value">${escHtml(popupNoteDraft)}</textarea>
-        <div class="exv2-note-actions">
-          <button type="button" class="exv2-note-cancel" onclick="popupNoteCancelV2()">${t('cancel','Anuluj')}</button>
-          <button type="button" class="exv2-note-save" onclick="popupNoteSaveV2()">${t('exNoteSave','Zapisz notatkę')}</button>
-        </div>
-        <p class="exv2-note-hint">${t('exNoteHint','Wróci przy każdym treningu tego ćwiczenia.')}</p>
-      </div>`;
-  } else if(noteVal){
-    noteHtml = `
-      <div class="exv2-note${animCls}">
-        <div class="exv2-note-body">
-          <span class="exv2-note-k">${t('exNoteLabel','Twoja notatka')}</span>
-          <span class="exv2-note-v">${escHtml(noteVal)}</span>
-        </div>
-        <button type="button" class="exv2-note-edit" aria-label="${escHtml(t('edit','Edytuj'))}" onclick="popupNoteEditV2()">${ph('pencil')}</button>
-      </div>`;
-  } else {
-    noteHtml = `<button type="button" class="exv2-note-add${animCls}" onclick="popupNoteEditV2()">${ph('pencil')}<span>${t('exNoteAdd','Dodaj notatkę do tego ćwiczenia')}</span></button>`;
-  }
+  const howto = LANG !== 'en' && EXERCISE_HOWTO[ex.name];
+  const versionPill = ex.version ? `<span class="lg-tag lg-tag--v">${escHtml(t('execVersion'+ex.version, EXECUTION_VERSIONS[ex.version].label))}</span>` : '';
+  const tipHtml = aiAction
+    ? `<div class="lg-ai${rise(2)}"><div class="lg-ai-h">${ph('sparks')}<span>${t('trainerAi','TRENER AI')}</span></div><p class="lg-ai-t">${escHtml(aiAction)}</p></div>`
+    : `<div class="lg-tip${rise(2)}"><span class="lg-tip-l">${t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><span class="lg-tip-t">${escHtml(sugg.text)}</span></div>`;
   box.innerHTML = `
-    <div class="exv2-card">
-      <div class="exv2-header-group${animCls}">
-        <div class="exv2-title-block">
-          <span class="exv2-pill"><span>${groupLabel(ex.group)}</span></span>
-          ${ex.version ? `<span class="exv2-pill exv2-pill--version"><span>${escHtml(t('execVersion'+ex.version, EXECUTION_VERSIONS[ex.version].label))}</span></span>` : ''}
-          <div class="exv2-title-row">
-            <div class="exv2-title">${escHtml(ex.name)}</div>
-            <span class="exv2-close" onclick="closeExercisePopupV2()">${ph('x')}</span>
-          </div>
-        </div>
-        <div class="exv2-stats">
-          <div class="exv2-stat">${ph('stack')}<span>${t('statSetsCount', `${ex.sets} serie`, ex.sets)}</span></div>
-          <div class="exv2-stat">${ph('arrow-clockwise')}<span>${ex.repLow}-${ex.repHigh} ${t('repsUnit','powt.')}</span></div>
-          <div class="exv2-stat">${ph('clock-countdown')}<span>${ex.rest}</span></div>
-        </div>
-      </div>
-      ${noteHtml}
-      <div class="exv2-tip${animCls}${aiAction?' exv2-tip--ai':''}"><span class="lbl">${aiAction ? ph('sparks','exv2-tip-ic') + t('trainingTipAi','SUGESTIA TRENERA AI') : t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><span class="txt">${escHtml(aiAction || sugg.text)}</span></div>
-      <div class="exv2-series-section">
-        <div class="exv2-series-list">${seriesHtml}</div>
-        <div class="exv2-series-controls${animCls}" style="animation-delay:${controlsDelay}ms">
-          <button type="button" class="exv2-btn-outline" ${ex.sets<=1?'disabled':''} onclick="popupRemoveSetRowV2()">${t('removeSeries','Usuń serię')}</button>
-          <button type="button" class="exv2-btn-fill" onclick="popupAddSetRowV2()">${t('addSeries','Dodaj serię')}</button>
-        </div>
-      </div>
-      ${popupShowWarning ? `<div class="exv2-warn">${t('popupNoValues','Pola są puste — liczby w tle to tylko podpowiedź z ostatniego treningu. Wpisz je, żeby dodać ćwiczenie.')}</div>` : ''}
-      <button type="button" class="exv2-submit${animCls}" style="animation-delay:${submitDelay}ms" onclick="confirmExercisePopupV2()">${btnLabel}</button>
+    <div class="lg-bar">
+      <button type="button" class="lg-circ" onclick="closeExercisePopupV2()" aria-label="${escHtml(t('gymLeaveLogging','Wyjdź z logowania'))}">${LG_ICONS.x}</button>
+      <span class="lg-bar-title">${escHtml(popupPlanTitle())}</span>
+      <button type="button" class="lg-circ fill" onclick="confirmExercisePopupV2()" aria-label="${escHtml(t('gymAddExerciseDone','Dodaj ćwiczenie do treningu'))}">${LG_ICONS.checkBig}</button>
     </div>
-  `;
+    <div class="lg-scroll">
+      <div class="lg-head${rise(0)}">
+        <div class="lg-tags"><span class="lg-tag">${escHtml(groupLabel(ex.group))}</span>${versionPill}</div>
+        <div class="lg-name-row">
+          ${howto ? `<button type="button" class="lg-ic bulb" onclick="openExHowtoV2()" aria-label="${escHtml(t('exHowtoTitle','Jak ćwiczyć'))}">${LG_ICONS.bulb}</button>` : ''}
+          <div class="lg-name">${escHtml(ex.name)}</div>
+          <button type="button" class="lg-ic note${noteVal?' has-note':''}" onclick="openExNoteV2()" aria-label="${escHtml(t('exNoteLabel','Twoja notatka'))}">${LG_ICONS.note}</button>
+        </div>
+        <div class="lg-chips">
+          <span class="lg-chip">${ph('stack')}<span>${t('statSetsCount', `${ex.sets} serie`, ex.sets)}</span></span>
+          <span class="lg-chip">${ph('arrow-clockwise')}<span>${ex.repLow}-${ex.repHigh} ${t('repsUnit','powt.')}</span></span>
+          <span class="lg-chip rest" id="lgRest">${ph('clock-countdown')}<span id="lgRestTxt">${escHtml(ex.rest)}</span></span>
+        </div>
+      </div>
+      ${tipHtml}
+      ${bw ? '' : `
+      <div class="lg-block${rise(3)}">
+        <span class="lg-lab">${t('weightLabel','Ciężar').toUpperCase()}</span>
+        <div class="lg-wval is-pale"><input class="lg-num" id="lgW" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" oninput="lgTypeW(this)" onblur="lgNumBlur()" onkeydown="lgNumKey(event)" aria-label="${escHtml(t('weightLabel','Ciężar'))}"><span class="lg-unit">kg</span></div>
+        <div class="lg-ruler" id="lgRuler"></div>
+      </div>`}
+      <div class="lg-block${rise(4)}">
+        <span class="lg-lab">${t('repsLabel','Powtórzenia').toUpperCase()}</span>
+        <div class="lg-reps">
+          <button type="button" class="lg-step" onclick="lgStepR(-1)" aria-label="−1">${LG_ICONS.minus}</button>
+          <input class="lg-num lg-num-r is-pale" id="lgR" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" oninput="lgTypeR(this)" onblur="lgNumBlur()" onkeydown="lgNumKey(event)" aria-label="${escHtml(t('repsLabel','Powtórzenia'))}">
+          <button type="button" class="lg-step" onclick="lgStepR(1)" aria-label="+1">${LG_ICONS.plus}</button>
+        </div>
+      </div>
+      <div class="lg-setsec${rise(5)}">
+        <div class="lg-sets" id="lgSets"></div>
+        <p class="lg-hint" id="lgHint" hidden>${t('gymSwipeHint','Przesuń serię w lewo, żeby ją usunąć')}</p>
+      </div>
+      ${popupShowWarning ? `<div class="lg-warn">${t('gymLogWarn','Zaloguj choć jedną serię, żeby dodać ćwiczenie.')}</div>` : ''}
+      <button type="button" class="lg-add${rise(6)}" onclick="lgAddExtra()">${t('gymExtraSet','Dodatkowa seria')}</button>
+    </div>`;
+  lgRenderSets();
+  lgPaint();
+  restPaint(restTimer ? (restTimer.endAt - Date.now()) / 1000 : null);
+  requestAnimationFrame(()=>{
+    const host = document.getElementById('lgRuler');
+    if(host && lg && !bw){ lg.ruler = lgBuildRuler(host, lg.step, lg.w, v=> lgSetW(v, 'ruler')); }
+  });
 }
+function popupInitLg(){
+  lg = { editIdx: null, timer: null, ruler: null, step: weightStepFor(popupExercise), w: '', r: '', wt: false, rt: false, wPre: false, rPre: false };
+  lgResetCurrent();
+}
+function confirmExercisePopupV2(){
+  if(!popupExercise) return;
+  lgFlush();
+  const ex = popupExercise;
+  ex.notes = exerciseNotes[ex.name] || '';   // also carried into workout history
+  const bw = lgBw();
+  const idx = sessionExercises.findIndex(e => e.name === ex.name);
+  const logged = ex.setValues.filter(s => setIsLogged(s, bw));
+  if(!logged.length){
+    if(idx !== -1){
+      sessionExercises.splice(idx, 1);
+    } else {
+      popupShowWarning = true;
+      renderExercisePopupV2();
+      haptic('warning');
+      return;
+    }
+  } else {
+    ex.setValues = logged.map(s => ({...s}));
+    ex.sets = ex.setValues.length;
+    if(idx === -1){
+      sessionExercises.push(ex);
+      haptic('medium');
+    } else {
+      sessionExercises[idx] = ex;
+      haptic('light');
+    }
+    markGymActivity();
+    liveActivity();
+  }
+  delete popupDrafts[ex.name];
+  persistGymSession();
+  closeExercisePopupV2();
+  renderGymGrid();
+  renderExercisePanels();
+}
+
+/* ---- note + "jak ćwiczyć" sub-sheets ---- */
+function lgSubOpen(id){
+  mSheetOpenReset(id);
+  document.getElementById(id).classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+  syncSheetsToVisualViewport();
+}
+function lgSubClose(id, viaDrag){
+  mSheetClose(id, viaDrag, ()=>{
+    // the logging sheet underneath is still open → keep the page locked
+    if(popupExercise) document.documentElement.classList.add('modal-lock');
+  });
+}
+let exNoteDraftV2 = '';
+function openExNoteV2(){
+  if(!popupExercise) return;
+  exNoteDraftV2 = exerciseNotes[popupExercise.name] || '';
+  document.getElementById('exNoteBoxV2').innerHTML = `
+    <div class="lg-bar">
+      <button type="button" class="lg-circ" onclick="closeExNoteV2()" aria-label="${escHtml(t('cancel','Anuluj'))}">${LG_ICONS.x}</button>
+      <span class="lg-bar-title">${t('exNoteSheetTitle','NOTATKA')}</span>
+      <button type="button" class="lg-circ fill" onclick="saveExNoteV2()" aria-label="${escHtml(t('exNoteSave','Zapisz notatkę'))}">${LG_ICONS.checkBig}</button>
+    </div>
+    <div class="lg-scroll lg-sub-scroll">
+      <div class="lg-name-row"><div class="lg-name">${escHtml(popupExercise.name)}</div></div>
+      <textarea class="lg-note-ta" id="exNoteTa" rows="6" maxlength="280" placeholder="${escHtml(t('exNotePh','np. Siedzisko 4, uchwyt wąski'))}" oninput="exNoteDraftV2=this.value;document.getElementById('exNoteCount').textContent=this.value.length+'/280'">${escHtml(exNoteDraftV2)}</textarea>
+      <div class="lg-note-meta"><span>${t('exNoteHint','Wróci przy każdym treningu tego ćwiczenia.')}</span><span id="exNoteCount">${exNoteDraftV2.length}/280</span></div>
+    </div>`;
+  lgSubOpen('exNoteOverlayV2');
+}
+function closeExNoteV2(viaDrag){ lgSubClose('exNoteOverlayV2', viaDrag); }
+function saveExNoteV2(){
+  if(!popupExercise) return;
+  const v = exNoteDraftV2.trim();
+  if(v) exerciseNotes[popupExercise.name] = v; else delete exerciseNotes[popupExercise.name];
+  saveExerciseNotes();
+  popupExercise.notes = v;
+  const b = document.querySelector('#exercisePopupBoxV2 .lg-ic.note');
+  if(b) b.classList.toggle('has-note', !!v);
+  haptic('light');
+  closeExNoteV2();
+}
+function openExHowtoV2(){
+  if(!popupExercise) return;
+  const h = EXERCISE_HOWTO[popupExercise.name];
+  if(!h) return;
+  document.getElementById('exHowtoBoxV2').innerHTML = `
+    <div class="lg-bar">
+      <button type="button" class="lg-circ" onclick="closeExHowtoV2()" aria-label="${escHtml(t('close','Zamknij'))}">${LG_ICONS.x}</button>
+      <span class="lg-bar-title">${t('exHowtoSheetTitle','JAK ĆWICZYĆ')}</span>
+      <span class="lg-circ ghost" aria-hidden="true"></span>
+    </div>
+    <div class="lg-scroll lg-sub-scroll">
+      <div class="lg-name-row"><div class="lg-name">${escHtml(popupExercise.name)}</div></div>
+      <div class="lg-how"><p class="lg-how-l">${t('exHowtoSetup','USTAWIENIE')}</p><p class="lg-how-t">${escHtml(h.setup)}</p></div>
+      <div class="lg-how"><p class="lg-how-l">${t('exHowtoMove','RUCH')}</p><ol class="lg-how-ol">${h.steps.map(s=>`<li>${escHtml(s)}</li>`).join('')}</ol></div>
+      <div class="lg-how lg-how--warn"><p class="lg-how-l">${t('exHowtoMistake','TYPOWY BŁĄD')}</p><p class="lg-how-t">${escHtml(h.mistake)}</p></div>
+    </div>`;
+  lgSubOpen('exHowtoOverlayV2');
+}
+function closeExHowtoV2(viaDrag){ lgSubClose('exHowtoOverlayV2', viaDrag); }
+mSheetDrag('exNoteOverlayV2', closeExNoteV2);
+mSheetDrag('exHowtoOverlayV2', closeExHowtoV2);
 
 /* v3 "Dodaj własne ćwiczenie" (#newExerciseOverlayV2) — reached from
    GYM v2 and plan editor v2's dashed add-tiles (buildAddCustomExerciseTile()),
@@ -8938,6 +9443,7 @@ function saveWorkout(){
   workouts.push(workout);
   saveWorkouts(workouts);
   resetGymSessionTiming();
+  liveReset(); restStop();
   trackEvent('/event/save-workout', 'Zapisano trening');
   toast(t('workoutSaved','Trening zapisany'));
   sessionExercises = [];
@@ -11306,29 +11812,16 @@ const GYMV2_DAY_NAMES_PL = LANG==='en'
   : ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
 function renderGymV2(){
   const iso = todayStr();
-  const d = new Date(iso+'T00:00:00');
-  document.getElementById('gymV2Date').textContent = `${GYMV2_DAY_NAMES_PL[d.getDay()]}, ${fmtDateHuman(iso)}`;
-
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
-  const card = document.querySelector('.gymv2-plan-card');
+  const nameEl = document.getElementById('gymV2PlanName');
   const noPlan = document.getElementById('gymV2NoPlan');
   if(plan){
-    const todayEx = (plan.schedule[dayKeyFromDate(iso)]||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name));
-    document.getElementById('gymV2PlanName').textContent = plan.name;
-    document.getElementById('gymV2PlanDesc').textContent = t('gymV2PlanDesc','Twój trening na dziś.');
-    document.getElementById('gymV2Count').textContent = planExCountText(todayEx.length);
-    // Real elapsed time once the session has actually started (first tile
-    // tap today), falling back to the old rough guess before that —
-    // see markGymActivity()/computeGymSessionDurationMin() above.
-    document.getElementById('gymV2Duration').textContent = gymSessionStartAt
-      ? `${computeGymSessionDurationMin()} min`
-      : `~${Math.max(15, todayEx.length*5)} min`;
-    const diffKey = plan.customizationV2 ? plan.customizationV2.difficulty : planDifficultyKey(planAvgExercisesPerDay(plan));
-    document.getElementById('gymV2Difficulty').textContent = planDifficultyLabel(diffKey);
-    card.classList.remove('hidden');
+    nameEl.textContent = plan.name;
+    nameEl.hidden = false;
     noPlan.classList.add('hidden');
   } else {
-    card.classList.add('hidden');
+    nameEl.textContent = '';
+    nameEl.hidden = true;
     noPlan.classList.remove('hidden');
   }
 
@@ -11348,7 +11841,7 @@ function renderGymV2(){
     editBtn.classList.add('hidden');
   } else if(planToday > 0){
     head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
-    label.textContent = t('gymV2ExercisesInPlan', 'Ćwiczenia w planie');
+    label.textContent = t('gymV2YourExercises', 'Twoje ćwiczenia');
     editBtn.classList.toggle('hidden', !plan);
   } else if(hasWork){
     head.classList.remove('hidden'); grid.classList.remove('hidden'); restNote.classList.add('hidden');
@@ -11365,6 +11858,8 @@ function renderGymV2(){
   updateGymV2RepeatBtn();
   renderGymGridV2(true);
   renderGymDoneV2(true);
+  updateGymPillsV2();
+  liveRender();
 }
 /* #1 — "Powtórz ostatni trening": the most recent SAVED workout, by date
    then id (so multiple same-day workouts still order right). */
@@ -11496,6 +11991,7 @@ function renderGymGridV2(animate){
   sessionExercises.forEach(se=>{
     if(!shown.has(se.name) && byName.has(se.name)){ slots.push({ ex: byName.get(se.name) }); shown.add(se.name); }
   });
+  let gridTotal = 0, gridDone = 0;
   slots.forEach(slot=>{
     const ex = slot.ex;
     const inSession = sessionExercises.some(e=>e.name===ex.name);
@@ -11505,12 +12001,22 @@ function renderGymGridV2(animate){
     // warm-up / stretch bookend (Maciej Q4: once it has logged sets you've
     // committed to it, so no swap then). Available in "Powtórz" mode too —
     // slot.swapOrigin is set for repeat slots as well (see repeatSlots above).
-    const canSwap = slot.swapOrigin && !slot.bookend && ex.type !== 'checklist' && !inSession;
-    const btn = buildExerciseTileV2(ex, state, canSwap ? { swapOrigin: slot.swapOrigin, swapped: slot.swapped } : null);
+    const dr = (!inSession && ex.type !== 'checklist') ? popupDrafts[ex.name] : null;
+    const bwEx = ex.equipment === 'masa ciała';
+    const nLogged = dr ? (dr.setValues||[]).filter(sv=>setIsLogged(sv, bwEx)).length : 0;
+    const partial = nLogged > 0 ? { done: nLogged, total: Math.max(nLogged, (dr.setValues||[]).length) } : null;
+    const canSwap = slot.swapOrigin && !slot.bookend && ex.type !== 'checklist' && !inSession && !partial;
+    const tileOpts = {};
+    if(canSwap){ tileOpts.swapOrigin = slot.swapOrigin; tileOpts.swapped = slot.swapped; }
+    if(partial) tileOpts.partial = partial;
+    if(ex.type !== 'checklist' && !slot.bookend){ gridTotal++; if(inSession) gridDone++; }
+    const btn = buildExerciseTileV2(ex, state, Object.keys(tileOpts).length ? tileOpts : null);
     btn.classList.add('gymv2-tile');
     btn.onclick = ()=> onTileTapV2(ex);
     grid.appendChild(btn);
   });
+  gymGridStats = { done: gridDone, total: gridTotal };
+  updateGymPillsV2();
   const searchBtn = document.createElement('button');
   searchBtn.type = 'button';
   searchBtn.className = 'gymv2-tile gymv2-search-tile';
@@ -11542,33 +12048,166 @@ function renderGymGridV2(animate){
     });
   }
 }
-function renderGymDoneV2(animate){
-  const area = document.getElementById('gymDoneV2');
-  if(!area) return;
-  area.innerHTML = '';
-  document.getElementById('gymDoneV2Section').classList.toggle('hidden', sessionExercises.length===0);
-  sessionExercises.forEach(ex=>{
-    const nameArg = jsArg(ex.name);
-    const row = document.createElement('button');
-    row.type = 'button';
-    row.className = 'gymv2-done-row';
-    row.onclick = ()=> openExercisePopupV2(ex);
-    row.innerHTML = `
-      <div class="gymv2-done-row-info">${ph('check-circle')}<span>${escHtml(ex.name)}</span></div>
-      <div class="gymv2-done-row-actions">
-        ${ph('pencil')}
-        <span onclick="event.stopPropagation();removeExerciseFromSession(${nameArg})">${ph('trash')}</span>
-      </div>
-    `;
-    area.appendChild(row);
-  });
+function renderGymDoneV2(){
+  // 5.0: logged exercises stay in the grid as greyed "done" tiles (tap to
+  // edit; delete every set + ✓ to remove) — the separate list is gone.
+}
 
-  if(animate){
-    Array.from(area.children).forEach((el, i)=>{
-      el.classList.add('gymv2-anim-in');
-      el.style.animationDelay = Math.round(120 + Math.min(i,10) * 45 + Math.random() * 25) + 'ms';
-    });
+/* ============================================================
+   GYM 5.0 — workout in progress (Figma 459:6092)
+   ============================================================ */
+/* On-screen workout clock. Starts on the first tile tap; if nothing happens
+   for GYM_LIVE_IDLE_MS it pauses at the last activity ("Wstrzymano" — the
+   tap was probably accidental) and the next tile tap / logged set resumes
+   it. Separate from the stored-duration engine above (markGymActivity), which
+   is left exactly as it was. */
+const LS_GYM_LIVE = "fitlog_gym_live_timer_v1";
+const GYM_LIVE_IDLE_MS = 12 * 60 * 1000;
+let gymLive = { started:false, running:false, accumMs:0, runStart:0, lastAct:0 };
+let gymGridStats = { done:0, total:0 };
+let liveIv = null;
+function liveLoad(){
+  try{ const o = JSON.parse(localStorage.getItem(LS_GYM_LIVE)); if(o && o.started) gymLive = o; }catch(e){}
+}
+function liveSave(){
+  try{
+    if(gymLive.started) localStorage.setItem(LS_GYM_LIVE, JSON.stringify(gymLive));
+    else localStorage.removeItem(LS_GYM_LIVE);
+  }catch(e){}
+}
+function liveEnsureTick(){ if(!liveIv) liveIv = setInterval(liveTick, 1000); }
+function liveActivity(){
+  const now = Date.now(), g = gymLive;
+  if(!g.started){ gymLive = { started:true, running:true, accumMs:0, runStart:now, lastAct:now }; }
+  else if(!g.running){ g.running = true; g.runStart = now; g.lastAct = now; }
+  else { g.lastAct = now; }
+  liveSave(); liveEnsureTick(); liveRender();
+}
+function liveReset(){
+  gymLive = { started:false, running:false, accumMs:0, runStart:0, lastAct:0 };
+  liveSave(); liveRender();
+}
+function liveElapsedMs(now){
+  const g = gymLive;
+  return g.started ? g.accumMs + (g.running ? Math.max(0, now - g.runStart) : 0) : 0;
+}
+function liveTick(){
+  const g = gymLive, now = Date.now();
+  if(g.started && g.running && now - g.lastAct > GYM_LIVE_IDLE_MS){
+    g.accumMs += Math.max(0, g.lastAct - g.runStart);
+    g.running = false;
+    liveSave();
   }
+  liveRender();
+}
+function fmtLiveClock(ms){
+  const sec = Math.floor(ms / 1000), h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
+}
+function liveRender(){
+  const pill = document.getElementById('gymV2PillTime');
+  const txt = document.getElementById('gymV2PillTimeTxt');
+  if(!pill || !txt) return;
+  const g = gymLive;
+  pill.classList.toggle('is-paused', g.started && !g.running);
+  txt.textContent = !g.started ? '0:00' : (!g.running ? t('gymPaused','Wstrzymano') : fmtLiveClock(liveElapsedMs(Date.now())));
+}
+function gymSessionVolumeKg(){
+  let v = 0;
+  const add = sv => (sv || []).forEach(s => { v += (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0); });
+  sessionExercises.forEach(e => { if(e.type !== 'checklist') add(e.setValues); });
+  Object.keys(popupDrafts).forEach(n => { if(!sessionExercises.some(e => e.name === n)) add(popupDrafts[n].setValues); });
+  return Math.round(v);
+}
+function updateGymPillsV2(){
+  const ex = document.getElementById('gymV2PillExTxt'), kg = document.getElementById('gymV2PillKgTxt');
+  if(!ex || !kg) return;
+  ex.textContent = `${gymGridStats.done}/${gymGridStats.total} ${t('gymPillExercises','ćwiczeń')}`;
+  kg.textContent = `${gymSessionVolumeKg()} kg`;
+}
+liveLoad();
+if(gymLive.started) liveEnsureTick();
+
+/* In-app confirm dialog (same look as the "Powtórz ostatni trening" one). */
+let gymConfirmCb = null;
+function gymConfirmV2(o){
+  document.getElementById('gymConfirmTitle').textContent = o.title;
+  document.getElementById('gymConfirmBody').textContent = o.body;
+  document.getElementById('gymConfirmYes').textContent = o.yes;
+  document.getElementById('gymConfirmNo').textContent = o.no;
+  gymConfirmCb = o.onYes || null;
+  document.getElementById('gymConfirmOverlay').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+  haptic('warning');
+}
+function gymConfirmCloseV2(ok){
+  document.getElementById('gymConfirmOverlay').classList.add('hidden');
+  document.documentElement.classList.remove('modal-lock');
+  const cb = gymConfirmCb; gymConfirmCb = null;
+  if(ok && cb) cb();
+}
+function gymHasProgress(){
+  const bwOf = n => { const d = orderedExerciseLibrary().find(e => e.name === n); return !!d && d.equipment === 'masa ciała'; };
+  return sessionExercises.length > 0
+    || Object.keys(popupDrafts).some(n => (popupDrafts[n].setValues || []).some(sv => setIsLogged(sv, bwOf(n))))
+    || gymLive.started;
+}
+/* X — abort the workout (asks first when there is anything to lose). */
+function gymAbortV2(){
+  if(popupExercise) return;
+  if(!gymHasProgress()){ goRoute('dashboard'); return; }
+  gymConfirmV2({
+    title: t('gymAbortTitleDlg','Przerwać trening?'),
+    body: t('gymAbortBody','Wszystko, co dziś zalogowałeś w tym treningu, zniknie.'),
+    yes: t('gymAbortYes','Przerwij'),
+    no: t('gymAbortNo','Wróć do treningu'),
+    onYes: ()=>{
+      sessionExercises = []; extraGymTiles = []; repeatMode = null; popupDrafts = {};
+      todaySwaps = {}; persistTodaySwaps();
+      persistGymSession(); resetGymSessionTiming(); liveReset(); restStop();
+      goRoute('dashboard');
+      renderGymGridV2();
+    }
+  });
+}
+/* Sets logged in an exercise that was left with X (never ✓) still count. */
+function gymAdoptDrafts(){
+  const lib = orderedExerciseLibrary(), planList = todayPlanExerciseNames() || [];
+  Object.keys(popupDrafts).forEach(name=>{
+    if(sessionExercises.some(e => e.name === name)) return;
+    const def = lib.find(e => e.name === name) || extraGymTiles.find(e => e.name === name);
+    if(!def) return;
+    const bw = def.equipment === 'masa ciała';
+    const logged = (popupDrafts[name].setValues || []).filter(sv => setIsLogged(sv, bw));
+    if(!logged.length) return;
+    let ex = { ...def };
+    const slot = planList.find(e => e.name === name);
+    if(slot && slot.versionCycle){
+      const r = resolvePeriodizedVersion({ ...def, versionCycle: slot.versionCycle });
+      if(r) ex = { ...ex, repLow:r.repLow, repHigh:r.repHigh, rest:r.rest, version:r.tag };
+    }
+    sessionExercises.push({ ...ex, sets: logged.length, setValues: logged.map(s => ({...s})), rpe: popupDrafts[name].rpe || '', notes: exerciseNotes[name] || '' });
+    delete popupDrafts[name];
+  });
+}
+/* ✓ / ZAKOŃCZ TRENING — same action from both places. */
+function gymFinishTapV2(){
+  if(popupExercise) return;
+  gymAdoptDrafts();
+  persistGymSession();
+  renderGymGridV2();
+  const anyLogged = sessionExercises.some(e => e.type !== 'checklist' && (e.setValues || []).some(sv => setIsLogged(sv, e.equipment === 'masa ciała')));
+  if(!anyLogged){
+    gymConfirmV2({
+      title: t('gymEmptyTitle','Trening jest pusty'),
+      body: t('gymEmptyBody','Nie ma jeszcze ani jednego ćwiczenia. Dodać pierwsze?'),
+      yes: t('gymEmptyYes','Dodaj ćwiczenie'),
+      no: t('cancel','Anuluj'),
+      onYes: ()=> openExercisePickerV2()
+    });
+    return;
+  }
+  saveWorkoutV2();
 }
 
 // The "Mekkio" load screen (Figma node 107:329). Now that the v3 layout IS
