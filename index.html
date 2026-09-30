@@ -2319,6 +2319,13 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
+/* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
+#view-gym-v2 .gymv2-tile.gymv2-search-tile, #view-gym-v2 .gymv2-tile.gymv2-add-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:13px;padding:4.5px 0 0;box-sizing:border-box;background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);}
+#view-gym-v2 .gymv2-tile.gymv2-search-tile{border:.5px solid #f1d7cb;}
+#view-gym-v2 .gymv2-tile.gymv2-add-tile{border:1px dashed #cd1200;}
+#view-gym-v2 .gymv2-tile .gy-tile-ic{width:49px;height:48px;flex:none;display:block;}
+.gy-tile-lbl{width:94px;height:40px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.04em;line-height:1.02;text-transform:uppercase;color:var(--m-ink);}
+#view-gym-v2 .gymv2-add-tile .gy-tile-lbl{color:var(--m-orange);}
 .lg-num{cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;}
 .lg-num.is-editing::after{content:"";display:inline-block;width:2px;height:.78em;margin-left:3px;background:var(--m-orange);vertical-align:-.04em;}
 @media (prefers-reduced-motion: no-preference){
@@ -12030,6 +12037,13 @@ function applyRepeatLastWorkout(){
   else renderGymV2();
   toast(t('repeatDone', `Wczytano trening z ${fmtDateHuman(last.date)}`, fmtDateHuman(last.date)));
 }
+/* GYM 5.0 tiles "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" (Figma 461:7507 / 461:7528):
+   glass tile + icon + live label instead of the baked EX_TILE_*_SVG (those stay
+   for the plan editor). */
+const GY_SEARCH_ICON = '<svg class="gy-tile-ic" viewBox="0 0 49 48" fill="none"><path d="M48.296 45.1318L36.357 33.2515C39.7615 29.3555 41.5131 24.2963 41.242 19.1403C40.9711 13.9844 38.699 9.13457 34.9046 5.61317C31.1102 2.09177 26.0901 0.173797 20.9023 0.26377C15.7145 0.353626 10.7645 2.44432 7.09568 6.09512C3.42682 9.74591 1.32577 14.6715 1.23547 19.8337C1.14505 24.9958 3.07252 29.9914 6.61135 33.7671C10.1502 37.5428 15.0241 39.8037 20.2055 40.0733C25.3869 40.3428 30.4712 38.6001 34.3865 35.2123L46.3256 47.0925C46.5898 47.3376 46.9395 47.471 47.3006 47.4646C47.6618 47.4583 48.0064 47.3127 48.2619 47.0585C48.5173 46.8043 48.6636 46.4614 48.6701 46.102C48.6764 45.7425 48.5423 45.3947 48.296 45.1318ZM4.09044 20.2152C4.09044 16.831 5.09885 13.5229 6.98837 10.7091C8.87777 7.8953 11.5633 5.7022 14.7053 4.40705C17.8473 3.11202 21.3047 2.7732 24.6403 3.43344C27.9758 4.09368 31.0397 5.72327 33.4445 8.11621C35.8493 10.5091 37.4869 13.5579 38.1504 16.877C38.8139 20.1962 38.4734 23.6365 37.172 26.7631C35.8704 29.8896 33.6665 32.5619 30.8387 34.442C28.011 36.3221 24.6866 37.3256 21.2856 37.3256C16.7268 37.3202 12.3564 35.5156 9.13284 32.308C5.90941 29.1004 4.09592 24.7515 4.09044 20.2152Z" fill="#FF3300"/></svg>';
+const GY_PLUS_ICON = '<svg class="gy-tile-ic" viewBox="0 0 49 48" fill="none"><path d="M45.9718 23.735C45.9718 24.1029 45.8256 24.4558 45.5654 24.7159C45.3053 24.9762 44.9524 25.1224 44.5844 25.1224H25.6233V44.0826C25.6233 44.4506 25.4771 44.8034 25.2169 45.0636C24.9568 45.3238 24.6039 45.47 24.2359 45.47C23.868 45.47 23.515 45.3238 23.2549 45.0636C22.9947 44.8034 22.8485 44.4506 22.8485 44.0826V25.1224H3.88743C3.51947 25.1224 3.16655 24.9762 2.90644 24.7159C2.64622 24.4558 2.5 24.1029 2.5 23.735C2.5 23.3671 2.64622 23.0141 2.90644 22.7539C3.16655 22.4938 3.51947 22.3476 3.88743 22.3476H22.8485V3.38737C22.8485 3.01942 22.9947 2.66651 23.2549 2.4063C23.515 2.14621 23.868 2 24.2359 2C24.6039 2 24.9568 2.14621 25.2169 2.4063C25.4771 2.66651 25.6233 3.01942 25.6233 3.38737V22.3476H44.5844C44.9524 22.3476 45.3053 22.4938 45.5654 22.7539C45.8256 23.0141 45.9718 23.3671 45.9718 23.735Z" fill="#FF7458"/></svg>';
+function GY_SEARCH_TILE_HTML(){ return GY_SEARCH_ICON + `<span class="gy-tile-lbl">${t('gymV2PickOther','Wybierz inne ćwiczenie')}</span>`; }
+function GY_ADD_TILE_HTML(){ return GY_PLUS_ICON + `<span class="gy-tile-lbl">${t('addNew','Dodaj ćwiczenie')}</span>`; }
 function renderGymGridV2(animate){
   const grid = document.getElementById('gymGridV2');
   if(!grid) return;
@@ -12112,7 +12126,7 @@ function renderGymGridV2(animate){
   searchBtn.type = 'button';
   searchBtn.className = 'gymv2-tile gymv2-search-tile';
   searchBtn.title = t('gymV2PickOther','Wybierz inne ćwiczenie');
-  searchBtn.innerHTML = EX_TILE_SEARCH_SVG;
+  searchBtn.innerHTML = GY_SEARCH_TILE_HTML();
   searchBtn.onclick = openExercisePickerV2;
   grid.appendChild(searchBtn);
 
@@ -12120,7 +12134,7 @@ function renderGymGridV2(animate){
   addBtn.type = 'button';
   addBtn.className = 'gymv2-tile gymv2-add-tile';
   addBtn.title = t('addNew','Dodaj ćwiczenie');
-  addBtn.innerHTML = EX_TILE_ADD_SVG;
+  addBtn.innerHTML = GY_ADD_TILE_HTML();
   // Was a bare `toggleNewExerciseForm` reference — as an onclick handler
   // that passes the click Event itself as prefillGroup, which
   // toggleNewExerciseForm() happily stringified into the group field
