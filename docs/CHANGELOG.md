@@ -77,6 +77,7 @@ Stan na 4.44.0.
 | Polityka prywatności | `polityka-prywatnosci.html` | od 4.40.0 (RODO) |
 | Schemat bazy | `supabase-schema.sql` | idempotentny, można puszczać ponownie |
 | Edge Functions | `supabase/functions/ai-proxy`, `supabase/functions/delete-account`, `supabase/functions/apple-store-token`, `supabase/functions/_shared/apple.ts` | proxy do Claude, usuwanie konta (unieważnia też token Apple), zapis tokenu Apple po logowaniu; sekrety `APPLE_TEAM_ID`/`APPLE_KEY_ID`/`APPLE_PRIVATE_KEY` |
+| Dashboard statystyk | `stats.html` → **app.mekkio.app/stats** + Edge Function `supabase/functions/admin-stats` | od 2026-10-01, prywatny: tylko zbiorcze liczby, tylko konta z sekretu `STATS_ADMIN_EMAILS`; `service_role` ma `select` na `workouts`. Goście niewidoczni, pobrania w App Store Connect |
 | Zasady ruchu / animacji | `CLAUDE.md` + tokeny `--m-*` w `:root` | od 4.42.4 |
 | Hosting (główny) | Cloudflare Workers (static assets): **app.mekkio.app** | od 2026-09-28; repo `mekkio`, build `sh scripts/build-web.sh` → `dist/` (tylko pliki apki), `wrangler.jsonc` |
 | Hosting (lustro) | GitHub Pages: `maciejmleczko-ux.github.io/thryve/` | stare ikony na pulpicie; jeden `git push` idzie do obu repo (`origin` ma dwa push URL). Inny adres = osobny localStorage |
