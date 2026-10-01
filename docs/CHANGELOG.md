@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.48.3 (2026-10-01)
-- **Liczba wersji:** 227 · **commitów:** 553
+- **Aktualna wersja:** 4.48.4 (2026-10-01)
+- **Liczba wersji:** 228 · **commitów:** 553
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -114,6 +114,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.48.4 · PATCH · 2026-10-01
+
+Bez wpisu „Co nowego”.
+
+- **X i ✓ na górze popupu logowania serii mają 40×40, jak w nagłówku Treningu** (Figma 461:7667 / 461:7673). Było 34×34 z ikonami 18/20 px; teraz `.lg-circ` ma 40 px, ikona X 28 px (ten sam rysunek co `.gy-x`), ptaszek 24 px (jak `.gy-ok`). Dotyczy też podokien „Notatka” i „Jak ćwiczyć”, które używają tych samych przycisków.
+
+**Commity:**
+
+- `380300d` 2026-10-01 — Menu: ikona Plany w ramce 32x32, tej samej wielkości co reszta (4.48.3)
+- poprawka przycisków popupu (hash w kolejnej wersji)
 
 ### 4.48.3 · PATCH · 2026-10-01
 
