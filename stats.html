@@ -33,7 +33,7 @@ button{font-family:inherit;cursor:pointer;}
 h2{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:28px 0 10px;}
 .grid{display:grid;gap:10px;grid-template-columns:repeat(3,1fr);}
 .grid.g4{grid-template-columns:repeat(4,1fr);}
-.grid.g2{grid-template-columns:1fr 1fr;}
+.grid.g2,.grid.two{grid-template-columns:1fr 1fr;}
 @media (max-width:640px){ .grid,.grid.g4{grid-template-columns:repeat(2,1fr);} .grid .wide{grid-column:span 2;} .grid.g2{grid-template-columns:1fr;} .grid.g2 .wide{grid-column:auto;} }
 .card{background:var(--card);border-radius:var(--r);padding:16px;min-width:0;}
 .k{font-size:13px;color:var(--muted);margin:0 0 6px;}
@@ -42,25 +42,22 @@ h2{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 .hint{font-size:12px;color:var(--muted);margin:8px 0 0;line-height:1.4;}
 .card.hero{background:var(--orange);color:#fff;}
 .card.hero .k,.card.hero .hint{color:rgba(255,255,255,.82);}
-.chart{display:flex;align-items:flex-end;gap:3px;height:120px;margin-top:8px;}
-.bar{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative;}
-.bar i{display:block;background:var(--orange);border-radius:4px 4px 1px 1px;min-height:2px;}
-.bar i.zero{background:var(--line);}
-.bar.today i{background:var(--ink);}
-.axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;}
 .wk{display:grid;grid-template-columns:70px 1fr 34px;align-items:center;gap:10px;font-size:13px;padding:5px 0;}
 .wk .d{color:var(--muted);}
 .wk .t{height:10px;background:var(--bg);border-radius:999px;overflow:hidden;}
 .wk .t i{display:block;height:100%;background:var(--orange);border-radius:999px;}
 .wk .n{text-align:right;font-weight:600;}
 .legend{font-size:12px;color:var(--muted);margin:0 0 6px;}
-ol.top{margin:0;padding:0;list-style:none;}
-ol.top li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;}
-ol.top li:last-child{border-bottom:none;}
-ol.top b{font-weight:600;}
 .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
 .pill{background:var(--bg);border-radius:999px;padding:5px 10px;font-size:13px;}
 .pill b{font-weight:600;}
+.seg{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--bg);margin:4px 0 14px;}
+.seg i{display:block;height:100%;}
+.seg-list{display:grid;gap:10px;}
+.seg-row{display:grid;grid-template-columns:12px 1fr auto;align-items:start;gap:10px;font-size:14px;}
+.seg-row .dot{width:12px;height:12px;border-radius:50%;margin-top:3px;}
+.seg-row b{font-weight:600;font-size:20px;line-height:1;}
+.seg-row small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
 .note{font-size:13px;color:var(--muted);line-height:1.5;margin-top:28px;}
 .note a{color:var(--ink);}
 /* logowanie */
@@ -108,65 +105,47 @@ ol.top b{font-weight:600;}
       </div>
     </header>
 
-    <h2>Kto trenuje</h2>
-    <div class="grid">
-      <div class="card hero"><p class="k">Dziś</p><div class="v" id="activeToday">–</div><p class="hint">osób zapisało trening</p></div>
-      <div class="card"><p class="k">Ostatnie 7 dni</p><div class="v" id="active7">–</div><p class="hint">różnych osób z treningiem</p></div>
-      <div class="card wide"><p class="k">Ostatnie 30 dni</p><div class="v" id="active30">–</div><p class="hint">różnych osób z treningiem</p></div>
+    <div class="grid" style="margin-top:4px">
+      <div class="card hero wide" style="grid-column:1/-1"><p class="k">Użytkownicy z kontem</p><div class="v" id="total">–</div><p class="hint">bez konta recenzenta Apple</p></div>
     </div>
 
-    <h2>Czy wracają</h2>
+    <h2>Aktualni użytkownicy</h2>
+    <div class="grid">
+      <div class="card"><p class="k">Dziś</p><div class="v" id="activeToday">–</div><p class="hint">osób użyło apki</p></div>
+      <div class="card"><p class="k">Ostatnie 7 dni</p><div class="v" id="active7">–</div><p class="hint">osób użyło apki</p></div>
+      <div class="card wide"><p class="k">Ostatnie 30 dni</p><div class="v" id="active30">–</div><p class="hint">osób użyło apki</p></div>
+    </div>
+
+    <h2>Nowi użytkownicy</h2>
+    <div class="grid two">
+      <div class="card"><p class="k">Ostatnie 7 dni</p><div class="v" id="new7">–</div><p class="hint">nowych kont</p></div>
+      <div class="card"><p class="k">Ostatnie 30 dni</p><div class="v" id="new30">–</div><p class="hint">nowych kont</p></div>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <p class="k">Jak się zapisują</p>
+      <div class="pills" id="providers"></div>
+    </div>
+
+    <h2>Regularnie powracający</h2>
     <div class="card">
+      <div class="seg" id="segBar"></div>
+      <div class="seg-list" id="segList"></div>
+      <p class="hint">Liczone z ostatnich 4 tygodni: w ilu z nich ktoś choć raz użył apki.</p>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <p class="k">Wrócili w ostatnich 7 dniach</p>
       <div class="v" id="retPct">–</div>
       <p class="hint" id="retText"></p>
     </div>
 
-    <h2>Treningi dziennie · 30 dni</h2>
-    <div class="card">
-      <div class="chart" id="daysChart"></div>
-      <div class="axis"><span id="daysFrom"></span><span>dziś</span></div>
-    </div>
-
-    <h2>Treningi</h2>
-    <div class="grid g4">
-      <div class="card"><p class="k">Dziś</p><div class="v" id="wToday">–</div></div>
-      <div class="card"><p class="k">7 dni</p><div class="v" id="w7">–</div></div>
-      <div class="card"><p class="k">30 dni</p><div class="v" id="w30">–</div></div>
-      <div class="card"><p class="k">Od początku</p><div class="v" id="wTotal">–</div></div>
-    </div>
-    <div class="grid" style="margin-top:10px">
-      <div class="card wide" style="grid-column:1/-1"><p class="k">Średni czas treningu (30 dni)</p><div class="v" id="avgDur">–</div></div>
-    </div>
-
-    <h2>Konta</h2>
-    <div class="grid">
-      <div class="card"><p class="k">Wszystkie konta</p><div class="v" id="uTotal">–</div></div>
-      <div class="card"><p class="k">Nowe · 7 dni</p><div class="v" id="u7">–</div></div>
-      <div class="card wide"><p class="k">Nowe · 30 dni</p><div class="v" id="u30">–</div></div>
-    </div>
-    <div class="card" style="margin-top:10px">
-      <p class="k">Jak się logują</p>
-      <div class="pills" id="providers"></div>
-    </div>
-
     <h2>Tydzień po tygodniu · 12 tygodni</h2>
     <div class="grid g2">
-      <div class="card wide"><p class="legend">Osoby trenujące w tygodniu</p><div id="weeksActive"></div></div>
-      <div class="card wide"><p class="legend">Nowe konta w tygodniu</p><div id="weeksSignups"></div></div>
-    </div>
-
-    <h2>Najczęstsze ćwiczenia · 30 dni</h2>
-    <div class="card"><ol class="top" id="topEx"></ol></div>
-
-    <h2>Trener AI</h2>
-    <div class="grid">
-      <div class="card"><p class="k">Pytania dziś</p><div class="v" id="aiToday">–</div></div>
-      <div class="card"><p class="k">Pytania · 30 dni</p><div class="v" id="ai30">–</div></div>
-      <div class="card wide"><p class="k">Osób · 30 dni</p><div class="v" id="aiUsers">–</div></div>
+      <div class="card wide"><p class="legend">Osoby, które użyły apki</p><div id="weeksActive"></div></div>
+      <div class="card wide"><p class="legend">Nowe konta</p><div id="weeksNew"></div></div>
     </div>
 
     <p class="note">
-      Liczą się tylko osoby z kontem w chmurze. Goście trzymają dane na telefonie, więc ich tu nie widać.<br>
+      „Użył apki” = zapisał trening, zapytał Trenera AI albo się zalogował. Liczą się tylko osoby z kontem w chmurze. Goście trzymają dane na telefonie, więc ich tu nie widać.<br>
       Pobrania apki, instalacje z TestFlight i crashe są w <a href="https://appstoreconnect.apple.com/" target="_blank" rel="noopener">App Store Connect</a>.
     </p>
   </main>
@@ -211,62 +190,48 @@ async function load(){
   }
 }
 
+const SEGMENTS = [
+  { key:'regular',    label:'Regularni',   desc:'używali apki w co najmniej 3 z 4 ostatnich tygodni', color:'#ff3300' },
+  { key:'occasional', label:'Okazjonalni', desc:'1–2 tygodnie z 4',                                   color:'#ffa390' },
+  { key:'fresh',      label:'Nowi',        desc:'konto młodsze niż 2 tygodnie, za wcześnie oceniać',  color:'#343941' },
+  { key:'dormant',    label:'Uśpieni',     desc:'brak aktywności od 4 tygodni',                         color:'#cfcbd6' },
+];
+
 function render(s){
   $('updated').textContent = 'Stan na ' + new Date(s.generatedAt).toLocaleString('pl-PL', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
+  $('total').textContent = fmt(s.total);
 
   $('activeToday').textContent = fmt(s.active.today);
   $('active7').textContent = fmt(s.active.d7);
   $('active30').textContent = fmt(s.active.d30);
 
-  const r = s.returning;
-  if(r.lastWeek > 0){
-    $('retPct').innerHTML = Math.round(r.alsoThisWeek / r.lastWeek * 100) + '<small>%</small>';
-    $('retText').textContent = r.alsoThisWeek + ' z ' + r.lastWeek + ' osób, które trenowały w zeszłym tygodniu, trenowało też w tym. Tydzień liczy się od poniedziałku, więc na początku tygodnia ta liczba jest naturalnie niższa.';
-  }else{
-    $('retPct').textContent = '–';
-    $('retText').textContent = 'W zeszłym tygodniu nikt nie trenował, więc nie ma czego porównać.';
-  }
-
-  const maxD = Math.max(1, ...s.days.map(d => d.workouts));
-  $('daysChart').innerHTML = s.days.map((d, i) => {
-    const h = d.workouts ? Math.max(4, d.workouts / maxD * 100) : 0;
-    const label = new Date(d.date + 'T12:00:00').toLocaleDateString('pl-PL', { day:'numeric', month:'short' }) + ': ' + d.workouts;
-    return '<div class="bar' + (i === s.days.length - 1 ? ' today' : '') + '" title="' + label + '"><i class="' + (d.workouts ? '' : 'zero') + '" style="height:' + (h || 2) + (h ? '%' : 'px') + '"></i></div>';
-  }).join('');
-  $('daysFrom').textContent = new Date(s.days[0].date + 'T12:00:00').toLocaleDateString('pl-PL', { day:'numeric', month:'short' });
-
-  $('wToday').textContent = fmt(s.workouts.today);
-  $('w7').textContent = fmt(s.workouts.d7);
-  $('w30').textContent = fmt(s.workouts.d30);
-  $('wTotal').textContent = fmt(s.workouts.total);
-  $('avgDur').innerHTML = s.workouts.avgDurationMin == null ? '–' : s.workouts.avgDurationMin + '<small>min</small>';
-
-  $('uTotal').textContent = fmt(s.users.total);
-  $('u7').textContent = fmt(s.users.new7);
-  $('u30').textContent = fmt(s.users.new30);
+  $('new7').textContent = fmt(s.newUsers.d7);
+  $('new30').textContent = fmt(s.newUsers.d30);
   const prov = $('providers'); prov.innerHTML = '';
-  Object.entries(s.users.providers).sort((a, b) => b[1] - a[1]).forEach(([k, n]) => {
+  Object.entries(s.providers).sort((a, b) => b[1] - a[1]).forEach(([k, n]) => {
     const el = document.createElement('span'); el.className = 'pill';
     el.textContent = (PROVIDERS[k] || k) + ' ';
     const b = document.createElement('b'); b.textContent = n; el.appendChild(b);
     prov.appendChild(el);
   });
 
-  weekRows($('weeksActive'), s.weeks, 'activeUsers');
-  weekRows($('weeksSignups'), s.weeks, 'signups');
+  const total = Math.max(1, s.total);
+  $('segBar').innerHTML = SEGMENTS.map(g => s.segments[g.key] ? '<i style="width:' + (s.segments[g.key] / total * 100) + '%;background:' + g.color + '"></i>' : '').join('');
+  $('segList').innerHTML = SEGMENTS.map(g =>
+    '<div class="seg-row"><span class="dot" style="background:' + g.color + '"></span><span>' + g.label + '<small>' + g.desc + '</small></span><b>' + s.segments[g.key] + '</b></div>'
+  ).join('');
 
-  const top = $('topEx'); top.innerHTML = '';
-  if(!s.topExercises.length){ top.innerHTML = '<li><span>Brak treningów w ostatnich 30 dniach</span></li>'; }
-  s.topExercises.forEach(e => {
-    const li = document.createElement('li');
-    const n = document.createElement('span'); n.textContent = e.name;
-    const c = document.createElement('b'); c.textContent = e.count + '×';
-    li.append(n, c); top.appendChild(li);
-  });
+  const r = s.returning;
+  if(r.prev > 0){
+    $('retPct').innerHTML = Math.round(r.back / r.prev * 100) + '<small>%</small>';
+    $('retText').textContent = r.back + ' z ' + r.prev + ' osób, które używały apki tydzień wcześniej (8–14 dni temu), wróciło w ostatnich 7 dniach.';
+  }else{
+    $('retPct').textContent = '–';
+    $('retText').textContent = 'Tydzień wcześniej nikt nie używał apki, więc nie ma czego porównać.';
+  }
 
-  $('aiToday').textContent = fmt(s.ai.today);
-  $('ai30').textContent = fmt(s.ai.d30);
-  $('aiUsers').textContent = fmt(s.ai.users30);
+  weekRows($('weeksActive'), s.weeks, 'active');
+  weekRows($('weeksNew'), s.weeks, 'newUsers');
 }
 
 function weekRows(el, weeks, key){

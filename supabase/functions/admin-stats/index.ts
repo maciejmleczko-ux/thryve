@@ -1,4 +1,5 @@
-// Mekkio — dane do prywatnego dashboardu stats.html. Zwraca WYŁĄCZNIE
+// Mekkio — dane do prywatnego dashboardu stats.html: KTO korzysta z apki
+// (aktualni, nowi, regularnie wracający), nie ile trenują. Zwraca WYŁĄCZNIE
 // zbiorcze liczby (żadnych e-maili, id ani treści konkretnych osób) i tylko
 // kontom z sekretu STATS_ADMIN_EMAILS (lista po przecinku; bez niego
 // funkcja nikogo nie wpuszcza). Ustawienie raz:
@@ -6,12 +7,18 @@
 // Wymaga `grant select on public.workouts to service_role` (patrz
 // supabase-schema.sql) — ten projekt nie nadaje go automatycznie.
 // Widać tylko konta w chmurze: goście trzymają dane na telefonie.
+//
+// „Aktywny dnia X” = tego dnia zapisał trening, użył Trenera AI albo się
+// zalogował. Okna 7/14/28 dni są kroczące (do dziś włącznie), więc liczby
+// nie spadają sztucznie w poniedziałek.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ADMIN_EMAILS = (Deno.env.get('STATS_ADMIN_EMAILS') || '')
   .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+// Konto demo dla recenzenta App Store — nie jest prawdziwym użytkownikiem.
+const EXCLUDED_EMAILS = new Set(['review@mekkio.app']);
 
 const TZ = 'Europe/Warsaw';
 const WEEKS = 12;
@@ -39,99 +46,95 @@ Deno.serve(async (req) => {
 
   try {
     const today = warsawDate(Date.now());
-    const from = shiftDate(today, -(WEEKS * 7 - 1));
+    const from = shiftDate(mondayOf(today), -7 * (WEEKS - 1));
 
     // ---- konta (auth.users przez admin API, stronicowane) ----
-    const users: { created_at: string; last_sign_in_at?: string | null; provider: string }[] = [];
+    type U = { id: string; created: string; provider: string };
+    const users: U[] = [];
+    const activity = new Map<string, Set<string>>(); // user_id -> daty aktywności
+    const touch = (id: string, d: string) => {
+      const s = activity.get(id);
+      if (s) s.add(d);
+    };
     for (let page = 1; page <= 50; page++) {
       const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 1000 });
       if (error) throw error;
-      data.users.forEach((u) => users.push({
-        created_at: u.created_at,
-        last_sign_in_at: u.last_sign_in_at,
-        provider: String(u.app_metadata?.provider || 'email'),
-      }));
+      data.users.forEach((u) => {
+        if (EXCLUDED_EMAILS.has((u.email || '').toLowerCase())) return;
+        users.push({ id: u.id, created: warsawDate(Date.parse(u.created_at)), provider: String(u.app_metadata?.provider || 'email') });
+        activity.set(u.id, new Set());
+        if (u.last_sign_in_at) touch(u.id, warsawDate(Date.parse(u.last_sign_in_at)));
+      });
       if (data.users.length < 1000) break;
     }
 
-    // ---- treningi z ostatnich 12 tygodni + łączna liczba ----
-    const rows: { user_id: string; date: string; duration_min: number | null; exercises: unknown }[] = [];
+    // ---- aktywność: treningi + Trener AI z ostatnich 12 tygodni ----
     for (let off = 0; ; off += 1000) {
       const { data, error } = await supabase
-        .from('workouts')
-        .select('user_id, date, duration_min, exercises')
-        .gte('date', from)
-        .order('date', { ascending: true })
-        .range(off, off + 999);
+        .from('workouts').select('user_id, date').gte('date', from)
+        .order('date', { ascending: true }).range(off, off + 999);
       if (error) throw error;
-      rows.push(...(data || []));
+      (data || []).forEach((r) => touch(r.user_id, r.date));
       if (!data || data.length < 1000) break;
     }
-    const { count: workoutsTotal, error: cntErr } = await supabase
-      .from('workouts').select('id', { count: 'exact', head: true });
-    if (cntErr) throw cntErr;
-
-    // ---- Trener AI, ostatnie 30 dni ----
-    const aiFrom = new Date(Date.now() - 30 * DAY_MS).toISOString();
     const { data: aiRows, error: aiErr } = await supabase
-      .from('ai_usage').select('user_id, created_at').gte('created_at', aiFrom).limit(20000);
+      .from('ai_usage').select('user_id, created_at')
+      .gte('created_at', new Date(Date.parse(from + 'T00:00:00Z') - DAY_MS).toISOString()).limit(50000);
     if (aiErr) throw aiErr;
+    (aiRows || []).forEach((r) => touch(r.user_id, warsawDate(Date.parse(r.created_at))));
 
     // ---- liczenie ----
+    const activeBetween = (id: string, a: string, b: string) => {
+      for (const d of activity.get(id) || []) if (d >= a && d <= b) return true;
+      return false;
+    };
+    const countActive = (a: string, b: string) => users.filter((u) => activeBetween(u.id, a, b)).length;
+
     const d7 = shiftDate(today, -6), d30 = shiftDate(today, -29);
-    const activeIn = (since: string) => new Set(rows.filter((r) => r.date >= since).map((r) => r.user_id)).size;
+
+    // regularność: w ilu z 4 ostatnich kroczących tygodni ktoś był aktywny
+    const segments = { regular: 0, occasional: 0, dormant: 0, fresh: 0 };
+    users.forEach((u) => {
+      let weeksActive = 0;
+      for (let w = 0; w < 4; w++) {
+        const b = shiftDate(today, -7 * w), a = shiftDate(b, -6);
+        if (activeBetween(u.id, a, b)) weeksActive++;
+      }
+      if (u.created > shiftDate(today, -14)) segments.fresh++;         // konto młodsze niż 2 tyg. — za wcześnie oceniać
+      else if (weeksActive >= 3) segments.regular++;
+      else if (weeksActive >= 1) segments.occasional++;
+      else segments.dormant++;
+    });
+
+    // wracający: aktywni 8–14 dni temu i znowu w ostatnich 7 dniach
+    const prevA = shiftDate(today, -13), prevB = shiftDate(today, -7);
+    const prev = users.filter((u) => activeBetween(u.id, prevA, prevB));
+    const returning = { prev: prev.length, back: prev.filter((u) => activeBetween(u.id, d7, today)).length };
 
     const weekStart = mondayOf(today);
     const weeks = [];
     for (let i = WEEKS - 1; i >= 0; i--) {
       const ws = shiftDate(weekStart, -7 * i), we = shiftDate(ws, 6);
-      const inWeek = rows.filter((r) => r.date >= ws && r.date <= we);
-      const signups = users.filter((u) => { const d = warsawDate(Date.parse(u.created_at)); return d >= ws && d <= we; }).length;
-      weeks.push({ start: ws, workouts: inWeek.length, activeUsers: new Set(inWeek.map((r) => r.user_id)).size, signups });
-    }
-
-    // wracający: trenowali w poprzednim tygodniu i też w bieżącym
-    const lastWeekStart = shiftDate(weekStart, -7), lastWeekEnd = shiftDate(weekStart, -1);
-    const prevUsers = new Set(rows.filter((r) => r.date >= lastWeekStart && r.date <= lastWeekEnd).map((r) => r.user_id));
-    const thisUsers = new Set(rows.filter((r) => r.date >= weekStart).map((r) => r.user_id));
-    const returning = [...prevUsers].filter((u) => thisUsers.has(u)).length;
-
-    const days = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = shiftDate(today, -i);
-      days.push({ date: d, workouts: rows.filter((r) => r.date === d).length });
-    }
-
-    const exCount = new Map<string, number>();
-    rows.filter((r) => r.date >= d30).forEach((r) => {
-      (Array.isArray(r.exercises) ? r.exercises : []).forEach((e: { name?: unknown }) => {
-        if (e && typeof e.name === 'string' && e.name) exCount.set(e.name, (exCount.get(e.name) || 0) + 1);
+      weeks.push({
+        start: ws,
+        active: countActive(ws, we),
+        newUsers: users.filter((u) => u.created >= ws && u.created <= we).length,
       });
-    });
-    const topExercises = [...exCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5)
-      .map(([name, count]) => ({ name, count }));
-
-    const durs = rows.filter((r) => r.date >= d30 && r.duration_min && r.duration_min > 0).map((r) => r.duration_min as number);
-    const avgDurationMin = durs.length ? Math.round(durs.reduce((a, b) => a + b, 0) / durs.length) : null;
+    }
 
     const providers: Record<string, number> = {};
     users.forEach((u) => { providers[u.provider] = (providers[u.provider] || 0) + 1; });
 
-    const createdSince = (n: number) => users.filter((u) => Date.parse(u.created_at) >= Date.now() - n * DAY_MS).length;
-    const ai = aiRows || [];
-    const aiToday = ai.filter((r) => warsawDate(Date.parse(r.created_at)) === today).length;
-
     return json({
       generatedAt: new Date().toISOString(),
       today,
-      users: { total: users.length, new7: createdSince(7), new30: createdSince(30), providers },
-      active: { today: activeIn(today), d7: activeIn(d7), d30: activeIn(d30) },
-      workouts: { total: workoutsTotal ?? 0, today: rows.filter((r) => r.date === today).length, d7: rows.filter((r) => r.date >= d7).length, d30: rows.filter((r) => r.date >= d30).length, avgDurationMin },
-      returning: { lastWeek: prevUsers.size, alsoThisWeek: returning },
-      ai: { today: aiToday, d30: ai.length, users30: new Set(ai.map((r) => r.user_id)).size },
+      total: users.length,
+      active: { today: countActive(today, today), d7: countActive(d7, today), d30: countActive(d30, today) },
+      newUsers: { d7: users.filter((u) => u.created >= d7).length, d30: users.filter((u) => u.created >= d30).length },
+      segments,
+      returning,
       weeks,
-      days,
-      topExercises,
+      providers,
     });
   } catch (e) {
     console.error('admin-stats failed', e);
