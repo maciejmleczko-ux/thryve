@@ -6529,7 +6529,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.48.1";
+const APP_VERSION = "4.48.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -8726,8 +8726,17 @@ const EXERCISE_HOWTO = {"Chest Press":{"setup":"Ustaw siedzisko tak, żeby uchwy
 const BARBELL_EXERCISES = new Set(['Barbell Deadlift','Barbell Curl','Barbell Bench Press','Barbell Back Squat','Hip Thrust']);
 function weightStepFor(ex){ return BARBELL_EXERCISES.has(ex && ex.name) ? 1.25 : 2.5; }
 function parseRestSeconds(str){
-  const nums = (String(str||'').match(/\d+/g) || []).map(Number);
-  return nums.length ? Math.max(...nums) : 90;
+  const s = String(str||'');
+  const nums = (s.match(/\d+/g) || []).map(Number);
+  if(!nums.length) return 90;
+  // Built-in exercises write rest as "90-120s"/"60s" (already seconds), but
+  // EXECUTION_VERSIONS (periodization, see resolvePeriodizedVersion) writes
+  // "2-3 min"/"1 min" — the regex above ignored the unit and read "2-3 min"
+  // as 3 SECONDS, so a periodized exercise's rest countdown ended almost
+  // instantly instead of running ~2-3 minutes (Maciej, 2026-10-01: "po 1-2
+  // sekundach kończyło się").
+  const mult = /min/i.test(s) ? 60 : 1;
+  return Math.max(...nums) * mult;
 }
 function fmtKgLocal(n){ return String(Math.round(n * 100) / 100).replace('.', LANG==='en' ? '.' : ','); }
 function fmtRestClock(sec){ sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec/60) + ':' + String(sec%60).padStart(2,'0'); }

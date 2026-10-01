@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.48.1 (2026-09-30)
-- **Liczba wersji:** 225 · **commitów:** 552
+- **Aktualna wersja:** 4.48.2 (2026-10-01)
+- **Liczba wersji:** 226 · **commitów:** 553
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -114,6 +114,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.48.2 · PATCH · 2026-10-01
+
+Bez wpisu „Co nowego” (poprawka).
+
+- **Odliczanie przerwy przy periodyzacji kończyło się po 1-2 s.** `parseRestSeconds()` brał same cyfry z pola `rest` i traktował je jako sekundy — działało dla wbudowanych ćwiczeń ("90-120s"), ale poziomy periodyzacji w `EXECUTION_VERSIONS` mają ten czas zapisany jako "2-3 min" / "1-2 min" / "1 min", więc "2-3 min" wychodziło jako 3 sekundy. Funkcja rozpoznaje teraz "min" w tekście i mnoży przez 60.
+
+**Commity:**
+
+- poprawka `parseRestSeconds()` — odliczanie przerwy przy periodyzacji (hash w kolejnej wersji)
 
 ### 4.48.1 · PATCH · 2026-09-30
 
