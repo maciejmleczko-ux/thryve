@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.48.2 (2026-10-01)
-- **Liczba wersji:** 226 · **commitów:** 553
+- **Aktualna wersja:** 4.48.3 (2026-10-01)
+- **Liczba wersji:** 227 · **commitów:** 553
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -114,6 +114,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.48.3 · PATCH · 2026-10-01
+
+Bez wpisu „Co nowego”.
+
+- **Ikona „Plany” w dolnym menu nie jest już większa od reszty.** Eksport z Figmy był przycięty do samego rysunku (`viewBox 0 0 21.5 26.5`), więc w polu 24 px rysunek zajmował całą wysokość (~24 px), a ikony Phosphor obok mają margines siatki 256 (~18–19 px). `viewBox` to teraz `-5.25 -2.75 32 32`, czyli rysunek wyśrodkowany w ramce 32×32 jak warstwa ClipboardText w Figmie. Po zmianie: Plany 16×20 px, pozostałe 18×19 px.
+
+**Commity:**
+
+- `4744140` 2026-10-01 — Napraw odliczanie przerwy przy periodyzacji (kończyło się po 1-2 s)
+- `05d7618` 2026-10-01 — Build 24: wysłany do App Store Connect (zawiera poprawkę timera przerwy)
+- poprawka ikony Plany (hash w kolejnej wersji)
 
 ### 4.48.2 · PATCH · 2026-10-01
 
