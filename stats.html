@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#eceaf1">
+<title>Mekkio · Statystyki</title>
+<link rel="icon" href="favicon.png">
+<link href="vendor/geist/geist.css" rel="stylesheet">
+<!-- Prywatny dashboard właściciela. Dane liczy Edge Function admin-stats:
+     tylko zbiorcze liczby i tylko dla kont z sekretu STATS_ADMIN_EMAILS.
+     Ta sama domena co apka, więc sesja z app.mekkio.app działa od razu. -->
+<script src="vendor/supabase-2.117.2.js"></script>
+<style>
+:root{
+  --orange:#ff3300; --ink:#343941; --muted:#7d7c83; --bg:#eceaf1; --card:#fdfbff; --line:#e3dfea;
+  --soft:#ffe2d9; --r:16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;}
+body{padding:calc(20px + env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom));}
+.wrap{max-width:880px;margin:0 auto;}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;}
+h1{margin:0;font-size:22px;font-weight:600;letter-spacing:-.01em;}
+h1 span{color:var(--orange);}
+.sub{margin:2px 0 0;font-size:13px;color:var(--muted);}
+.btns{display:flex;gap:8px;flex:none;}
+button{font-family:inherit;cursor:pointer;}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:500;}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:#fff;}
+.btn:disabled{opacity:.5;cursor:default;}
+h2{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:28px 0 10px;}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(3,1fr);}
+.grid.g4{grid-template-columns:repeat(4,1fr);}
+.grid.g2{grid-template-columns:1fr 1fr;}
+@media (max-width:640px){ .grid,.grid.g4{grid-template-columns:repeat(2,1fr);} .grid .wide{grid-column:span 2;} .grid.g2{grid-template-columns:1fr;} .grid.g2 .wide{grid-column:auto;} }
+.card{background:var(--card);border-radius:var(--r);padding:16px;min-width:0;}
+.k{font-size:13px;color:var(--muted);margin:0 0 6px;}
+.v{font-size:32px;font-weight:600;line-height:1;letter-spacing:-.02em;}
+.v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px;}
+.hint{font-size:12px;color:var(--muted);margin:8px 0 0;line-height:1.4;}
+.card.hero{background:var(--orange);color:#fff;}
+.card.hero .k,.card.hero .hint{color:rgba(255,255,255,.82);}
+.chart{display:flex;align-items:flex-end;gap:3px;height:120px;margin-top:8px;}
+.bar{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative;}
+.bar i{display:block;background:var(--orange);border-radius:4px 4px 1px 1px;min-height:2px;}
+.bar i.zero{background:var(--line);}
+.bar.today i{background:var(--ink);}
+.axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;}
+.wk{display:grid;grid-template-columns:70px 1fr 34px;align-items:center;gap:10px;font-size:13px;padding:5px 0;}
+.wk .d{color:var(--muted);}
+.wk .t{height:10px;background:var(--bg);border-radius:999px;overflow:hidden;}
+.wk .t i{display:block;height:100%;background:var(--orange);border-radius:999px;}
+.wk .n{text-align:right;font-weight:600;}
+.legend{font-size:12px;color:var(--muted);margin:0 0 6px;}
+ol.top{margin:0;padding:0;list-style:none;}
+ol.top li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;}
+ol.top li:last-child{border-bottom:none;}
+ol.top b{font-weight:600;}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.pill{background:var(--bg);border-radius:999px;padding:5px 10px;font-size:13px;}
+.pill b{font-weight:600;}
+.note{font-size:13px;color:var(--muted);line-height:1.5;margin-top:28px;}
+.note a{color:var(--ink);}
+/* logowanie */
+.login{max-width:360px;margin:12vh auto 0;}
+.login .card{padding:22px;}
+.login p{font-size:14px;color:var(--muted);margin:0 0 16px;line-height:1.45;}
+.login input{width:100%;font:inherit;font-size:15px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;margin-bottom:8px;color:var(--ink);}
+.login .btn{width:100%;padding:12px;font-size:15px;margin-top:6px;}
+.login .or{text-align:center;font-size:12px;color:var(--muted);margin:14px 0 6px;}
+.msg{font-size:14px;margin-top:12px;color:var(--orange);min-height:1em;}
+.state{text-align:center;color:var(--muted);font-size:14px;margin-top:20vh;}
+[hidden]{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="loginView" class="login" hidden>
+    <div class="card">
+      <h1>Mekkio <span>·</span> Statystyki</h1>
+      <p class="sub" style="margin-bottom:18px">Zaloguj się kontem właściciela.</p>
+      <form id="loginForm">
+        <input id="email" type="email" autocomplete="username" placeholder="E-mail" required>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Hasło" required>
+        <button class="btn primary" type="submit">Zaloguj</button>
+      </form>
+      <div class="or">albo</div>
+      <button class="btn" type="button" data-oauth="apple">Zaloguj przez Apple</button>
+      <button class="btn" type="button" data-oauth="google">Zaloguj przez Google</button>
+      <div class="msg" id="loginMsg"></div>
+    </div>
+  </section>
+
+  <div id="stateView" class="state">Ładowanie…</div>
+
+  <main id="dashView" hidden>
+    <header>
+      <div>
+        <h1>Mekkio <span>·</span> Statystyki</h1>
+        <p class="sub" id="updated"></p>
+      </div>
+      <div class="btns">
+        <button class="btn" id="refreshBtn" type="button">Odśwież</button>
+        <button class="btn" id="logoutBtn" type="button">Wyloguj</button>
+      </div>
+    </header>
+
+    <h2>Kto trenuje</h2>
+    <div class="grid">
+      <div class="card hero"><p class="k">Dziś</p><div class="v" id="activeToday">–</div><p class="hint">osób zapisało trening</p></div>
+      <div class="card"><p class="k">Ostatnie 7 dni</p><div class="v" id="active7">–</div><p class="hint">różnych osób z treningiem</p></div>
+      <div class="card wide"><p class="k">Ostatnie 30 dni</p><div class="v" id="active30">–</div><p class="hint">różnych osób z treningiem</p></div>
+    </div>
+
+    <h2>Czy wracają</h2>
+    <div class="card">
+      <div class="v" id="retPct">–</div>
+      <p class="hint" id="retText"></p>
+    </div>
+
+    <h2>Treningi dziennie · 30 dni</h2>
+    <div class="card">
+      <div class="chart" id="daysChart"></div>
+      <div class="axis"><span id="daysFrom"></span><span>dziś</span></div>
+    </div>
+
+    <h2>Treningi</h2>
+    <div class="grid g4">
+      <div class="card"><p class="k">Dziś</p><div class="v" id="wToday">–</div></div>
+      <div class="card"><p class="k">7 dni</p><div class="v" id="w7">–</div></div>
+      <div class="card"><p class="k">30 dni</p><div class="v" id="w30">–</div></div>
+      <div class="card"><p class="k">Od początku</p><div class="v" id="wTotal">–</div></div>
+    </div>
+    <div class="grid" style="margin-top:10px">
+      <div class="card wide" style="grid-column:1/-1"><p class="k">Średni czas treningu (30 dni)</p><div class="v" id="avgDur">–</div></div>
+    </div>
+
+    <h2>Konta</h2>
+    <div class="grid">
+      <div class="card"><p class="k">Wszystkie konta</p><div class="v" id="uTotal">–</div></div>
+      <div class="card"><p class="k">Nowe · 7 dni</p><div class="v" id="u7">–</div></div>
+      <div class="card wide"><p class="k">Nowe · 30 dni</p><div class="v" id="u30">–</div></div>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <p class="k">Jak się logują</p>
+      <div class="pills" id="providers"></div>
+    </div>
+
+    <h2>Tydzień po tygodniu · 12 tygodni</h2>
+    <div class="grid g2">
+      <div class="card wide"><p class="legend">Osoby trenujące w tygodniu</p><div id="weeksActive"></div></div>
+      <div class="card wide"><p class="legend">Nowe konta w tygodniu</p><div id="weeksSignups"></div></div>
+    </div>
+
+    <h2>Najczęstsze ćwiczenia · 30 dni</h2>
+    <div class="card"><ol class="top" id="topEx"></ol></div>
+
+    <h2>Trener AI</h2>
+    <div class="grid">
+      <div class="card"><p class="k">Pytania dziś</p><div class="v" id="aiToday">–</div></div>
+      <div class="card"><p class="k">Pytania · 30 dni</p><div class="v" id="ai30">–</div></div>
+      <div class="card wide"><p class="k">Osób · 30 dni</p><div class="v" id="aiUsers">–</div></div>
+    </div>
+
+    <p class="note">
+      Liczą się tylko osoby z kontem w chmurze. Goście trzymają dane na telefonie, więc ich tu nie widać.<br>
+      Pobrania apki, instalacje z TestFlight i crashe są w <a href="https://appstoreconnect.apple.com/" target="_blank" rel="noopener">App Store Connect</a>.
+    </p>
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://ajxsguyjewxzmnfphjze.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_GV1qHi1JDzQgVbz6c5OGgw_b7UGktTZ';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => (n == null ? '–' : Number(n).toLocaleString('pl-PL'));
+const PROVIDERS = { email: 'E-mail', apple: 'Apple', google: 'Google' };
+
+function show(view, text){
+  $('loginView').hidden = view !== 'login';
+  $('dashView').hidden = view !== 'dash';
+  $('stateView').hidden = view !== 'state';
+  if(text) $('stateView').textContent = text;
+}
+
+async function load(){
+  const { data } = await sb.auth.getSession();
+  const session = data && data.session;
+  if(!session){ show('login'); return; }
+  $('refreshBtn').disabled = true;
+  try{
+    const res = await fetch(SUPABASE_URL + '/functions/v1/admin-stats', {
+      method: 'POST',
+      headers: { 'authorization': 'Bearer ' + session.access_token, 'apikey': SUPABASE_ANON_KEY, 'content-type': 'application/json' },
+      body: '{}'
+    });
+    if(res.status === 401){ await sb.auth.signOut(); show('login'); return; }
+    if(res.status === 403){ show('login'); $('loginMsg').textContent = 'To konto (' + (session.user.email || 'bez e-maila') + ') nie ma dostępu do statystyk.'; return; }
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    render(await res.json());
+    show('dash');
+  }catch(e){
+    console.error(e);
+    show('state', 'Nie udało się pobrać statystyk. Spróbuj odświeżyć za chwilę.');
+  }finally{
+    $('refreshBtn').disabled = false;
+  }
+}
+
+function render(s){
+  $('updated').textContent = 'Stan na ' + new Date(s.generatedAt).toLocaleString('pl-PL', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
+
+  $('activeToday').textContent = fmt(s.active.today);
+  $('active7').textContent = fmt(s.active.d7);
+  $('active30').textContent = fmt(s.active.d30);
+
+  const r = s.returning;
+  if(r.lastWeek > 0){
+    $('retPct').innerHTML = Math.round(r.alsoThisWeek / r.lastWeek * 100) + '<small>%</small>';
+    $('retText').textContent = r.alsoThisWeek + ' z ' + r.lastWeek + ' osób, które trenowały w zeszłym tygodniu, trenowało też w tym. Tydzień liczy się od poniedziałku, więc na początku tygodnia ta liczba jest naturalnie niższa.';
+  }else{
+    $('retPct').textContent = '–';
+    $('retText').textContent = 'W zeszłym tygodniu nikt nie trenował, więc nie ma czego porównać.';
+  }
+
+  const maxD = Math.max(1, ...s.days.map(d => d.workouts));
+  $('daysChart').innerHTML = s.days.map((d, i) => {
+    const h = d.workouts ? Math.max(4, d.workouts / maxD * 100) : 0;
+    const label = new Date(d.date + 'T12:00:00').toLocaleDateString('pl-PL', { day:'numeric', month:'short' }) + ': ' + d.workouts;
+    return '<div class="bar' + (i === s.days.length - 1 ? ' today' : '') + '" title="' + label + '"><i class="' + (d.workouts ? '' : 'zero') + '" style="height:' + (h || 2) + (h ? '%' : 'px') + '"></i></div>';
+  }).join('');
+  $('daysFrom').textContent = new Date(s.days[0].date + 'T12:00:00').toLocaleDateString('pl-PL', { day:'numeric', month:'short' });
+
+  $('wToday').textContent = fmt(s.workouts.today);
+  $('w7').textContent = fmt(s.workouts.d7);
+  $('w30').textContent = fmt(s.workouts.d30);
+  $('wTotal').textContent = fmt(s.workouts.total);
+  $('avgDur').innerHTML = s.workouts.avgDurationMin == null ? '–' : s.workouts.avgDurationMin + '<small>min</small>';
+
+  $('uTotal').textContent = fmt(s.users.total);
+  $('u7').textContent = fmt(s.users.new7);
+  $('u30').textContent = fmt(s.users.new30);
+  const prov = $('providers'); prov.innerHTML = '';
+  Object.entries(s.users.providers).sort((a, b) => b[1] - a[1]).forEach(([k, n]) => {
+    const el = document.createElement('span'); el.className = 'pill';
+    el.textContent = (PROVIDERS[k] || k) + ' ';
+    const b = document.createElement('b'); b.textContent = n; el.appendChild(b);
+    prov.appendChild(el);
+  });
+
+  weekRows($('weeksActive'), s.weeks, 'activeUsers');
+  weekRows($('weeksSignups'), s.weeks, 'signups');
+
+  const top = $('topEx'); top.innerHTML = '';
+  if(!s.topExercises.length){ top.innerHTML = '<li><span>Brak treningów w ostatnich 30 dniach</span></li>'; }
+  s.topExercises.forEach(e => {
+    const li = document.createElement('li');
+    const n = document.createElement('span'); n.textContent = e.name;
+    const c = document.createElement('b'); c.textContent = e.count + '×';
+    li.append(n, c); top.appendChild(li);
+  });
+
+  $('aiToday').textContent = fmt(s.ai.today);
+  $('ai30').textContent = fmt(s.ai.d30);
+  $('aiUsers').textContent = fmt(s.ai.users30);
+}
+
+function weekRows(el, weeks, key){
+  const max = Math.max(1, ...weeks.map(w => w[key]));
+  el.innerHTML = weeks.slice().reverse().map((w, i) => {
+    const d = new Date(w.start + 'T12:00:00').toLocaleDateString('pl-PL', { day:'numeric', month:'short' });
+    return '<div class="wk"><span class="d">' + (i === 0 ? 'ten tydz.' : d) + '</span><span class="t"><i style="width:' + (w[key] / max * 100) + '%"></i></span><span class="n">' + w[key] + '</span></div>';
+  }).join('');
+}
+
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('loginMsg').textContent = '';
+  const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });
+  if(error){ $('loginMsg').textContent = 'Nie udało się zalogować. Sprawdź e-mail i hasło.'; return; }
+  show('state', 'Ładowanie…'); load();
+});
+document.querySelectorAll('[data-oauth]').forEach(b => b.addEventListener('click', () => {
+  sb.auth.signInWithOAuth({ provider: b.dataset.oauth, options: { redirectTo: location.origin + location.pathname } });
+}));
+$('refreshBtn').addEventListener('click', load);
+$('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); show('login'); });
+sb.auth.onAuthStateChange((event) => { if(event === 'SIGNED_IN' && $('dashView').hidden && $('loginView').hidden === false) load(); });
+
+load();
+</script>
+</body>
+</html>

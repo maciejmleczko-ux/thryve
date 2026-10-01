@@ -216,3 +216,6 @@ grant select, insert on public.ai_usage to service_role;
 -- delete: ai-proxy rezerwuje wiersz PRZED wywołaniem AI (odporność na
 -- równoległe zapytania) i oddaje go, gdy wywołanie się nie uda.
 grant delete on public.ai_usage to service_role;
+-- admin-stats (prywatny dashboard stats.html) liczy zbiorcze statystyki
+-- treningów — tylko odczyt, tylko service_role.
+grant select on public.workouts to service_role;
