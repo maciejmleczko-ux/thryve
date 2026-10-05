@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.48.4 (2026-10-01)
-- **Liczba wersji:** 228 · **commitów:** 553
+- **Aktualna wersja:** 4.48.5 (2026-10-05)
+- **Liczba wersji:** 229 · **commitów:** 553
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -115,6 +115,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.48.5 · PATCH · 2026-10-05
+
+Bez wpisu „Co nowego”.
+
+- **Ikony dolnego menu z jednej biblioteki, jak w Figmie** (479:11951). Dom, kalendarz i wykres były Phosphor Regular (grubsza linia), a Plany z eksportu Figmy w Phosphor Light, więc pasek wyglądał na zbiór z dwóch bibliotek. Teraz wszystkie cztery to Phosphor Light wyeksportowane z komponentów Figmy (373:4297/4300/4306/4309), przycięte do tego samego okna 32×32 (`viewBox 10 10 32 32`), jako osobne klucze `nav-house` / `nav-plans` / `nav-calendar` / `nav-chart` (ikony `house` / `calendar-dots` / `chart-line-up` w innych miejscach apki bez zmian). Pole ikony 23,09 px zamiast 24, czyli skala komponentu 52 → 37,52 z Figmy. Wymiary rysunków zgadzają się z Figmą co do 0,1 px.
+
+**Commity:**
+
+- `605e7c8` 2026-10-01 — iOS: zgoda na zapis do Zdjęć, wraca „Zapisz obraz” przy udostępnianiu treningu
+- `07a2ca8` 2026-10-01 — Build 25 (4.48.4)
+- ikony menu z Figmy (hash w kolejnej wersji)
 
 ### 4.48.4 · PATCH · 2026-10-01
 
