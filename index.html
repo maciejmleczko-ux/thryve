@@ -2350,14 +2350,19 @@ body.pev2-bg{background:var(--m-panel);}
   /* Floating sheets, concentric with the screen corner (Maciej, 2026-10-05):
      on Face ID iPhones (home indicator => safe-area-inset-bottom ~34px) the
      sheet floats 10px above the bottom edge and its bottom corners are
-     the screen's corner radius minus that gap (17 Pro: 62 - 10 = 52px), so
-     the 10px gap stays 10px around the curve too. A single 45px missed on
-     the 17 Pro: the corner pinched to ~7px. With no home indicator
+     the screen's corner radius x --m-screen-r-k minus that gap (17 Pro:
+     62 x 1.13 - 10 = 60px), so the 10px gap stays even around the curve.
+     A fixed 45px pinched the 17 Pro's corner to ~7px. With no home indicator
      (iPhone SE, Safari with its bottom toolbar, desktop) env() is 0, so the
      gap and bottom radius collapse to 0 and the sheet sits flush as before. */
   --m-sheet-gap:min(10px, env(safe-area-inset-bottom));
   --m-screen-r:55px; /* overwritten per model by the screen-size lookup in the first <script> */
-  --m-sheet-r-bottom:min(calc(var(--m-screen-r) - var(--m-sheet-gap)), calc(env(safe-area-inset-bottom) * 2));}
+  /* iOS screen corners are a continuous "squircle", not a circular arc, so a
+     CSS circle reads concentric only when it's ~13% larger than the spec
+     radius. Tuned by eye on Maciej's 17 Pro (spec 62 -> 60px sheet corner
+     looked even; 2026-10-05). */
+  --m-screen-r-k:1.13;
+  --m-sheet-r-bottom:min(calc(var(--m-screen-r) * var(--m-screen-r-k) - var(--m-sheet-gap)), calc(env(safe-area-inset-bottom) * 2));}
 html.gymv2-bg{background:#e2e2e1;}
 body.gymv2-bg{background:transparent;}
 .gy-bg{display:none;position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;}
