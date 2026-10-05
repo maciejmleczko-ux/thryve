@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.48.6 (2026-10-05)
-- **Liczba wersji:** 230 · **commitów:** 553
+- **Aktualna wersja:** 4.48.7 (2026-10-05)
+- **Liczba wersji:** 231 · **commitów:** 553
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -115,6 +115,20 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.48.7 · PATCH · 2026-10-05
+
+Bez wpisu „Co nowego”.
+
+- **Nowy suwak ciężaru wg Figmy 479:12000.** Układ: liczby u góry, pod nimi kreski (1,9 × 22,65 px, zaokrąglone), pod spodem mały trójkąt wskazujący środek zamiast pionowej kreski. Kreski do aktualnej wartości pomarańczowe, za nią `#FFC2B2`; liczby za wartością na 70%. Liczba co 5 kg = 47,2 px, więc widać 7 wartości. Kreski rysowane zawsze co 1,25 kg (`LG_TICK_KG`), zatrzymują się tylko te na wielokrotności kroku ćwiczenia (2,5 kg → co druga). Figma ma kreskę co 1 kg, ale przy sztandze krok 1,25 kg nie trafiałby w kreski. Skrajne ~3–4 kreski i liczby z obu stron zanikają i lekko się rozmywają (maska + `backdrop-filter`), jak suwak timera w iOS. Kolorowanie przelicza tylko zmieniony odcinek kresek.
+- **Popup logowania:** ikona „Jak ćwiczyć” przeniesiona do górnego paska obok ✓ (koło 38,76 px, `#DCDCDC`, ikona 20,74 px, odstęp 8 px); tytuł paska zwęża się, żeby jej nie najechać. Przycisk notatki 28 px z ikoną 15 px (było 32/16). X w pomarańczowym kółku ma ciemną ikonę, jak w Treningu.
+
+**Commity:**
+
+- `28f3a84` 2026-10-05 — Popupy 10 px nad dołem z koncentrycznymi rogami 45 px na iPhone'ach z Face ID (4.48.6)
+- `24b2fd0` 2026-10-05 — Popupy: dolny promień = promień rogu ekranu − 10 px, według modelu iPhone'a (4.48.6)
+- `57194b8` 2026-10-05 — Popupy: mnożnik 1,13 na kształt rogów iPhone'a, 60 px na 17 Pro dobrane na oko (4.48.6)
+- nowy suwak i pasek popupu (hash w kolejnej wersji)
 
 ### 4.48.6 · PATCH · 2026-10-05
 
