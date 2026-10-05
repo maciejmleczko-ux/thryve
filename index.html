@@ -2460,7 +2460,7 @@ body.gymv2-bg .gy-bg{display:block;}
    ticks under them, a small up-pointing triangle under the centre. Ticks up
    to the current value are solid orange, the ones past it pale; labels past
    it at 70%. The outer ~3-4 ticks and edge labels sink into a soft blur +
-   fade like the iOS timer ruler. 5 kg between labels = 47.2px (Figma). */
+   fade like the iOS timer ruler. 4 ticks between labels = 47.2px (Figma). */
 .lg-ruler{--lg-tw:11.8px;position:relative;width:calc(100% - 28px);max-width:297px;margin:0 auto;height:58px;}
 .lg-ruler-ind{position:absolute;left:50%;top:50px;width:10.4px;height:7.6px;margin-left:-5.2px;color:var(--m-orange);pointer-events:none;z-index:2;}
 .lg-ruler-ind svg{display:block;width:100%;height:100%;}
@@ -2471,8 +2471,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-ruler::before{left:0;-webkit-mask-image:linear-gradient(90deg,#000,transparent);mask-image:linear-gradient(90deg,#000,transparent);}
 .lg-ruler::after{right:0;-webkit-mask-image:linear-gradient(270deg,#000,transparent);mask-image:linear-gradient(270deg,#000,transparent);}
 .lg-ruler-sp{flex:0 0 calc(50% - var(--lg-tw) / 2);height:1px;}
-.lg-tick{position:relative;flex:none;width:var(--lg-tw);height:42px;display:flex;align-items:flex-end;justify-content:center;}
-.lg-tick.snap{scroll-snap-align:center;}
+.lg-tick{position:relative;flex:none;width:var(--lg-tw);height:42px;scroll-snap-align:center;display:flex;align-items:flex-end;justify-content:center;}
 .lg-tick i{display:block;width:1.9px;height:22.65px;border-radius:.95px;background:var(--m-orange);}
 .lg-tick.ahead i{background:#ffc2b2;}
 .lg-tick em{position:absolute;top:0;left:50%;transform:translateX(-50%);font-style:normal;font-size:var(--m-fs-2xs);line-height:12px;color:var(--m-ink);white-space:nowrap;}
@@ -8843,18 +8842,17 @@ function restPop(){
 }
 
 /* ---- ruler (horizontal, scroll-snap, value ↔ scrollLeft on a fixed tick width) ----
-   Ticks are always drawn every 1.25 kg (LG_TICK_KG) so barbell and dumbbell
-   rulers look the same; only ticks on a multiple of the exercise's step
-   snap (2.5 kg exercises snap to every other tick). Label every 5 kg. */
-const LG_TICK_W = 11.8, LG_TICK_KG = 1.25, LG_MAX_KG = 400;
+   One tick = one selectable step (barbell 1.25 kg, everything else 2.5 kg),
+   so every tick under the triangle is exactly the number shown above it.
+   A label every 4 ticks (5 kg / 10 kg) keeps Figma's 47.2px label rhythm. */
+const LG_TICK_W = 11.8, LG_MAX_KG = 400;
 const LG_RULER_IND = '<svg viewBox="0 0 9 8" fill="currentColor"><path d="M8.87 6.15c.37.63-.08 1.43-.82 1.43H.95C.22 7.58-.24 6.78.13 6.15L3.48.47A.94.94 0 0 1 4.3 0h.4c.34 0 .65.18.82.47l3.35 5.68Z"/></svg>';
 function lgBuildRuler(host, step, value, onUser){
-  const n = Math.round(LG_MAX_KG / LG_TICK_KG);
-  const k = Math.max(1, Math.round(step / LG_TICK_KG));   // visual ticks per step
+  const n = Math.round(LG_MAX_KG / step);
   let html = '<div class="lg-ruler-sp"></div>';
   for(let i = 0; i <= n; i++){
     const label = i % 4 === 0;
-    html += `<div class="lg-tick${i % k === 0 ? ' snap' : ''}">${label?`<em>${fmtKgLocal(i*LG_TICK_KG)}</em>`:''}<i></i></div>`;
+    html += `<div class="lg-tick">${label?`<em>${fmtKgLocal(Math.round(i*step*100)/100)}</em>`:''}<i></i></div>`;
   }
   html += '<div class="lg-ruler-sp"></div>';
   host.innerHTML = `<div class="lg-ruler-ind">${LG_RULER_IND}</div><div class="lg-ruler-track">${html}</div>`;
@@ -8868,8 +8866,7 @@ function lgBuildRuler(host, step, value, onUser){
     painted = vi;
   };
   let user = false, down = false, lastIdx = null, raf = null, idleT = null;
-  const visOf = ()=> Math.max(0, Math.min(n, Math.round(track.scrollLeft / LG_TICK_W)));
-  const idxOf = vi=> Math.max(0, Math.min(Math.floor(n / k), Math.round(vi / k)));   // step index
+  const idxOf = ()=> Math.max(0, Math.min(n, Math.round(track.scrollLeft / LG_TICK_W)));
   const press = ()=>{ if(!user) haptic('select-start'); user = true; down = true; clearTimeout(idleT); };
   const release = ()=>{ down = false; clearTimeout(idleT); idleT = setTimeout(endUser, 220); };
   const endUser = ()=>{ if(!down && user){ user = false; haptic('select-end'); } };
@@ -8886,9 +8883,8 @@ function lgBuildRuler(host, step, value, onUser){
   track.addEventListener('scroll', ()=>{
     if(raf) cancelAnimationFrame(raf);
     raf = requestAnimationFrame(()=>{
-      const vi = visOf();
-      if(vi !== painted) paint(vi);
-      const i = idxOf(vi);
+      const i = idxOf();
+      if(i !== painted) paint(i);
       if(i !== lastIdx){
         lastIdx = i;
         if(user){ haptic('select'); onUser(Math.round(i * step * 100) / 100); }
@@ -8901,11 +8897,11 @@ function lgBuildRuler(host, step, value, onUser){
     setValue(v){
       if(down) return;   // never move the ruler under the finger
       user = false;
-      const vi = Math.max(0, Math.min(n, Math.round((Number(v)||0) / LG_TICK_KG)));
-      lastIdx = idxOf(vi);
-      paint(vi);
+      const i = Math.max(0, Math.min(n, Math.round((Number(v)||0) / step)));
+      lastIdx = i;
+      paint(i);
       track.style.scrollSnapType = 'none';
-      track.scrollLeft = vi * LG_TICK_W;
+      track.scrollLeft = i * LG_TICK_W;
       requestAnimationFrame(()=>{ track.style.scrollSnapType = 'x mandatory'; });
     }
   };
