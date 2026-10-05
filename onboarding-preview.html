@@ -110,25 +110,7 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Geist',
 .ruler-h-tick.ahead i{background:#ffc2b2;}
 .ruler-h-tick.ahead label{opacity:.7;}
 .ruler-h-ind{width:10.4px;height:7.6px;margin-top:8px;color:var(--m-orange);flex-shrink:0;}
-.ruler-h-ind svg,.ruler-v-ind svg{display:block;width:100%;height:100%;}
-
-/* wzrost: the same ruler turned 90° — numbers to the LEFT of their tick,
-   triangle on the right pointing at it. Values still grow downward. */
-.ruler-v-wrap{--rt:9.43px;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:8px;height:153px;}
-.ruler-v-box{position:relative;height:100%;}
-.ruler-v-scale{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-ms-overflow-style:none;scrollbar-width:none;
-  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.28),#000 36px,#000 calc(100% - 36px),rgba(0,0,0,.28));mask-image:linear-gradient(180deg,rgba(0,0,0,.28),#000 36px,#000 calc(100% - 36px),rgba(0,0,0,.28));}
-.ruler-v-scale::-webkit-scrollbar{display:none;}
-.ruler-v-box::before,.ruler-v-box::after{content:"";position:absolute;left:0;right:0;height:36px;z-index:1;pointer-events:none;-webkit-backdrop-filter:blur(1.4px);backdrop-filter:blur(1.4px);}
-.ruler-v-box::before{top:0;-webkit-mask-image:linear-gradient(180deg,#000,transparent);mask-image:linear-gradient(180deg,#000,transparent);}
-.ruler-v-box::after{bottom:0;-webkit-mask-image:linear-gradient(0deg,#000,transparent);mask-image:linear-gradient(0deg,#000,transparent);}
-.ruler-v-row{height:var(--rt);scroll-snap-align:center;display:flex;align-items:center;}
-.ruler-v-row label{font-size:10px;line-height:12px;color:var(--m-ink);width:22px;text-align:right;margin-right:6px;white-space:nowrap;flex-shrink:0;}
-.ruler-v-row i{display:block;height:1.9px;width:22.65px;border-radius:.95px;background:var(--m-orange);flex-shrink:0;}
-.ruler-v-row.ahead i{background:#ffc2b2;}
-.ruler-v-row.ahead label{opacity:.7;}
-.ruler-v-ind{position:relative;width:7.6px;height:10.4px;color:var(--m-orange);flex-shrink:0;}
-.ruler-v-ind svg{position:absolute;left:50%;top:50%;width:10.4px;height:7.6px;transform:translate(-50%,-50%) rotate(-90deg);}
+.ruler-h-ind svg{display:block;width:100%;height:100%;}
 
 .ob-cta{margin-top:24px;width:100%;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:16px;cursor:pointer;transition:transform .12s ease;flex-shrink:0;}
 .ob-cta:active{transform:scale(.97);}
@@ -268,59 +250,6 @@ function buildHRuler(min,max,value,onChange){
   </div>`;
 }
 
-// Same ruler as buildHRuler, rotated: label sits to the LEFT of its tick
-// (both scroll together), the fixed indicator is a separate horizontal
-// line further to the right with a gap — mirrors the horizontal one's
-// "indicator separate from the scale" rule, just turned 90°.
-function buildVRuler(min,max,value,onChange){
-  const uid = 'r'+Math.random().toString(36).slice(2,8);
-  let rows = '';
-  for(let v=min; v<=max; v++){
-    const major = v % 5 === 0;
-    rows += `<div class="ruler-v-row${major?' major':''}" data-v="${v}"><label>${major?v:''}</label><i></i></div>`;
-  }
-  setTimeout(()=>{
-    const track = document.getElementById(uid);
-    if(!track) return;
-    const center = track.clientHeight/2;
-    track.style.scrollPaddingTop = center+'px';
-    track.style.scrollPaddingBottom = center+'px';
-    track.firstElementChild.style.marginTop = center+'px';
-    track.lastElementChild.style.marginBottom = center+'px';
-    // Same real-position fix as buildHRuler — center on the target row's
-    // actual rendered offset, not an assumed index*height. Snap toggled
-    // off/on around it for the same iOS Safari re-snap reason.
-    track.style.scrollSnapType = 'none';
-    const target = track.querySelector(`[data-v="${value}"]`);
-    if(target){
-      const tr = track.getBoundingClientRect(), gr = target.getBoundingClientRect();
-      track.scrollTop += (gr.top+gr.height/2) - (tr.top+tr.height/2);
-    }
-    rulerPaint(track, value - min);
-    requestAnimationFrame(()=>{ track.style.scrollSnapType = 'y mandatory'; });
-    let raf = null;
-    track.addEventListener('scroll', ()=>{
-      if(raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(()=>{
-        const tr = track.getBoundingClientRect();
-        const cy = tr.top + tr.height/2;
-        let best = min, bestDist = Infinity;
-        for(const child of track.children){
-          const r = child.getBoundingClientRect();
-          const d = Math.abs((r.top+r.height/2) - cy);
-          if(d < bestDist){ bestDist = d; best = parseInt(child.dataset.v, 10); }
-        }
-        rulerPaint(track, best - min);
-        onChange(best);
-      });
-    });
-  }, 0);
-  return `<div class="ruler-v-wrap">
-    <div class="ruler-v-box"><div class="ruler-v-scale" id="${uid}">${rows}</div></div>
-    <div class="ruler-v-ind">${RULER_TRI}</div>
-  </div>`;
-}
-
 function screenAge(){
   return screenShell(`
     <h1 class="ob-h1">Opowiedz coś o sobie</h1>
@@ -363,7 +292,7 @@ function screenHeight(){
       <div class="ob-num" id="obHeightNum">${state.height}<small>cm</small></div>
     </div>
     <div class="ob-ruler-gap"></div>
-    ${buildVRuler(140,210,state.height,v=>{ state.height=v; const el=document.getElementById('obHeightNum'); if(el) el.innerHTML=v+'<small>cm</small>'; })}
+    ${buildHRuler(140,210,state.height,v=>{ state.height=v; const el=document.getElementById('obHeightNum'); if(el) el.innerHTML=v+'<small>cm</small>'; })}
     <div class="ob-spacer" style="flex-grow:137"></div>
     <button type="button" class="ob-cta" onclick="obNext()">Dalej</button>
   `);
