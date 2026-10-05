@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.49.2 (2026-10-05)
+- **Aktualna wersja:** 4.49.3 (2026-10-05)
 - **Liczba wersji:** 232 · **commitów:** 553
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -115,6 +115,11 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.49.3 · PATCH · 2026-10-05
+
+Wiersz „Dźwięk tyknięcia (test)” schowany za flagą `SOUND_TEST_ROW` (domyślnie false). Wtyczka `mekkio-sound` zostaje w buildzie.
+
 
 ### 4.49.2 · PATCH · 2026-10-05
 

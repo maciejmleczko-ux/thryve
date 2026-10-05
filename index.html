@@ -5194,7 +5194,7 @@ function renderAccountPanel(){
   if(st) st.classList.toggle('on', soundOn);
   const tr = document.getElementById('acctSoundTestRows');
   if(tr){
-    tr.hidden = !(IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.MekkioSound);
+    tr.hidden = !(SOUND_TEST_ROW && IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.MekkioSound);
     const tv = document.getElementById('acctSoundTestV');
     if(tv) tv.textContent = sysTickId ? ('Systemowy ' + sysTickId) : 'Własny';
   }
@@ -6400,6 +6400,7 @@ function openReminderSheet(){
 }
 function closeReminderSheet(viaDrag){ acctSheetClose('reminderSheet', viaDrag); }
 /* ---- native: audition iOS system sounds for the ruler tick ---- */
+const SOUND_TEST_ROW = false; // flip to true to show the audition row in the account panel (native only)
 const SOUND_TEST_IDS = [1104,1103,1105,1306,1057,1123,1157,1156,1155,1100,1101,1102,1106,1107,1108,1109,1110,1200,1204,1054,1519,1520,1521];
 function soundTestPlay(id){
   const P = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.MekkioSound;
@@ -6749,7 +6750,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.49.2";
+const APP_VERSION = "4.49.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
