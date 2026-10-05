@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.48.7 (2026-10-05)
-- **Liczba wersji:** 231 · **commitów:** 553
+- **Aktualna wersja:** 4.48.8 (2026-10-05)
+- **Liczba wersji:** 232 · **commitów:** 553
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -115,6 +115,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.48.8 · PATCH · 2026-10-05
+
+Bez wpisu „Co nowego”.
+
+- **Każdy przycisk X to okrąg 40 px z pomarańczowym obrysem i glifem 28 px**, jak w oknie logowania serii (wcześniej: samo X 24 px bez okręgu, w Treningu bez okręgu obok wypełnionego ✓). Jedna wspólna reguła na końcu `<style>` obejmuje `.plansv2-customize-close` (12 popupów), `.newex-v2-close`, `.wnv2-close`, `.exv2-close`, `.swapv2-close`, `.plansv2-close`, `.histv2-card-close` i nową klasę `.x-ring`; `.gy-x` w Treningu dostał obrys, a X w oknie Trenera AI (`.ai-popup-close`) 36 px z białym obrysem na fioletowym tle. Nagłówki nie rosną (przy tytule jest już ikona 40 px), a obszar dotyku X wzrósł z 24 do 40 px. Stan wciśnięcia (scale .94) dopisany do zbiorczej listy `:active`.
+
+**Commity:**
+
+- `9aaf119` 2026-10-05 — Popup logowania wg Figmy 479:12000: nowy suwak ciężaru, żarówka w pasku, mniejsza notatka (4.48.7)
+- `257e09e` 2026-10-05 — Suwak ciężaru: jedna kreska = jeden krok, liczby co 4 kreski (4.48.7)
+- X w okręgu wszędzie (hash w kolejnej wersji)
 
 ### 4.48.7 · PATCH · 2026-10-05
 

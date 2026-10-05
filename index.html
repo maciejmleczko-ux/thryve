@@ -2319,7 +2319,7 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
-.lg-num:active{transition-duration:var(--m-dur-press-in);}
+.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.wnv2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
 /* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
 #view-gym-v2 .gymv2-tile.gymv2-search-tile, #view-gym-v2 .gymv2-tile.gymv2-add-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:13px;padding:4.5px 0 0;box-sizing:border-box;background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);}
 #view-gym-v2 .gymv2-tile.gymv2-search-tile{border:.5px solid #f1d7cb;}
@@ -2519,6 +2519,18 @@ body.gymv2-bg .gy-bg{display:block;}
 html{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 img,svg{-webkit-user-drag:none;-webkit-touch-callout:none;}
 input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;}
+/* Every dismiss X is a 40px ring with a 28px glyph, same as the set-logging
+   popup's .lg-circ and Trening's header (Maciej, 2026-10-05: "wszedzie X w
+   kolku"). One rule for all the per-screen close classes; they used to be
+   bare 24px glyphs. The 40px matches the 40px icon next to each sheet title,
+   so headers don't grow, and fixes the sub-44px tap target. */
+.x-ring,.plansv2-customize-close,.newex-v2-close,.wnv2-close,.exv2-close,.swapv2-close,.plansv2-close,.histv2-card-close{box-sizing:border-box;width:40px;height:40px;padding:6px;margin:0;border:.5px solid var(--m-orange);border-radius:50%;background:none;color:var(--m-ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.x-ring svg,.plansv2-customize-close svg,.newex-v2-close svg,.wnv2-close svg,.exv2-close svg,.swapv2-close svg,.plansv2-close svg,.histv2-card-close svg{display:block;width:100%;height:100%;}
+.x-ring:active,.plansv2-customize-close:active,.newex-v2-close:active,.wnv2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.gy-circ.gy-x:active{transform:scale(.94);}
+.gy-circ.gy-x{border:.5px solid var(--m-orange);}
+.ai-popup-close{width:36px;height:36px;top:12px;right:12px;border:.5px solid rgba(255,255,255,.7);border-radius:50%;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.ai-popup-close:active{transform:scale(.94);}
+.ai-popup-close .ph{width:20px;height:20px;}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -6576,7 +6588,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.48.7";
+const APP_VERSION = "4.48.8";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
