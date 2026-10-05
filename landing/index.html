@@ -1174,7 +1174,8 @@ document.documentElement.classList.add('js');
 
   /* HERO — three phones on an invisible, slightly tilted orbit. Each faces outward, so only the front one shows
      its screen. Drag (mouse or finger) turns the orbit; on release it lands on the nearest phone, with the
-     throw's momentum. No automatic rotation. Each phone has its own canvas so the ones going back can be
+     throw's momentum. Every 3 s the next phone comes round on its own (the first turn right after load, so people
+     see it can be turned); any drag restarts that clock. Each phone has its own canvas so the ones going back can be
      blurred (CSS filter) and stacked by depth. */
   (async function(){
     var hero = document.getElementById('hero'), box = document.getElementById('heroOrbit');
@@ -1194,6 +1195,12 @@ document.documentElement.classList.add('js');
 
     var phi = 0, target = 0, rate = 5;                      // orbit angle (starts on the poster pose: no ghosting on the cross-fade)
     var tilt = { x: 0, y: 0 }, tiltT = { x: 0, y: 0 }, scrollTurn = 0, lastT = 0;
+    var AUTO_MS = 3000, lastTurn = performance.now();
+    function nextFront(from){                               // next phone comes round from the right (angle decreases)
+      var best = -1e9;
+      ANG.forEach(function(a){ for(var n = -2; n <= 2; n++){ var c = -a + n * 2 * Math.PI; if(c < from - .05 && c > best) best = c; } });
+      return best;
+    }
     function nearest(from){                                 // orbit angle (in any turn) that brings a phone to the front
       var best = 0, bd = 1e9;
       ANG.forEach(function(a){ var f = -a, c = f + Math.round((from - f) / (2 * Math.PI)) * 2 * Math.PI, d = Math.abs(c - from); if(d < bd){ bd = d; best = c; } });
@@ -1204,6 +1211,7 @@ document.documentElement.classList.add('js');
     var drag = null, K = function(){ return 4 / Math.max(innerWidth, 600); };
     box.addEventListener('pointerdown', function(e){
       if(e.button > 0) return;
+      lastTurn = performance.now();
       drag = { x: e.clientX, y: e.clientY, start: target, axis: e.pointerType === 'mouse' ? 'x' : null, vx: 0, px: e.clientX, pt: e.timeStamp, id: e.pointerId };
       if(e.pointerType === 'mouse'){ e.preventDefault(); box.setPointerCapture(e.pointerId); box.classList.add('dragging'); }
     });
@@ -1225,7 +1233,7 @@ document.documentElement.classList.add('js');
         var fresh = e && e.timeStamp - drag.pt < 80 ? drag.vx : 0;      // a pause before letting go = no throw
         target = nearest(target + fresh * 220 * K()); rate = 5;
       }
-      drag = null; box.classList.remove('dragging');
+      drag = null; box.classList.remove('dragging'); lastTurn = performance.now();
     }
     box.addEventListener('pointerup', release); box.addEventListener('pointercancel', release);
     box.addEventListener('lostpointercapture', function(){ release(); });
@@ -1244,6 +1252,8 @@ document.documentElement.classList.add('js');
     // the first view drives the shared motion; every view then places its own phone
     items[0].v.update = function(t){
       var dt = Math.min(.05, lastT ? t - lastT : 0); lastT = t;
+      var now = performance.now();
+      if(!drag && !document.hidden && now - lastTurn > AUTO_MS){ target = nextFront(nearest(target)); rate = 3.2; lastTurn = now; }
       phi += (target - phi) * (1 - Math.exp(-dt * rate));
       tilt.x += (tiltT.x - tilt.x) * (1 - Math.exp(-dt * 4)); tilt.y += (tiltT.y - tilt.y) * (1 - Math.exp(-dt * 4));
       place(t);
@@ -1277,6 +1287,7 @@ document.documentElement.classList.add('js');
     }
     items.forEach(function(it){ it.v.fit(); }); place(0);
     items.forEach(function(it){ it.v.r.render(it.v.scene, it.v.cam); });
+    lastTurn = performance.now() - AUTO_MS + 800;           // first turn right after load: shows the orbit can be turned
     box.classList.add('gl-on'); kick();
   })();
 
