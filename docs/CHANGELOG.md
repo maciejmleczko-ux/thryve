@@ -120,7 +120,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 Bez wpisu „Co nowego”.
 
-- **Ikony dolnego menu z jednej biblioteki, jak w Figmie** (479:11951). Dom, kalendarz i wykres były Phosphor Regular (grubsza linia), a Plany z eksportu Figmy w Phosphor Light, więc pasek wyglądał na zbiór z dwóch bibliotek. Teraz wszystkie cztery to Phosphor Light wyeksportowane z komponentów Figmy (373:4297/4300/4306/4309), przycięte do tego samego okna 32×32 (`viewBox 10 10 32 32`), jako osobne klucze `nav-house` / `nav-plans` / `nav-calendar` / `nav-chart` (ikony `house` / `calendar-dots` / `chart-line-up` w innych miejscach apki bez zmian). Pole ikony 23,09 px zamiast 24, czyli skala komponentu 52 → 37,52 z Figmy. Wymiary rysunków zgadzają się z Figmą co do 0,1 px.
+- **Ikony dolnego menu z jednej biblioteki.** Dom, kalendarz i wykres były Phosphor Regular, a Plany z eksportu Figmy w Phosphor Light, więc pasek wyglądał na zbiór z dwóch bibliotek. Po porównaniu obu wariantów Maciek wybrał Regular: wszystkie cztery to teraz oficjalne Phosphor Regular (`@phosphor-icons/core`, siatka 256 = ramka 32), osobne klucze `nav-house` / `nav-plans` / `nav-calendar` / `nav-chart` (ikony `house` / `calendar-dots` / `chart-line-up` w innych miejscach apki bez zmian). Pole ikony 23,09 px zamiast 24, czyli skala komponentu 52 → 37,52 z Figmy. Figma (479:11951) wciąż pokazuje Light, do aktualizacji.
 
 **Commity:**
 
