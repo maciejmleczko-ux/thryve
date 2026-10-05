@@ -90,31 +90,44 @@ body{display:flex;align-items:center;justify-content:center;font-family:'Geist',
 
 .ob-ruler-gap{flex-shrink:0;height:16px;}
 
-/* Horizontal ruler (wiek/waga). Figma's ticks-row is 294x10 at y:585,
-   labels sit at y:567 (18px above), indicator is a 60px line ending at
-   y:560 (7px above the labels) — so: indicator(60) -> gap(7) ->
-   label(~12) -> gap(6) -> ticks(10). Major ticks 10px tall, minor 6px,
-   all the same light orange (no separate color/opacity split). */
-.ruler-h{flex-shrink:0;display:flex;flex-direction:column;align-items:center;}
-.ruler-h-indicator{width:1px;height:60px;background:var(--m-orange);margin-bottom:7px;flex-shrink:0;}
-.ruler-h-track{width:100%;height:28px;overflow-x:scroll;scroll-snap-type:x mandatory;display:flex;align-items:flex-end;-ms-overflow-style:none;scrollbar-width:none;}
+/* Rulers — same design as the in-app weight ruler (Figma 479:12000 / 483:18019,
+   2026-10-05): numbers on top, rounded ticks under them, a small triangle
+   under the centre (instead of the old long indicator line). Ticks up to the
+   chosen value are solid orange, the ones past it pale, their labels 70%. The
+   outer ~4 ticks fade and blur like the iOS timer ruler. One tick per unit,
+   label every 5 = 47.15px between labels (Figma), so --rt = 9.43px. */
+.ruler-h{--rt:9.43px;position:relative;flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:100%;}
+.ruler-h-track{width:100%;height:42px;overflow-x:scroll;scroll-snap-type:x mandatory;display:flex;align-items:flex-start;-ms-overflow-style:none;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.28),#000 44px,#000 calc(100% - 44px),rgba(0,0,0,.28));mask-image:linear-gradient(90deg,rgba(0,0,0,.28),#000 44px,#000 calc(100% - 44px),rgba(0,0,0,.28));}
 .ruler-h-track::-webkit-scrollbar{display:none;}
-.ruler-h-tick{flex:none;width:7px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
-.ruler-h-tick label{font-size:10px;font-weight:400;color:var(--m-ink);margin-bottom:6px;white-space:nowrap;}
-.ruler-h-tick i{display:block;width:1px;background:var(--m-orange);opacity:.4;border-radius:1px;height:6px;}
-.ruler-h-tick.major i{height:10px;}
+.ruler-h::before,.ruler-h::after{content:"";position:absolute;top:0;height:42px;width:44px;z-index:1;pointer-events:none;-webkit-backdrop-filter:blur(1.4px);backdrop-filter:blur(1.4px);}
+.ruler-h::before{left:0;-webkit-mask-image:linear-gradient(90deg,#000,transparent);mask-image:linear-gradient(90deg,#000,transparent);}
+.ruler-h::after{right:0;-webkit-mask-image:linear-gradient(270deg,#000,transparent);mask-image:linear-gradient(270deg,#000,transparent);}
+.ruler-h-tick{position:relative;flex:none;width:var(--rt);height:42px;scroll-snap-align:center;display:flex;align-items:flex-end;justify-content:center;}
+.ruler-h-tick label{position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:10px;line-height:12px;color:var(--m-ink);white-space:nowrap;}
+.ruler-h-tick i{display:block;width:1.9px;height:22.65px;border-radius:.95px;background:var(--m-orange);}
+.ruler-h-tick.ahead i{background:#ffc2b2;}
+.ruler-h-tick.ahead label{opacity:.7;}
+.ruler-h-ind{width:10.4px;height:7.6px;margin-top:8px;color:var(--m-orange);flex-shrink:0;}
+.ruler-h-ind svg,.ruler-v-ind svg{display:block;width:100%;height:100%;}
 
-/* wzrost's ruler is the same one rotated 90°. Figma: whole label+tick
-   group is 34x153 (not the 280/180 I'd guessed), indicator is a 60px
-   line starting 5px past the group (not 16). */
-.ruler-v-wrap{flex-shrink:0;display:flex;align-items:center;justify-content:center;height:153px;}
-.ruler-v-scale{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-ms-overflow-style:none;scrollbar-width:none;}
+/* wzrost: the same ruler turned 90° — numbers to the LEFT of their tick,
+   triangle on the right pointing at it. Values still grow downward. */
+.ruler-v-wrap{--rt:9.43px;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:8px;height:153px;}
+.ruler-v-box{position:relative;height:100%;}
+.ruler-v-scale{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-ms-overflow-style:none;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.28),#000 36px,#000 calc(100% - 36px),rgba(0,0,0,.28));mask-image:linear-gradient(180deg,rgba(0,0,0,.28),#000 36px,#000 calc(100% - 36px),rgba(0,0,0,.28));}
 .ruler-v-scale::-webkit-scrollbar{display:none;}
-.ruler-v-row{height:6px;scroll-snap-align:center;display:flex;align-items:center;}
-.ruler-v-row label{font-size:10px;font-weight:400;color:var(--m-ink);width:22px;text-align:right;margin-right:4px;white-space:nowrap;flex-shrink:0;}
-.ruler-v-row i{display:block;height:1px;width:6px;background:var(--m-orange);opacity:.4;border-radius:1px;flex-shrink:0;}
-.ruler-v-row.major i{width:10px;}
-.ruler-v-indicator{width:60px;height:1px;background:var(--m-orange);margin-left:5px;flex-shrink:0;}
+.ruler-v-box::before,.ruler-v-box::after{content:"";position:absolute;left:0;right:0;height:36px;z-index:1;pointer-events:none;-webkit-backdrop-filter:blur(1.4px);backdrop-filter:blur(1.4px);}
+.ruler-v-box::before{top:0;-webkit-mask-image:linear-gradient(180deg,#000,transparent);mask-image:linear-gradient(180deg,#000,transparent);}
+.ruler-v-box::after{bottom:0;-webkit-mask-image:linear-gradient(0deg,#000,transparent);mask-image:linear-gradient(0deg,#000,transparent);}
+.ruler-v-row{height:var(--rt);scroll-snap-align:center;display:flex;align-items:center;}
+.ruler-v-row label{font-size:10px;line-height:12px;color:var(--m-ink);width:22px;text-align:right;margin-right:6px;white-space:nowrap;flex-shrink:0;}
+.ruler-v-row i{display:block;height:1.9px;width:22.65px;border-radius:.95px;background:var(--m-orange);flex-shrink:0;}
+.ruler-v-row.ahead i{background:#ffc2b2;}
+.ruler-v-row.ahead label{opacity:.7;}
+.ruler-v-ind{position:relative;width:7.6px;height:10.4px;color:var(--m-orange);flex-shrink:0;}
+.ruler-v-ind svg{position:absolute;left:50%;top:50%;width:10.4px;height:7.6px;transform:translate(-50%,-50%) rotate(-90deg);}
 
 .ob-cta{margin-top:24px;width:100%;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:16px;cursor:pointer;transition:transform .12s ease;flex-shrink:0;}
 .ob-cta:active{transform:scale(.97);}
@@ -188,6 +201,14 @@ function screenGender(){
   `);
 }
 
+const RULER_TRI = '<svg viewBox="0 0 9 8" fill="currentColor"><path d="M8.87 6.15c.37.63-.08 1.43-.82 1.43H.95C.22 7.58-.24 6.78.13 6.15L3.48.47A.94.94 0 0 1 4.3 0h.4c.34 0 .65.18.82.47l3.35 5.68Z"/></svg>';
+// Ticks past the chosen value go pale; only the stretch that changed is touched.
+function rulerPaint(track, cur){
+  const kids = track.children, prev = track._painted;
+  const lo = prev == null ? 0 : Math.min(prev, cur), hi = prev == null ? kids.length - 1 : Math.max(prev, cur);
+  for(let i = lo; i <= hi; i++) kids[i].classList.toggle('ahead', i > cur);
+  track._painted = cur;
+}
 // Numbers sit ABOVE their tick (label first in the DOM, tick last —
 // both bottom-aligned so every tick lines up regardless of whether its
 // column has a label). Ticks are all the same light orange; only major
@@ -221,6 +242,7 @@ function buildHRuler(min,max,value,onChange){
       const tr = track.getBoundingClientRect(), gr = target.getBoundingClientRect();
       track.scrollLeft += (gr.left+gr.width/2) - (tr.left+tr.width/2);
     }
+    rulerPaint(track, value - min);
     requestAnimationFrame(()=>{ track.style.scrollSnapType = 'x mandatory'; });
     let raf = null;
     track.addEventListener('scroll', ()=>{
@@ -234,13 +256,14 @@ function buildHRuler(min,max,value,onChange){
           const d = Math.abs((r.left+r.width/2) - cx);
           if(d < bestDist){ bestDist = d; best = parseInt(child.dataset.v, 10); }
         }
+        rulerPaint(track, best - min);
         onChange(best);
       });
     });
   }, 0);
   return `<div class="ruler-h">
-    <div class="ruler-h-indicator"></div>
     <div class="ruler-h-track" id="${uid}">${ticks}</div>
+    <div class="ruler-h-ind">${RULER_TRI}</div>
   </div>`;
 }
 
@@ -272,6 +295,7 @@ function buildVRuler(min,max,value,onChange){
       const tr = track.getBoundingClientRect(), gr = target.getBoundingClientRect();
       track.scrollTop += (gr.top+gr.height/2) - (tr.top+tr.height/2);
     }
+    rulerPaint(track, value - min);
     requestAnimationFrame(()=>{ track.style.scrollSnapType = 'y mandatory'; });
     let raf = null;
     track.addEventListener('scroll', ()=>{
@@ -285,13 +309,14 @@ function buildVRuler(min,max,value,onChange){
           const d = Math.abs((r.top+r.height/2) - cy);
           if(d < bestDist){ bestDist = d; best = parseInt(child.dataset.v, 10); }
         }
+        rulerPaint(track, best - min);
         onChange(best);
       });
     });
   }, 0);
   return `<div class="ruler-v-wrap">
-    <div class="ruler-v-scale" id="${uid}">${rows}</div>
-    <div class="ruler-v-indicator"></div>
+    <div class="ruler-v-box"><div class="ruler-v-scale" id="${uid}">${rows}</div></div>
+    <div class="ruler-v-ind">${RULER_TRI}</div>
   </div>`;
 }
 
