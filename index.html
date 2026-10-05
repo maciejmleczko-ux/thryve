@@ -2577,18 +2577,34 @@ const SFX = (()=>{
     o.connect(g); g.connect(c.destination);
     o.start(t0); o.stop(t0 + dur + 0.02);
   };
+  // wheel-style tick: a 12 ms band-passed noise burst (a soft "tk", no pitch),
+  // centre frequency wobbles a little so a fast flick isn't a machine gun
+  let noiseBuf = null;
   const tick = (c, t)=>{
-    // ruler tick: tiny 14 ms click, pitch wobbles a little so it isn't a machine gun
-    const f = 1900 + Math.random() * 160;
-    note(c, f, t, 0.014, 0.07, 'triangle');
+    if(!noiseBuf){
+      noiseBuf = c.createBuffer(1, Math.floor(c.sampleRate * 0.03), c.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const src = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = noiseBuf;
+    bp.type = 'bandpass'; bp.frequency.value = 2600 + Math.random() * 300; bp.Q.value = 2.2;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.55, t + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.014);
+    src.connect(bp); bp.connect(g); g.connect(c.destination);
+    src.start(t); src.stop(t + 0.03);
   };
+  // soft bell: fundamental + a quiet 3rd-ish partial, long decay
+  const bell = (c, f, t, vol)=>{ note(c, f, t, 0.7, vol); note(c, f * 2.76, t, 0.35, vol * 0.25); };
   return {
     play(kind){
       if(!soundOn) return;
       const c = get(); if(!c) return;
       const t = c.currentTime + 0.005;
       if(kind === 'select') tick(c, t);
-      else if(kind === 'success'){ note(c, 880, t, 0.16, 0.10); note(c, 1318.5, t + 0.09, 0.26, 0.10); }
+      else if(kind === 'done'){ note(c, 880, t, 0.16, 0.10); note(c, 1318.5, t + 0.09, 0.26, 0.10); }
+      else if(kind === 'rest'){ bell(c, 784, t, 0.10); bell(c, 1046.5, t + 0.22, 0.10); }
       else if(kind === 'record'){ note(c, 659.3, t, 0.14, 0.10); note(c, 880, t + 0.09, 0.14, 0.10); note(c, 1318.5, t + 0.18, 0.4, 0.11); }
       else if(kind === 'warning'){ note(c, 330, t, 0.2, 0.10, 'triangle'); }
     },
@@ -2603,15 +2619,18 @@ function setSoundOn(on){
   try{ localStorage.setItem(LS_SOUND, soundOn ? '1' : '0'); }catch(e){}
   const t = document.getElementById('acctSoundToggle');
   if(t) t.classList.toggle('on', soundOn);
-  if(soundOn) SFX.play('success');
+  if(soundOn) SFX.play('done');
 }
 function haptic(kind){
-  if(kind === 'select' || kind === 'success' || kind === 'record' || kind === 'warning'){
+  if(kind === 'select' || kind === 'done' || kind === 'rest' || kind === 'record' || kind === 'warning'){
     if(kind !== 'select' || Date.now() - (haptic._st || 0) >= 35){
       if(kind === 'select') haptic._st = Date.now();
       SFX.play(kind);
     }
   }
+  // 'done' / 'rest' are sound names too: feel like success / medium
+  if(kind === 'rest') kind = 'success';
+  else if(kind === 'done') kind = 'medium';
   const H = IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
   if(!H) return;
   if(kind === 'record'){
@@ -6657,7 +6676,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.49.0";
+const APP_VERSION = "4.49.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -8903,7 +8922,7 @@ function restTick(){
     // Came back to the app long after the rest ended → don't buzz for a stale timer.
     const stale = left < -5;
     restStop();
-    if(!stale){ haptic('success'); restPop(); }
+    if(!stale){ haptic('rest'); restPop(); }
     return;
   }
   restPaint(left);
@@ -9405,7 +9424,7 @@ function confirmExercisePopupV2(){
     ex.sets = ex.setValues.length;
     if(idx === -1){
       sessionExercises.push(ex);
-      haptic('medium');
+      haptic('done');
     } else {
       sessionExercises[idx] = ex;
       haptic('light');
