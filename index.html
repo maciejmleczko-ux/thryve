@@ -1483,8 +1483,8 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    .plansv2-customize-stack is the moving panel (== .m-sheet),
    .plansv2-customize-card is its scrolling body. */
 .plansv2-customize-overlay{flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden;gap:0;background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
-.plansv2-customize-stack{width:calc(100% - 20px);max-width:500px;margin:0 auto;background:var(--m-panel);border-radius:34px 34px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:calc(100% - var(--m-sheet-top));display:flex;flex-direction:column;align-items:center;overflow:hidden;font-family:var(--m-font);will-change:transform;}
-.plansv2-customize-overlay.m-kb .plansv2-customize-stack{padding-bottom:14px;}
+.plansv2-customize-stack{width:calc(100% - 20px);max-width:500px;margin:0 auto var(--m-sheet-gap);background:var(--m-panel);border-radius:34px 34px var(--m-sheet-r-bottom) var(--m-sheet-r-bottom);padding:0 0 max(14px, calc(env(safe-area-inset-bottom) - var(--m-sheet-gap)));box-sizing:border-box;max-height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));display:flex;flex-direction:column;align-items:center;overflow:hidden;font-family:var(--m-font);will-change:transform;}
+.plansv2-customize-overlay.m-kb .plansv2-customize-stack{padding-bottom:14px;margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;}
 .plansv2-customize-stack.m-sheet-snapback{transition:transform var(--m-dur-snap) var(--m-ease-sheet);}
 @media (prefers-reduced-motion: no-preference){
   .plansv2-customize-overlay{animation:mSheetBackdropIn var(--m-dur-fade) ease-out;}
@@ -1796,11 +1796,11 @@ body.pev2-bg{background:var(--m-panel);}
    established slide-up curve (var(--m-ease-sheet)) rather than
    a new one, per [[feedback_thryve_animation_vocabulary]]. */
 .m-sheet-overlay{flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden;background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);}
-.m-sheet{width:calc(100% - 20px);max-width:500px;margin:0 auto;background:var(--m-panel);border-radius:34px 34px 0 0;padding:0 0 max(14px,env(safe-area-inset-bottom));box-sizing:border-box;max-height:calc(100% - var(--m-sheet-top));position:relative;display:flex;flex-direction:column;overflow:hidden;font-family:var(--m-font);will-change:transform;}
+.m-sheet{width:calc(100% - 20px);max-width:500px;margin:0 auto var(--m-sheet-gap);background:var(--m-panel);border-radius:34px 34px var(--m-sheet-r-bottom) var(--m-sheet-r-bottom);padding:0 0 max(14px, calc(env(safe-area-inset-bottom) - var(--m-sheet-gap)));box-sizing:border-box;max-height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));position:relative;display:flex;flex-direction:column;overflow:hidden;font-family:var(--m-font);will-change:transform;}
 /* % = of the overlay's content box, which syncSheetsToVisualViewport() pads
    down to the visible band — so the sheet always fits above the keyboard.
    With the keyboard up, the home-indicator inset is under it: drop it. */
-.m-sheet-overlay.m-kb .m-sheet{padding-bottom:14px;}
+.m-sheet-overlay.m-kb .m-sheet{padding-bottom:14px;margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;}
 .m-sheet-grab{flex-shrink:0;width:40px;height:5px;border-radius:3px;background:rgba(44,39,39,.22);margin:8px auto 10px;cursor:grab;touch-action:none;}
 .m-sheet-grab:active{cursor:grabbing;}
 .m-sheet-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:24px;overflow:hidden;}
@@ -1826,8 +1826,8 @@ body.pev2-bg{background:var(--m-panel);}
   .m-sheet-overlay.m-sheet-closing .m-sheet{animation:mSheetDown var(--m-dur-exit) var(--m-ease-exit) forwards;}
   @keyframes mSheetBackdropIn{from{opacity:0;}to{opacity:1;}}
   @keyframes mSheetBackdropOut{from{opacity:1;}to{opacity:0;}}
-  @keyframes mSheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
-  @keyframes mSheetDown{from{transform:translateY(0);}to{transform:translateY(100%);}}
+  @keyframes mSheetUp{from{transform:translateY(calc(100% + var(--m-sheet-gap)));}to{transform:translateY(0);}}
+  @keyframes mSheetDown{from{transform:translateY(0);}to{transform:translateY(calc(100% + var(--m-sheet-gap)));}}
 }
 /* set-logging card: the sheet owns the panel bg + rounded top; the card
    keeps its own internal scroll so the submit button below stays pinned
@@ -2334,7 +2334,7 @@ body.pev2-bg{background:var(--m-panel);}
   .lg-num.is-editing::after{animation:lgCaret 1s steps(1) infinite;}
   @keyframes lgCaret{0%,49%{opacity:1;}50%,100%{opacity:0;}}
 }
-.lg-pad{position:absolute;left:0;right:0;bottom:0;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 12px calc(12px + env(safe-area-inset-bottom));background:var(--m-panel);border-radius:26px 26px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.08);transform:translateY(100%);transition:transform var(--m-dur-exit) var(--m-ease-exit);}
+.lg-pad{position:absolute;left:0;right:0;bottom:0;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 12px calc(12px + env(safe-area-inset-bottom) - var(--m-sheet-gap));background:var(--m-panel);border-radius:26px 26px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.08);transform:translateY(100%);transition:transform var(--m-dur-exit) var(--m-ease-exit);}
 .lg-pad[hidden]{display:none;}
 .lg-pad.is-open{transform:translateY(0);transition:transform var(--m-dur-in) var(--m-ease-sheet);}
 @media (prefers-reduced-motion: reduce){ .lg-pad{transition:none;} }
@@ -2346,7 +2346,15 @@ body.pev2-bg{background:var(--m-panel);}
 .lg-key:active{transform:scale(.95);transition-duration:var(--m-dur-press-in);}
 .gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active,.lg-set:active,.lg-key:active,.lg-num:active{transition-duration:var(--m-dur-press-in);}
 /* ==== GYM 5.0 — workout in progress (Figma 459:6092) + set logging (Figma 461:7553) ==== */
-:root{--m-fs-display:108px;--m-fs-display-sm:60px;--m-sheet-top:max(30px, calc(var(--top-inset) + 4px));}
+:root{--m-fs-display:108px;--m-fs-display-sm:60px;--m-sheet-top:max(30px, calc(var(--top-inset) + 4px));
+  /* Floating sheets, concentric with the screen corner (Maciej, 2026-10-05):
+     on Face ID iPhones (home indicator => safe-area-inset-bottom ~34px) the
+     sheet floats 10px above the bottom edge and its bottom corners are
+     screen radius (~55) minus that gap = 45px. With no home indicator
+     (iPhone SE, Safari with its bottom toolbar, desktop) env() is 0, so the
+     gap and bottom radius collapse to 0 and the sheet sits flush as before. */
+  --m-sheet-gap:min(10px, env(safe-area-inset-bottom));
+  --m-sheet-r-bottom:min(45px, calc(env(safe-area-inset-bottom) * 1.4));}
 html.gymv2-bg{background:#e2e2e1;}
 body.gymv2-bg{background:transparent;}
 .gy-bg{display:none;position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;}
@@ -2387,7 +2395,7 @@ body.gymv2-bg .gy-bg{display:block;}
 
 /* --- set-logging sheet --- */
 #exercisePopupOverlayV2{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
-#exercisePopupSheetV2{height:calc(100% - var(--m-sheet-top));max-height:none;padding-bottom:0;background:#fff;}
+#exercisePopupSheetV2{height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;padding-bottom:0;background:#fff;}
 #exercisePopupSheetV2 > .m-sheet-grab{display:none;}
 #exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2{align-items:stretch;gap:0;}
 .lg-sub-overlay{z-index:95;}
@@ -6531,7 +6539,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.48.5";
+const APP_VERSION = "4.48.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -8413,10 +8421,11 @@ function mSheetDrag(overlayId, closeFn){
       // Carry the finger's motion off-screen instead of teleporting:
       // continue from the current offset at roughly release speed.
       const fromOpacity = getComputedStyle(overlay).opacity;
+      const offY = h + (parseFloat(getComputedStyle(mover).marginBottom) || 0); // clear the float gap too
       const dur = Math.round(Math.min(300, Math.max(160, (h - dy) / Math.max(vY, 1.5))));
       overlay.style.pointerEvents = 'none';
       const aSheet = mover.animate(
-        [{transform:'translateY(' + dy.toFixed(1) + 'px)'}, {transform:'translateY(100%)'}],
+        [{transform:'translateY(' + dy.toFixed(1) + 'px)'}, {transform:'translateY(' + offY + 'px)'}],
         {duration:dur, easing:MOTION.throw, fill:'forwards'});
       const aDim = overlay.animate(
         [{opacity:fromOpacity}, {opacity:0}],
@@ -8428,7 +8437,7 @@ function mSheetDrag(overlayId, closeFn){
         // Pin the end state inline, drop the WAAPI fills, then let the
         // sheet's own close() hide it (its finish() clears these inline
         // styles only after the overlay is already hidden, so no flash).
-        mover.style.transform = 'translateY(100%)';
+        mover.style.transform = 'translateY(' + offY + 'px)';
         overlay.style.opacity = '0';
         aSheet.cancel(); aDim.cancel();
         overlay.style.pointerEvents = '';

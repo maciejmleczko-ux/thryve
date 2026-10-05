@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.48.5 (2026-10-05)
-- **Liczba wersji:** 229 · **commitów:** 553
+- **Aktualna wersja:** 4.48.6 (2026-10-05)
+- **Liczba wersji:** 230 · **commitów:** 553
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -115,6 +115,20 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.48.6 · PATCH · 2026-10-05
+
+Bez wpisu „Co nowego”.
+
+- **Popupy unoszą się nad dołem ekranu z koncentrycznymi rogami.** Na iPhone'ach z Face ID popup (`.m-sheet` i `.plansv2-customize-stack`, czyli wszystkie bottom sheety v2) ma 10 px odstępu od dołu, jak po bokach, a dolne rogi 45 px: promień rogu ekranu (~55) minus odstęp, więc łuk popupu biegnie równo z łukiem ekranu. Nowe tokeny w `:root`: `--m-sheet-gap: min(10px, env(safe-area-inset-bottom))` i `--m-sheet-r-bottom: min(45px, env(safe-area-inset-bottom) × 1,4)`. Bez paska Home (iPhone SE, Safari z dolnym paskiem, komputer) oba wychodzą 0 i popup leży przy dolnej krawędzi jak wcześniej. Przy otwartej klawiaturze popup przylega do niej bez odstępu i bez dolnych rogów. Wjazd, zamknięcie i rzut palcem wyjeżdżają teraz o wysokość + odstęp, żeby na dole nie został pasek popupu. Dolny padding popupu i klawiatury liczbowej pomniejszony o odstęp.
+
+**Commity:**
+
+- `1d3dae7` 2026-10-05 — Menu: wszystkie ikony Phosphor Light z komponentów Figmy, jedna skala (4.48.5)
+- `b6b7423` 2026-10-05 — Menu: ikony Phosphor Regular zamiast Light, wybór po porównaniu (4.48.5)
+- `3767a78` 2026-10-05 — Build 26 (4.48.5)
+- `670cea2` 2026-10-05 — Komentarz: Figma menu już w Phosphor Regular
+- koncentryczne popupy (hash w kolejnej wersji)
 
 ### 4.48.5 · PATCH · 2026-10-05
 
