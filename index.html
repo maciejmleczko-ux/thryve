@@ -2549,7 +2549,69 @@ if(IS_NATIVE) document.documentElement.classList.add('native-app');
 /* Taptic feedback in the native app only (iOS Safari has no vibration API).
    Reserved for moments that mean "done": an exercise saved, a workout
    finished. Never on plain navigation or typing. */
+/* UI sounds, synthesized in Web Audio (no files). Same vocabulary as haptic():
+   one tick for the ruler, a rising pair for success, a low dull note for a
+   warning. Off with the silent switch (Web Audio follows it on iOS), mixes with
+   the user's music, and is gated by the "Dźwięki" toggle in the account panel. */
+const LS_SOUND = 'thryve_sound';
+let soundOn = (()=>{ try{ return localStorage.getItem(LS_SOUND) !== '0'; }catch(e){ return true; } })();
+const SFX = (()=>{
+  let ctx = null;
+  const get = ()=>{
+    if(!ctx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      try{ if(navigator.audioSession) navigator.audioSession.type = 'ambient'; }catch(e){}
+      ctx = new AC();
+    }
+    if(ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  };
+  // one short enveloped sine/triangle note
+  const note = (c, freq, t0, dur, vol, type)=>{
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t0); o.stop(t0 + dur + 0.02);
+  };
+  const tick = (c, t)=>{
+    // ruler tick: tiny 14 ms click, pitch wobbles a little so it isn't a machine gun
+    const f = 1900 + Math.random() * 160;
+    note(c, f, t, 0.014, 0.07, 'triangle');
+  };
+  return {
+    play(kind){
+      if(!soundOn) return;
+      const c = get(); if(!c) return;
+      const t = c.currentTime + 0.005;
+      if(kind === 'select') tick(c, t);
+      else if(kind === 'success'){ note(c, 880, t, 0.16, 0.10); note(c, 1318.5, t + 0.09, 0.26, 0.10); }
+      else if(kind === 'record'){ note(c, 659.3, t, 0.14, 0.10); note(c, 880, t + 0.09, 0.14, 0.10); note(c, 1318.5, t + 0.18, 0.4, 0.11); }
+      else if(kind === 'warning'){ note(c, 330, t, 0.2, 0.10, 'triangle'); }
+    },
+    unlock(){ get(); }
+  };
+})();
+// first touch unlocks the audio context (iOS requires a user gesture)
+document.addEventListener('touchstart', ()=> SFX.unlock(), {passive:true, once:true});
+document.addEventListener('mousedown', ()=> SFX.unlock(), {once:true});
+function setSoundOn(on){
+  soundOn = !!on;
+  try{ localStorage.setItem(LS_SOUND, soundOn ? '1' : '0'); }catch(e){}
+  const t = document.getElementById('acctSoundToggle');
+  if(t) t.classList.toggle('on', soundOn);
+  if(soundOn) SFX.play('success');
+}
 function haptic(kind){
+  if(kind === 'select' || kind === 'success' || kind === 'record' || kind === 'warning'){
+    if(kind !== 'select' || Date.now() - (haptic._st || 0) >= 35){
+      if(kind === 'select') haptic._st = Date.now();
+      SFX.play(kind);
+    }
+  }
   const H = IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
   if(!H) return;
   if(kind === 'record'){
@@ -3115,6 +3177,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <button type="button" class="acct-row" onclick="openAiPrefsSheet()"><span>Czego unikać</span><span class="acct-v" id="acctAiAvoidV">Uzupełnij</span></button>
     </div>
     <p class="acct-hint">Trener AI patrzy na Twoje treningi i preferencje. To nie porada medyczna.</p>
+    <p class="acct-sec">Dźwięki</p>
+    <div class="acct-rows">
+      <button type="button" class="acct-row" onclick="setSoundOn(!soundOn)"><span>Dźwięki w aplikacji</span><span class="acct-toggle" id="acctSoundToggle"><span class="acct-toggle-knob"></span></span></button>
+    </div>
+    <p class="acct-hint">Tyknięcia suwaka i dźwięk zapisania serii. Nie przerywają muzyki i milkną w trybie cichym.</p>
     <p class="acct-sec" id="acctReminderSec" hidden>Powiadomienia</p>
     <div class="acct-rows" id="acctReminderRows" hidden>
       <button type="button" class="acct-row" onclick="openReminderSheet()"><span>Przypomnienie o treningu</span><span class="acct-v" id="acctReminderV">Wyłączone</span></button>
@@ -5066,6 +5133,8 @@ function renderAccountPanel(){
   renderAcctCloudCard();
   renderReminderRow();
   renderHealthRow();
+  const st = document.getElementById('acctSoundToggle');
+  if(st) st.classList.toggle('on', soundOn);
 }
 let _acctPanelCloseT = null;
 function openAccountPanel(){
@@ -6588,7 +6657,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.48.8";
+const APP_VERSION = "4.49.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
