@@ -2350,11 +2350,14 @@ body.pev2-bg{background:var(--m-panel);}
   /* Floating sheets, concentric with the screen corner (Maciej, 2026-10-05):
      on Face ID iPhones (home indicator => safe-area-inset-bottom ~34px) the
      sheet floats 10px above the bottom edge and its bottom corners are
-     screen radius (~55) minus that gap = 45px. With no home indicator
+     the screen's corner radius minus that gap (17 Pro: 62 - 10 = 52px), so
+     the 10px gap stays 10px around the curve too. A single 45px missed on
+     the 17 Pro: the corner pinched to ~7px. With no home indicator
      (iPhone SE, Safari with its bottom toolbar, desktop) env() is 0, so the
      gap and bottom radius collapse to 0 and the sheet sits flush as before. */
   --m-sheet-gap:min(10px, env(safe-area-inset-bottom));
-  --m-sheet-r-bottom:min(45px, calc(env(safe-area-inset-bottom) * 1.4));}
+  --m-screen-r:55px; /* overwritten per model by the screen-size lookup in the first <script> */
+  --m-sheet-r-bottom:min(calc(var(--m-screen-r) - var(--m-sheet-gap)), calc(env(safe-area-inset-bottom) * 2));}
 html.gymv2-bg{background:#e2e2e1;}
 body.gymv2-bg{background:transparent;}
 .gy-bg{display:none;position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;}
@@ -2548,6 +2551,17 @@ const MOTION = (()=>{
 // on the element or an ancestor — this empty passive one turns on
 // every :active press state in the app. Never preventDefault here.
 document.addEventListener('touchstart', ()=>{}, {passive:true});
+/* iPhone display corner radius by screen size (points, portrait), feeding
+   --m-screen-r for the concentric floating sheets. CSS can't read the
+   device's corner radius, so it's looked up here; unknown sizes keep the
+   55px default. Values per Apple's display specs as commonly published. */
+(function(){
+  const w = Math.min(screen.width, screen.height), h = Math.max(screen.width, screen.height);
+  const R = {'375x812':39, '414x896':41.5, '390x844':47.33, '428x926':53.33, '360x780':44,
+             '393x852':55, '430x932':55, '402x874':62, '440x956':62, '420x912':62};
+  const r = R[w + 'x' + h];
+  if(r) document.documentElement.style.setProperty('--m-screen-r', r + 'px');
+})();
 document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
 document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 </script>
