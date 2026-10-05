@@ -798,7 +798,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    straight from the finish screen too. Only the few genuinely new bits
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
-#nameEditOverlay,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet{z-index:9600;}
+#nameEditOverlay,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#soundTestSheet{z-index:9600;}
 /* mConfirm() is opened from inside the account panel (z 95) and its sheets
    (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
 #mConfirmOverlay{z-index:9650;}
@@ -2554,6 +2554,7 @@ if(IS_NATIVE) document.documentElement.classList.add('native-app');
    warning. Off with the silent switch (Web Audio follows it on iOS), mixes with
    the user's music, and is gated by the "Dźwięki" toggle in the account panel. */
 const LS_SOUND = 'thryve_sound';
+let sysTickId = (()=>{ try{ return parseInt(localStorage.getItem('thryve_tick_sys'), 10) || 0; }catch(e){ return 0; } })();
 let soundOn = (()=>{ try{ return localStorage.getItem(LS_SOUND) !== '0'; }catch(e){ return true; } })();
 const SFX = (()=>{
   let ctx = null;
@@ -2602,7 +2603,12 @@ const SFX = (()=>{
       if(!soundOn) return;
       const c = get(); if(!c) return;
       const t = c.currentTime + 0.005;
-      if(kind === 'select') tick(c, t);
+      if(kind === 'select'){
+        // native only: a chosen iOS system sound (see the "Dźwięk tyknięcia" test sheet) replaces the synth tick
+        const P = sysTickId && IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.MekkioSound;
+        if(P){ P.play({ id: sysTickId }).catch(()=>{}); return; }
+        tick(c, t);
+      }
       else if(kind === 'done'){ note(c, 880, t, 0.16, 0.10); note(c, 1318.5, t + 0.09, 0.26, 0.10); }
       else if(kind === 'rest'){ bell(c, 784, t, 0.10); bell(c, 1046.5, t + 0.22, 0.10); }
       else if(kind === 'record'){ note(c, 659.3, t, 0.14, 0.10); note(c, 880, t + 0.09, 0.14, 0.10); note(c, 1318.5, t + 0.18, 0.4, 0.11); }
@@ -3200,6 +3206,9 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="acct-rows">
       <button type="button" class="acct-row" onclick="setSoundOn(!soundOn)"><span>Dźwięki w aplikacji</span><span class="acct-toggle" id="acctSoundToggle"><span class="acct-toggle-knob"></span></span></button>
     </div>
+    <div class="acct-rows" id="acctSoundTestRows" hidden>
+      <button type="button" class="acct-row" onclick="openSoundTestSheet()"><span>Dźwięk tyknięcia (test)</span><span class="acct-v" id="acctSoundTestV">Własny</span></button>
+    </div>
     <p class="acct-hint">Tyknięcia suwaka i dźwięk zapisania serii. Nie przerywają muzyki i milkną w trybie cichym.</p>
     <p class="acct-sec" id="acctReminderSec" hidden>Powiadomienia</p>
     <div class="acct-rows" id="acctReminderRows" hidden>
@@ -3518,6 +3527,35 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
      wybierana przez użytkownika. Przeliczane przy starcie apki i przy
      zapisie tego arkusza — NIE na żywo przy każdej zmianie planu (patrz
      scheduleWorkoutReminders()). -->
+<!-- Dźwięk tyknięcia (test, native only): audition iOS SystemSoundIDs and pick one for the ruler tick. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="soundTestSheet" onclick="if(event.target===this) closeSoundTestSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-header">
+        <div class="fbv2-title-row">
+          <h1>DŹWIĘK TYKNIĘCIA</h1>
+          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeSoundTestSheet()"></span>
+        </div>
+        <p class="fbv2-subtitle">Dotknij numeru, żeby odsłuchać. „Użyj” ustawia go jako tyknięcie suwaka.</p>
+      </div>
+      <div class="plansv2-customize-section">
+        <div class="acct-rows" id="soundTestList" style="max-height:44vh;overflow:auto;"></div>
+        <div class="acct-num-row solo">
+          <div class="exv2-field">
+            <label>Własny numer</label>
+            <input type="number" inputmode="numeric" id="soundTestCustom" placeholder="np. 1157" onkeydown="if(event.key==='Enter') soundTestPlay(parseInt(this.value,10))">
+          </div>
+        </div>
+      </div>
+      <div class="plansv2-customize-actions">
+        <button type="button" class="plansv2-customize-cancel" onclick="soundTestUse(0)">WŁASNY</button>
+        <button type="button" class="plansv2-customize-apply" onclick="soundTestPlay(parseInt(document.getElementById('soundTestCustom').value,10))">ODSŁUCHAJ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden plansv2-customize-overlay" id="reminderSheet" onclick="if(event.target===this) closeReminderSheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
@@ -5077,7 +5115,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet'];
+const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','soundTestSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -5154,6 +5192,12 @@ function renderAccountPanel(){
   renderHealthRow();
   const st = document.getElementById('acctSoundToggle');
   if(st) st.classList.toggle('on', soundOn);
+  const tr = document.getElementById('acctSoundTestRows');
+  if(tr){
+    tr.hidden = !(IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.MekkioSound);
+    const tv = document.getElementById('acctSoundTestV');
+    if(tv) tv.textContent = sysTickId ? ('Systemowy ' + sysTickId) : 'Własny';
+  }
 }
 let _acctPanelCloseT = null;
 function openAccountPanel(){
@@ -6355,6 +6399,35 @@ function openReminderSheet(){
   setTimeout(()=> acctSheetOpen('reminderSheet'), 200); // po animacji zamykania panelu konta
 }
 function closeReminderSheet(viaDrag){ acctSheetClose('reminderSheet', viaDrag); }
+/* ---- native: audition iOS system sounds for the ruler tick ---- */
+const SOUND_TEST_IDS = [1104,1103,1105,1306,1057,1123,1157,1156,1155,1100,1101,1102,1106,1107,1108,1109,1110,1200,1204,1054,1519,1520,1521];
+function soundTestPlay(id){
+  const P = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.MekkioSound;
+  if(!P || !id) return;
+  P.play({ id }).catch(()=>{});
+}
+function soundTestUse(id){
+  sysTickId = id || 0;
+  try{ localStorage.setItem('thryve_tick_sys', String(sysTickId)); }catch(e){}
+  renderSoundTestList();
+  const tv = document.getElementById('acctSoundTestV');
+  if(tv) tv.textContent = sysTickId ? ('Systemowy ' + sysTickId) : 'Własny';
+  toast(sysTickId ? 'Tyknięcie: systemowy ' + sysTickId : 'Tyknięcie: własny dźwięk');
+}
+function renderSoundTestList(){
+  const el = document.getElementById('soundTestList');
+  if(!el) return;
+  el.innerHTML = SOUND_TEST_IDS.map(id=>
+    `<div class="acct-row" style="cursor:default;"><button type="button" class="acct-row" style="border:0;padding:0;width:auto;flex:1;" onclick="soundTestPlay(${id})"><span>${id}${id === sysTickId ? ' · wybrany' : ''}</span></button><button type="button" class="acct-photo-clear" onclick="soundTestUse(${id})">Użyj</button></div>`
+  ).join('');
+}
+function openSoundTestSheet(){
+  closeAccountPanel();
+  renderSoundTestList();
+  setTimeout(()=> acctSheetOpen('soundTestSheet'), 200);
+}
+function closeSoundTestSheet(viaDrag){ acctSheetClose('soundTestSheet', viaDrag); }
+
 function toggleReminderEnabled(){
   const toggle = document.getElementById('reminderToggle');
   const label = document.getElementById('reminderToggleRow').querySelector('span');
@@ -6676,7 +6749,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.49.1";
+const APP_VERSION = "4.49.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -8646,7 +8719,7 @@ function mSheetDrag(overlayId, closeFn){
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet']
+['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','soundTestSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 
 /* ---- "Zamień ćwiczenie" sheet (stage 3, idea #5) — rides .m-sheet ---- */
