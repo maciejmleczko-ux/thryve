@@ -5142,6 +5142,8 @@ const ISOLATION_CYCLE = ['VC','VD'];
 // call site that shows the BUILDER toggle.
 function canUsePeriodization(){ return true; }
 const BUILTIN_EXERCISES_BY_NAME = new Map(BUILTIN_EXERCISES.map(e=>[e.name, e]));
+// declared here, early: exSetsView() runs during startup (recomputeWorkoutCalories) before the later code that uses it is reached
+const LEGACY_TIME_EX = new Set(['Plank','Dead Hang']);
 function getExerciseLibrary(){
   return [...BUILTIN_EXERCISES, ...customExercises.map(e => ({...e, day:'Własne'}))];
 }
@@ -9245,7 +9247,6 @@ function fmtDur(sec, perSide){
 /* Plank and Dead Hang were reps-mode exercises that logged SECONDS in `reps`. Their stored history is never
    rewritten (no migration, no change to sync signatures): wherever sets are read for history / stats /
    records, exSetsView() reads such a set (no durationSec, reps>0, no weight) as a time set instead. */
-const LEGACY_TIME_EX = new Set(['Plank','Dead Hang']);
 // built-in cardio (group Kardio): never a record, never mixed into strength numbers
 function isCardioName(name){ const b = BUILTIN_EXERCISES_BY_NAME.get(name); return !!b && b.group === 'Kardio'; }
 function exSetsView(ex){
