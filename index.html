@@ -9126,10 +9126,15 @@ function restStop(){
   if(restTimer){ clearInterval(restTimer.iv); restTimer = null; }
   restPaint(null);
 }
-function restStart(ex){
+// startedAt: when the set actually ended (a timed set finished while the app was in the
+// background); default now. rest "0s" = no rest timer at all (single-set warm-up / cardio / stretch).
+function restStart(ex, startedAt){
   restStop();
   const sec = parseRestSeconds(ex.rest);
-  restTimer = { endAt: Date.now() + sec*1000, total: sec, exName: ex.name, iv: setInterval(restTick, 250) };
+  if(sec <= 0) return;
+  const endAt = (startedAt || Date.now()) + sec*1000;
+  if(endAt < Date.now() - 5000) return; // already over long ago: same "stale" rule as restTick, no chip, no buzz
+  restTimer = { endAt, total: sec, exName: ex.name, iv: setInterval(restTick, 250) };
   restTick();
 }
 function restTick(){
@@ -9724,6 +9729,9 @@ function tmSkip(){
 function tmCommit(sec, auto){
   const ex = popupExercise;
   if(!ex || !isTimeEx(ex)){ tmStop(); return; }
+  // when the set really ended: on timeline end for an automatic finish (the app may only be
+  // coming back from the background now), otherwise right now
+  const endedAt = auto && tm ? tm.t0 + (tm.sides === 2 ? 2 * tm.D + TM_SWITCH_MS : tm.D) : Date.now();
   tmStop();
   const sv = ex.setValues;
   const row = { weight:'', reps:'', durationSec: Math.max(1, Math.round(sec)) };
@@ -9734,7 +9742,7 @@ function tmCommit(sec, auto){
   haptic(auto ? 'done' : 'medium');   // 'done' also plays the success sound — the end-of-set signal, also when the screen was off
   markGymActivity();
   liveActivity();
-  restStart(ex);
+  restStart(ex, endedAt);
   lgPersistDraft();
   lgRenderSets();
   lgResetCurrent();
