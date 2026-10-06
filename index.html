@@ -5273,8 +5273,11 @@ let kcalPersonalFactor = (()=>{ const v = parseFloat(localStorage.getItem(LS_KCA
    Treadmill — ACSM metabolic equations (ml O2 / kg / min, S = speed in m/min, G = grade as a fraction):
      walking  VO2 = 0.1·S + 1.8·S·G + 3.5     (ACSM validity: about 3.0–6.4 km/h; 1.9–4.0 mph)
      running  VO2 = 0.2·S + 0.9·S·G + 3.5     (ACSM validity: from about 8 km/h; 5 mph and up)
-   kcal = VO2 · kg / 1000 · 5 kcal per litre of O2 · minutes. ACSM leaves 6.4–8 km/h open, so the walk/run
-   switch at 7 km/h is OUR decision (the middle of that gap), not a figure from the ACSM text.
+   kcal = VO2 · kg / 1000 · 5 kcal per litre of O2 · minutes. ACSM leaves 6.4–8 km/h open (neither equation is
+   validated there), so this zone is OUR decision: a transition zone 6.4–8 km/h in which VO2 is interpolated
+   linearly between the walking value at 6.4 km/h and the running value at 8 km/h (same grade). That replaces a
+   hard 7 km/h switch, which made the estimate jump by roughly 75 % at the threshold. Below 6.4 km/h the walking
+   equation applies, from 8 km/h the running equation, so the estimate is continuous everywhere.
    Speed comes from distance ÷ time; speeds outside 1.2–25 km/h are treated as a typing error (not counted).
 
    Other machines — METs from the Compendium of Physical Activities (pacompendium.com, 2024 codes),
@@ -5290,11 +5293,20 @@ let kcalPersonalFactor = (()=>{ const v = parseFloat(localStorage.getItem(LS_KCA
      HIIT            02040  7.5  Circuit training, including kettlebells, some aerobic movement with minimal
                                   rest, general, vigorous intensity */
 const CARDIO_MET = { 'Stationary Bike': 6.8, 'Air Bike': 8.0, 'Elliptical': 5.0, 'Stair Climber': 9.3, 'Rowing Machine': 7.3, 'Ski Erg': 10.5, 'Jump Rope': 11.0, 'HIIT': 7.5 };
-const TREADMILL_WALK_RUN_MPM = 7000 / 60;   // 7 km/h in m/min — our decision, see above
+const TM_WALK_MAX_MPM = 6400 / 60, TM_RUN_MIN_MPM = 8000 / 60;   // 6.4 and 8 km/h in m/min — ends of the transition zone, see above
+const acsmWalkVo2 = (S, G)=> 0.1 * S + 1.8 * S * G + 3.5;
+const acsmRunVo2  = (S, G)=> 0.2 * S + 0.9 * S * G + 3.5;
+function treadmillVo2(S, G){
+  if(S <= TM_WALK_MAX_MPM) return acsmWalkVo2(S, G);
+  if(S >= TM_RUN_MIN_MPM) return acsmRunVo2(S, G);
+  const t = (S - TM_WALK_MAX_MPM) / (TM_RUN_MIN_MPM - TM_WALK_MAX_MPM);
+  const a = acsmWalkVo2(TM_WALK_MAX_MPM, G), b = acsmRunVo2(TM_RUN_MIN_MPM, G);
+  return a + t * (b - a);
+}
 function treadmillKcal(durationSec, distanceM, inclinePct, kg){
   const min = durationSec / 60, S = distanceM / min, G = (inclinePct || 0) / 100;
   if(!(min > 0) || !(S >= 20 && S <= 25000 / 60)) return null;
-  const vo2 = S >= TREADMILL_WALK_RUN_MPM ? 0.2 * S + 0.9 * S * G + 3.5 : 0.1 * S + 1.8 * S * G + 3.5;
+  const vo2 = treadmillVo2(S, G);
   return vo2 * kg / 1000 * 5 * min;
 }
 // kcal of one cardio set, or null when it can't be estimated (then its minutes stay in the base term); any stray set.kcal is ignored
