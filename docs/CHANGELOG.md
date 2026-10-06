@@ -126,6 +126,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Sheet i zegar:** lista kroków jako kafelki jak ćwiczenia główne; jedna oś czasu dla całej sekwencji (timestamp, działa w tle), 5 s „Przygotuj się” z opisem PL/EN przed każdym ćwiczeniem, zmiana strony, pauza, pomiń krok, przerwij; Keep Awake i powiadomienia lokalne (ids 91100+). Zaliczenie (wpis `Warm-up`/`Stretching` w sesji) tylko po dojściu do końca zegara.
 - **Czas planu:** „~N min” na karcie planu wlicza oba bloki (z 5 s przygotowania na ćwiczenie).
 - **Układ Trening:** „Wybierz inne ćwiczenie” i „Dodaj ćwiczenie” kończą sekcję ćwiczeń, przed kartą rozciągania.
+- **iOS:** Build 31 (4.53.0), archiwum zbudowane 2026-10-06; wysyłka na TestFlight po zalogowaniu w Xcode. `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
 
 **Commity:** wpis dopisany w commicie tej zmiany.
 
