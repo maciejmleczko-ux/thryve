@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.52.1 (2026-10-06)
-- **Liczba wersji:** 235 · **commitów:** 576
+- **Aktualna wersja:** 4.52.2 (2026-10-06)
+- **Liczba wersji:** 236 · **commitów:** 578
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.52.2 · PATCH · 2026-10-06
+
+**Dla użytkownika:** poprawione opisy „Jak ćwiczyć” dla 10 ćwiczeń (PL) i 2 (EN).
+
+- **Poprawki opisów (PL, 10 wpisów):** Close-Grip Bench Press, Upright Row, Dumbbell Rear Delt Fly, Cable Rear Delt Fly, Hip Adduction, Smith Machine Squat, Kettlebell Snatch (literówka „z zbyt”), Band External Rotation, Wall Slides, HIIT (opis zgodny z timerem 8 minut bez rund). **EN (2 wpisy):** HIIT i Close-Grip Bench Press. Reszta bez zmian; oba słowniki dalej mają po 167 kluczy, a `EXERCISE_HOWTO_EN` jest zgodny z `EXERCISE_HOWTO_EN.json`.
+- **iOS:** Build 30 (4.52.2) archiwum zbudowane 2026-10-06; wysyłka na TestFlight robiona ręcznie po zalogowaniu w Xcode. `version.json` zostaje na 22 do końca przetwarzania buildu.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.52.1 · PATCH · 2026-10-06
 
