@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.51.0 (2026-10-06)
-- **Liczba wersji:** 234 · **commitów:** 560
+- **Aktualna wersja:** 4.52.0 (2026-10-06)
+- **Liczba wersji:** 235 · **commitów:** 570
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -78,7 +78,7 @@ Stan na 4.44.0.
 | Schemat bazy | `supabase-schema.sql` | idempotentny, można puszczać ponownie |
 | Edge Functions | `supabase/functions/ai-proxy`, `supabase/functions/delete-account`, `supabase/functions/apple-store-token`, `supabase/functions/_shared/apple.ts` | proxy do Claude, usuwanie konta (unieważnia też token Apple), zapis tokenu Apple po logowaniu; sekrety `APPLE_TEAM_ID`/`APPLE_KEY_ID`/`APPLE_PRIVATE_KEY` |
 | Dashboard statystyk | `stats.html` → **app.mekkio.app/stats** + Edge Function `supabase/functions/admin-stats` | od 2026-10-01, prywatny: tylko zbiorcze liczby, tylko konta z sekretu `STATS_ADMIN_EMAILS`; `service_role` ma `select` na `workouts`. Goście niewidoczni, pobrania w App Store Connect |
-| Ćwiczenia czasowe | `index.html` (`mode:'time'`, `tm*`), `docs/mekkio_domyslne_wartosci.md`, `docs/exercise-defaults-review.md` | od 4.51.0; seria czasowa = `{weight:0, reps:0, durationSec, perSide?}`; klucz `mekkio_tm_notif_asked_v1` (bez prefiksu `fitlog_`); natywnie wtyczka `@capacitor-community/keep-awake` (`native/package.json`) i powiadomienia lokalne id 91000+ |
+| Ćwiczenia czasowe | `index.html` (`mode:'time'`, `tm*`), `docs/mekkio_domyslne_wartosci.md`, `docs/exercise-defaults-review.md` | od 4.51.0; seria czasowa = `{weight:0, reps:0, durationSec, perSide?}`; klucz `mekkio_tm_notif_asked_v1` (bez prefiksu `fitlog_`); natywnie wtyczka `@capacitor-community/keep-awake` (`native/package.json`) i powiadomienia lokalne id 91000+ |; kardio od 4.52.0: `metrics` w bibliotece, pola serii `distanceM`/`inclinePct`/`level`/`floors`/`jumps`/`kcal`, kalorie `CARDIO_MET` + ACSM
 | Zasady ruchu / animacji | `CLAUDE.md` + tokeny `--m-*` w `:root` | od 4.42.4 |
 | Hosting (główny) | Cloudflare Workers (static assets): **app.mekkio.app** | od 2026-09-28; repo `mekkio`, build `sh scripts/build-web.sh` → `dist/` (tylko pliki apki), `wrangler.jsonc` |
 | Hosting (lustro) | GitHub Pages: `maciejmleczko-ux.github.io/thryve/` | stare ikony na pulpicie; jeden `git push` idzie do obu repo (`origin` ma dwa push URL). Inny adres = osobny localStorage |
@@ -116,6 +116,29 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.52.0 · MINOR · 2026-10-06
+
+**Dla użytkownika:** kardio z wynikami (dystans, nachylenie, poziom, piętra, skoki, kalorie z maszyny) i szacunkiem kalorii; Plank, Dead Hang i Wall Sit jako ćwiczenia na czas; nowe ikony (Incline Bench Press, Treadmill, Wall Sit); w podsumowaniu blok „Na czas”.
+
+- **Wyniki kardio:** po serii kardio arkusz „Wyniki” (też przy dotknięciu serii). Pola zależą od ćwiczenia (`metrics` w danych biblioteki): bieżnia (dystans, nachylenie), rower i Air Bike (dystans, poziom), orbitrek (poziom, dystans), stair climber (poziom, piętra), wioślarz i Ski Erg (dystans w m), skakanka (skoki). Seria: `{weight:0, reps:0, durationSec, distanceM?, inclinePct?, level?, floors?, jumps?, kcal?, kcalEst:false}`. Dystans zawsze w metrach; kcal tylko gdy użytkownik wpisał odczyt z maszyny, szacunku na serii nie zapisujemy. Stary klient ignoruje nowe pola. `sanitizeImportedExercise` przepuszcza `metrics` po białej liście. Bez migracji (Supabase: JSONB).
+- **Historia i podsumowanie:** wiersz kardio „20:00 · 3,2 km · 2%” (kcal serii tylko z ręcznego wpisu, z oznaczeniem „z maszyny”). Blok „Na czas” w podsumowaniu tylko gdy są ćwiczenia czasowe; czwarty kafel „Łączny czas” tylko dla treningu wyłącznie czasowego (karta historii tak samo). Karta „Kardio · 7 dni” w statystykach (czas, dystans, sesje; bez kalorii), kardio poza rekordami i listą ćwiczeń w Postępach.
+- **Kalorie:** szacunek zawsze „ok. N kcal”. Bieżnia: równanie ACSM (marsz do 7 km/h, bieg od 7 km/h; próg 7 km/h to nasza decyzja), reszta: MET z Compendium (kody w komentarzu przy `CARDIO_MET`, Air Bike jako przybliżenie). Minuty kardio liczone osobno wychodzą z członu bazowego treningu, bieżnia bez dystansu zostaje w bazie. Osobisty mnożnik na całej sumie; priorytet bez zmian (edycja, Apple Health, szacunek). Bez zmiany `KCAL_MODEL_VERSION`, więc istniejące treningi się nie przeliczają.
+- **Plank, Dead Hang, Wall Sit:** Plank 3 × 45 s, Dead Hang 3 × 30 s (grupa Plecy), Wall Sit 3 × 30 s. Stara historia Planka i Dead Hanga (sekundy w `reps`) czytana jako czas przez `exSetsView()`, bez zapisu; plany dostają `mode`/`durationSec` z biblioteki w czasie działania.
+- **Makiety:** `mockups/kardio.html` (statyczne stany, CSS z `index.html`).
+
+**Commity (10):**
+
+- `d897839` 2026-10-06 — teksty ćwiczeń czasowych, podpowiedź Kardio
+- `c1bcde4` 2026-10-06 — Plank i Dead Hang w trybie czasowym, odczyt starej historii, nakładka z biblioteki
+- `9e7a566` 2026-10-06 — Dead Hang w grupie Plecy
+- `afa6797` 2026-10-06 — Etap 0: ikony i wpisy Incline Bench Press i Treadmill
+- `1cf7092` 2026-10-06 — Wall Sit
+- `cb46143` 2026-10-06 — makiety kardio
+- `73806a2` 2026-10-06 — etap C(a): metrics i pola serii
+- `ffd744f` 2026-10-06 — etap C(b): arkusz Wyniki, historia, podsumowanie, statystyki
+- `aa28ae8` 2026-10-06 — etap C(c): kalorie kardio
+
 
 ### 4.51.0 · MINOR · 2026-10-06
 
