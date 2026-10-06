@@ -32,7 +32,7 @@ Stare = moje szacunki z 4.50.0. Nowe = `docs/mekkio_domyslne_wartosci.md` (sekcj
 | Dumbbell Rear Delt Fly | `dumbbell_rear_delt_fly` | 3×12-15, 60s | 3×12-15, 60s |  |
 | Dumbbell Romanian Deadlift | `dumbbell_romanian_deadlift` | 3×8-12, 90s | 3×8-12, 90s |  |
 | Dumbbell Shrug | `dumbbell_shrug` | 3×10-15, 60s | 3×10-15, 75s |  |
-| Farmer's Walk | `farmers_walk` | 3×30-60, 60-90s | _bez zmian, TODO(time-mode), docelowo czas (sekcja B)_ | |
+| Farmer's Walk | `farmers_walk` | 3×30-60, 60-90s | _tryb czasowy (sekcja B), patrz niżej_ | |
 | Incline Dumbbell Curl | `incline_dumbbell_curl` | 2×10-12, 60s | 3×10-12, 60s |  |
 | Assisted Pull-Up Machine | `assisted_pull_up_machine` | 3×8-12, 90s | 3×8-12, 90s |  |
 | Chest-Supported Dumbbell Row | `chest_supported_dumbbell_row` | 3×10-12, 75s | 3×10-12, 90s |  |
@@ -62,18 +62,27 @@ Stare = moje szacunki z 4.50.0. Nowe = `docs/mekkio_domyslne_wartosci.md` (sekcj
 | Kettlebell Windmill | `kettlebell_windmill` | 2×6-8, 60s | 3×5-8, 60s (/str.) |  |
 | Lying Leg Raise | `lying_leg_raise` | 3×10-15, 45-60s | 3×10-15, 60s |  |
 | Russian Twist | `russian_twist` | 3×15-20, 45-60s | 3×16-20, 45s ((łącznie)) |  |
-| Side Plank | `side_plank` | 3×20-40, 45-60s | _bez zmian, TODO(time-mode), docelowo czas (sekcja B)_ | |
+| Side Plank | `side_plank` | 3×20-40, 45-60s | _tryb czasowy (sekcja B), patrz niżej_ | |
 | Band External Rotation | `band_external_rotation` | 2×12-15, 45s | 3×12-15, 45s (/str.) |  |
 | Band Face Pull | `band_face_pull` | 3×12-20, 60s | 3×15-20, 45s |  |
 | Band Lateral Walk | `band_lateral_walk` | 3×12-20, 45-60s | 3×12-15, 45s (kroków /str.) | ⚠ |
 | Band Pull-Apart | `band_pull_apart` | 3×15-20, 45-60s | 3×15-20, 45s |  |
 | Bird Dog | `bird_dog` | 3×8-12, 45s | 3×8-10, 45s (/str.) |  |
 | Burpees | `burpees` | 3×10-15, 60s | 3×8-12, 60s |  |
-| Hollow Body Hold | `hollow_body_hold` | 3×20-40, 45-60s | _bez zmian, TODO(time-mode), docelowo czas (sekcja B)_ | |
-| Mountain Climbers | `mountain_climbers` | 3×20-40, 45-60s | _bez zmian, TODO(time-mode), docelowo czas (sekcja B)_ | |
+| Hollow Body Hold | `hollow_body_hold` | 3×20-40, 45-60s | _tryb czasowy (sekcja B), patrz niżej_ | |
+| Mountain Climbers | `mountain_climbers` | 3×20-40, 45-60s | _tryb czasowy (sekcja B), patrz niżej_ | |
 | Nordic Curl | `nordic_curl` | 3×4-8, 90s | 3×4-8, 90s |  |
 | Sissy Squat | `sissy_squat` | 3×8-12, 75s | 3×8-12, 75s |  |
 
 ## Duże różnice (1)
 
 - **Band Lateral Walk**: było 3×12-20, 45-60s, jest 3×12-15, 45s (kroków /str.)
+
+## Ćwiczenia czasowe (sekcja B, `mode:'time'` od Etapu 2)
+
+| Ćwiczenie | Serie | Czas | Przerwa |
+|---|---|---|---|
+| Farmer's Walk | 3 | 40 s | 90 s |
+| Side Plank | 3 | 30 s na stronę | 45 s |
+| Hollow Body Hold | 3 | 30 s | 45 s |
+| Mountain Climbers | 3 | 30 s | 45 s |

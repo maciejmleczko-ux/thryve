@@ -2498,6 +2498,15 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);letter-spacing:.07em;text-transform:uppercase;color:#000;}
 .lg-hint[hidden]{display:none;}
 .lg-warn{font-size:var(--m-fs-xs);line-height:1.4;color:#cd1200;text-align:center;}
+.lg-tm{gap:10px;}
+.lg-tm-clock{font-size:var(--m-fs-display-sm);font-weight:200;letter-spacing:-.02em;line-height:1;color:#a3a3a3;font-variant-numeric:tabular-nums;transition:color var(--m-dur-quick) ease;}
+.lg-tm-clock.is-run{color:var(--m-orange);}
+.lg-tm-msg{min-height:1.2em;margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-ink);}
+.lg-tm-btns{width:100%;display:flex;flex-direction:column;gap:10px;}
+.lg-tm-row{display:flex;gap:10px;}
+.lg-tm-row[hidden]{display:none;}
+.lg-tm-row .lg-add{flex:1;min-width:0;}
+.lg-add.lg-tm-main{background:var(--m-orange);color:#fff;}
 .lg-add{width:100%;height:55px;border-radius:74px;border:1px solid var(--m-orange);background:transparent;color:var(--m-ink);font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;flex:none;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .lg-sub-scroll{gap:18px;}
 .lg-note-ta{width:100%;box-sizing:border-box;min-height:150px;border:1px solid #e3e1e6;border-radius:16px;padding:14px 16px;background:#f7f6f8;font-family:inherit;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);resize:none;outline:none;}
@@ -4204,6 +4213,10 @@ const T_EN = {
   tuesdayLabel: 'Tuesday:',
   saturdayLabel: 'Saturday:',
   repsUnit: 'reps',
+  timeLabel: 'Time', timeLabelSide: 'Time per side', perSideShort: '/side',
+  tmStart: 'Start', tmPause: 'Pause', tmResume: 'Resume', tmEnd: 'Finish', tmSkip: 'Skip',
+  tmSwitchSides: 'Switch sides', tmSideN: (n,m)=>`Side ${n} of ${m}`,
+  suggestTime: 'Hold the full time on every set. When it feels easy, add a few seconds.',
   customGroupFallback: 'Custom',
   asNeeded: 'as needed',
   shareFileWorkout: 'workout',
@@ -4922,8 +4935,9 @@ const GYM_PLAN_KALISTENIKA = [
   {name:"Calf Raise (Bodyweight)", group:"Łydki", sets:3, repLow:15, repHigh:20, rest:"45-60s", icon:"calf_raise_bodyweight", equipment:"masa ciała"},
 ];
 /* Library extension: 3D icons packs 1-7 (2026-10-06). sets / repLow / repHigh / rest from
-   docs/mekkio_domyslne_wartosci.md (Maciej's proposal, section A); the 4 timed ones (TODO(time-mode))
-   are still old estimates. "na stronę" = per side, comment only, no field yet.
+   docs/mekkio_domyslne_wartosci.md (Maciej's proposal, section A); the 4 timed ones
+   use mode:'time' (durationSec = per side when perSide; repLow/repHigh mirror it only for code that
+   doesn't know the mode). "na stronę" comments = per side, reps mode, no field.
    equipment:"gumy" is new (band_* only), filter chip 'gumy' in PLAN_EQUIP_FILTERS. Icons for packs 8-11 (stretching/mobility/cardio) are
    icon-only, see CUSTOM_EXERCISE_ICON_SUGGEST. seated_leg_curl is not here on
    purpose (same move/equipment as "Leg Curl"). */
@@ -4956,7 +4970,7 @@ const GYM_PLAN_EXTRA_V2 = [
   {name:"Dumbbell Rear Delt Fly", group:"Barki (tylne)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_rear_delt_fly", equipment:"hantle"},
   {name:"Dumbbell Romanian Deadlift", group:"Uda (dwugłowe)", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"dumbbell_romanian_deadlift", equipment:"hantle"},
   {name:"Dumbbell Shrug", group:"Barki", sets:3, repLow:10, repHigh:15, rest:"75s", icon:"dumbbell_shrug", equipment:"hantle"},
-  {name:"Farmer's Walk", group:"Plecy (dół, całość)", sets:3, repLow:30, repHigh:60, rest:"60-90s", icon:"farmers_walk", equipment:"hantle"}, // TODO(time-mode): czasowe, wartości stare (reps) do czasu Etapu 2
+  {name:"Farmer's Walk", group:"Plecy (dół, całość)", sets:3, mode:"time", durationSec:40, repLow:40, repHigh:40, rest:"90s", icon:"farmers_walk", equipment:"hantle"},
   {name:"Incline Dumbbell Curl", group:"Biceps", sets:3, repLow:10, repHigh:12, rest:"60s", icon:"incline_dumbbell_curl", equipment:"hantle"},
   {name:"Assisted Pull-Up Machine", group:"Plecy (szerokość)", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"assisted_pull_up_machine", equipment:"maszyny"},
   {name:"Chest-Supported Dumbbell Row", group:"Plecy (grubość)", sets:3, repLow:10, repHigh:12, rest:"90s", icon:"chest_supported_dumbbell_row", equipment:"hantle"},
@@ -4986,15 +5000,15 @@ const GYM_PLAN_EXTRA_V2 = [
   {name:"Kettlebell Windmill", group:"Brzuch (skos)", sets:3, repLow:5, repHigh:8, rest:"60s", icon:"kettlebell_windmill", equipment:"kettlebell"}, // na stronę
   {name:"Lying Leg Raise", group:"Brzuch", sets:3, repLow:10, repHigh:15, rest:"60s", icon:"lying_leg_raise", equipment:"masa ciała"},
   {name:"Russian Twist", group:"Brzuch (skos)", sets:3, repLow:16, repHigh:20, rest:"45s", icon:"russian_twist", equipment:"masa ciała"}, // łącznie (obie strony)
-  {name:"Side Plank", group:"Brzuch (skos)", sets:3, repLow:20, repHigh:40, rest:"45-60s", icon:"side_plank", equipment:"masa ciała"}, // TODO(time-mode): czasowe, wartości stare (reps) do czasu Etapu 2
+  {name:"Side Plank", group:"Brzuch (skos)", sets:3, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"45s", icon:"side_plank", equipment:"masa ciała"},
   {name:"Band External Rotation", group:"Barki (tylne)", sets:3, repLow:12, repHigh:15, rest:"45s", icon:"band_external_rotation", equipment:"gumy"}, // na stronę
   {name:"Band Face Pull", group:"Barki (tylne)", sets:3, repLow:15, repHigh:20, rest:"45s", icon:"band_face_pull", equipment:"gumy"},
   {name:"Band Lateral Walk", group:"Pośladki", sets:3, repLow:12, repHigh:15, rest:"45s", icon:"band_lateral_walk", equipment:"gumy"}, // kroków na stronę
   {name:"Band Pull-Apart", group:"Barki (tylne)", sets:3, repLow:15, repHigh:20, rest:"45s", icon:"band_pull_apart", equipment:"gumy"},
   {name:"Bird Dog", group:"Plecy (dół, całość)", sets:3, repLow:8, repHigh:10, rest:"45s", icon:"bird_dog", equipment:"masa ciała"}, // na stronę
   {name:"Burpees", group:"Nogi (całość)", sets:3, repLow:8, repHigh:12, rest:"60s", icon:"burpees", equipment:"masa ciała"},
-  {name:"Hollow Body Hold", group:"Brzuch", sets:3, repLow:20, repHigh:40, rest:"45-60s", icon:"hollow_body_hold", equipment:"masa ciała"}, // TODO(time-mode): czasowe, wartości stare (reps) do czasu Etapu 2
-  {name:"Mountain Climbers", group:"Brzuch", sets:3, repLow:20, repHigh:40, rest:"45-60s", icon:"mountain_climbers", equipment:"masa ciała"}, // TODO(time-mode): czasowe, wartości stare (reps) do czasu Etapu 2
+  {name:"Hollow Body Hold", group:"Brzuch", sets:3, mode:"time", durationSec:30, repLow:30, repHigh:30, rest:"45s", icon:"hollow_body_hold", equipment:"masa ciała"},
+  {name:"Mountain Climbers", group:"Brzuch", sets:3, mode:"time", durationSec:30, repLow:30, repHigh:30, rest:"45s", icon:"mountain_climbers", equipment:"masa ciała"},
   {name:"Nordic Curl", group:"Uda (dwugłowe)", sets:3, repLow:4, repHigh:8, rest:"90s", icon:"nordic_curl", equipment:"masa ciała"},
   {name:"Sissy Squat", group:"Nogi (czworogłowe)", sets:3, repLow:8, repHigh:12, rest:"75s", icon:"sissy_squat", equipment:"masa ciała"},
 ];
@@ -8398,6 +8412,7 @@ function estimateStartingWeight(exerciseName, targetReps){
 }
 
 function buildSuggestion(exMeta, history){
+  if(isTimeEx(exMeta)) return {cls:'', text:t('suggestTime','Utrzymaj pełny czas w każdej serii. Gdy pójdzie łatwo, dołóż kilka sekund.')};
   const isBodyweightEx = exMeta.equipment === 'masa ciała';
   if(exMeta.version){
     // Undulating periodization: progression is pinned to the last time THIS
@@ -8686,6 +8701,7 @@ function closeExercisePopupV2(viaDrag){
     persistGymSession();
   }
   if(lg){ clearTimeout(lg.timer); }
+  tmStop();
   popupExercise = null;
   popupShowWarning = false;
   renderGymGridV2(); // tiles show the "2/4" partial-progress badge
@@ -9074,9 +9090,22 @@ function parseRestSeconds(str){
   const mult = /min/i.test(s) ? 60 : 1;
   return Math.max(...nums) * mult;
 }
+/* ---- timed exercises (mode:'time') ----
+   A timed set is saved as {weight:0, reps:0, durationSec, perSide?}: reps:0 keeps old clients
+   (which only know weight/reps) from counting it as volume or a record. durationSec is the time
+   of ONE side when perSide. A missing/zero durationSec falls back to 30 s so the screen can't hang. */
+function isTimeEx(ex){ return !!ex && ex.mode === 'time'; }
+function timeDurFor(ex){ const n = parseInt(ex && ex.durationSec, 10); return n > 0 ? n : 30; }
+function fmtDur(sec, perSide){
+  sec = Math.max(0, Math.round(sec));
+  const txt = sec < 60 ? `${sec} s` : `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;
+  return perSide ? `${txt} ${t('perSideShort','/str.')}` : txt;
+}
+function fmtClock(sec){ sec = Math.max(0, Math.round(sec)); return sec < 60 ? String(sec) : `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`; }
 function fmtKgLocal(n){ return String(Math.round(n * 100) / 100).replace('.', LANG==='en' ? '.' : ','); }
 function fmtRestClock(sec){ sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec/60) + ':' + String(sec%60).padStart(2,'0'); }
 function setIsLogged(sv, bw){
+  if(sv && sv.durationSec > 0) return true; // timed set (mode:'time'): reps/weight stay empty
   const r = String(sv.reps).trim() !== '';
   return bw ? r : (String(sv.weight).trim() !== '' && r);
 }
@@ -9249,7 +9278,7 @@ function lgPaint(){
   }
 }
 function lgReady(){
-  if(!lg || lgPad) return false;
+  if(!lg || lgPad || isTimeEx(popupExercise)) return false;
   const bw = lgBw();
   if(lg.w === '' && !bw) return false;
   if(lg.r === '' || lg.r < 1) return false;
@@ -9377,7 +9406,7 @@ function lgTapSet(i){
   if(Date.now() - lgSwipeAt < 400) return;
   if(lgPad) lgPadClose();
   const sv = popupExercise.setValues[i];
-  if(!sv || !setIsLogged(sv, lgBw())) return;
+  if(!sv || !setIsLogged(sv, lgBw()) || sv.durationSec > 0) return; // timed sets aren't editable, only deletable
   lgFlush();
   lg.editIdx = (lg.editIdx === i) ? null : i;
   haptic('light');
@@ -9418,7 +9447,7 @@ function lgSetsHtml(){
   ex.setValues.forEach((sv, i)=>{
     const logged = setIsLogged(sv, bw);
     const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '');
-    const val = logged ? (bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}` : `${escHtml(fmtKgLocal(parseFloat(sv.weight)||0))}kg x ${escHtml(String(sv.reps))}`) : '—';
+    const val = logged ? (sv.durationSec > 0 ? escHtml(fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}` : `${escHtml(fmtKgLocal(parseFloat(sv.weight)||0))}kg x ${escHtml(String(sv.reps))}`) : '—';
     html += `<div class="lg-set-wrap" data-i="${i}"><div class="lg-set-del" aria-hidden="true">${LG_ICONS.trash}</div>
       <button type="button" class="${cls}" onclick="lgTapSet(${i})"><span class="lg-set-l">${t('seriesLabel', `Seria ${i+1}`, i+1)}</span><span class="lg-set-v">${val}</span><span class="lg-set-c">${LG_ICONS.check}</span></button></div>`;
   });
@@ -9513,6 +9542,7 @@ function renderExercisePopupV2(animate){
   const sugg = buildSuggestion(ex, history);
   const aiAction = getAiActionFor(ex.name);
   const bw = lgBw();
+  const time = isTimeEx(ex);
   const rise = (n)=> animate ? ` m-rise" style="--i:${n}` : '';
   const noteVal = exerciseNotes[ex.name] || '';
   const howto = LANG !== 'en' && EXERCISE_HOWTO[ex.name];
@@ -9538,25 +9568,37 @@ function renderExercisePopupV2(animate){
         </div>
         <div class="lg-chips">
           <span class="lg-chip">${ph('stack')}<span>${t('statSetsCount', `${ex.sets} serie`, ex.sets)}</span></span>
-          <span class="lg-chip">${ph('arrow-clockwise')}<span>${ex.repLow}-${ex.repHigh} ${t('repsUnit','powt.')}</span></span>
+          <span class="lg-chip">${ph('arrow-clockwise')}<span>${time ? escHtml(fmtDur(timeDurFor(ex), ex.perSide)) : `${ex.repLow}-${ex.repHigh} ${t('repsUnit','powt.')}`}</span></span>
           <span class="lg-chip rest" id="lgRest">${ph('clock-countdown')}<span id="lgRestTxt">${escHtml(ex.rest)}</span></span>
         </div>
       </div>
       ${tipHtml}
-      ${bw ? '' : `
+      ${time ? `
+      <div class="lg-block lg-tm${rise(3)}">
+        <span class="lg-lab">${(ex.perSide ? t('timeLabelSide','Czas na stronę') : t('timeLabel','Czas')).toUpperCase()}</span>
+        <div class="lg-tm-clock" id="tmClock">${fmtClock(timeDurFor(ex))}</div>
+        <p class="lg-tm-msg" id="tmMsg" aria-live="polite"></p>
+        <div class="lg-tm-btns">
+          <button type="button" class="lg-add lg-tm-main m-press" id="tmMain" onclick="tmMain()">${t('tmStart','Start')}</button>
+          <div class="lg-tm-row" id="tmRow" hidden>
+            <button type="button" class="lg-add m-press" onclick="tmEnd()">${t('tmEnd','Zakończ')}</button>
+            <button type="button" class="lg-add m-press" onclick="tmSkip()">${t('tmSkip','Pomiń')}</button>
+          </div>
+        </div>
+      </div>` : bw ? '' : `
       <div class="lg-block${rise(3)}">
         <span class="lg-lab">${t('weightLabel','Ciężar').toUpperCase()}</span>
         <div class="lg-wval is-pale"><button type="button" class="lg-num" id="lgW" onclick="lgPadOpen('w')" aria-label="${escHtml(t('weightLabel','Ciężar'))}"></button><span class="lg-unit">kg</span></div>
         <div class="lg-ruler" id="lgRuler"></div>
       </div>`}
-      <div class="lg-block${rise(4)}">
+      ${time ? '' : `<div class="lg-block${rise(4)}">
         <span class="lg-lab">${t('repsLabel','Powtórzenia').toUpperCase()}</span>
         <div class="lg-reps">
           <button type="button" class="lg-step" onclick="lgStepR(-1)" aria-label="−1">${LG_ICONS.minus}</button>
           <button type="button" class="lg-num lg-num-r is-pale" id="lgR" onclick="lgPadOpen('r')" aria-label="${escHtml(t('repsLabel','Powtórzenia'))}"></button>
           <button type="button" class="lg-step" onclick="lgStepR(1)" aria-label="+1">${LG_ICONS.plus}</button>
         </div>
-      </div>
+      </div>`}
       <div class="lg-setsec${rise(5)}">
         <div class="lg-sets" id="lgSets"></div>
         <p class="lg-hint" id="lgHint" hidden>${t('gymSwipeHint','Przesuń serię w lewo, żeby ją usunąć')}</p>
@@ -9574,12 +9616,135 @@ function renderExercisePopupV2(animate){
   lgRenderSets();
   lgPaint();
   restPaint(restTimer ? (restTimer.endAt - Date.now()) / 1000 : null);
+  if(time) tmPaint();
   requestAnimationFrame(()=>{
     const host = document.getElementById('lgRuler');
-    if(host && lg && !bw){ lg.ruler = lgBuildRuler(host, lg.step, lg.w, v=> lgSetW(v, 'ruler')); }
+    if(host && lg && !bw && !time){ lg.ruler = lgBuildRuler(host, lg.step, lg.w, v=> lgSetW(v, 'ruler')); }
   });
 }
+/* ---- timed set countdown (mode:'time') ----
+   Everything derives from ONE timestamp (t0 = start of the timeline, shifted forward by however
+   long it was paused), never from counting interval ticks: iOS freezes timers in the background
+   and with the screen off, and after coming back the clock must show the true remaining time.
+   Timeline: side 1 [0, D) → (perSide) switch [D, D+S) → side 2 [D+S, 2D+S) → done. */
+const TM_SWITCH_MS = 5000;
+let tm = null; // { D, sides, t0, pausedAt, key, iv, wl }
+function tmPhase(){
+  const e = Math.max(0, (tm.pausedAt !== null ? tm.pausedAt : Date.now()) - tm.t0), D = tm.D;
+  if(e < D) return { key:'s0', left: D - e, side: e };
+  if(tm.sides === 1) return { key:'done', left: 0, side: D };
+  if(e < D + TM_SWITCH_MS) return { key:'sw', left: D + TM_SWITCH_MS - e, side: D };
+  if(e < 2*D + TM_SWITCH_MS) return { key:'s1', left: 2*D + TM_SWITCH_MS - e, side: e - D - TM_SWITCH_MS };
+  return { key:'done', left: 0, side: D };
+}
+function tmStop(){
+  if(!tm) return;
+  clearInterval(tm.iv);
+  const wl = tm.wl;
+  tm = null;
+  if(wl){ try{ wl.release().catch(()=>{}); }catch(e){} }
+  if(popupExercise && isTimeEx(popupExercise)) tmPaint();
+}
+async function tmWakeAcquire(){
+  const mine = tm;
+  try{
+    if(!mine || mine.wl || !navigator.wakeLock) return;
+    const wl = await navigator.wakeLock.request('screen');
+    if(tm !== mine){ wl.release().catch(()=>{}); return; }
+    mine.wl = wl;
+    wl.addEventListener('release', ()=>{ if(tm === mine) mine.wl = null; });
+  }catch(e){ /* unsupported (e.g. WKWebView) or denied: the screen may sleep, the timestamp clock still stays correct */ }
+}
+function tmMain(){
+  if(!popupExercise || !isTimeEx(popupExercise)) return;
+  if(!tm){
+    tm = { D: timeDurFor(popupExercise) * 1000, sides: popupExercise.perSide ? 2 : 1, t0: Date.now(), pausedAt: null, key: 's0', iv: setInterval(tmTick, 250), wl: null };
+    haptic('medium');
+    tmWakeAcquire();
+  } else if(tm.pausedAt === null){
+    tm.pausedAt = Date.now();
+    haptic('light');
+  } else {
+    tm.t0 += Date.now() - tm.pausedAt;
+    tm.pausedAt = null;
+    haptic('light');
+    tmWakeAcquire();
+  }
+  tmTick();
+}
+function tmTick(){
+  if(!tm) return;
+  if(!popupExercise || !isTimeEx(popupExercise)){ tmStop(); return; }
+  const ph = tmPhase();
+  if(ph.key !== tm.key){
+    const from = tm.key;
+    tm.key = ph.key;
+    if(ph.key === 'done'){ tmCommit(Math.round(tm.D / 1000), true); return; }
+    if(ph.key === 'sw') haptic('medium');
+    else if(ph.key === 's1' && from === 'sw') haptic('light');
+  }
+  tmPaint();
+}
+function tmPaint(){
+  const clock = document.getElementById('tmClock');
+  if(!clock || !popupExercise) return;
+  const main = document.getElementById('tmMain'), row = document.getElementById('tmRow'), msg = document.getElementById('tmMsg');
+  if(!tm){
+    clock.textContent = fmtClock(timeDurFor(popupExercise));
+    clock.classList.remove('is-run');
+    if(msg) msg.textContent = '';
+    if(main) main.textContent = t('tmStart','Start');
+    if(row) row.hidden = true;
+    return;
+  }
+  const ph = tmPhase(), sec = Math.max(0, Math.ceil(ph.left / 1000));
+  clock.textContent = fmtClock(sec);
+  clock.classList.toggle('is-run', tm.pausedAt === null);
+  if(msg) msg.textContent = ph.key === 'sw' ? t('tmSwitchSides','Zmień stronę') : (tm.sides === 2 ? t('tmSideN', `Strona ${ph.key === 's1' ? 2 : 1} z 2`, ph.key === 's1' ? 2 : 1, 2) : '');
+  if(main) main.textContent = tm.pausedAt !== null ? t('tmResume','Wznów') : t('tmPause','Pauza');
+  if(row) row.hidden = false;
+}
+// "Zakończ": save what was actually done (>0 s). perSide: durationSec is one side's time —
+// during side 1 only that time, during the switch the full side, during side 2 that side's time
+// (the shorter of the two sides).
+function tmEnd(){
+  if(!tm || !popupExercise) return;
+  const ph = tmPhase();
+  const sec = Math.floor(Math.min(ph.side, tm.D) / 1000);
+  if(sec > 0) tmCommit(sec, false);
+  else { haptic('warning'); tmStop(); tmPaint(); }
+}
+// "Pomiń": throw the attempt away, nothing is saved.
+function tmSkip(){
+  if(!tm) return;
+  haptic('light');
+  tmStop();
+  tmPaint();
+}
+function tmCommit(sec, auto){
+  const ex = popupExercise;
+  if(!ex || !isTimeEx(ex)){ tmStop(); return; }
+  tmStop();
+  const sv = ex.setValues;
+  const row = { weight:'', reps:'', durationSec: Math.max(1, Math.round(sec)) };
+  if(ex.perSide) row.perSide = true;
+  const idx = lgFirstBlank();
+  if(idx === -1) sv.push(row); else sv[idx] = row;
+  ex.sets = sv.length;
+  haptic(auto ? 'done' : 'medium');   // 'done' also plays the success sound — the end-of-set signal, also when the screen was off
+  markGymActivity();
+  liveActivity();
+  restStart(ex);
+  lgPersistDraft();
+  lgRenderSets();
+  lgResetCurrent();
+  tmPaint();
+  updateGymPillsV2();
+}
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && tm){ tmTick(); tmWakeAcquire(); } });
+window.addEventListener('pageshow', ()=>{ if(tm) tmTick(); });
 function popupInitLg(){
+  tmStop();
   lg = { editIdx: null, timer: null, ruler: null, step: weightStepFor(popupExercise), w: '', r: '', wt: false, rt: false, wPre: false, rPre: false };
   lgResetCurrent();
 }
@@ -9921,13 +10086,15 @@ function saveWorkout(){
     // "20kg×10 · 0kg×0 · 0kg×0". A row counts as filled if it has EITHER
     // a weight or a reps value, so a bodyweight set (reps only) still saves.
     sets: ex.setValues
-      .filter(s => String(s.weight).trim() !== '' || String(s.reps).trim() !== '')
-      .map(s=>({weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0})),
+      .filter(s => String(s.weight).trim() !== '' || String(s.reps).trim() !== '' || s.durationSec > 0)
+      .map(s=> s.durationSec > 0
+        ? {weight: 0, reps: 0, durationSec: Math.round(s.durationSec), ...(s.perSide ? {perSide: true} : {})}
+        : {weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0}),
     rpe: ex.rpe || null,
     notes: ex.notes || '',
     version: ex.version || null // execution-version tag, periodized plans only — see resolvePeriodizedVersion()
   })).filter(e => e.sets.length); // drop exercises left with no filled sets at all
-  const hasAny = result.some(e => e.sets.some(s => s.weight>0 || s.reps>0));
+  const hasAny = result.some(e => e.sets.some(s => s.weight>0 || s.reps>0 || s.durationSec>0));
   if(!hasAny){ showEmptyWorkoutPopup(t('enterAtLeastOneResult','Wpisz przynajmniej jeden wynik przed zapisem')); return; }
   const cls = classifySession(result.map(e=>e.name));
   const workout = {
@@ -10214,7 +10381,7 @@ function saveWorkoutV2(){
       if(hadReps && s.reps > prevReps && (!repsPR || s.reps > repsPR.reps)) repsPR = { name: ex.name, reps: s.reps };
     });
   });
-  const exCount = w.exercises.filter(ex=> ex.sets.some(s=> s.weight > 0 || s.reps > 0)).length;
+  const exCount = w.exercises.filter(ex=> ex.sets.some(s=> s.weight > 0 || s.reps > 0 || s.durationSec > 0)).length;
 
   // --- calories (F3): estimate from bodyweight-on-the-day + session METs ---
   const kc = computeWorkoutKcal(w);
@@ -10688,10 +10855,12 @@ function sortExercisesByKey(list, pinnedName){
 // means that's only a real risk at hard+a narrow equipment filter).
 // buckets defaults to the full set (fullbody); a split day passes a
 // role-specific subset instead (see planv2PickExercisesForRole()).
+// timed cardio / warm-up / stretching never goes into an auto-generated strength plan, whatever its day
+const NON_STRENGTH_GROUPS = new Set(['Kardio','Rozgrzewka','Rozciąganie']);
 function planv2PickExercises(count, equipment, buckets){
   buckets = buckets || PLANSV2_MUSCLE_BUCKETS;
   // day:'E' = GYM_PLAN_EXTRA_V2 (estimated sets/reps, no timed mode yet) — kept out of auto plans until reviewed.
-  const pool = getExerciseLibrary().filter(ex=>ex.day!=='E' && !BOOKEND_EX_NAMES.has(ex.name) && planv2MatchesEquipment(ex, equipment));
+  const pool = getExerciseLibrary().filter(ex=>ex.day!=='E' && !(ex.mode==='time' && NON_STRENGTH_GROUPS.has(ex.group)) && !BOOKEND_EX_NAMES.has(ex.name) && planv2MatchesEquipment(ex, equipment));
   const used = new Set();
   const picked = [];
   let guard = 0; // laps guard — bails instead of spinning forever if every bucket is exhausted
@@ -11664,6 +11833,7 @@ function sanitizeImportedExercise(entry){
   if(typeof entry.equipment === 'string') out.equipment = cleanName(entry.equipment).slice(0, 30);
   if(typeof entry.compound === 'boolean') out.compound = entry.compound;
   if(typeof entry.version === 'string' && Object.prototype.hasOwnProperty.call(EXECUTION_VERSIONS, entry.version)) out.version = entry.version;
+  if(entry.mode === 'time'){ out.mode = 'time'; out.durationSec = int(entry.durationSec, 1, 3600, 30); if(entry.perSide === true) out.perSide = true; }
   return out;
 }
 function decodePlanPayload(code){
@@ -12063,7 +12233,8 @@ function renderDashboard(){
       exerciseTrend[name] = exerciseTrend[name].slice(-3);
     });
 
-    const exercisesPayload = lastWorkout.exercises.map(ex=>{
+    // timed sets (durationSec, reps:0) are left out: the trainer prompt only knows weight × reps
+    const exercisesPayload = lastWorkout.exercises.filter(ex=> ex.sets.some(s=>s.reps>0)).map(ex=>{
       const sets = ex.sets.filter(s=>s.reps>0).map(s=>({weightKg: s.weight||0, reps: s.reps}));
       const prior = priorBest[ex.name];
       const isNewRecord = sets.some(s=> !prior || s.weightKg > prior.weight || (s.weightKg===prior.weight && s.reps>prior.reps));
@@ -13144,7 +13315,7 @@ function histWorkoutVolRecordV2(w){
 function histWorkoutCardInner(w){
   const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
   const setCount = w.exercises.reduce((s,e)=> s + e.sets.length, 0);
-  const doneCount = w.exercises.filter(e=> e.sets.some(s=> s.weight > 0 || s.reps > 0)).length || w.exercises.length;
+  const doneCount = w.exercises.filter(e=> e.sets.some(s=> s.weight > 0 || s.reps > 0 || s.durationSec > 0)).length || w.exercises.length;
   const exp = !!histExpandedV2[w.id];
   const head = `
     <div class="histv2-card-head">
@@ -13205,7 +13376,7 @@ function histWorkoutCardInner(w){
           <span class="histv2-ex-ico">${statsV2ExerciseIconHtml(e.name)}</span>
           <div class="histv2-ex-meta">
             <p class="histv2-ex-name">${escHtml(e.name)}</p>
-            <p class="histv2-ex-sets">${e.sets.map(s=> s.weight > 0 ? `${s.weight}kg×${s.reps}` : `${s.reps}`).join(' · ')}</p>
+            <p class="histv2-ex-sets">${e.sets.map(s=> s.durationSec > 0 ? fmtDur(s.durationSec, s.perSide) : s.weight > 0 ? `${s.weight}kg×${s.reps}` : `${s.reps}`).join(' · ')}</p>
           </div>
         </div>`).join('')}
     </div>`;
