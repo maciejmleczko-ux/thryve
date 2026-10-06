@@ -122,7 +122,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 **Dla użytkownika:** poprawione opisy „Jak ćwiczyć” dla 10 ćwiczeń (PL) i 2 (EN).
 
 - **Poprawki opisów (PL, 10 wpisów):** Close-Grip Bench Press, Upright Row, Dumbbell Rear Delt Fly, Cable Rear Delt Fly, Hip Adduction, Smith Machine Squat, Kettlebell Snatch (literówka „z zbyt”), Band External Rotation, Wall Slides, HIIT (opis zgodny z timerem 8 minut bez rund). **EN (2 wpisy):** HIIT i Close-Grip Bench Press. Reszta bez zmian; oba słowniki dalej mają po 167 kluczy, a `EXERCISE_HOWTO_EN` jest zgodny z `EXERCISE_HOWTO_EN.json`.
-- **iOS:** Build 30 (4.52.2) archiwum zbudowane 2026-10-06; wysyłka na TestFlight robiona ręcznie po zalogowaniu w Xcode. `version.json` zostaje na 22 do końca przetwarzania buildu.
+- **iOS:** Build 30 (4.52.2), archiwum zbudowane 2026-10-06 (`npm run sync`, `xcodebuild archive`); wysyłka na TestFlight ręcznie po zalogowaniu w Xcode. `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
 
 **Commity:** wpis dopisany w commicie tej zmiany.
 
