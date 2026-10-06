@@ -2554,7 +2554,9 @@ if(IS_NATIVE) document.documentElement.classList.add('native-app');
    warning. Off with the silent switch (Web Audio follows it on iOS), mixes with
    the user's music, and is gated by the "Dźwięki" toggle in the account panel. */
 const LS_SOUND = 'thryve_sound';
-let sysTickId = (()=>{ try{ return parseInt(localStorage.getItem('thryve_tick_sys'), 10) || 0; }catch(e){ return 0; } })();
+// native: the iOS keyboard-click system sound (1104) is the ruler tick; web keeps the synth tick
+const SYS_TICK_DEFAULT = 1104;
+let sysTickId = (()=>{ try{ const v = localStorage.getItem('thryve_tick_sys'); return v === null ? SYS_TICK_DEFAULT : (parseInt(v, 10) || 0); }catch(e){ return SYS_TICK_DEFAULT; } })();
 let soundOn = (()=>{ try{ return localStorage.getItem(LS_SOUND) !== '0'; }catch(e){ return true; } })();
 const SFX = (()=>{
   let ctx = null;
@@ -6750,7 +6752,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.49.3";
+const APP_VERSION = "4.49.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
