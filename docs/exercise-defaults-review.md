@@ -1,75 +1,79 @@
-# Domyślne serie/powtórzenia/przerwy do przeglądu (GYM_PLAN_EXTRA_V2)
+# Domyślne serie/powtórzenia/przerwy (GYM_PLAN_EXTRA_V2): stare vs nowe
 
-Wszystkie wartości **szacunkowe**, niezweryfikowane. Dla ćwiczeń czasowych (Farmer's Walk, Side Plank, Hollow Body Hold, Mountain Climbers) repLow/repHigh to sekundy/kroki, a nie powtórzenia, bo nie ma jeszcze trybu czasowego.
+Stare = moje szacunki z 4.50.0. Nowe = `docs/mekkio_domyslne_wartosci.md` (sekcja A), przerwy w sekundach. ⚠ = różnica > 1 serii lub > 3 powtórzeń (dolna albo górna granica).
 
-| Ćwiczenie | Grupa | Serie | Powt. | Przerwa | Sprzęt |
-|---|---|---|---|---|---|
-| Barbell Shrug | Barki | 3 | 10-15 | 60s | hantle |
-| Close-Grip Bench Press | Triceps | 3 | 8-12 | 90s | hantle |
-| Decline Bench Press | Klatka piersiowa (dół) | 3 | 8-12 | 90s | hantle |
-| Front Squat | Nogi (czworogłowe) | 3 | 6-10 | 120s | hantle |
-| Good Morning | Uda (dwugłowe) | 3 | 8-12 | 90s | hantle |
-| Overhead Press | Barki | 3 | 6-10 | 90-120s | hantle |
-| Rack Pull | Plecy (dół, całość) | 3 | 5-8 | 120s | hantle |
-| Romanian Deadlift | Uda (dwugłowe) | 3 | 8-12 | 90-120s | hantle |
-| Sumo Deadlift | Nogi (uda, pośladki) | 3 | 5-8 | 120s | hantle |
-| Upright Row | Barki | 3 | 10-12 | 60-75s | hantle |
-| Barbell Lunge | Nogi (uda, pośladki) | 3 | 8-12 | 90s | hantle |
-| Dumbbell Goblet Squat | Nogi (uda, pośladki) | 3 | 10-15 | 75-90s | hantle |
-| EZ-Bar Curl | Biceps | 3 | 8-12 | 75s | hantle |
-| Incline Dumbbell Press | Klatka piersiowa (górna) | 3 | 8-12 | 90s | hantle |
-| Landmine Press | Barki | 3 | 8-12 | 75-90s | hantle |
-| Landmine Squat | Nogi (czworogłowe) | 3 | 8-12 | 90s | hantle |
-| Reverse Curl | Biceps | 2 | 10-15 | 60s | hantle |
-| Skull Crusher | Triceps | 3 | 8-12 | 75s | hantle |
-| Spider Curl | Biceps | 2 | 10-15 | 60s | hantle |
-| T-Bar Row | Plecy (grubość) | 3 | 8-12 | 90s | hantle |
-| Arnold Press | Barki | 3 | 8-12 | 75-90s | hantle |
-| Concentration Curl | Biceps | 2 | 10-15 | 60s | hantle |
-| Dumbbell Front Raise | Barki | 3 | 12-15 | 60s | hantle |
-| Dumbbell Kickback | Triceps | 3 | 12-15 | 60s | hantle |
-| Dumbbell Pullover | Plecy (szerokość) | 3 | 10-12 | 75s | hantle |
-| Dumbbell Rear Delt Fly | Barki (tylne) | 3 | 12-15 | 60s | hantle |
-| Dumbbell Romanian Deadlift | Uda (dwugłowe) | 3 | 8-12 | 90s | hantle |
-| Dumbbell Shrug | Barki | 3 | 10-15 | 60s | hantle |
-| Farmer's Walk | Plecy (dół, całość) | 3 | 30-60 | 60-90s | hantle |
-| Incline Dumbbell Curl | Biceps | 2 | 10-12 | 60s | hantle |
-| Assisted Pull-Up Machine | Plecy (szerokość) | 3 | 8-12 | 90s | maszyny |
-| Chest-Supported Dumbbell Row | Plecy (grubość) | 3 | 10-12 | 75s | hantle |
-| Chest-Supported Row Machine | Plecy (grubość) | 3 | 10-12 | 75s | maszyny |
-| Glute Kickback Machine | Pośladki | 3 | 12-15 | 60s | maszyny |
-| Hip Adduction | Nogi (uda, pośladki) | 3 | 12-15 | 60s | maszyny |
-| Reverse Hyperextension | Pośladki | 3 | 12-15 | 60s | maszyny |
-| Seated Calf Raise | Łydki | 3 | 12-20 | 45-60s | maszyny |
-| Step-Up | Nogi (uda, pośladki) | 3 | 8-12 | 75s | hantle |
-| Wrist Curl | Biceps (przedramiona) | 2 | 15-20 | 45s | hantle |
-| Bayesian Cable Curl | Biceps | 2 | 10-15 | 60s | maszyny |
-| Cable Crunch | Brzuch | 3 | 12-15 | 45-60s | maszyny |
-| Cable Glute Kickback | Pośladki | 3 | 12-15 | 60s | maszyny |
-| Pallof Press | Brzuch (skos) | 3 | 10-12 | 45-60s | maszyny |
-| Rope Pushdown | Triceps | 3 | 12-15 | 60s | maszyny |
-| Single-Arm Cable Row | Plecy (grubość) | 3 | 10-12 | 75s | maszyny |
-| Smith Machine Bench Press | Klatka piersiowa | 3 | 8-12 | 90s | maszyny |
-| Smith Machine Incline Press | Klatka piersiowa (górna) | 3 | 8-12 | 90s | maszyny |
-| Smith Machine Shoulder Press | Barki | 3 | 8-12 | 75-90s | maszyny |
-| Smith Machine Squat | Nogi (całość) | 3 | 8-12 | 90-120s | maszyny |
-| Ab Wheel Rollout | Brzuch | 3 | 8-12 | 60s | masa ciała |
-| Cable Pull-Through | Pośladki | 3 | 12-15 | 60-75s | maszyny |
-| Cable Rear Delt Fly | Barki (tylne) | 3 | 12-15 | 60s | maszyny |
-| Kettlebell Clean | Nogi (całość) | 3 | 6-10 | 75-90s | kettlebell |
-| Kettlebell Press | Barki | 3 | 8-12 | 75s | kettlebell |
-| Kettlebell Snatch | Nogi (całość) | 3 | 6-10 | 90s | kettlebell |
-| Kettlebell Windmill | Brzuch (skos) | 2 | 6-8 | 60s | kettlebell |
-| Lying Leg Raise | Brzuch | 3 | 10-15 | 45-60s | masa ciała |
-| Russian Twist | Brzuch (skos) | 3 | 15-20 | 45-60s | masa ciała |
-| Side Plank | Brzuch (skos) | 3 | 20-40 | 45-60s | masa ciała |
-| Band External Rotation | Barki (tylne) | 2 | 12-15 | 45s | gumy |
-| Band Face Pull | Barki (tylne) | 3 | 12-20 | 60s | gumy |
-| Band Lateral Walk | Pośladki | 3 | 12-20 | 45-60s | gumy |
-| Band Pull-Apart | Barki (tylne) | 3 | 15-20 | 45-60s | gumy |
-| Bird Dog | Plecy (dół, całość) | 3 | 8-12 | 45s | masa ciała |
-| Burpees | Nogi (całość) | 3 | 10-15 | 60s | masa ciała |
-| Hollow Body Hold | Brzuch | 3 | 20-40 | 45-60s | masa ciała |
-| Mountain Climbers | Brzuch | 3 | 20-40 | 45-60s | masa ciała |
-| Nordic Curl | Uda (dwugłowe) | 3 | 4-8 | 90s | masa ciała |
-| Sissy Squat | Nogi (czworogłowe) | 3 | 8-12 | 75s | masa ciała |
+| Ćwiczenie | slug | Stare | Nowe | |
+|---|---|---|---|---|
+| Barbell Shrug | `barbell_shrug` | 3×10-15, 60s | 3×8-12, 90s |  |
+| Close-Grip Bench Press | `close_grip_bench_press` | 3×8-12, 90s | 3×6-10, 120s |  |
+| Decline Bench Press | `decline_bench_press` | 3×8-12, 90s | 3×8-10, 120s |  |
+| Front Squat | `front_squat` | 3×6-10, 120s | 3×5-8, 150s |  |
+| Good Morning | `good_morning` | 3×8-12, 90s | 3×8-10, 120s |  |
+| Overhead Press | `overhead_press` | 3×6-10, 90-120s | 3×6-10, 120s |  |
+| Rack Pull | `rack_pull` | 3×5-8, 120s | 3×4-6, 180s |  |
+| Romanian Deadlift | `romanian_deadlift` | 3×8-12, 90-120s | 3×8-10, 120s |  |
+| Sumo Deadlift | `sumo_deadlift` | 3×5-8, 120s | 3×4-6, 180s |  |
+| Upright Row | `upright_row` | 3×10-12, 60-75s | 3×10-12, 90s |  |
+| Barbell Lunge | `barbell_lunge` | 3×8-12, 90s | 3×8-10, 120s (/str.) |  |
+| Dumbbell Goblet Squat | `dumbbell_goblet_squat` | 3×10-15, 75-90s | 3×10-12, 90s |  |
+| EZ-Bar Curl | `ez_bar_curl` | 3×8-12, 75s | 3×8-12, 75s |  |
+| Incline Dumbbell Press | `incline_dumbbell_press` | 3×8-12, 90s | 3×8-12, 120s |  |
+| Landmine Press | `landmine_press` | 3×8-12, 75-90s | 3×8-12, 90s (/str.) |  |
+| Landmine Squat | `landmine_squat` | 3×8-12, 90s | 3×10-12, 90s |  |
+| Reverse Curl | `reverse_curl` | 2×10-15, 60s | 3×10-15, 60s |  |
+| Skull Crusher | `skull_crusher` | 3×8-12, 75s | 3×8-12, 90s |  |
+| Spider Curl | `spider_curl` | 2×10-15, 60s | 3×10-12, 60s |  |
+| T-Bar Row | `t_bar_row` | 3×8-12, 90s | 3×8-10, 120s |  |
+| Arnold Press | `arnold_press` | 3×8-12, 75-90s | 3×8-12, 90s |  |
+| Concentration Curl | `concentration_curl` | 2×10-15, 60s | 3×10-12, 60s (/str.) |  |
+| Dumbbell Front Raise | `dumbbell_front_raise` | 3×12-15, 60s | 3×12-15, 60s |  |
+| Dumbbell Kickback | `dumbbell_kickback` | 3×12-15, 60s | 3×12-15, 60s (/str.) |  |
+| Dumbbell Pullover | `dumbbell_pullover` | 3×10-12, 75s | 3×10-12, 75s |  |
+| Dumbbell Rear Delt Fly | `dumbbell_rear_delt_fly` | 3×12-15, 60s | 3×12-15, 60s |  |
+| Dumbbell Romanian Deadlift | `dumbbell_romanian_deadlift` | 3×8-12, 90s | 3×8-12, 90s |  |
+| Dumbbell Shrug | `dumbbell_shrug` | 3×10-15, 60s | 3×10-15, 75s |  |
+| Farmer's Walk | `farmers_walk` | 3×30-60, 60-90s | _bez zmian, TODO(time-mode), docelowo czas (sekcja B)_ | |
+| Incline Dumbbell Curl | `incline_dumbbell_curl` | 2×10-12, 60s | 3×10-12, 60s |  |
+| Assisted Pull-Up Machine | `assisted_pull_up_machine` | 3×8-12, 90s | 3×8-12, 90s |  |
+| Chest-Supported Dumbbell Row | `chest_supported_dumbbell_row` | 3×10-12, 75s | 3×10-12, 90s |  |
+| Chest-Supported Row Machine | `chest_supported_row_machine` | 3×10-12, 75s | 3×10-12, 90s |  |
+| Glute Kickback Machine | `glute_kickback_machine` | 3×12-15, 60s | 3×12-15, 60s (/str.) |  |
+| Hip Adduction | `hip_adduction` | 3×12-15, 60s | 3×12-15, 60s |  |
+| Reverse Hyperextension | `reverse_hyperextension` | 3×12-15, 60s | 3×12-15, 75s |  |
+| Seated Calf Raise | `seated_calf_raise` | 3×12-20, 45-60s | 4×12-20, 60s |  |
+| Step-Up | `step_up` | 3×8-12, 75s | 3×10-12, 75s (/str.) |  |
+| Wrist Curl | `wrist_curl` | 2×15-20, 45s | 3×15-20, 45s |  |
+| Bayesian Cable Curl | `bayesian_cable_curl` | 2×10-15, 60s | 3×10-15, 60s (/str.) |  |
+| Cable Crunch | `cable_crunch` | 3×12-15, 45-60s | 3×12-15, 60s |  |
+| Cable Glute Kickback | `cable_glute_kickback` | 3×12-15, 60s | 3×12-15, 60s (/str.) |  |
+| Pallof Press | `pallof_press` | 3×10-12, 45-60s | 3×10-12, 60s (/str.) |  |
+| Rope Pushdown | `rope_pushdown` | 3×12-15, 60s | 3×10-15, 60s |  |
+| Single-Arm Cable Row | `single_arm_cable_row` | 3×10-12, 75s | 3×10-12, 75s (/str.) |  |
+| Smith Machine Bench Press | `smith_machine_bench_press` | 3×8-12, 90s | 3×8-10, 120s |  |
+| Smith Machine Incline Press | `smith_machine_incline_press` | 3×8-12, 90s | 3×8-12, 90s |  |
+| Smith Machine Shoulder Press | `smith_machine_shoulder_press` | 3×8-12, 75-90s | 3×8-12, 90s |  |
+| Smith Machine Squat | `smith_machine_squat` | 3×8-12, 90-120s | 3×8-12, 120s |  |
+| Ab Wheel Rollout | `ab_wheel_rollout` | 3×8-12, 60s | 3×8-12, 60s |  |
+| Cable Pull-Through | `cable_pull_through` | 3×12-15, 60-75s | 3×12-15, 75s |  |
+| Cable Rear Delt Fly | `cable_rear_delt_fly` | 3×12-15, 60s | 3×12-15, 60s |  |
+| Kettlebell Clean | `kettlebell_clean` | 3×6-10, 75-90s | 3×6-8, 75s (/str.) |  |
+| Kettlebell Press | `kettlebell_press` | 3×8-12, 75s | 3×6-10, 75s (/str.) |  |
+| Kettlebell Snatch | `kettlebell_snatch` | 3×6-10, 90s | 3×6-8, 90s (/str.) |  |
+| Kettlebell Windmill | `kettlebell_windmill` | 2×6-8, 60s | 3×5-8, 60s (/str.) |  |
+| Lying Leg Raise | `lying_leg_raise` | 3×10-15, 45-60s | 3×10-15, 60s |  |
+| Russian Twist | `russian_twist` | 3×15-20, 45-60s | 3×16-20, 45s ((łącznie)) |  |
+| Side Plank | `side_plank` | 3×20-40, 45-60s | _bez zmian, TODO(time-mode), docelowo czas (sekcja B)_ | |
+| Band External Rotation | `band_external_rotation` | 2×12-15, 45s | 3×12-15, 45s (/str.) |  |
+| Band Face Pull | `band_face_pull` | 3×12-20, 60s | 3×15-20, 45s |  |
+| Band Lateral Walk | `band_lateral_walk` | 3×12-20, 45-60s | 3×12-15, 45s (kroków /str.) | ⚠ |
+| Band Pull-Apart | `band_pull_apart` | 3×15-20, 45-60s | 3×15-20, 45s |  |
+| Bird Dog | `bird_dog` | 3×8-12, 45s | 3×8-10, 45s (/str.) |  |
+| Burpees | `burpees` | 3×10-15, 60s | 3×8-12, 60s |  |
+| Hollow Body Hold | `hollow_body_hold` | 3×20-40, 45-60s | _bez zmian, TODO(time-mode), docelowo czas (sekcja B)_ | |
+| Mountain Climbers | `mountain_climbers` | 3×20-40, 45-60s | _bez zmian, TODO(time-mode), docelowo czas (sekcja B)_ | |
+| Nordic Curl | `nordic_curl` | 3×4-8, 90s | 3×4-8, 90s |  |
+| Sissy Squat | `sissy_squat` | 3×8-12, 75s | 3×8-12, 75s |  |
+
+## Duże różnice (1)
+
+- **Band Lateral Walk**: było 3×12-20, 45-60s, jest 3×12-15, 45s (kroków /str.)
