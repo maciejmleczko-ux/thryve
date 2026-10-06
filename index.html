@@ -4216,10 +4216,11 @@ const T_EN = {
   timeLabel: 'Time', timeLabelSide: 'Time per side', perSideShort: '/side',
   tmStart: 'Start', tmPause: 'Pause', tmResume: 'Resume', tmEnd: 'Finish', tmSkip: 'Skip',
   tmSwitchSides: 'Switch sides', tmSideN: (n,m)=>`Side ${n} of ${m}`,
-  tmNotifAskTitle: 'A signal when the set ends',
-  tmNotifAskBody: 'When the screen turns off, we will let you know with a notification that time is up. The system will ask for permission next.',
-  tmNotifAskYes: 'Continue', tmNotifAskNo: 'Not now', tmNotifSwitch: 'Switch sides', tmNotifDone: 'Set finished',
-  suggestTime: 'Hold the full time on every set. When it feels easy, add a few seconds.',
+  tmNotifAskTitle: 'A notification when the set ends',
+  tmNotifAskBody: 'If the screen turns off mid-set, a notification will tell you time is up. The system will ask for permission next.',
+  tmNotifAskYes: 'Continue', tmNotifAskNo: 'Not now', tmNotifSwitch: 'Switch sides', tmNotifDone: 'Time is up',
+  suggestTime: 'Try to hold the full time on every set. If it feels easy, add a few seconds.',
+  suggestCardio: 'Start easy and build the pace gradually. Next time, try adding a minute or a bit more speed.',
   customGroupFallback: 'Custom',
   asNeeded: 'as needed',
   shareFileWorkout: 'workout',
@@ -8459,7 +8460,9 @@ function estimateStartingWeight(exerciseName, targetReps){
 }
 
 function buildSuggestion(exMeta, history){
-  if(isTimeEx(exMeta)) return {cls:'', text:t('suggestTime','Utrzymaj pełny czas w każdej serii. Gdy pójdzie łatwo, dołóż kilka sekund.')};
+  if(isTimeEx(exMeta)) return {cls:'', text: exMeta.group === 'Kardio'
+    ? t('suggestCardio','Zacznij spokojnie i podkręcaj stopniowo. Następnym razem spróbuj dołożyć minutę albo trochę tempa.')
+    : t('suggestTime','Spróbuj wytrzymać cały czas w każdej serii. Jak pójdzie łatwo, dołóż kilka sekund.')};
   const isBodyweightEx = exMeta.equipment === 'masa ciała';
   if(exMeta.version){
     // Undulating periodization: progression is pinned to the last time THIS
@@ -9753,7 +9756,7 @@ async function tmNotifSchedule(){
   const now = Date.now(), items = [];
   const swAt = mine.t0 + mine.D, endAt = mine.t0 + (mine.sides === 2 ? 2 * mine.D + TM_SWITCH_MS : mine.D);
   if(mine.sides === 2 && swAt > now) items.push({ id: 91000, body: t('tmNotifSwitch','Zmień stronę'), at: swAt });
-  if(endAt > now) items.push({ id: 91001, body: t('tmNotifDone','Koniec serii'), at: endAt });
+  if(endAt > now) items.push({ id: 91001, body: t('tmNotifDone','Czas minął'), at: endAt });
   try{
     await LN.cancel({ notifications: TM_NOTIF_IDS.map(id=>({ id })) });
     if(!live() || !items.length) return;
@@ -9770,8 +9773,8 @@ function tmStartFlow(begin){
     if(p && p.display !== 'prompt'){ begin(); return; }
     try{ localStorage.setItem(LS_TM_NOTIF_ASKED, '1'); }catch(e){}
     gymConfirmV2({
-      title: t('tmNotifAskTitle','Sygnał na koniec serii'),
-      body: t('tmNotifAskBody','Gdy ekran zgaśnie, damy znać powiadomieniem, że czas minął. Za chwilę system zapyta o zgodę.'),
+      title: t('tmNotifAskTitle','Powiadomienie na koniec serii'),
+      body: t('tmNotifAskBody','Jeśli ekran zgaśnie w trakcie, powiadomienie da ci znać, że czas minął. Zaraz system zapyta o zgodę.'),
       yes: t('tmNotifAskYes','Dalej'), no: t('tmNotifAskNo','Nie teraz'),
       onYes: ()=>{ Promise.resolve().then(()=> LN.requestPermissions()).catch(()=>{}).then(begin); },
       onNo: begin
