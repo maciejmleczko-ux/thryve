@@ -2634,7 +2634,6 @@ function metricRow(label, val, unit, o){
 function resultsSheet(ex, o){
   const rows = (o.rows||[]).map(r=> metricRow(r[0], r[1], r[2], r[3])).join('');
   const derived = (o.derived||[]).map(d=>`<span class="lg-chip">${d}</span>`).join('');
-  const kcalRow = `<div class="lg-set-wrap"><div class="lg-set mk-metric is-empty"><span class="lg-set-l" style="width:96px">KALORIE</span><span class="lg-set-v">— <small>z maszyny</small></span><span class="mk-steps"><button type="button" class="lg-step mk-s">${LG.minus}</button><button type="button" class="lg-step mk-s">${LG.plus}</button></span></div></div>`;
   return `<div class="onboard-overlay m-sheet-overlay lg-sub-overlay m-sheet-entered"><div class="m-sheet" id="exNoteSheetV2"><div class="m-sheet-grab"></div><div class="m-sheet-body" id="exNoteBoxV2" style="align-items:stretch;gap:0">
     <div class="lg-bar">
       <button type="button" class="lg-circ">${LG.x}</button>
@@ -2644,11 +2643,11 @@ function resultsSheet(ex, o){
     <div class="lg-scroll lg-sub-scroll">
       <div class="lg-name-row"><div class="lg-name">${ex.name}</div></div>
       <div class="lg-chips"><span class="lg-chip">${ph('clock-countdown')}<span>${o.time||ex.dur}</span></span></div>
-      <div class="lg-sets" style="margin-top:6px">${rows}${o.noKcal?'':kcalRow}</div>
+      <div class="lg-sets" style="margin-top:6px">${rows}</div>
       ${derived ? `<div class="mk-derived">${derived}</div>` : ''}
       ${o.hint ? `<p class="mk-hintline">${o.hint}</p>` : ''}
       ${o.warn ? `<div class="lg-warn" style="margin:0">${o.warn}</div>` : ''}
-      <p class="mk-hintline">Szare wartości to podpowiedź z poprzedniego razu. Wszystko jest opcjonalne, a kalorie wpisz tylko wtedy, gdy pokazuje je maszyna.</p>
+      <p class="mk-hintline">Szare wartości to podpowiedź z poprzedniego razu. Wszystko jest opcjonalne.</p>
       <button type="button" class="lg-add">Zapisz</button>
       <button type="button" class="lg-add" style="border-color:transparent">Pomiń</button>
     </div></div></div></div>`;
@@ -2724,13 +2723,13 @@ const STATES = [
   render:()=> popupShell(popupBox(EX.treadmill,{sets:[{v:'20:00',blank:false}]}), resultsSheet(EX.treadmill,{rows:[['DYSTANS','','km',{active:true}],['NACHYLENIE','2','%']],hint:'Dodaj dystans, żeby policzyć dokładniej.'}))},
  {id:'s6', label:'6. Brak masy ciała', cap:'Gdy nie ma masy ciała: żadnych kalorii, tylko zachęta (ta sama co dziś na ekranie końca treningu).',
   render:()=> popupShell(popupBox(EX.treadmill,{sets:[{v:'20:00',blank:false}]}), resultsSheet(EX.treadmill,{rows:[['DYSTANS','3,2','km',{active:true}],['NACHYLENIE','2','%']],derived:['Prędkość 9,6 km/h'],warn:'Dodaj masę ciała w koncie, żeby oszacować kalorie.'}))},
- {id:'s4', label:'4. Wiersz serii kardio w historii', cap:'Kalorie serii pokazuję tylko, gdy użytkownik wpisał je sam z maszyny (oznaczone „z maszyny”). Bez wpisu: sam czas i metryki.',
+ {id:'s4', label:'4. Wiersz serii kardio w historii', cap:'Wiersz serii: tylko czas i metryki. Kalorie istnieją wyłącznie na poziomie całego treningu (kafelek „Kalorie · szacunek” w karcie), nigdy w wierszu serii.',
   render:()=> `<div class="mk-page" style="background:var(--m-panel)">${histCard(
-     histItem('treadmill','Treadmill','20:00 · 3,2 km · 2%',' · 210 kcal <span class="mk-flag">z maszyny</span>') +
+     histItem('treadmill','Treadmill','20:00 · 3,2 km · 2%') +
      histItem('stationary_bike','Stationary Bike','20:00 · 6,1 km · poz. 6') +
      histItem('rowing_machine','Rowing Machine','15:00 · 3 120 m · 2:24 /500 m') +
      histItem('jump_rope','Jump Rope','2:00 · 240 skoków'),
-     {time:'58',ex:4,sets:4,tileK:'Objętość',tileV:'0<small>kg</small>',kcal:'ok. 520'})}</div>`},
+     {time:'58',ex:4,sets:4,tileK:'Łączny czas',tileV:'57:00',kcal:'ok. 520'})}</div>`},
  {id:'s5', label:'5. Karta statystyk kardio', cap:'Osobna karta: czas, dystans i liczba sesji za 7 dni. Bez kalorii (te są tylko w podsumowaniu pojedynczego treningu). Nie wchodzi w objętość ani rekordy siłowe.',
   render:()=> statsCardio()},
  {id:'s7', label:'7. Podsumowanie z blokiem kardio', cap:'Blok „Na czas” tylko gdy są ćwiczenia czasowe; czysty trening siłowy wygląda jak dziś. Czwarty kafel zostaje „Objętość”, bo jest też siła. Kardio z metrykami, reszta serie × czas. Kalorie: jedna wartość dla całego treningu.',

@@ -2421,7 +2421,6 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-derived{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
 .lg-derived:empty{display:none;}
 .lg-cr-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);color:rgba(44,39,39,.71);line-height:1.4;}
-.histv2-ex-flag{display:inline-block;margin-left:6px;font-size:var(--m-fs-2xs);padding:2px 8px;border-radius:var(--m-r-pill);background:#fde8e1;color:#cd1200;}
 .gymfin-timed{width:100%;background:var(--m-panel);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:6px 14px;margin-top:8px;box-sizing:border-box;text-align:left;}
 .gymfin-timed[hidden]{display:none;}
 .gymfin-timed-k{margin:8px 0 2px;font-size:var(--m-fs-2xs);letter-spacing:.1em;text-transform:uppercase;color:rgba(44,39,39,.71);}
@@ -4396,7 +4395,7 @@ const T_EN = {
   stV2RepsShort: 'reps',
   stV2TimeProgress: 'Time progress',
   gymFinTimedBlock: 'Timed', gymFinTotalTime: 'Total time', crTitle: 'Results', crSave: 'Save', crSkip: 'Skip',
-  crHintPrev: 'Grey values come from last time. Everything is optional; enter calories only if the machine shows them.',
+  crHintPrev: 'Grey values come from last time. Everything is optional.',
   stV2TagSila: 'strength',
   stV2TagCiezar: 'weight',
   stV2TagObjetosc: 'volume',
@@ -5264,12 +5263,11 @@ const KCAL_FACTOR_LO = 0.6, KCAL_FACTOR_HI = 1.6;
 let kcalPersonalFactor = (()=>{ const v = parseFloat(localStorage.getItem(LS_KCAL_FACTOR)); return (v >= KCAL_FACTOR_LO && v <= KCAL_FACTOR_HI) ? v : 1; })();
 /* ---------- cardio calories (counted per cardio set, added to the workout total) ----------
    A cardio set is "counted separately" when we can estimate it:
-     · the user typed the machine's own kcal (set.kcal, kcalEst:false) — that value wins for the set;
      · treadmill with a distance: ACSM walking / running equation from speed and incline;
      · any other cardio machine: MET × 3.5 × kg / 200 × minutes (same constant as the base term below).
    Only the minutes of sets counted separately are taken out of the base (background-metabolism) term, so a
    treadmill set WITHOUT a distance (nothing to estimate from) simply stays in the base and no minutes vanish.
-   Nothing is stored on the set: estimates are recomputed from weight + metrics; only a manual machine kcal is saved.
+   Nothing calorie-related is stored on the set: estimates are recomputed from weight + metrics. A machine's own kcal display is deliberately NOT collected (it doesn't know the user's body weight, and a manual entry would beat Apple Health); calories exist only for the whole workout (estimate → Apple Health → the user's edit of the workout).
    Calories stay approximate: shown as "ok. N kcal", never as an exact figure.
 
    Treadmill — ACSM metabolic equations (ml O2 / kg / min, S = speed in m/min, G = grade as a fraction):
@@ -5299,10 +5297,9 @@ function treadmillKcal(durationSec, distanceM, inclinePct, kg){
   const vo2 = S >= TREADMILL_WALK_RUN_MPM ? 0.2 * S + 0.9 * S * G + 3.5 : 0.1 * S + 1.8 * S * G + 3.5;
   return vo2 * kg / 1000 * 5 * min;
 }
-// kcal of one cardio set, or null when it can't be estimated (then its minutes stay in the base term)
+// kcal of one cardio set, or null when it can't be estimated (then its minutes stay in the base term); any stray set.kcal is ignored
 function cardioSetKcal(x, name, kg){
   if(!(x.durationSec > 0)) return null;
-  if(x.kcal > 0 && x.kcalEst === false) return x.kcal;
   if(name === 'Treadmill') return x.distanceM > 0 ? treadmillKcal(x.durationSec, x.distanceM, x.inclinePct, kg) : null;
   return CARDIO_MET[name] ? CARDIO_MET[name] * 3.5 * kg / 200 * (x.durationSec / 60) : null;
 }
@@ -9265,8 +9262,8 @@ function withLibraryTime(e){
 }
 /* ---- cardio metrics (optional fields on a timed set) ----
    An exercise lists the metrics it offers in `metrics` (library data); a logged set may carry:
-   distanceM (always metres), inclinePct, level, floors, jumps, and `kcal` (+ kcalEst:false) ONLY when the
-   user typed the machine's own calorie reading. Estimates are never stored on the set. All fields are
+   distanceM (always metres), inclinePct, level, floors, jumps. NO calories on the set (not even the machine's
+   reading: it doesn't know the user's body weight); kcal lives on the whole workout. All fields are
    optional; a set stays {weight:0, reps:0, durationSec, ...} so old clients just ignore the extras. */
 const CARDIO_METRIC_DEFS = {
   distanceKm: { field:'distanceM',  label:'Dystans',    unit:'km', step:0.1, dec:1, max:200,   toStored:v=> Math.round(v * 1000), fromStored:m=> m / 1000 },
@@ -9278,7 +9275,7 @@ const CARDIO_METRIC_DEFS = {
 };
 const CARDIO_SET_FIELDS = ['distanceM','inclinePct','level','floors','jumps'];
 const CARDIO_FIELD_MAX = { distanceM:200000, inclinePct:40, level:100, floors:1000, jumps:50000 };
-// the metric fields of one set, validated (finite, 0..max); the machine's kcal only as a manual entry
+// the metric fields of one set, validated (finite, 0..max); any kcal / kcalEst in the input is dropped
 function cardioSetFields(s){
   const out = {};
   if(!s || typeof s !== 'object') return out;
@@ -9287,8 +9284,6 @@ function cardioSetFields(s){
     const n = Number(s[k]);
     if(Number.isFinite(n) && n >= 0 && n <= CARDIO_FIELD_MAX[k]) out[k] = k === 'inclinePct' ? Math.round(n * 10) / 10 : Math.round(n);   // whole metres / levels / floors / jumps, incline to 0.1 %
   });
-  const kc = Number(s.kcal);
-  if(s.kcal !== '' && s.kcal != null && Number.isFinite(kc) && kc > 0 && kc <= 5000 && s.kcalEst !== true){ out.kcal = Math.round(kc); out.kcalEst = false; }
   return out;
 }
 
@@ -9372,7 +9367,7 @@ function openCardioResults(idx){
   if(!ex || !isTimeEx(ex) || !ex.metrics || !ex.metrics.length) return;
   const set = ex.setValues[idx];
   if(!set || !(set.durationSec > 0)) return;
-  cr = { idx, vals: {}, kcal: set.kcal > 0 ? String(set.kcal) : '' };
+  cr = { idx, vals: {} };
   ex.metrics.forEach(k=>{ const def = CARDIO_METRIC_DEFS[k]; cr.vals[k] = set[def.field] != null ? def.fromStored(set[def.field]) : null; });
   renderCardioResults();
   lgSubOpen('exCardioOverlayV2');
@@ -9398,13 +9393,10 @@ function renderCardioResults(){
       <div class="lg-name-row"><div class="lg-name">${escHtml(ex.name)}</div></div>
       <div class="lg-chips"><span class="lg-chip">${ph('clock-countdown')}<span>${escHtml(fmtDur(set.durationSec))}</span></span></div>
       <div class="lg-sets">${rows}
-        <div class="lg-metric" data-k="kcal"><span class="lg-metric-l">KALORIE</span>
-          <input class="lg-metric-in" id="crIn_kcal" type="text" inputmode="numeric" autocomplete="off" value="${escHtml(cr.kcal)}" placeholder="— z maszyny" oninput="crSetKcal(this.value)">
-          <span class="lg-steps"><button type="button" class="lg-step" onclick="crStepKcal(-10)" aria-label="−">${LG_ICONS.minus}</button><button type="button" class="lg-step" onclick="crStepKcal(10)" aria-label="+">${LG_ICONS.plus}</button></span></div>
       </div>
       <div class="lg-derived" id="crDerived"></div>
       <p class="lg-cr-hint" id="crKcalHint"></p>
-      <p class="lg-cr-hint">${t('crHintPrev','Szare wartości to podpowiedź z poprzedniego razu. Wszystko jest opcjonalne, a kalorie wpisz tylko wtedy, gdy pokazuje je maszyna.')}</p>
+      <p class="lg-cr-hint">${t('crHintPrev','Szare wartości to podpowiedź z poprzedniego razu. Wszystko jest opcjonalne.')}</p>
       <button type="button" class="lg-add" onclick="saveCardioResults()">${t('crSave','Zapisz')}</button>
       <button type="button" class="lg-add" style="border-color:transparent" onclick="closeCardioResults()">${t('crSkip','Pomiń')}</button>
     </div>`;
@@ -9446,25 +9438,14 @@ function crStep(key, dir){
   haptic('light');
   crPaintDerived();
 }
-function crSetKcal(raw){ if(cr) cr.kcal = String(raw).replace(/[^\d]/g, '').slice(0, 4); }
-function crStepKcal(d){
-  if(!cr) return;
-  const v = Math.max(0, Math.min(5000, (parseInt(cr.kcal, 10) || 0) + d));
-  cr.kcal = v > 0 ? String(v) : '';
-  const inp = document.getElementById('crIn_kcal');
-  if(inp) inp.value = cr.kcal;
-  haptic('light');
-}
 function saveCardioResults(){
   const ex = popupExercise;
   if(!ex || !cr) return;
   const set = ex.setValues[cr.idx];
   if(set){
-    [...CARDIO_SET_FIELDS, 'kcal', 'kcalEst'].forEach(k=> delete set[k]);
+    [...CARDIO_SET_FIELDS, 'kcal', 'kcalEst'].forEach(k=> delete set[k]);   // kcal / kcalEst are removed too (an old draft may still carry them)
     const raw = {};
     ex.metrics.forEach(k=>{ const def = CARDIO_METRIC_DEFS[k]; if(cr.vals[k] != null) raw[def.field] = def.toStored(cr.vals[k]); });
-    const kc = parseInt(cr.kcal, 10);
-    if(kc > 0){ raw.kcal = kc; }   // only what the user typed from the machine (kcalEst:false); no estimate is ever stored
     Object.assign(set, cardioSetFields(raw));
     lgPersistDraft();
     lgRenderSets();
@@ -9828,7 +9809,7 @@ function lgSetsHtml(){
   ex.setValues.forEach((sv, i)=>{
     const logged = setIsLogged(sv, bw);
     const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '');
-    const val = logged ? (sv.durationSec > 0 ? escHtml(ex.metrics && ex.metrics.length ? cardioSetLine(sv, ex.name) + (sv.kcal > 0 ? ` · ${sv.kcal} kcal` : '') : fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}` : `${escHtml(fmtKgLocal(parseFloat(sv.weight)||0))}kg x ${escHtml(String(sv.reps))}`) : '—';
+    const val = logged ? (sv.durationSec > 0 ? escHtml(ex.metrics && ex.metrics.length ? cardioSetLine(sv, ex.name) : fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}` : `${escHtml(fmtKgLocal(parseFloat(sv.weight)||0))}kg x ${escHtml(String(sv.reps))}`) : '—';
     html += `<div class="lg-set-wrap" data-i="${i}"><div class="lg-set-del" aria-hidden="true">${LG_ICONS.trash}</div>
       <button type="button" class="${cls}" onclick="lgTapSet(${i})"><span class="lg-set-l">${t('seriesLabel', `Seria ${i+1}`, i+1)}</span><span class="lg-set-v">${val}</span><span class="lg-set-c">${LG_ICONS.check}</span></button></div>`;
   });
@@ -13886,7 +13867,7 @@ function histWorkoutCardInner(w){
           <span class="histv2-ex-ico">${statsV2ExerciseIconHtml(e.name)}</span>
           <div class="histv2-ex-meta">
             <p class="histv2-ex-name">${escHtml(e.name)}</p>
-            <p class="histv2-ex-sets">${cardioMetricsFor(e.name) ? exSetsView(e).filter(s=> s.durationSec > 0).map(s=> escHtml(cardioSetLine(s, e.name)) + (s.kcal > 0 && s.kcalEst === false ? ` · ${s.kcal} kcal <span class="histv2-ex-flag">z maszyny</span>` : '')).join('<br>') : exSetsView(e).map(s=> s.durationSec > 0 ? fmtDur(s.durationSec, s.perSide) : s.weight > 0 ? `${s.weight}kg×${s.reps}` : `${s.reps}`).join(' · ')}</p>
+            <p class="histv2-ex-sets">${cardioMetricsFor(e.name) ? exSetsView(e).filter(s=> s.durationSec > 0).map(s=> escHtml(cardioSetLine(s, e.name))).join('<br>') : exSetsView(e).map(s=> s.durationSec > 0 ? fmtDur(s.durationSec, s.perSide) : s.weight > 0 ? `${s.weight}kg×${s.reps}` : `${s.reps}`).join(' · ')}</p>
           </div>
         </div>`).join('')}
     </div>`;
