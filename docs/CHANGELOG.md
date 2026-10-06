@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.52.2 (2026-10-06)
-- **Liczba wersji:** 236 · **commitów:** 578
+- **Aktualna wersja:** 4.53.0 (2026-10-06)
+- **Liczba wersji:** 237 · **commitów:** 579
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,19 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.53.0 · MINOR · 2026-10-06
+
+**Dla użytkownika:** rozgrzewka i rozciąganie dobierają się same do ćwiczeń na ekranie Trening (wpis „Co nowego” do napisania osobno).
+
+- **Bloki zamiast kafelków:** na górze dnia karta „Rozgrzewka”, na dole „Rozciąganie”. Stare kafelki `Warm-up` / `Stretching` nie są już wstawiane do planów ani do trybu „Powtórz”; wpisy w zapisanych planach są pomijane przy wyświetlaniu (bez migracji danych).
+- **Dobór:** `buildWarmupBlock` / `buildStretchBlock` z ćwiczeń na ekranie (plan, ręcznie dodane, „Powtórz”, z uwzględnieniem „Zamień na dziś”). Znaczniki partii `WARMUP_MUSCLES` / `STRETCH_MUSCLES`. 5–7 ćwiczeń, budżet ok. 5,5 min; fullbody (4+ partie) dostaje ruchy na całe ciało; rozciąganie tylko partii, które pracowały, po jednym ćwiczeniu na partię kolejno. Luki: Biceps, Brzuch, Pośladki, przedramiona (do uzupełnienia nowymi ćwiczeniami).
+- **Sheet i zegar:** lista kroków jako kafelki jak ćwiczenia główne; jedna oś czasu dla całej sekwencji (timestamp, działa w tle), 5 s „Przygotuj się” z opisem PL/EN przed każdym ćwiczeniem, zmiana strony, pauza, pomiń krok, przerwij; Keep Awake i powiadomienia lokalne (ids 91100+). Zaliczenie (wpis `Warm-up`/`Stretching` w sesji) tylko po dojściu do końca zegara.
+- **Czas planu:** „~N min” na karcie planu wlicza oba bloki (z 5 s przygotowania na ćwiczenie).
+- **Układ Trening:** „Wybierz inne ćwiczenie” i „Dodaj ćwiczenie” kończą sekcję ćwiczeń, przed kartą rozciągania.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.52.2 · PATCH · 2026-10-06
 

@@ -2405,9 +2405,9 @@ body.gymv2-bg .gy-bg{display:block;}
 #exercisePopupOverlayV2{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
 #exercisePopupSheetV2{height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;padding-bottom:0;background:#fff;}
 #exercisePopupSheetV2 > .m-sheet-grab{display:none;}
-#exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2, #exCardioBoxV2{align-items:stretch;gap:0;}
+#exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2, #exCardioBoxV2, #blockBoxV2{align-items:stretch;gap:0;}
 .lg-sub-overlay{z-index:95;}
-#exNoteSheetV2, #exHowtoSheetV2, #exCardioSheetV2{background:#fff;}
+#exNoteSheetV2, #exHowtoSheetV2, #exCardioSheetV2, #blockSheetV2{background:#fff;}
 /* cardio "Wyniki" sheet: rows like .lg-set, − / + like the reps stepper but smaller (see mockups/kardio.html) */
 .lg-metric{position:relative;width:100%;display:flex;align-items:center;gap:8px;box-sizing:border-box;background:#ededed;border:1.5px solid transparent;border-radius:16px;padding:8px 10px 8px 16px;}
 .lg-metric.is-active{border-color:rgba(255,51,0,.32);}
@@ -2421,8 +2421,8 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-derived{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
 .lg-derived:empty{display:none;}
 .lg-cr-link{display:block;width:100%;min-height:44px;padding:0 8px;background:none;border:none;font:inherit;color:inherit;text-align:center;text-decoration:underline;text-underline-offset:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-#exCardioBoxV2 .lg-bar .lg-circ{position:relative;}
-#exCardioBoxV2 .lg-bar .lg-circ::after{content:"";position:absolute;inset:-4px;}   /* 40px ring, 48px touch area */
+#exCardioBoxV2 .lg-bar .lg-circ, #blockBoxV2 .lg-bar .lg-circ{position:relative;}
+#exCardioBoxV2 .lg-bar .lg-circ::after, #blockBoxV2 .lg-bar .lg-circ::after{content:"";position:absolute;inset:-4px;}   /* 40px ring, 48px touch area */
 #exCardioBoxV2 .lg-steps .lg-step{position:relative;}
 #exCardioBoxV2 .lg-steps .lg-step::after{content:"";position:absolute;inset:-7px;}   /* 34px button (1px border) + 6px each side = 46px touch area */
 .lg-cr-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);color:rgba(44,39,39,.71);line-height:1.4;}
@@ -2520,6 +2520,33 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-hint[hidden]{display:none;}
 .lg-warn{font-size:var(--m-fs-xs);line-height:1.4;color:#cd1200;text-align:center;}
 .lg-tm{gap:10px;}
+.gymv2-block{grid-column:1/-1;display:flex;align-items:center;gap:14px;box-sizing:border-box;width:100%;min-height:104px;margin:14px 0;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-md);padding:18px 16px;text-align:left;font-family:inherit;color:var(--m-ink);cursor:pointer;touch-action:manipulation;}
+.gymv2-block.is-done{opacity:.6;}
+.gymv2-block-ic{display:flex;flex:none;}
+.gymv2-block-ic img{width:52px;height:52px;border-radius:14px;background:#fff;object-fit:contain;margin-left:-10px;border:2px solid var(--m-card);box-sizing:border-box;}
+.gymv2-block-ic img:first-child{margin-left:0;}
+.gymv2-block-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.gymv2-block-t b{font-size:var(--m-fs-lg);font-weight:600;}
+.gymv2-block-t span{font-size:var(--m-fs-xs);color:var(--m-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gymv2-block-chip{flex:none;font-size:var(--m-fs-xs);font-weight:600;padding:4px 10px;border-radius:var(--m-r-pill);background:#e4ebff;color:#2642a4;}
+.gymv2-block-chip svg{width:16px;height:16px;display:block;}
+.bk-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:4px 0 12px;}
+.bk-tiles .ex-tile{pointer-events:none;}
+.bk-step{display:flex;align-items:center;gap:12px;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:8px 12px;}
+.bk-step img{width:44px;height:44px;border-radius:10px;background:#fff;object-fit:contain;flex:none;}
+.bk-step-n{flex:1;min-width:0;color:var(--m-ink);font-size:var(--m-fs-base);font-weight:600;}
+.bk-step-d{flex:none;font-size:var(--m-fs-xs);font-weight:600;color:var(--m-muted);}
+.bk-prog{display:flex;gap:4px;margin:2px 0 8px;}
+.bk-prog i{flex:1;height:4px;border-radius:2px;background:#ddd8e6;transition:background-color var(--m-dur-quick) ease;}
+.bk-prog i.on{background:var(--m-orange);}
+.bk-run{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;}
+.bk-run img{width:210px;height:210px;object-fit:contain;}
+.bk-how{width:100%;text-align:left;display:flex;flex-direction:column;gap:6px;margin:4px 0 2px;}
+.bk-how p{margin:0;font-size:var(--m-fs-sm);line-height:1.45;color:var(--m-ink);}
+.bk-how ol{margin:0;padding-left:20px;font-size:var(--m-fs-sm);line-height:1.45;color:var(--m-ink);}
+.bk-run-n{font-size:var(--m-fs-lg);font-weight:700;color:var(--m-ink);}
+.bk-run-next{margin:0;font-size:var(--m-fs-xs);color:var(--m-muted);min-height:1.2em;}
+.bk-done-note{margin:0 0 8px;font-size:var(--m-fs-xs);color:var(--m-muted);}
 .lg-tm-clock{font-size:var(--m-fs-display-sm);font-weight:200;letter-spacing:-.02em;line-height:1;color:#a3a3a3;font-variant-numeric:tabular-nums;transition:color var(--m-dur-quick) ease;}
 .lg-tm-clock.is-run{color:var(--m-orange);}
 .lg-tm-msg{min-height:1.2em;margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-ink);}
@@ -3992,6 +4019,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="m-sheet-body" id="exCardioBoxV2"></div>
   </div>
 </div>
+<div class="onboard-overlay hidden m-sheet-overlay lg-sub-overlay" id="blockOverlayV2" onclick="if(event.target===this) closeBlockSheet()">
+  <div class="m-sheet" id="blockSheetV2">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="m-sheet-body" id="blockBoxV2"></div>
+  </div>
+</div>
 <div class="onboard-overlay hidden m-sheet-overlay lg-sub-overlay" id="exHowtoOverlayV2" onclick="if(event.target===this) closeExHowtoV2()">
   <div class="m-sheet" id="exHowtoSheetV2">
     <div class="m-sheet-grab" aria-hidden="true"></div>
@@ -4244,6 +4277,7 @@ const T_EN = {
   repsUnit: 'reps',
   timeLabel: 'Time', timeLabelSide: 'Time per side', perSideShort: '/side',
   tmStart: 'Start', tmPause: 'Pause', tmResume: 'Resume', tmEnd: 'Finish', tmSkip: 'Skip',
+  bkWarmup: 'Warm-up', bkStretch: 'Stretching', bkMin: 'min', bkMore: n=>`+${n} more`, bkStart: 'Start', bkRepeat: 'Do it again', bkUndo: 'Mark as not done', bkSkipStep: 'Skip step', bkStop: 'Stop', bkDoneNote: 'Done today.', bkNext: n=>`Next: ${n}`, bkNotifDone: 'Block finished', bkGetReady: 'Get ready',
   tmSwitchSides: 'Switch sides', tmSideN: (n,m)=>`Side ${n} of ${m}`,
   tmNotifAskTitle: 'A notification when the set ends',
   tmNotifAskBody: 'If the screen turns off mid-set, a notification will tell you time is up. The system will ask for permission next.',
@@ -7034,7 +7068,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.52.2";
+const APP_VERSION = "4.53.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -10320,6 +10354,260 @@ mSheetDrag('exNoteOverlayV2', closeExNoteV2);
 mSheetDrag('exHowtoOverlayV2', closeExHowtoV2);
 mSheetDrag('exCardioOverlayV2', closeCardioResults);
 
+/* ---- Warm-up / stretching blocks on Trening ----
+   One card at the top (warm-up) and one at the bottom (stretching) of today's grid, built live from the
+   day's main exercises (buildWarmupBlock / buildStretchBlock). Tap → sheet with the steps → Start runs the
+   whole sequence on ONE timeline (same rules as the single timed set: everything derives from t0, so the
+   clock stays right after the background / a locked screen). Finishing it naturally logs the legacy
+   Warm-up / Stretching checklist entry (history keeps working); skipping or stopping logs nothing. */
+let gymBlocks = { warmup: [], stretch: [] };
+let bk = null;   // running: { kind, segs, total, t0, pausedAt, seg, iv, wl }
+let bkOpen = null; // kind of the open sheet
+const BK_NOTIF_BASE = 91100;
+const BK_PREP_MS = 5000;
+const bkEntry = kind => kind === 'warmup' ? WARMUP_EXERCISE : STRETCH_EXERCISE;
+const bkTitle = kind => kind === 'warmup' ? t('bkWarmup','Rozgrzewka') : t('bkStretch','Rozciąganie');
+const bkDone = kind => sessionExercises.some(e=> e.name === bkEntry(kind).name);
+const bkMinTxt = list => Math.max(1, Math.round(blockSeconds(list) / 60)) + ' ' + t('bkMin','min');
+const bkImg = e => { const slug = EXERCISE_ICON_MAP[e.name] || e.icon, u = slug ? iconPngUrl(slug) : ''; return u ? `<img src="${u}" alt="" loading="lazy">` : ''; };
+function buildGymBlockCard(kind, list){
+  const done = bkDone(kind);
+  const names = list.slice(0, 3).map(e=> e.name).join(', ') + (list.length > 3 ? ' ' + t('bkMore', `+${list.length - 3} więcej`, list.length - 3) : '');
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'gymv2-block m-press' + (done ? ' is-done' : '');
+  btn.dataset.block = kind;
+  btn.innerHTML = `<span class="gymv2-block-ic">${list.slice(0, 3).map(bkImg).join('')}</span>
+    <span class="gymv2-block-t"><b>${escHtml(bkTitle(kind))}</b><span>${escHtml(names)}</span></span>
+    <span class="gymv2-block-chip">${done ? PLAN_EX_CHECK_SVG : escHtml(bkMinTxt(list))}</span>`;
+  btn.onclick = ()=> openBlockSheet(kind);
+  return btn;
+}
+function bkSegments(list){
+  const segs = [];
+  let at = 0;
+  list.forEach((e, ei)=>{
+    const D = timeDurFor(e) * 1000, sides = e.perSide ? 2 : 1;
+    segs.push({ ei, kind:'prep', start:at, ms:BK_PREP_MS }); at += BK_PREP_MS;   // time to read the description and get into position
+    for(let sd = 0; sd < sides; sd++){
+      if(sd){ segs.push({ ei, kind:'sw', start:at, ms:TM_SWITCH_MS }); at += TM_SWITCH_MS; }
+      segs.push({ ei, kind:'work', side:sd + 1, sides, start:at, ms:D }); at += D;
+    }
+  });
+  return { segs, total: at };
+}
+const bkNow = ()=> bk.pausedAt !== null ? bk.pausedAt : Date.now();
+function bkPhase(){
+  const e = Math.max(0, bkNow() - bk.t0);
+  if(e >= bk.total) return { i: bk.segs.length, left: 0 };
+  let i = bk.segs.length - 1;
+  while(i > 0 && bk.segs[i].start > e) i--;
+  const sg = bk.segs[i];
+  return { i, left: sg.start + sg.ms - e };
+}
+function openBlockSheet(kind){
+  const list = gymBlocks[kind];
+  if(!list || !list.length) return;
+  bkOpen = kind;
+  renderBlockSheet();
+  mSheetOpenReset('blockOverlayV2');
+  document.getElementById('blockOverlayV2').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+  syncSheetsToVisualViewport();
+}
+function closeBlockSheet(viaDrag){
+  bkStop();
+  bkOpen = null;
+  mSheetClose('blockOverlayV2', viaDrag);
+}
+function bkBar(kind){
+  return `<div class="lg-bar">
+      <button type="button" class="lg-circ" onclick="closeBlockSheet()" aria-label="${escHtml(t('cancel','Anuluj'))}">${LG_ICONS.x}</button>
+      <span class="lg-bar-title">${escHtml(bkTitle(kind).toUpperCase())}</span>
+      <div class="lg-bar-end"></div>
+    </div>`;
+}
+function renderBlockSheet(){
+  const kind = bkOpen, box = document.getElementById('blockBoxV2');
+  if(!kind || !box) return;
+  if(bk){ renderBlockRun(); return; }
+  const list = gymBlocks[kind], done = bkDone(kind);
+  const tiles = list.map(e=> buildExerciseTileV2(e, 'plain').outerHTML).join('');   // same tiles as the main exercises
+  box.innerHTML = `${bkBar(kind)}
+    <div class="lg-scroll lg-sub-scroll">
+      <div class="lg-name-row"><div class="lg-name">${escHtml(bkTitle(kind))}</div></div>
+      <div class="lg-chips"><span class="lg-chip">${ph('clock-countdown')}<span>${escHtml(bkMinTxt(list))}</span></span><span class="lg-chip">${ph('stack')}<span>${list.length}</span></span></div>
+      <div class="gymv2-grid bk-tiles">${tiles}</div>
+      ${done ? `<p class="bk-done-note">${escHtml(t('bkDoneNote','Zrobione dziś.'))}</p>` : ''}
+      <div class="lg-tm-btns">
+        <button type="button" class="lg-add lg-tm-main m-press" onclick="bkStart()">${escHtml(done ? t('bkRepeat','Zrób jeszcze raz') : t('bkStart','Start'))}</button>
+        ${done ? `<button type="button" class="lg-add m-press" onclick="bkUndo()">${escHtml(t('bkUndo','Oznacz jako niezrobione'))}</button>` : ''}
+      </div>
+    </div>`;
+}
+function renderBlockRun(){
+  const kind = bkOpen, box = document.getElementById('blockBoxV2');
+  if(!kind || !box || !bk) return;
+  const list = gymBlocks[kind], ph0 = bkPhase(), sg = bk.segs[Math.min(ph0.i, bk.segs.length - 1)];
+  const e = list[sg.ei], nextEx = list[sg.ei + 1];
+  const how = (LANG === 'en' ? EXERCISE_HOWTO_EN : EXERCISE_HOWTO)[e.name];
+  const prog = list.map((_, i)=> `<i class="${i <= sg.ei ? 'on' : ''}"></i>`).join('');
+  box.innerHTML = `${bkBar(kind)}
+    <div class="lg-scroll lg-sub-scroll">
+      <div class="bk-prog">${prog}</div>
+      <div class="bk-run">
+        ${bkImg(e)}
+        <div class="bk-run-n">${escHtml(e.name)}</div>
+        <div class="lg-tm-clock" id="bkClock"></div>
+        <p class="lg-tm-msg" id="bkMsg" aria-live="polite"></p>
+        <p class="bk-run-next">${nextEx ? escHtml(t('bkNext', `Dalej: ${nextEx.name}`, nextEx.name)) : ''}</p>
+      </div>
+      ${how ? `<div class="bk-how"><p>${escHtml(how.setup)}</p><ol>${how.steps.map(x=>`<li>${escHtml(x)}</li>`).join('')}</ol></div>` : ''}
+      <div class="lg-tm-btns">
+        <button type="button" class="lg-add lg-tm-main m-press" id="bkMain" onclick="bkMain()"></button>
+        <div class="lg-tm-row">
+          <button type="button" class="lg-add m-press" onclick="bkSkipStep()">${escHtml(t('bkSkipStep','Pomiń krok'))}</button>
+          <button type="button" class="lg-add m-press" onclick="bkAbort()">${escHtml(t('bkStop','Przerwij'))}</button>
+        </div>
+      </div>
+    </div>`;
+  bkPaint();
+}
+function bkPaint(){
+  const clock = document.getElementById('bkClock');
+  if(!clock || !bk) return;
+  const ph0 = bkPhase();
+  if(ph0.i >= bk.segs.length) return;
+  const sg = bk.segs[ph0.i];
+  clock.textContent = fmtClock(Math.max(0, Math.ceil(ph0.left / 1000)));
+  clock.classList.toggle('is-run', bk.pausedAt === null && sg.kind !== 'prep');
+  const msg = document.getElementById('bkMsg'), main = document.getElementById('bkMain');
+  if(msg) msg.textContent = sg.kind === 'prep' ? t('bkGetReady','Przygotuj się') : sg.kind === 'sw' ? t('tmSwitchSides','Zmień stronę') : (sg.sides === 2 ? t('tmSideN', `Strona ${sg.side} z 2`, sg.side, 2) : '');
+  if(main) main.textContent = bk.pausedAt !== null ? t('tmResume','Wznów') : t('tmPause','Pauza');
+}
+function bkStart(){
+  if(bk || !bkOpen) return;
+  const kind = bkOpen, list = gymBlocks[kind];
+  if(!list.length) return;
+  tmStartFlow(()=>{
+    if(bk || bkOpen !== kind) return;   // sheet closed while the permission prompt was up
+    const { segs, total } = bkSegments(list);
+    bk = { kind, segs, total, t0: Date.now(), pausedAt: null, seg: 0, iv: setInterval(bkTick, 250), wl: null };
+    liveActivity();
+    haptic('medium');
+    bkAwake(true);
+    bkNotifSchedule();
+    renderBlockRun();
+  });
+}
+function bkMain(){
+  if(!bk) return;
+  if(bk.pausedAt === null){ bk.pausedAt = Date.now(); haptic('light'); bkAwake(false); bkNotifCancel(); }
+  else { bk.t0 += Date.now() - bk.pausedAt; bk.pausedAt = null; haptic('light'); bkAwake(true); bkNotifSchedule(); }
+  bkPaint();
+}
+function bkTick(){
+  if(!bk) return;
+  const ph0 = bkPhase();
+  if(ph0.i >= bk.segs.length){ bkFinish(); return; }
+  if(ph0.i !== bk.seg){
+    const prev = bk.segs[bk.seg], cur = bk.segs[ph0.i];
+    bk.seg = ph0.i;
+    haptic(cur.kind === 'sw' || (prev && cur.ei !== prev.ei) ? 'medium' : 'light');
+    if(!prev || cur.ei !== prev.ei) renderBlockRun(); else bkPaint();
+    return;
+  }
+  bkPaint();
+}
+function bkSkipStep(){
+  if(!bk) return;
+  const cur = bk.segs[Math.min(bkPhase().i, bk.segs.length - 1)];
+  const next = bk.segs.find(sg=> sg.ei > cur.ei);
+  if(!next){ bkAbort(); return; }   // skipping the last exercise ends the block without counting it as done
+  const now = bkNow();
+  bk.t0 = now - next.start;
+  haptic('light');
+  bkNotifSchedule();
+  bkTick();
+}
+function bkAbort(){
+  haptic('warning');
+  bkStop();
+  renderBlockSheet();
+}
+function bkStop(){
+  if(!bk) return;
+  clearInterval(bk.iv);
+  const wl = bk.wl;
+  bk = null;
+  if(wl){ try{ wl.release().catch(()=>{}); }catch(e){} }
+  bkAwake(false);
+  bkNotifCancel();
+}
+function bkFinish(){
+  if(!bk) return;
+  const kind = bk.kind;
+  bkStop();
+  haptic('done');
+  markGymActivity();
+  liveActivity();
+  if(!bkDone(kind)){ sessionExercises.push({ ...bkEntry(kind), done:true }); persistGymSession(); }
+  renderGymGrid(); renderExercisePanels();
+  closeBlockSheet();
+}
+function bkUndo(){
+  const kind = bkOpen;
+  if(!kind) return;
+  markGymActivity();
+  liveActivity();
+  removeExerciseFromSession(bkEntry(kind).name);
+  renderBlockSheet();
+}
+async function bkWake(){
+  const mine = bk;
+  try{
+    if(!mine || mine.wl || !navigator.wakeLock) return;
+    const wl = await navigator.wakeLock.request('screen');
+    if(bk !== mine){ wl.release().catch(()=>{}); return; }
+    mine.wl = wl;
+  }catch(e){ /* unsupported or denied: the timestamp clock stays correct anyway */ }
+}
+function bkAwake(on){
+  if(capPlugin('KeepAwake')){ tmAwake(on); return; }   // native: same plugin + flag as the single timed set
+  if(on) bkWake();
+  else if(bk && bk.wl){ try{ bk.wl.release().catch(()=>{}); }catch(e){} bk.wl = null; }
+}
+function bkNotifIds(){ return Array.from({ length: 30 }, (_, i)=> ({ id: BK_NOTIF_BASE + i })); }
+function bkNotifCancel(){
+  const LN = tmNotifLN();
+  if(!LN) return;
+  const list = { notifications: bkNotifIds() };
+  try{ LN.cancel(list).catch(()=>{}); }catch(e){}
+  try{ if(LN.removeDeliveredNotifications) LN.removeDeliveredNotifications(list).catch(()=>{}); }catch(e){}
+}
+async function bkNotifSchedule(){
+  const mine = bk, LN = tmNotifLN();
+  if(!mine || mine.pausedAt !== null || !LN) return;
+  if(!(await tmNotifGranted())) return;
+  const live = ()=> bk === mine && mine.pausedAt === null;
+  if(!live()) return;
+  const now = Date.now(), list = gymBlocks[mine.kind], items = [];
+  mine.segs.forEach((sg, i)=>{
+    const at = mine.t0 + sg.start;
+    if(i === 0 || at <= now || (sg.kind === 'work' && sg.side === 1)) return;   // work after prep needs no ping
+    items.push({ id: BK_NOTIF_BASE + i, at, body: sg.kind === 'sw' ? t('tmNotifSwitch','Zmień stronę') : list[sg.ei].name });
+  });
+  const endAt = mine.t0 + mine.total;
+  if(endAt > now) items.push({ id: BK_NOTIF_BASE + mine.segs.length, at: endAt, body: t('bkNotifDone','Blok zakończony') });
+  try{
+    await LN.cancel({ notifications: bkNotifIds() });
+    if(!live() || !items.length) return;
+    await LN.schedule({ notifications: items.map(i=>({ id: i.id, title: 'Mekkio', body: i.body, schedule: { at: new Date(i.at), allowWhileIdle: true } })) });
+    if(!live()) bkNotifCancel();
+  }catch(e){ console.error('bkNotifSchedule', e); }
+}
+mSheetDrag('blockOverlayV2', closeBlockSheet);
+
 /* v3 "Dodaj własne ćwiczenie" (#newExerciseOverlayV2) — reached from
    GYM v2 and plan editor v2's dashed add-tiles (buildAddCustomExerciseTile()),
    and GYM v2's own standalone add-tile. Mirrors
@@ -10970,20 +11258,89 @@ function scheduleOnDays(days, exercises){
 const WARMUP_EXERCISE = {name:'Warm-up', group:'Rozgrzewka', type:'checklist', icon:'warmup'};
 const STRETCH_EXERCISE = {name:'Stretching', group:'Rozciąganie', type:'checklist', icon:'stretching'};
 const BOOKEND_EX_NAMES = new Set([WARMUP_EXERCISE.name, STRETCH_EXERCISE.name]);
+/* Smart warm-up / stretching blocks — derived from a day's main exercises, never stored in the plan.
+   Tags use PLAN_EX_GROUPS keys; 'all' = whole-body move, 'any' = universal. A stretch with no tag
+   for a worked group simply isn't picked (gaps: Biceps, Brzuch, Pośladki, przedramiona — to be filled
+   with new exercises later). */
+const WARMUP_MUSCLES = {
+  'Arm Circles':['Barki'], 'Cat-Cow':['Plecy'], 'Couch Stretch':['Nogi'], 'Hip Circles':['Nogi'],
+  'Inchworm':['all'], 'Leg Swings':['Nogi'], 'Pigeon Stretch':['Nogi'], 'Scapular Push-up':['Barki','Klatka'],
+  'Thoracic Rotation':['Plecy'], "World's Greatest Stretch":['all'], 'Ankle Mobility':['Nogi'],
+  'Wall Slides':['Barki','Plecy'], 'Foam Roll':['any'],
+};
+const STRETCH_MUSCLES = {
+  'Butterfly Stretch':['Nogi'], "Child's Pose":['Plecy'], 'Cross-Body Shoulder Stretch':['Barki'],
+  'Doorway Chest Stretch':['Klatka'], 'Hamstring Stretch':['Nogi'], '90/90 Hip Stretch':['Nogi'],
+  'Lat Stretch':['Plecy'], 'Overhead Triceps Stretch':['Triceps'], 'Quad Stretch':['Nogi'], 'Wall Calf Stretch':['Nogi'],
+};
+const BLOCK_MIN_EX = 5, BLOCK_MAX_EX = 7, BLOCK_BUDGET_SEC = 330, FULLBODY_MIN_GROUPS = 4;
+/* muscle-group keys a day's main exercises actually train (timed blocks and custom ones don't count) */
+function dayWorkedGroups(exercises){
+  const worked = [];
+  (exercises || []).forEach(e=>{
+    if(!e || e.type === 'checklist' || isTimeEx(e)) return;
+    const b = muscleGroupBucket(e.group);
+    if(b.strength === false || b.key === 'Wlasne') return;
+    if(!worked.includes(b.key)) worked.push(b.key);
+  });
+  return worked;
+}
+function blockSeconds(list){
+  return list.reduce((s,e)=> s + 5 + timeDurFor(e) * (e.perSide ? 2 : 1) + (e.perSide ? TM_SWITCH_MS / 1000 : 0), 0);   // 5 s = BK_PREP_MS before each exercise
+}
+function blockFromNames(names){
+  return names.map(n=> BUILTIN_EXERCISES_BY_NAME.get(n)).filter(Boolean).map(e=>({...e}));
+}
+/* Deterministic: same day exercises → same block. Returns [] for a day with no strength work. */
+function buildWarmupBlock(exercises){
+  const worked = dayWorkedGroups(exercises);
+  if(!worked.length) return [];
+  const full = worked.length >= FULLBODY_MIN_GROUPS;
+  const names = Object.keys(WARMUP_MUSCLES);
+  const hits = n => WARMUP_MUSCLES[n].filter(g=> worked.includes(g)).length;
+  const general = names.filter(n=> WARMUP_MUSCLES[n].includes('all'));
+  // one move per worked group in turn (multi-group moves first within a group), so no group starves another
+  const per = worked.map(g=> names.filter(n=> WARMUP_MUSCLES[n].includes(g)).sort((a,b)=> hits(b) - hits(a)));
+  const local = [];
+  for(let i = 0; per.some(l=> l.length > i); i++) per.forEach(l=>{ if(l[i] && !local.includes(l[i])) local.push(l[i]); });
+  const universal = names.filter(n=> WARMUP_MUSCLES[n].includes('any'));
+  // whole-body moves open the block (all of them on a fullbody day, one otherwise), then moves for the worked groups
+  const pick = [...(full ? general : general.slice(0,1)), ...local, ...general, ...universal];
+  return blockFromNames(capBlock(pick));
+}
+/* Only groups that were worked; no filler, so a short day gets a short block. One stretch per group in
+   turn, so a fullbody day covers every worked group before any group gets a second one. */
+function buildStretchBlock(exercises){
+  const worked = dayWorkedGroups(exercises);
+  if(!worked.length) return [];
+  const order = PLAN_EX_GROUPS.map(b=>b.key);
+  const sorted = [...worked].sort((a,b)=> order.indexOf(a) - order.indexOf(b));
+  const per = sorted.map(g=> Object.keys(STRETCH_MUSCLES).filter(n=> STRETCH_MUSCLES[n].includes(g)));
+  const pick = [];
+  for(let i = 0; per.some(l=> l.length > i); i++) per.forEach(l=>{ if(l[i] && !pick.includes(l[i])) pick.push(l[i]); });
+  return blockFromNames(capBlock(pick));
+}
+/* first BLOCK_MIN_EX always stay; more only while the block fits BLOCK_BUDGET_SEC and BLOCK_MAX_EX */
+function capBlock(names){
+  const out = [];
+  let sec = 0;
+  names.forEach(n=>{
+    if(out.includes(n) || out.length >= BLOCK_MAX_EX) return;
+    const e = BUILTIN_EXERCISES_BY_NAME.get(n);
+    const add = e ? blockSeconds([e]) : 0;
+    if(out.length >= BLOCK_MIN_EX && sec + add > BLOCK_BUDGET_SEC) return;
+    out.push(n); sec += add;
+  });
+  return out;
+}
 function stripWarmupStretch(schedule){
   PLAN_DAYS.forEach(d=>{
     if(schedule[d] && schedule[d].length) schedule[d] = schedule[d].filter(e=>!BOOKEND_EX_NAMES.has(e.name));
   });
 }
-function ensureWarmupStretch(schedule){
-  PLAN_DAYS.forEach(d=>{
-    const list = schedule[d];
-    if(!list || !list.length) return;
-    const real = list.filter(e=>!BOOKEND_EX_NAMES.has(e.name));
-    if(!real.length) return;
-    schedule[d] = [{...WARMUP_EXERCISE}, ...real, {...STRETCH_EXERCISE}];
-  });
-}
+/* Warm-up / stretching are no longer stored in plans (blocks are built live, see buildWarmupBlock).
+   Kept under the old name for the save/generate paths: they now strip any legacy bookend entries. */
+function ensureWarmupStretch(schedule){ stripWarmupStretch(schedule); }
 const DEFAULT_PLAN_EX_SOURCE = [...GYM_PLAN.A, ...GYM_PLAN.B, ...GYM_PLAN_C_EXTRA];
 function defEx(...names){
   return names.map(name=>{
@@ -11020,7 +11377,6 @@ function defaultTrainingPlans(){
       ...emptySchedule(), mon: upperA, tue: lowerA, thu: upperB, fri: lowerB,
     }},
   ];
-  plans.forEach(p=> ensureWarmupStretch(p.schedule));
   return plans;
 }
 /* Plan schedule entries are full copies of the exercise object taken at
@@ -11088,7 +11444,6 @@ function migratePlan(p){
   }
   cleanPlanInPlace(plan);
   applyExerciseRenames(plan.schedule); // fixes stale name/icon on exercises renamed after the plan was saved
-  ensureWarmupStretch(plan.schedule); // retroactively adds bookends to plans saved before this feature existed
   return plan;
 }
 // Resets a builtin plan's schedule to a fresh hardcoded default — ONLY
@@ -11190,12 +11545,14 @@ function timedExerciseMin(e){
 function planAvgMinutesPerDay(p){
   const days = planActiveDays(p);
   if(!days.length) return 0;
-  let reps = 0, timed = 0;
-  days.forEach(d=> (p.schedule[d]||[]).forEach(e=>{
-    if(BOOKEND_EX_NAMES.has(e.name)) return;
-    if(isTimeEx(e)) timed += timedExerciseMin(e); else reps++;
-  }));
-  return Math.round(reps / days.length) * 5 + Math.round(timed / days.length);
+  let reps = 0, timed = 0, blocks = 0;
+  days.forEach(d=>{
+    const list = (p.schedule[d]||[]).filter(e=> !BOOKEND_EX_NAMES.has(e.name));
+    list.forEach(e=>{ if(isTimeEx(e)) timed += timedExerciseMin(e); else reps++; });
+    // the smart warm-up / stretching blocks of this day
+    blocks += Math.ceil((blockSeconds(buildWarmupBlock(list)) + blockSeconds(buildStretchBlock(list))) / 60);
+  });
+  return Math.round(reps / days.length) * 5 + Math.round(timed / days.length) + Math.round(blocks / days.length);
 }
 function planAvgExercisesPerDay(p){
   const days = planActiveDays(p);
@@ -13139,8 +13496,6 @@ function renderGymGridV2(animate){
     // exercises (in order), always wrapped in warm-up first / stretching
     // last (Maciej, 2026-09-19) — regardless of whether the starred plan
     // has them, or there is a plan at all.
-    const mkBookend = e=>({ ex: byName.get(e.name) || e, swapOrigin: null, swapped: false, bookend: true });
-    const warmupSlot = mkBookend(WARMUP_EXERCISE), stretchSlot = mkBookend(STRETCH_EXERCISE);
     const repeatSlots = repeatMode.names
       .filter(name=> !BOOKEND_EX_NAMES.has(name))
       .map(name=>{
@@ -13152,9 +13507,10 @@ function renderGymGridV2(animate){
         }
         return { ex: fallback, swapOrigin: name, swapped: false, bookend: false };
       });
-    planSlots = [warmupSlot, ...repeatSlots, stretchSlot];
+    planSlots = repeatSlots;
   } else {
-    const planEx = todayPlanExerciseNames() || [];
+    // legacy Warm-up / Stretching checklist entries in older saved plans are ignored: the blocks are built live now
+    const planEx = (todayPlanExerciseNames() || []).filter(e=> !BOOKEND_EX_NAMES.has(e.name));
     // Resolve any "Zamień na dziś" swaps: a swapped plan slot shows the
     // replacement exercise but remembers which plan exercise it stands in
     // for (swapOrigin), so its tile still carries the swap control.
@@ -13180,6 +13536,11 @@ function renderGymGridV2(animate){
     if(!shown.has(se.name) && byName.has(se.name)){ slots.push({ ex: byName.get(se.name) }); shown.add(se.name); }
   });
   let gridTotal = 0, gridDone = 0;
+  // warm-up / stretching blocks follow the exercises on the grid (plan slots with swaps included)
+  // …and ones picked or logged by hand, so a free workout with no plan gets blocks too
+  const mainEx = slots.map(sl=> sl.ex);
+  gymBlocks = { warmup: buildWarmupBlock(mainEx), stretch: buildStretchBlock(mainEx) };
+  if(gymBlocks.warmup.length) grid.appendChild(buildGymBlockCard('warmup', gymBlocks.warmup));
   slots.forEach(slot=>{
     const ex = slot.ex;
     const inSession = sessionExercises.some(e=>e.name===ex.name);
@@ -13226,6 +13587,8 @@ function renderGymGridV2(animate){
   // popup with no prefill (Maciej, 2026-09-01).
   addBtn.onclick = ()=> openNewExerciseFormV2(null, 'gym');
   grid.appendChild(addBtn);
+  // stretching closes the day, after the exercises section (which ends with the search / add tiles)
+  if(gymBlocks.stretch.length) grid.appendChild(buildGymBlockCard('stretch', gymBlocks.stretch));
 
   if(animate){
     // Fade + slide up, one tile after another — capped stagger so a long
