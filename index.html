@@ -4407,6 +4407,7 @@ const GROUP_LABELS_EN = {
   'Własne':'Custom', 'Custom':'Custom',
   'Barki (tylne)':'Shoulders (rear)', 'Nogi (całość)':'Legs (overall)',
   'Klatka piersiowa (dół)':'Chest (lower)', 'Brzuch (skos)':'Abs (obliques)',
+  'Kardio':'Cardio', 'Rozgrzewka':'Warm-up', 'Rozciąganie':'Stretching',
 };
 // Order = legs first (biggest muscle mass), then antagonist pairs kept
 // adjacent — Klatka (push) right before Plecy (pull), Biceps right before
@@ -4428,6 +4429,11 @@ const PLAN_EX_GROUPS = [
   {key:'Triceps', match:['triceps'], pl:'Triceps', en:'Triceps'},
   {key:'Barki', match:['bark'], pl:'Barki', en:'Shoulders'},
   {key:'Brzuch', match:['brzuch'], pl:'Brzuch', en:'Abs'},
+  // timed blocks, not muscle groups: strength:false keeps them out of the AI "neglected groups" list and
+  // no "add your own" tile (a custom exercise there would be a reps exercise)
+  {key:'Kardio', match:['kardio'], pl:'Kardio', en:'Cardio', strength:false},
+  {key:'Rozgrzewka', match:['rozgrzew'], pl:'Rozgrzewka', en:'Warm-up', strength:false},
+  {key:'Rozciaganie', match:['rozci'], pl:'Rozciąganie', en:'Stretching', strength:false},
   {key:'Wlasne', match:[], pl:'Własne', en:'Custom'}, // fallback — always last, matches anything unrecognized
 ];
 function muscleGroupBucket(group){
@@ -5012,6 +5018,44 @@ const GYM_PLAN_EXTRA_V2 = [
   {name:"Nordic Curl", group:"Uda (dwugłowe)", sets:3, repLow:4, repHigh:8, rest:"90s", icon:"nordic_curl", equipment:"masa ciała"},
   {name:"Sissy Squat", group:"Nogi (czworogłowe)", sets:3, repLow:8, repHigh:12, rest:"75s", icon:"sissy_squat", equipment:"masa ciała"},
 ];
+/* Timed warm-up / stretching / cardio (packs 8-11, 2026-10-06). Values: docs/mekkio_domyslne_wartosci.md,
+   sections C, D, E. All mode:'time' (durationSec = one side when perSide). Groups Rozgrzewka / Rozciąganie /
+   Kardio are NOT strength groups (PLAN_EX_GROUPS strength:false): never in auto-generated plans, not counted
+   as "neglected muscle groups". rest:"0s" = no rest timer (single block). These are library alternatives;
+   the Warm-up / Stretching checklist tiles (WARMUP_EXERCISE / STRETCH_EXERCISE) stay as they are. */
+const GYM_PLAN_TIME_V3 = [
+  {name:"Arm Circles", group:"Rozgrzewka", sets:1, mode:"time", durationSec:30, repLow:30, repHigh:30, rest:"0s", icon:"arm_circles", equipment:"masa ciała"},
+  {name:"Cat-Cow", group:"Rozgrzewka", sets:1, mode:"time", durationSec:45, repLow:45, repHigh:45, rest:"0s", icon:"cat_cow", equipment:"masa ciała"},
+  {name:"Couch Stretch", group:"Rozgrzewka", sets:1, mode:"time", durationSec:45, perSide:true, repLow:45, repHigh:45, rest:"0s", icon:"couch_stretch", equipment:"masa ciała"},
+  {name:"Hip Circles", group:"Rozgrzewka", sets:1, mode:"time", durationSec:30, repLow:30, repHigh:30, rest:"0s", icon:"hip_circles", equipment:"masa ciała"},
+  {name:"Inchworm", group:"Rozgrzewka", sets:1, mode:"time", durationSec:45, repLow:45, repHigh:45, rest:"0s", icon:"inchworm", equipment:"masa ciała"},
+  {name:"Leg Swings", group:"Rozgrzewka", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"leg_swings", equipment:"masa ciała"},
+  {name:"Pigeon Stretch", group:"Rozgrzewka", sets:1, mode:"time", durationSec:45, perSide:true, repLow:45, repHigh:45, rest:"0s", icon:"pigeon_stretch", equipment:"masa ciała"},
+  {name:"Scapular Push-up", group:"Rozgrzewka", sets:1, mode:"time", durationSec:30, repLow:30, repHigh:30, rest:"0s", icon:"scapular_push_up", equipment:"masa ciała"},
+  {name:"Thoracic Rotation", group:"Rozgrzewka", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"thoracic_rotation", equipment:"masa ciała"},
+  {name:"World's Greatest Stretch", group:"Rozgrzewka", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"worlds_greatest_stretch", equipment:"masa ciała"},
+  {name:"Ankle Mobility", group:"Rozgrzewka", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"ankle_mobility", equipment:"masa ciała"},
+  {name:"Wall Slides", group:"Rozgrzewka", sets:1, mode:"time", durationSec:45, repLow:45, repHigh:45, rest:"0s", icon:"wall_slides", equipment:"masa ciała"},
+  {name:"Foam Roll", group:"Rozgrzewka", sets:1, mode:"time", durationSec:60, repLow:60, repHigh:60, rest:"0s", icon:"foam_roll", equipment:"masa ciała"}, // 60 s total, one block
+  {name:"Butterfly Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:45, repLow:45, repHigh:45, rest:"0s", icon:"butterfly_stretch", equipment:"masa ciała"},
+  {name:"Child's Pose", group:"Rozciąganie", sets:1, mode:"time", durationSec:45, repLow:45, repHigh:45, rest:"0s", icon:"childs_pose", equipment:"masa ciała"},
+  {name:"Cross-Body Shoulder Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"cross_body_shoulder_stretch", equipment:"masa ciała"},
+  {name:"Doorway Chest Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"doorway_chest_stretch", equipment:"masa ciała"},
+  {name:"Hamstring Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"hamstring_stretch", equipment:"masa ciała"},
+  {name:"90/90 Hip Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:45, perSide:true, repLow:45, repHigh:45, rest:"0s", icon:"hip_90_90_stretch", equipment:"masa ciała"},
+  {name:"Lat Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"lat_stretch", equipment:"masa ciała"},
+  {name:"Overhead Triceps Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"overhead_triceps_stretch", equipment:"masa ciała"},
+  {name:"Quad Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"quad_stretch", equipment:"masa ciała"},
+  {name:"Wall Calf Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"wall_calf_stretch", equipment:"masa ciała"},
+  {name:"Stationary Bike", group:"Kardio", sets:1, mode:"time", durationSec:1200, repLow:1200, repHigh:1200, rest:"0s", icon:"stationary_bike", equipment:"maszyny"},
+  {name:"Elliptical", group:"Kardio", sets:1, mode:"time", durationSec:1200, repLow:1200, repHigh:1200, rest:"0s", icon:"elliptical", equipment:"maszyny"},
+  {name:"Rowing Machine", group:"Kardio", sets:1, mode:"time", durationSec:900, repLow:900, repHigh:900, rest:"0s", icon:"rowing_machine", equipment:"maszyny"},
+  {name:"Stair Climber", group:"Kardio", sets:1, mode:"time", durationSec:900, repLow:900, repHigh:900, rest:"0s", icon:"stair_climber", equipment:"maszyny"},
+  {name:"Ski Erg", group:"Kardio", sets:1, mode:"time", durationSec:600, repLow:600, repHigh:600, rest:"0s", icon:"ski_erg", equipment:"maszyny"},
+  {name:"Air Bike", group:"Kardio", sets:1, mode:"time", durationSec:600, repLow:600, repHigh:600, rest:"0s", icon:"air_bike", equipment:"maszyny"}, // best as intervals (file note)
+  {name:"Jump Rope", group:"Kardio", sets:3, mode:"time", durationSec:120, repLow:120, repHigh:120, rest:"60s", icon:"jump_rope", equipment:"masa ciała"},
+  {name:"HIIT", group:"Kardio", sets:1, mode:"time", durationSec:480, repLow:480, repHigh:480, rest:"0s", icon:"hiit", equipment:"masa ciała"}, // plain 8 min timer for now; interval mode (8 × 30 s work / 30 s rest) is a later stage
+];
 /* Multi-joint lifts — everything else in the library is single-joint /
    isolation. Drives exercise ordering (compound before isolation within a
    muscle group); see exerciseOrderKey(). Match is by exact name. */
@@ -5033,6 +5077,7 @@ const BUILTIN_EXERCISES = [
   ...GYM_PLAN_C_EXTRA.map(e => ({...e, day:'C', compound: COMPOUND_EXERCISES.has(e.name)})),
   ...GYM_PLAN_KALISTENIKA.map(e => ({...e, day:'D', compound: COMPOUND_EXERCISES.has(e.name)})),
   ...GYM_PLAN_EXTRA_V2.map(e => ({...e, day:'E', compound: COMPOUND_EXERCISES.has(e.name)})),
+  ...GYM_PLAN_TIME_V3.map(e => ({...e, day:'F', compound: false})),
 ];
 
 /* ---------- undulating periodization ("wersje wykonania", Szostek Balance FBW) ----------
@@ -9574,7 +9619,7 @@ function renderExercisePopupV2(animate){
         <div class="lg-chips">
           <span class="lg-chip">${ph('stack')}<span>${t('statSetsCount', `${ex.sets} serie`, ex.sets)}</span></span>
           <span class="lg-chip">${ph('arrow-clockwise')}<span>${time ? escHtml(fmtDur(timeDurFor(ex), ex.perSide)) : `${ex.repLow}-${ex.repHigh} ${t('repsUnit','powt.')}`}</span></span>
-          <span class="lg-chip rest" id="lgRest">${ph('clock-countdown')}<span id="lgRestTxt">${escHtml(ex.rest)}</span></span>
+          ${parseRestSeconds(ex.rest) > 0 ? `<span class="lg-chip rest" id="lgRest">${ph('clock-countdown')}<span id="lgRestTxt">${escHtml(ex.rest)}</span></span>` : ''}
         </div>
       </div>
       ${tipHtml}
@@ -10705,6 +10750,24 @@ function planTotalExercises(p){
 // own plan card already shows for today specifically (todayEx.length), so
 // a 3-day/week plan reads as "7 ćwiczeń" (one day's worth) instead of "21"
 // (the whole week), which is what a single-session preview should say.
+// Plan-card time estimate: reps exercises keep the old flat ~5 min each; a timed one
+// (mode:'time') is sets × (time × sides + side switch) + rest between sets.
+function timedExerciseMin(e){
+  const sets = Math.max(1, parseInt(e.sets, 10) || 1), sides = e.perSide ? 2 : 1;
+  const work = timeDurFor(e) * sides + (e.perSide ? TM_SWITCH_MS / 1000 : 0);
+  const rest = Math.max(0, parseRestSeconds(e.rest || '0s'));
+  return Math.max(1, Math.ceil((sets * work + (sets - 1) * rest) / 60));
+}
+function planAvgMinutesPerDay(p){
+  const days = planActiveDays(p);
+  if(!days.length) return 0;
+  let reps = 0, timed = 0;
+  days.forEach(d=> (p.schedule[d]||[]).forEach(e=>{
+    if(BOOKEND_EX_NAMES.has(e.name)) return;
+    if(isTimeEx(e)) timed += timedExerciseMin(e); else reps++;
+  }));
+  return Math.round(reps / days.length) * 5 + Math.round(timed / days.length);
+}
 function planAvgExercisesPerDay(p){
   const days = planActiveDays(p);
   return days.length ? Math.round(planTotalExercises(p) / days.length) : 0;
@@ -10839,6 +10902,10 @@ function planv2MatchesEquipment(ex, equipment){
    a lock — the GYM list stays hand-draggable. */
 const EX_EQUIP_RANK = { hantle:0, kettlebell:0, 'wolne ciężary':0, sztanga:0, maszyny:1, gumy:1, 'masa ciała':1 };
 function exerciseGroupRank(group){
+  // timed blocks frame the muscle work: warm-up first, then the strength groups, cardio, stretching last
+  if(group === 'Rozgrzewka') return -1;
+  if(group === 'Kardio') return PLANSV2_MUSCLE_BUCKETS.length + 1;
+  if(group === 'Rozciąganie') return PLANSV2_MUSCLE_BUCKETS.length + 2;
   const i = PLANSV2_MUSCLE_BUCKETS.findIndex(b => b.match(group || ''));
   return i === -1 ? PLANSV2_MUSCLE_BUCKETS.length : i;
 }
@@ -11261,7 +11328,7 @@ function buildPlanCardV2(p, isCustom, animate, i){
       <p class="plansv2-card-name">${escHtml(p.name)}</p>
       <div class="plansv2-card-stats">
         <div class="plansv2-stat">${ph('barbell')}<span>${planExCountText(exCount)}</span></div>
-        <div class="plansv2-stat">${ph('clock-countdown')}<span>~${Math.max(15, exCount*5)} min</span></div>
+        <div class="plansv2-stat">${ph('clock-countdown')}<span>~${Math.max(15, planAvgMinutesPerDay(p))} min</span></div>
         <div class="plansv2-stat">${ph('chart-line')}<span>${planDifficultyLabel(diffKey)}</span></div>
       </div>
     </div>
@@ -11601,7 +11668,7 @@ function renderPlanEditorGridV2(animate){
         tile.onclick = ()=> togglePlanExercise(ex);
         grid.appendChild(tile);
       });
-      grid.appendChild(buildAddCustomExerciseTile('planEditor', LANG==='en' ? b.en : b.pl));
+      if(b.strength !== false) grid.appendChild(buildAddCustomExerciseTile('planEditor', LANG==='en' ? b.en : b.pl));
       section.appendChild(grid);
     }
     container.appendChild(section);
@@ -12277,7 +12344,7 @@ function renderDashboard(){
       const g = muscleGroupBucket(ex.group).key;
       if(!lastTrainedDate[g] || w.date > lastTrainedDate[g]) lastTrainedDate[g] = w.date;
     }));
-    const neglectedGroups = PLAN_EX_GROUPS.filter(g=>g.key!=='Wlasne').map(g=>g.key)
+    const neglectedGroups = PLAN_EX_GROUPS.filter(g=>g.key!=='Wlasne' && g.strength!==false).map(g=>g.key)
       .map(group => ({ group, daysSinceLastTrained: lastTrainedDate[group] ? daysBetween(lastTrainedDate[group], today) : null }))
       .filter(g => g.daysSinceLastTrained === null || g.daysSinceLastTrained > ROLLING_DAYS);
 
