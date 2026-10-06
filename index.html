@@ -5260,10 +5260,66 @@ const LS_KCAL_FACTOR = "fitlog_kcal_factor_v1";
 const KCAL_FACTOR_MIN_EDITS = 3;
 const KCAL_FACTOR_LO = 0.6, KCAL_FACTOR_HI = 1.6;
 let kcalPersonalFactor = (()=>{ const v = parseFloat(localStorage.getItem(LS_KCAL_FACTOR)); return (v >= KCAL_FACTOR_LO && v <= KCAL_FACTOR_HI) ? v : 1; })();
+/* ---------- cardio calories (counted per cardio set, added to the workout total) ----------
+   A cardio set is "counted separately" when we can estimate it:
+     · the user typed the machine's own kcal (set.kcal, kcalEst:false) — that value wins for the set;
+     · treadmill with a distance: ACSM walking / running equation from speed and incline;
+     · any other cardio machine: MET × 3.5 × kg / 200 × minutes (same constant as the base term below).
+   Only the minutes of sets counted separately are taken out of the base (background-metabolism) term, so a
+   treadmill set WITHOUT a distance (nothing to estimate from) simply stays in the base and no minutes vanish.
+   Nothing is stored on the set: estimates are recomputed from weight + metrics; only a manual machine kcal is saved.
+   Calories stay approximate: shown as "ok. N kcal", never as an exact figure.
+
+   Treadmill — ACSM metabolic equations (ml O2 / kg / min, S = speed in m/min, G = grade as a fraction):
+     walking  VO2 = 0.1·S + 1.8·S·G + 3.5     (ACSM validity: about 3.0–6.4 km/h; 1.9–4.0 mph)
+     running  VO2 = 0.2·S + 0.9·S·G + 3.5     (ACSM validity: from about 8 km/h; 5 mph and up)
+   kcal = VO2 · kg / 1000 · 5 kcal per litre of O2 · minutes. ACSM leaves 6.4–8 km/h open, so the walk/run
+   switch at 7 km/h is OUR decision (the middle of that gap), not a figure from the ACSM text.
+   Speed comes from distance ÷ time; speeds outside 1.2–25 km/h are treated as a typing error (not counted).
+
+   Other machines — METs from the Compendium of Physical Activities (pacompendium.com, 2024 codes),
+   verified directly in the source on 2026-10-06:
+     Stationary Bike 01200  6.8  Bicycling, stationary, general
+     Air Bike        01228  8.0  Bicycling, stationary, 126-150 watts  — AN APPROXIMATION: the Compendium has
+                                  no row for an air / assault bike, so this is the nearest cycling-ergometer band
+     Elliptical      02048  5.0  Elliptical trainer, moderate effort
+     Stair Climber   02065  9.3  Stair treadmill ergometer, general
+     Rowing Machine  02070  7.3  Rowing, stationary ergometer, general, vigorous effort
+     Ski Erg         02082 10.5  Ski ergometer, cross country, double poling, slow to moderate speed
+     Jump Rope       02068 11.0  Rope skipping exercise, general
+     HIIT            02040  7.5  Circuit training, including kettlebells, some aerobic movement with minimal
+                                  rest, general, vigorous intensity */
+const CARDIO_MET = { 'Stationary Bike': 6.8, 'Air Bike': 8.0, 'Elliptical': 5.0, 'Stair Climber': 9.3, 'Rowing Machine': 7.3, 'Ski Erg': 10.5, 'Jump Rope': 11.0, 'HIIT': 7.5 };
+const TREADMILL_WALK_RUN_MPM = 7000 / 60;   // 7 km/h in m/min — our decision, see above
+function treadmillKcal(durationSec, distanceM, inclinePct, kg){
+  const min = durationSec / 60, S = distanceM / min, G = (inclinePct || 0) / 100;
+  if(!(min > 0) || !(S >= 20 && S <= 25000 / 60)) return null;
+  const vo2 = S >= TREADMILL_WALK_RUN_MPM ? 0.2 * S + 0.9 * S * G + 3.5 : 0.1 * S + 1.8 * S * G + 3.5;
+  return vo2 * kg / 1000 * 5 * min;
+}
+// kcal of one cardio set, or null when it can't be estimated (then its minutes stay in the base term)
+function cardioSetKcal(x, name, kg){
+  if(!(x.durationSec > 0)) return null;
+  if(x.kcal > 0 && x.kcalEst === false) return x.kcal;
+  if(name === 'Treadmill') return x.distanceM > 0 ? treadmillKcal(x.durationSec, x.distanceM, x.inclinePct, kg) : null;
+  return CARDIO_MET[name] ? CARDIO_MET[name] * 3.5 * kg / 200 * (x.durationSec / 60) : null;
+}
+function workoutCardioKcal(w, kg){
+  let kcal = 0, minutes = 0;
+  w.exercises.forEach(e=>{
+    if(!isCardioName(e.name)) return;
+    exSetsView(e).forEach(x=>{
+      const k = cardioSetKcal(x, e.name, kg);
+      if(k != null){ kcal += k; minutes += x.durationSec / 60; }
+    });
+  });
+  return { kcal, minutes };
+}
 function rawWorkoutKcal(w){   // the pure formula, before any personal factor
   const wt = weightAtDate(w.date);
   if(!wt || !w.durationMin) return null;
-  return workoutTonnage(w, wt) / KCAL_TONNAGE_K + KCAL_BASE_MET * 3.5 * wt / 200 * w.durationMin;
+  const c = workoutCardioKcal(w, wt);   // cardio counted separately; its minutes leave the base term (never more than the session length)
+  return workoutTonnage(w, wt) / KCAL_TONNAGE_K + KCAL_BASE_MET * 3.5 * wt / 200 * Math.max(0, w.durationMin - c.minutes) + c.kcal;
 }
 function kcalEditRatios(){
   const out = [];
@@ -6912,7 +6968,7 @@ function refreshGymFinKcal(){
     if(w.kcalUser != null) kEl.textContent = 'Kalorie · edytowane';
     else if(w.kcalWatch != null) kEl.innerHTML = '<span class="kcal-watch-tag">' + ph('watch') + 'Kalorie · z zegarka</span>';
     else kEl.textContent = 'Kalorie · szacunek';
-    vEl.textContent = shown + ' kcal'; eEl.hidden = false; gymFinKcalMode = 'edit';
+    vEl.textContent = (w.kcalUser == null && w.kcalWatch == null ? 'ok. ' : '') + shown + ' kcal'; eEl.hidden = false; gymFinKcalMode = 'edit';
   }
 }
 
@@ -9346,6 +9402,7 @@ function renderCardioResults(){
           <span class="lg-steps"><button type="button" class="lg-step" onclick="crStepKcal(-10)" aria-label="−">${LG_ICONS.minus}</button><button type="button" class="lg-step" onclick="crStepKcal(10)" aria-label="+">${LG_ICONS.plus}</button></span></div>
       </div>
       <div class="lg-derived" id="crDerived"></div>
+      <p class="lg-cr-hint" id="crKcalHint"></p>
       <p class="lg-cr-hint">${t('crHintPrev','Szare wartości to podpowiedź z poprzedniego razu. Wszystko jest opcjonalne, a kalorie wpisz tylko wtedy, gdy pokazuje je maszyna.')}</p>
       <button type="button" class="lg-add" onclick="saveCardioResults()">${t('crSave','Zapisz')}</button>
       <button type="button" class="lg-add" style="border-color:transparent" onclick="closeCardioResults()">${t('crSkip','Pomiń')}</button>
@@ -9360,6 +9417,16 @@ function crPaintDerived(){
   if(km > 0 && sec > 0) chips.push(`Prędkość ${fmtNum1(km / (sec / 3600))} km/h`);
   if(m > 0 && sec > 0) chips.push(`Tempo ${fmtPace500(sec, m)}`);
   el.innerHTML = chips.map(c=> `<span class="lg-chip">${escHtml(c)}</span>`).join('');
+  // what the calorie estimate will rest on (or what's missing); the estimate itself is never stored on the set
+  const hint = document.getElementById('crKcalHint');
+  if(hint){
+    const name = popupExercise.name;
+    hint.className = 'lg-cr-hint';
+    if(weightAtDate(todayStr()) == null){ hint.className = 'lg-warn'; hint.textContent = 'Dodaj masę ciała w koncie, żeby oszacować kalorie.'; }
+    else if(name === 'Treadmill') hint.textContent = km > 0 ? 'Kalorie oszacuję z dystansu, nachylenia i Twojej masy ciała.' : 'Dodaj dystans, żeby policzyć dokładniej.';
+    else if(CARDIO_MET[name]) hint.textContent = name === 'Air Bike' ? 'Kalorie oszacuję z czasu i Twojej masy ciała (dla roweru powietrznego to przybliżenie).' : 'Kalorie oszacuję z czasu i Twojej masy ciała.';
+    else hint.textContent = '';
+  }
 }
 function crSet(key, raw){
   if(!cr) return;
@@ -10622,7 +10689,7 @@ function showGymFinishV2(summary, onDone){
       kcalEl.hidden = false; kEl.textContent = 'Kalorie'; vEl.textContent = 'Dodaj masę ciała';
       eEl.hidden = true; gymFinKcalMode = 'noweight';
     } else if(summary.kcal != null){
-      kcalEl.hidden = false; kEl.textContent = 'Kalorie · szacunek'; vEl.textContent = summary.kcal + ' kcal';
+      kcalEl.hidden = false; kEl.textContent = 'Kalorie · szacunek'; vEl.textContent = 'ok. ' + summary.kcal + ' kcal';
       eEl.hidden = false; gymFinKcalMode = 'edit';
     } else {
       kcalEl.hidden = true; gymFinKcalMode = null;
@@ -13797,7 +13864,7 @@ function histWorkoutCardInner(w){
       const edited = w.kcalUser != null;
       const est = (w.kcalEstimated != null) ? w.kcalEstimated : computeWorkoutKcal(w).kcalEstimated;
       return `<div class="histv2-wkcal" onclick="event.stopPropagation();openEditKcal('${w.id}')">
-        <div><p class="histv2-wkcal-k">${t('gymFinKcal','Kalorie')}</p><p class="histv2-wkcal-v">${shown} kcal</p></div>
+        <div><p class="histv2-wkcal-k">${t('gymFinKcal','Kalorie')}</p><p class="histv2-wkcal-v">${!edited && w.kcalWatch == null ? 'ok. ' : ''}${shown} kcal</p></div>
         ${edited
           ? `<div class="histv2-wkcal-r"><span class="histv2-wkcal-chip">edytowane</span>${w.kcalWatch!=null?`<span class="histv2-wkcal-was">zegarek ${w.kcalWatch}</span>`:est!=null?`<span class="histv2-wkcal-was">szac. ${est}</span>`:''}</div>`
           : w.kcalWatch != null
