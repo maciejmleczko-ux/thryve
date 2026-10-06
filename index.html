@@ -5057,14 +5057,14 @@ const GYM_PLAN_TIME_V3 = [
   {name:"Overhead Triceps Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"overhead_triceps_stretch", equipment:"masa ciała"},
   {name:"Quad Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"quad_stretch", equipment:"masa ciała"},
   {name:"Wall Calf Stretch", group:"Rozciąganie", sets:1, mode:"time", durationSec:30, perSide:true, repLow:30, repHigh:30, rest:"0s", icon:"wall_calf_stretch", equipment:"masa ciała"},
-  {name:"Stationary Bike", group:"Kardio", sets:1, mode:"time", durationSec:1200, repLow:1200, repHigh:1200, rest:"0s", icon:"stationary_bike", equipment:"maszyny"},
-  {name:"Treadmill", group:"Kardio", sets:1, mode:"time", durationSec:1200, repLow:1200, repHigh:1200, rest:"0s", icon:"treadmill", equipment:"maszyny"},
-  {name:"Elliptical", group:"Kardio", sets:1, mode:"time", durationSec:1200, repLow:1200, repHigh:1200, rest:"0s", icon:"elliptical", equipment:"maszyny"},
-  {name:"Rowing Machine", group:"Kardio", sets:1, mode:"time", durationSec:900, repLow:900, repHigh:900, rest:"0s", icon:"rowing_machine", equipment:"maszyny"},
-  {name:"Stair Climber", group:"Kardio", sets:1, mode:"time", durationSec:900, repLow:900, repHigh:900, rest:"0s", icon:"stair_climber", equipment:"maszyny"},
-  {name:"Ski Erg", group:"Kardio", sets:1, mode:"time", durationSec:600, repLow:600, repHigh:600, rest:"0s", icon:"ski_erg", equipment:"maszyny"},
-  {name:"Air Bike", group:"Kardio", sets:1, mode:"time", durationSec:600, repLow:600, repHigh:600, rest:"0s", icon:"air_bike", equipment:"maszyny"}, // best as intervals (file note)
-  {name:"Jump Rope", group:"Kardio", sets:3, mode:"time", durationSec:120, repLow:120, repHigh:120, rest:"60s", icon:"jump_rope", equipment:"masa ciała"},
+  {name:"Stationary Bike", group:"Kardio", sets:1, mode:"time", durationSec:1200, repLow:1200, repHigh:1200, rest:"0s", icon:"stationary_bike", equipment:"maszyny", metrics:["distanceKm","level"]},
+  {name:"Treadmill", group:"Kardio", sets:1, mode:"time", durationSec:1200, repLow:1200, repHigh:1200, rest:"0s", icon:"treadmill", equipment:"maszyny", metrics:["distanceKm","inclinePct"]},
+  {name:"Elliptical", group:"Kardio", sets:1, mode:"time", durationSec:1200, repLow:1200, repHigh:1200, rest:"0s", icon:"elliptical", equipment:"maszyny", metrics:["level","distanceKm"]},
+  {name:"Rowing Machine", group:"Kardio", sets:1, mode:"time", durationSec:900, repLow:900, repHigh:900, rest:"0s", icon:"rowing_machine", equipment:"maszyny", metrics:["distanceM"]},
+  {name:"Stair Climber", group:"Kardio", sets:1, mode:"time", durationSec:900, repLow:900, repHigh:900, rest:"0s", icon:"stair_climber", equipment:"maszyny", metrics:["level","floors"]},
+  {name:"Ski Erg", group:"Kardio", sets:1, mode:"time", durationSec:600, repLow:600, repHigh:600, rest:"0s", icon:"ski_erg", equipment:"maszyny", metrics:["distanceM"]},
+  {name:"Air Bike", group:"Kardio", sets:1, mode:"time", durationSec:600, repLow:600, repHigh:600, rest:"0s", icon:"air_bike", equipment:"maszyny", metrics:["distanceKm","level"]}, // best as intervals (file note)
+  {name:"Jump Rope", group:"Kardio", sets:3, mode:"time", durationSec:120, repLow:120, repHigh:120, rest:"60s", icon:"jump_rope", equipment:"masa ciała", metrics:["jumps"]},
   {name:"HIIT", group:"Kardio", sets:1, mode:"time", durationSec:480, repLow:480, repHigh:480, rest:"0s", icon:"hiit", equipment:"masa ciała"}, // plain 8 min timer for now; interval mode (8 × 30 s work / 30 s rest) is a later stage
 ];
 /* Multi-joint lifts — everything else in the library is single-joint /
@@ -9163,6 +9163,8 @@ function fmtDur(sec, perSide){
    rewritten (no migration, no change to sync signatures): wherever sets are read for history / stats /
    records, exSetsView() reads such a set (no durationSec, reps>0, no weight) as a time set instead. */
 const LEGACY_TIME_EX = new Set(['Plank','Dead Hang']);
+// built-in cardio (group Kardio): never a record, never mixed into strength numbers
+function isCardioName(name){ const b = BUILTIN_EXERCISES_BY_NAME.get(name); return !!b && b.group === 'Kardio'; }
 function exSetsView(ex){
   if(!ex || !LEGACY_TIME_EX.has(ex.name)) return ex.sets;
   return ex.sets.map(s=> (!(s.durationSec > 0) && s.reps > 0 && !(s.weight > 0)) ? { ...s, reps: 0, durationSec: s.reps } : s);
@@ -9170,10 +9172,40 @@ function exSetsView(ex){
 // Built-in exercises only (a custom exercise with the same name can't exist): plan entries are stored copies, so
 // mode / durationSec / perSide come from the library at read time instead of migrating saved plans.
 function withLibraryTime(e){
-  if(!e || e.type === 'checklist' || isTimeEx(e)) return e;
+  if(!e || e.type === 'checklist') return e;
   const b = BUILTIN_EXERCISES_BY_NAME.get(e.name);
-  if(!b || b.mode !== 'time') return e;
-  return { ...e, mode: 'time', durationSec: b.durationSec, ...(b.perSide ? { perSide: true } : {}) };
+  if(!b) return e;
+  if(isTimeEx(e)) return (b.metrics && !e.metrics) ? { ...e, metrics: b.metrics } : e;
+  if(b.mode !== 'time') return e;
+  return { ...e, mode: 'time', durationSec: b.durationSec, ...(b.perSide ? { perSide: true } : {}), ...(b.metrics ? { metrics: b.metrics } : {}) };
+}
+/* ---- cardio metrics (optional fields on a timed set) ----
+   An exercise lists the metrics it offers in `metrics` (library data); a logged set may carry:
+   distanceM (always metres), inclinePct, level, floors, jumps, and `kcal` (+ kcalEst:false) ONLY when the
+   user typed the machine's own calorie reading. Estimates are never stored on the set. All fields are
+   optional; a set stays {weight:0, reps:0, durationSec, ...} so old clients just ignore the extras. */
+const CARDIO_METRIC_DEFS = {
+  distanceKm: { field:'distanceM',  label:'Dystans',    unit:'km', step:0.1, dec:1, max:200,   toStored:v=> Math.round(v * 1000), fromStored:m=> m / 1000 },
+  distanceM:  { field:'distanceM',  label:'Dystans',    unit:'m',  step:50,  dec:0, max:200000, toStored:v=> Math.round(v),        fromStored:m=> m },
+  inclinePct: { field:'inclinePct', label:'Nachylenie', unit:'%',  step:0.5, dec:1, max:40,    toStored:v=> Math.round(v * 10) / 10, fromStored:v=> v },
+  level:      { field:'level',      label:'Poziom',     unit:'',   step:1,   dec:0, max:100,   toStored:v=> Math.round(v),        fromStored:v=> v },
+  floors:     { field:'floors',     label:'Piętra',     unit:'',   step:1,   dec:0, max:1000,  toStored:v=> Math.round(v),        fromStored:v=> v },
+  jumps:      { field:'jumps',      label:'Skoki',      unit:'',   step:10,  dec:0, max:50000, toStored:v=> Math.round(v),        fromStored:v=> v },
+};
+const CARDIO_SET_FIELDS = ['distanceM','inclinePct','level','floors','jumps'];
+const CARDIO_FIELD_MAX = { distanceM:200000, inclinePct:40, level:100, floors:1000, jumps:50000 };
+// the metric fields of one set, validated (finite, 0..max); the machine's kcal only as a manual entry
+function cardioSetFields(s){
+  const out = {};
+  if(!s || typeof s !== 'object') return out;
+  CARDIO_SET_FIELDS.forEach(k=>{
+    if(s[k] === '' || s[k] == null) return;
+    const n = Number(s[k]);
+    if(Number.isFinite(n) && n >= 0 && n <= CARDIO_FIELD_MAX[k]) out[k] = k === 'inclinePct' ? Math.round(n * 10) / 10 : Math.round(n);   // whole metres / levels / floors / jumps, incline to 0.1 %
+  });
+  const kc = Number(s.kcal);
+  if(s.kcal !== '' && s.kcal != null && Number.isFinite(kc) && kc > 0 && kc <= 5000 && s.kcalEst !== true){ out.kcal = Math.round(kc); out.kcalEst = false; }
+  return out;
 }
 function fmtClock(sec){ sec = Math.max(0, Math.round(sec)); return sec < 60 ? String(sec) : `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`; }
 function fmtKgLocal(n){ return String(Math.round(n * 100) / 100).replace('.', LANG==='en' ? '.' : ','); }
@@ -10249,7 +10281,7 @@ function saveWorkout(){
     sets: ex.setValues
       .filter(s => String(s.weight).trim() !== '' || String(s.reps).trim() !== '' || s.durationSec > 0)
       .map(s=> s.durationSec > 0
-        ? {weight: 0, reps: 0, durationSec: Math.round(s.durationSec), ...(s.perSide ? {perSide: true} : {})}
+        ? {weight: 0, reps: 0, durationSec: Math.round(s.durationSec), ...(s.perSide ? {perSide: true} : {}), ...cardioSetFields(s)}
         : {weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0}),
     rpe: ex.rpe || null,
     notes: ex.notes || '',
@@ -10507,7 +10539,7 @@ function saveWorkoutV2(){
   workouts.forEach(w=>{
     const perEx = {}, perExReps = {};
     w.exercises.forEach(ex=> exSetsView(ex).forEach(s=>{
-      if(s.durationSec > 0) priorBestTime[ex.name] = Math.max(priorBestTime[ex.name] || 0, s.durationSec);
+      if(s.durationSec > 0 && !isCardioName(ex.name)) priorBestTime[ex.name] = Math.max(priorBestTime[ex.name] || 0, s.durationSec);
       if(s.weight > 0) priorBestWeight[ex.name] = Math.max(priorBestWeight[ex.name] || 0, s.weight);
       if(s.reps > 0) priorBestReps[ex.name] = Math.max(priorBestReps[ex.name] || 0, s.reps);
       perEx[ex.name] = (perEx[ex.name] || 0) + s.weight * s.reps;
@@ -10537,7 +10569,7 @@ function saveWorkoutV2(){
     const hadTime = priorBestTime[ex.name] !== undefined;
     const prevTime = priorBestTime[ex.name] || 0;
     exSetsView(ex).forEach(s=>{
-      if(hadTime && s.durationSec > prevTime && (!timePR || s.durationSec > timePR.sec)) timePR = { name: ex.name, sec: s.durationSec, perSide: !!s.perSide };
+      if(hadTime && !isCardioName(ex.name) && s.durationSec > prevTime && (!timePR || s.durationSec > timePR.sec)) timePR = { name: ex.name, sec: s.durationSec, perSide: !!s.perSide };
       volume += s.weight * s.reps;
       repsTotal += s.reps || 0;
       setCount += 1;
@@ -11074,7 +11106,7 @@ function planv2PickExercisesForRole(count, equipment, role){
 function planv2ExerciseEntry(ex, params){
   const base = { name: ex.name, group: ex.group, icon: ex.icon, compound: ex.compound, equipment: ex.equipment };
   // a timed exercise keeps its own sets / time / rest: the goal's reps-based sets, reps and rest don't apply
-  if(isTimeEx(ex)) return { ...base, sets: ex.sets, mode: 'time', durationSec: ex.durationSec, ...(ex.perSide ? { perSide: true } : {}), repLow: ex.repLow, repHigh: ex.repHigh, rest: ex.rest };
+  if(isTimeEx(ex)) return { ...base, sets: ex.sets, mode: 'time', durationSec: ex.durationSec, ...(ex.perSide ? { perSide: true } : {}), ...(ex.metrics ? { metrics: ex.metrics } : {}), repLow: ex.repLow, repHigh: ex.repHigh, rest: ex.rest };
   return { ...base, sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest };
 }
 function generatePlanScheduleV2(goal, difficulty, equipment, frequency){
@@ -12024,6 +12056,7 @@ function sanitizeImportedExercise(entry){
   if(typeof entry.compound === 'boolean') out.compound = entry.compound;
   if(typeof entry.version === 'string' && Object.prototype.hasOwnProperty.call(EXECUTION_VERSIONS, entry.version)) out.version = entry.version;
   if(entry.mode === 'time'){ out.mode = 'time'; out.durationSec = int(entry.durationSec, 1, 3600, 30); if(entry.perSide === true) out.perSide = true; }
+  if(Array.isArray(entry.metrics)){ const m = [...new Set(entry.metrics.filter(k=> typeof k === 'string' && Object.prototype.hasOwnProperty.call(CARDIO_METRIC_DEFS, k)))].slice(0, 4); if(m.length) out.metrics = m; }
   return out;
 }
 function decodePlanPayload(code){
