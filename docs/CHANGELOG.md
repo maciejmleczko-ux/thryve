@@ -126,6 +126,8 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Znaczniki partii** (`WARMUP_MUSCLES` / `STRETCH_MUSCLES`): pośladki → Nogi, przedramiona → Biceps, kark → Plecy, brzuch → Brzuch. Luki z 4.53.0 uzupełnione, dobór bloków korzysta z nowych wpisów.
 - **Opisy „Jak ćwiczyć”:** 17 wpisów PL (`EXERCISE_HOWTO`) i EN (`EXERCISE_HOWTO_EN`), dosłownie z plików autora; obie mapy po 184 klucze o identycznym zestawie, stare wpisy bez zmian.
 
+- **iOS:** Build 32 (4.54.0), archiwum zbudowane i wysłane na TestFlight 2026-10-06. `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
+
 **Commity:** wpis dopisany w commicie tej zmiany.
 
 
