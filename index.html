@@ -2405,9 +2405,26 @@ body.gymv2-bg .gy-bg{display:block;}
 #exercisePopupOverlayV2{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
 #exercisePopupSheetV2{height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;padding-bottom:0;background:#fff;}
 #exercisePopupSheetV2 > .m-sheet-grab{display:none;}
-#exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2{align-items:stretch;gap:0;}
+#exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2, #exCardioBoxV2{align-items:stretch;gap:0;}
 .lg-sub-overlay{z-index:95;}
-#exNoteSheetV2, #exHowtoSheetV2{background:#fff;}
+#exNoteSheetV2, #exHowtoSheetV2, #exCardioSheetV2{background:#fff;}
+/* cardio "Wyniki" sheet: rows like .lg-set, − / + like the reps stepper but smaller (see mockups/kardio.html) */
+.lg-metric{position:relative;width:100%;display:flex;align-items:center;gap:8px;box-sizing:border-box;background:#ededed;border:1.5px solid transparent;border-radius:16px;padding:8px 10px 8px 16px;}
+.lg-metric.is-active{border-color:rgba(255,51,0,.32);}
+.lg-metric-l{width:96px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(44,39,39,.71);}
+.lg-metric-in{flex:1;min-width:0;background:none;border:none;outline:none;padding:0;margin:0;font:inherit;font-size:var(--m-fs-md);color:var(--m-ink);font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none;}
+.lg-metric-in::placeholder{color:#b8b8b8;}
+.lg-metric-u{font-size:var(--m-fs-2xs);color:rgba(44,39,39,.71);flex:none;}
+.lg-steps{display:flex;gap:8px;flex:none;}
+.lg-steps .lg-step{width:34px;height:34px;}
+.lg-steps .lg-step svg{width:16px;height:16px;}
+.lg-derived{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.lg-derived:empty{display:none;}
+.lg-cr-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);color:rgba(44,39,39,.71);line-height:1.4;}
+.histv2-ex-flag{display:inline-block;margin-left:6px;font-size:var(--m-fs-2xs);padding:2px 8px;border-radius:var(--m-r-pill);background:#fde8e1;color:#cd1200;}
+.gymfin-timed{width:100%;background:var(--m-panel);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:6px 14px;margin-top:8px;box-sizing:border-box;text-align:left;}
+.gymfin-timed[hidden]{display:none;}
+.gymfin-timed-k{margin:8px 0 2px;font-size:var(--m-fs-2xs);letter-spacing:.1em;text-transform:uppercase;color:rgba(44,39,39,.71);}
 .lg-bar{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;padding:20px 20px 10px;box-sizing:border-box;}
 .lg-bar-title{position:absolute;left:50%;transform:translateX(-50%);max-width:58%;font-size:var(--m-fs-xs);font-weight:600;letter-spacing:.0833em;text-transform:uppercase;color:var(--m-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .lg-circ{width:40px;height:40px;border-radius:50%;border:.5px solid var(--m-orange);background:transparent;color:var(--m-orange);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex:none;transition:transform var(--m-dur-press-out) var(--m-ease);}
@@ -2755,6 +2772,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="gymfin-stat gymfin-stat--navy"><p class="gymfin-stat-k" data-i18n="gymFinSets">Serie</p><p class="gymfin-stat-v" id="gymFinSetsV">0</p></div>
         <div class="gymfin-stat gymfin-stat--plain"><p class="gymfin-stat-k" data-i18n="gymFinVolume">Objętość</p><p class="gymfin-stat-v" id="gymFinVolV">0</p></div>
       </div>
+
+      <div class="gymfin-timed" id="gymFinTimed" hidden><p class="gymfin-timed-k" data-i18n="gymFinTimedBlock">Na czas</p><div id="gymFinTimedList"></div></div>
 
       <button type="button" class="gymfin-kcal" id="gymFinKcal" hidden onclick="gymFinEditKcal()">
         <span class="gymfin-kcal-l">
@@ -3963,6 +3982,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="m-sheet-body" id="exNoteBoxV2"></div>
   </div>
 </div>
+<div class="onboard-overlay hidden m-sheet-overlay lg-sub-overlay" id="exCardioOverlayV2" onclick="if(event.target===this) closeCardioResults()">
+  <div class="m-sheet" id="exCardioSheetV2">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="m-sheet-body" id="exCardioBoxV2"></div>
+  </div>
+</div>
 <div class="onboard-overlay hidden m-sheet-overlay lg-sub-overlay" id="exHowtoOverlayV2" onclick="if(event.target===this) closeExHowtoV2()">
   <div class="m-sheet" id="exHowtoSheetV2">
     <div class="m-sheet-grab" aria-hidden="true"></div>
@@ -4370,6 +4395,8 @@ const T_EN = {
   stV2RecLongestSet: 'Longest set',
   stV2RepsShort: 'reps',
   stV2TimeProgress: 'Time progress',
+  gymFinTimedBlock: 'Timed', gymFinTotalTime: 'Total time', crTitle: 'Results', crSave: 'Save', crSkip: 'Skip',
+  crHintPrev: 'Grey values come from last time. Everything is optional; enter calories only if the machine shows them.',
   stV2TagSila: 'strength',
   stV2TagCiezar: 'weight',
   stV2TagObjetosc: 'volume',
@@ -9207,6 +9234,180 @@ function cardioSetFields(s){
   if(s.kcal !== '' && s.kcal != null && Number.isFinite(kc) && kc > 0 && kc <= 5000 && s.kcalEst !== true){ out.kcal = Math.round(kc); out.kcalEst = false; }
   return out;
 }
+
+/* ---- cardio: one set as text ("20:00 · 3,2 km · 2%"), shared by the popup, history, summary and stats ---- */
+function cardioMetricsFor(name){ const b = BUILTIN_EXERCISES_BY_NAME.get(name); return (b && b.metrics) || null; }
+function plPlural(n, one, few, many){
+  const m10 = n % 10, m100 = n % 100;
+  if(n === 1) return one;
+  return (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) ? few : many;
+}
+function fmtNum1(n){ return String(Math.round(n * 10) / 10).replace('.', ','); }
+function fmtDistance(m, inMetres){
+  return inMetres ? `${String(Math.round(m)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0')} m` : `${fmtNum1(m / 1000)} km`;
+}
+function fmtPace500(durationSec, distanceM){
+  const p = Math.round(durationSec / (distanceM / 500));
+  return `${Math.floor(p / 60)}:${String(p % 60).padStart(2, '0')} /500 m`;
+}
+function cardioSetLine(s, name){
+  const metrics = cardioMetricsFor(name) || [], inM = metrics.includes('distanceM');
+  const parts = [fmtDur(s.durationSec)];
+  if(s.distanceM > 0){
+    parts.push(fmtDistance(s.distanceM, inM));
+    if(inM && s.durationSec > 0) parts.push(fmtPace500(s.durationSec, s.distanceM));
+  }
+  if(s.inclinePct != null) parts.push(`${fmtNum1(s.inclinePct)}%`);
+  if(s.level != null) parts.push(`poz. ${s.level}`);
+  if(s.floors != null) parts.push(`${s.floors} ${plPlural(s.floors, 'piętro', 'piętra', 'pięter')}`);
+  if(s.jumps != null) parts.push(`${s.jumps} ${plPlural(s.jumps, 'skok', 'skoki', 'skoków')}`);
+  return parts.join(' · ');
+}
+// "3 × 45 s" for equal sets, otherwise the list — the non-cardio rows of the summary's "Na czas" block
+function timedSetsLine(sets){
+  const ds = sets.filter(x=> x.durationSec > 0);
+  if(!ds.length) return '';
+  const same = ds.every(x=> x.durationSec === ds[0].durationSec && !!x.perSide === !!ds[0].perSide);
+  return same ? `${ds.length} × ${fmtDur(ds[0].durationSec, ds[0].perSide)}` : ds.map(x=> fmtDur(x.durationSec, x.perSide)).join(' · ');
+}
+// timed exercises of a workout as rows for the summary's "Na czas" block (nothing → no block)
+function timedSummaryRows(w){
+  const rows = [];
+  w.exercises.forEach(ex=>{
+    if(ex.type === 'checklist') return;
+    const sets = exSetsView(ex);
+    if(!sets.some(x=> x.durationSec > 0)) return;
+    const lib = BUILTIN_EXERCISES_BY_NAME.get(ex.name);
+    const icon = EXERCISE_ICON_MAP[ex.name] || (lib && lib.icon) || null;
+    const line = (cardioMetricsFor(ex.name))
+      ? sets.filter(x=> x.durationSec > 0).map(x=> cardioSetLine(x, ex.name)).join(' / ')
+      : timedSetsLine(sets);
+    rows.push({ icon, name: ex.name, line });
+  });
+  return rows;
+}
+// the whole workout is timed sets only (no weight / reps anywhere): the 4th tile reads "Łączny czas"
+function workoutIsTimedOnly(w){
+  const ex = w.exercises.filter(e=> e.type !== 'checklist');
+  return ex.length > 0 && ex.every(e=> { const sv = exSetsView(e); return sv.length && sv.every(x=> x.durationSec > 0); });
+}
+function workoutTimedTotalSec(w){
+  return w.exercises.reduce((sum, e)=> sum + exSetsView(e).reduce((s2, x)=> s2 + (x.durationSec > 0 ? x.durationSec : 0), 0), 0);
+}
+function timedRowHtml(r){
+  const png = r.icon ? iconPngUrl(r.icon) : '';
+  return `<div class="histv2-ex-item"><span class="histv2-ex-ico">${png ? `<img src="${png}" alt="">` : ''}</span><div class="histv2-ex-meta"><p class="histv2-ex-name">${escHtml(r.name)}</p><p class="histv2-ex-sets">${escHtml(r.line)}</p></div></div>`;
+}
+
+/* ---- cardio "Wyniki" sheet: fill the metrics of the set that was just logged (or edit it later) ---- */
+let cr = null; // { idx, vals:{metricKey:number|null}, kcal:string }
+function crHint(key){
+  const def = CARDIO_METRIC_DEFS[key], hist = lastSessionsFor(popupExercise.name);
+  for(const h of hist){
+    const sets = exSetsView(h);
+    for(let i = sets.length - 1; i >= 0; i--) if(sets[i][def.field] != null) return def.fromStored(sets[i][def.field]);
+  }
+  return null;
+}
+function crFmt(def, v){ return v == null ? '' : String(Math.round(v * Math.pow(10, def.dec)) / Math.pow(10, def.dec)).replace('.', ','); }
+function openCardioResults(idx){
+  const ex = popupExercise;
+  if(!ex || !isTimeEx(ex) || !ex.metrics || !ex.metrics.length) return;
+  const set = ex.setValues[idx];
+  if(!set || !(set.durationSec > 0)) return;
+  cr = { idx, vals: {}, kcal: set.kcal > 0 ? String(set.kcal) : '' };
+  ex.metrics.forEach(k=>{ const def = CARDIO_METRIC_DEFS[k]; cr.vals[k] = set[def.field] != null ? def.fromStored(set[def.field]) : null; });
+  renderCardioResults();
+  lgSubOpen('exCardioOverlayV2');
+}
+function renderCardioResults(){
+  const ex = popupExercise, box = document.getElementById('exCardioBoxV2');
+  if(!ex || !cr || !box) return;
+  const set = ex.setValues[cr.idx];
+  const rows = ex.metrics.map(k=>{
+    const def = CARDIO_METRIC_DEFS[k], hint = crHint(k);
+    return `<div class="lg-metric" data-k="${k}"><span class="lg-metric-l">${escHtml(def.label)}</span>
+      <input class="lg-metric-in" id="crIn_${k}" type="text" inputmode="decimal" autocomplete="off" value="${crFmt(def, cr.vals[k])}" placeholder="${hint != null ? crFmt(def, hint) : '—'}" oninput="crSet('${k}', this.value)">
+      ${def.unit ? `<span class="lg-metric-u">${def.unit}</span>` : ''}
+      <span class="lg-steps"><button type="button" class="lg-step" onclick="crStep('${k}',-1)" aria-label="−">${LG_ICONS.minus}</button><button type="button" class="lg-step" onclick="crStep('${k}',1)" aria-label="+">${LG_ICONS.plus}</button></span></div>`;
+  }).join('');
+  box.innerHTML = `
+    <div class="lg-bar">
+      <button type="button" class="lg-circ" onclick="closeCardioResults()" aria-label="${escHtml(t('cancel','Anuluj'))}">${LG_ICONS.x}</button>
+      <span class="lg-bar-title">${t('crTitle','WYNIKI')}</span>
+      <button type="button" class="lg-circ fill" onclick="saveCardioResults()" aria-label="${escHtml(t('crSave','Zapisz'))}">${LG_ICONS.checkBig}</button>
+    </div>
+    <div class="lg-scroll lg-sub-scroll">
+      <div class="lg-name-row"><div class="lg-name">${escHtml(ex.name)}</div></div>
+      <div class="lg-chips"><span class="lg-chip">${ph('clock-countdown')}<span>${escHtml(fmtDur(set.durationSec))}</span></span></div>
+      <div class="lg-sets">${rows}
+        <div class="lg-metric" data-k="kcal"><span class="lg-metric-l">KALORIE</span>
+          <input class="lg-metric-in" id="crIn_kcal" type="text" inputmode="numeric" autocomplete="off" value="${escHtml(cr.kcal)}" placeholder="— z maszyny" oninput="crSetKcal(this.value)">
+          <span class="lg-steps"><button type="button" class="lg-step" onclick="crStepKcal(-10)" aria-label="−">${LG_ICONS.minus}</button><button type="button" class="lg-step" onclick="crStepKcal(10)" aria-label="+">${LG_ICONS.plus}</button></span></div>
+      </div>
+      <div class="lg-derived" id="crDerived"></div>
+      <p class="lg-cr-hint">${t('crHintPrev','Szare wartości to podpowiedź z poprzedniego razu. Wszystko jest opcjonalne, a kalorie wpisz tylko wtedy, gdy pokazuje je maszyna.')}</p>
+      <button type="button" class="lg-add" onclick="saveCardioResults()">${t('crSave','Zapisz')}</button>
+      <button type="button" class="lg-add" style="border-color:transparent" onclick="closeCardioResults()">${t('crSkip','Pomiń')}</button>
+    </div>`;
+  crPaintDerived();
+}
+function crPaintDerived(){
+  const el = document.getElementById('crDerived');
+  if(!el || !cr || !popupExercise) return;
+  const sec = popupExercise.setValues[cr.idx].durationSec, chips = [];
+  const km = cr.vals.distanceKm, m = cr.vals.distanceM;
+  if(km > 0 && sec > 0) chips.push(`Prędkość ${fmtNum1(km / (sec / 3600))} km/h`);
+  if(m > 0 && sec > 0) chips.push(`Tempo ${fmtPace500(sec, m)}`);
+  el.innerHTML = chips.map(c=> `<span class="lg-chip">${escHtml(c)}</span>`).join('');
+}
+function crSet(key, raw){
+  if(!cr) return;
+  const def = CARDIO_METRIC_DEFS[key], n = parseFloat(String(raw).replace(',', '.'));
+  cr.vals[key] = (raw === '' || !Number.isFinite(n)) ? null : Math.max(0, Math.min(def.max, n));
+  crPaintDerived();
+}
+function crStep(key, dir){
+  if(!cr) return;
+  const def = CARDIO_METRIC_DEFS[key];
+  const base = cr.vals[key] != null ? cr.vals[key] : (dir > 0 ? (crHint(key) != null ? crHint(key) - def.step : 0) : (crHint(key) != null ? crHint(key) + def.step : 0));
+  const v = Math.max(0, Math.min(def.max, Math.round((base + dir * def.step) * Math.pow(10, def.dec)) / Math.pow(10, def.dec)));
+  cr.vals[key] = v;
+  const inp = document.getElementById('crIn_' + key);
+  if(inp) inp.value = crFmt(def, v);
+  haptic('light');
+  crPaintDerived();
+}
+function crSetKcal(raw){ if(cr) cr.kcal = String(raw).replace(/[^\d]/g, '').slice(0, 4); }
+function crStepKcal(d){
+  if(!cr) return;
+  const v = Math.max(0, Math.min(5000, (parseInt(cr.kcal, 10) || 0) + d));
+  cr.kcal = v > 0 ? String(v) : '';
+  const inp = document.getElementById('crIn_kcal');
+  if(inp) inp.value = cr.kcal;
+  haptic('light');
+}
+function saveCardioResults(){
+  const ex = popupExercise;
+  if(!ex || !cr) return;
+  const set = ex.setValues[cr.idx];
+  if(set){
+    [...CARDIO_SET_FIELDS, 'kcal', 'kcalEst'].forEach(k=> delete set[k]);
+    const raw = {};
+    ex.metrics.forEach(k=>{ const def = CARDIO_METRIC_DEFS[k]; if(cr.vals[k] != null) raw[def.field] = def.toStored(cr.vals[k]); });
+    const kc = parseInt(cr.kcal, 10);
+    if(kc > 0){ raw.kcal = kc; }   // only what the user typed from the machine (kcalEst:false); no estimate is ever stored
+    Object.assign(set, cardioSetFields(raw));
+    lgPersistDraft();
+    lgRenderSets();
+  }
+  haptic('light');
+  closeCardioResults();
+}
+function closeCardioResults(viaDrag){
+  lgSubClose('exCardioOverlayV2', viaDrag);
+  cr = null;
+}
 function fmtClock(sec){ sec = Math.max(0, Math.round(sec)); return sec < 60 ? String(sec) : `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`; }
 function fmtKgLocal(n){ return String(Math.round(n * 100) / 100).replace('.', LANG==='en' ? '.' : ','); }
 function fmtRestClock(sec){ sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec/60) + ':' + String(sec%60).padStart(2,'0'); }
@@ -9517,7 +9718,8 @@ function lgTapSet(i){
   if(Date.now() - lgSwipeAt < 400) return;
   if(lgPad) lgPadClose();
   const sv = popupExercise.setValues[i];
-  if(!sv || !setIsLogged(sv, lgBw()) || sv.durationSec > 0) return; // timed sets aren't editable, only deletable
+  if(sv && sv.durationSec > 0 && popupExercise.metrics && popupExercise.metrics.length){ openCardioResults(i); return; }   // cardio set → fill / edit its results
+  if(!sv || !setIsLogged(sv, lgBw()) || sv.durationSec > 0) return; // other timed sets aren't editable, only deletable
   lgFlush();
   lg.editIdx = (lg.editIdx === i) ? null : i;
   haptic('light');
@@ -9558,7 +9760,7 @@ function lgSetsHtml(){
   ex.setValues.forEach((sv, i)=>{
     const logged = setIsLogged(sv, bw);
     const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '');
-    const val = logged ? (sv.durationSec > 0 ? escHtml(fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}` : `${escHtml(fmtKgLocal(parseFloat(sv.weight)||0))}kg x ${escHtml(String(sv.reps))}`) : '—';
+    const val = logged ? (sv.durationSec > 0 ? escHtml(ex.metrics && ex.metrics.length ? cardioSetLine(sv, ex.name) + (sv.kcal > 0 ? ` · ${sv.kcal} kcal` : '') : fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}` : `${escHtml(fmtKgLocal(parseFloat(sv.weight)||0))}kg x ${escHtml(String(sv.reps))}`) : '—';
     html += `<div class="lg-set-wrap" data-i="${i}"><div class="lg-set-del" aria-hidden="true">${LG_ICONS.trash}</div>
       <button type="button" class="${cls}" onclick="lgTapSet(${i})"><span class="lg-set-l">${t('seriesLabel', `Seria ${i+1}`, i+1)}</span><span class="lg-set-v">${val}</span><span class="lg-set-c">${LG_ICONS.check}</span></button></div>`;
   });
@@ -9933,6 +10135,7 @@ function tmCommit(sec, auto){
   lgResetCurrent();
   tmPaint();
   updateGymPillsV2();
+  if(ex.metrics && ex.metrics.length) openCardioResults(idx === -1 ? sv.length - 1 : idx);   // cardio: offer the results sheet right after the set
 }
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && tm){ tmTick(); if(tm && tm.pausedAt === null) tmAwake(true); } });
 window.addEventListener('pageshow', ()=>{ if(tm) tmTick(); });
@@ -10048,6 +10251,7 @@ function openExHowtoV2(){
 function closeExHowtoV2(viaDrag){ lgSubClose('exHowtoOverlayV2', viaDrag); }
 mSheetDrag('exNoteOverlayV2', closeExNoteV2);
 mSheetDrag('exHowtoOverlayV2', closeExHowtoV2);
+mSheetDrag('exCardioOverlayV2', closeCardioResults);
 
 /* v3 "Dodaj własne ćwiczenie" (#newExerciseOverlayV2) — reached from
    GYM v2 and plan editor v2's dashed add-tiles (buildAddCustomExerciseTile()),
@@ -10369,7 +10573,14 @@ function showGymFinishV2(summary, onDone){
   // is always 0 kg when nothing was ever weighed, so it becomes a reps
   // count instead — same swap as the Stats per-exercise record.
   const volLabelEl = volEl.previousElementSibling;
-  if(volLabelEl) volLabelEl.textContent = summary.isBodyweight ? t('gymFinReps','Powtórzenia') : t('gymFinVolume','Objętość');
+  if(volLabelEl) volLabelEl.textContent = summary.timedOnly ? t('gymFinTotalTime','Łączny czas') : summary.isBodyweight ? t('gymFinReps','Powtórzenia') : t('gymFinVolume','Objętość');
+  // "Na czas" block: only when the workout has timed exercises (plank, wall sit, stretching, cardio); a pure strength workout looks as before
+  const timedEl = document.getElementById('gymFinTimed');
+  if(timedEl){
+    const rows = summary.timedRows || [];
+    timedEl.hidden = !rows.length;
+    document.getElementById('gymFinTimedList').innerHTML = rows.map(timedRowHtml).join('');
+  }
 
   if(summary.subtitle) document.getElementById('gymFinSub').textContent = summary.subtitle;
 
@@ -10424,7 +10635,8 @@ function showGymFinishV2(summary, onDone){
   // count-up + staggered reveal ride in together, just after the check pops
   const startFill = ()=>{
     if(summary.durationMin) animateDashNumber(timeEl, summary.durationMin, 0, '<small>min</small>');
-    animateDashNumber(volEl, summary.volume || 0, 0, summary.isBodyweight ? '' : '<small>kg</small>');
+    if(summary.timedOnly) volEl.textContent = fmtDur(summary.timedTotalSec || 0);
+    else animateDashNumber(volEl, summary.volume || 0, 0, summary.isBodyweight ? '' : '<small>kg</small>');
     animateDashNumber(exEl, summary.exercises || 0, 0, '');
     animateDashNumber(setsEl, summary.sets || 0, 0, '');
   };
@@ -10624,6 +10836,9 @@ function saveWorkoutV2(){
     isBodyweight: isBw,
     exercises: exCount,
     sets: setCount,
+    timedRows: timedSummaryRows(w),
+    timedOnly: workoutIsTimedOnly(w),
+    timedTotalSec: workoutTimedTotalSec(w),
     record: record,
     progress: progress,
     date: w.date,
@@ -13553,7 +13768,7 @@ function histWorkoutCardInner(w){
   if(!exp){
     return head + `
     <p class="histv2-card-title">${t('histWorkoutVolTitle', `${w.exercises.length} ${plExercisesWord(w.exercises.length)}`, w.exercises.length)}</p>
-    <p class="histv2-card-sub">${t('histWorkoutVolSub', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol))}</p>`;
+    <p class="histv2-card-sub">${workoutIsTimedOnly(w) ? `łączny czas ${fmtDur(workoutTimedTotalSec(w))}` : t('histWorkoutVolSub', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol))}</p>`;
   }
   const rec = histWorkoutRecordV2(w);
   const volRec = rec ? null : histWorkoutVolRecordV2(w);
@@ -13572,7 +13787,9 @@ function histWorkoutCardInner(w){
       <div class="histv2-wtile histv2-wtile--orange"><p class="k">${t('gymFinTime','Czas')}</p>${timeCell}</div>
       <div class="histv2-wtile histv2-wtile--blue"><p class="k">${t('gymFinExercises','Ćwiczenia')}</p><p class="v">${doneCount}</p></div>
       <div class="histv2-wtile histv2-wtile--navy"><p class="k">${t('gymFinSets','Serie')}</p><p class="v">${setCount}</p></div>
-      <div class="histv2-wtile histv2-wtile--plain"><p class="k">${t('gymFinVolume','Objętość')}</p><p class="v">${formatDashNum(Math.round(totalVol),0)}<small>kg</small></p></div>
+      ${workoutIsTimedOnly(w)
+        ? `<div class="histv2-wtile histv2-wtile--plain"><p class="k">${t('gymFinTotalTime','Łączny czas')}</p><p class="v">${fmtDur(workoutTimedTotalSec(w))}</p></div>`
+        : `<div class="histv2-wtile histv2-wtile--plain"><p class="k">${t('gymFinVolume','Objętość')}</p><p class="v">${formatDashNum(Math.round(totalVol),0)}<small>kg</small></p></div>`}
     </div>
     ${(()=>{
       const shown = workoutKcalShown(w);
@@ -13601,7 +13818,7 @@ function histWorkoutCardInner(w){
           <span class="histv2-ex-ico">${statsV2ExerciseIconHtml(e.name)}</span>
           <div class="histv2-ex-meta">
             <p class="histv2-ex-name">${escHtml(e.name)}</p>
-            <p class="histv2-ex-sets">${exSetsView(e).map(s=> s.durationSec > 0 ? fmtDur(s.durationSec, s.perSide) : s.weight > 0 ? `${s.weight}kg×${s.reps}` : `${s.reps}`).join(' · ')}</p>
+            <p class="histv2-ex-sets">${cardioMetricsFor(e.name) ? exSetsView(e).filter(s=> s.durationSec > 0).map(s=> escHtml(cardioSetLine(s, e.name)) + (s.kcal > 0 && s.kcalEst === false ? ` · ${s.kcal} kcal <span class="histv2-ex-flag">z maszyny</span>` : '')).join('<br>') : exSetsView(e).map(s=> s.durationSec > 0 ? fmtDur(s.durationSec, s.perSide) : s.weight > 0 ? `${s.weight}kg×${s.reps}` : `${s.reps}`).join(' · ')}</p>
           </div>
         </div>`).join('')}
     </div>`;
@@ -13799,6 +14016,7 @@ function statsV2YtdStats(){
 function statsV2RecentExerciseNames(){
   const lastSeen = new Map();
   dashboardAllSets().concat(statsV2TimeRows()).forEach(s=>{
+    if(isCardioName(s.name)) return;   // cardio has its own card, never a per-exercise "record"
     if(!lastSeen.has(s.name) || s.date > lastSeen.get(s.name)) lastSeen.set(s.name, s.date);
   });
   return Array.from(lastSeen.entries()).sort((a,b)=> b[1].localeCompare(a[1])).map(([name])=>name);
@@ -14332,6 +14550,7 @@ function renderStatsV2Overview(){
           </div>`;
         })()}
       </div>
+      ${statsV2CardioHtml()}
 
       <div class="statsv2-caro" id="statsCaro">
         <div class="statsv2-caro-track" id="statsCaroTrack">
@@ -14679,6 +14898,44 @@ function statsV2SetupDrawReveal(body){
    drawLines — arm the line/ring scroll draw-in; defaults to `animate` but
    can be requested on its own, e.g. opening an exercise's detail (no card
    re-slide, but its progress line should still draw). */
+// Cardio card on the Stats screen: last 7 days of time, distance and sessions (cardio only; never strength volume, no calories — those live in a single workout's summary)
+function statsV2CardioHtml(){
+  const cut = new Date(); cut.setDate(cut.getDate() - 7);
+  const cs = dateStr(cut);
+  let sec = 0, distM = 0, sessions = 0;
+  const recent = [], distNames = new Set();
+  workouts.slice().sort((a,b)=> b.date.localeCompare(a.date)).forEach(w=>{
+    let had = false;
+    w.exercises.forEach(ex=>{
+      if(!isCardioName(ex.name)) return;
+      exSetsView(ex).forEach(x=>{
+        if(!(x.durationSec > 0)) return;
+        had = true;
+        if(w.date >= cs){ sec += x.durationSec; if(x.distanceM > 0){ distM += x.distanceM; distNames.add(ex.name); } }
+        if(recent.length < 3 && !recent.some(r=> r.name === ex.name)) recent.push({ name: ex.name, line: cardioSetLine(x, ex.name), icon: (BUILTIN_EXERCISES_BY_NAME.get(ex.name) || {}).icon });
+      });
+    });
+    if(had && w.date >= cs) sessions++;
+  });
+  if(!recent.length) return '';
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
+  const timeTxt = sec ? (h ? `${h}:${String(m).padStart(2,'0')}<small>h łącznie</small>` : `${m}<small>min łącznie</small>`) : '—';
+  const names = [...distNames].slice(0, 2).join(', ');
+  return `
+      <div class="statsv2-scard statsv2-anim-card" style="--i:1">
+        <p class="statsv2-scard-eyebrow">Kardio · 7 dni</p>
+        <p class="statsv2-scard-num">${timeTxt}</p>
+        <p class="statsv2-scard-delta">łączny czas kardio</p>
+      </div>
+      <div class="statsv2-krow statsv2-anim-card" style="--i:1">
+        <div class="statsv2-kcard"><p class="statsv2-kcard-eyebrow">Dystans · 7 dni</p><div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${distM ? fmtNum1(distM / 1000) : '—'}<small>km</small></span></div><p class="statsv2-kcard-delta">${names ? escHtml(names) : 'bez wpisanego dystansu'}</p></div>
+        <div class="statsv2-kcard"><p class="statsv2-kcard-eyebrow">Sesje · 7 dni</p><div class="statsv2-kcard-num-row">${ph('stack')}<span class="statsv2-kcard-num">${sessions}</span></div><p class="statsv2-kcard-delta">z ćwiczeniami kardio</p></div>
+      </div>
+      <div class="statsv2-scard statsv2-anim-card" style="--i:1">
+        <p class="statsv2-scard-eyebrow">Ostatnio</p>
+        ${recent.map((r,i)=>`<div class="histv2-ex-item"${i===0?' style="border-top:none"':''}><span class="histv2-ex-ico">${r.icon ? `<img src="${iconPngUrl(r.icon)}" alt="">` : ''}</span><div class="histv2-ex-meta"><p class="histv2-ex-name">${escHtml(r.name)}</p><p class="histv2-ex-sets">${escHtml(r.line)}</p></div></div>`).join('')}
+      </div>`;
+}
 function renderStatsV2(animate, drawLines){
   if(drawLines === undefined) drawLines = animate;
   const body = document.getElementById('statsV2Body');
