@@ -4216,6 +4216,9 @@ const T_EN = {
   timeLabel: 'Time', timeLabelSide: 'Time per side', perSideShort: '/side',
   tmStart: 'Start', tmPause: 'Pause', tmResume: 'Resume', tmEnd: 'Finish', tmSkip: 'Skip',
   tmSwitchSides: 'Switch sides', tmSideN: (n,m)=>`Side ${n} of ${m}`,
+  tmNotifAskTitle: 'A signal when the set ends',
+  tmNotifAskBody: 'When the screen turns off, we will let you know with a notification that time is up. The system will ask for permission next.',
+  tmNotifAskYes: 'Continue', tmNotifAskNo: 'Not now', tmNotifSwitch: 'Switch sides', tmNotifDone: 'Set finished',
   suggestTime: 'Hold the full time on every set. When it feels easy, add a few seconds.',
   customGroupFallback: 'Custom',
   asNeeded: 'as needed',
@@ -6632,17 +6635,16 @@ async function saveReminderSheet(){
   scheduleWorkoutReminders();
   toast('Zapisano');
 }
-// The only feature in the app using local notifications, so a clean cancel-all
-// before rescheduling is safe (no risk of clobbering another feature's).
+// Cancels and reschedules only its own ids (90000-90999) — the timed-set notifications use 91000+.
 async function scheduleWorkoutReminders(){
   if(!IS_NATIVE) return;
   const LN = capPlugin('LocalNotifications');
   if(!LN) return;
   try{
+    // only the reminder ids (90000-90999): 91000+ belong to the timed-set notifications (tmNotif*)
     const pending = await LN.getPending();
-    if(pending && pending.notifications && pending.notifications.length){
-      await LN.cancel({ notifications: pending.notifications });
-    }
+    const own = pending && pending.notifications ? pending.notifications.filter(n=> n.id >= 90000 && n.id < 91000) : [];
+    if(own.length) await LN.cancel({ notifications: own });
   }catch(e){ console.error('scheduleWorkoutReminders: cancel', e); }
   if(!workoutReminder.enabled) return;
   const plan = trainingPlans.find(p=> p.id === starredPlanId);
@@ -9693,6 +9695,8 @@ function tmStop(){
   const wl = tm.wl;
   tm = null;
   if(wl){ try{ wl.release().catch(()=>{}); }catch(e){} }
+  tmAwake(false);
+  tmNotifCancel();
   if(popupExercise && isTimeEx(popupExercise)) tmPaint();
 }
 async function tmWakeAcquire(){
@@ -9705,20 +9709,97 @@ async function tmWakeAcquire(){
     wl.addEventListener('release', ()=>{ if(tm === mine) mine.wl = null; });
   }catch(e){ /* unsupported (e.g. WKWebView) or denied: the screen may sleep, the timestamp clock still stays correct */ }
 }
+/* Keep the screen on while a timed set runs: native KeepAwake plugin when the build has it,
+   otherwise the Wake Lock API (PWA / browsers; may be unavailable in WKWebView). Released on
+   pause, finish, Zakończ, Pomiń and when the popup closes (tmStop). */
+let tmKaOn = false;
+function tmAwake(on){
+  const KA = capPlugin('KeepAwake');
+  if(KA){
+    try{
+      if(on && !tmKaOn){ tmKaOn = true; KA.keepAwake().catch(()=>{ tmKaOn = false; tmWakeAcquire(); }); }
+      else if(!on && tmKaOn){ tmKaOn = false; KA.allowSleep().catch(()=>{}); }
+    }catch(e){ tmKaOn = false; }
+    return;
+  }
+  if(on) tmWakeAcquire();
+  else if(tm && tm.wl){ try{ tm.wl.release().catch(()=>{}); }catch(e){} }
+}
+/* Local notifications (native only; ids 91000+, reminders own 90000-90999): the JS timer is frozen once the
+   screen is off, so the OS rings for us at the end of the side (91000, perSide) and of the set (91001).
+   Permission is asked once, at the first timed set, after a short explanation; on refusal only the
+   in-app countdown remains. All calls are no-ops where the plugin doesn't exist. */
+const TM_NOTIF_IDS = [91000, 91001];
+const LS_TM_NOTIF_ASKED = 'mekkio_tm_notif_asked_v1';
+const tmNotifLN = ()=> capPlugin('LocalNotifications');
+async function tmNotifGranted(){
+  const LN = tmNotifLN();
+  if(!LN) return false;
+  try{ const p = await LN.checkPermissions(); return !!p && p.display === 'granted'; }catch(e){ return false; }
+}
+function tmNotifCancel(){
+  const LN = tmNotifLN();
+  if(!LN) return;
+  const list = { notifications: TM_NOTIF_IDS.map(id=>({ id })) };
+  try{ LN.cancel(list).catch(()=>{}); }catch(e){}
+  try{ if(LN.removeDeliveredNotifications) LN.removeDeliveredNotifications(list).catch(()=>{}); }catch(e){}  // set already ended while away: clear the banner on return
+}
+async function tmNotifSchedule(){
+  const mine = tm, LN = tmNotifLN();
+  if(!mine || mine.pausedAt !== null || !LN) return;
+  if(!(await tmNotifGranted())) return;
+  const live = ()=> tm === mine && mine.pausedAt === null;
+  if(!live()) return;
+  const now = Date.now(), items = [];
+  const swAt = mine.t0 + mine.D, endAt = mine.t0 + (mine.sides === 2 ? 2 * mine.D + TM_SWITCH_MS : mine.D);
+  if(mine.sides === 2 && swAt > now) items.push({ id: 91000, body: t('tmNotifSwitch','Zmień stronę'), at: swAt });
+  if(endAt > now) items.push({ id: 91001, body: t('tmNotifDone','Koniec serii'), at: endAt });
+  try{
+    await LN.cancel({ notifications: TM_NOTIF_IDS.map(id=>({ id })) });
+    if(!live() || !items.length) return;
+    await LN.schedule({ notifications: items.map(i=>({ id: i.id, title: 'Mekkio', body: i.body, schedule: { at: new Date(i.at), allowWhileIdle: true } })) });
+    if(!live()) tmNotifCancel();   // stopped while scheduling: take it back
+  }catch(e){ console.error('tmNotifSchedule', e); }
+}
+function tmStartFlow(begin){
+  const LN = tmNotifLN();
+  let asked = true;
+  try{ asked = !!localStorage.getItem(LS_TM_NOTIF_ASKED); }catch(e){}
+  if(!LN || asked){ begin(); return; }
+  LN.checkPermissions().then(p=>{
+    if(p && p.display !== 'prompt'){ begin(); return; }
+    try{ localStorage.setItem(LS_TM_NOTIF_ASKED, '1'); }catch(e){}
+    gymConfirmV2({
+      title: t('tmNotifAskTitle','Sygnał na koniec serii'),
+      body: t('tmNotifAskBody','Gdy ekran zgaśnie, damy znać powiadomieniem, że czas minął. Za chwilę system zapyta o zgodę.'),
+      yes: t('tmNotifAskYes','Dalej'), no: t('tmNotifAskNo','Nie teraz'),
+      onYes: ()=>{ Promise.resolve().then(()=> LN.requestPermissions()).catch(()=>{}).then(begin); },
+      onNo: begin
+    });
+  }).catch(()=> begin());
+}
+function tmBegin(){
+  if(tm || !popupExercise || !isTimeEx(popupExercise)) return;   // popup closed / already running while the permission prompt was up
+  tm = { D: timeDurFor(popupExercise) * 1000, sides: popupExercise.perSide ? 2 : 1, t0: Date.now(), pausedAt: null, key: 's0', iv: setInterval(tmTick, 250), wl: null };
+  haptic('medium');
+  tmAwake(true);
+  tmNotifSchedule();
+  tmTick();
+}
 function tmMain(){
   if(!popupExercise || !isTimeEx(popupExercise)) return;
-  if(!tm){
-    tm = { D: timeDurFor(popupExercise) * 1000, sides: popupExercise.perSide ? 2 : 1, t0: Date.now(), pausedAt: null, key: 's0', iv: setInterval(tmTick, 250), wl: null };
-    haptic('medium');
-    tmWakeAcquire();
-  } else if(tm.pausedAt === null){
+  if(!tm){ tmStartFlow(tmBegin); return; }
+  if(tm.pausedAt === null){
     tm.pausedAt = Date.now();
     haptic('light');
+    tmAwake(false);
+    tmNotifCancel();
   } else {
     tm.t0 += Date.now() - tm.pausedAt;
     tm.pausedAt = null;
     haptic('light');
-    tmWakeAcquire();
+    tmAwake(true);
+    tmNotifSchedule();
   }
   tmTick();
 }
@@ -9794,7 +9875,7 @@ function tmCommit(sec, auto){
   tmPaint();
   updateGymPillsV2();
 }
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && tm){ tmTick(); tmWakeAcquire(); } });
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && tm){ tmTick(); if(tm && tm.pausedAt === null) tmAwake(true); } });
 window.addEventListener('pageshow', ()=>{ if(tm) tmTick(); });
 function popupInitLg(){
   tmStop();
@@ -12894,13 +12975,14 @@ liveLoad();
 if(gymLive.started) liveEnsureTick();
 
 /* In-app confirm dialog (same look as the "Powtórz ostatni trening" one). */
-let gymConfirmCb = null;
+let gymConfirmCb = null, gymConfirmNoCb = null;
 function gymConfirmV2(o){
   document.getElementById('gymConfirmTitle').textContent = o.title;
   document.getElementById('gymConfirmBody').textContent = o.body;
   document.getElementById('gymConfirmYes').textContent = o.yes;
   document.getElementById('gymConfirmNo').textContent = o.no;
   gymConfirmCb = o.onYes || null;
+  gymConfirmNoCb = o.onNo || null;
   document.getElementById('gymConfirmOverlay').classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');
   haptic('warning');
@@ -12908,8 +12990,9 @@ function gymConfirmV2(o){
 function gymConfirmCloseV2(ok){
   document.getElementById('gymConfirmOverlay').classList.add('hidden');
   if(!popupExercise) document.documentElement.classList.remove('modal-lock');
-  const cb = gymConfirmCb; gymConfirmCb = null;
+  const cb = gymConfirmCb, noCb = gymConfirmNoCb; gymConfirmCb = null; gymConfirmNoCb = null;
   if(ok && cb) cb();
+  else if(!ok && noCb) noCb();
 }
 function gymHasProgress(){
   const bwOf = n => { const d = orderedExerciseLibrary().find(e => e.name === n); return !!d && d.equipment === 'masa ciała'; };
