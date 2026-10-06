@@ -133,7 +133,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Ekran włączony i powiadomienia:** `KeepAwake` (wtyczka, fallback Wake Lock API), powiadomienia lokalne `91000` (zmiana strony) i `91001` (koniec serii), zgoda przy pierwszej serii czasowej (klucz `mekkio_tm_notif_asked_v1`). `scheduleWorkoutReminders()` anuluje tylko id 90000–90999.
 - **Poprawka startu:** `LEGACY_TIME_EX` zadeklarowane wcześnie (`b5fa7f3`); wcześniej aplikacja wywalała się przy ładowaniu, gdy w zapisie był trening z kardio.
 - **Makiety:** `mockups/kardio.html` (statyczne stany, CSS z `index.html`).
-- **Przy wydaniu:** w `native/` trzeba `npm install` (nowa zależność `@capacitor-community/keep-awake` w `package.json`) i `npm run sync`; bez `UIBackgroundModes`. Zgaszony ekran, dźwięk powiadomienia, Keep Awake i klawiatura w arkuszu „Wyniki” sprawdzić ręcznie na iPhonie.
+- **iOS:** Build 28 wysłany na TestFlight 2026-10-06 (`npm install`, `npm run sync`, archiwum i wysyłka wykonane; w buildzie wtyczka Keep Awake, bez `UIBackgroundModes`). `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight. Zgaszony ekran, dźwięk powiadomień, Keep Awake i klawiaturę w arkuszu „Wyniki” sprawdzić ręcznie na iPhonie.
 
 **Commity (19):**
 
