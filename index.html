@@ -2415,11 +2415,16 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-metric-in{flex:1;min-width:0;background:none;border:none;outline:none;padding:0;margin:0;font:inherit;font-size:var(--m-fs-md);color:var(--m-ink);font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none;}
 .lg-metric-in::placeholder{color:#b8b8b8;}
 .lg-metric-u{font-size:var(--m-fs-2xs);color:rgba(44,39,39,.71);flex:none;}
-.lg-steps{display:flex;gap:8px;flex:none;}
+.lg-steps{display:flex;gap:12px;flex:none;}   /* 12px = 2 × the 6px touch extension of each button */
 .lg-steps .lg-step{width:34px;height:34px;}
 .lg-steps .lg-step svg{width:16px;height:16px;}
 .lg-derived{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
 .lg-derived:empty{display:none;}
+.lg-cr-link{display:block;width:100%;min-height:44px;padding:0 8px;background:none;border:none;font:inherit;color:inherit;text-align:center;text-decoration:underline;text-underline-offset:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+#exCardioBoxV2 .lg-bar .lg-circ{position:relative;}
+#exCardioBoxV2 .lg-bar .lg-circ::after{content:"";position:absolute;inset:-4px;}   /* 40px ring, 48px touch area */
+#exCardioBoxV2 .lg-steps .lg-step{position:relative;}
+#exCardioBoxV2 .lg-steps .lg-step::after{content:"";position:absolute;inset:-7px;}   /* 34px button (1px border) + 6px each side = 46px touch area */
 .lg-cr-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);color:rgba(44,39,39,.71);line-height:1.4;}
 .gymfin-timed{width:100%;background:var(--m-panel);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:6px 14px;margin-top:8px;box-sizing:border-box;text-align:left;}
 .gymfin-timed[hidden]{display:none;}
@@ -4394,8 +4399,8 @@ const T_EN = {
   stV2RecLongestSet: 'Longest set',
   stV2RepsShort: 'reps',
   stV2TimeProgress: 'Time progress',
-  gymFinTimedBlock: 'Timed', gymFinTotalTime: 'Total time', crTitle: 'Results', crSave: 'Save', crSkip: 'Skip',
-  crHintPrev: 'Grey values come from last time. Everything is optional.',
+  gymFinTimedBlock: 'Timed', gymFinTotalTime: 'Total time', crTitle: 'Results', crSave: 'Save', crSkip: 'Skip', crAddWeight: 'Add your body weight in your account to estimate calories.',
+  crHintPrev: 'Grey values: from last time',
   stV2TagSila: 'strength',
   stV2TagCiezar: 'weight',
   stV2TagObjetosc: 'volume',
@@ -5597,6 +5602,7 @@ function saveWeightSheet(){
   renderAccountPanel();
   if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
   if(document.getElementById('histDetailV2') && selectedHistDateV2) renderHistDetailV2(false);
+  if(typeof cr !== 'undefined' && cr && popupExercise) crPaintDerived();   // the cardio results sheet may be waiting for a weight
   closeWeightSheet();
   toast('Zapisano pomiar');
 }
@@ -9397,7 +9403,7 @@ function renderCardioResults(){
   }).join('');
   box.innerHTML = `
     <div class="lg-bar">
-      <button type="button" class="lg-circ" onclick="closeCardioResults()" aria-label="${escHtml(t('cancel','Anuluj'))}">${LG_ICONS.x}</button>
+      <button type="button" class="lg-circ" onclick="closeCardioResults()" aria-label="${escHtml(t('crSkip','Pomiń'))}">${LG_ICONS.x}</button>
       <span class="lg-bar-title">${t('crTitle','WYNIKI')}</span>
       <button type="button" class="lg-circ fill" onclick="saveCardioResults()" aria-label="${escHtml(t('crSave','Zapisz'))}">${LG_ICONS.checkBig}</button>
     </div>
@@ -9408,9 +9414,7 @@ function renderCardioResults(){
       </div>
       <div class="lg-derived" id="crDerived"></div>
       <p class="lg-cr-hint" id="crKcalHint"></p>
-      <p class="lg-cr-hint">${t('crHintPrev','Szare wartości to podpowiedź z poprzedniego razu. Wszystko jest opcjonalne.')}</p>
-      <button type="button" class="lg-add" onclick="saveCardioResults()">${t('crSave','Zapisz')}</button>
-      <button type="button" class="lg-add" style="border-color:transparent" onclick="closeCardioResults()">${t('crSkip','Pomiń')}</button>
+      <p class="lg-cr-hint">${t('crHintPrev','Szare wartości: z poprzedniego razu')}</p>
     </div>`;
   crPaintDerived();
 }
@@ -9427,7 +9431,7 @@ function crPaintDerived(){
   if(hint){
     const name = popupExercise.name;
     hint.className = 'lg-cr-hint';
-    if(weightAtDate(todayStr()) == null){ hint.className = 'lg-warn'; hint.textContent = 'Dodaj masę ciała w koncie, żeby oszacować kalorie.'; }
+    if(weightAtDate(todayStr()) == null){ hint.innerHTML = `<button type="button" class="lg-cr-link" onclick="openWeightSheet()">${t('crAddWeight','Dodaj masę ciała w koncie, żeby oszacować kalorie.')}</button>`; }
     else if(name === 'Treadmill') hint.textContent = km > 0 ? 'Kalorie oszacuję z dystansu, nachylenia i Twojej masy ciała.' : 'Dodaj dystans, żeby policzyć dokładniej.';
     else if(CARDIO_MET[name]) hint.textContent = name === 'Air Bike' ? 'Kalorie oszacuję z czasu i Twojej masy ciała (dla roweru powietrznego to przybliżenie).' : 'Kalorie oszacuję z czasu i Twojej masy ciała.';
     else hint.textContent = '';

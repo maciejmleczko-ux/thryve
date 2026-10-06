@@ -2387,9 +2387,30 @@ body.gymv2-bg .gy-bg{display:block;}
 #exercisePopupOverlayV2{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
 #exercisePopupSheetV2{height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;padding-bottom:0;background:#fff;}
 #exercisePopupSheetV2 > .m-sheet-grab{display:none;}
-#exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2{align-items:stretch;gap:0;}
+#exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2, #exCardioBoxV2{align-items:stretch;gap:0;}
 .lg-sub-overlay{z-index:95;}
-#exNoteSheetV2, #exHowtoSheetV2{background:#fff;}
+#exNoteSheetV2, #exHowtoSheetV2, #exCardioSheetV2{background:#fff;}
+/* cardio "Wyniki" sheet: rows like .lg-set, − / + like the reps stepper but smaller (see mockups/kardio.html) */
+.lg-metric{position:relative;width:100%;display:flex;align-items:center;gap:8px;box-sizing:border-box;background:#ededed;border:1.5px solid transparent;border-radius:16px;padding:8px 10px 8px 16px;}
+.lg-metric.is-active{border-color:rgba(255,51,0,.32);}
+.lg-metric-l{width:96px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(44,39,39,.71);}
+.lg-metric-in{flex:1;min-width:0;background:none;border:none;outline:none;padding:0;margin:0;font:inherit;font-size:var(--m-fs-md);color:var(--m-ink);font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none;}
+.lg-metric-in::placeholder{color:#b8b8b8;}
+.lg-metric-u{font-size:var(--m-fs-2xs);color:rgba(44,39,39,.71);flex:none;}
+.lg-steps{display:flex;gap:12px;flex:none;}   /* 12px = 2 × the 6px touch extension of each button */
+.lg-steps .lg-step{width:34px;height:34px;}
+.lg-steps .lg-step svg{width:16px;height:16px;}
+.lg-derived{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.lg-derived:empty{display:none;}
+.lg-cr-link{display:block;width:100%;min-height:44px;padding:0 8px;background:none;border:none;font:inherit;color:inherit;text-align:center;text-decoration:underline;text-underline-offset:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+#exCardioBoxV2 .lg-bar .lg-circ{position:relative;}
+#exCardioBoxV2 .lg-bar .lg-circ::after{content:"";position:absolute;inset:-4px;}   /* 40px ring, 48px touch area */
+#exCardioBoxV2 .lg-steps .lg-step{position:relative;}
+#exCardioBoxV2 .lg-steps .lg-step::after{content:"";position:absolute;inset:-7px;}   /* 34px button (1px border) + 6px each side = 46px touch area */
+.lg-cr-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);color:rgba(44,39,39,.71);line-height:1.4;}
+.gymfin-timed{width:100%;background:var(--m-panel);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:6px 14px;margin-top:8px;box-sizing:border-box;text-align:left;}
+.gymfin-timed[hidden]{display:none;}
+.gymfin-timed-k{margin:8px 0 2px;font-size:var(--m-fs-2xs);letter-spacing:.1em;text-transform:uppercase;color:rgba(44,39,39,.71);}
 .lg-bar{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;padding:20px 20px 10px;box-sizing:border-box;}
 .lg-bar-title{position:absolute;left:50%;transform:translateX(-50%);max-width:58%;font-size:var(--m-fs-xs);font-weight:600;letter-spacing:.0833em;text-transform:uppercase;color:var(--m-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .lg-circ{width:40px;height:40px;border-radius:50%;border:.5px solid var(--m-orange);background:transparent;color:var(--m-orange);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex:none;transition:transform var(--m-dur-press-out) var(--m-ease);}
@@ -2625,31 +2646,27 @@ function popupShell(inner, subHtml){
 function metricRow(label, val, unit, o){
   o = o || {};
   const empty = val === '' || val == null;
-  return `<div class="lg-set-wrap"><div class="lg-set mk-metric${empty?' is-empty':''}${o.active?' is-active':''}">
-    <span class="lg-set-l" style="width:96px">${label}</span>
-    <span class="lg-set-v">${empty ? '—' : val}${empty ? '' : ` <small>${unit||''}</small>`}</span>
-    <span class="mk-steps"><button type="button" class="lg-step mk-s">${LG.minus}</button><button type="button" class="lg-step mk-s">${LG.plus}</button></span>
-  </div></div>`;
+  return `<div class="lg-metric${o.active?' is-active':''}"><span class="lg-metric-l">${label}</span>
+    <input class="lg-metric-in" type="text" readonly value="${empty ? '' : val}" placeholder="—">
+    ${unit ? `<span class="lg-metric-u">${unit}</span>` : ''}
+    <span class="lg-steps"><button type="button" class="lg-step" aria-label="−">${LG.minus}</button><button type="button" class="lg-step" aria-label="+">${LG.plus}</button></span></div>`;
 }
 function resultsSheet(ex, o){
   const rows = (o.rows||[]).map(r=> metricRow(r[0], r[1], r[2], r[3])).join('');
   const derived = (o.derived||[]).map(d=>`<span class="lg-chip">${d}</span>`).join('');
-  return `<div class="onboard-overlay m-sheet-overlay lg-sub-overlay m-sheet-entered"><div class="m-sheet" id="exNoteSheetV2"><div class="m-sheet-grab"></div><div class="m-sheet-body" id="exNoteBoxV2" style="align-items:stretch;gap:0">
+  return `<div class="onboard-overlay m-sheet-overlay lg-sub-overlay m-sheet-entered"><div class="m-sheet" id="exCardioSheetV2"><div class="m-sheet-grab"></div><div class="m-sheet-body" id="exCardioBoxV2">
     <div class="lg-bar">
-      <button type="button" class="lg-circ">${LG.x}</button>
+      <button type="button" class="lg-circ" aria-label="Pomiń">${LG.x}</button>
       <span class="lg-bar-title">WYNIKI</span>
-      <button type="button" class="lg-circ fill">${LG.checkBig}</button>
+      <button type="button" class="lg-circ fill" aria-label="Zapisz">${LG.checkBig}</button>
     </div>
     <div class="lg-scroll lg-sub-scroll">
       <div class="lg-name-row"><div class="lg-name">${ex.name}</div></div>
       <div class="lg-chips"><span class="lg-chip">${ph('clock-countdown')}<span>${o.time||ex.dur}</span></span></div>
-      <div class="lg-sets" style="margin-top:6px">${rows}</div>
-      ${derived ? `<div class="mk-derived">${derived}</div>` : ''}
-      ${o.hint ? `<p class="mk-hintline">${o.hint}</p>` : ''}
-      ${o.warn ? `<div class="lg-warn" style="margin:0">${o.warn}</div>` : ''}
-      <p class="mk-hintline">Szare wartości to podpowiedź z poprzedniego razu. Wszystko jest opcjonalne.</p>
-      <button type="button" class="lg-add">Zapisz</button>
-      <button type="button" class="lg-add" style="border-color:transparent">Pomiń</button>
+      <div class="lg-sets">${rows}</div>
+      ${derived ? `<div class="lg-derived">${derived}</div>` : ''}
+      ${o.warn ? `<p class="lg-cr-hint"><button type="button" class="lg-cr-link">${o.warn}</button></p>` : (o.hint ? `<p class="lg-cr-hint">${o.hint}</p>` : '')}
+      <p class="lg-cr-hint">Szare wartości: z poprzedniego razu</p>
     </div></div></div></div>`;
 }
 
@@ -2711,7 +2728,7 @@ function statsCardio(){
 const STATES = [
  {id:'s1', label:'1. Seria kardio przed startem', cap:'Ekran serii przed startem. Cele przed startem odłożone, więc nic poza zegarem i „Start”.', render:()=> popupShell(popupBox(EX.treadmill,{phase:'idle'}))},
  {id:'s2', label:'2. Odliczanie kardio', cap:'Duży zegar. Pauza / Zakończ / Pomiń jak w trybie czasowym (Zakończ zapisuje faktyczny czas, Pomiń nic).', render:()=> popupShell(popupBox(EX.treadmill,{phase:'run',clock:'14:32'}))},
- {id:'s3a', sub:1, label:'3a. Wyniki: bieżnia', cap:'Po zakończeniu serii seria jest już zapisana z czasem. Arkusz tylko ją uzupełnia. Szare wartości = z poprzedniego razu. Prędkość wynika z dystansu i czasu.',
+ {id:'s3a', sub:1, label:'3a. Wyniki: bieżnia', cap:'Po zakończeniu serii seria jest już zapisana z czasem. Arkusz tylko ją uzupełnia: ✕ (Pomiń) zamyka bez wyników, ✓ (Zapisz) zapisuje. Szare wartości = z poprzedniego razu. Prędkość wynika z dystansu i czasu.',
   render:()=> popupShell(popupBox(EX.treadmill,{sets:[{v:'20:00',blank:false}]}), resultsSheet(EX.treadmill,{rows:[['DYSTANS','3,2','km',{active:true}],['NACHYLENIE','2','%']],derived:['Prędkość 9,6 km/h'],hint:'Kalorie oszacuję z dystansu, nachylenia i Twojej masy ciała.'}))},
  {id:'s3b', sub:1, label:'3b. Wyniki: rower', cap:'Dystans i poziom oporu. Poziom nie zmienia szacunku kalorii (nie przelicza się na waty).',
   render:()=> popupShell(popupBox(EX.bike,{sets:[{v:'20:00',blank:false}]}), resultsSheet(EX.bike,{rows:[['DYSTANS','6,1','km',{active:true}],['POZIOM','6','']],derived:['Prędkość 18,3 km/h']}))},
@@ -2721,7 +2738,7 @@ const STATES = [
   render:()=> popupShell(popupBox(EX.rope,{sets:[{v:'2:00',blank:false},{v:'—',blank:true,active:true}]}), resultsSheet(EX.rope,{rows:[['SKOKI','240','',{active:true}]]}))},
  {id:'s9', label:'9. Bieżnia bez dystansu', cap:'Bez dystansu bieżni nie liczę kalorii osobno (jej minuty zostają w członie bazowym treningu). Podpowiedź zamiast liczby.',
   render:()=> popupShell(popupBox(EX.treadmill,{sets:[{v:'20:00',blank:false}]}), resultsSheet(EX.treadmill,{rows:[['DYSTANS','','km',{active:true}],['NACHYLENIE','2','%']],hint:'Dodaj dystans, żeby policzyć dokładniej.'}))},
- {id:'s6', label:'6. Brak masy ciała', cap:'Gdy nie ma masy ciała: żadnych kalorii, tylko zachęta (ta sama co dziś na ekranie końca treningu).',
+ {id:'s6', label:'6. Brak masy ciała', cap:'Gdy nie ma masy ciała: żadnych kalorii. Neutralny szary tekst, który można dotknąć (otwiera arkusz wagi), zamiast czerwonego ostrzeżenia.',
   render:()=> popupShell(popupBox(EX.treadmill,{sets:[{v:'20:00',blank:false}]}), resultsSheet(EX.treadmill,{rows:[['DYSTANS','3,2','km',{active:true}],['NACHYLENIE','2','%']],derived:['Prędkość 9,6 km/h'],warn:'Dodaj masę ciała w koncie, żeby oszacować kalorie.'}))},
  {id:'s4', label:'4. Wiersz serii kardio w historii', cap:'Wiersz serii: tylko czas i metryki. Kalorie istnieją wyłącznie na poziomie całego treningu (kafelek „Kalorie · szacunek” w karcie), nigdy w wierszu serii.',
   render:()=> `<div class="mk-page" style="background:var(--m-panel)">${histCard(
