@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.49.4 (2026-10-06)
-- **Liczba wersji:** 232 · **commitów:** 553
+- **Aktualna wersja:** 4.50.0 (2026-10-06)
+- **Liczba wersji:** 233 · **commitów:** 554
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -115,6 +115,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.50.0 · MINOR · 2026-10-06
+
+101 nowych ikon ćwiczeń 3D (`icons/exercises/`, `ICON_VER` 2 → 3, slugi w `EXERCISE_ICON_PNG_SLUGS`).
+
+- Paczki 1–7: 69 nowych ćwiczeń w `GYM_PLAN_EXTRA_V2` (`day:'E'`). **Serie, powtórzenia i przerwy są szacunkowe**, lista do przeglądu: `docs/exercise-defaults-review.md`. Ćwiczenia czasowe (Farmer's Walk, Side Plank, Hollow Body Hold, Mountain Climbers) mają sekundy w polach powtórzeń, bo nie ma jeszcze trybu czasowego.
+- `seated_leg_curl`: tylko ikona, bo istniejący Leg Curl to ta sama maszyna siedząca.
+- Paczki 8–11 (rozciąganie, mobilność, cardio, HIIT, 31 ikon): tylko ikony i słowa kluczowe w `CUSTOM_EXERCISE_ICON_SUGGEST`, bez wpisów w bazie.
+- Nowy sprzęt `gumy` (4 ćwiczenia `band_*`) i chip „Gumy” w filtrze sprzętu; chipy skalują się (`flex:0 1 52px` + `aspect-ratio`), żeby 6 mieściło się na 375 px. W `EX_EQUIP_RANK` klucz `guma` zamieniony na `gumy`.
+- Generator planów (`planv2PickExercises`) pomija `day:'E'`, więc auto-plany nie losują nowych ćwiczeń do czasu przeglądu.
+- Bez `EXERCISE_HOWTO` i bez nazw PL (osobne zadania).
+
 
 ### 4.49.4 · PATCH · 2026-10-06
 
