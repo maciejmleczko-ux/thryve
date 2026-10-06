@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.52.0 (2026-10-06)
-- **Liczba wersji:** 234 · **commitów:** 574
+- **Aktualna wersja:** 4.52.1 (2026-10-06)
+- **Liczba wersji:** 235 · **commitów:** 576
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.52.1 · PATCH · 2026-10-06
+
+**Dla użytkownika:** okno „Jak ćwiczyć” działa teraz dla wszystkich ćwiczeń z biblioteki (167) i po polsku, i po angielsku.
+
+- **Opisy „Jak ćwiczyć”:** `EXERCISE_HOWTO` rozszerzone z 64 do 167 wpisów (103 nowych ćwiczeń: ustawienie, ruch, typowy błąd), dotychczasowe wpisy bez zmian. Dla 4 ćwiczeń, których nazwa w danych roboczych była inna, wpisy dopisane pod nazwami z aplikacji: Incline Bench Press, Assisted Pull-Up Machine, Step-Up, 90/90 Hip Stretch.
+- **Angielski:** nowa stała `EXERCISE_HOWTO_EN` (167 wpisów, te same klucze co `EXERCISE_HOWTO`). Żarówka „Jak ćwiczyć” jest teraz widoczna także dla `LANG === 'en'` (wcześniej ukryta warunkiem `LANG !== 'en'`); słownik wybierany wg języka w ekranie logowania ćwiczenia i w `openExHowtoV2`. Ćwiczenie bez wpisu w danym języku nie ma żarówki (bez zastępowania polskim tekstem). Napisy okna (HOW TO DO IT, SETUP, MOVEMENT, COMMON MISTAKE) już miały tłumaczenia.
+- Treści opisów nie były edytowane.
+- **Iteracja iOS:** Build 29.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.52.0 · MINOR · 2026-10-06
 
