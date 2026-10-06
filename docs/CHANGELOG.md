@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.50.0 (2026-10-06)
-- **Liczba wersji:** 233 · **commitów:** 554
+- **Aktualna wersja:** 4.51.0 (2026-10-06)
+- **Liczba wersji:** 234 · **commitów:** 560
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -78,6 +78,7 @@ Stan na 4.44.0.
 | Schemat bazy | `supabase-schema.sql` | idempotentny, można puszczać ponownie |
 | Edge Functions | `supabase/functions/ai-proxy`, `supabase/functions/delete-account`, `supabase/functions/apple-store-token`, `supabase/functions/_shared/apple.ts` | proxy do Claude, usuwanie konta (unieważnia też token Apple), zapis tokenu Apple po logowaniu; sekrety `APPLE_TEAM_ID`/`APPLE_KEY_ID`/`APPLE_PRIVATE_KEY` |
 | Dashboard statystyk | `stats.html` → **app.mekkio.app/stats** + Edge Function `supabase/functions/admin-stats` | od 2026-10-01, prywatny: tylko zbiorcze liczby, tylko konta z sekretu `STATS_ADMIN_EMAILS`; `service_role` ma `select` na `workouts`. Goście niewidoczni, pobrania w App Store Connect |
+| Ćwiczenia czasowe | `index.html` (`mode:'time'`, `tm*`), `docs/mekkio_domyslne_wartosci.md`, `docs/exercise-defaults-review.md` | od 4.51.0; seria czasowa = `{weight:0, reps:0, durationSec, perSide?}`; klucz `mekkio_tm_notif_asked_v1` (bez prefiksu `fitlog_`); natywnie wtyczka `@capacitor-community/keep-awake` (`native/package.json`) i powiadomienia lokalne id 91000+ |
 | Zasady ruchu / animacji | `CLAUDE.md` + tokeny `--m-*` w `:root` | od 4.42.4 |
 | Hosting (główny) | Cloudflare Workers (static assets): **app.mekkio.app** | od 2026-09-28; repo `mekkio`, build `sh scripts/build-web.sh` → `dist/` (tylko pliki apki), `wrangler.jsonc` |
 | Hosting (lustro) | GitHub Pages: `maciejmleczko-ux.github.io/thryve/` | stare ikony na pulpicie; jeden `git push` idzie do obu repo (`origin` ma dwa push URL). Inny adres = osobny localStorage |
@@ -115,6 +116,28 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.51.0 · MINOR · 2026-10-06
+
+**Dla użytkownika:** ćwiczenia na czas z zegarem (plank, spacer farmera, rozciąganie, mobilność, kardio, HIIT jako 8-minutowy timer) i 31 nowych ćwiczeń z paczek 8–11. Nowe grupy: Kardio, Rozgrzewka, Rozciąganie.
+
+- **Tryb czasowy** (`mode:'time'`, `durationSec`, `perSide`): odliczanie liczone od znacznika czasu (przeżywa tło i zgaszony ekran), pauza, Zakończ (zapisuje faktycznie wykonany czas), Pomiń (nic nie zapisuje), przy `perSide` pierwsza strona, 5 s „Zmień stronę”, druga strona. Seria czasowa w zapisie to `{weight:0, reps:0, durationSec, perSide?}`, więc stary klient pokaże pustą serię, ale nie policzy objętości ani rekordów. Brak lub zły `durationSec` daje 30 s. Statystyki, PR i payload Trenera AI pomijają serie czasowe. Brak migracji danych.
+- **Dane:** wartości 65 ćwiczeń siłowych z `docs/mekkio_domyslne_wartosci.md` (stare vs nowe: `docs/exercise-defaults-review.md`); 4 siłowe na czas (Farmer's Walk, Side Plank, Hollow Body Hold, Mountain Climbers) w trybie czasowym; 31 ćwiczeń `GYM_PLAN_TIME_V3` (`day:'F'`).
+- **Grupy** Kardio / Rozgrzewka / Rozciąganie w `PLAN_EX_GROUPS` z `strength:false`: poza generatorem planów i listą „zaniedbanych partii” Trenera AI, bez kafelka „dodaj własne”. Układ dnia: rozgrzewka na początku, kardio i rozciąganie na końcu. Kafelki Warm-up i Stretching zostają bez zmian.
+- **Czas planu** na karcie: ćwiczenia czasowe liczone jako serie × czas (+ przerwy), pozostałe jak dawniej ~5 min.
+- **Przerwa** `rest:"0s"` = bez timera; po powrocie z tła przerwa liczy się od końca serii (`restStart(ex, startedAt)`).
+- **Ekran włączony i powiadomienia** (Etap 2b): `KeepAwake` (wtyczka, fallback Wake Lock API), powiadomienia lokalne `91000` (zmiana strony) i `91001` (koniec serii), zgoda przy pierwszej serii czasowej (klucz `mekkio_tm_notif_asked_v1`). `scheduleWorkoutReminders()` anuluje tylko id 90000–90999.
+- **Przy wydaniu:** w `native/` trzeba `npm install` (nowa zależność `@capacitor-community/keep-awake` w `package.json`) i `npm run sync`; bez `UIBackgroundModes`. Zgaszony ekran, dźwięk powiadomienia i Keep Awake sprawdzić ręcznie na iPhonie.
+
+**Commity (6):**
+
+- `4c1b551` 2026-10-06 — 101 ikon ćwiczeń 3D, 69 nowych ćwiczeń, sprzęt gumy + chip, filtr generatora (4.50.0)
+- `297e8c8` 2026-10-06 — Etap 1: wartości domyślne 65 nowych ćwiczeń
+- `54ab17e` 2026-10-06 — Etap 2: tryb czasowy
+- `76b44c2` 2026-10-06 — przerwa po serii czasowej liczy od końca serii; rest 0s = brak timera
+- `be99a5d` 2026-10-06 — Etap 3: 31 ćwiczeń czasowych, grupy poza siłowymi, szacowanie czasu planu
+- `f73746f` 2026-10-06 — Etap 2b: Keep Awake, powiadomienia lokalne, zgoda przy pierwszej serii czasowej
+
 
 ### 4.50.0 · MINOR · 2026-10-06
 
