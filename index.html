@@ -4369,6 +4369,7 @@ const T_EN = {
   stV2RecVolume: 'Biggest session volume',
   stV2RecLongestSet: 'Longest set',
   stV2RepsShort: 'reps',
+  stV2TimeProgress: 'Time progress',
   stV2TagSila: 'strength',
   stV2TagCiezar: 'weight',
   stV2TagObjetosc: 'volume',
@@ -4938,9 +4939,9 @@ const GYM_PLAN_KALISTENIKA = [
   {name:"Pistol Squat", group:"Nogi (czworogłowe)", sets:3, repLow:5, repHigh:8, rest:"90-120s", icon:"pistol_squat", equipment:"masa ciała"},
   {name:"Pike Push-up", group:"Barki", sets:3, repLow:8, repHigh:12, rest:"75-90s", icon:"pike_push_up", equipment:"masa ciała"},
   {name:"Handstand Push-up", group:"Barki", sets:3, repLow:5, repHigh:8, rest:"90-120s", icon:"handstand_push_up", equipment:"masa ciała"},
-  {name:"Plank", group:"Brzuch", sets:3, repLow:30, repHigh:60, rest:"45-60s", icon:"plank", equipment:"masa ciała"},
+  {name:"Plank", group:"Brzuch", sets:3, mode:"time", durationSec:45, repLow:45, repHigh:45, rest:"60s", icon:"plank", equipment:"masa ciała"},
   {name:"Crunch", group:"Brzuch", sets:3, repLow:15, repHigh:20, rest:"45-60s", icon:"crunch", equipment:"masa ciała"},
-  {name:"Dead Hang", group:"Brzuch", sets:3, repLow:20, repHigh:40, rest:"45-60s", icon:"pull_up", equipment:"masa ciała"},
+  {name:"Dead Hang", group:"Brzuch", sets:3, mode:"time", durationSec:30, repLow:30, repHigh:30, rest:"60s", icon:"pull_up", equipment:"masa ciała"},
   {name:"Glute Bridge", group:"Pośladki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"glute_bridge", equipment:"masa ciała"},
   {name:"Calf Raise (Bodyweight)", group:"Łydki", sets:3, repLow:15, repHigh:20, rest:"45-60s", icon:"calf_raise_bodyweight", equipment:"masa ciała"},
 ];
@@ -5107,6 +5108,7 @@ const ISOLATION_CYCLE = ['VC','VD'];
 // Behind one function so a future paywall only has to change this, not every
 // call site that shows the BUILDER toggle.
 function canUsePeriodization(){ return true; }
+const BUILTIN_EXERCISES_BY_NAME = new Map(BUILTIN_EXERCISES.map(e=>[e.name, e]));
 function getExerciseLibrary(){
   return [...BUILTIN_EXERCISES, ...customExercises.map(e => ({...e, day:'Własne'}))];
 }
@@ -8611,12 +8613,12 @@ function todayPlanExerciseNames(){
   if(!plan) return null;
   const list = plan.schedule[dayKeyFromDate(todayStr())];
   if(!list || !list.length) return null;
-  if(!plan.periodized) return list;
+  if(!plan.periodized) return list.map(withLibraryTime);
   // Periodized plan: tag each non-bookend exercise with the cycle its
   // position in the day earns it — a new array, the plan's own stored
   // schedule is never mutated, so this recomputes cleanly on every render.
   let compoundI = 0, isolationI = 0;
-  return list.map(e=>{
+  return list.map(withLibraryTime).map(e=>{
     if(e.type === 'checklist') return e;
     const idx = e.compound ? compoundI++ : isolationI++;
     return {...e, versionCycle: versionCycleFor(e, idx)};
@@ -9150,6 +9152,22 @@ function fmtDur(sec, perSide){
   sec = Math.max(0, Math.round(sec));
   const txt = sec < 60 ? `${sec} s` : `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;
   return perSide ? `${txt} ${t('perSideShort','/str.')}` : txt;
+}
+/* Plank and Dead Hang were reps-mode exercises that logged SECONDS in `reps`. Their stored history is never
+   rewritten (no migration, no change to sync signatures): wherever sets are read for history / stats /
+   records, exSetsView() reads such a set (no durationSec, reps>0, no weight) as a time set instead. */
+const LEGACY_TIME_EX = new Set(['Plank','Dead Hang']);
+function exSetsView(ex){
+  if(!ex || !LEGACY_TIME_EX.has(ex.name)) return ex.sets;
+  return ex.sets.map(s=> (!(s.durationSec > 0) && s.reps > 0 && !(s.weight > 0)) ? { ...s, reps: 0, durationSec: s.reps } : s);
+}
+// Built-in exercises only (a custom exercise with the same name can't exist): plan entries are stored copies, so
+// mode / durationSec / perSide come from the library at read time instead of migrating saved plans.
+function withLibraryTime(e){
+  if(!e || e.type === 'checklist' || isTimeEx(e)) return e;
+  const b = BUILTIN_EXERCISES_BY_NAME.get(e.name);
+  if(!b || b.mode !== 'time') return e;
+  return { ...e, mode: 'time', durationSec: b.durationSec, ...(b.perSide ? { perSide: true } : {}) };
 }
 function fmtClock(sec){ sec = Math.max(0, Math.round(sec)); return sec < 60 ? String(sec) : `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`; }
 function fmtKgLocal(n){ return String(Math.round(n * 100) / 100).replace('.', LANG==='en' ? '.' : ','); }
@@ -10479,9 +10497,11 @@ function saveWorkoutV2(){
   const priorBestVol = {};      // best single-session volume (kg) per exercise
   const priorBestReps = {};     // best-ever single-set reps per exercise (masa ciała)
   const priorBestRepsVol = {};  // best single-session total reps per exercise (masa ciała)
+  const priorBestTime = {};     // best single-set time (s) per timed exercise (legacy Plank / Dead Hang read as time)
   workouts.forEach(w=>{
     const perEx = {}, perExReps = {};
-    w.exercises.forEach(ex=> ex.sets.forEach(s=>{
+    w.exercises.forEach(ex=> exSetsView(ex).forEach(s=>{
+      if(s.durationSec > 0) priorBestTime[ex.name] = Math.max(priorBestTime[ex.name] || 0, s.durationSec);
       if(s.weight > 0) priorBestWeight[ex.name] = Math.max(priorBestWeight[ex.name] || 0, s.weight);
       if(s.reps > 0) priorBestReps[ex.name] = Math.max(priorBestReps[ex.name] || 0, s.reps);
       perEx[ex.name] = (perEx[ex.name] || 0) + s.weight * s.reps;
@@ -10501,14 +10521,17 @@ function saveWorkoutV2(){
 
   const w = workouts[workouts.length - 1];
   const isBw = workoutIsBodyweightOnly(w);
-  let volume = 0, repsTotal = 0, setCount = 0, weightPR = null, repsPR = null;
+  let volume = 0, repsTotal = 0, setCount = 0, weightPR = null, repsPR = null, timePR = null;
   const exVol = {}, exRepsVol = {};
   w.exercises.forEach(ex=>{
     const hadW = priorBestWeight[ex.name] !== undefined;
     const prevW = priorBestWeight[ex.name] || 0;
     const hadReps = priorBestReps[ex.name] !== undefined;
     const prevReps = priorBestReps[ex.name] || 0;
-    ex.sets.forEach(s=>{
+    const hadTime = priorBestTime[ex.name] !== undefined;
+    const prevTime = priorBestTime[ex.name] || 0;
+    exSetsView(ex).forEach(s=>{
+      if(hadTime && s.durationSec > prevTime && (!timePR || s.durationSec > timePR.sec)) timePR = { name: ex.name, sec: s.durationSec, perSide: !!s.perSide };
       volume += s.weight * s.reps;
       repsTotal += s.reps || 0;
       setCount += 1;
@@ -10554,6 +10577,8 @@ function saveWorkoutV2(){
     });
     if(volPR) record = { label: t('gymFinRecordVolume','Nowy rekord objętości'), text: volPR.name + ' · ' + formatDashNum(Math.round(volPR.vol), 0) + ' kg' };
   }
+
+  if(!record && timePR) record = { label: t('gymFinRecordLabel','Nowy rekord'), text: timePR.name + ' — ' + fmtDur(timePR.sec, timePR.perSide) };
 
   showGymFinishV2({
     durationMin: w.durationMin,
@@ -11040,14 +11065,17 @@ function planv2PickExercisesForRole(count, equipment, role){
   const buckets = PLANSV2_MUSCLE_BUCKETS.filter(b=> labels.includes(b.label));
   return planv2PickExercises(count, equipment, buckets);
 }
+function planv2ExerciseEntry(ex, params){
+  const base = { name: ex.name, group: ex.group, icon: ex.icon, compound: ex.compound, equipment: ex.equipment };
+  // a timed exercise keeps its own sets / time / rest: the goal's reps-based sets, reps and rest don't apply
+  if(isTimeEx(ex)) return { ...base, sets: ex.sets, mode: 'time', durationSec: ex.durationSec, ...(ex.perSide ? { perSide: true } : {}), repLow: ex.repLow, repHigh: ex.repHigh, rest: ex.rest };
+  return { ...base, sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest };
+}
 function generatePlanScheduleV2(goal, difficulty, equipment, frequency){
   const params = PLANSV2_GOAL_PARAMS[goal];
   const count = PLANSV2_DIFFICULTY_COUNT[difficulty];
   const days = PLANSV2_FREQUENCY_DAYS[frequency] || PLANSV2_FREQUENCY_DAYS[3];
-  const exercises = sortExercisesByKey(planv2PickExercises(count, equipment).map(ex=>({
-    name: ex.name, group: ex.group, icon: ex.icon, compound: ex.compound, equipment: ex.equipment,
-    sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest,
-  })));   // big-before-small, compound-before-isolation within a group
+  const exercises = sortExercisesByKey(planv2PickExercises(count, equipment).map(ex=> planv2ExerciseEntry(ex, params)));   // big-before-small, compound-before-isolation within a group
   const schedule = scheduleOnDays(days, exercises); // same full exercise list every session — still genuinely fullbody, only the day count changes
   ensureWarmupStretch(schedule);
   return schedule;
@@ -11066,10 +11094,7 @@ function generateSplitPlanScheduleV2(splitId, goal, difficulty, equipment){
   const count = PLANSV2_DIFFICULTY_COUNT[difficulty];
   const schedule = emptySchedule();
   Object.keys(dayRoles).forEach(day=>{
-    const exercises = sortExercisesByKey(planv2PickExercisesForRole(count, equipment, dayRoles[day]).map(ex=>({
-      name: ex.name, group: ex.group, icon: ex.icon, compound: ex.compound, equipment: ex.equipment,
-      sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest,
-    })));
+    const exercises = sortExercisesByKey(planv2PickExercisesForRole(count, equipment, dayRoles[day]).map(ex=> planv2ExerciseEntry(ex, params)));
     schedule[day] = exercises;
   });
   ensureWarmupStretch(schedule);
@@ -12189,7 +12214,7 @@ function dashboardAllSets(){
   const out = [];
   workouts.forEach(w=>{
     w.exercises.forEach(ex=>{
-      ex.sets.forEach(s=>{
+      exSetsView(ex).forEach(s=>{
         // masa ciała sets have weight:0 (no kg ever logged) — used to be
         // dropped here entirely by the weight>0 check, so a calisthenics
         // exercise never reached any stat, even the reps-based ones.
@@ -12368,7 +12393,7 @@ function renderDashboard(){
     const priorBest = {};
     workouts.forEach(w=>{
       if(w === lastWorkout) return;
-      w.exercises.forEach(ex=> ex.sets.forEach(s=>{
+      w.exercises.forEach(ex=> exSetsView(ex).forEach(s=>{
         if(!(s.reps>0)) return;
         const b = priorBest[ex.name];
         if(!b || s.weight > b.weight || (s.weight===b.weight && s.reps>b.reps)) priorBest[ex.name] = {weight:s.weight||0, reps:s.reps};
@@ -12382,7 +12407,7 @@ function renderDashboard(){
     workouts.forEach(w=>{
       if(w === lastWorkout) return;
       w.exercises.forEach(ex=>{
-        const best = ex.sets.reduce((b,s)=> (s.reps>0 && (!b || s.weight>b.weight || (s.weight===b.weight && s.reps>b.reps))) ? s : b, null);
+        const best = exSetsView(ex).reduce((b,s)=> (s.reps>0 && (!b || s.weight>b.weight || (s.weight===b.weight && s.reps>b.reps))) ? s : b, null);
         if(!best) return;
         (exerciseTrend[ex.name] = exerciseTrend[ex.name] || []).push({date: w.date, weightKg: best.weight||0, reps: best.reps});
       });
@@ -12393,8 +12418,8 @@ function renderDashboard(){
     });
 
     // timed sets (durationSec, reps:0) are left out: the trainer prompt only knows weight × reps
-    const exercisesPayload = lastWorkout.exercises.filter(ex=> ex.sets.some(s=>s.reps>0)).map(ex=>{
-      const sets = ex.sets.filter(s=>s.reps>0).map(s=>({weightKg: s.weight||0, reps: s.reps}));
+    const exercisesPayload = lastWorkout.exercises.filter(ex=> exSetsView(ex).some(s=>s.reps>0)).map(ex=>{
+      const sets = exSetsView(ex).filter(s=>s.reps>0).map(s=>({weightKg: s.weight||0, reps: s.reps}));
       const prior = priorBest[ex.name];
       const isNewRecord = sets.some(s=> !prior || s.weightKg > prior.weight || (s.weightKg===prior.weight && s.reps>prior.reps));
       // Fade: how many reps you lost from the first set to the last — a
@@ -12436,7 +12461,7 @@ function renderDashboard(){
     let pushSets = 0, pullSets = 0;
     recentWorkouts.forEach(w=> w.exercises.forEach(ex=>{
       const g = muscleGroupBucket(ex.group).key;
-      const setCount = ex.sets.filter(s=>s.reps>0).length;
+      const setCount = exSetsView(ex).filter(s=>s.reps>0).length;
       if(PUSH_GROUPS.includes(g)) pushSets += setCount;
       else if(PULL_GROUPS.includes(g)) pullSets += setCount;
     }));
@@ -13537,7 +13562,7 @@ function histWorkoutCardInner(w){
           <span class="histv2-ex-ico">${statsV2ExerciseIconHtml(e.name)}</span>
           <div class="histv2-ex-meta">
             <p class="histv2-ex-name">${escHtml(e.name)}</p>
-            <p class="histv2-ex-sets">${e.sets.map(s=> s.durationSec > 0 ? fmtDur(s.durationSec, s.perSide) : s.weight > 0 ? `${s.weight}kg×${s.reps}` : `${s.reps}`).join(' · ')}</p>
+            <p class="histv2-ex-sets">${exSetsView(e).map(s=> s.durationSec > 0 ? fmtDur(s.durationSec, s.perSide) : s.weight > 0 ? `${s.weight}kg×${s.reps}` : `${s.reps}`).join(' · ')}</p>
           </div>
         </div>`).join('')}
     </div>`;
@@ -13734,7 +13759,7 @@ function statsV2YtdStats(){
 }
 function statsV2RecentExerciseNames(){
   const lastSeen = new Map();
-  dashboardAllSets().forEach(s=>{
+  dashboardAllSets().concat(statsV2TimeRows()).forEach(s=>{
     if(!lastSeen.has(s.name) || s.date > lastSeen.get(s.name)) lastSeen.set(s.name, s.date);
   });
   return Array.from(lastSeen.entries()).sort((a,b)=> b[1].localeCompare(a[1])).map(([name])=>name);
@@ -13765,12 +13790,31 @@ function statsV2Epley(weight, reps){ return weight * (1 + reps/30); }
 // every stat that's normally weight-based (siła/ciężar/objętość/progres)
 // switches to a reps-based equivalent. See project_thryve_roadmap.md "typy
 // obciążenia" — E1 slice for calisthenics only, bands (E2) not built yet.
+function statsV2IsTime(name){
+  if(LEGACY_TIME_EX.has(name)) return true;
+  const found = getExerciseLibrary().find(e=>e.name===name);
+  return !!(found && found.mode === 'time');
+}
+// A timed exercise runs through the same reps-only machinery as masa ciała (best set / total per session /
+// progress chart), with SECONDS standing in for reps — only the unit labels differ (statsV2Unit()).
 function statsV2IsBodyweight(name){
+  if(statsV2IsTime(name)) return true;
   const found = getExerciseLibrary().find(e=>e.name===name);
   return !!(found && found.equipment === 'masa ciała');
 }
+function statsV2Unit(name){ return statsV2IsTime(name) ? 's' : t('stV2RepsShort','powt.'); }
+// timed sets as {date, name, weight:0, reps:<seconds>, perSide} rows, from the raw workouts
+function statsV2TimeRows(name){
+  const out = [];
+  workouts.forEach(w=> w.exercises.forEach(ex=>{
+    if(name && ex.name !== name) return;
+    exSetsView(ex).forEach(s=>{ if(s.durationSec > 0) out.push({ date: w.date, name: ex.name, weight: 0, reps: s.durationSec, perSide: !!s.perSide }); });
+  }));
+  return out;
+}
 // this exercise's full logged history as {date, weight, reps} rows, oldest first
 function statsV2ExerciseSets(name){
+  if(statsV2IsTime(name)) return statsV2TimeRows(name).sort((a,b)=> a.date.localeCompare(b.date));
   return dashboardAllSets().filter(s=>s.name===name).sort((a,b)=> a.date.localeCompare(b.date));
 }
 function statsV2RelativeDate(iso){
@@ -13819,7 +13863,7 @@ function statsV2ExerciseRecord(name){
     const ex = w.exercises.find(e=>e.name===name);
     if(!ex) return;
     const vol = isBodyweightEx
-      ? ex.sets.reduce((sum,st)=> sum + (st.reps||0), 0)
+      ? exSetsView(ex).reduce((sum,st)=> sum + (statsV2IsTime(name) ? (st.durationSec||0) : (st.reps||0)), 0)
       : ex.sets.reduce((sum,st)=> sum + (st.weight||0) * (st.reps||0), 0);
     if(vol > 0 && (!objetosc || vol > objetosc.vol)) objetosc = { vol, date: w.date };
   });
@@ -13939,7 +13983,12 @@ function statsV2ExerciseDailySeries(name){
 function statsV2ExerciseSessions(name){
   const isBodyweightEx = statsV2IsBodyweight(name);
   const rows = workouts.filter(w=> w.exercises.some(e=>e.name===name))
-    .map(w=>({date:w.date, sets: w.exercises.find(e=>e.name===name).sets}))
+    .map(w=>{
+      const ex = w.exercises.find(e=>e.name===name), sv = exSetsView(ex);
+      // timed: seconds stand in for reps (see statsV2IsBodyweight)
+      return { date: w.date, sets: statsV2IsTime(name) ? sv.filter(s=>s.durationSec>0).map(s=>({ ...s, weight: 0, reps: s.durationSec })) : sv };
+    })
+    .filter(r=> r.sets.length)
     .sort((a,b)=> a.date.localeCompare(b.date));
   // three running bests, each moving forward in time — a session gets a
   // tag for every one it beats outright (a tie is not a new record).
@@ -14330,7 +14379,7 @@ function renderStatsV2Detail(name){
     const dateShort = `${dateObj.getDate()} ${MONTH_GEN_PL[dateObj.getMonth()].slice(0,3)} ${dateObj.getFullYear()}`;
     const weekday = GYMV2_DAY_NAMES_PL[dateObj.getDay()];
     const setsStr = rec.isBodyweight
-      ? r.sets.map(s=>`${s.reps} ${t('stV2RepsShort','powt.')}`).join(' · ')
+      ? r.sets.map(s=>`${s.reps} ${statsV2Unit(name)}`).join(' · ')
       : r.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ');
     const tags = [
       r.prSila     ? `<span class="statsv2-log-tag">${t('stV2TagSila','siła')}</span>` : '',
@@ -14366,7 +14415,7 @@ function renderStatsV2Detail(name){
   const deltaText = rec.firstResult
     ? t('stV2FirstResult','Pierwszy zapisany wynik')
     : rec.isBodyweight
-      ? `${deltaVal>=0?'+':''}${deltaVal} ${t('stV2RepsShort','powt.')} ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`
+      ? `${deltaVal>=0?'+':''}${deltaVal} ${statsV2IsTime(name) ? 'sek.' : statsV2Unit(name)} ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`
       : `${deltaVal>=0?'+':''}${deltaVal} kg ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`;
 
   const fmtW = w => (typeof fmtGymWeight === 'function') ? fmtGymWeight(w) : String(w);
@@ -14378,16 +14427,16 @@ function renderStatsV2Detail(name){
     ? `${fmtW(rec.sila.weight)}<small>kg</small> <span class="statsv2-record-num-x">× ${rec.sila.reps}</span>`
     : rec.ciezar
       ? `${fmtW(rec.ciezar.weight)}<small>kg</small> <span class="statsv2-record-num-x">× ${rec.ciezar.reps}</span>`
-      : `${rec.seria ? rec.seria.reps : 0}<small>${t('stV2RepsShort','powt.')}</small>`;
+      : `${rec.seria ? rec.seria.reps : 0}<small>${statsV2Unit(name)}</small>`;
   const e1rmLine = rec.sila
     ? `≈ 1RM ${Math.round(rec.sila.e1rm)} kg${deltaText ? ' · ' + deltaText : ''}`
     : deltaText;
   const recRows = [
     rec.ciezar ? `<div class="statsv2-record-row">${ph('barbell','statsv2-record-ric')}<span class="statsv2-record-rk">${t('stV2RecHeaviest','Najcięższy ciężar')}</span><span class="statsv2-record-rv">${fmtW(rec.ciezar.weight)} kg <small>× ${rec.ciezar.reps}</small></span></div>` : '',
-    rec.objetosc ? `<div class="statsv2-record-row">${ph('medal','statsv2-record-ric')}<span class="statsv2-record-rk">${t('stV2RecVolume','Największa objętość sesji')}</span><span class="statsv2-record-rv">${rec.isBodyweight ? `${Math.round(rec.objetosc.vol)} ${t('stV2RepsShort','powt.')}` : `${formatDashNum(Math.round(rec.objetosc.vol),0)} kg`}</span></div>` : '',
+    rec.objetosc ? `<div class="statsv2-record-row">${ph('medal','statsv2-record-ric')}<span class="statsv2-record-rk">${t('stV2RecVolume','Największa objętość sesji')}</span><span class="statsv2-record-rv">${rec.isBodyweight ? `${Math.round(rec.objetosc.vol)} ${statsV2Unit(name)}` : `${formatDashNum(Math.round(rec.objetosc.vol),0)} kg`}</span></div>` : '',
   ].join('');
   const seriaFoot = rec.seria
-    ? `${t('stV2RecLongestSet','Najdłuższa seria')}: <strong>${rec.seria.reps} ${t('stV2RepsShort','powt.')}</strong>${rec.seria.weight>0?` × ${fmtW(rec.seria.weight)} kg`:''} · ${t('stV2TotalSets','Serie ogółem')} ${rec.totalSets}`
+    ? `${t('stV2RecLongestSet','Najdłuższa seria')}: <strong>${rec.seria.reps} ${statsV2Unit(name)}</strong>${rec.seria.weight>0?` × ${fmtW(rec.seria.weight)} kg`:''} · ${t('stV2TotalSets','Serie ogółem')} ${rec.totalSets}`
     : `${t('stV2TotalSets','Serie ogółem')} ${rec.totalSets}`;
 
   return `
@@ -14407,12 +14456,12 @@ function renderStatsV2Detail(name){
       </div>
 
       <div class="statsv2-detail-chart-card statsv2-anim-card" style="--i:1">
-        <p class="statsv2-detail-chart-eyebrow">${rec.isBodyweight ? t('stV2RepsProgress','Progres powtórzeń') : t('stV2WeightProgress','Progres ciężaru')}</p>
+        <p class="statsv2-detail-chart-eyebrow">${statsV2IsTime(name) ? t('stV2TimeProgress','Progres czasu') : rec.isBodyweight ? t('stV2RepsProgress','Progres powtórzeń') : t('stV2WeightProgress','Progres ciężaru')}</p>
         <div class="statsv2-range-row">
           ${ranges.map(([m,label],i)=>`<button type="button" class="statsv2-range-chip${i===ranges.length-1?' wide':''}${statsV2Range===m?' active':''}" onclick="setStatsV2RangeV2(${m})">${label}</button>`).join('')}
         </div>
         <div class="statsv2-detail-wave">
-          ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(Math.max(0,p.y-p.r-6)/(dH+16)*100).toFixed(1)}%;">PR ${p.weight}${rec.isBodyweight ? ' ' + t('stV2RepsShort','powt.') : 'kg'}</div>`).join('')}
+          ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(Math.max(0,p.y-p.r-6)/(dH+16)*100).toFixed(1)}%;">PR ${p.weight}${rec.isBodyweight ? ' ' + statsV2Unit(name) : 'kg'}</div>`).join('')}
           <svg viewBox="0 0 ${dW} ${dH+16}" preserveAspectRatio="none">${detailComet.svg}</svg>
           ${chartPts.map((p,i)=>{
             const L = (p.x/dW*100).toFixed(1), T = (p.y/(dH+16)*100).toFixed(1);
@@ -14995,7 +15044,7 @@ async function buildWorkoutCardBlob(w){
   const CX = SHARE_CARD_W / 2;
 
   const totalVol = Math.round(w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0));
-  const totalReps = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.reps, 0), 0);
+  const totalReps = w.exercises.reduce((s,e)=> s + exSetsView(e).reduce((s2,st)=> s2 + st.reps, 0), 0);
   const rec = histWorkoutRecordV2(w);
   // no record card → drop the whole icon+hero+stats block a bit lower so
   // the space it would have taken is shared, not left as a hole
