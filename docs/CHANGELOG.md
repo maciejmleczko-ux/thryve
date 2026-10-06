@@ -124,7 +124,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Opisy „Jak ćwiczyć”:** `EXERCISE_HOWTO` rozszerzone z 64 do 167 wpisów (103 nowych ćwiczeń: ustawienie, ruch, typowy błąd), dotychczasowe wpisy bez zmian. Dla 4 ćwiczeń, których nazwa w danych roboczych była inna, wpisy dopisane pod nazwami z aplikacji: Incline Bench Press, Assisted Pull-Up Machine, Step-Up, 90/90 Hip Stretch.
 - **Angielski:** nowa stała `EXERCISE_HOWTO_EN` (167 wpisów, te same klucze co `EXERCISE_HOWTO`). Żarówka „Jak ćwiczyć” jest teraz widoczna także dla `LANG === 'en'` (wcześniej ukryta warunkiem `LANG !== 'en'`); słownik wybierany wg języka w ekranie logowania ćwiczenia i w `openExHowtoV2`. Ćwiczenie bez wpisu w danym języku nie ma żarówki (bez zastępowania polskim tekstem). Napisy okna (HOW TO DO IT, SETUP, MOVEMENT, COMMON MISTAKE) już miały tłumaczenia.
 - Treści opisów nie były edytowane.
-- **Iteracja iOS:** Build 29.
+- **iOS:** Build 29 (4.52.1) wysłany na TestFlight 2026-10-06 (`npm run sync`, archiwum i wysyłka). Zawiera opisy „Jak ćwiczyć” PL i EN. `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
 
 **Commity:** wpis dopisany w commicie tej zmiany.
 
