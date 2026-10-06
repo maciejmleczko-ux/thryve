@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.53.0 (2026-10-06)
-- **Liczba wersji:** 237 · **commitów:** 579
+- **Aktualna wersja:** 4.54.0 (2026-10-06)
+- **Liczba wersji:** 238 · **commitów:** 581
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.54.0 · MINOR · 2026-10-06
+
+**Dla użytkownika:** 17 nowych ćwiczeń rozgrzewki i rozciągania z ikonami i opisami PL/EN (wpis „Co nowego” do napisania osobno).
+
+- **Nowe ćwiczenia (17):** rozciąganie: Biceps Wall Stretch, Cobra Stretch, Standing Side Bend, Figure-Four Stretch, Seated Glute Stretch, Wrist Flexor Stretch, Wrist Extensor Stretch, Neck Side Stretch; rozgrzewka: Arm Swings (Chest Opener), Band Pull-Apart (Light), Elbow Circles, Wrist Circles, Torso Twists, Dead Bug, Glute Bridge Hold, Bodyweight Good Morning, Shoulder Dislocates. W `GYM_PLAN_TIME_V3` (`day:'F'`, czasowe, „na stronę” tam, gdzie ruch jest jednostronny: Biceps Wall Stretch, Standing Side Bend, Figure-Four, Seated Glute, Wrist Flexor/Extensor, Neck Side).
+- **Ikony:** 17 PNG 360×360 w `icons/exercises/`, slugi dopisane do `EXERCISE_ICON_PNG_SLUGS` (170 → 187), `ICON_VER` 5 → 6. „Band Pull-Apart (Light)” ma osobny slug `band_pull_apart_warmup`; stare ćwiczenie siłowe Band Pull-Apart i jego ikona bez zmian.
+- **Znaczniki partii** (`WARMUP_MUSCLES` / `STRETCH_MUSCLES`): pośladki → Nogi, przedramiona → Biceps, kark → Plecy, brzuch → Brzuch. Luki z 4.53.0 uzupełnione, dobór bloków korzysta z nowych wpisów.
+- **Opisy „Jak ćwiczyć”:** 17 wpisów PL (`EXERCISE_HOWTO`) i EN (`EXERCISE_HOWTO_EN`), dosłownie z plików autora; obie mapy po 184 klucze o identycznym zestawie, stare wpisy bez zmian.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.53.0 · MINOR · 2026-10-06
 
