@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.54.0 (2026-10-06)
-- **Liczba wersji:** 238 · **commitów:** 581
+- **Aktualna wersja:** 4.55.0 (2026-10-07)
+- **Liczba wersji:** 239 · **commitów:** 582
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.55.0 · MINOR · 2026-10-07
+
+**Dla użytkownika:** 3 nowe darmowe plany gotowe do wyboru (Fullbody 2× Minimum, Kalistenika Start, Powrót do formy) (wpis „Co nowego” do napisania osobno).
+
+- **13 nowych planów wbudowanych** (`NEW_BUILTIN_PLAN_DEFS`, dane z `mekkio_nowe_plany.json`): 3 `free` widoczne od razu, 10 `plus` ukrytych za flagą `PLANS_PLUS_ENABLED = false` (obok `canUsePeriodization()`, hook pod przyszły paywall). Istniejące 3 plany dostają `tier:'free'`, poza tym bez zmian.
+- **Dodawanie istniejącym użytkownikom:** bez zmian mechanizmu: `loadTrainingPlans()` dopisuje brakujące plany domyślne po `id` (bez duplikatów, bez nadpisania zmian, usunięte pozostają usunięte). Plany `plus` nie są dopisywane ani wysyłane do chmury, dopóki flaga jest `false`; plany `plus` już zapisane na urządzeniu zostają w danych, ale znikają z list, wyboru planu i edytora (`isPlanHidden`, `visiblePlans`, `toggleStarredPlan`, `openPlanEditorV2`). Rozpoznawanie planów wbudowanych przy pobraniu z chmury (`allBuiltinPlans()`) obejmuje wszystkie 16.
+- **Ćwiczenia:** `libEx()` czyta z całej biblioteki (`defEx` zna tylko GYM_PLAN A/B/C); kopie ćwiczeń jak w `defEx`; stare kafelki rozgrzewki/rozciągania nie są dodawane (bloki liczą się na bieżąco).
+- **Nazwy i poziom:** nazwy PL i EN w metadanych, wyświetlane wg języka (`planDisplayName`) o ile użytkownik nie zmienił nazwy; poziom z pola `level` (Łatwy/Średni/Trudny; „Średni–Trudny” → Trudny, „Łatwy–Średni” → Średni) steruje kolorem i etykietą karty (`planLevelKey`). Etykiety dni, `goal`, `equipment` i `notes` (PL/EN) są tylko w metadanych, bez miejsca w UI.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.54.0 · MINOR · 2026-10-06
 

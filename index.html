@@ -5196,6 +5196,11 @@ const ISOLATION_CYCLE = ['VC','VD'];
 // Behind one function so a future paywall only has to change this, not every
 // call site that shows the BUILDER toggle.
 function canUsePeriodization(){ return true; }
+// Mekkio+ paywall hook for the ready-made plans with tier 'plus' (NEW_BUILTIN_PLAN_DEFS). While false they are
+// hidden everywhere (lists, onboarding, picking by id) and never added to a user's plan list or the cloud; plans
+// already on a device are neither removed nor changed. Flip to true (or make it a function, like the one above)
+// when the paywall ships.
+const PLANS_PLUS_ENABLED = false;
 const BUILTIN_EXERCISES_BY_NAME = new Map(BUILTIN_EXERCISES.map(e=>[e.name, e]));
 // declared here, early: exSetsView() runs during startup (recomputeWorkoutCalories) before the later code that uses it is reached
 const LEGACY_TIME_EX = new Set(['Plank','Dead Hang']);
@@ -6081,7 +6086,7 @@ async function syncCloudData(){
     if(allPlans.error || allWorkouts.error){ console.error('syncCloudData: pull', allPlans.error || allWorkouts.error); return; }
 
     if(push.plansOk){
-      const builtinIds = new Set(defaultTrainingPlans().map(p => p.id));
+      const builtinIds = new Set(allBuiltinPlans().map(p => p.id));   // all of them, hidden plus plans included
       const localById = new Map((trainingPlans || []).map(p => [String(p.id), p]));
       // Never synced + not in the cloud = created locally while this sync
       // was in flight: keep it (the queued push sends it next).
@@ -6720,7 +6725,7 @@ function reminderPlanHint(){
   if(!p) return 'Wybierz plan (zakładka Plany), żeby ustawić dni przypomnienia.';
   const days = planActiveDays(p);
   if(!days.length) return 'Twój plan nie ma jeszcze dni treningowych.';
-  return 'Dni: ' + days.map(d=> REMINDER_DAY_LABEL[d]).join(', ') + ' — na podstawie planu „' + p.name + '”.';
+  return 'Dni: ' + days.map(d=> REMINDER_DAY_LABEL[d]).join(', ') + ' — na podstawie planu „' + planDisplayName(p) + '”.';
 }
 function openReminderSheet(){
   closeAccountPanel();
@@ -7085,7 +7090,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.54.0";
+const APP_VERSION = "4.55.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -9963,7 +9968,7 @@ function closeExercisePopupX(){
 /* ---- popup shell ---- */
 function popupPlanTitle(){
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
-  return plan ? plan.name : t('gymTitleTraining','TRENING');
+  return plan ? planDisplayName(plan) : t('gymTitleTraining','TRENING');
 }
 function renderExercisePopupV2(animate){
   const box = document.getElementById('exercisePopupBoxV2');
@@ -11370,7 +11375,114 @@ function defEx(...names){
     return {...found};
   });
 }
-function defaultTrainingPlans(){
+const NEW_BUILTIN_PLAN_DEFS = [
+  {id:'plan_fullbody_2x_minimum', tier:'free', level:"Łatwy", goal:"Ogólna forma", equipment:"maszyny",
+   name:{pl:"Fullbody 2× Minimum", en:"Fullbody 2× Minimum"}, notes:{pl:"Około 40 min. Dobry plan startowy dla osób wracających po przerwie.", en:"About 40 min. A good starter plan for people coming back after a break."},
+   blocks:[
+    {days:['tue','fri'], label:"ten sam trening", ex:["Leg Press Machine", "Chest Press", "Seated Row", "Shoulder Press", "Leg Curl", "Plank"]}]},
+  {id:'plan_kalistenika_start', tier:'free', level:"Łatwy", goal:"Wytrzymałość / ogólna forma", equipment:"masa ciała (drążek lub stół do wiosłowania)",
+   name:{pl:"Kalistenika Start", en:"Calisthenics Start"}, notes:null,
+   blocks:[
+    {days:['mon','fri'], label:"A", ex:["Push-up", "Inverted Row", "Bodyweight Squat", "Glute Bridge", "Plank"]},
+    {days:['wed'], label:"B", ex:["Lunge", "Pike Push-up", "Superman", "Dead Hang", "Hollow Body Hold", "Calf Raise (Bodyweight)"]}]},
+  {id:'plan_powrot_do_formy', tier:'free', level:"Łatwy", goal:"Ogólna forma", equipment:"maszyny, masa ciała, lekkie hantle",
+   name:{pl:"Powrót do formy", en:"Back in Shape"}, notes:{pl:"Ciężary tak dobrane, żeby zostawały 3–4 powtórzenia w zapasie. To plan wprowadzający, nie rehabilitacyjny.", en:"Choose weights that leave 3–4 reps in reserve. This is an introductory plan, not a rehabilitation one."},
+   blocks:[
+    {days:['mon','fri'], label:"A", ex:["Leg Press Machine", "Chest Press", "Seated Row", "Glute Bridge", "Bird Dog", "Plank"]},
+    {days:['wed'], label:"B", ex:["Dumbbell Goblet Squat", "Shoulder Press", "Lat Pulldown", "Hip Abduction", "Back Extension", "Side Plank"]}]},
+  {id:'plan_fullbody_sztanga_3x', tier:'plus', level:"Średni", goal:"Masa / siła", equipment:"sztanga, drążek",
+   name:{pl:"Fullbody Sztanga 3×", en:"Barbell Fullbody 3×"}, notes:null,
+   blocks:[
+    {days:['mon','fri'], label:"A", ex:["Barbell Back Squat", "Barbell Bench Press", "T-Bar Row", "Romanian Deadlift", "Barbell Curl", "Plank"]},
+    {days:['wed'], label:"B", ex:["Front Squat", "Overhead Press", "Chin-up", "Close-Grip Bench Press", "Barbell Lunge", "Hanging Leg Raise"]}]},
+  {id:'plan_upper_lower_4x_hipertrofia', tier:'plus', level:"Średni–Trudny", goal:"Masa", equipment:"sztanga, hantle, maszyny, wyciągi",
+   name:{pl:"Upper / Lower 4× Hipertrofia", en:"Upper / Lower 4× Hypertrophy"}, notes:null,
+   blocks:[
+    {days:['mon'], label:"Upper A", ex:["Barbell Bench Press", "T-Bar Row", "Dumbbell Shoulder Press", "Lat Pulldown", "Dumbbell Lateral Raise", "Triceps Pushdown", "EZ-Bar Curl"]},
+    {days:['tue'], label:"Lower A", ex:["Barbell Back Squat", "Romanian Deadlift", "Leg Press Machine", "Leg Curl", "Seated Calf Raise", "Cable Crunch"]},
+    {days:['thu'], label:"Upper B", ex:["Incline Dumbbell Press", "Chest-Supported Dumbbell Row", "Pull-up", "Cable Lateral Raise", "Overhead Triceps", "Incline Dumbbell Curl", "Face Pull"]},
+    {days:['fri'], label:"Lower B", ex:["Hack Squat Machine", "Hip Thrust", "Dumbbell Walking Lunge", "Leg Extension", "Calf Raise", "Hanging Leg Raise"]}]},
+  {id:'plan_ppl_6x', tier:'plus', level:"Trudny", goal:"Masa", equipment:"sztanga, hantle, maszyny, wyciągi",
+   name:{pl:"PPL 6×", en:"PPL 6×"}, notes:null,
+   blocks:[
+    {days:['mon'], label:"Push A", ex:["Barbell Bench Press", "Overhead Press", "Incline Dumbbell Press", "Dumbbell Lateral Raise", "Triceps Pushdown", "Overhead Triceps"]},
+    {days:['tue'], label:"Pull A", ex:["Pull-up", "T-Bar Row", "Lat Pulldown", "Face Pull", "Barbell Curl", "Dumbbell Hammer Curl"]},
+    {days:['wed'], label:"Legs A", ex:["Barbell Back Squat", "Romanian Deadlift", "Leg Press Machine", "Leg Curl", "Calf Raise", "Cable Crunch"]},
+    {days:['thu'], label:"Push B", ex:["Incline Bench Press", "Dumbbell Shoulder Press", "Cable Crossover", "Cable Lateral Raise", "Skull Crusher", "Rope Pushdown"]},
+    {days:['fri'], label:"Pull B", ex:["Chin-up", "Single-Arm Cable Row", "Straight-Arm Pulldown", "Reverse Pec Deck", "Preacher Curl", "Bayesian Cable Curl"]},
+    {days:['sat'], label:"Legs B", ex:["Hack Squat Machine", "Hip Thrust", "Bulgarian Split Squat", "Leg Extension", "Seated Calf Raise", "Hanging Leg Raise"]}]},
+  {id:'plan_split_5_dni_klatka_plecy_nogi_barki_rece', tier:'plus', level:"Średni–Trudny", goal:"Masa", equipment:"sztanga, hantle, maszyny, wyciągi",
+   name:{pl:"Split 5 dni (Klatka / Plecy / Nogi / Barki / Ręce)", en:"5-Day Split"}, notes:null,
+   blocks:[
+    {days:['mon'], label:"Klatka", ex:["Barbell Bench Press", "Incline Dumbbell Press", "Chest Press", "Pec Deck", "Cable Crossover", "Chest Dip"]},
+    {days:['tue'], label:"Plecy", ex:["Pull-up", "T-Bar Row", "Lat Pulldown", "Single-Arm Cable Row", "Straight-Arm Pulldown", "Back Extension"]},
+    {days:['wed'], label:"Nogi", ex:["Barbell Back Squat", "Leg Press Machine", "Romanian Deadlift", "Leg Extension", "Leg Curl", "Calf Raise"]},
+    {days:['thu'], label:"Barki", ex:["Overhead Press", "Dumbbell Lateral Raise", "Cable Lateral Raise", "Reverse Pec Deck", "Face Pull", "Barbell Shrug"]},
+    {days:['fri'], label:"Ręce", ex:["Close-Grip Bench Press", "EZ-Bar Curl", "Skull Crusher", "Preacher Curl", "Rope Pushdown", "Dumbbell Hammer Curl", "Wrist Curl"]}]},
+  {id:'plan_sila_3x', tier:'plus', level:"Trudny", goal:"Siła", equipment:"sztanga, drążek",
+   name:{pl:"Siła 3×", en:"Strength 3×"}, notes:{pl:"Mniej ćwiczeń niż zwykle (5), bo każde jest ciężkie i wymaga długiej przerwy.", en:"Fewer exercises than usual (5), because each one is heavy and needs a long rest."},
+   blocks:[
+    {days:['mon'], label:"A", ex:["Barbell Back Squat", "Barbell Bench Press", "T-Bar Row", "Face Pull", "Hanging Leg Raise"]},
+    {days:['wed'], label:"B", ex:["Barbell Deadlift", "Overhead Press", "Chin-up", "Triceps Dip", "Ab Wheel Rollout"]},
+    {days:['fri'], label:"C", ex:["Front Squat", "Incline Bench Press", "Dumbbell Row", "Romanian Deadlift", "Plank"]}]},
+  {id:'plan_posladki_i_nogi_4x', tier:'plus', level:"Średni", goal:"Masa / sylwetka", equipment:"sztanga, maszyny, wyciągi, gumy",
+   name:{pl:"Pośladki i nogi 4×", en:"Glutes & Legs 4×"}, notes:null,
+   blocks:[
+    {days:['mon'], label:"Pośladki A", ex:["Hip Thrust", "Romanian Deadlift", "Bulgarian Split Squat", "Cable Glute Kickback", "Hip Abduction", "Back Extension"]},
+    {days:['tue'], label:"Góra (lekka)", ex:["Lat Pulldown", "Seated Row", "Shoulder Press", "Dumbbell Bench Press", "Face Pull", "Plank"]},
+    {days:['thu'], label:"Pośladki B", ex:["Hack Squat Machine", "Sumo Deadlift", "Step-Up", "Glute Kickback Machine", "Cable Pull-Through", "Hip Adduction"]},
+    {days:['sat'], label:"Nogi i pośladki C", ex:["Dumbbell Walking Lunge", "Leg Press Machine", "Leg Curl", "Reverse Hyperextension", "Band Lateral Walk", "Calf Raise"]}]},
+  {id:'plan_dom_hantle_i_gumy', tier:'plus', level:"Łatwy–Średni", goal:"Masa / forma", equipment:"hantle, gumy",
+   name:{pl:"Dom: hantle i gumy", en:"Home: Dumbbells & Bands"}, notes:null,
+   blocks:[
+    {days:['mon'], label:"A", ex:["Dumbbell Goblet Squat", "Push-up", "Dumbbell Row", "Dumbbell Shoulder Press", "Band Pull-Apart", "Plank"]},
+    {days:['wed'], label:"B", ex:["Dumbbell Romanian Deadlift", "Dumbbell Walking Lunge", "Glute Bridge", "Band Lateral Walk", "Calf Raise (Bodyweight)", "Side Plank"]},
+    {days:['fri'], label:"C", ex:["Dumbbell Row", "Pike Push-up", "Dumbbell Lateral Raise", "Dumbbell Hammer Curl", "Dumbbell Kickback", "Band Face Pull"]}]},
+  {id:'plan_kettlebell_3x', tier:'plus', level:"Średni", goal:"Siła / wytrzymałość", equipment:"kettlebell",
+   name:{pl:"Kettlebell 3×", en:"Kettlebell 3×"}, notes:{pl:"Ćwiczenia z szarpnięciem (Snatch, Clean) wymagają techniki, więc plan jest dla osób, które je już znają.", en:"Snatch and Clean exercises need technique, so this plan is for people who already know them."},
+   blocks:[
+    {days:['mon'], label:"A", ex:["Kettlebell Swing", "Kettlebell Goblet Squat", "Kettlebell Press", "Kettlebell Row", "Kettlebell Halo", "Plank"]},
+    {days:['wed'], label:"B", ex:["Kettlebell Deadlift", "Kettlebell Clean", "Turkish Get-Up", "Kettlebell Windmill", "Farmer's Walk", "Russian Twist"]},
+    {days:['fri'], label:"C", ex:["Kettlebell Snatch", "Kettlebell Goblet Squat", "Kettlebell Row", "Kettlebell Press", "Kettlebell Swing", "Hollow Body Hold"]}]},
+  {id:'plan_kalistenika_progresja_4x', tier:'plus', level:"Trudny", goal:"Siła / sprawność", equipment:"masa ciała, drążek, poręcze",
+   name:{pl:"Kalistenika Progresja 4×", en:"Calisthenics Progression 4×"}, notes:null,
+   blocks:[
+    {days:['mon'], label:"Push", ex:["Handstand Push-up", "Chest Dip", "Diamond Push-up", "Pike Push-up", "Triceps Dip", "Hollow Body Hold"]},
+    {days:['tue'], label:"Pull", ex:["Pull-up", "Chin-up", "Inverted Row", "Dead Hang", "Superman", "Hanging Leg Raise"]},
+    {days:['thu'], label:"Nogi", ex:["Pistol Squat", "Bulgarian Split Squat", "Nordic Curl", "Sissy Squat", "Glute Bridge", "Calf Raise (Bodyweight)"]},
+    {days:['fri'], label:"Core i kondycja", ex:["Side Plank", "Hollow Body Hold", "Hanging Leg Raise", "Mountain Climbers", "Burpees", "Plank"]}]},
+  {id:'plan_sila_kondycja_5x', tier:'plus', level:"Średni", goal:"Siła + wytrzymałość", equipment:"sztanga, hantle, maszyny, sprzęt cardio",
+   name:{pl:"Siła + Kondycja 5×", en:"Strength + Conditioning 5×"}, notes:{pl:"Dni kardio mają ćwiczenia czasowe, logowane ręcznie (czas, tempo, nachylenie).", en:"Cardio days use timed exercises, logged manually (time, pace, incline)."},
+   blocks:[
+    {days:['mon'], label:"Siła góra", ex:["Barbell Bench Press", "T-Bar Row", "Dumbbell Shoulder Press", "Lat Pulldown", "Face Pull"]},
+    {days:['tue'], label:"Kardio spokojne", ex:["Stationary Bike", "Treadmill", "Elliptical"]},
+    {days:['wed'], label:"Siła dół", ex:["Barbell Back Squat", "Romanian Deadlift", "Leg Press Machine", "Leg Curl", "Calf Raise"]},
+    {days:['thu'], label:"Interwały", ex:["Air Bike", "Jump Rope", "HIIT", "Mountain Climbers", "Burpees"]},
+    {days:['sat'], label:"Obwód całego ciała", ex:["Kettlebell Swing", "Dumbbell Goblet Squat", "Push-up", "Dumbbell Row", "Farmer's Walk", "Plank"]}]},
+];
+const BUILTIN_PLAN_DEF_BY_ID = new Map(NEW_BUILTIN_PLAN_DEFS.map(d=>[d.id, d]));
+// library lookup (defEx only knows GYM_PLAN A/B/C); same copy-the-exercise rule as defEx
+function libEx(...names){
+  return names.map(name=>{
+    const found = BUILTIN_EXERCISES_BY_NAME.get(name);
+    if(!found) throw new Error('builtin plan: unknown exercise name "'+name+'"');
+    return {...found};
+  });
+}
+function planFromBuiltinDef(def){
+  const schedule = emptySchedule();
+  def.blocks.forEach(b=> b.days.forEach(d=>{ schedule[d] = libEx(...b.ex); }));
+  ensureWarmupStretch(schedule);
+  return {id:def.id, tier:def.tier, name:def.name.pl, builtin:true, schedule};
+}
+// Name / difficulty of a built-in plan shown in the user's language; a plan the user renamed keeps its own name.
+function planDisplayName(p){
+  const d = p && BUILTIN_PLAN_DEF_BY_ID.get(p.id);
+  return (d && p.name === d.name.pl && LANG === 'en') ? d.name.en : p.name;
+}
+const PLAN_LEVEL_KEY = {'Łatwy':'easy', 'Łatwy–Średni':'medium', 'Średni':'medium', 'Średni–Trudny':'hard', 'Trudny':'hard'};
+function planLevelKey(p){ const d = p && BUILTIN_PLAN_DEF_BY_ID.get(p.id); return d ? (PLAN_LEVEL_KEY[d.level] || null) : null; }
+function allBuiltinPlans(){
   const pushDay = defEx('Chest Press','Incline Chest','Dumbbell Shoulder Press','Dumbbell Lateral Raise','Triceps Pushdown','Overhead Triceps');
   const pullDay = defEx('Lat Pulldown','Seated Row','Straight-Arm Pulldown','Barbell Curl','Cable Curl','Face Pull');
   const legsDay = defEx('Leg Press Machine','Leg Curl','Leg Extension','Barbell Back Squat','Hip Thrust','Calf Raise');
@@ -11390,16 +11502,23 @@ function defaultTrainingPlans(){
     // only ever adds a default plan that's still missing, so an existing
     // user's saved plan_b is untouched by this, only fresh installs stop
     // getting a second card.
-    {id:'plan_a', name:'Fullbody workout', builtin:true, schedule: scheduleOnDays(['mon','wed','fri'], GYM_PLAN.A)},
-    {id:'plan_ppl', name:'Push / Pull / Legs', builtin:true, schedule: {
+    {id:'plan_a', tier:'free', name:'Fullbody workout', builtin:true, schedule: scheduleOnDays(['mon','wed','fri'], GYM_PLAN.A)},
+    {id:'plan_ppl', tier:'free', name:'Push / Pull / Legs', builtin:true, schedule: {
       ...emptySchedule(), mon: pushDay, wed: pullDay, fri: legsDay,
     }},
-    {id:'plan_ul', name:'Upper / Lower Split', builtin:true, schedule: {
+    {id:'plan_ul', tier:'free', name:'Upper / Lower Split', builtin:true, schedule: {
       ...emptySchedule(), mon: upperA, tue: lowerA, thu: upperB, fri: lowerB,
     }},
+    ...NEW_BUILTIN_PLAN_DEFS.map(planFromBuiltinDef),
   ];
   return plans;
 }
+// What a user is offered: while the Mekkio+ flag is off, tier 'plus' plans are left out.
+function defaultTrainingPlans(){ return allBuiltinPlans().filter(p=> !isPlusPlanId(p.id)); }
+const isPlusPlanId = id => !PLANS_PLUS_ENABLED && NEW_BUILTIN_PLAN_DEFS.some(d=> d.id === id && d.tier === 'plus');
+// a plus plan that is on the device (test build, cloud) but not unlocked: kept as data, hidden in every list and picker
+const isPlanHidden = p => !!p && isPlusPlanId(p.id);
+const visiblePlans = () => trainingPlans.filter(p=> !isPlanHidden(p));
 /* Plan schedule entries are full copies of the exercise object taken at
    the time they were added — renaming/re-iconing an exercise in the
    library doesn't reach copies already baked into someone's saved plan.
@@ -11804,7 +11923,7 @@ function openPlanCustomizeV2(id){
   if(!plan) return;
   planv2CustomizeTargetId = id;
   const saved = plan.customizationV2 || {goal:'mass', difficulty:'medium', equipment:'mix', frequency:3};
-  document.getElementById('planCustomizeTitle').textContent = plan.name;
+  document.getElementById('planCustomizeTitle').textContent = planDisplayName(plan);
   document.querySelectorAll('#planCustomizeOverlay .plansv2-choice-chip').forEach(chip=>{
     chip.classList.toggle('active', chip.dataset.value===saved[chip.dataset.group]);
   });
@@ -11903,9 +12022,10 @@ function updatePlanPillLabel(){
   const label = document.getElementById('planPillLabel');
   if(!label) return;
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
-  label.textContent = plan ? plan.name : t('planPill','Plany treningowe');
+  label.textContent = plan ? planDisplayName(plan) : t('planPill','Plany treningowe');
 }
 function toggleStarredPlan(id){
+  if(isPlanHidden(trainingPlans.find(p=>p.id===id)) && starredPlanId !== id) return;   // a hidden plus plan can't be picked
   starredPlanId = (starredPlanId === id) ? null : id;
   if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId);
   else localStorage.removeItem(LS_STARRED_PLAN);
@@ -11967,7 +12087,7 @@ function closePlansv2Swipe(){
   if(plansv2OpenSwipe){ plansv2OpenSwipe.close(); plansv2OpenSwipe = null; }
 }
 function confirmPlanDeleteV2(plan){
-  return confirm(t('planDeleteConfirmV2', `Na pewno usunąć plan „${plan.name}"?`, plan.name));
+  return confirm(t('planDeleteConfirmV2', `Na pewno usunąć plan „${planDisplayName(plan)}"?`, planDisplayName(plan)));
 }
 // The actual mutation, no confirm — callers own that (and the full-swipe
 // path also owns its slide-out animation, running this once it finishes).
@@ -12118,7 +12238,7 @@ function buildPlanCardV2(p, isCustom, animate, i){
   // and disagree with PLANSV2_DIFFICULTY_COUNT (e.g. "Trudny" generates
   // exactly 11 exercises, which planDifficultyKey's >16 threshold would
   // otherwise mislabel as "Średni").
-  const diffKey = p.customizationV2 ? p.customizationV2.difficulty : planDifficultyKey(exCount);
+  const diffKey = p.customizationV2 ? p.customizationV2.difficulty : (planLevelKey(p) || planDifficultyKey(exCount));
   const color = (isCustom ? PLANSV2_CUSTOM_COLOR_BY_DIFFICULTY : PLANSV2_AUTO_COLOR_BY_DIFFICULTY)[diffKey];
   const wrap = document.createElement('div');
   wrap.className = 'plansv2-card-wrap';
@@ -12132,7 +12252,7 @@ function buildPlanCardV2(p, isCustom, animate, i){
   card.style.background = color;
   card.innerHTML = `
     <div class="plansv2-card-info">
-      <p class="plansv2-card-name">${escHtml(p.name)}</p>
+      <p class="plansv2-card-name">${escHtml(planDisplayName(p))}</p>
       <div class="plansv2-card-stats">
         <div class="plansv2-stat">${ph('barbell')}<span>${planExCountText(exCount)}</span></div>
         <div class="plansv2-stat">${ph('clock-countdown')}<span>~${Math.max(15, planAvgMinutesPerDay(p))} min</span></div>
@@ -12176,8 +12296,9 @@ function renderPlansListV2(animate){
   if(!autoWrap || !customWrap) return;
   autoWrap.innerHTML = '';
   customWrap.innerHTML = '';
-  const autoPlans = trainingPlans.filter(p=>p.builtin);
-  const customPlans = trainingPlans.filter(p=>!p.builtin);
+  const listed = visiblePlans();
+  const autoPlans = listed.filter(p=>p.builtin);
+  const customPlans = listed.filter(p=>!p.builtin);
   autoPlans.forEach((p,i)=> autoWrap.appendChild(buildPlanCardV2(p, false, animate, i)));
   customPlans.forEach((p,i)=> customWrap.appendChild(buildPlanCardV2(p, true, animate, autoPlans.length+i)));
   customLabel.classList.toggle('plansv2-hidden', !customPlans.length);
@@ -12215,12 +12336,13 @@ let editingPlan = null; // working copy: {id, name, builtin, schedule:{mon:[],..
 // (Figma node 155:1086, "06. PLAN - SET UP") — reached from Plans v2.
 function openPlanEditorV2(id){
   const existing = id ? trainingPlans.find(p=>p.id===id) : null;
+  if(isPlanHidden(existing)) return;   // hidden plus plan: not reachable by id either
   const schedule = emptySchedule();
   if(existing) PLAN_DAYS.forEach(d=>{ schedule[d] = (existing.schedule[d]||[]).map(e=>({...e})); });
   stripWarmupStretch(schedule);
   editingPlan = {
     id: existing ? existing.id : null,
-    name: existing ? existing.name : '',
+    name: existing ? planDisplayName(existing) : '',
     builtin: existing ? !!existing.builtin : false,
     periodized: existing ? !!existing.periodized : false,
     schedule,
@@ -12891,7 +13013,7 @@ function updateTodayPlanBanner(){
   const iso = document.getElementById('gymDate').value || todayStr();
   const exercises = plan.schedule[dayKeyFromDate(iso)] || [];
   banner.classList.remove('hidden');
-  document.getElementById('todayPlanName').textContent = plan.name;
+  document.getElementById('todayPlanName').textContent = planDisplayName(plan);
   document.getElementById('todayPlanExercises').textContent = exercises.length
     ? exercises.map(e=>e.name).join(' · ')
     : t('planRestDay','Dzień odpoczynku');
@@ -12959,7 +13081,7 @@ function renderDashboard(){
   document.getElementById('dashHeadline').textContent = trainedToday
     ? DASH_CONGRATS_PL[Math.floor(Math.random()*DASH_CONGRATS_PL.length)]
     : todayExNames.length
-      ? DASH_PLAN_DAY_PL[Math.floor(Math.random()*DASH_PLAN_DAY_PL.length)].replace('{plan}', plan.name)
+      ? DASH_PLAN_DAY_PL[Math.floor(Math.random()*DASH_PLAN_DAY_PL.length)].replace('{plan}', planDisplayName(plan))
       : DASH_REST_DAY_PL[Math.floor(Math.random()*DASH_REST_DAY_PL.length)];
 
   const allSets = dashboardAllSets();
@@ -12989,7 +13111,7 @@ function renderDashboard(){
   document.getElementById('dashSessions').textContent = t('dashSessions', `${sessionCount} ${plTreningWord(sessionCount)}`, sessionCount);
   document.getElementById('dashMinutes').textContent = t('dashMinutesActivity', `${Math.round(weekMin)} min aktywności`, Math.round(weekMin));
 
-  document.getElementById('dashPlanName').textContent = plan ? plan.name : t('dashNoPlanChosen','Brak wybranego planu');
+  document.getElementById('dashPlanName').textContent = plan ? planDisplayName(plan) : t('dashNoPlanChosen','Brak wybranego planu');
   if(plan){
     const uniqueNames = new Set();
     PLAN_DAYS.forEach(d=> (plan.schedule[d]||[]).forEach(e=>{ if(!BOOKEND_EX_NAMES.has(e.name)) uniqueNames.add(e.name); }));
@@ -13379,7 +13501,7 @@ function renderGymV2(){
   const nameEl = document.getElementById('gymV2PlanName');
   const noPlan = document.getElementById('gymV2NoPlan');
   if(plan){
-    nameEl.textContent = plan.name;
+    nameEl.textContent = planDisplayName(plan);
     nameEl.hidden = false;
     noPlan.classList.add('hidden');
   } else {
