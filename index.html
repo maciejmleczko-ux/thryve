@@ -1543,6 +1543,7 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    flat chip sections. */
 .plansv2-customize-boxed{background:var(--m-card);border-radius:var(--m-r-sm);padding:14px;display:flex;flex-direction:column;gap:10px;}
 .plansv2-customize-boxed.hidden{display:none;}
+.plansv2-customize-section.hidden,.plansv2-customize-freq-hint.hidden{display:none;}   /* light "Dostosuj" hides Sprzęt / the note */
 .plansv2-customize-dni-header{display:flex;align-items:center;justify-content:space-between;}
 .plansv2-customize-dni-value{margin:0;font-size:var(--m-fs-sm);font-weight:700;color:var(--m-orange);}
 .plansv2-customize-divider{height:1px;background:rgba(0,0,0,.08);width:100%;}
@@ -3030,7 +3031,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
               <button type="button" class="plansv2-choice-chip" data-group="goal" data-value="endurance" onclick="pickPlanCustomizeChipV2(this)" data-i18n="pcV2GoalEndurance">Wytrzymałość</button>
             </div>
           </div>
-          <div class="plansv2-customize-boxed">
+          <p class="plansv2-customize-freq-hint hidden" id="planCustomizeGoalHint" data-i18n="pcV2GoalOnlyHint">Zmienia tylko serie, powtórzenia i przerwy. Ćwiczenia, dni i kolejność zostają takie, jak w planie.</p>
+          <div class="plansv2-customize-boxed" id="planCustomizeDiffSection">
             <p class="plansv2-customize-label" data-i18n="pcV2DiffLabel">Trudność</p>
             <div class="plansv2-slider-wrap">
               <input type="range" class="plansv2-slider-input" id="planCustomizeDifficultySlider" min="0" max="2" step="1" value="1" oninput="onPlanCustomizeSliderInput(this,'difficulty')">
@@ -3041,7 +3043,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
               </div>
             </div>
           </div>
-          <div class="plansv2-customize-section">
+          <div class="plansv2-customize-section" id="planCustomizeEquipSection">
             <p class="plansv2-customize-label" data-i18n="pcV2EquipLabel">Sprzęt</p>
             <div class="plansv2-choice-row">
               <button type="button" class="plansv2-choice-chip" data-group="equipment" data-value="maszyny" onclick="pickPlanCustomizeChipV2(this)" data-i18n="pcV2EquipMachines">Maszyny</button>
@@ -4399,6 +4401,7 @@ const T_EN = {
   pcV2EquipMix: 'Mix',
   pcV2DaysLabel: 'Days per week',
   pcV2FreqHint: 'Each session is still a full workout — only how many times a week you repeat it changes.',
+  pcV2GoalOnlyHint: 'Only changes sets, reps and rest. Exercises, days and order stay as they are in the plan.',
   pcV2Cancel: 'Cancel',
   pcV2Apply: 'Apply',
   feedbackSending: 'SENDING...',
@@ -7090,7 +7093,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.55.0";
+const APP_VERSION = "4.56.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -11763,7 +11766,17 @@ function planv2SplitRoleId(plan){
 // one by one in the plan editor — regenerating would silently wipe
 // hand-picked choices the generator knows nothing about.
 function planIsDostosujable(p){
-  return PLANSV2_CUSTOMIZABLE_IDS.has(p.id) || !!p.customizationV2;
+  return planCustomizeKind(p) !== null;
+}
+// 'full'  = the generator sheet (goal, difficulty, equipment, days), for the 4 original templates and their forks;
+// 'goal'  = the light sheet (goal only: sets / reps / rest, nothing else changes), for the hand-built plans
+//           (NEW_BUILTIN_PLAN_DEFS) and the forks made by it (customizationV2.goalOnly) — a full regeneration
+//           would wipe their carefully composed exercises.
+function planCustomizeKind(p){
+  if(!p) return null;
+  if(p.customizationV2) return p.customizationV2.goalOnly ? 'goal' : 'full';
+  if(PLANSV2_CUSTOMIZABLE_IDS.has(p.id)) return 'full';
+  return BUILTIN_PLAN_DEF_BY_ID.has(p.id) ? 'goal' : null;
 }
 // Sets/rep-range/rest per goal — standard, uncontroversial baseline
 // splits (low reps+heavy+long rest for strength; moderate reps/rest for
@@ -11917,11 +11930,32 @@ function generateSplitPlanScheduleV2(splitId, goal, difficulty, equipment){
   ensureWarmupStretch(schedule);
   return schedule;
 }
+/* Light "Dostosuj": copy of the schedule with only sets / rep range / rest taken from the goal — everything else
+   on every entry (name, group, icon, equipment, perSide, metrics…), the exercises, the days and their order stay.
+   A timed exercise keeps its sets and time (no reps); it only takes the goal's rest when it already has one
+   (holds like Plank), so cardio and warm-ups (rest 0 s) are untouched. A body-weight exercise takes only the
+   goal's sets and rest, never its rep range (that depends on the person's level, not on the goal). */
+function planv2ApplyGoalToSchedule(schedule, goal){
+  const params = PLANSV2_GOAL_PARAMS[goal];
+  const out = emptySchedule();
+  PLAN_DAYS.forEach(d=>{
+    out[d] = (schedule[d] || []).map(e=>{
+      if(isTimeEx(withLibraryTime(e))) return parseRestSeconds(e.rest || '0s') > 0 ? { ...e, rest: params.rest } : { ...e };
+      // body-weight (equipment 'masa ciała', the same check as lgBw()): sets and rest from the goal, the rep range stays the plan's own
+      const lib = BUILTIN_EXERCISES_BY_NAME.get(e.name);
+      if((e.equipment || (lib && lib.equipment)) === 'masa ciała') return { ...e, sets: params.sets, rest: params.rest };
+      return { ...e, sets: params.sets, repLow: params.repLow, repHigh: params.repHigh, rest: params.rest };
+    });
+  });
+  return out;
+}
 let planv2CustomizeTargetId = null;
 function openPlanCustomizeV2(id){
   const plan = trainingPlans.find(p=>p.id===id);
   if(!plan) return;
+  if(isPlanHidden(plan)) return;
   planv2CustomizeTargetId = id;
+  const lite = planCustomizeKind(plan) === 'goal';
   const saved = plan.customizationV2 || {goal:'mass', difficulty:'medium', equipment:'mix', frequency:3};
   document.getElementById('planCustomizeTitle').textContent = planDisplayName(plan);
   document.querySelectorAll('#planCustomizeOverlay .plansv2-choice-chip').forEach(chip=>{
@@ -11936,7 +11970,15 @@ function openPlanCustomizeV2(id){
   // PLANSV2_SPLIT_DAY_ROLES, so hide it entirely rather than showing a
   // control that would silently do nothing on Zastosuj.
   const isSplit = !!planv2SplitRoleId(plan);
-  document.getElementById('planCustomizeDniSection').classList.toggle('hidden', isSplit);
+  document.getElementById('planCustomizeDniSection').classList.toggle('hidden', isSplit || lite);
+  // light mode: only "Cel treningowy" (+ a one-line note)
+  document.getElementById('planCustomizeDiffSection').classList.toggle('hidden', lite);
+  document.getElementById('planCustomizeEquipSection').classList.toggle('hidden', lite);
+  document.getElementById('planCustomizeGoalHint').classList.toggle('hidden', !lite);
+  if(lite){
+    const key = (plan.customizationV2 && plan.customizationV2.difficulty) || planLevelKey(plan) || planDifficultyKey(planAvgExercisesPerDay(plan));
+    document.getElementById('planCustomizeHero').style.background = PLANSV2_CUSTOM_COLOR_BY_DIFFICULTY[key];
+  }
   const freqSlider = document.getElementById('planCustomizeFrequencySlider');
   const freqIdx = PLANSV2_FREQUENCY_SLIDER.indexOf(saved.frequency);
   freqSlider.value = freqIdx===-1 ? 1 : freqIdx;
@@ -11990,7 +12032,13 @@ function applyPlanCustomizeV2(){
   const difficulty = PLANSV2_DIFFICULTY_SLIDER[Number(document.getElementById('planCustomizeDifficultySlider').value)] || 'medium';
   const splitId = planv2SplitRoleId(plan);
   let schedule, customizationV2;
-  if(splitId){
+  if(planCustomizeKind(plan) === 'goal'){
+    // light version: only sets / reps / rest change; the rest of the plan is copied as is
+    schedule = planv2ApplyGoalToSchedule(plan.schedule, goal);
+    const prev = plan.customizationV2 || {};
+    customizationV2 = {goal, goalOnly:true, sourceId: prev.sourceId || plan.id,
+      difficulty: prev.difficulty || planLevelKey(plan) || planDifficultyKey(planAvgExercisesPerDay(plan))};
+  } else if(splitId){
     schedule = generateSplitPlanScheduleV2(splitId, goal, difficulty, equipment);
     customizationV2 = {goal, difficulty, equipment, splitOf: splitId};
   } else {
@@ -12004,7 +12052,7 @@ function applyPlanCustomizeV2(){
     // stays untouched, this becomes the user's own plan, and takes over
     // the star if the automatic plan was the active one.
     const newId = 'plan_' + Date.now();
-    trainingPlans.push({id:newId, name: plan.name, builtin:false, schedule, customizationV2});
+    trainingPlans.push({id:newId, name: planDisplayName(plan), builtin:false, schedule, customizationV2});
     if(starredPlanId === plan.id){ starredPlanId = newId; localStorage.setItem(LS_STARRED_PLAN, newId); }
   } else {
     // Already the user's own plan (a previous fork) — further

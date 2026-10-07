@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.55.0 (2026-10-07)
-- **Liczba wersji:** 239 · **commitów:** 582
+- **Aktualna wersja:** 4.56.0 (2026-10-07)
+- **Liczba wersji:** 240 · **commitów:** 584
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.56.0 · MINOR · 2026-10-07
+
+**Dla użytkownika:** gotowe plany można dostosować do celu (siła, masa, wytrzymałość) (wpis „Co nowego” do napisania osobno).
+
+- **Lekkie „Dostosuj plan” dla 13 nowych planów** (także gdy flaga `PLANS_PLUS_ENABLED` je odsłoni): ikona suwaków na karcie otwiera uproszczony arkusz tylko z polem „Cel treningowy” (bez trudności, dni i sprzętu), z jednym zdaniem wyjaśnienia (PL/EN). Pełny generator nadal działa tylko dla `plan_a/b/ppl/ul` i ich forków, bez zmian.
+- **Co zmienia cel:** w kopii planu tylko `sets`, `repLow`, `repHigh`, `rest` wg `PLANSV2_GOAL_PARAMS` (`planv2ApplyGoalToSchedule`); ćwiczenia, dni, kolejność i reszta pól wpisu zostają. Ćwiczenie z masą ciała (`equipment:'masa ciała'`, ten sam test co `lgBw()`) bierze z celu tylko serie i przerwę, zakres powtórzeń zostaje z planu. Ćwiczenie czasowe zachowuje serie i czas, bierze z celu tylko przerwę, o ile już ją ma (Plank, Dead Hang…); kardio i rozgrzewki bez zmian.
+- **Fork:** jak w pełnym Dostosuj: oryginał automatyczny nietknięty, wynik w „Twoich planach” z `customizationV2 = {goal, goalOnly:true, sourceId, difficulty}`; ponowne uruchomienie na forku aktualizuje go w miejscu. `goalOnly` (`planCustomizeKind`: `'full'` / `'goal'`) sprawia, że fork nowego planu nie otwiera pełnego generatora, który zniszczyłby ręcznie ułożone ćwiczenia. `periodized` i „Zmienna intensywność” w edytorze działają na forku.
+- **Poprawka CSS:** `.plansv2-customize-section.hidden` i `.plansv2-customize-freq-hint.hidden` (wcześniej ukrywało się tylko `.plansv2-customize-boxed`).
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.55.0 · MINOR · 2026-10-07
 
