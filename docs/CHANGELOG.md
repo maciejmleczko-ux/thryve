@@ -126,6 +126,8 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Ćwiczenia:** `libEx()` czyta z całej biblioteki (`defEx` zna tylko GYM_PLAN A/B/C); kopie ćwiczeń jak w `defEx`; stare kafelki rozgrzewki/rozciągania nie są dodawane (bloki liczą się na bieżąco).
 - **Nazwy i poziom:** nazwy PL i EN w metadanych, wyświetlane wg języka (`planDisplayName`) o ile użytkownik nie zmienił nazwy; poziom z pola `level` (Łatwy/Średni/Trudny; „Średni–Trudny” → Trudny, „Łatwy–Średni” → Średni) steruje kolorem i etykietą karty (`planLevelKey`). Etykiety dni, `goal`, `equipment` i `notes` (PL/EN) są tylko w metadanych, bez miejsca w UI.
 
+- **iOS:** Build 33 (4.55.0), archiwum zbudowane i wysłane na TestFlight 2026-10-07. `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
+
 **Commity:** wpis dopisany w commicie tej zmiany.
 
 
