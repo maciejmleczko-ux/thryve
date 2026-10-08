@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.56.0 (2026-10-07)
-- **Liczba wersji:** 240 · **commitów:** 584
+- **Aktualna wersja:** 4.57.0 (2026-10-08)
+- **Liczba wersji:** 241 · **commitów:** 585
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,19 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.57.0 · MINOR · 2026-10-08
+
+**Dla użytkowników:** użytkowniczki, które w profilu wybrały płeć „Kobieta”, widzą ikony ćwiczeń z postacią kobiecą (wpis „Co nowego” do napisania osobno).
+
+- **Żeński zestaw ikon:** 185 PNG 360×360 w `icons/exercises/female/` (te same slugi co męskie; ikony męskie bez zmian). Z paczki `zenskie_apka_360.zip`; jedyna zmiana nazwy to `incline_bench_press_a.png` → `female/incline_bench_press.png` (wariant `a` jest identyczny bajt w bajt z męską `incline_bench_press.png` w aplikacji).
+- **Wybór zestawu:** `iconPngUrl()` korzysta z istniejącego pola `bodyData.sex`; tylko `'f'` daje `icons/exercises/female/<slug>.png`, każda inna wartość (`'m'`, niewybrana, brak danych) zostawia dotychczasowy wygląd. Brak pliku w zestawie żeńskim (np. `band_pull_apart_warmup`) → ikona męska, brak obu → dotychczasowy fallback. Lista `EXERCISE_ICON_PNG_SLUGS_F`, `ICON_VER` 6 → 7.
+- **Natychmiastowa zmiana:** `refreshExerciseIcons()` przerysowuje otwarty ekran (Trening, edytor planu, Historia, Postępy) po zapisaniu danych ciała, po pobraniu profilu z chmury i po imporcie kopii zapasowej, bez przeładowania. Nowe pole ani ustawienie nie powstało; migracja niepotrzebna (płeć jest już w profilu, w chmurze i w kopii).
+- **Cache i waga:** `sw.js` bez zmian (ikony nie są w precache, zapisują się przy pierwszym użyciu; cache unieważnia `?v=ICON_VER`). Folder `icons/exercises/female` ma 12 MB, trafia do `dist/` i do paczki iOS (offline od razu).
+- **Test:** `scripts/check-icon-sets.js` (`node scripts/check-icon-sets.js`) sprawdza, że każdy slug z obu list ma plik w swoim zestawie, a żeński zestaw jest podzbiorem męskiego; wypisuje ćwiczenia bez żeńskiej ikony (obecnie `band_pull_apart_warmup`).
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.56.0 · MINOR · 2026-10-07
 
