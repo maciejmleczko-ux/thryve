@@ -124,6 +124,8 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Przyczyna:** wiersz był chowany atrybutem `hidden` (flaga `SOUND_TEST_ROW = false`), ale reguła `.acct-rows{display:flex}` go przesłaniała, więc w aplikacji iOS nadal było go widać. Ta sama przyczyna sprawiała, że wiersze „Powiadomienia” i „Apple Zdrowie” (ukrywane poza aplikacją natywną) widać było w wersji web.
 - **Poprawka:** `.acct-rows[hidden]{display:none}`; test dźwięku usunięty w całości (wiersz, arkusz `soundTestSheet`, funkcje `soundTest*`, flaga). Tyknięcie suwaka na iOS zostaje na stałe na dźwięku klawiatury (1104), stare zapisane nadpisanie (`thryve_tick_sys`) jest czyszczone.
 
+- **iOS:** Build 35 (4.60.1), archiwum zbudowane i wysłane na TestFlight 2026-10-09. `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
+
 **Commity:** wpis dopisany w commicie tej zmiany.
 
 
