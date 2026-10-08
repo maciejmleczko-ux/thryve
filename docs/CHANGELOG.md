@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.58.0 (2026-10-08)
-- **Liczba wersji:** 243 · **commitów:** 587
+- **Aktualna wersja:** 4.58.1 (2026-10-08)
+- **Liczba wersji:** 244 · **commitów:** 588
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.58.1 · PATCH · 2026-10-08
+
+**Dla użytkownika:** popup „Co nowego” losuje tło z 10 zdjęć.
+
+- `WHATSNEW_IMAGES` = 10 teł (`icons/whatsnew/wn-{1,3,4,7,9,11,14,16,17,19}.jpg`, JPEG q82, ~100–150 KB każde), wybranych z 19 propozycji: kadr pasa hero zasłania twarze i zostawia tułów, dłonie na sztandze i nogi, tło ciemne pod białym tekstem. Oryginalne PNG (608×1088) leżą w `assets-src/whatsnew-originals/`, poza `icons/`, żeby `build-web.sh` nie kopiował ich do `dist/`.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
 
 ### 4.58.0 · MINOR · 2026-10-08
 

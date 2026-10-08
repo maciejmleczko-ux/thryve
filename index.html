@@ -7090,7 +7090,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.58.0";
+const APP_VERSION = "4.58.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7666,8 +7666,8 @@ function pendingChangelogItems(){
 // repeats every pending version, newest first: "wersja mekkio v.X", then
 // each entry as TITLE + short text (plain-string entries: text only).
 // Hero photo: one of WHATSNEW_IMAGES, picked at random on each opening —
-// add files to icons/whatsnew/ and list them here.
-const WHATSNEW_IMAGES = ['icons/whatsnew/wn-1.jpg'];
+// add files to icons/whatsnew/ (wn-N.jpg) and add N to the list here.
+const WHATSNEW_IMAGES = [1,3,4,7,9,11,14,16,17,19].map(n => `icons/whatsnew/wn-${n}.jpg`);
 function whatsNewHeadline(versions){
   for(const v of versions){
     const f = changelogEntries(v).find(i => i && typeof i === 'object' && i.featured);
