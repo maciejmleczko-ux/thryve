@@ -904,12 +904,16 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    only .wn-scroll below it scrolls, so the list slides under the photo's
    bottom edge. Backdrop = same rgba+blur as the set-logging sheet. */
 #whatsnewOverlay{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
-#whatsnewSheet{height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;padding-bottom:0;background:#fff;}
+:root{--wn-top-extra:24px;} /* extra air under the status bar / system blur band; the one knob for both hero sheets */
+#whatsnewSheet,#changelogHistorySheet .plansv2-customize-stack{height:calc(100% - var(--m-sheet-top) - var(--wn-top-extra) - var(--m-sheet-gap));max-height:none;padding-bottom:0;background:#fff;}
+#changelogHistorySheet .plansv2-customize-stack{align-items:stretch;}
+#changelogHistorySheet .plansv2-customize-stack > .m-sheet-grab{display:none;}
+.wn-label.wn-label--sentence{text-transform:none;}
 .wn-hero{position:relative;flex-shrink:0;box-sizing:border-box;min-height:271px;padding:116px 27px 22px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px;background-color:#1c1c1c;background-size:cover;background-position:center 60%;color:#fff;}
 .wn-hero::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.5);pointer-events:none;}
 .wn-hero > *{position:relative;}
 .wn-close{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;background:var(--m-orange);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
-.wn-close svg{display:block;width:18px;height:18px;}
+.wn-hero .wn-close.ph svg{display:block;width:18px;height:18px;}
 .wn-close:active{transform:scale(.94);transition-duration:var(--m-dur-press-in);}
 .wn-label{margin:0;font-size:var(--m-fs-xs);font-weight:700;letter-spacing:0;line-height:1.02;text-transform:uppercase;}
 .wn-headline{margin:0;font-size:32px;font-weight:300;line-height:1.04;letter-spacing:-.02em;overflow-wrap:anywhere;}
@@ -3516,16 +3520,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <div class="onboard-overlay hidden plansv2-customize-overlay" id="changelogHistorySheet" onclick="if(event.target===this) closeChangelogHistorySheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
-    <div class="plansv2-customize-card">
-      <div class="fbv2-header">
-        <div class="fbv2-title-row">
-          <h1 data-i18n="chlSheetTitle">HISTORIA ZMIAN</h1>
-          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeChangelogHistorySheet()"></span>
-        </div>
-        <p class="fbv2-subtitle" data-i18n="chlSheetSubtitle">Co się zmieniło w Mekkio, wersja po wersji.</p>
-      </div>
-      <div class="chl-list" id="changelogHistoryList"></div>
+    <div class="wn-hero" id="chlHero">
+      <span class="ph wn-close" data-ph="x" onclick="closeChangelogHistorySheet()"></span>
+      <p class="wn-label wn-label--sentence" data-i18n="chlSheetSubtitle">Co się zmieniło w Mekkio, wersja po wersji.</p>
+      <h2 class="wn-headline" data-i18n="chlSheetTitle">HISTORIA ZMIAN</h2>
     </div>
+    <div class="wn-scroll"><div class="chl-list" id="changelogHistoryList"></div></div>
   </div>
 </div>
 
@@ -6605,7 +6605,9 @@ function clearAllLocalUserData(){
 function renderChangelogHistorySheet(){
   const el = document.getElementById('changelogHistoryList');
   if(!el) return;
+  document.getElementById('chlHero').style.backgroundImage = `url("${WHATSNEW_IMAGES[Math.floor(Math.random() * WHATSNEW_IMAGES.length)]}")`;
   const versions = Object.keys(CHANGELOG); // written newest-first, source order
+  el.parentElement.scrollTop = 0;
   el.innerHTML = versions.map((v, i)=>{
     const items = changelogEntries(v);
     const featured = items.find(it => it && typeof it === 'object' && it.featured);
@@ -7090,7 +7092,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.59.0";
+const APP_VERSION = "4.59.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at

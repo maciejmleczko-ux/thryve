@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.59.0 (2026-10-08)
-- **Liczba wersji:** 245 · **commitów:** 589
+- **Aktualna wersja:** 4.59.1 (2026-10-08)
+- **Liczba wersji:** 246 · **commitów:** 590
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,15 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.59.1 · PATCH · 2026-10-08
+
+**Dla użytkownika:** popup „Co nowego” jest niższy (nie wchodzi już na pasek z blurem), a „Historia zmian” w profilu ma ten sam nagłówek ze zdjęciem.
+
+- **Wysokość:** `--wn-top-extra: 24px` w `:root` obniża górną krawędź obu arkuszy z hero (jedna zmienna do regulacji; nie weryfikowane na urządzeniu).
+- **Historia zmian:** `#changelogHistorySheet` używa `.wn-hero` (losowe zdjęcie z `WHATSNEW_IMAGES`, mały napis „Co się zmieniło w Mekkio, wersja po wersji.”, duży „HISTORIA ZMIAN”, pomarańczowy X) i przewijanej listy `.wn-scroll`; lista numerowana bez zmian.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
 
 ### 4.59.0 · MINOR · 2026-10-08
 
