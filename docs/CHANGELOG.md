@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.60.0 (2026-10-09)
-- **Liczba wersji:** 248 · **commitów:** 592
+- **Aktualna wersja:** 4.60.1 (2026-10-09)
+- **Liczba wersji:** 249 · **commitów:** 594
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.60.1 · PATCH · 2026-10-09
+
+**Dla użytkownika:** z konta znika wiersz „Dźwięk tyknięcia (test)”.
+
+- **Przyczyna:** wiersz był chowany atrybutem `hidden` (flaga `SOUND_TEST_ROW = false`), ale reguła `.acct-rows{display:flex}` go przesłaniała, więc w aplikacji iOS nadal było go widać. Ta sama przyczyna sprawiała, że wiersze „Powiadomienia” i „Apple Zdrowie” (ukrywane poza aplikacją natywną) widać było w wersji web.
+- **Poprawka:** `.acct-rows[hidden]{display:none}`; test dźwięku usunięty w całości (wiersz, arkusz `soundTestSheet`, funkcje `soundTest*`, flaga). Tyknięcie suwaka na iOS zostaje na stałe na dźwięku klawiatury (1104), stare zapisane nadpisanie (`thryve_tick_sys`) jest czyszczone.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.60.0 · MINOR · 2026-10-09
 
