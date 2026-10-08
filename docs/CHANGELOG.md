@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.57.0 (2026-10-08)
-- **Liczba wersji:** 241 · **commitów:** 585
+- **Aktualna wersja:** 4.58.0 (2026-10-08)
+- **Liczba wersji:** 243 · **commitów:** 587
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,29 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.58.0 · MINOR · 2026-10-08
+
+**Dla użytkownika:** nowy wygląd popupu „Co nowego” (bez osobnego wpisu „Co nowego”).
+
+- **Popup „Co nowego” (Figma 500:19077):** bottom sheet (`.m-sheet`) ze stałym hero: losowe zdjęcie z `WHATSNEW_IMAGES` (`icons/whatsnew/`), etykieta „CO NOWEGO” i duży napis = tytuł głównej nowości (pierwszy wpis `featured` najnowszej niewidzianej wersji, fallback „Nowości w Mekkio”). Pod spodem przewijana lista wersji („wersja mekkio v.X”, tytuł + opis); scroll chowa się pod zdjęciem. X zamyka i zapisuje `LS_LAST_SEEN_VERSION`; sheet da się też zamknąć ściągnięciem w dół (`mSheetDrag`).
+- Usunięty stary kod popupu (`wnv2-*`, `renderWhatsNewCard`) oraz czarne karty dla wpisów `ai:true` (nowy projekt ma jedną białą listę).
+- Na razie jedno zdjęcie (`wn-1.jpg`); reszta biblioteki 6–10 do dodania.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
+### 4.57.1 · PATCH · 2026-10-08
+
+**Dla użytkownika:** podpowiedzi treningowe są jaśniejsze i bezpieczniejsze, a etykiety wersji treningu opisują, co robisz (wpis „Co nowego” do napisania osobno).
+
+- **Zwykły trener (`buildSuggestion`):** koniec z „Pierwszy raz na tym poziomie intensywności”, gdy ćwiczenie ma historię z innej wersji lub sprzed „Zmiennej intensywności”. Teraz podaje ostatni wynik i cel: „Ostatnio: 140 kg × 12. Przy 10–20 powtórzeniach spróbuj 145 kg, z zapasem 1–2 powtórzeń.”
+- **Estymacja z ostatnich sesji:** `recentE1rm()` bierze najlepszy szacowany 1RM z dwóch ostatnich sesji (wcześniej najlepszy w historii: `estimateStartingWeight`, usunięte).
+- **Limit 5%:** sugerowany ciężar nie przekracza ostatniego o więcej niż 5%, zaokrąglany w dół do 2,5 kg (`tipCapWeight`); gdy limit obcina estymację, tekst mówi „zacznij od … i dokładaj, jeśli poczujesz zapas”. Jedna reguła progresji we wszystkich gałęziach: wszystkie serie na górze zakresu → +2,5 kg, ale nie więcej niż 5% i co najmniej krok 1,25 kg (`tipStepUpKg`); wersja z pamięcią korzysta z tej samej logiki co zwykła.
+- **Język:** przecinek dziesiętny (`fmtKgLocal`), bez „RPE” i bez „poziomu intensywności” („z zapasem 1–2 powtórzeń”); brakujące teksty EN dodane (także dla ćwiczeń z masą ciała).
+- **Etykiety wersji (żeton w oknie ćwiczenia):** Max → „Maksymalny ciężar”, Siła → „Duży ciężar”, Objętość → „Średnia liczba powtórzeń”, Gęstość → „Dużo powtórzeń” (EN: Maximum weight, Heavy weight, Medium reps, High reps). Trener AI bez zmian (osobny krok).
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.57.0 · MINOR · 2026-10-08
 

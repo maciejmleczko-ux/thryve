@@ -899,51 +899,27 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .statsv2-kcard-num small{font-size:var(--m-fs-base);font-weight:400;color:var(--m-muted);margin-left:4px;}
 .statsv2-kcard-delta{margin:8px 0 0;font-size:var(--m-fs-2xs);color:var(--m-muted);}
 .statsv2-kcal-spark{width:100%;height:54px;margin-top:10px;display:block;}
-/* "Co nowego" v2 (Figma node 185:14176) — backdrop values copied
-   exactly from .exv2-overlay (same rgba+blur already established for
-   this app's other full-screen popups), everything else is new. */
-.wnv2-overlay{background:rgba(52,57,65,.88);-webkit-backdrop-filter:blur(4.85px);backdrop-filter:blur(4.85px);padding:10px;}
-.wnv2-box{background:var(--m-panel);color:var(--m-ink);border-radius:var(--m-r-md);padding:18px;max-width:355px;width:100%;max-height:calc(100dvh - 40px);display:flex;flex-direction:column;gap:24px;box-sizing:border-box;}
-.wnv2-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.wnv2-header-title{display:flex;align-items:center;gap:11px;}
-.wnv2-header-icon{width:40px;height:40px;color:var(--m-orange);flex-shrink:0;}
-.wnv2-header-icon svg{display:block;width:100%;height:100%;}
-.wnv2-header h3{margin:0;font-size:var(--m-fs-lg);font-weight:400;letter-spacing:.8px;color:var(--m-ink);}
-.wnv2-close{width:24px;height:24px;color:var(--m-ink);flex-shrink:0;cursor:pointer;}
-.wnv2-close svg{display:block;width:100%;height:100%;}
-.wnv2-scroll{overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:24px;}
-.wnv2-card{border-radius:var(--m-r-md);padding:14px;box-sizing:border-box;background:var(--m-card);}
-.wnv2-card.hero{background:var(--m-orange);}
-.wnv2-card-version{margin:0 0 7px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.4px;color:var(--m-orange);}
-.wnv2-card.hero .wnv2-card-version{color:rgba(255,255,255,.8);}
-.wnv2-card-title{margin:0 0 7px;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.56px;color:var(--m-orange);}
-.wnv2-card.hero .wnv2-card-title{color:#fff;}
-.wnv2-card-text{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:#000;}
-.wnv2-card.hero .wnv2-card-text{color:#fff;}
-.wnv2-card-list{margin:0;padding-left:16px;font-size:var(--m-fs-xs);line-height:1.6;color:#000;}
-.wnv2-card.hero .wnv2-card-list{color:#fff;}
-.wnv2-card-list li{margin-bottom:4px;}
-.wnv2-card-list li:last-child{margin-bottom:0;}
-.wnv2-card-text + .wnv2-card-list{margin-top:8px;}
-/* Stacked title — when a card holds MORE THAN ONE featured entry (e.g. two
-   AI items in the same version), each one after the first gets its own
-   title + divider instead of just concatenating text. */
-.wnv2-card-title--stacked{margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08);}
-.wnv2-card.hero .wnv2-card-title--stacked,.wnv2-card--ai .wnv2-card-title--stacked{border-top-color:rgba(255,255,255,.15);}
-/* AI changelog entries get the same black/gradient/glow identity as the
-   Trener AI card/popup/account-panel section — driven by entry.ai:true in
-   CHANGELOG (Maciej, 2026-09-17: every AI-related entry, not a one-off for
-   a single version), rendered as its OWN card, separate from non-AI items
-   in the same version (see renderWhatsNewCard()). */
-.wnv2-card--ai{
-  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
-  border:1px solid transparent;
-  box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,.5);
-}
-.wnv2-card--ai .wnv2-card-version{color:rgba(255,255,255,.7);}
-.wnv2-card--ai .wnv2-card-title{color:#fff;}
-.wnv2-card--ai .wnv2-card-text{color:#fff;}
-.wnv2-card--ai .wnv2-card-list{color:#fff;}
+/* "Co nowego" v3 (Figma 500:19077) — bottom sheet (.m-sheet). The hero
+   (random photo, label, headline = the biggest feature) is a fixed block;
+   only .wn-scroll below it scrolls, so the list slides under the photo's
+   bottom edge. Backdrop = same rgba+blur as the set-logging sheet. */
+#whatsnewOverlay{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+#whatsnewSheet{height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;padding-bottom:0;background:#fff;}
+.wn-hero{position:relative;flex-shrink:0;box-sizing:border-box;min-height:271px;padding:116px 27px 22px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px;background-color:#1c1c1c;background-size:cover;background-position:center 60%;color:#fff;}
+.wn-hero::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.5);pointer-events:none;}
+.wn-hero > *{position:relative;}
+.wn-close{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;background:var(--m-orange);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.wn-close svg{display:block;width:18px;height:18px;}
+.wn-close:active{transform:scale(.94);transition-duration:var(--m-dur-press-in);}
+.wn-label{margin:0;font-size:var(--m-fs-xs);font-weight:700;letter-spacing:0;line-height:1.02;text-transform:uppercase;}
+.wn-headline{margin:0;font-size:32px;font-weight:300;line-height:1.04;letter-spacing:-.02em;overflow-wrap:anywhere;}
+.wn-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:22px 27px calc(28px + max(14px, env(safe-area-inset-bottom)));color:var(--m-ink);}
+.wn-ver{margin:0 0 14px;font-size:var(--m-fs-2xs);font-weight:600;color:var(--m-ink);}
+.wn-ver:not(:first-child){margin-top:30px;}
+.wn-item{margin-bottom:22px;}
+.wn-item:last-child{margin-bottom:0;}
+.wn-item-title{margin:0 0 6px;font-size:var(--m-fs-base);font-weight:400;letter-spacing:.04em;text-transform:uppercase;line-height:1.3;}
+.wn-item-text{margin:0;font-size:var(--m-fs-xs);line-height:1.5;}
 .backup-hint{padding:0 20px;margin-top:10px;font-size:var(--m-fs-2xs);line-height:1.5;color:rgba(255,255,255,.5);}
 
 /* ---------- "Historia zmian" sheet — full numbered CHANGELOG, reached
@@ -2320,7 +2296,7 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
-.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.wnv2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
+.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
 /* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
 #view-gym-v2 .gymv2-tile.gymv2-search-tile, #view-gym-v2 .gymv2-tile.gymv2-add-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:13px;padding:4.5px 0 0;box-sizing:border-box;background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);}
 #view-gym-v2 .gymv2-tile.gymv2-search-tile{border:.5px solid #f1d7cb;}
@@ -2582,9 +2558,9 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
    kolku"). One rule for all the per-screen close classes; they used to be
    bare 24px glyphs. The 40px matches the 40px icon next to each sheet title,
    so headers don't grow, and fixes the sub-44px tap target. */
-.x-ring,.plansv2-customize-close,.newex-v2-close,.wnv2-close,.exv2-close,.swapv2-close,.plansv2-close,.histv2-card-close{box-sizing:border-box;width:40px;height:40px;padding:6px;margin:0;border:.5px solid var(--m-orange);border-radius:50%;background:none;color:var(--m-ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
-.x-ring svg,.plansv2-customize-close svg,.newex-v2-close svg,.wnv2-close svg,.exv2-close svg,.swapv2-close svg,.plansv2-close svg,.histv2-card-close svg{display:block;width:100%;height:100%;}
-.x-ring:active,.plansv2-customize-close:active,.newex-v2-close:active,.wnv2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.gy-circ.gy-x:active{transform:scale(.94);}
+.x-ring,.plansv2-customize-close,.newex-v2-close,.exv2-close,.swapv2-close,.plansv2-close,.histv2-card-close{box-sizing:border-box;width:40px;height:40px;padding:6px;margin:0;border:.5px solid var(--m-orange);border-radius:50%;background:none;color:var(--m-ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.x-ring svg,.plansv2-customize-close svg,.newex-v2-close svg,.exv2-close svg,.swapv2-close svg,.plansv2-close svg,.histv2-card-close svg{display:block;width:100%;height:100%;}
+.x-ring:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.gy-circ.gy-x:active{transform:scale(.94);}
 .gy-circ.gy-x{border:.5px solid var(--m-orange);}
 .ai-popup-close{width:36px;height:36px;top:12px;right:12px;border:.5px solid rgba(255,255,255,.7);border-radius:50%;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .ai-popup-close:active{transform:scale(.94);}
@@ -3744,24 +3720,17 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<!-- "Co nowego" — Figma node 185:14176 ("02. Dashboard - change log").
-     Maciej: "change log - nowy design popup ... troszke go zmienilem
-     pod nowy design" — confirmed (2026-09-01) this replaces the popup
-     everywhere, production included, not a v3-only variant: it's a
-     redesign of an existing global popup (triggered by APP_VERSION at
-     load time, before previewMode is even known), not a new v3-scoped
-     screen, so there's no clean "old design in production, new design
-     in v3" split to make here the way the other *V2 popups have. -->
-<div class="onboard-overlay hidden wnv2-overlay" id="whatsnewOverlay">
-  <div class="wnv2-box">
-    <div class="wnv2-header">
-      <div class="wnv2-header-title">
-        <span class="ph wnv2-header-icon" data-ph="clock-counter-clockwise"></span>
-        <h3 data-i18n="whatsnewTitle">CO NOWEGO</h3>
-      </div>
-      <span class="ph wnv2-close" data-ph="x" onclick="closeWhatsNew()"></span>
+<!-- "Co nowego" — Figma 500:19077. Bottom sheet: fixed photo hero (random from
+     WHATSNEW_IMAGES) + scrolling list of pending versions. Opened at boot by
+     openWhatsNew() when APP_VERSION differs from the last seen one. -->
+<div class="onboard-overlay hidden m-sheet-overlay" id="whatsnewOverlay">
+  <div class="m-sheet" id="whatsnewSheet">
+    <div class="wn-hero" id="whatsnewHero">
+      <span class="ph wn-close" data-ph="x" onclick="closeWhatsNew()"></span>
+      <p class="wn-label" data-i18n="whatsnewTitle">CO NOWEGO</p>
+      <h2 class="wn-headline" id="whatsnewHeadline"></h2>
     </div>
-    <div class="wnv2-scroll" id="whatsnewList"></div>
+    <div class="wn-scroll" id="whatsnewList"></div>
   </div>
 </div>
 
@@ -4169,6 +4138,8 @@ const T_EN = {
   save: 'Save',
   whatsnewVersion: v => `Version ${v}`,
   whatsnewTitle: "WHAT'S NEW",
+  whatsnewVer: v => `Mekkio version v.${v}`,
+  whatsnewFallbackHeadline: "What's new in Mekkio",
   whatsnewClose: 'Great, close',
   whatsnewFeaturedBadge: 'New',
   chlSheetTitle: 'CHANGE LOG',
@@ -4233,16 +4204,20 @@ const T_EN = {
   importChoiceReplace: 'Replace everything',
   imageSaved: 'Image saved to device',
   imageGenFailed: "Couldn't generate the image",
-  noPriorResults: 'No previous results yet — pick a weight so your last set finishes 1-2 reps before failure (RPE 7-8), toward the low end of the range.',
-  noPriorResultsVersion: "First time at this intensity level — not enough history yet to estimate a weight. Start conservatively, around RPE 7-8.",
-  noPriorResultsVersionEst: (kg) => `First time at this intensity level — based on your history, try around ${kg} kg (RPE 7-8).`,
+  noPriorResults: 'No previous results yet: pick a weight so your last set ends with 1-2 reps left in reserve, toward the low end of the range.',
+  noPriorResultsBw: 'No previous results yet: start at the low end of the rep range, leaving 1-2 reps in reserve.',
   noCompletePriorData: 'No complete data from the last session.',
-  suggestUpVersion: (w, target) => `Last time at this intensity level: ${w} kg — add at least 1.25 kg (${target} kg).`,
-  suggestDownVersion: (w) => `Last time you didn't reach the low end of the range on a few sets — consider cutting the weight by about 10% (from ${w} kg).`,
-  suggestUp: (w, rh, rl) => `Last time ${w} kg × ${rh}+ across all sets — add 2.5–5 kg and drop back to ${rl} reps.`,
-  suggestUpMixed: (w, rh) => `Last time you hit ${rh}+ reps on every set, heaviest at ${w} kg — try bringing the lighter sets up to that, or add 2.5–5 kg on your heaviest.`,
-  suggestDown: (rl, n, w) => `Last time you missed ${rl} reps on ${n} set${n===1?'':'s'} — consider cutting the weight by about 10% (from ${w} kg).`,
+  tipOtherVersion: (w, r, range, target) => `Last time: ${w} kg × ${r}. For ${range}, try ${target} kg, with 1-2 reps in reserve.`,
+  tipOtherVersionCapped: (w, r, range, target) => `Last time: ${w} kg × ${r}. For ${range}, start at ${target} kg and add more if you feel you have reps to spare.`,
+  tipOtherVersionNoEst: (w, r, range) => `Last time: ${w} kg × ${r}. Pick a weight that fits ${range} reps with 1-2 reps in reserve.`,
+  tipOtherVersionBw: (r, range) => `Last time ${r} reps. Now aim for ${range} reps per set, with 1-2 reps in reserve.`,
+  suggestUp: (w, rh, next, rl) => `Last time ${w} kg × ${rh}+ across all sets. Try ${next} kg and drop back to ${rl} reps.`,
+  suggestUpMixed: (rh, w, step) => `Last time you hit ${rh}+ reps on every set, heaviest at ${w} kg. Bring the lighter sets up to that, or add ${step} kg on your heaviest.`,
+  suggestDown: (rl, n, down, w) => `Last time you missed ${rl} reps on ${n} set${n===1?'':'s'}. Try about ${down} kg (roughly 10% less than ${w} kg).`,
   suggestHold: (w, rh) => `Stay at ${w} kg and try to reach ${rh} reps on every set.`,
+  suggestUpBw: (rh) => `Last time ${rh}+ reps on every set. Try a harder variation, or push to the top of the range with reps to spare.`,
+  suggestDownBw: (rl, n) => `Last time you missed ${rl} reps on ${n} set${n===1?'':'s'}. Consider an easier variation or a longer rest between sets.`,
+  suggestHoldBw: (rh) => `Stay with this variation and try to reach ${rh} reps on every set.`,
   exMeta: (group, sets, rl, rh, rest) => `${group} · ${sets} sets x ${rl}-${rh} reps · rest ${rest}`,
   statSetsCount: (n) => `${n} sets`,
   trainingTip: 'TRAINING TIP',
@@ -4371,10 +4346,10 @@ const T_EN = {
   peV2ForkHint: 'Your changes save as your own copy of this plan — the original stays as is.',
   peV2PeriodizeTitle: 'Variable intensity',
   peV2PeriodizeDesc: 'Each session uses a different level: Max, Volume, Strength or Density. Weight, reps and rest change with it.',
-  execVersionHD: 'Max',
-  execVersionVC: 'Volume',
-  execVersionHC: 'Strength',
-  execVersionVD: 'Density',
+  execVersionHD: 'Maximum weight',
+  execVersionVC: 'Medium reps',
+  execVersionHC: 'Heavy weight',
+  execVersionVD: 'High reps',
   peV2DaysLabel: 'DAYS OF THE WEEK',
   peV2DayHint: 'Pick a weekday and assign it exercises',
   peV2SelectDays: 'Select days',
@@ -5210,10 +5185,10 @@ const BUILTIN_EXERCISES = [
    of what the lifter can actually do (Maciej, 2026-09-22: flagged this
    exact mismatch after a 25kg×10 Preacher Curl got told to do 10-20). */
 const EXECUTION_VERSIONS = {
-  HD: {label:'Max',      ranges:[[0,1],[1,3],[1,5]],    rest:'2-3 min'},
-  VC: {label:'Objętość', ranges:[[6,8],[8,10]],         rest:'1-2 min'},
-  HC: {label:'Siła',     ranges:[[1,3],[3,6]],          rest:'2-3 min'},
-  VD: {label:'Gęstość',  ranges:[[6,8],[8,10],[10,20]], rest:'1 min'},
+  HD: {label:'Maksymalny ciężar', ranges:[[0,1],[1,3],[1,5]],    rest:'2-3 min'},
+  VC: {label:'Średnia liczba powtórzeń', ranges:[[6,8],[8,10]],         rest:'1-2 min'},
+  HC: {label:'Duży ciężar', ranges:[[1,3],[3,6]],          rest:'2-3 min'},
+  VD: {label:'Dużo powtórzeń', ranges:[[6,8],[8,10],[10,20]], rest:'1 min'},
 };
 const MAIN_LIFT_CYCLE = ['HD','VC','HC','VD'];
 const ISOLATION_CYCLE = ['VC','VD'];
@@ -7115,7 +7090,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.57.0";
+const APP_VERSION = "4.58.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7686,72 +7661,43 @@ function pendingChangelogVersions(){
 function pendingChangelogItems(){
   return pendingChangelogVersions().flatMap(v => changelogEntries(v));
 }
-// Maciej: "change log - nowy design popup [Figma 185:14176] ... troszke
-// go zmienilem pod nowy design" — confirmed to replace the popup
-// everywhere (production included), not a v3-only variant. Figma shows
-// one card per VERSION (not per changelog item like the old design):
-// the newest pending version gets the red "hero" treatment, any older
-// still-pending versions render as plain white cards — positional, not
-// tied to whether that version's own entries happen to be flagged
-// featured. A featured entry's title/text drives the card; any plain-
-// string entries in the same version render as a bullet list under it
-// (or ARE the whole card body, for a version with no featured entry).
-// One featured entry -> one title+text block; ties multiple entries in the
-// same card together with a divider instead of only ever showing the first.
-function renderFeaturedBlock(f, isFirstInCard){
-  const titleCls = isFirstInCard ? 'wnv2-card-title' : 'wnv2-card-title wnv2-card-title--stacked';
-  return `<p class="${titleCls}">${f.title}</p><p class="wnv2-card-text">${f.text}</p>`;
-}
-// AI-related changelog entries (entry.ai:true) render in their OWN black
-// "Trener AI"-styled card, separate from whatever else shipped in the same
-// version (Maciej, 2026-09-17: "tylko zmiany, dodatki w aplikacji związane
-// z AI" na czarnym boxie, "jeśli... jedna z AI i jedna bez, rozbijemy na
-// dwa boxy") — so a version can render 0, 1, or 2 cards depending on what's
-// in it, instead of always exactly one.
-function renderWhatsNewCard(v, isFirst){
-  const items = changelogEntries(v);
-  const featuredItems = items.filter(i => i && typeof i === 'object' && i.featured);
-  const stringItems = items.filter(i => typeof i === 'string');
-  const aiFeatured = featuredItems.filter(f => f.ai);
-  const restFeatured = featuredItems.filter(f => !f.ai);
-  const cards = [];
-
-  if(aiFeatured.length){
-    cards.push(`
-      <div class="wnv2-card wnv2-card--ai" data-version="${v}">
-        <p class="wnv2-card-version">v.${v}</p>
-        ${aiFeatured.map((f,i)=>renderFeaturedBlock(f, i===0)).join('')}
-      </div>`);
+// "Co nowego" (Figma 500:19077). The hero shows the name of the newest
+// pending version's biggest feature (first featured entry); the list below
+// repeats every pending version, newest first: "wersja mekkio v.X", then
+// each entry as TITLE + short text (plain-string entries: text only).
+// Hero photo: one of WHATSNEW_IMAGES, picked at random on each opening —
+// add files to icons/whatsnew/ and list them here.
+const WHATSNEW_IMAGES = ['icons/whatsnew/wn-1.jpg'];
+function whatsNewHeadline(versions){
+  for(const v of versions){
+    const f = changelogEntries(v).find(i => i && typeof i === 'object' && i.featured);
+    if(f) return f.title;
   }
-
-  if(restFeatured.length || stringItems.length){
-    const listHtml = stringItems.length ? `<ul class="wnv2-card-list">${stringItems.map(s=>`<li>${s}</li>`).join('')}</ul>` : '';
-    const bodyHtml = restFeatured.length
-      ? restFeatured.map((f,i)=>renderFeaturedBlock(f, i===0)).join('') + listHtml
-      : `<p class="wnv2-card-title">${t('whatsnewVersion','Wersja ' + v, v)}</p>${listHtml}`;
-    cards.push(`
-      <div class="wnv2-card${isFirst?' hero':''}" data-version="${v}">
-        <p class="wnv2-card-version">v.${v}</p>
-        ${bodyHtml}
-      </div>`);
-  }
-
-  if(!cards.length){
-    cards.push(`
-      <div class="wnv2-card${isFirst?' hero':''}" data-version="${v}">
-        <p class="wnv2-card-version">v.${v}</p>
-        <p class="wnv2-card-title">${t('whatsnewVersion','Wersja ' + v, v)}</p>
-      </div>`);
-  }
-  return cards.join('');
+  return t('whatsnewFallbackHeadline','Nowości w Mekkio');
 }
 function renderWhatsNew(){
+  const versions = pendingChangelogVersions();
+  document.getElementById('whatsnewHeadline').textContent = whatsNewHeadline(versions);
+  const img = WHATSNEW_IMAGES[Math.floor(Math.random() * WHATSNEW_IMAGES.length)];
+  document.getElementById('whatsnewHero').style.backgroundImage = `url("${img}")`;
   const list = document.getElementById('whatsnewList');
-  list.innerHTML = pendingChangelogVersions().map((v,i)=> renderWhatsNewCard(v, i===0)).join('');
+  list.innerHTML = versions.map(v=>{
+    const items = changelogEntries(v).map(i => typeof i === 'string'
+      ? `<div class="wn-item"><p class="wn-item-text">${i}</p></div>`
+      : `<div class="wn-item"><p class="wn-item-title">${i.title}</p><p class="wn-item-text">${i.text}</p></div>`).join('');
+    return `<p class="wn-ver">${t('whatsnewVer','wersja mekkio v.' + v, v)}</p>${items}`;
+  }).join('');
+  list.scrollTop = 0;
 }
-function closeWhatsNew(){
+function openWhatsNew(){
+  renderWhatsNew();
+  mSheetOpenReset('whatsnewOverlay');
+  document.getElementById('whatsnewOverlay').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+}
+function closeWhatsNew(viaDrag){
   localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);
-  document.getElementById('whatsnewOverlay').classList.add('hidden');
+  mSheetClose('whatsnewOverlay', viaDrag === true);
 }
 
 /* ---------- feedback ---------- */
@@ -8572,7 +8518,7 @@ function versionCycleFor(ex, indexAmongSameType){
 // the target doesn't jump around session to session. First time ever at
 // this version: fall back to whichever range best matches the rep count
 // behind the lifter's best estimated 1RM for this exercise (same Epley
-// data estimateStartingWeight() draws on) — reps in reserve don't apply
+// data recentE1rm() draws on) — reps in reserve don't apply
 // here since the range affects only the target reps, not RPE. No history
 // at all: most conservative (lowest-rep) option.
 function pickSubRange(exerciseName, tag, history){
@@ -8631,72 +8577,73 @@ function getAiActionFor(exerciseName){
   return hit ? hit.action : null;
 }
 
-// First time at a given execution version, there's no history AT that
-// version to suggest from — but there's very likely history at some OTHER
-// version of the same exercise. Back it out through the same Epley e1RM
-// Stats already uses for records (statsV2Epley, below) to land on a real
-// number instead of leaving the lifter to guess cold. Epley gets unreliable
-// much past ~12 reps (see STATSV2_E1RM_REP_CAP), so this only fires when
-// the target rep count is still in Epley's reliable range, and only draws
-// from historical sets that are themselves e1RM-eligible.
-function estimateStartingWeight(exerciseName, targetReps){
-  if(targetReps > STATSV2_E1RM_REP_CAP) return null;
-  const eligible = statsV2ExerciseSets(exerciseName).filter(statsV2E1rmEligible);
-  if(!eligible.length) return null;
-  const bestE1rm = Math.max(...eligible.map(s=>statsV2Epley(s.weight, s.reps)));
-  const est = bestE1rm / (1 + targetReps/30);
-  return Math.round(est / 1.25) * 1.25; // 1.25 kg steps — same increment the periodization progression uses
+/* ---------- training tip (the "Wskazówka treningowa" box) ----------
+   One progression rule for every branch: all sets at the top of the range → +2.5 kg (never more than 5% of the last
+   weight, at least one 1,25 kg step); the weight suggested for a range the user hasn't trained yet comes from the last
+   two sessions (not the all-time best) and is also capped at +5% over the last weight, rounded down to 2,5 kg. Plain
+   words only: no RPE, no names of the execution versions (the rep range sits in the chips right above the tip). */
+function tipStepUpKg(last){
+  const cap = Math.floor(last * 0.05 / 1.25) * 1.25;
+  return Math.max(1.25, Math.min(2.5, cap));
 }
-
+function tipCapWeight(last, est){
+  const capped = Math.min(est, last * 1.05);
+  return capped >= last ? Math.max(last, Math.floor(capped / 2.5) * 2.5) : Math.round(capped / 2.5) * 2.5;
+}
+// Best estimated 1RM (Epley, the one Stats uses) over the last two sessions of the exercise; only sets in Epley's reliable range.
+function recentE1rm(history){
+  let best = 0;
+  history.slice(0, 2).forEach(h=> (h.sets || []).forEach(s=>{ if(statsV2E1rmEligible(s)) best = Math.max(best, statsV2Epley(s.weight, s.reps)); }));
+  return best || null;
+}
+function estimateWeightForReps(history, reps){
+  if(reps > STATSV2_E1RM_REP_CAP) return null;
+  const e = recentE1rm(history);
+  return e ? e / (1 + reps / 30) : null;
+}
+function tipRepsRange(lo, hi){ return lo === hi ? String(lo) : `${lo}–${hi}`; }
+function tipRepsLoc(lo, hi){   // "przy 8–10 powtórzeniach" / "for 8–10 reps"
+  const r = tipRepsRange(lo, hi);
+  return LANG === 'en' ? `${r} reps` : (lo === hi && lo === 1 ? '1 powtórzeniu' : `${r} powtórzeniach`);
+}
 function buildSuggestion(exMeta, history){
   if(isTimeEx(exMeta)) return {cls:'', text: exMeta.group === 'Kardio'
     ? t('suggestCardio','Zacznij spokojnie i podkręcaj stopniowo. Następnym razem spróbuj dołożyć minutę albo trochę tempa.')
     : t('suggestTime','Spróbuj wytrzymać cały czas w każdej serii. Jak pójdzie łatwo, dołóż kilka sekund.')};
   const isBodyweightEx = exMeta.equipment === 'masa ciała';
-  if(exMeta.version){
-    // Undulating periodization: progression is pinned to the last time THIS
-    // exact execution version was trained, not to the last session overall
-    // — a light VD day says nothing about how heavy the previous HD day was.
-    // Rep target always lives in the stats row under the exercise name —
-    // never restated here as a number, so there's only one place to read
-    // "how many reps" and it can never look like it disagrees with itself
-    // (Maciej, 2026-09-22: "1-2 powtórzeń" next to "6-8 powt." read like
-    // two conflicting targets). This tip box speaks only to weight + RPE.
-    const atVersion = history.find(h => h.version === exMeta.version);
-    if(!atVersion){
-      if(isBodyweightEx){
-        return {cls:'', text:t('noPriorResultsVersionBw','Pierwszy raz na tym poziomie intensywności — zacznij w dolnej granicy zakresu, przy RPE 7-8.')};
-      }
-      const est = estimateStartingWeight(exMeta.name, exMeta.repLow);
-      return {cls:'', text: est
-        ? t('noPriorResultsVersionEst', `Pierwszy raz na tym poziomie intensywności — na podstawie Twoich wyników spróbuj ok. ${est} kg (RPE 7-8).`, est)
-        : t('noPriorResultsVersion','Pierwszy raz na tym poziomie intensywności — brak wystarczających danych, żeby oszacować ciężar. Zacznij ostrożnie, przy RPE 7-8.')};
-    }
-    const validSets = atVersion.sets.filter(s=> s.weight>0 || s.reps>0);
-    if(!validSets.length){
-      return {cls:'', text:t('noCompletePriorData','Brak kompletnych danych z poprzedniej sesji.')};
-    }
-    const lowFails = validSets.filter(s => s.reps < exMeta.repLow).length;
-    if(lowFails>=2){
-      if(isBodyweightEx){
-        return {cls:'down', text:t('suggestDownVersionBw', 'Ostatnio nie domknąłeś dołu zakresu w kilku seriach — rozważ łatwiejszy wariant albo krótszy odpoczynek między seriami.')};
-      }
-      const lastWeightDown = Math.max(...validSets.map(s=>s.weight||0));
-      return {cls:'down', text:t('suggestDownVersion', `Ostatnio nie domknąłeś dołu zakresu w kilku seriach — rozważ zmniejszenie ciężaru o ok. 10% (z ${lastWeightDown} kg).`, lastWeightDown)};
-    }
-    if(isBodyweightEx){
-      return {cls:'', text:t('suggestHoldVersionBw', 'Wróciłeś do tego poziomu intensywności — spróbuj dobić do górnej granicy zakresu w każdej serii.')};
-    }
-    const lastWeightVersion = Math.max(...validSets.map(s=>s.weight||0));
-    const targetWeightVersion = Math.round((lastWeightVersion + 1.25) * 100) / 100;
-    return {cls:'up', text:t('suggestUpVersion', `Ostatnio przy tym poziomie intensywności: ${lastWeightVersion} kg — dodaj min. 1,25 kg (${targetWeightVersion} kg).`, lastWeightVersion, targetWeightVersion)};
-  }
+  const kg = fmtKgLocal;
   if(!history.length){
     return {cls:'', text: isBodyweightEx
-      ? t('noPriorResultsBw','Brak wcześniejszych wyników — zacznij w dolnej granicy zakresu powtórzeń, kończąc 1-2 powtórzenia przed upadkiem mięśniowym (RPE 7-8).')
-      : t('noPriorResults','Brak wcześniejszych wyników — dobierz ciężar tak, by ostatnia seria kończyła się 1-2 powtórzenia przed upadkiem mięśniowym (RPE 7-8), w dolnej granicy zakresu.')};
+      ? t('noPriorResultsBw','Brak wcześniejszych wyników: zacznij w dolnej granicy zakresu powtórzeń, zostawiając sobie 1–2 powtórzenia zapasu.')
+      : t('noPriorResults','Brak wcześniejszych wyników: dobierz ciężar tak, by ostatnia seria kończyła się z zapasem 1–2 powtórzeń, w dolnej granicy zakresu.')};
   }
-  const last = history[0];
+  // Undulating periodization: progression follows the last time THIS execution version was trained. When the exercise
+  // has history, but only from another version (or from before periodization), say what the last result was and what
+  // that means for the rep range of today, instead of pretending there is no history.
+  let last = history[0];
+  if(exMeta.version){
+    const atVersion = history.find(h => h.version === exMeta.version);
+    if(atVersion) last = atVersion;
+    else {
+      const prior = history[0].sets.filter(s=> s.weight>0 || s.reps>0);
+      if(!prior.length) return {cls:'', text:t('noCompletePriorData','Brak kompletnych danych z poprzedniej sesji.')};
+      const best = prior.reduce((b,s)=> (!b || (s.weight||0) > (b.weight||0) || ((s.weight||0) === (b.weight||0) && s.reps > b.reps)) ? s : b, null);
+      const range = tipRepsRange(exMeta.repLow, exMeta.repHigh), loc = tipRepsLoc(exMeta.repLow, exMeta.repHigh);
+      if(isBodyweightEx){
+        return {cls:'', text:t('tipOtherVersionBw', `Ostatnio ${best.reps} powt. Teraz celuj w ${range} powtórzeń w serii, z zapasem 1–2 powtórzeń.`, best.reps, range)};
+      }
+      const est = estimateWeightForReps(history, exMeta.repLow);
+      if(!est){
+        return {cls:'', text:t('tipOtherVersionNoEst', `Ostatnio: ${kg(best.weight||0)} kg × ${best.reps}. Dobierz ciężar tak, by zmieścić ${range} powtórzeń z zapasem 1–2 powtórzeń.`, kg(best.weight||0), best.reps, range)};
+      }
+      const target = tipCapWeight(best.weight || 0, est);
+      // the 5% cap cut the estimate: the weight is only a safe starting point, so don't promise a reserve
+      if(est > (best.weight || 0) * 1.05){
+        return {cls:'', text:t('tipOtherVersionCapped', `Ostatnio: ${kg(best.weight||0)} kg × ${best.reps}. Przy ${loc} zacznij od ${kg(target)} kg i dokładaj, jeśli poczujesz zapas.`, kg(best.weight||0), best.reps, loc, kg(target))};
+      }
+      return {cls:'', text:t('tipOtherVersion', `Ostatnio: ${kg(best.weight||0)} kg × ${best.reps}. Przy ${loc} spróbuj ${kg(target)} kg, z zapasem 1–2 powtórzeń.`, kg(best.weight||0), best.reps, loc, kg(target))};
+    }
+  }
   const validSets = last.sets.filter(s=> s.weight>0 || s.reps>0);
   if(!validSets.length){
     return {cls:'', text:t('noCompletePriorData','Brak kompletnych danych z poprzedniej sesji.')};
@@ -8705,10 +8652,10 @@ function buildSuggestion(exMeta, history){
   const lowFails = validSets.filter(s => s.reps < exMeta.repLow).length;
   if(isBodyweightEx){
     if(allTop){
-      return {cls:'up', text:t('suggestUpBw', `Ostatnio ${exMeta.repHigh}+ powtórzeń we wszystkich seriach — spróbuj trudniejszego wariantu albo dobij do góry zakresu z zapasem.`, exMeta.repHigh)};
+      return {cls:'up', text:t('suggestUpBw', `Ostatnio ${exMeta.repHigh}+ powtórzeń we wszystkich seriach. Spróbuj trudniejszego wariantu albo dobij do góry zakresu z zapasem.`, exMeta.repHigh)};
     }
     if(lowFails>=2){
-      return {cls:'down', text:t('suggestDownBw', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach — rozważ łatwiejszy wariant albo krótszy odpoczynek między seriami.`, exMeta.repLow, lowFails)};
+      return {cls:'down', text:t('suggestDownBw', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach. Rozważ łatwiejszy wariant albo dłuższy odpoczynek między seriami.`, exMeta.repLow, lowFails)};
     }
     return {cls:'', text:t('suggestHoldBw', `Zostań przy tym wariancie i spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, exMeta.repHigh)};
   }
@@ -8720,14 +8667,16 @@ function buildSuggestion(exMeta, history){
   // jest nieprawdą" — only the last of 3 sets was 140, the rest were 130).
   const weightWasUniform = validSets.every(s => (s.weight||0) === lastWeight);
   if(allTop){
+    const step = tipStepUpKg(lastWeight), next = Math.round((lastWeight + step) * 100) / 100;
     return weightWasUniform
-      ? {cls:'up', text:t('suggestUp', `Ostatnio ${lastWeight} kg × ${exMeta.repHigh}+ we wszystkich seriach — zwiększ o 2,5–5 kg i wróć do ${exMeta.repLow} powt.`, lastWeight, exMeta.repHigh, exMeta.repLow)}
-      : {cls:'up', text:t('suggestUpMixed', `Ostatnio dobiłeś do ${exMeta.repHigh}+ powt. w każdej serii, najciężej ${lastWeight} kg — spróbuj podciągnąć lżejsze serie do tego ciężaru albo dołóż 2,5–5 kg na najcięższej.`, lastWeight, exMeta.repHigh)};
+      ? {cls:'up', text:t('suggestUp', `Ostatnio ${kg(lastWeight)} kg × ${exMeta.repHigh}+ we wszystkich seriach. Spróbuj ${kg(next)} kg i wróć do ${exMeta.repLow} powt.`, kg(lastWeight), exMeta.repHigh, kg(next), exMeta.repLow)}
+      : {cls:'up', text:t('suggestUpMixed', `Ostatnio dobiłeś do ${exMeta.repHigh}+ powt. w każdej serii, najciężej ${kg(lastWeight)} kg. Podciągnij lżejsze serie do tego ciężaru albo dołóż ${kg(step)} kg na najcięższej.`, exMeta.repHigh, kg(lastWeight), kg(step))};
   }
   if(lowFails>=2){
-    return {cls:'down', text:t('suggestDown', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach — rozważ zmniejszenie ciężaru o ok. 10% (z ${lastWeight} kg).`, exMeta.repLow, lowFails, lastWeight)};
+    const down = Math.round(lastWeight * 0.9 / 2.5) * 2.5;
+    return {cls:'down', text:t('suggestDown', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach. Spróbuj ok. ${kg(down)} kg (około 10% mniej niż ${kg(lastWeight)} kg).`, exMeta.repLow, lowFails, kg(down), kg(lastWeight))};
   }
-  return {cls:'', text:t('suggestHold', `Zostań przy ${lastWeight} kg i spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, lastWeight, exMeta.repHigh)};
+  return {cls:'', text:t('suggestHold', `Zostań przy ${kg(lastWeight)} kg i spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, kg(lastWeight), exMeta.repHigh)};
 }
 
 /* ---------- persisted, user-draggable exercise tile order ---------- */
@@ -9086,6 +9035,7 @@ function mSheetDrag(overlayId, closeFn){
   });
 }
 // The set-logging sheet is fixed (no drag-to-dismiss, no backdrop close): only X leaves, so a slipping thumb can't drop it.
+mSheetDrag('whatsnewOverlay', closeWhatsNew);
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
@@ -16367,8 +16317,7 @@ if(!onboardSeen){
   document.getElementById('onboardOverlay').classList.remove('hidden');
 } else if(localStorage.getItem(LS_LAST_SEEN_VERSION) !== APP_VERSION){
   if(pendingChangelogItems().length){
-    renderWhatsNew();
-    document.getElementById('whatsnewOverlay').classList.remove('hidden');
+    openWhatsNew();
   } else {
     localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);
   }
