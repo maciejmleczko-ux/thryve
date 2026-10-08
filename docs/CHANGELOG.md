@@ -127,6 +127,8 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Nie do zapomnienia:** parametry z karty trafiają do zapisanej serii od razu (nachylenie, poziom), arkusz Wyniki otwiera się po „Zakończ” z chipem celu i czasem ponad cel, brakujący dystans jest podświetlony („do uzupełnienia”), a jego podpowiedź to dystans z prędkości i czasu albo cel dystansowy.
 - **Etykiety parametrów w EN** (`cardioMetricLabel`): Distance / Incline / Level / Floors / Jumps także w arkuszu Wyniki.
 
+- **iOS:** Build 34 (4.60.0), archiwum zbudowane i wysłane na TestFlight 2026-10-09; obejmuje wersje od 4.56.0 do 4.60.0 (lekkie Dostosuj plan, ikony żeńskie, podpowiedzi treningowe, nowy popup Co nowego, kardio z celem). `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
+
 **Commity:** wpis dopisany w commicie tej zmiany.
 
 
