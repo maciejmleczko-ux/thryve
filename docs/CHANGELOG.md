@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.58.1 (2026-10-08)
-- **Liczba wersji:** 244 · **commitów:** 588
+- **Aktualna wersja:** 4.59.0 (2026-10-08)
+- **Liczba wersji:** 245 · **commitów:** 589
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,22 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.59.0 · MINOR · 2026-10-08
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> **Rozgrzewka i rozciąganie** — Na ekranie Trening masz teraz kartę rozgrzewki na górze i rozciągania na dole. Ćwiczenia dobierają się same do partii, które dziś robisz, a zegar prowadzi krok po kroku. Doszło też 17 nowych ćwiczeń z ikonami i opisami.
+>
+> **Trzy nowe plany** — Fullbody 2× Minimum, Kalistenika Start i Powrót do formy czekają w wyborze planu. Każdy dopasujesz do celu: siły, masy albo wytrzymałości.
+>
+> **Ikony dla kobiet** — Wybierz w profilu płeć Kobieta, a ćwiczenia dostaną ikony z kobiecą postacią. Zmienia się od razu.
+>
+> **Jaśniejsze podpowiedzi** — Trener podaje ostatni wynik i cel na dziś, a proponowany ciężar rośnie najwyżej o 5%. Etykiety wersji treningu mówią wprost, o co chodzi, np. „Maksymalny ciężar”.
+
+- Pierwszy wpis „Co nowego” dla nowego popupu: zbiorczy, za wersje 4.53–4.57.1 (te nie miały własnych wpisów). Klucz 4.59.0, bo użytkownicy z 4.58.1 mają już zapisaną ostatnio widzianą wersję i starszy klucz byłby dla nich niewidoczny. Hero pokazuje tytuł pierwszego wpisu: „Rozgrzewka i rozciąganie”. Wpisy PL + EN.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
 
 ### 4.58.1 · PATCH · 2026-10-08
 
