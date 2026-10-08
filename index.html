@@ -2528,6 +2528,25 @@ body.gymv2-bg .gy-bg{display:block;}
 .bk-run-n{font-size:var(--m-fs-lg);font-weight:700;color:var(--m-ink);}
 .bk-run-next{margin:0;font-size:var(--m-fs-xs);color:var(--m-muted);min-height:1.2em;}
 .bk-done-note{margin:0 0 8px;font-size:var(--m-fs-xs);color:var(--m-muted);}
+.cg-box{display:flex;flex-direction:column;gap:10px;align-items:stretch;}
+.cg-box[hidden]{display:none;}
+.cg-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.cg-seg button{min-height:44px;border:1px solid rgba(0,0,0,.05);border-radius:var(--m-r-sm);padding:0 6px;background:var(--m-card);font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);cursor:pointer;transition:background-color var(--m-dur-quick) ease,color var(--m-dur-quick) ease;}
+.cg-seg button.active{background:var(--m-orange);color:#fff;border-color:transparent;}
+.cg-val{display:flex;align-items:baseline;justify-content:center;gap:8px;color:var(--m-ink);}
+.cg-val b{font-size:var(--m-fs-hero);font-weight:200;line-height:1;font-variant-numeric:tabular-nums;}
+.cg-val span{font-size:var(--m-fs-md);color:var(--m-muted);}
+.cg-est{margin:0;text-align:center;font-size:var(--m-fs-xs);color:rgba(44,39,39,.71);line-height:1.4;min-height:1.4em;}
+.cg-sec{margin:6px 0 0;font-size:var(--m-fs-2xs);letter-spacing:.1em;text-transform:uppercase;color:rgba(44,39,39,.71);}
+.cg-bar{width:100%;height:6px;border-radius:3px;background:#e4e1ea;overflow:hidden;}
+.cg-bar i{display:block;height:100%;width:100%;background:var(--m-orange);transform-origin:left;transform:scaleX(0);}
+.cg-barrow{width:100%;display:flex;justify-content:space-between;font-size:var(--m-fs-2xs);color:var(--m-muted);}
+.cg-run[hidden]{display:none;}
+.cg-run{width:100%;display:flex;flex-direction:column;gap:6px;}
+.cg-chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.cg-box .lg-steps .lg-step{position:relative;}
+.cg-box .lg-steps .lg-step::after{content:"";position:absolute;inset:-7px;}
+.lg-metric.is-need{border-color:var(--m-orange);}
 .lg-tm-clock{font-size:var(--m-fs-display-sm);font-weight:200;letter-spacing:-.02em;line-height:1;color:#a3a3a3;font-variant-numeric:tabular-nums;transition:color var(--m-dur-quick) ease;}
 .lg-tm-clock.is-run{color:var(--m-orange);}
 .lg-tm-msg{min-height:1.2em;margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-ink);}
@@ -4255,6 +4274,15 @@ const T_EN = {
   timeLabel: 'Time', timeLabelSide: 'Time per side', perSideShort: '/side',
   tmStart: 'Start', tmPause: 'Pause', tmResume: 'Resume', tmEnd: 'Finish', tmSkip: 'Skip',
   bkWarmup: 'Warm-up', bkStretch: 'Stretching', bkMin: 'min', bkMore: n=>`+${n} more`, bkStart: 'Start', bkRepeat: 'Do it again', bkUndo: 'Mark as not done', bkSkipStep: 'Skip step', bkStop: 'Stop', bkDoneNote: 'Done today.', bkNext: n=>`Next: ${n}`, bkNotifDone: 'Block finished', bkGetReady: 'Get ready',
+  cm_distanceKm: 'Distance', cm_distanceM: 'Distance', cm_inclinePct: 'Incline', cm_level: 'Level', cm_floors: 'Floors', cm_jumps: 'Jumps',
+  cgTitle: 'Goal for today', cgTime: 'Time', cgDist: 'Distance', cgNone: 'No goal', cgParams: 'Settings', cgSpeed: 'Speed',
+  cgEstSpeed: (sp, min) => `At ${sp} km/h that is about ${min} min. I'll let you know when the time is up.`,
+  cgEstNoSpeed: 'Add a speed and I will estimate the time. Without it the clock counts up.',
+  cgEstM: 'The clock counts up. Enter the distance at the end.',
+  cgEstNone: 'The clock counts up. You finish when you want.',
+  cgEstKm: (sp, km) => `At ${sp} km/h that is about ${km} km.`,
+  cgLabLeft: 'Left', cgLabOver: 'Over goal', cgLabTime: 'Time', cgGoal: (g) => `Goal: ${g}`, cgTotal: (t) => `Total ${t}`, cgReached: 'Goal reached',
+  tmNotifGoal: 'Goal reached', crNeed: 'to fill in', crGoalChip: (g) => `Goal ${g}`, cgDistHint: 'Add the distance from the machine to calculate speed and calories.',
   tmSwitchSides: 'Switch sides', tmSideN: (n,m)=>`Side ${n} of ${m}`,
   tmNotifAskTitle: 'A notification when the set ends',
   tmNotifAskBody: 'If the screen turns off mid-set, a notification will tell you time is up. The system will ask for permission next.',
@@ -7092,7 +7120,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.59.2";
+const APP_VERSION = "4.60.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -9421,6 +9449,7 @@ function timedRowHtml(r){
 /* ---- cardio "Wyniki" sheet: fill the metrics of the set that was just logged (or edit it later) ---- */
 let cr = null; // { idx, vals:{metricKey:number|null}, kcal:string }
 function crHint(key){
+  if(cr && cr.hints && cr.hints[key] != null) return cr.hints[key];   // a goal set: the distance from the speed and the time, or the distance goal
   const def = CARDIO_METRIC_DEFS[key], hist = lastSessionsFor(popupExercise.name);
   for(const h of hist){
     const sets = exSetsView(h);
@@ -9434,7 +9463,8 @@ function openCardioResults(idx){
   if(!ex || !isTimeEx(ex) || !ex.metrics || !ex.metrics.length) return;
   const set = ex.setValues[idx];
   if(!set || !(set.durationSec > 0)) return;
-  cr = { idx, vals: {} };
+  cr = { idx, vals: {}, chip: cgResult ? cgResult.chip : '', hints: cgResult ? cgResult.hints : null };
+  cgResult = null;
   ex.metrics.forEach(k=>{ const def = CARDIO_METRIC_DEFS[k]; cr.vals[k] = set[def.field] != null ? def.fromStored(set[def.field]) : null; });
   renderCardioResults();
   lgSubOpen('exCardioOverlayV2');
@@ -9445,7 +9475,8 @@ function renderCardioResults(){
   const set = ex.setValues[cr.idx];
   const rows = ex.metrics.map(k=>{
     const def = CARDIO_METRIC_DEFS[k], hint = crHint(k);
-    return `<div class="lg-metric" data-k="${k}"><span class="lg-metric-l">${escHtml(def.label)}</span>
+    const need = isCardioGoalEx(ex) && /^distance/.test(k) && cr.vals[k] == null;   // the one thing the machine shows and we can't know
+    return `<div class="lg-metric${need ? ' is-need' : ''}" data-k="${k}"><span class="lg-metric-l">${escHtml(cardioMetricLabel(k))}${need ? ' · ' + escHtml(t('crNeed','do uzupełnienia')) : ''}</span>
       <input class="lg-metric-in" id="crIn_${k}" type="text" inputmode="decimal" autocomplete="off" value="${crFmt(def, cr.vals[k])}" placeholder="${hint != null ? crFmt(def, hint) : '—'}" oninput="crSet('${k}', this.value)">
       ${def.unit ? `<span class="lg-metric-u">${def.unit}</span>` : ''}
       <span class="lg-steps"><button type="button" class="lg-step" onclick="crStep('${k}',-1)" aria-label="−">${LG_ICONS.minus}</button><button type="button" class="lg-step" onclick="crStep('${k}',1)" aria-label="+">${LG_ICONS.plus}</button></span></div>`;
@@ -9458,7 +9489,7 @@ function renderCardioResults(){
     </div>
     <div class="lg-scroll lg-sub-scroll">
       <div class="lg-name-row"><div class="lg-name">${escHtml(ex.name)}</div></div>
-      <div class="lg-chips"><span class="lg-chip">${ph('clock-countdown')}<span>${escHtml(fmtDur(set.durationSec))}</span></span></div>
+      <div class="lg-chips"><span class="lg-chip">${ph('clock-countdown')}<span>${escHtml(fmtDur(set.durationSec))}</span></span>${cr.chip ? `<span class="lg-chip"><span>${escHtml(cr.chip)}</span></span>` : ''}</div>
       <div class="lg-sets">${rows}
       </div>
       <div class="lg-derived" id="crDerived"></div>
@@ -9590,12 +9621,14 @@ function restPop(){
    A label every 4 ticks (5 kg / 10 kg) keeps Figma's 47.2px label rhythm. */
 const LG_TICK_W = 11.8, LG_MAX_KG = 400;
 const LG_RULER_IND = '<svg viewBox="0 0 9 8" fill="currentColor"><path d="M8.87 6.15c.37.63-.08 1.43-.82 1.43H.95C.22 7.58-.24 6.78.13 6.15L3.48.47A.94.94 0 0 1 4.3 0h.4c.34 0 .65.18.82.47l3.35 5.68Z"/></svg>';
-function lgBuildRuler(host, step, value, onUser){
-  const n = Math.round(LG_MAX_KG / step);
+function lgBuildRuler(host, step, value, onUser, opts){
+  opts = opts || {};   // the cardio goal reuses this ruler for minutes / km / m: {max, labelEvery, fmt}
+  const max = opts.max || LG_MAX_KG, every = opts.labelEvery || 4, fmt = opts.fmt || fmtKgLocal;
+  const n = Math.round(max / step);
   let html = '<div class="lg-ruler-sp"></div>';
   for(let i = 0; i <= n; i++){
-    const label = i % 4 === 0;
-    html += `<div class="lg-tick">${label?`<em>${fmtKgLocal(Math.round(i*step*100)/100)}</em>`:''}<i></i></div>`;
+    const label = i % every === 0;
+    html += `<div class="lg-tick">${label?`<em>${fmt(Math.round(i*step*100)/100)}</em>`:''}<i></i></div>`;
   }
   html += '<div class="lg-ruler-sp"></div>';
   host.innerHTML = `<div class="lg-ruler-ind">${LG_RULER_IND}</div><div class="lg-ruler-track">${html}</div>`;
@@ -10000,11 +10033,16 @@ function renderExercisePopupV2(animate){
         </div>
       </div>
       ${tipHtml}
-      ${time ? `
+      ${time ? `${isCardioGoalEx(ex) ? cgHtml(ex, rise(3)) : ''}
       <div class="lg-block lg-tm${rise(3)}">
-        <span class="lg-lab">${(ex.perSide ? t('timeLabelSide','Czas na stronę') : t('timeLabel','Czas')).toUpperCase()}</span>
-        <div class="lg-tm-clock" id="tmClock">${fmtClock(timeDurFor(ex))}</div>
+        <span class="lg-lab" id="tmLab">${(ex.perSide ? t('timeLabelSide','Czas na stronę') : t('timeLabel','Czas')).toUpperCase()}</span>
+        <div class="lg-tm-clock" id="tmClock">${isCardioGoalEx(ex) ? cgIdleClock() : fmtClock(timeDurFor(ex))}</div>
         <p class="lg-tm-msg" id="tmMsg" aria-live="polite"></p>
+        <div class="cg-run" id="cgRun" hidden>
+          <div class="cg-bar"><i id="cgBarFill"></i></div>
+          <div class="cg-barrow"><span id="cgBarL"></span><span id="cgBarR"></span></div>
+          <div class="cg-chips" id="cgChips"></div>
+        </div>
         <div class="lg-tm-btns">
           <button type="button" class="lg-add lg-tm-main m-press" id="tmMain" onclick="tmMain()">${t('tmStart','Start')}</button>
           <div class="lg-tm-row" id="tmRow" hidden>
@@ -10047,6 +10085,7 @@ function renderExercisePopupV2(animate){
   requestAnimationFrame(()=>{
     const host = document.getElementById('lgRuler');
     if(host && lg && !bw && !time){ lg.ruler = lgBuildRuler(host, lg.step, lg.w, v=> lgSetW(v, 'ruler')); }
+    if(time && isCardioGoalEx(ex)) cgInit();
   });
 }
 /* ---- timed set countdown (mode:'time') ----
@@ -10054,10 +10093,227 @@ function renderExercisePopupV2(animate){
    long it was paused), never from counting interval ticks: iOS freezes timers in the background
    and with the screen off, and after coming back the clock must show the true remaining time.
    Timeline: side 1 [0, D) → (perSide) switch [D, D+S) → side 2 [D+S, 2D+S) → done. */
+/* ---- cardio goal, chosen before Start (bieżnia, rower, wioślarz…) ----
+   Goal = time (ruler in minutes), distance (ruler in km / m) or none. Time counts down and, once reached, the clock goes on counting
+   up ("+2:15") until the user taps Zakończ; a distance goal on a machine with a speed (bieżnia, rower…) is turned into a time with
+   it, otherwise the clock simply counts up. The settings entered before Start (nachylenie, poziom) are written into the set when it
+   ends, so they can't be forgotten; the results sheet then only has the distance left to fill in. Choices are remembered per exercise. */
+const LS_CARDIO_GOAL = 'mekkio_cardio_goal_v1';
+let cardioGoals = (()=>{ try{ const v = JSON.parse(localStorage.getItem(LS_CARDIO_GOAL)); return (v && typeof v === 'object') ? v : {}; }catch(e){ return {}; } })();
+function saveCardioGoals(){ try{ localStorage.setItem(LS_CARDIO_GOAL, JSON.stringify(cardioGoals)); }catch(e){} }
+const CG_TIME = { min:5, max:120, step:1 };                     // minutes
+const CG_DIST = { km:{ max:30, step:0.5 }, m:{ max:10000, step:250 } };
+const CG_PRE_PARAMS = ['inclinePct', 'level'];                  // metrics worth entering before Start; the distance is read off the machine at the end
+const CG_SPEED_DEF = { label:'Prędkość', unit:'km/h', step:0.5, dec:1, max:40 };
+let cg = null;        // { mode:'time'|'dist'|'none', timeMin, dist, speed, params:{inclinePct, level}, ruler }
+let cgResult = null;  // what the results sheet needs after a goal set: { chip, hints }
+function isCardioGoalEx(ex){ return !!ex && isTimeEx(ex) && ex.group === 'Kardio' && !!ex.metrics && ex.metrics.length > 0 && ex.name !== 'Jump Rope'; }
+function cgDistKind(ex){ return ex.metrics.includes('distanceKm') ? 'km' : (ex.metrics.includes('distanceM') ? 'm' : null); }
+const cgClamp = (v, lo, hi)=> Math.max(lo, Math.min(hi, v));
+const cardioMetricLabel = k => t('cm_' + k, CARDIO_METRIC_DEFS[k].label);
+function cgFmtMMSS(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), r = sec % 60;
+  return h ? `${h}:${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}` : `${m}:${String(r).padStart(2,'0')}`;
+}
+function cgFmtDist(v, kind){ return kind === 'm' ? Math.round(v).toLocaleString(LANG === 'en' ? 'en' : 'pl').replace(/ /g, ' ') : fmtKgLocal(v); }
+function cgLoad(ex){
+  const saved = cardioGoals[ex.name] || {}, kind = cgDistKind(ex);
+  const hist = lastSessionsFor(ex.name);
+  let speed = saved.speed != null ? saved.speed : null;
+  if(speed == null && kind === 'km'){   // last time's average speed
+    for(const h of hist){
+      const set = exSetsView(h).find(x=> x.distanceM > 0 && x.durationSec > 0);
+      if(set){ speed = Math.round(set.distanceM / 1000 / (set.durationSec / 3600) * 2) / 2; break; }
+    }
+  }
+  const params = {};
+  ex.metrics.filter(k=> CG_PRE_PARAMS.includes(k)).forEach(k=>{
+    params[k] = saved.params && saved.params[k] != null ? saved.params[k] : crHint(k);
+  });
+  const mode = ['time','dist','none'].includes(saved.mode) && !(saved.mode === 'dist' && !kind) ? saved.mode : 'time';
+  cg = {
+    mode, kind,
+    timeMin: cgClamp(Math.round(saved.timeMin || timeDurFor(ex) / 60), CG_TIME.min, CG_TIME.max),
+    dist: saved.dist || (kind === 'm' ? 2000 : 5),
+    speed, params, ruler: null
+  };
+}
+function cgSave(){
+  if(!cg || !popupExercise) return;
+  cardioGoals[popupExercise.name] = { mode: cg.mode, timeMin: cg.timeMin, dist: cg.dist, speed: cg.speed, params: cg.params };
+  saveCardioGoals();
+}
+// goal in ms for the countdown; 0 = nothing to count down to (stopwatch)
+function cgGoalMs(){
+  if(!cg) return 0;
+  if(cg.mode === 'time') return cg.timeMin * 60000;
+  if(cg.mode === 'dist' && cg.kind === 'km' && cg.speed > 0) return Math.round(cg.dist / cg.speed * 3600000);
+  return 0;
+}
+function cgIdleClock(){
+  if(!cg) return fmtClock(timeDurFor(popupExercise));
+  const ms = cgGoalMs();
+  return ms ? cgFmtMMSS(ms / 1000) : '0:00';
+}
+function cgGoalLabel(g){
+  if(g.mode === 'time') return `${g.timeMin} min`;
+  if(g.mode === 'dist') return `${cgFmtDist(g.dist, g.kind)} ${g.kind === 'm' ? 'm' : 'km'}`;
+  return '';
+}
+function cgBegin(){   // snapshot taken at Start (the card is hidden while it runs)
+  cgSave();
+  const chips = document.getElementById('cgChips');
+  if(chips){ chips.innerHTML = ''; delete chips.dataset.k; }
+  return { mode: cg.mode, kind: cg.kind, D: cgGoalMs(), timeMin: cg.timeMin, dist: cg.dist, speed: cg.speed, params: { ...cg.params } };
+}
+function cgHtml(ex, rise){
+  cgLoad(ex);
+  const defs = ex.metrics.filter(k=> CG_PRE_PARAMS.includes(k));
+  const rows = [];
+  if(cg.kind === 'km') rows.push(['speed', CG_SPEED_DEF]);
+  defs.forEach(k=> rows.push([k, CARDIO_METRIC_DEFS[k]]));
+  const rowHtml = rows.map(([k, def])=>{
+    const v = k === 'speed' ? cg.speed : cg.params[k];
+    return `<div class="lg-metric" data-k="${k}"><span class="lg-metric-l">${escHtml(k === 'speed' ? t('cgSpeed','Prędkość') : cardioMetricLabel(k))}</span>
+      <input class="lg-metric-in" id="cgIn_${k}" type="text" inputmode="decimal" autocomplete="off" value="${crFmt(def, v)}" placeholder="—" oninput="cgSetParam('${k}', this.value)">
+      ${def.unit ? `<span class="lg-metric-u">${def.unit}</span>` : ''}
+      <span class="lg-steps"><button type="button" class="lg-step" onclick="cgStepParam('${k}',-1)" aria-label="−">${LG_ICONS.minus}</button><button type="button" class="lg-step" onclick="cgStepParam('${k}',1)" aria-label="+">${LG_ICONS.plus}</button></span></div>`;
+  }).join('');
+  const modes = [['time', t('cgTime','Czas')], ['dist', t('cgDist','Dystans')], ['none', t('cgNone','Bez celu')]]
+    .filter(([m])=> !(m === 'dist' && !cg.kind));
+  return `<div class="lg-block cg-box${rise || ''}" id="cgBox">
+    <span class="lg-lab">${escHtml(t('cgTitle','Cel na dziś').toUpperCase())}</span>
+    <div class="cg-seg" id="cgSeg" style="grid-template-columns:repeat(${modes.length},1fr)">${modes.map(([m, l])=> `<button type="button" data-m="${m}" onclick="cgSetMode('${m}')">${escHtml(l)}</button>`).join('')}</div>
+    <div class="cg-val" id="cgVal"></div>
+    <div class="lg-ruler" id="cgRuler"></div>
+    <p class="cg-est" id="cgEst"></p>
+    ${rows.length ? `<p class="cg-sec">${escHtml(t('cgParams','Parametry'))}</p><div class="lg-sets">${rowHtml}</div>` : ''}
+  </div>`;
+}
+function cgInit(){
+  if(!cg || !document.getElementById('cgRuler')) return;
+  cgBuildRuler();
+  cgPaint();
+}
+function cgBuildRuler(){
+  const host = document.getElementById('cgRuler');
+  if(!host || !cg) return;
+  host.style.display = cg.mode === 'none' ? 'none' : '';
+  if(cg.mode === 'none'){ cg.ruler = null; return; }
+  if(cg.mode === 'time'){
+    cg.ruler = lgBuildRuler(host, CG_TIME.step, cg.timeMin, v=>{ cg.timeMin = cgClamp(Math.round(v), CG_TIME.min, CG_TIME.max); cgSave(); cgPaint(); }, { max: CG_TIME.max, labelEvery: 5, fmt: v=> String(v) });
+  } else {
+    const D = CG_DIST[cg.kind];
+    cg.ruler = lgBuildRuler(host, D.step, cg.dist, v=>{ cg.dist = cgClamp(v, D.step, D.max); cgSave(); cgPaint(); },
+      { max: D.max, labelEvery: cg.kind === 'm' ? 4 : 2, fmt: v=> cg.kind === 'm' ? String(v) : fmtKgLocal(v) });
+  }
+}
+function cgPaint(){
+  if(!cg) return;
+  document.querySelectorAll('#cgSeg button').forEach(b=> b.classList.toggle('active', b.dataset.m === cg.mode));
+  const val = document.getElementById('cgVal'), est = document.getElementById('cgEst');
+  if(val){
+    val.innerHTML = cg.mode === 'time' ? `<b>${cg.timeMin}</b><span>min</span>`
+      : cg.mode === 'dist' ? `<b>${cgFmtDist(cg.dist, cg.kind)}</b><span>${cg.kind === 'm' ? 'm' : 'km'}</span>`
+      : `<b>—</b>`;
+  }
+  if(est){
+    let txt = '';
+    if(cg.mode === 'dist'){
+      if(cg.kind === 'km') txt = cg.speed > 0 ? t('cgEstSpeed', `Przy ${fmtKgLocal(cg.speed)} km/h to około ${Math.round(cg.dist / cg.speed * 60)} min. Dam znać, gdy ten czas minie.`, fmtKgLocal(cg.speed), Math.round(cg.dist / cg.speed * 60)) : t('cgEstNoSpeed','Podaj prędkość, a oszacuję czas. Bez niej zegar liczy w górę.');
+      else txt = t('cgEstM','Zegar liczy czas w górę. Dystans wpiszesz na końcu.');
+    } else if(cg.mode === 'time'){
+      if(cg.kind === 'km' && cg.speed > 0) txt = t('cgEstKm', `Przy ${fmtKgLocal(cg.speed)} km/h to około ${fmtKgLocal(Math.round(cg.speed * cg.timeMin / 60 * 10) / 10)} km.`, fmtKgLocal(cg.speed), fmtKgLocal(Math.round(cg.speed * cg.timeMin / 60 * 10) / 10));
+    } else txt = t('cgEstNone','Zegar liczy w górę. Kończysz, kiedy chcesz.');
+    est.textContent = txt;
+  }
+  const clock = document.getElementById('tmClock');
+  if(clock && !tm) clock.textContent = cgIdleClock();
+}
+function cgSetMode(m){
+  if(!cg || cg.mode === m) return;
+  cg.mode = m;
+  haptic('select');
+  cgSave();
+  cgBuildRuler();
+  cgPaint();
+}
+function cgParamDef(k){ return k === 'speed' ? CG_SPEED_DEF : CARDIO_METRIC_DEFS[k]; }
+function cgSetParam(k, raw){
+  if(!cg) return;
+  const def = cgParamDef(k), n = parseFloat(String(raw).replace(',', '.'));
+  const v = (raw === '' || !Number.isFinite(n)) ? null : cgClamp(n, 0, def.max);
+  if(k === 'speed') cg.speed = v; else cg.params[k] = v;
+  cgSave(); cgPaint();
+}
+function cgStepParam(k, dir){
+  if(!cg) return;
+  const def = cgParamDef(k), cur = k === 'speed' ? cg.speed : cg.params[k];
+  const base = cur != null ? cur : 0, p = Math.pow(10, def.dec);
+  const v = cgClamp(Math.round((base + dir * def.step) * p) / p, 0, def.max);
+  if(k === 'speed') cg.speed = v; else cg.params[k] = v;
+  const inp = document.getElementById('cgIn_' + k);
+  if(inp) inp.value = crFmt(def, v);
+  haptic('light');
+  cgSave(); cgPaint();
+}
+// while it runs: clock, label, message, progress bar and the settings chosen before Start
+function cgPaintRun(g, ph, clock, msg, lab, main, row){
+  const goal = cgGoalLabel(g);
+  let label, text, extra = '';
+  if(ph.key === 'up'){ text = cgFmtMMSS(ph.side / 1000); label = t('cgLabTime','Czas'); extra = goal ? t('cgGoal', `Cel: ${goal}`, goal) : ''; }
+  else if(ph.key === 's0'){ text = cgFmtMMSS(Math.ceil(ph.left / 1000)); label = t('cgLabLeft','Zostało'); extra = goal ? t('cgGoal', `Cel: ${goal}`, goal) : ''; }
+  else { text = '+' + cgFmtMMSS(ph.over / 1000); label = t('cgLabOver','Ponad cel'); extra = t('cgReached','Cel osiągnięty'); }
+  clock.textContent = text;
+  clock.classList.toggle('is-run', tm.pausedAt === null);
+  if(lab) lab.textContent = label.toUpperCase();
+  if(msg) msg.textContent = ph.key === 'over' ? t('cgTotal', `Razem ${cgFmtMMSS(ph.side / 1000)}`, cgFmtMMSS(ph.side / 1000)) + ' · ' + extra : extra;
+  const bar = document.getElementById('cgBarFill'), L = document.getElementById('cgBarL'), R = document.getElementById('cgBarR'), chips = document.getElementById('cgChips');
+  const hasBar = g.D > 0;
+  if(bar){ bar.parentElement.hidden = !hasBar; bar.style.transform = `scaleX(${hasBar ? Math.min(1, ph.side / g.D) : 0})`; }
+  if(L){ L.parentElement.hidden = !hasBar; L.textContent = hasBar ? cgFmtMMSS(ph.side / 1000) : ''; }
+  if(R) R.textContent = hasBar ? cgFmtMMSS(g.D / 1000) : '';
+  if(chips && !chips.dataset.k){
+    const parts = [];
+    if(g.speed > 0) parts.push(`${t('cgSpeed','Prędkość')} ${fmtKgLocal(g.speed)} km/h`);
+    Object.keys(g.params).forEach(k=>{ if(g.params[k] != null){ const d = CARDIO_METRIC_DEFS[k]; parts.push(`${cardioMetricLabel(k)} ${crFmt(d, g.params[k])}${d.unit ? (d.unit === '%' ? '%' : ' ' + d.unit) : ''}`); } });
+    chips.innerHTML = parts.map(x=> `<span class="lg-chip">${escHtml(x)}</span>`).join('');
+    chips.dataset.k = '1';
+  }
+  if(main) main.textContent = tm.pausedAt !== null ? t('tmResume','Wznów') : t('tmPause','Pauza');
+  if(row) row.hidden = false;
+}
+// the set row gets the settings chosen before Start (validated like any cardio field)
+function cgRowFields(g){
+  const raw = {};
+  Object.keys(g.params).forEach(k=>{ if(g.params[k] != null){ const d = CARDIO_METRIC_DEFS[k]; raw[d.field] = d.toStored(g.params[k]); } });
+  return cardioSetFields(raw);
+}
+// chip + starting values for the distance in the results sheet: from the speed and the real time, else the distance goal
+function cgResultFor(g, sec){
+  const hints = {};
+  if(g.kind === 'km'){
+    if(g.speed > 0) hints.distanceKm = Math.round(g.speed * sec / 3600 * 10) / 10;
+    else if(g.mode === 'dist') hints.distanceKm = g.dist;
+  } else if(g.kind === 'm' && g.mode === 'dist') hints.distanceM = g.dist;
+  let chip = '';
+  if(g.mode !== 'none'){
+    chip = t('crGoalChip', `Cel ${cgGoalLabel(g)}`, cgGoalLabel(g));
+    if(g.D && sec * 1000 > g.D) chip += ' · +' + cgFmtMMSS(sec - g.D / 1000);
+  }
+  return { chip, hints };
+}
+
 const TM_SWITCH_MS = 5000;
 let tm = null; // { D, sides, t0, pausedAt, key, iv, wl }
 function tmPhase(){
   const e = Math.max(0, (tm.pausedAt !== null ? tm.pausedAt : Date.now()) - tm.t0), D = tm.D;
+  if(tm.cg){   // cardio with a goal: counts down to the goal (when there is a time for it), then keeps counting up; never ends by itself
+    if(!D) return { key:'up', left: 0, side: e };
+    if(e < D) return { key:'s0', left: D - e, side: e };
+    return { key:'over', left: 0, side: e, over: e - D };
+  }
   if(e < D) return { key:'s0', left: D - e, side: e };
   if(tm.sides === 1) return { key:'done', left: 0, side: D };
   if(e < D + TM_SWITCH_MS) return { key:'sw', left: D + TM_SWITCH_MS - e, side: D };
@@ -10122,13 +10378,14 @@ function tmNotifCancel(){
 async function tmNotifSchedule(){
   const mine = tm, LN = tmNotifLN();
   if(!mine || mine.pausedAt !== null || !LN) return;
+  if(mine.cg && !mine.D) return;   // cardio without a goal time: nothing to ring
   if(!(await tmNotifGranted())) return;
   const live = ()=> tm === mine && mine.pausedAt === null;
   if(!live()) return;
   const now = Date.now(), items = [];
   const swAt = mine.t0 + mine.D, endAt = mine.t0 + (mine.sides === 2 ? 2 * mine.D + TM_SWITCH_MS : mine.D);
   if(mine.sides === 2 && swAt > now) items.push({ id: 91000, body: t('tmNotifSwitch','Zmień stronę'), at: swAt });
-  if(endAt > now) items.push({ id: 91001, body: t('tmNotifDone','Czas minął'), at: endAt });
+  if(endAt > now) items.push({ id: 91001, body: mine.cg ? t('tmNotifGoal','Cel osiągnięty') : t('tmNotifDone','Czas minął'), at: endAt });
   try{
     await LN.cancel({ notifications: TM_NOTIF_IDS.map(id=>({ id })) });
     if(!live() || !items.length) return;
@@ -10155,7 +10412,8 @@ function tmStartFlow(begin){
 }
 function tmBegin(){
   if(tm || !popupExercise || !isTimeEx(popupExercise)) return;   // popup closed / already running while the permission prompt was up
-  tm = { D: timeDurFor(popupExercise) * 1000, sides: popupExercise.perSide ? 2 : 1, t0: Date.now(), pausedAt: null, key: 's0', iv: setInterval(tmTick, 250), wl: null };
+  const g = (isCardioGoalEx(popupExercise) && cg) ? cgBegin() : null;   // cardio: the goal chosen before Start
+  tm = { D: g ? g.D : timeDurFor(popupExercise) * 1000, sides: g ? 1 : (popupExercise.perSide ? 2 : 1), t0: Date.now(), pausedAt: null, key: (g && !g.D) ? 'up' : 's0', iv: setInterval(tmTick, 250), wl: null, cg: g };
   haptic('medium');
   tmAwake(true);
   tmNotifSchedule();
@@ -10188,6 +10446,7 @@ function tmTick(){
     if(ph.key === 'done'){ tmCommit(Math.round(tm.D / 1000), true); return; }
     if(ph.key === 'sw') haptic('medium');
     else if(ph.key === 's1' && from === 'sw') haptic('light');
+    else if(ph.key === 'over') haptic('done');   // cardio goal reached: the clock goes on counting up
   }
   tmPaint();
 }
@@ -10195,8 +10454,14 @@ function tmPaint(){
   const clock = document.getElementById('tmClock');
   if(!clock || !popupExercise) return;
   const main = document.getElementById('tmMain'), row = document.getElementById('tmRow'), msg = document.getElementById('tmMsg');
+  const cgOn = isCardioGoalEx(popupExercise) && cg;
+  const cgBox = document.getElementById('cgBox'), cgRun = document.getElementById('cgRun'), lab = document.getElementById('tmLab');
+  if(cgBox) cgBox.hidden = !!tm;           // the goal card only before Start
+  if(cgRun) cgRun.hidden = !(tm && tm.cg);  // progress + the chosen settings only while it runs
+  if(tm && tm.cg){ cgPaintRun(tm.cg, tmPhase(), clock, msg, lab, main, row); return; }
   if(!tm){
-    clock.textContent = fmtClock(timeDurFor(popupExercise));
+    clock.textContent = cgOn ? cgIdleClock() : fmtClock(timeDurFor(popupExercise));
+    if(lab && cgOn) lab.textContent = t('cgLabTime','Czas').toUpperCase();
     clock.classList.remove('is-run');
     if(msg) msg.textContent = '';
     if(main) main.textContent = t('tmStart','Start');
@@ -10216,7 +10481,7 @@ function tmPaint(){
 function tmEnd(){
   if(!tm || !popupExercise) return;
   const ph = tmPhase();
-  const sec = Math.floor(Math.min(ph.side, tm.D) / 1000);
+  const sec = tm.cg ? Math.floor(ph.side / 1000) : Math.floor(Math.min(ph.side, tm.D) / 1000);   // cardio: the real time, also past the goal
   if(sec > 0) tmCommit(sec, false);
   else { haptic('warning'); tmStop(); tmPaint(); }
 }
@@ -10233,10 +10498,12 @@ function tmCommit(sec, auto){
   // when the set really ended: on timeline end for an automatic finish (the app may only be
   // coming back from the background now), otherwise right now
   const endedAt = auto && tm ? tm.t0 + (tm.sides === 2 ? 2 * tm.D + TM_SWITCH_MS : tm.D) : Date.now();
+  const goal = tm ? tm.cg : null;
   tmStop();
   const sv = ex.setValues;
   const row = { weight:'', reps:'', durationSec: Math.max(1, Math.round(sec)) };
   if(ex.perSide) row.perSide = true;
+  if(goal) Object.assign(row, cgRowFields(goal));   // the settings chosen before Start land in the set at once, whatever happens in the results sheet
   const idx = lgFirstBlank();
   if(idx === -1) sv.push(row); else sv[idx] = row;
   ex.sets = sv.length;
@@ -10249,6 +10516,7 @@ function tmCommit(sec, auto){
   lgResetCurrent();
   tmPaint();
   updateGymPillsV2();
+  if(goal) cgResult = cgResultFor(goal, row.durationSec);
   if(ex.metrics && ex.metrics.length) openCardioResults(idx === -1 ? sv.length - 1 : idx);   // cardio: offer the results sheet right after the set
 }
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && tm){ tmTick(); if(tm && tm.pausedAt === null) tmAwake(true); } });

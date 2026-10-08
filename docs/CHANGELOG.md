@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.59.2 (2026-10-09)
-- **Liczba wersji:** 247 · **commitów:** 591
+- **Aktualna wersja:** 4.60.0 (2026-10-09)
+- **Liczba wersji:** 248 · **commitów:** 592
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -116,6 +116,19 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.60.0 · MINOR · 2026-10-09
+
+**Dla użytkownika:** w ćwiczeniach kardio możesz przed startem wybrać cel (czas albo dystans) i wpisać parametry; po osiągnięciu celu zegar liczy dalej (wpis „Co nowego” do napisania osobno).
+
+- **Cel na dziś:** nad zegarem karta z wyborem „Czas / Dystans / Bez celu” i suwakiem-linijką (ten sam komponent co ciężar w ćwiczeniach siłowych, `lgBuildRuler` z opcjami `max`, `labelEvery`, `fmt`): czas 5–120 min, dystans 0,5–30 km (bieżnia, rower, orbitrek, Air Bike) albo 250–10 000 m (wioślarz, Ski Erg). Dotyczy ćwiczeń kardio z metrykami, bez skakanki i HIIT. Wybór pamiętany dla każdego ćwiczenia (`mekkio_cardio_goal_v1`).
+- **Parametry przed startem:** prędkość (tylko do szacowania; z poprzedniego razu), nachylenie i poziom (podpowiedziane z historii). Przy celu dystansowym z prędkością zegar odlicza oszacowany czas, bez prędkości liczy w górę.
+- **Zegar:** odlicza do celu, po jego osiągnięciu haptyka, dźwięk i (przy zgaszonym ekranie) jedno powiadomienie lokalne, potem liczy dalej jako „+2:15” aż do „Zakończ”; zapisuje się faktyczny czas. Pasek postępu i wybrane parametry pod zegarem; bez celu stoper. Timestampowy zegar, Keep Awake i pauza jak dotąd.
+- **Nie do zapomnienia:** parametry z karty trafiają do zapisanej serii od razu (nachylenie, poziom), arkusz Wyniki otwiera się po „Zakończ” z chipem celu i czasem ponad cel, brakujący dystans jest podświetlony („do uzupełnienia”), a jego podpowiedź to dystans z prędkości i czasu albo cel dystansowy.
+- **Etykiety parametrów w EN** (`cardioMetricLabel`): Distance / Incline / Level / Floors / Jumps także w arkuszu Wyniki.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.59.2 · PATCH · 2026-10-09
 
