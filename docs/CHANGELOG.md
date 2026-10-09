@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.60.1 (2026-10-09)
+- **Aktualna wersja:** 4.61.0 (2026-10-09)
 - **Liczba wersji:** 249 · **commitów:** 594
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -116,6 +116,23 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.61.0 · MINOR · 2026-10-09
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Ćwiczenie otwiera się teraz od przeglądu: serie, powtórzenia, przerwa, podpowiedź trenera i cel na dziś. Start przenosi do logowania serii. Przesuń palcem w lewo, a zobaczysz, jak ćwiczyć, z ilustracją, ustawieniem, ruchem i typowym błędem.
+
+- **Przegląd (strona 1):** rozmiary, odstępy i kolory z Figmy (513:21437). Tagi, kafelki Serie / Powtórzenia / Przerwa, karta Trenera AI (gdy jest akcja z analizy treningu) albo ciemna wskazówka treningowa (jak dotąd), obie z celem na dziś, notatka użytkownika, kafelki „Ostatnio” (z datą) i „Rekord e1RM” (z trendem 4 tyg. i wykresem), przycisk Start.
+- **Bramka:** do Startu brak kropek i swipe'a w przód. Po Starcie, a także gdy ćwiczenie ma już zalogowane serie, popup otwiera się na Treningu z kropkami, a strony przesuwają się swobodnie w obie strony.
+- **Trening (strona 2):** dotychczasowy ekran logowania, bez tagów i karty Trenera. Ćwiczenia na czas / kardio nie mają Przeglądu (mają własny Start).
+- **Jak ćwiczyć (strona 3):** zastępuje osobny arkusz z żarówki (usunięty razem z `exHowtoOverlayV2`); ilustracja to 3D ikona ćwiczenia (`iconPngUrl()`, zestaw męski lub żeński wg płci z Konto → Dane ciała; line-art SVG tylko jako zapas), Ustawienie, Ruch (kroki jako jeden akapit) i czarna karta Typowy błąd, rozmiary z Figmy.
+- **Gest:** swipe stron wg wzoru z karuzeli Stats (oś, rzut z prędkością); wyłączony na linijce ciężaru i liście serii (`data-nopage`).
+- **Dane:** `buildSuggestion()` zwraca teraz też `goal:{w,reps}`; nowe funkcje `lgOverviewData`, `lgOverviewHtml`, `lgHowHtml`, `lgGo`, `lgStart`, `lgWirePager`.
+
+**Commity (1):**
+
+- (hash dopisać przy następnej wersji) 2026-10-09 — 4.61.0: popup logowania serii w 3 stronach
 
 ### 4.60.1 · PATCH · 2026-10-09
 

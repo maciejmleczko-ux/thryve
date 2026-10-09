@@ -2387,9 +2387,9 @@ body.gymv2-bg .gy-bg{display:block;}
 #exercisePopupOverlayV2{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
 #exercisePopupSheetV2{height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;padding-bottom:0;background:#fff;}
 #exercisePopupSheetV2 > .m-sheet-grab{display:none;}
-#exercisePopupBoxV2, #exNoteBoxV2, #exHowtoBoxV2, #exCardioBoxV2, #blockBoxV2{align-items:stretch;gap:0;}
+#exercisePopupBoxV2, #exNoteBoxV2, #exCardioBoxV2, #blockBoxV2{align-items:stretch;gap:0;}
 .lg-sub-overlay{z-index:95;}
-#exNoteSheetV2, #exHowtoSheetV2, #exCardioSheetV2, #blockSheetV2{background:#fff;}
+#exNoteSheetV2, #exCardioSheetV2, #blockSheetV2{background:#fff;}
 /* cardio "Wyniki" sheet: rows like .lg-set, − / + like the reps stepper but smaller (see mockups/kardio.html) */
 .lg-metric{position:relative;width:100%;display:flex;align-items:center;gap:8px;box-sizing:border-box;background:#ededed;border:1.5px solid transparent;border-radius:16px;padding:8px 10px 8px 16px;}
 .lg-metric.is-active{border-color:rgba(255,51,0,.32);}
@@ -2566,6 +2566,64 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-how-t{margin:0;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);}
 .lg-how-ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);}
 .lg-how--warn{background:#f7f6f8;border-radius:16px;padding:14px 16px;}
+/* --- set-logging pager: Przegląd → Trening → Jak ćwiczyć (Figma "TRENING - LOGOWANIE ĆWICZENIA", 513:21437).
+   Sizes follow Figma; labels under 11px (Figma 10 / 8) stay at the --m-fs-2xs floor like the rest of the app --- */
+.lg-dots{flex:none;display:flex;justify-content:center;gap:12px;height:8px;margin:6px 0 8px;transition:opacity var(--m-dur-fade) ease;}
+.lg-dots.is-off{opacity:0;pointer-events:none;}
+.lg-dot{position:relative;width:20px;height:8px;padding:0;border:none;border-radius:var(--m-r-pill);background:rgba(163,163,163,.39);cursor:pointer;transition:background-color var(--m-dur-quick) ease;}
+.lg-dot::before{content:"";position:absolute;inset:-10px -4px;}   /* bigger touch target than the 8px pill */
+.lg-dot.is-on{width:40px;background:var(--m-orange);}
+.lg-pager{flex:1;min-height:0;overflow:hidden;position:relative;touch-action:pan-y;}
+.lg-track{display:flex;height:100%;width:100%;will-change:transform;}
+.lg-track.is-snap{transition:transform var(--m-dur-snap) var(--m-ease-spring);}
+.lg-track > .lg-scroll{flex:0 0 100%;min-width:0;}
+/* Przegląd */
+.lg-pg-ov{gap:8px;}
+.lg-pg-ov .lg-head{margin-bottom:42px;}   /* 8 + 42 = the 50px between header and content in Figma */
+.lg-pg-ov .lg-name{font-size:var(--m-fs-2xl);line-height:27.6px;letter-spacing:.0293em;}
+.lg-ov-tiles{display:grid;grid-template-columns:24.8% 35.6% minmax(0,1fr);gap:4px;}
+.lg-ov-tile{min-width:0;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;color:#fff;}
+.lg-ov-tile.t-sets{background:var(--m-plan-hard);}
+.lg-ov-tile.t-reps{background:#5da9e9;}
+.lg-ov-tile.t-rest{background:var(--m-orange);}
+.lg-ov-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:rgba(255,255,255,.82);}
+.lg-ov-tile.t-reps .lg-ov-l, .lg-ov-tile.t-rest .lg-ov-l{color:#e4f2ff;}
+.lg-ov-v{display:flex;align-items:flex-end;gap:8px;min-width:0;font-size:28px;font-weight:200;letter-spacing:-.0357em;line-height:1;white-space:nowrap;}
+.lg-ov-v.is-long{font-size:var(--m-fs-xl);}
+.lg-ov-v .ph, .lg-ov-v .ph svg{width:16px;height:16px;display:block;flex:none;}
+.lg-pg-ov .lg-ai{gap:26px;}
+.lg-pg-ov .lg-ai-t{font-size:var(--m-fs-base);font-weight:300;line-height:1.4;}
+.lg-ai-body, .lg-tip-body{display:flex;flex-direction:column;gap:12px;}
+.lg-ai-sep{height:0;border-top:.5px solid #dc9dff;}
+.lg-tip .lg-ai-sep{border-top-color:rgba(255,255,255,.2);}
+.lg-ai-goal{display:flex;flex-direction:column;align-items:flex-start;gap:12px;}
+.lg-ai-goal-l{display:inline-flex;align-items:center;height:19px;padding:0 14px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.14);color:#fff;font-size:var(--m-fs-2xs);letter-spacing:.04em;text-transform:uppercase;}
+.lg-ai-goal-v{font-size:34.43px;font-weight:200;letter-spacing:-.01em;line-height:1;color:#fff;}
+.lg-pg-ov .lg-tip{gap:26px;padding:16px;}
+.lg-pg-ov .lg-tip-t{font-size:var(--m-fs-base);font-weight:300;line-height:1.4;}
+.lg-ov-row{display:grid;grid-template-columns:174fr 141fr;gap:8px;}
+.lg-mini{min-width:0;min-height:135px;background:#ededed;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;gap:10px;}
+.lg-mini-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(44,39,39,.8);}
+.lg-mini-v{font-size:40px;font-weight:200;letter-spacing:-.02em;line-height:40px;color:#2c2727;white-space:nowrap;}
+.lg-mini-v small{font-size:var(--m-fs-md);font-weight:400;letter-spacing:0;margin-left:4px;color:rgba(44,39,39,.8);}
+.lg-mini-s{display:flex;align-items:center;gap:8px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#2c2727;}
+.lg-mini-s.is-trend{gap:4px;}
+.lg-mini-s b{font-weight:500;color:var(--m-orange);}
+.lg-mini-s .ph, .lg-mini-s .ph svg{width:12px;height:12px;display:block;color:var(--m-orange);}
+.lg-mini-sp{display:block;width:109px;max-width:100%;height:19px;margin-top:auto;}
+.lg-add.lg-ov-start{flex:none;margin-top:auto;background:var(--m-orange);color:#fff;}
+/* Jak ćwiczyć */
+.lg-pg-how{gap:16px;}
+.lg-how-ill{display:flex;align-items:center;justify-content:center;}
+.lg-how-ill img{display:block;width:305px;max-width:100%;height:auto;aspect-ratio:1;object-fit:contain;}
+.lg-how-ill svg{height:200px;width:auto;max-width:70%;color:#2c2727;}
+.lg-how-txt{display:flex;flex-direction:column;gap:8px;padding:0 12px;}
+.lg-how-txt .lg-how{gap:8px;}
+.lg-how-txt .lg-how-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;}
+.lg-how-txt .lg-how-t{font-size:var(--m-fs-xs);font-weight:400;line-height:normal;color:#343941;}
+.lg-how-err{background:#000;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;gap:12px;}
+.lg-how-err .lg-how-l{font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.0909em;}
+.lg-how-err .lg-how-t{font-size:var(--m-fs-xs);font-weight:400;line-height:normal;color:#fdfbff;}
 .gy-confirm-box{text-align:center;}
 @media (prefers-reduced-motion: no-preference){
   .lg-chip.rest.is-pop{animation:lgRestPop var(--m-dur-pop) var(--m-ease-spring);}
@@ -3986,12 +4044,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="m-sheet-body" id="blockBoxV2"></div>
   </div>
 </div>
-<div class="onboard-overlay hidden m-sheet-overlay lg-sub-overlay" id="exHowtoOverlayV2" onclick="if(event.target===this) closeExHowtoV2()">
-  <div class="m-sheet" id="exHowtoSheetV2">
-    <div class="m-sheet-grab" aria-hidden="true"></div>
-    <div class="m-sheet-body" id="exHowtoBoxV2"></div>
-  </div>
-</div>
 
 <!-- Generic in-app confirm dialog (abort workout, empty finish) — see gymConfirmV2(). -->
 <div class="onboard-overlay hidden" id="gymConfirmOverlay" onclick="if(event.target===this) gymConfirmCloseV2(false)">
@@ -4059,6 +4111,7 @@ const T_EN = {
   gymUnsavedTitle: 'Changes not saved', gymUnsavedBody: 'This exercise was already done. To save your changes, go back and tap ✓.', gymUnsavedYes: 'Leave without saving', gymUnsavedNo: 'Back',
   gymEmptyTitle: 'The workout is empty', gymEmptyBody: "You haven't logged an exercise yet. Add the first one?", gymEmptyYes: 'Add exercise',
   gymLeaveLogging: 'Leave logging', gymAddExerciseDone: 'Add exercise to workout', gymSwipeHint: 'Swipe a set left to delete it', gymLogWarn: 'Log at least one set to add the exercise.', gymExtraSet: 'Extra set',
+  lgOvGoal: 'Goal for today', lgOvLast: 'Last time', lgOvRecord: 'RECORD', lgOvRecordE1rm: 'E1RM RECORD', lgOvRepsWord: 'reps', lgOvWeeks: 'in 4 wks', lgOvSets: 'Sets', lgOvReps: 'Reps', lgOvRest: 'Rest',
   trainerAi: 'AI COACH', exNoteSheetTitle: 'NOTE', exHowtoTitle: 'How to do it', exHowtoSheetTitle: 'HOW TO DO IT', exHowtoSetup: 'SETUP', exHowtoMove: 'MOVEMENT', exHowtoMistake: 'COMMON MISTAKE',
   planPill: 'Training plans',
   planOnboardingIntro: "Before you start, pick a ready-made plan or build your own — you'll see it right away in GYM.",
@@ -7055,7 +7108,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.60.1";
+const APP_VERSION = "4.61.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7104,6 +7157,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.61.0": {
+    pl: [
+      {featured:true, icon:'barbell', badge:'Nowość', title:'Ćwiczenie w trzech krokach', text:'Ćwiczenie otwiera się teraz od przeglądu: serie, powtórzenia, przerwa, podpowiedź trenera i cel na dziś. Start przenosi do logowania serii. Przesuń palcem w lewo, a zobaczysz, jak ćwiczyć, z ilustracją, ustawieniem, ruchem i typowym błędem.'}
+    ],
+    en: [
+      {featured:true, icon:'barbell', badge:'New', title:'Three steps per exercise', text:'An exercise now opens with an overview: sets, reps, rest, the coach\'s tip and today\'s target. Start takes you to set logging. Swipe left to see how to do it, with an illustration, setup, movement and the typical mistake.'}
+    ],
+  },
   "4.59.0": {
     pl: [
       {featured:true, icon:'flame', badge:'Nowość', title:'Rozgrzewka i rozciąganie', text:'Na ekranie Trening masz teraz kartę rozgrzewki na górze i rozciągania na dole. Ćwiczenia dobierają się same do partii, które dziś robisz, a zegar prowadzi krok po kroku. Doszło też 17 nowych ćwiczeń z ikonami i opisami.'},
@@ -8618,9 +8679,9 @@ function buildSuggestion(exMeta, history){
       const target = tipCapWeight(best.weight || 0, est);
       // the 5% cap cut the estimate: the weight is only a safe starting point, so don't promise a reserve
       if(est > (best.weight || 0) * 1.05){
-        return {cls:'', text:t('tipOtherVersionCapped', `Ostatnio: ${kg(best.weight||0)} kg × ${best.reps}. Przy ${loc} zacznij od ${kg(target)} kg i dokładaj, jeśli poczujesz zapas.`, kg(best.weight||0), best.reps, loc, kg(target))};
+        return {cls:'', text:t('tipOtherVersionCapped', `Ostatnio: ${kg(best.weight||0)} kg × ${best.reps}. Przy ${loc} zacznij od ${kg(target)} kg i dokładaj, jeśli poczujesz zapas.`, kg(best.weight||0), best.reps, loc, kg(target)), goal:{w:target, reps:exMeta.repLow}};
       }
-      return {cls:'', text:t('tipOtherVersion', `Ostatnio: ${kg(best.weight||0)} kg × ${best.reps}. Przy ${loc} spróbuj ${kg(target)} kg, z zapasem 1–2 powtórzeń.`, kg(best.weight||0), best.reps, loc, kg(target))};
+      return {cls:'', text:t('tipOtherVersion', `Ostatnio: ${kg(best.weight||0)} kg × ${best.reps}. Przy ${loc} spróbuj ${kg(target)} kg, z zapasem 1–2 powtórzeń.`, kg(best.weight||0), best.reps, loc, kg(target)), goal:{w:target, reps:exMeta.repLow}};
     }
   }
   const validSets = last.sets.filter(s=> s.weight>0 || s.reps>0);
@@ -8648,14 +8709,14 @@ function buildSuggestion(exMeta, history){
   if(allTop){
     const step = tipStepUpKg(lastWeight), next = Math.round((lastWeight + step) * 100) / 100;
     return weightWasUniform
-      ? {cls:'up', text:t('suggestUp', `Ostatnio ${kg(lastWeight)} kg × ${exMeta.repHigh}+ we wszystkich seriach. Spróbuj ${kg(next)} kg i wróć do ${exMeta.repLow} powt.`, kg(lastWeight), exMeta.repHigh, kg(next), exMeta.repLow)}
-      : {cls:'up', text:t('suggestUpMixed', `Ostatnio dobiłeś do ${exMeta.repHigh}+ powt. w każdej serii, najciężej ${kg(lastWeight)} kg. Podciągnij lżejsze serie do tego ciężaru albo dołóż ${kg(step)} kg na najcięższej.`, exMeta.repHigh, kg(lastWeight), kg(step))};
+      ? {cls:'up', text:t('suggestUp', `Ostatnio ${kg(lastWeight)} kg × ${exMeta.repHigh}+ we wszystkich seriach. Spróbuj ${kg(next)} kg i wróć do ${exMeta.repLow} powt.`, kg(lastWeight), exMeta.repHigh, kg(next), exMeta.repLow), goal:{w:next, reps:exMeta.repLow}}
+      : {cls:'up', text:t('suggestUpMixed', `Ostatnio dobiłeś do ${exMeta.repHigh}+ powt. w każdej serii, najciężej ${kg(lastWeight)} kg. Podciągnij lżejsze serie do tego ciężaru albo dołóż ${kg(step)} kg na najcięższej.`, exMeta.repHigh, kg(lastWeight), kg(step)), goal:{w:lastWeight, reps:exMeta.repHigh}};
   }
   if(lowFails>=2){
     const down = Math.round(lastWeight * 0.9 / 2.5) * 2.5;
-    return {cls:'down', text:t('suggestDown', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach. Spróbuj ok. ${kg(down)} kg (około 10% mniej niż ${kg(lastWeight)} kg).`, exMeta.repLow, lowFails, kg(down), kg(lastWeight))};
+    return {cls:'down', text:t('suggestDown', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach. Spróbuj ok. ${kg(down)} kg (około 10% mniej niż ${kg(lastWeight)} kg).`, exMeta.repLow, lowFails, kg(down), kg(lastWeight)), goal:{w:down, reps:exMeta.repLow}};
   }
-  return {cls:'', text:t('suggestHold', `Zostań przy ${kg(lastWeight)} kg i spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, kg(lastWeight), exMeta.repHigh)};
+  return {cls:'', text:t('suggestHold', `Zostań przy ${kg(lastWeight)} kg i spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, kg(lastWeight), exMeta.repHigh), goal:{w:lastWeight, reps:exMeta.repHigh}};
 }
 
 /* ---------- persisted, user-draggable exercise tile order ---------- */
@@ -9715,7 +9776,7 @@ function lgPadOpen(f){
   if(!lg || !popupExercise) return;
   if(lgPad && lgPad.f !== f) lgPadApply();
   lgPad = { f, buf: '' };
-  const pad = document.getElementById('lgPad'), scroll = document.querySelector('#exercisePopupBoxV2 .lg-scroll');
+  const pad = document.getElementById('lgPad'), scroll = document.getElementById('lgMain');
   if(!pad) return;
   pad.querySelector('.lg-key-dec').disabled = (f === 'r');
   scroll.classList.add('pad-open');
@@ -9740,7 +9801,7 @@ function lgPadClose(){
   if(!lgPad) return;
   lgPadApply();
   lgPad = null;
-  const pad = document.getElementById('lgPad'), scroll = document.querySelector('#exercisePopupBoxV2 .lg-scroll');
+  const pad = document.getElementById('lgPad'), scroll = document.getElementById('lgMain');
   if(pad){ pad.classList.remove('is-open'); setTimeout(()=>{ if(!lgPad) pad.hidden = true; }, 260); } // == --m-dur-exit
   if(scroll) scroll.classList.remove('pad-open');
   lgPaint();
@@ -9924,6 +9985,158 @@ function closeExercisePopupX(){
   }
   closeExercisePopupV2();
 }
+
+/* ---- set-logging pager: Przegląd → Trening → Jak ćwiczyć ----
+   Przegląd is the gate before the first set (no dots, no swipe forward; Start moves on). After Start, or whenever the
+   exercise already has logged sets, the dots show and all pages swipe freely. Timed / cardio exercises have no Przegląd
+   (their own Start lives on Trening). Ruler and set rows (data-nopage) keep their own horizontal gestures. */
+let lgPg = null;   // { page:'ov'|'main'|'how', started }
+function fmtDayMonShort(iso){
+  const [y,m,d] = iso.split('-');
+  const mon = (LANG === 'en' ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] : ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'])[parseInt(m)-1];
+  return `${parseInt(d)} ${mon}` + (y !== todayStr().slice(0,4) ? ` ${y}` : '');
+}
+// last result + best result of the exercise, for the two small cards on Przegląd (null when there is no history)
+function lgOverviewData(ex){
+  const bw = ex.equipment === 'masa ciała';
+  const sessions = workouts.filter(w=> w.exercises.some(e=> e.name === ex.name)).sort((a,b)=> b.date.localeCompare(a.date));
+  if(!sessions.length) return null;
+  const sets = exSetsView(sessions[0].exercises.find(e=> e.name === ex.name)).filter(x=> x.weight > 0 || x.reps > 0);
+  if(!sets.length) return null;
+  const last = { date: sessions[0].date, sub: sets.map(x=> x.reps || 0).join('•'),
+    big: fmtKgLocal(bw ? Math.max(...sets.map(x=> x.reps || 0)) : Math.max(...sets.map(x=> x.weight || 0))), unit: bw ? t('repsUnit','powt.') : 'kg' };
+  const all = statsV2ExerciseSets(ex.name);
+  let rec = null;
+  if(bw){
+    const best = Math.max(0, ...all.map(x=> x.reps));
+    if(best > 0) rec = { big: String(best), unit: t('repsUnit','powt.'), label: t('lgOvRecord','REKORD') };
+  } else {
+    const el = all.filter(statsV2E1rmEligible), e1 = x=> statsV2Epley(x.weight, x.reps);
+    if(el.length){
+      const best = Math.max(...el.map(e1));
+      const age = x=> Math.round((new Date(todayStr()+'T00:00:00') - new Date(x.date+'T00:00:00')) / 86400000);
+      const older = el.filter(x=> age(x) >= 28);
+      const delta = older.length ? Math.round((best - Math.max(...older.map(e1))) * 10) / 10 : 0;
+      const byDay = {};
+      el.forEach(x=>{ byDay[x.date] = Math.max(byDay[x.date] || 0, e1(x)); });
+      const spark = Object.keys(byDay).sort().slice(-6).map(d=> byDay[d]);
+      rec = { big: fmtKgLocal(Math.round(best)), unit: 'kg', label: t('lgOvRecordE1rm','REKORD E1RM'), delta: delta >= 1 ? delta : 0, spark };
+    }
+  }
+  return { last, rec };
+}
+function lgSparkSvg(vals){
+  if(!vals || vals.length < 2) return '';
+  const lo = Math.min(...vals), hi = Math.max(...vals), rng = (hi - lo) || 1;
+  const pts = vals.map((v,i)=> `${(2 + i * 96 / (vals.length - 1)).toFixed(1)},${(22 - (v - lo) / rng * 20).toFixed(1)}`).join(' ');
+  return `<svg class="lg-mini-sp" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="var(--m-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
+}
+function lgOverviewHtml(ex, history, sugg, aiAction, versionPill, rise){
+  const kg = fmtKgLocal;
+  const repsTxt = `${ex.repLow}-${ex.repHigh}`, restTxt = parseRestSeconds(ex.rest) > 0 ? String(ex.rest) : '–';
+  const tile = (cls, label, icon, txt)=> `<div class="lg-ov-tile ${cls}"><span class="lg-ov-l">${escHtml(label)}</span><span class="lg-ov-v${txt.length >= 5 ? ' is-long' : ''}">${ph(icon)}<span>${escHtml(txt)}</span></span></div>`;
+  const goal = sugg.goal && sugg.goal.w > 0 ? `<div class="lg-ai-goal"><span class="lg-ai-goal-l">${t('lgOvGoal','Cel na dziś')}</span><span class="lg-ai-goal-v">${kg(sugg.goal.w)}kg x ${sugg.goal.reps}</span></div>` : '';
+  // Trener AI (the action from the last workout's analysis) when there is one, otherwise the rule-based training tip: same as before the pager
+  const tipHtml = aiAction
+    ? `<div class="lg-ai${rise(2)}"><div class="lg-ai-h">${ph('sparks')}<span>${t('trainerAi','TRENER AI')}</span></div><div class="lg-ai-body"><p class="lg-ai-t">${escHtml(aiAction)}</p>${goal ? `<div class="lg-ai-sep"></div>${goal}` : ''}</div></div>`
+    : `<div class="lg-tip${rise(2)}"><span class="lg-tip-l">${t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><div class="lg-tip-body"><span class="lg-tip-t">${escHtml(sugg.text)}</span>${goal ? `<div class="lg-ai-sep"></div>${goal}` : ''}</div></div>`;
+  const d = lgOverviewData(ex);
+  const rowHtml = d ? `<div class="lg-ov-row${rise(3)}">
+      <div class="lg-mini"><span class="lg-mini-l">${t('lgOvLast','Ostatnio')} • ${escHtml(fmtDayMonShort(d.last.date))}</span><span class="lg-mini-v">${d.last.big}<small>${escHtml(d.last.unit)}</small></span><span class="lg-mini-s"><b>${escHtml(d.last.sub)}</b><span>${t('lgOvRepsWord','powtórzeń')}</span></span></div>
+      ${d.rec ? `<div class="lg-mini"><span class="lg-mini-l">${escHtml(d.rec.label)}</span><span class="lg-mini-v">${d.rec.big}<small>${escHtml(d.rec.unit)}</small></span>${d.rec.delta ? `<span class="lg-mini-s is-trend"><span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span><b>${kg(d.rec.delta)}kg</b><span>${t('lgOvWeeks','w 4 tyg.')}</span></span>` : ''}${lgSparkSvg(d.rec.spark)}</div>` : ''}
+    </div>` : '';
+  const note = exerciseNotes[ex.name] || '';
+  return `<div class="lg-scroll lg-pg-ov" id="lgOv">
+      <div class="lg-head${rise(0)}">
+        <div class="lg-tags"><span class="lg-tag">${escHtml(groupLabel(ex.group))}</span>${versionPill}</div>
+        <div class="lg-name-row">
+          <div class="lg-name">${escHtml(ex.name)}</div>
+          <button type="button" class="lg-ic note${note?' has-note':''}" onclick="openExNoteV2()" aria-label="${escHtml(t('exNoteLabel','Twoja notatka'))}">${LG_ICONS.note}</button>
+        </div>
+      </div>
+      <div class="lg-ov-tiles${rise(1)}">${tile('t-sets', t('lgOvSets','Serie'), 'stack', String(ex.sets))}${tile('t-reps', t('lgOvReps','Powtórzenia'), 'arrow-clockwise', repsTxt)}${tile('t-rest', t('lgOvRest','Przerwa'), 'clock-countdown', restTxt)}</div>
+      ${note ? `<div class="lg-tip lg-ov-note${rise(2)}"><span class="lg-tip-l">${t('exNoteSheetTitle','NOTATKA')}</span><span class="lg-tip-t">${escHtml(note)}</span></div>` : ''}
+      ${tipHtml}
+      ${rowHtml}
+      <button type="button" class="lg-add lg-ov-start${rise(4)}" onclick="lgStart()">${t('tmStart','Start')}</button>
+    </div>`;
+}
+function lgHowHtml(ex, h){
+  const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon, png = slug ? iconPngUrl(slug) : '', svg = !png && slug ? iconSvgV3(slug) : '';
+  return `<div class="lg-scroll lg-pg-how" id="lgHow">
+      <div class="lg-name-row"><div class="lg-name">${t('exHowtoSheetTitle','JAK ĆWICZYĆ')}</div></div>
+      ${png ? `<div class="lg-how-ill" aria-hidden="true"><img src="${png}" alt=""></div>` : svg ? `<div class="lg-how-ill" aria-hidden="true">${svg}</div>` : ''}
+      <div class="lg-how-txt">
+        <div class="lg-how"><p class="lg-how-l">${t('exHowtoSetup','USTAWIENIE')}</p><p class="lg-how-t">${escHtml(h.setup)}</p></div>
+        <div class="lg-how"><p class="lg-how-l">${t('exHowtoMove','RUCH')}</p><p class="lg-how-t">${escHtml(h.steps.join(' '))}</p></div>
+      </div>
+      <div class="lg-how-err"><p class="lg-how-l">${t('exHowtoMistake','TYPOWY BŁĄD')}</p><p class="lg-how-t">${escHtml(h.mistake)}</p></div>
+    </div>`;
+}
+function lgPageKeys(){ return [...(document.getElementById('lgOv') ? ['ov'] : []), 'main', ...(document.getElementById('lgHow') ? ['how'] : [])]; }
+function lgGo(key, instant){
+  const track = document.getElementById('lgTrack'); if(!track || !lgPg) return;
+  const keys = lgPageKeys(), i = keys.indexOf(key);
+  if(i < 0 || (key !== 'ov' && key !== lgPg.page && !lgPg.started && keys[0] === 'ov')) return;   // nothing past Przegląd before Start
+  if(lgPad) lgPadClose();
+  lgPg.page = key;
+  track.classList.toggle('is-snap', !instant);
+  track.style.transform = `translateX(${-100 * i}%)`;
+  document.querySelectorAll('#lgDots .lg-dot').forEach((d, n)=> d.classList.toggle('is-on', n === i));
+}
+function lgStart(){
+  if(!lgPg) return;
+  lgPg.started = true;
+  const dots = document.getElementById('lgDots');
+  if(dots) dots.classList.remove('is-off');
+  haptic('light');
+  lgGo('main');
+}
+function lgWirePager(){
+  const vp = document.getElementById('lgPager'), track = document.getElementById('lgTrack');
+  if(!vp || !track) return;
+  let x0 = 0, y0 = 0, axis = '', drag = false, lastX = 0, lastT = 0, prevX = 0, prevT = 0, curT = 0;
+  vp.addEventListener('touchstart', e=>{
+    if(e.touches.length !== 1 || e.target.closest('[data-nopage]')){ drag = false; axis = 'skip'; return; }
+    const p = e.touches[0];
+    x0 = p.clientX; y0 = p.clientY; axis = ''; drag = false; curT = 0;
+    prevX = lastX = p.clientX; prevT = lastT = e.timeStamp;
+  }, { passive: true });
+  vp.addEventListener('touchmove', e=>{
+    if(axis === 'skip' || e.touches.length !== 1) return;
+    const p = e.touches[0], dx = p.clientX - x0, dy = p.clientY - y0;
+    if(!axis){
+      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      drag = axis === 'x';
+      if(drag) track.classList.remove('is-snap');
+    }
+    if(!drag) return;
+    prevX = lastX; prevT = lastT; lastX = p.clientX; lastT = e.timeStamp;
+    const keys = lgPageKeys(), i = keys.indexOf(lgPg.page), w = vp.clientWidth || 1;
+    const blockedFwd = lgPg.page === 'ov' && !lgPg.started;
+    const edge = (dx > 0 && i === 0) || (dx < 0 && (i === keys.length - 1 || blockedFwd));
+    curT = edge ? dx * 0.25 : dx;
+    track.style.transform = `translateX(${(-i * w + curT).toFixed(1)}px)`;
+  }, { passive: true });
+  const end = e=>{
+    if(!drag){ return; }
+    drag = false;
+    const keys = lgPageKeys(), i = keys.indexOf(lgPg.page), w = vp.clientWidth || 1;
+    const dx = e.changedTouches[0].clientX - x0, dt = Math.max(1, lastT - prevT), vel = (lastX - prevX) / dt;
+    const flick = Math.abs(vel) > 0.5 && Math.abs(dx) > 24 && (vel < 0) === (dx < 0);
+    let to = i;
+    if(Math.abs(dx) > w * 0.22 || flick) to = i + (dx < 0 ? 1 : -1);
+    to = Math.max(0, Math.min(keys.length - 1, to));
+    if(lgPg.page === 'ov' && !lgPg.started) to = 0;
+    track.style.transform = `translateX(${-i * w + curT}px)`;
+    void track.offsetWidth;
+    lgGo(keys[to]);
+    if(to !== i) haptic('light');
+  };
+  vp.addEventListener('touchend', end, { passive: true });
+  vp.addEventListener('touchcancel', end, { passive: true });
+}
 /* ---- popup shell ---- */
 function popupPlanTitle(){
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
@@ -9945,21 +10158,28 @@ function renderExercisePopupV2(animate){
   const tipHtml = aiAction
     ? `<div class="lg-ai${rise(2)}"><div class="lg-ai-h">${ph('sparks')}<span>${t('trainerAi','TRENER AI')}</span></div><p class="lg-ai-t">${escHtml(aiAction)}</p></div>`
     : `<div class="lg-tip${rise(2)}"><span class="lg-tip-l">${t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><span class="lg-tip-t">${escHtml(sugg.text)}</span></div>`;
+  const hasOv = !time, hasHow = !!howto;
+  const pages = [...(hasOv ? ['ov'] : []), 'main', ...(hasHow ? ['how'] : [])];
+  if(!pages.includes(lgPg.page)) lgPg.page = 'main';
+  const ovHtml = hasOv ? lgOverviewHtml(ex, history, sugg, aiAction, versionPill, rise) : '';
+  const howHtml = hasHow ? lgHowHtml(ex, howto) : '';
   box.innerHTML = `
     <div class="lg-bar">
       <button type="button" class="lg-circ" onclick="closeExercisePopupX()" aria-label="${escHtml(t('gymLeaveLogging','Wyjdź z logowania'))}">${LG_ICONS.x}</button>
       <span class="lg-bar-title">${escHtml(popupPlanTitle())}</span>
       <div class="lg-bar-end">
-        ${howto ? `<button type="button" class="lg-ic bulb" onclick="openExHowtoV2()" aria-label="${escHtml(t('exHowtoTitle','Jak ćwiczyć'))}">${LG_ICONS.bulb}</button>` : ''}
         <button type="button" class="lg-circ fill" onclick="confirmExercisePopupV2()" aria-label="${escHtml(t('gymAddExerciseDone','Dodaj ćwiczenie do treningu'))}">${LG_ICONS.checkBig}</button>
       </div>
     </div>
-    <div class="lg-scroll" onclick="if(lgPad && !event.target.closest('.lg-num')) lgPadClose()">
+    ${pages.length > 1 ? `<div class="lg-dots${hasOv && !lgPg.started ? ' is-off' : ''}" id="lgDots">${pages.map((k,i)=>`<button type="button" class="lg-dot${k === lgPg.page ? ' is-on' : ''}" onclick="lgGo('${k}')" aria-label="${i+1}/${pages.length}"></button>`).join('')}</div>` : ''}
+    <div class="lg-pager" id="lgPager"><div class="lg-track" id="lgTrack" style="transform:translateX(${-100 * pages.indexOf(lgPg.page)}%)">
+    ${ovHtml}
+    <div class="lg-scroll" id="lgMain" onclick="if(lgPad && !event.target.closest('.lg-num')) lgPadClose()">
       <div class="lg-head${rise(0)}">
-        <div class="lg-tags"><span class="lg-tag">${escHtml(groupLabel(ex.group))}</span>${versionPill}</div>
+        ${hasOv ? '' : `<div class="lg-tags"><span class="lg-tag">${escHtml(groupLabel(ex.group))}</span>${versionPill}</div>`}
         <div class="lg-name-row">
           <div class="lg-name">${escHtml(ex.name)}</div>
-          <button type="button" class="lg-ic note${noteVal?' has-note':''}" onclick="openExNoteV2()" aria-label="${escHtml(t('exNoteLabel','Twoja notatka'))}">${LG_ICONS.note}</button>
+          ${hasOv ? '' : `<button type="button" class="lg-ic note${noteVal?' has-note':''}" onclick="openExNoteV2()" aria-label="${escHtml(t('exNoteLabel','Twoja notatka'))}">${LG_ICONS.note}</button>`}
         </div>
         <div class="lg-chips">
           <span class="lg-chip">${ph('stack')}<span>${t('statSetsCount', `${ex.sets} serie`, ex.sets)}</span></span>
@@ -9967,7 +10187,7 @@ function renderExercisePopupV2(animate){
           ${parseRestSeconds(ex.rest) > 0 ? `<span class="lg-chip rest" id="lgRest">${ph('clock-countdown')}<span id="lgRestTxt">${escHtml(ex.rest)}</span></span>` : ''}
         </div>
       </div>
-      ${tipHtml}
+      ${hasOv ? '' : tipHtml}
       ${time ? `${isCardioGoalEx(ex) ? cgHtml(ex, rise(3)) : ''}
       <div class="lg-block lg-tm${rise(3)}">
         <span class="lg-lab" id="tmLab">${(ex.perSide ? t('timeLabelSide','Czas na stronę') : t('timeLabel','Czas')).toUpperCase()}</span>
@@ -9989,7 +10209,7 @@ function renderExercisePopupV2(animate){
       <div class="lg-block${rise(3)}">
         <span class="lg-lab">${t('weightLabel','Ciężar').toUpperCase()}</span>
         <div class="lg-wval is-pale"><button type="button" class="lg-num" id="lgW" onclick="lgPadOpen('w')" aria-label="${escHtml(t('weightLabel','Ciężar'))}"></button><span class="lg-unit">kg</span></div>
-        <div class="lg-ruler" id="lgRuler"></div>
+        <div class="lg-ruler" id="lgRuler" data-nopage></div>
       </div>`}
       ${time ? '' : `<div class="lg-block${rise(4)}">
         <span class="lg-lab">${t('repsLabel','Powtórzenia').toUpperCase()}</span>
@@ -10000,12 +10220,14 @@ function renderExercisePopupV2(animate){
         </div>
       </div>`}
       <div class="lg-setsec${rise(5)}">
-        <div class="lg-sets" id="lgSets"></div>
+        <div class="lg-sets" id="lgSets" data-nopage></div>
         <p class="lg-hint" id="lgHint" hidden>${t('gymSwipeHint','Przesuń serię w lewo, żeby ją usunąć')}</p>
       </div>
       ${popupShowWarning ? `<div class="lg-warn">${t('gymLogWarn','Zaloguj choć jedną serię, żeby dodać ćwiczenie.')}</div>` : ''}
       <button type="button" class="lg-add${rise(6)}" onclick="lgAddExtra()">${t('gymExtraSet','Dodatkowa seria')}</button>
     </div>
+    ${howHtml}
+    </div></div>
     <div class="lg-pad" id="lgPad" hidden>
       ${['1','2','3','4','5','6','7','8','9'].map(k=>`<button type="button" class="lg-key" onclick="lgPadKey('${k}')">${k}</button>`).join('')}
       <button type="button" class="lg-key lg-key-dec" onclick="lgPadKey(',')">,</button>
@@ -10013,6 +10235,7 @@ function renderExercisePopupV2(animate){
       <button type="button" class="lg-key lg-key-del" onclick="lgPadKey('del')" aria-label="⌫"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5h10a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 19 19H9l-5.5-7L9 5Zm3.5 4.5 5 5m0-5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <button type="button" class="lg-key lg-key-ok" onclick="lgPadClose()">OK</button>
     </div>`;
+  lgWirePager();
   lgRenderSets();
   lgPaint();
   restPaint(restTimer ? (restTimer.endAt - Date.now()) / 1000 : null);
@@ -10460,6 +10683,9 @@ function popupInitLg(){
   tmStop();
   lg = { editIdx: null, timer: null, ruler: null, step: weightStepFor(popupExercise), w: '', r: '', wt: false, rt: false, wPre: false, rPre: false };
   lgResetCurrent();
+  // Przegląd (page 1) is the gate before a first set; once the exercise has logged sets, or has no overview (timed), it opens on Trening
+  const started = isTimeEx(popupExercise) || popupExercise.setValues.some(s=> setIsLogged(s, lgBw()));
+  lgPg = { page: started ? 'main' : 'ov', started };
 }
 function confirmExercisePopupV2(){
   if(!popupExercise) return;
@@ -10547,27 +10773,7 @@ function saveExNoteV2(){
   haptic('light');
   closeExNoteV2();
 }
-function openExHowtoV2(){
-  if(!popupExercise) return;
-  const h = (LANG === 'en' ? EXERCISE_HOWTO_EN : EXERCISE_HOWTO)[popupExercise.name];
-  if(!h) return;
-  document.getElementById('exHowtoBoxV2').innerHTML = `
-    <div class="lg-bar">
-      <button type="button" class="lg-circ" onclick="closeExHowtoV2()" aria-label="${escHtml(t('close','Zamknij'))}">${LG_ICONS.x}</button>
-      <span class="lg-bar-title">${t('exHowtoSheetTitle','JAK ĆWICZYĆ')}</span>
-      <span class="lg-circ ghost" aria-hidden="true"></span>
-    </div>
-    <div class="lg-scroll lg-sub-scroll">
-      <div class="lg-name-row"><div class="lg-name">${escHtml(popupExercise.name)}</div></div>
-      <div class="lg-how"><p class="lg-how-l">${t('exHowtoSetup','USTAWIENIE')}</p><p class="lg-how-t">${escHtml(h.setup)}</p></div>
-      <div class="lg-how"><p class="lg-how-l">${t('exHowtoMove','RUCH')}</p><ol class="lg-how-ol">${h.steps.map(s=>`<li>${escHtml(s)}</li>`).join('')}</ol></div>
-      <div class="lg-how lg-how--warn"><p class="lg-how-l">${t('exHowtoMistake','TYPOWY BŁĄD')}</p><p class="lg-how-t">${escHtml(h.mistake)}</p></div>
-    </div>`;
-  lgSubOpen('exHowtoOverlayV2');
-}
-function closeExHowtoV2(viaDrag){ lgSubClose('exHowtoOverlayV2', viaDrag); }
 mSheetDrag('exNoteOverlayV2', closeExNoteV2);
-mSheetDrag('exHowtoOverlayV2', closeExHowtoV2);
 mSheetDrag('exCardioOverlayV2', closeCardioResults);
 
 /* ---- Warm-up / stretching blocks on Trening ----
