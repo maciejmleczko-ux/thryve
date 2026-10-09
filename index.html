@@ -2562,6 +2562,10 @@ body.gymv2-bg .gy-bg{display:block;}
 .sh-arrow[disabled]{opacity:.2;pointer-events:none;}
 .sh-row{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:var(--m-r-md);padding:10px 0 10px 16px;}
 .sh-row[hidden]{display:none;}
+/* the TEKST row fades and slides in / out (opacity + transform only); entering waits one 60 ms stagger step so the card resizes first */
+#shTextRow{transition:opacity var(--m-dur-fade) ease,transform var(--m-dur-in) var(--m-ease);}
+#shTextRow:not(.is-off){transition-delay:60ms;}
+#shTextRow.is-off{opacity:0;transform:translateY(10px);pointer-events:none;}
 .sh-row-k{flex:none;width:50px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:#343941;}
 .sh-bg{position:relative;flex:1;min-width:0;display:flex;align-items:center;gap:4px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px calc(50% - 20px);-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;}
 .sh-bg::-webkit-scrollbar{display:none;}
@@ -2583,7 +2587,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .sh-main{flex:1;min-width:0;height:55px;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),opacity var(--m-dur-quick) ease;}
 .sh-actions [disabled]{opacity:.5;pointer-events:none;}
 .sh-hint{margin:6px 0 0;text-align:center;font-size:var(--m-fs-2xs);color:var(--m-muted);}
-@media (prefers-reduced-motion: reduce){ .sh-track.is-snap{transition:none;} .sh-bgi{transition:none;} }
+@media (prefers-reduced-motion: reduce){ .sh-track.is-snap{transition:none;} .sh-bgi{transition:none;} #shTextRow{transition:opacity var(--m-dur-fade) ease;} #shTextRow.is-off{transform:none;} }
 /* --- set-logging pager: Przegląd → Trening → Jak ćwiczyć (Figma "TRENING - LOGOWANIE ĆWICZENIA", 513:21437).
    Sizes follow Figma; labels under 11px (Figma 10 / 8) stay at the --m-fs-2xs floor like the rest of the app --- */
 .lg-dots{flex:none;display:flex;justify-content:center;gap:12px;height:8px;margin:6px 0 8px;transition:opacity var(--m-dur-fade) ease;}
@@ -16922,24 +16926,54 @@ function shSync(initial){
   document.querySelectorAll('#shareBox .sh-seg-b').forEach(b=>{ const on = b.dataset.f === st.format; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
   document.querySelectorAll('#shareBox .sh-sw').forEach(b=>{ const on = b.dataset.c === st.color; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); b.disabled = !allowed.includes(b.dataset.c); });
   document.querySelectorAll('#shareBox .sh-bgi').forEach(b=>{ const on = b.dataset.bg === st.bg; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
-  document.getElementById('shTextRow').hidden = allowed.length < 2;   // a photo that allows one colour only has nothing to choose: the row is hidden
+  shTextRow(allowed.length >= 2, !!initial);   // a photo that allows one colour only has nothing to choose: the row fades away
   document.querySelectorAll('#shDots .lg-dot').forEach((d,i)=> d.classList.toggle('is-on', i === sh.page));
   document.getElementById('shPrev').disabled = sh.page <= 0;
   document.getElementById('shNext').disabled = sh.page >= sh.layouts.length - 1;
-  shSize();
+  shSize(!initial);
   const track = document.getElementById('shTrack');
   track.classList.toggle('is-snap', !initial);
   track.style.transform = `translateX(${-100 * sh.page}%)`;
   if(initial) requestAnimationFrame(()=> shBgCenter(st.bg, false));
 }
-// card size per format (Figma: 208×371, 240×300, 240×240), shrunk to the room the stage has
-function shSize(){
+function motionMs(name){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v.endsWith('ms') ? parseFloat(v) : parseFloat(v) * 1000;
+}
+const shReduceMotion = ()=> window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// card size per format (Figma: 208×371, 240×300, 240×240), shrunk to the room the stage has. When only the room changes
+// (the TEKST row came or went) the cards glide to the new size (FLIP: a scale from the old size to none, transform only).
+function shSize(animate){
   const stage = document.getElementById('shStage'); if(!stage) return;
   const [fw, fh] = SC_FORMATS[sh.state.format];
+  const oldW = sh.cw, oldH = sh.ch;
   const maxW = Math.min(240, stage.clientWidth - 90), maxH = Math.min(371, stage.clientHeight);
   const k = Math.min(maxW / fw, maxH / fh);
   sh.cw = Math.round(fw * k); sh.ch = Math.round(fh * k);
-  document.querySelectorAll('#shareBox .sh-card').forEach(c=>{ c.style.width = sh.cw + 'px'; c.style.height = sh.ch + 'px'; });
+  const cards = document.querySelectorAll('#shareBox .sh-card');
+  cards.forEach(c=>{ c.style.width = sh.cw + 'px'; c.style.height = sh.ch + 'px'; });
+  if(animate && oldW && oldW !== sh.cw && Math.abs(oldW / oldH - sh.cw / sh.ch) < 0.01 && !shReduceMotion()){
+    const s0 = oldW / sh.cw;
+    cards.forEach(c=> c.animate([{ transform: `scale(${s0})` }, { transform: 'none' }], { duration: motionMs('--m-dur-in'), easing: MOTION.ease }));
+  }
+}
+// show / hide the TEKST row: fade + slide, then (when hiding) take it out of the layout so the cards can grow into its place
+function shTextRow(show, instant){
+  const row = document.getElementById('shTextRow'); if(!row || sh.textShown === show) return;
+  sh.textShown = show;
+  clearTimeout(sh.timers.row);
+  if(instant || shReduceMotion()){
+    row.hidden = !show; row.classList.toggle('is-off', !show);
+    if(!instant){ shSize(false); shRender(); }
+    return;
+  }
+  if(show){
+    row.hidden = false; void row.offsetHeight;    // laid out first, so the transition has a start
+    row.classList.remove('is-off');
+  } else {
+    row.classList.add('is-off');
+    sh.timers.row = setTimeout(()=>{ if(!sh || sh.textShown) return; row.hidden = true; shSize(true); shRender(); }, motionMs('--m-dur-fade'));
+  }
 }
 function shRender(){
   if(!sh) return;
@@ -17045,7 +17079,7 @@ function shWire(){
   vp.addEventListener('touchcancel', end, { passive: true });
   window.addEventListener('resize', shOnResize);
 }
-function shOnResize(){ if(!sh){ window.removeEventListener('resize', shOnResize); return; } shSize(); shRender(); }
+function shOnResize(){ if(!sh){ window.removeEventListener('resize', shOnResize); return; } shSize(false); shRender(); }
 async function shExport(kind){
   if(!sh || sh.busy) return;
   const w = sh.w, name = `mekkio-${t('shareFileWorkout','trening')}-${w.date}.png`;
