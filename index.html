@@ -16369,13 +16369,29 @@ function scDrawPaths(ctx, ds, vb, dx, dy, dw, dh, color){
 /* Workout share card — Figma node 199:703 "Instagram story - 1". 1080×1920,
    TRANSPARENT background (saves as a PNG with no backdrop, to drop onto an
    IG story). Exact type sizes / colours / positions from get_design_context. */
-async function buildWorkoutCardBlob(w){
+/* What the user can change on the share sheet. The default is today's card: 9:16, the classic layout, a transparent
+   background and white text; buildWorkoutCardBlob(w) without a state must keep producing exactly that PNG. */
+const SC_DEFAULT_STATE = { format:'9:16', layout:'classic', bg:'transparent', color:'white' };
+const SC_FORMATS = { '9:16':[1080,1920], '4:5':[1080,1350], '1:1':[1080,1080] };
+function scNormState(state){
+  const st = Object.assign({}, SC_DEFAULT_STATE, state || {});
+  if(!SC_FORMATS[st.format]) st.format = SC_DEFAULT_STATE.format;
+  return st;
+}
+async function scEnsureFonts(){
   await ensureFontsReady();
   try{ await Promise.all(['300','400','500','600','700'].map(wt=> document.fonts.load(wt + ' 40px Geist'))); }catch(e){}
-  const canvas = document.createElement('canvas');
-  canvas.width = SHARE_CARD_W; canvas.height = SHARE_CARD_H;
+}
+/* The same renderer draws the live preview (a small canvas) and the export (1080 px wide). Coordinates stay in 1080-px
+   units: the canvas is scaled by canvas.width / 1080. Fonts must already be loaded (scEnsureFonts). */
+function renderWorkoutCard(canvas, w, state){
+  state = scNormState(state);
+  const [fw, fh] = SC_FORMATS[state.format];
+  canvas.height = Math.round(canvas.width * fh / fw);   // the caller sets canvas.width (1080 for export)
   const ctx = canvas.getContext('2d');       // no bg fill — stays transparent
-  const CX = SHARE_CARD_W / 2;
+  ctx.save();
+  ctx.scale(canvas.width / fw, canvas.width / fw);
+  const CX = fw / 2;
 
   const totalVol = Math.round(w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0));
   const totalReps = w.exercises.reduce((s,e)=> s + exSetsView(e).reduce((s2,st)=> s2 + st.reps, 0), 0);
@@ -16491,7 +16507,14 @@ async function buildWorkoutCardBlob(w){
   ctx.fillText('EVERY REP COUNTS.', CX, 1773.28);
   ctx.fillText('LITERALLY.', CX, 1773.28 + 12.53);
   scLetterSpacing(ctx, 0);
-
+  ctx.restore();
+}
+async function buildWorkoutCardBlob(w, state){
+  await scEnsureFonts();
+  const canvas = document.createElement('canvas');
+  const [fw] = SC_FORMATS[scNormState(state).format];
+  canvas.width = fw;
+  renderWorkoutCard(canvas, w, state);
   return new Promise(res=> canvas.toBlob(res, 'image/png'));
 }
 async function buildRunCardBlob(r){
