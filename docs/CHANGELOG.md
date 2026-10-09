@@ -132,6 +132,8 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Wejścia:** przycisk udostępniania na ekranie Gratulacje (po rekordzie arkusz otwiera się na układzie Rekord) i `shareHistCard('workout', id)` w Historii. Usunięta `shareWorkoutById`.
 - **Service worker:** cache v26, zdjęcia hero i gym w `URLS_TO_CACHE` (działają offline od pierwszego uruchomienia). `native/www` powstaje z `scripts/build-web.sh`, który kopiuje cały `icons/`, więc nic więcej do synchronizacji.
 
+- **iOS:** Build 36 (4.63.0), archiwum zbudowane i wysłane na TestFlight 2026-10-10; obejmuje 4.61.0, 4.62.0 i 4.63.0 (popup logowania serii w 3 stronach, nowy ekran Gratulacje, udostępnianie). `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
+
 **Commity (1):**
 
 - (hash dopisać przy następnej wersji) 2026-10-10 — 4.63.0: udostępnianie treningu (arkusz, układy, tła, kolory)
