@@ -2482,13 +2482,16 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-hint[hidden]{display:none;}
 .lg-warn{font-size:var(--m-fs-xs);line-height:1.4;color:#cd1200;text-align:center;}
 .lg-tm{gap:10px;}
-.gymv2-block{grid-column:1/-1;display:flex;flex-direction:column;align-items:stretch;gap:12px;box-sizing:border-box;width:100%;min-height:104px;margin:14px 0;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-md);padding:18px 16px;text-align:left;font-family:inherit;color:var(--m-ink);cursor:pointer;touch-action:manipulation;}
+.gymv2-block{grid-column:1/-1;display:flex;align-items:center;gap:14px;box-sizing:border-box;width:100%;min-height:104px;margin:14px 0;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-md);padding:18px 16px;text-align:left;font-family:inherit;color:var(--m-ink);cursor:pointer;touch-action:manipulation;}
 .gymv2-block.is-done{opacity:.6;}
-.gymv2-block-ic{display:flex;flex:none;gap:14px;}
-.gymv2-block-ic img{width:52px;height:52px;object-fit:contain;display:block;}   /* transparent, 14px apart (10-16px range) so the figures never run together */
-.gymv2-block-title{font-size:var(--m-fs-lg);font-weight:300;letter-spacing:.0367em;text-transform:uppercase;line-height:1.15;color:#2c2727;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}   /* as an exercise name, at the banner's size */
-.gymv2-block .lg-chip .ph svg, .gymv2-block .lg-chip > svg{width:16px;height:16px;display:block;flex:none;}
-.gymv2-block .lg-chip.c-time > svg{color:#fff;}
+.gymv2-block-ic{display:flex;flex:none;}
+.gymv2-block-ic img{width:52px;height:52px;border-radius:14px;background:#fff;object-fit:contain;margin-left:-10px;border:2px solid var(--m-card);box-sizing:border-box;}
+.gymv2-block-ic img:first-child{margin-left:0;}
+.gymv2-block-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.gymv2-block-t b{font-size:var(--m-fs-lg);font-weight:600;}
+.gymv2-block-t span{font-size:var(--m-fs-xs);color:var(--m-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gymv2-block-chip{flex:none;font-size:var(--m-fs-xs);font-weight:600;padding:4px 10px;border-radius:var(--m-r-pill);background:#e4ebff;color:#2642a4;}
+.gymv2-block-chip svg{width:16px;height:16px;display:block;}
 .bk-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:4px 0 12px;}
 .bk-tiles .ex-tile{pointer-events:none;}
 .bk-step{display:flex;align-items:center;gap:12px;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:8px 12px;}
@@ -10902,14 +10905,14 @@ const bkMinTxt = list => Math.max(1, Math.round(blockSeconds(list) / 60)) + ' ' 
 const bkImg = e => { const slug = EXERCISE_ICON_MAP[e.name] || e.icon, u = slug ? iconPngUrl(slug) : ''; return u ? `<img src="${u}" alt="" loading="lazy">` : ''; };
 function buildGymBlockCard(kind, list){
   const done = bkDone(kind);
+  const names = list.slice(0, 3).map(e=> e.name).join(', ') + (list.length > 3 ? ' ' + t('bkMore', `+${list.length - 3} więcej`, list.length - 3) : '');
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'gymv2-block m-press' + (done ? ' is-done' : '');
   btn.dataset.block = kind;
-  // name in the exercise-name style (light, capitals), three exercise icons well apart under it, then the same pills as on an exercise card
-  btn.innerHTML = `<b class="gymv2-block-title">${escHtml(bkTitle(kind))}</b>
-      <span class="gymv2-block-ic">${list.slice(0, 3).map(bkImg).join('')}</span>
-      <span class="lg-chips"><span class="lg-chip">${ph('stack')}<span>${escHtml(planExCountText(list.length))}</span></span><span class="lg-chip c-time">${done ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : ph('clock-countdown')}<span>${escHtml(bkMinTxt(list))}</span></span></span>`;
+  btn.innerHTML = `<span class="gymv2-block-ic">${list.slice(0, 3).map(bkImg).join('')}</span>
+    <span class="gymv2-block-t"><b>${escHtml(bkTitle(kind))}</b><span>${escHtml(names)}</span></span>
+    <span class="gymv2-block-chip">${done ? PLAN_EX_CHECK_SVG : escHtml(bkMinTxt(list))}</span>`;
   btn.onclick = ()=> openBlockSheet(kind);
   return btn;
 }
