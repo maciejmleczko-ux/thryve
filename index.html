@@ -2482,12 +2482,11 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-hint[hidden]{display:none;}
 .lg-warn{font-size:var(--m-fs-xs);line-height:1.4;color:#cd1200;text-align:center;}
 .lg-tm{gap:10px;}
-.gymv2-block{grid-column:1/-1;display:flex;flex-direction:column;align-items:stretch;gap:10px;box-sizing:border-box;width:100%;min-height:104px;margin:14px 0;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-md);padding:18px 16px;text-align:left;font-family:inherit;color:var(--m-ink);cursor:pointer;touch-action:manipulation;}
+.gymv2-block{grid-column:1/-1;display:flex;flex-direction:column;align-items:stretch;gap:12px;box-sizing:border-box;width:100%;min-height:104px;margin:14px 0;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-md);padding:18px 16px;text-align:left;font-family:inherit;color:var(--m-ink);cursor:pointer;touch-action:manipulation;}
 .gymv2-block.is-done{opacity:.6;}
-.gymv2-block-ic{display:flex;flex:none;gap:4px;}
-.gymv2-block-ic img{width:34px;height:34px;object-fit:contain;display:block;}   /* apart from each other, transparent */
-.gymv2-block-h{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;}
-.gymv2-block-h b{flex:1;min-width:0;font-size:var(--m-fs-lg);font-weight:300;letter-spacing:.0367em;text-transform:uppercase;line-height:1.15;color:#2c2727;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}   /* as an exercise name, at the banner's size */
+.gymv2-block-ic{display:flex;flex:none;gap:14px;}
+.gymv2-block-ic img{width:52px;height:52px;object-fit:contain;display:block;}   /* transparent, 14px apart (10-16px range) so the figures never run together */
+.gymv2-block-title{font-size:var(--m-fs-lg);font-weight:300;letter-spacing:.0367em;text-transform:uppercase;line-height:1.15;color:#2c2727;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}   /* as an exercise name, at the banner's size */
 .gymv2-block .lg-chip .ph svg, .gymv2-block .lg-chip > svg{width:16px;height:16px;display:block;flex:none;}
 .gymv2-block .lg-chip.c-time > svg{color:#fff;}
 .bk-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:4px 0 12px;}
@@ -10907,8 +10906,9 @@ function buildGymBlockCard(kind, list){
   btn.type = 'button';
   btn.className = 'gymv2-block m-press' + (done ? ' is-done' : '');
   btn.dataset.block = kind;
-  // name in the exercise-name style (light, capitals), the same pills as on an exercise card under it, the icons apart on the right
-  btn.innerHTML = `<span class="gymv2-block-h"><b>${escHtml(bkTitle(kind))}</b><span class="gymv2-block-ic">${list.slice(0, 3).map(bkImg).join('')}</span></span>
+  // name in the exercise-name style (light, capitals), three exercise icons well apart under it, then the same pills as on an exercise card
+  btn.innerHTML = `<b class="gymv2-block-title">${escHtml(bkTitle(kind))}</b>
+      <span class="gymv2-block-ic">${list.slice(0, 3).map(bkImg).join('')}</span>
       <span class="lg-chips"><span class="lg-chip">${ph('stack')}<span>${escHtml(planExCountText(list.length))}</span></span><span class="lg-chip c-time">${done ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : ph('clock-countdown')}<span>${escHtml(bkMinTxt(list))}</span></span></span>`;
   btn.onclick = ()=> openBlockSheet(kind);
   return btn;
