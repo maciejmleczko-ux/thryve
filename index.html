@@ -2541,8 +2541,8 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-how--warn{background:#f7f6f8;border-radius:16px;padding:14px 16px;}
 /* --- share sheet (Figma 514:23219) --- */
 #shareOverlay{z-index:9700;}
-#shareSheet{background:#fff;height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;}
-#shareBox{align-items:stretch;gap:0;overflow-y:auto;padding:0 16px calc(16px + env(safe-area-inset-bottom));scrollbar-width:none;}
+#shareSheet{background:#fff;height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;padding-bottom:0;}
+#shareBox{align-items:stretch;gap:0;overflow-y:auto;padding:0 16px 16px;scrollbar-width:none;}   /* buttons sit 16px from the bottom, as from the sides */
 #shareBox::-webkit-scrollbar{display:none;}
 #shareBox .lg-bar{padding:6px 1px 12px;}
 .sh-seg{align-self:center;display:flex;gap:4px;padding:2px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);margin:9px 0 12px;}
@@ -2560,16 +2560,16 @@ body.gymv2-bg .gy-bg{display:block;}
 .sh-arrow.l{left:0;}.sh-arrow.r{right:0;}
 .sh-arrow svg{width:7px;height:12px;display:block;}
 .sh-arrow[disabled]{opacity:.2;pointer-events:none;}
-.sh-row{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:var(--m-r-md);padding:10px 0 10px 16px;}
+.sh-row{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:var(--m-r-md);padding:6px 0 6px 16px;}
 .sh-row[hidden]{display:none;}
 /* the TEKST row fades and slides in / out (opacity + transform only); entering waits one 60 ms stagger step so the card resizes first */
 #shTextRow{transition:opacity var(--m-dur-fade) ease,transform var(--m-dur-in) var(--m-ease);}
 #shTextRow:not(.is-off){transition-delay:60ms;}
 #shTextRow.is-off{opacity:0;transform:translateY(10px);pointer-events:none;}
 .sh-row-k{flex:none;width:50px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:#343941;}
-.sh-bg{position:relative;flex:1;min-width:0;display:flex;align-items:center;gap:4px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px calc(50% - 20px);-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;}
+.sh-bg{position:relative;flex:1;min-width:0;display:flex;align-items:center;gap:4px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px calc(50% - 17px);-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;}
 .sh-bg::-webkit-scrollbar{display:none;}
-.sh-bgi{flex:none;width:40px;height:64px;padding:0;border:.5px solid #f1d7cb;border-radius:4px;overflow:hidden;scroll-snap-align:center;cursor:pointer;background-color:#fff;background-image:conic-gradient(#cfcfcf 25%,#fff 0 50%,#cfcfcf 0 75%,#fff 0);background-size:8px 8px;transition:transform var(--m-dur-snap) var(--m-ease-spring),box-shadow var(--m-dur-quick) ease;}
+.sh-bgi{flex:none;width:34px;height:54px;padding:0;border:.5px solid #f1d7cb;border-radius:4px;overflow:hidden;scroll-snap-align:center;cursor:pointer;background-color:#fff;background-image:conic-gradient(#cfcfcf 25%,#fff 0 50%,#cfcfcf 0 75%,#fff 0);background-size:8px 8px;transition:transform var(--m-dur-snap) var(--m-ease-spring),box-shadow var(--m-dur-quick) ease;}
 .sh-bgi img{display:block;width:100%;height:100%;object-fit:cover;}
 .sh-bgi.is-on{transform:scale(1.16);box-shadow:0 0 0 1.5px var(--m-orange);}
 .sh-sw-row{display:flex;gap:8px;padding:2px 16px 2px 0;}
@@ -2587,6 +2587,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .sh-main{flex:1;min-width:0;height:55px;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),opacity var(--m-dur-quick) ease;}
 .sh-actions [disabled]{opacity:.5;pointer-events:none;}
 .sh-hint{margin:6px 0 0;text-align:center;font-size:var(--m-fs-2xs);color:var(--m-muted);}
+.sh-hint:empty{display:none;}
 @media (prefers-reduced-motion: reduce){ .sh-track.is-snap{transition:none;} .sh-bgi{transition:none;} #shTextRow{transition:opacity var(--m-dur-fade) ease;} #shTextRow.is-off{transform:none;} }
 /* --- set-logging pager: Przegląd → Trening → Jak ćwiczyć (Figma "TRENING - LOGOWANIE ĆWICZENIA", 513:21437).
    Sizes follow Figma; labels under 11px (Figma 10 / 8) stay at the --m-fs-2xs floor like the rest of the app --- */
@@ -2601,6 +2602,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-track > .lg-scroll{flex:0 0 100%;min-width:0;}
 /* Przegląd */
 .lg-pg-ov{gap:8px;}
+.lg-scroll.lg-pg-ov{padding-bottom:16px;}   /* START sits 16px from the bottom, as from the sides */
 .lg-pg-ov .lg-head{margin-bottom:42px;}   /* 8 + 42 = the 50px between header and content in Figma */
 .lg-pg-ov .lg-name{font-size:var(--m-fs-2xl);line-height:27.6px;letter-spacing:.0293em;}
 .lg-ov-tiles{display:grid;grid-template-columns:24.8% 35.6% minmax(0,1fr);gap:4px;}
@@ -2647,6 +2649,11 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-how-err .lg-how-l{font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.0909em;}
 .lg-how-err .lg-how-t{font-size:var(--m-fs-xs);font-weight:400;line-height:normal;color:#fdfbff;}
 .gy-confirm-box{text-align:center;}
+.gy-confirm-box .btns{flex-direction:column-reverse;gap:8px;}   /* confirm on top, cancel under it: long labels fit */
+.gy-confirm-box .btns button{flex:none;height:55px;padding:0 24px;border-radius:var(--m-r-pill);font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.gy-confirm-box .btns .save{background:var(--m-orange);color:#fff;border:none;}
+.gy-confirm-box .btns .cancel{background:transparent;color:var(--m-ink);border:1px solid var(--m-orange);}
+.gy-confirm-box .btns button:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
 @media (prefers-reduced-motion: no-preference){
   .lg-chip.rest.is-pop{animation:lgRestPop var(--m-dur-pop) var(--m-ease-spring);}
   @keyframes lgRestPop{0%{transform:scale(1);}35%{transform:scale(1.1);}100%{transform:scale(1);}}
@@ -7125,7 +7132,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.63.0";
+const APP_VERSION = "4.63.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -16949,13 +16956,13 @@ function motionMs(name){
   return v.endsWith('ms') ? parseFloat(v) : parseFloat(v) * 1000;
 }
 const shReduceMotion = ()=> window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-// card size per format (Figma: 208×371, 240×300, 240×240), shrunk to the room the stage has. When only the room changes
+// card size per format: as big as the stage allows (Figma drew 208×371 on an 812 pt screen). When only the room changes
 // (the TEKST row came or went) the cards glide to the new size (FLIP: a scale from the old size to none, transform only).
 function shSize(animate){
   const stage = document.getElementById('shStage'); if(!stage) return;
   const [fw, fh] = SC_FORMATS[sh.state.format];
   const oldW = sh.cw, oldH = sh.ch;
-  const maxW = Math.min(240, stage.clientWidth - 90), maxH = Math.min(371, stage.clientHeight);
+  const maxW = stage.clientWidth - 96, maxH = stage.clientHeight;   // arrows take 44 px on each side
   const k = Math.min(maxW / fw, maxH / fh);
   sh.cw = Math.round(fw * k); sh.ch = Math.round(fh * k);
   const cards = document.querySelectorAll('#shareBox .sh-card');

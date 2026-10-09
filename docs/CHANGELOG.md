@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.63.0 (2026-10-10)
+- **Aktualna wersja:** 4.63.1 (2026-10-10)
 - **Liczba wersji:** 249 · **commitów:** 594
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -117,6 +117,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.63.1 · PATCH · 2026-10-10
+
+**Dla użytkownika:** poprawki po teście 4.63.0 na iPhonie: odstępy przycisków od dołu, większy podgląd karty do udostępnienia, nowe przyciski w oknie „Przerwać trening?”.
+
+- **Arkusz „Udostępnij”:** dolne przyciski mają od dołu tyle samo (16 px), co od boków (wcześniej dochodził `env(safe-area-inset-bottom)`, padding arkusza i pusty wiersz statusu, razem ok. 90 px). Podgląd karty nie ma już limitu 208×371 z Figmy i zajmuje całe wolne miejsce (np. 292×519 na 440 pt). Miniatury teł mniejsze (34×54 zamiast 40×64, niższe wiersze), żeby zyskać miejsce u góry.
+- **Przegląd ćwiczenia:** przycisk START 16 px od dołu (tyle co od boków), zamiast 28 px + safe-area.
+- **Okno potwierdzenia** (`gymConfirmV2`: „Przerwać trening?”, „Zakończyć trening?” i pozostałe): przyciski jak w nowych układach: 55 px, 14/500, `letter-spacing .12em`, wersaliki; potwierdzenie pomarańczowe, anulowanie z pomarańczową obwódką, jedno pod drugim (długie podpisy się mieszczą).
+
+**Commity (1):**
+
+- (hash dopisać przy następnej wersji) 2026-10-10 — 4.63.1: poprawki po teście na iPhonie
 
 ### 4.63.0 · MINOR · 2026-10-10
 
