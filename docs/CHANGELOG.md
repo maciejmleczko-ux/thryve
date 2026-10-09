@@ -120,10 +120,10 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 ### 4.63.1 · PATCH · 2026-10-10
 
-**Dla użytkownika:** poprawki po teście 4.63.0 na iPhonie: odstępy przycisków od dołu, większy podgląd karty do udostępnienia, nowe przyciski w oknie „Przerwać trening?”.
+**Dla użytkownika:** poprawki po teście 4.63.0 na iPhonie: odstęp przycisków od dołu (32 px), większy podgląd karty do udostępnienia, nowe przyciski w oknie „Przerwać trening?”.
 
-- **Arkusz „Udostępnij”:** dolne przyciski mają od dołu tyle samo (16 px), co od boków (wcześniej dochodził `env(safe-area-inset-bottom)`, padding arkusza i pusty wiersz statusu, razem ok. 90 px). Podgląd karty nie ma już limitu 208×371 z Figmy i zajmuje całe wolne miejsce (np. 292×519 na 440 pt). Miniatury teł mniejsze (34×54 zamiast 40×64, niższe wiersze), żeby zyskać miejsce u góry.
-- **Przegląd ćwiczenia:** przycisk START 16 px od dołu (tyle co od boków), zamiast 28 px + safe-area.
+- **Arkusz „Udostępnij”:** dolne przyciski mają 32 px do dolnej krawędzi arkusza (wartość wybrana na telefonie, odsuwa je od zaokrąglonych rogów ekranu; wcześniej ok. 90 pt: 28 px, safe-area, padding arkusza i pusty wiersz statusu). Podgląd karty nie ma już limitu 208×371 z Figmy i zajmuje całe wolne miejsce (np. 292×519 na 440 pt). Miniatury teł mniejsze (34×54 zamiast 40×64, niższe wiersze), żeby zyskać miejsce u góry.
+- **Przegląd ćwiczenia:** przycisk START 32 px od dołu arkusza, tak samo jak przyciski w arkuszu udostępniania.
 - **Okno potwierdzenia** (`gymConfirmV2`: „Przerwać trening?”, „Zakończyć trening?” i pozostałe) wg Figmy 519:23635: karta 323 px, padding 30, 12 px promienia i cień, tytuł 20/400 wersalikami (`letter-spacing .04em`), tekst 12 px, 41 px odstępu do przycisków. Przyciski 55 px, 14/500, `letter-spacing .12em`, wersaliki: potwierdzenie pomarańczowe, „Wróć” z pomarańczową obwódką, 14 px między nimi, jeden pod drugim.
 
 **Commity (1):**
