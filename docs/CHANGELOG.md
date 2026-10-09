@@ -131,6 +131,8 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Pastylki na ekranie Trening** (serie, powtórzenia, przerwa) w kolorach kafli z karty startowej, żeby użytkownik uczył się, co jest czym: Serie granatowe (`--m-plan-hard`), Powtórzenia błękitne (nowy token `--m-sky: #5da9e9`, używany też na kaflu karty startowej i na ekranie Gratulacje), Przerwa pomarańczowa (jak dotąd); biały tekst i ikony.
 - **Okno potwierdzenia** (`gymConfirmV2`: „Przerwać trening?”, „Zakończyć trening?” i pozostałe) wg Figmy 519:23635: karta 323 px, padding 30, 12 px promienia i cień, tytuł 20/400 wersalikami (`letter-spacing .04em`), tekst 12 px, 41 px odstępu do przycisków. Przyciski 55 px, 14/500, `letter-spacing .12em`, wersaliki: potwierdzenie pomarańczowe, „Wróć” z pomarańczową obwódką, 14 px między nimi, jeden pod drugim.
 
+- **iOS:** Build 37 (4.63.1), archiwum zbudowane i wysłane na TestFlight 2026-10-10; obejmuje poprawki z tego wpisu. `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
+
 **Commity (1):**
 
 - (hash dopisać przy następnej wersji) 2026-10-10 — 4.63.1: poprawki po teście na iPhonie
