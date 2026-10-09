@@ -2648,9 +2648,13 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-how-err{background:#000;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;gap:12px;}
 .lg-how-err .lg-how-l{font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.0909em;}
 .lg-how-err .lg-how-t{font-size:var(--m-fs-xs);font-weight:400;line-height:normal;color:#fdfbff;}
-.gy-confirm-box{text-align:center;}
-.gy-confirm-box .btns{flex-direction:column-reverse;gap:8px;}   /* confirm on top, cancel under it: long labels fit */
-.gy-confirm-box .btns button{flex:none;height:55px;padding:0 24px;border-radius:var(--m-r-pill);font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;transition:transform var(--m-dur-press-out) var(--m-ease);}
+/* Confirm dialog (Figma 519:23635 "Przerwać trening?"): 323px card, 30px padding, 41px between text and buttons, 14px between buttons */
+.gy-confirm-box{max-width:323px;padding:30px;border-radius:var(--m-r-sm);box-shadow:0 13px 66px rgba(0,0,0,.18);display:flex;flex-direction:column;align-items:center;gap:41px;text-align:center;}
+.gy-confirm-text{width:100%;display:flex;flex-direction:column;gap:12px;}   /* title may use the full 263px (one line in Figma), the text under it wraps at 218px */
+.gy-confirm-box h3{margin:0;font-size:var(--m-fs-lg);font-weight:400;letter-spacing:.04em;text-transform:uppercase;color:var(--m-ink);}
+.gy-confirm-box p{margin:0 auto;max-width:218px;font-size:var(--m-fs-xs);line-height:1.2;color:var(--m-ink);}
+.gy-confirm-box .btns{align-self:stretch;flex-direction:column-reverse;gap:14px;margin:0;}   /* confirm on top, cancel under it */
+.gy-confirm-box .btns button{flex:none;height:55px;padding:12px 30px;border-radius:74px;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gy-confirm-box .btns .save{background:var(--m-orange);color:#fff;border:none;}
 .gy-confirm-box .btns .cancel{background:transparent;color:var(--m-ink);border:1px solid var(--m-orange);}
 .gy-confirm-box .btns button:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
@@ -4071,9 +4075,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <!-- Generic in-app confirm dialog (abort workout, empty finish) — see gymConfirmV2(). -->
 <div class="onboard-overlay hidden" id="gymConfirmOverlay" onclick="if(event.target===this) gymConfirmCloseV2(false)">
   <div class="onboard-box new-ex-form gy-confirm-box">
-    <h3 id="gymConfirmTitle"></h3>
-    <p id="gymConfirmBody"></p>
-    <div class="btns" style="margin-top:16px;">
+    <div class="gy-confirm-text">
+      <h3 id="gymConfirmTitle"></h3>
+      <p id="gymConfirmBody"></p>
+    </div>
+    <div class="btns">
       <button type="button" class="cancel" id="gymConfirmNo" onclick="gymConfirmCloseV2(false)"></button>
       <button type="button" class="save" id="gymConfirmYes" onclick="gymConfirmCloseV2(true)"></button>
     </div>
