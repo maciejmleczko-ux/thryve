@@ -2636,6 +2636,11 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-mini-s b{font-weight:500;color:var(--m-orange);}
 .lg-mini-s .ph, .lg-mini-s .ph svg{width:12px;height:12px;display:block;color:var(--m-orange);}
 .lg-mini-sp{display:block;width:109px;max-width:100%;height:19px;margin-top:auto;}
+.lg-mini-sp{will-change:clip-path;}
+@media (prefers-reduced-motion: no-preference){
+  .lg-spark-draw{animation:lgSparkDraw var(--m-dur-draw) var(--m-ease) 560ms backwards;}   /* the trend line is drawn left to right */
+  @keyframes lgSparkDraw{from{clip-path:inset(0 100% 0 0);}to{clip-path:inset(0 0 0 0);}}
+}
 .lg-add.lg-ov-start{flex:none;margin-top:auto;background:var(--m-orange);color:#fff;}
 /* Jak ćwiczyć */
 .lg-pg-how{gap:16px;}
@@ -10079,25 +10084,30 @@ function lgOverviewData(ex){
   }
   return { last, rec };
 }
-function lgSparkSvg(vals){
+function lgSparkSvg(vals, animate){
   if(!vals || vals.length < 2) return '';
   const lo = Math.min(...vals), hi = Math.max(...vals), rng = (hi - lo) || 1;
   const pts = vals.map((v,i)=> `${(2 + i * 96 / (vals.length - 1)).toFixed(1)},${(22 - (v - lo) / rng * 20).toFixed(1)}`).join(' ');
-  return `<svg class="lg-mini-sp" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="var(--m-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
+  return `<svg class="lg-mini-sp" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><polyline class="${animate ? 'lg-spark-draw' : ''}" points="${pts}" fill="none" stroke="var(--m-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
 }
 function lgOverviewHtml(ex, history, sugg, aiAction, versionPill, rise){
   const kg = fmtKgLocal;
+  // the bento tiles come in as big tiles (18px, --m-dur-tile), one 60 ms step apart, a beat after the sheet starts to settle
+  const animate = !!rise(0);
+  const riseT = n => rise(n).replace(' m-rise"', ' m-rise-tile"').replace(/--i:(\d+)/, '--i:$1;--m-delay:120ms');
+  // numbers that count up when the card opens (the markup already holds the final value)
+  const cnt = str => { const n = parseFloat(String(str).replace(/\s/g, '').replace(',', '.')); return Number.isFinite(n) ? `<span class="lg-count" data-t="${n}" data-d="${/[.,]/.test(String(str)) ? 1 : 0}">${str}</span>` : str; };
   const repsTxt = `${ex.repLow}-${ex.repHigh}`, restTxt = parseRestSeconds(ex.rest) > 0 ? String(ex.rest) : '–';
-  const tile = (cls, label, icon, txt)=> `<div class="lg-ov-tile ${cls}"><span class="lg-ov-l">${escHtml(label)}</span><span class="lg-ov-v${txt.length >= 5 ? ' is-long' : ''}">${ph(icon)}<span>${escHtml(txt)}</span></span></div>`;
-  const goal = sugg.goal && sugg.goal.w > 0 ? `<div class="lg-ai-goal"><span class="lg-ai-goal-l">${t('lgOvGoal','Cel na dziś')}</span><span class="lg-ai-goal-v">${kg(sugg.goal.w)}kg x ${sugg.goal.reps}</span></div>` : '';
+  const tile = (cls, label, icon, txt, i)=> `<div class="lg-ov-tile ${cls}${riseT(i)}"><span class="lg-ov-l">${escHtml(label)}</span><span class="lg-ov-v${txt.length >= 5 ? ' is-long' : ''}">${ph(icon)}<span>${escHtml(txt)}</span></span></div>`;
+  const goal = sugg.goal && sugg.goal.w > 0 ? `<div class="lg-ai-goal"><span class="lg-ai-goal-l">${t('lgOvGoal','Cel na dziś')}</span><span class="lg-ai-goal-v">${cnt(kg(sugg.goal.w))}kg x ${sugg.goal.reps}</span></div>` : '';
   // Trener AI (the action from the last workout's analysis) when there is one, otherwise the rule-based training tip: same as before the pager
   const tipHtml = aiAction
-    ? `<div class="lg-ai${rise(2)}"><div class="lg-ai-h">${ph('sparks')}<span>${t('trainerAi','TRENER AI')}</span></div><div class="lg-ai-body"><p class="lg-ai-t">${escHtml(aiAction)}</p>${goal ? `<div class="lg-ai-sep"></div>${goal}` : ''}</div></div>`
-    : `<div class="lg-tip${rise(2)}"><span class="lg-tip-l">${t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><div class="lg-tip-body"><span class="lg-tip-t">${escHtml(sugg.text)}</span>${goal ? `<div class="lg-ai-sep"></div>${goal}` : ''}</div></div>`;
+    ? `<div class="lg-ai${riseT(3)}"><div class="lg-ai-h">${ph('sparks')}<span>${t('trainerAi','TRENER AI')}</span></div><div class="lg-ai-body"><p class="lg-ai-t">${escHtml(aiAction)}</p>${goal ? `<div class="lg-ai-sep"></div>${goal}` : ''}</div></div>`
+    : `<div class="lg-tip${riseT(3)}"><span class="lg-tip-l">${t('trainingTip','WSKAZÓWKA TRENINGOWA')}</span><div class="lg-tip-body"><span class="lg-tip-t">${escHtml(sugg.text)}</span>${goal ? `<div class="lg-ai-sep"></div>${goal}` : ''}</div></div>`;
   const d = lgOverviewData(ex);
-  const rowHtml = d ? `<div class="lg-ov-row${rise(3)}">
-      <div class="lg-mini"><span class="lg-mini-l">${t('lgOvLast','Ostatnio')} • ${escHtml(fmtDayMonShort(d.last.date))}</span><span class="lg-mini-v">${d.last.big}<small>${escHtml(d.last.unit)}</small></span><span class="lg-mini-s"><b>${escHtml(d.last.sub)}</b><span>${t('lgOvRepsWord','powtórzeń')}</span></span></div>
-      ${d.rec ? `<div class="lg-mini"><span class="lg-mini-l">${escHtml(d.rec.label)}</span><span class="lg-mini-v">${d.rec.big}<small>${escHtml(d.rec.unit)}</small></span>${d.rec.delta ? `<span class="lg-mini-s is-trend"><span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span><b>${kg(d.rec.delta)}kg</b><span>${t('lgOvWeeks','w 4 tyg.')}</span></span>` : ''}${lgSparkSvg(d.rec.spark)}</div>` : ''}
+  const rowHtml = d ? `<div class="lg-ov-row">
+      <div class="lg-mini${riseT(4)}"><span class="lg-mini-l">${t('lgOvLast','Ostatnio')} • ${escHtml(fmtDayMonShort(d.last.date))}</span><span class="lg-mini-v">${cnt(d.last.big)}<small>${escHtml(d.last.unit)}</small></span><span class="lg-mini-s"><b>${escHtml(d.last.sub)}</b><span>${t('lgOvRepsWord','powtórzeń')}</span></span></div>
+      ${d.rec ? `<div class="lg-mini${riseT(5)}"><span class="lg-mini-l">${escHtml(d.rec.label)}</span><span class="lg-mini-v">${cnt(d.rec.big)}<small>${escHtml(d.rec.unit)}</small></span>${d.rec.delta ? `<span class="lg-mini-s is-trend"><span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span><b>${kg(d.rec.delta)}kg</b><span>${t('lgOvWeeks','w 4 tyg.')}</span></span>` : ''}${lgSparkSvg(d.rec.spark, animate)}</div>` : ''}
     </div>` : '';
   const note = exerciseNotes[ex.name] || '';
   return `<div class="lg-scroll lg-pg-ov" id="lgOv">
@@ -10108,12 +10118,29 @@ function lgOverviewHtml(ex, history, sugg, aiAction, versionPill, rise){
           <button type="button" class="lg-ic note${note?' has-note':''}" onclick="openExNoteV2()" aria-label="${escHtml(t('exNoteLabel','Twoja notatka'))}">${LG_ICONS.note}</button>
         </div>
       </div>
-      <div class="lg-ov-tiles${rise(1)}">${tile('t-sets', t('lgOvSets','Serie'), 'stack', String(ex.sets))}${tile('t-reps', t('lgOvReps','Powtórzenia'), 'arrow-clockwise', repsTxt)}${tile('t-rest', t('lgOvRest','Przerwa'), 'clock-countdown', restTxt)}</div>
+      <div class="lg-ov-tiles">${tile('t-sets', t('lgOvSets','Serie'), 'stack', String(ex.sets), 0)}${tile('t-reps', t('lgOvReps','Powtórzenia'), 'arrow-clockwise', repsTxt, 1)}${tile('t-rest', t('lgOvRest','Przerwa'), 'clock-countdown', restTxt, 2)}</div>
       ${note ? `<div class="lg-tip lg-ov-note${rise(2)}"><span class="lg-tip-l">${t('exNoteSheetTitle','NOTATKA')}</span><span class="lg-tip-t">${escHtml(note)}</span></div>` : ''}
       ${tipHtml}
       ${rowHtml}
-      <button type="button" class="lg-add lg-ov-start${rise(4)}" onclick="lgStart()">${t('tmStart','Start')}</button>
+      <button type="button" class="lg-add lg-ov-start${rise(6)}" onclick="lgStart()">${t('tmStart','Start')}</button>
     </div>`;
+}
+function lgOvCountUp(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const els = [...document.querySelectorAll('#lgOv .lg-count')];
+  if(!els.length) return;
+  els.forEach(el=>{ el.textContent = '0'; });
+  setTimeout(()=>{
+    const t0 = performance.now(), D = 700;
+    const tick = now=>{
+      const p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3);
+      els.forEach(el=>{ el.textContent = formatDashNum(+el.dataset.t * (p < 1 ? e : 1), +el.dataset.d); });
+      if(p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, 380);   // after the tiles have come in
+  // a backgrounded app pauses requestAnimationFrame: this timer always lands the real numbers
+  setTimeout(()=> els.forEach(el=>{ el.textContent = formatDashNum(+el.dataset.t, +el.dataset.d); }), 380 + 700 + 150);
 }
 function lgHowHtml(ex, h){
   const slug = EXERCISE_ICON_MAP[ex.name] || ex.icon, png = slug ? iconPngUrl(slug) : '', svg = !png && slug ? iconSvgV3(slug) : '';
@@ -10290,6 +10317,7 @@ function renderExercisePopupV2(animate){
       <button type="button" class="lg-key lg-key-ok" onclick="lgPadClose()">OK</button>
     </div>`;
   lgWirePager();
+  if(animate && hasOv) lgOvCountUp();
   lgRenderSets();
   lgPaint();
   restPaint(restTimer ? (restTimer.endAt - Date.now()) / 1000 : null);
