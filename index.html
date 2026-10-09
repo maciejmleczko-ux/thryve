@@ -2626,6 +2626,10 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-ai-goal-v{font-size:34.43px;font-weight:200;letter-spacing:-.01em;line-height:1;color:#fff;}
 .lg-pg-ov .lg-tip{gap:26px;padding:16px;}
 .lg-pg-ov .lg-tip-t{font-size:var(--m-fs-base);font-weight:300;line-height:1.4;}
+/* the user's note is its own thing, not a second dark card: peach with the deep red of the brand palette (#cd1200 is the red of "Dodaj ćwiczenie") */
+.lg-pg-ov .lg-tip.lg-ov-note{background:#ffe6dc;gap:8px;padding:12px 16px;}
+.lg-ov-note .lg-tip-l{color:#cd1200;}
+.lg-pg-ov .lg-ov-note .lg-tip-t{color:#5a1a0c;font-weight:400;}
 .lg-ov-row{display:grid;grid-template-columns:174fr 141fr;gap:8px;}
 .lg-mini{min-width:0;min-height:135px;background:#ededed;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;gap:10px;}
 .lg-mini-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(44,39,39,.8);}
@@ -2640,6 +2644,8 @@ body.gymv2-bg .gy-bg{display:block;}
 @media (prefers-reduced-motion: no-preference){
   .lg-spark-draw{animation:lgSparkDraw var(--m-dur-draw) var(--m-ease) 560ms backwards;}   /* the trend line is drawn left to right */
   @keyframes lgSparkDraw{from{clip-path:inset(0 100% 0 0);}to{clip-path:inset(0 0 0 0);}}
+  .lg-ai.m-rise-tile .lg-ai-h .ph{animation:lgStarPulse var(--m-dur-pop) var(--m-ease-spring) 640ms;}   /* one pulse, once the card is in */
+  @keyframes lgStarPulse{0%{transform:scale(1) rotate(0);}40%{transform:scale(1.28) rotate(14deg);}100%{transform:scale(1) rotate(0);}}
 }
 .lg-add.lg-ov-start{flex:none;margin-top:auto;background:var(--m-orange);color:#fff;}
 /* Jak ćwiczyć */
@@ -10172,9 +10178,18 @@ function lgGo(key, instant){
   track.style.transform = `translateX(${-100 * i}%)`;
   document.querySelectorAll('#lgDots .lg-dot').forEach((d, n)=> d.classList.toggle('is-on', n === i));
 }
+// the Trening page's blocks rise in again, one after another, while the page slides over (iOS "push"); only after START, not on a swipe
+function lgReplayMainIn(){
+  const main = document.getElementById('lgMain');
+  if(!main) return;
+  main.style.setProperty('--m-delay', '140ms');   // the page needs a moment to get under the finger
+  main.querySelectorAll('.m-rise').forEach(el=>{ el.classList.remove('m-rise'); void el.offsetWidth; el.classList.add('m-rise'); });
+  setTimeout(()=> main.style.removeProperty('--m-delay'), 1200);
+}
 function lgStart(){
   if(!lgPg) return;
   lgPg.started = true;
+  lgReplayMainIn();
   const dots = document.getElementById('lgDots');
   if(dots) dots.classList.remove('is-off');
   haptic('light');
