@@ -1,7 +1,7 @@
-const CACHE_NAME = 'mekkio-cache-v25';
-// icons/share/* = backgrounds of the share sheet, kept offline from the first launch (add gym-N.jpg here when they ship)
+const CACHE_NAME = 'mekkio-cache-v26';
+// icons/share/* = backgrounds of the share sheet, kept offline from the first launch
 const URLS_TO_CACHE = ['./', './index.html', './lottie.min.js', './success.json',
-  './icons/share/hero-1.jpg', './icons/share/hero-2.jpg', './icons/share/hero-3.jpg', './icons/share/hero-4.jpg', './icons/share/hero-5.jpg'];
+  ...[1,2,3,4,5].flatMap(n => ['./icons/share/hero-' + n + '.jpg', './icons/share/gym-' + n + '.jpg'])];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

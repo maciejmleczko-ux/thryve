@@ -16420,8 +16420,17 @@ function scDrawWordmark(ctx, x, y, w, color){ scDrawPaths(ctx, SC_WORDMARK_D, SC
    background and white text; buildWorkoutCardBlob(w) without a state must keep producing exactly that PNG. */
 /* Background photos of the share sheet, in slider order (after the transparent one). `allowedColors` = text colours that stay
    readable on the photo (contrast >= 4.5:1 under the type), `dim` = black layer 0..1, `iconWhite` = wordmark / barbell in white. */
-const SHARE_BG_IMAGES = [1,2,3,4,5].map(n => ({ id:'hero-' + n, group:'hero', file:'icons/share/hero-' + n + '.jpg', dim:0.16, iconWhite:true,
-  allowedColors:['white'], defaultColor:'white', focusY:0.5 }));   // measured: white type reaches >= 4.5:1 on 92-96% of its pixels from dim 0.16; brand and graphite never do
+const SHARE_BG_IMAGES = [
+  ...[1,2,3,4,5].map(n => ({ id:'hero-' + n, group:'hero', file:'icons/share/hero-' + n + '.jpg', dim:0.16, iconWhite:true,
+    allowedColors:['white'], defaultColor:'white', focusY:0.5 })),   // measured: white type reaches >= 4.5:1 on 92-96% of its pixels from dim 0.16; brand and graphite never do
+  // gym photos: dark, so white needs little or no dimming (measured the same way, worst of the 9 layout x format combos); brand orange
+  // would need 65%+ dimming even on the best one, graphite never works. focusY keeps the face / the plate in frame in 4:5 and 1:1.
+  { id:'gym-1', group:'gym', file:'icons/share/gym-1.jpg', dim:0.20, iconWhite:false, allowedColors:['white'], defaultColor:'white', focusY:0.3 },
+  { id:'gym-2', group:'gym', file:'icons/share/gym-2.jpg', dim:0.10, iconWhite:false, allowedColors:['white'], defaultColor:'white', focusY:0.5 },
+  { id:'gym-3', group:'gym', file:'icons/share/gym-3.jpg', dim:0.20, iconWhite:false, allowedColors:['white'], defaultColor:'white', focusY:0.3 },
+  { id:'gym-4', group:'gym', file:'icons/share/gym-4.jpg', dim:0.35, iconWhite:false, allowedColors:['white'], defaultColor:'white', focusY:0.4 },
+  { id:'gym-5', group:'gym', file:'icons/share/gym-5.jpg', dim:0.15, iconWhite:false, allowedColors:['white'], defaultColor:'white', focusY:0.3 }
+];
 function scBgPreset(id){ return SHARE_BG_IMAGES.find(p => p.id === id) || null; }
 const _scBgCache = {};
 function scLoadBg(id){   // -> Promise<HTMLImageElement|null>; same-origin, cached
