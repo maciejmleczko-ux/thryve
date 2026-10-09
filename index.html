@@ -16506,12 +16506,12 @@ function scStats(d){
 }
 /* Layout "Rekord" (Figma 514:22114, 4:5): wordmark top left, the record as a hero number, a rule, a 3 + 2 stat grid.
    Positions are the measured ink positions of the Figma export (1080-px units); the block sits 93 px above the bottom edge
-   in 4:5 and 1:1, and is centred in the Stories safe area in 9:16. */
+   in 4:5 and 1:1 and 300 px above it in 9:16 (Stories safe area); the wordmark stays top left (270 px down in 9:16). */
 function scDrawRecord(ctx, d, st, W, H, tcol, iconCol){
   const K = SC_K, rec = d.record, S = scStats(d);
   const BLOCK_TOP = 534.4, BLOCK_BOTTOM = 1265.2, SIDE = 92.5;
   let dy;
-  if(st.format === '9:16') dy = (250 + (H - 300 - 250) / 2) - (BLOCK_TOP + BLOCK_BOTTOM) / 2;
+  if(st.format === '9:16') dy = (H - 300) - BLOCK_BOTTOM;   // Stories: the block rests on the bottom safe-area edge (IG's UI covers the last 300 px)
   else dy = (H - 93.2) - BLOCK_BOTTOM;
   const Y = v => v + dy;
   // wordmark
