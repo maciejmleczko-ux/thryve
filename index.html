@@ -2561,6 +2561,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .sh-arrow svg{width:7px;height:12px;display:block;}
 .sh-arrow[disabled]{opacity:.2;pointer-events:none;}
 .sh-row{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:var(--m-r-md);padding:10px 0 10px 16px;}
+.sh-row[hidden]{display:none;}
 .sh-row-k{flex:none;width:50px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:#343941;}
 .sh-bg{position:relative;flex:1;min-width:0;display:flex;align-items:center;gap:4px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px calc(50% - 20px);-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;}
 .sh-bg::-webkit-scrollbar{display:none;}
@@ -16893,7 +16894,7 @@ function openShareSheet(id, opts){
     </div>
     <div class="lg-dots" id="shDots">${layouts.map((k,i)=> `<button type="button" class="lg-dot" aria-label="${i + 1}/${layouts.length}" onclick="shGo(${i})"></button>`).join('')}</div>
     <div class="sh-row"><span class="sh-row-k">${escHtml(t('shareBg','Tło'))}</span><div class="sh-bg" id="shBg" role="listbox" aria-label="${escHtml(t('shareBg','Tło'))}">${bgThumbs}</div></div>
-    <div class="sh-row"><span class="sh-row-k">${escHtml(t('shareText','Tekst'))}</span><div class="sh-sw-row">${swatch('white','w',t('shareColWhite','Biały tekst'))}${swatch('brand','b',t('shareColBrand','Pomarańczowy tekst'))}${swatch('graphite','g',t('shareColGraphite','Grafitowy tekst'))}</div></div>
+    <div class="sh-row" id="shTextRow"><span class="sh-row-k">${escHtml(t('shareText','Tekst'))}</span><div class="sh-sw-row">${swatch('white','w',t('shareColWhite','Biały tekst'))}${swatch('brand','b',t('shareColBrand','Pomarańczowy tekst'))}${swatch('graphite','g',t('shareColGraphite','Grafitowy tekst'))}</div></div>
     <div class="sh-actions">
       <button type="button" class="sh-ic m-press" id="shSave" aria-label="${escHtml(t('shareSave','Zapisz obraz'))}" onclick="shExport('save')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5V15m-4.5-4.5L12 15l4.5-4.5M4.5 15v3.5A1.5 1.5 0 0 0 6 20h12a1.5 1.5 0 0 0 1.5-1.5V15"/></svg></button>
       <button type="button" class="sh-main m-press" id="shShare" onclick="shExport('share')">${escHtml(t('shareTitle','UDOSTĘPNIJ'))}</button>
@@ -16921,6 +16922,7 @@ function shSync(initial){
   document.querySelectorAll('#shareBox .sh-seg-b').forEach(b=>{ const on = b.dataset.f === st.format; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
   document.querySelectorAll('#shareBox .sh-sw').forEach(b=>{ const on = b.dataset.c === st.color; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); b.disabled = !allowed.includes(b.dataset.c); });
   document.querySelectorAll('#shareBox .sh-bgi').forEach(b=>{ const on = b.dataset.bg === st.bg; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
+  document.getElementById('shTextRow').hidden = allowed.length < 2;   // a photo that allows one colour only has nothing to choose: the row is hidden
   document.querySelectorAll('#shDots .lg-dot').forEach((d,i)=> d.classList.toggle('is-on', i === sh.page));
   document.getElementById('shPrev').disabled = sh.page <= 0;
   document.getElementById('shNext').disabled = sh.page >= sh.layouts.length - 1;
