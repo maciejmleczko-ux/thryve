@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.61.0 (2026-10-09)
+- **Aktualna wersja:** 4.62.0 (2026-10-09)
 - **Liczba wersji:** 249 · **commitów:** 594
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -116,6 +116,23 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.62.0 · MINOR · 2026-10-09
+
+**Dla użytkownika:** ekran „Gratulacje” po treningu ma nowy wygląd. (Bez wpisu „Co nowego”.)
+
+- **Układ z Figmy (505:19279):** zdjęcie z `icons/backgrounds/gym.jpg` wyblakłe do bieli i przechodzące w brzoskwinię, kicker „GRATULACJE”, hasło „Karnet na siłowni należy Ci się dożywotnio.”, szklana karta „Nowy rekord” z dużą liczbą (ćwiczenie, wartość, jednostka, „+x względem poprzedniego”), pięć kafli: Czas, Ćwiczenia, Kalorie, Objętość i nowy „Vs poprzedni”.
+- **„Vs poprzedni”:** objętość (przy masie ciała: powtórzenia) tego treningu względem poprzedniego, w procentach; funkcja `workoutSumStats()`. Gdy nie ma poprzedniego treningu, kafel znika, a pozostałe zajmują jego miejsce (rozpiętości kolumn ustawia JS).
+- **Usunięte z ekranu:** pasek „GYM”, karta „Twój postęp”, kafel „Serie”, wiersz kalorii z „Edytuj” (kafel „Kalorie” sam jest przyciskiem edycji), podpis „Porównanie…” i link „Zobacz trening w historii”. `buildProgressCard()` zostaje, używa go Historia.
+- **Dane rekordu:** `saveWorkoutV2()` zwraca rekord jako `{name, value, unit, sub, icon}` (wcześniej jeden tekst); przy rekordzie ciężaru, objętości, powtórzeń i czasu.
+- **Etykieta i hasło zależą od treningu** (`gymFinPickMessage()`, tabela `GYMFIN_MSGS`): pierwszy pasujący stan wygrywa, w kolejności rekord → powrót po przerwie → spadek → wzrost → długi → zwykły. Etykiety: Rekord, Witaj z powrotem, Zapisane, Progres, Szacunek, Gratulacje. Hasło to losowa linia ze stanu, a w stanach pozytywnych także z puli humoru. Progi (stałe `GYMFIN_*`): przerwa ≥ 14 dni, długi ≥ 75 min, wzrost/spadek ≥ 5% względem poprzedniego treningu. Stany „Zapisane” i „Witaj z powrotem” nie dostają humoru. Polska typografia: jednoliterowe spójniki i przyimki (i, a, o, u, w, z) oraz liczba z rzeczownikiem („82 minuty”) są sklejone twardą spacją, więc nie zostają na końcu linii.
+- **Tło:** zdjęcie zawsze na całą szerokość ekranu (jednostki `vw`, wcześniej stałe 458 px nie sięgało prawej krawędzi na szerszych telefonach).
+- **Menu:** prawdziwe dolne menu zostaje nad ekranem (`html.gymfin-open`), a dotknięcie zakładki zamyka ekran i przechodzi tam (`gymFinDismissFn` w `navTap()`).
+- **Przyciski:** „Zakończ” i okrągły przycisk udostępniania (na razie woła istniejącą kartę treningu `shareHistCard('workout', id)`; docelowy ekran udostępniania dojdzie osobno).
+
+**Commity (1):**
+
+- (hash dopisać przy następnej wersji) 2026-10-09 — 4.62.0: nowy ekran Gratulacje
 
 ### 4.61.0 · MINOR · 2026-10-09
 
