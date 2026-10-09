@@ -2811,6 +2811,13 @@ function haptic(kind){
     setTimeout(()=> H.notification({ type: 'SUCCESS' }).catch(()=>{}), 150);
     return;
   }
+  if(kind === 'tick'){   // the wheel tick without the ruler's sound: a picker passing its next item (share backgrounds)
+    const now = Date.now();
+    if(now - (haptic._k || 0) < 35) return;
+    haptic._k = now;
+    (H.selectionChanged ? H.selectionChanged() : H.impact({ style: 'LIGHT' })).catch(()=>{});
+    return;
+  }
   if(kind === 'select-start'){ if(H.selectionStart) H.selectionStart().catch(()=>{}); return; }
   if(kind === 'select-end'){ if(H.selectionEnd) H.selectionEnd().catch(()=>{}); return; }
   if(kind === 'select'){
@@ -11581,7 +11588,7 @@ function showGymFinishV2(summary, onDone){
   };
   gymFinDismissFn = dismiss;   // a bottom-nav tap while the screen is up dismisses it and goes there (see navTap)
   document.getElementById('gymFinCta').onclick = ()=> dismiss();
-  document.getElementById('gymFinShare').onclick = ()=>{ if(summary.workoutId) openShareSheet(summary.workoutId, { fromFinish: true }); };
+  document.getElementById('gymFinShare').onclick = ()=>{ haptic('light'); if(summary.workoutId) openShareSheet(summary.workoutId, { fromFinish: true }); };
 }
 /* GYM v2 save button: wraps the shared saveWorkout() (production GYM's own
    button is untouched), then shows the finish screen with a summary of the
@@ -17079,8 +17086,8 @@ async function shEnsureBg(){
   toast(t('imageGenFailed','Nie udało się wygenerować grafiki'));
   shSync(); shBgCenter('transparent', true);
 }
-function shSetFormat(f){ if(!sh || sh.state.format === f) return; sh.state.format = f; shSaveState(); shSync(); shRender(true); }
-function shSetColor(c){ if(!sh || sh.state.color === c || !shAllowedColors(sh.state.bg).includes(c)) return; sh.state.color = c; shSaveState(); shSync(); shRender(true); }
+function shSetFormat(f){ if(!sh || sh.state.format === f) return; haptic('light'); sh.state.format = f; shSaveState(); shSync(); shRender(true); }
+function shSetColor(c){ if(!sh || sh.state.color === c || !shAllowedColors(sh.state.bg).includes(c)) return; haptic('light'); sh.state.color = c; shSaveState(); shSync(); shRender(true); }
 async function shSetBg(id){
   if(!sh || sh.state.bg === id) return;
   sh.state.bg = id;
@@ -17088,10 +17095,12 @@ async function shSetBg(id){
   shSaveState(); shSync();
   await shEnsureBg(); shRender(true);
 }
-function shPickBg(id){ shBgCenter(id, true); shSetBg(id); }   // a tap centres the tile and chooses it at once
+function shPickBg(id){ if(sh && sh.state.bg !== id) haptic('light'); shBgCenter(id, true); shSetBg(id); }   // a tap centres the tile and chooses it at once
 function shGo(i){
   if(!sh) return;
-  sh.page = Math.max(0, Math.min(sh.layouts.length - 1, i));
+  const next = Math.max(0, Math.min(sh.layouts.length - 1, i));
+  if(next !== sh.page) haptic('light');   // one tap when the card snaps to another layout
+  sh.page = next;
   sh.state.layout = sh.layouts[sh.page]; shSaveState(); shSync();
 }
 // the slider: centre one tile (code-driven scrolling must not re-pick), pick the tile in the middle when scrolling stops
@@ -17115,7 +17124,11 @@ function shWire(){
   // only a scroll the finger started (or the wheel) may pick a tile; code-driven scrolls (tap, restore) never do
   const settle = ()=>{ if(!sh || sh.progScroll || !sh.userScroll) return; sh.userScroll = false; const id = shBgNearest(); if(id && id !== sh.state.bg) shSetBg(id); };
   ['touchstart','pointerdown','wheel'].forEach(ev=> sl.addEventListener(ev, ()=>{ sh.userScroll = true; }, { passive: true }));
-  sl.addEventListener('scroll', ()=>{ clearTimeout(sh.timers.scroll); sh.timers.scroll = setTimeout(settle, 110); }, { passive: true });
+  sh.tickBg = sh.state.bg;
+  sl.addEventListener('scroll', ()=>{
+    clearTimeout(sh.timers.scroll); sh.timers.scroll = setTimeout(settle, 110);
+    if(sh.userScroll && !sh.progScroll){ const id = shBgNearest(); if(id && id !== sh.tickBg){ sh.tickBg = id; haptic('tick'); } }   // a tick for every photo that passes the middle
+  }, { passive: true });
   if('onscrollend' in window) sl.addEventListener('scrollend', settle);
   sl.addEventListener('keydown', e=>{
     if(e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
@@ -17169,15 +17182,15 @@ async function shExport(kind){
       if(!(navigator.clipboard && window.ClipboardItem)) throw new Error('no clipboard');
       // Safari needs the write inside the tap, so the blob is handed over as a promise
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': buildWorkoutCardBlob(w, state) })]);
-      toast(t('shareCopied','Skopiowano obraz'));
+      toast(t('shareCopied','Skopiowano obraz')); haptic('success');
     } else {
       const blob = await buildWorkoutCardBlob(w, state);
-      if(kind === 'save') scSaveBlob(blob, name);
+      if(kind === 'save'){ scSaveBlob(blob, name); haptic('success'); }
       else await shareBlob(blob, name, t('shareWorkoutText','Mój trening w Mekkio 💪'));
     }
   }catch(err){
     console.error('share export', err);
-    toast(kind === 'copy' ? t('shareCopyFailed','Nie udało się skopiować obrazu') : t('imageGenFailed','Nie udało się wygenerować grafiki'));
+    toast(kind === 'copy' ? t('shareCopyFailed','Nie udało się skopiować obrazu') : t('imageGenFailed','Nie udało się wygenerować grafiki')); haptic('warning');
   }
   if(sh) setBusy(false);
 }
