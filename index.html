@@ -2416,6 +2416,8 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-chip{display:inline-flex;align-items:center;gap:10px;height:28px;padding:0 12px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;font-size:var(--m-fs-2xs);color:#2c2727;white-space:nowrap;font-variant-numeric:tabular-nums;}
 .lg-chip .ph, .lg-chip .ph svg{width:16px;height:16px;display:block;flex:none;color:var(--m-orange);}
 .lg-chip.c-sets,.lg-chip.c-reps{color:#fff;border-color:transparent;}   /* same colours as the start-card tiles: Serie navy, Powtórzenia sky, Przerwa orange */
+.lg-chip.c-time{background:var(--m-orange);color:#fff;border-color:transparent;}   /* time = orange, as the rest chip of an exercise */
+.lg-chip.c-time .ph,.lg-chip.c-time .ph svg{color:#fff;}
 .lg-chip.c-sets{background:var(--m-plan-hard);}
 .lg-chip.c-reps{background:var(--m-sky);}
 .lg-chip.c-sets .ph,.lg-chip.c-sets .ph svg,.lg-chip.c-reps .ph,.lg-chip.c-reps .ph svg{color:#fff;}
@@ -10967,7 +10969,7 @@ function renderBlockSheet(){
   box.innerHTML = `${bkBar(kind)}
     <div class="lg-scroll lg-sub-scroll">
       <div class="lg-name-row"><div class="lg-name">${escHtml(bkTitle(kind))}</div></div>
-      <div class="lg-chips"><span class="lg-chip">${ph('clock-countdown')}<span>${escHtml(bkMinTxt(list))}</span></span><span class="lg-chip">${ph('stack')}<span>${list.length}</span></span></div>
+      <div class="lg-chips"><span class="lg-chip c-sets">${ph('stack')}<span>${list.length}</span></span><span class="lg-chip c-time">${ph('clock-countdown')}<span>${escHtml(bkMinTxt(list))}</span></span></div>
       <div class="gymv2-grid bk-tiles">${tiles}</div>
       ${done ? `<p class="bk-done-note">${escHtml(t('bkDoneNote','Zrobione dziś.'))}</p>` : ''}
       <div class="lg-tm-btns">
