@@ -138,7 +138,9 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 ### 4.62.0 · MINOR · 2026-10-09
 
-**Dla użytkownika:** ekran „Gratulacje” po treningu ma nowy wygląd. (Bez wpisu „Co nowego”.)
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Po zapisaniu treningu zobaczysz nowy ekran Gratulacje: rekord w dużym kadrze, kafle z czasem, kaloriami i objętością oraz porównanie z poprzednim treningiem. Nagłówek i hasło zmieniają się w zależności od tego, jak poszło.
 
 - **Układ z Figmy (505:19279):** zdjęcie z `icons/backgrounds/gym.jpg` wyblakłe do bieli i przechodzące w brzoskwinię, kicker „GRATULACJE”, hasło „Karnet na siłowni należy Ci się dożywotnio.”, szklana karta „Nowy rekord” z dużą liczbą (ćwiczenie, wartość, jednostka, „+x względem poprzedniego”), pięć kafli: Czas, Ćwiczenia, Kalorie, Objętość i nowy „Vs poprzedni”.
 - **„Vs poprzedni”:** objętość (przy masie ciała: powtórzenia) tego treningu względem poprzedniego, w procentach; funkcja `workoutSumStats()`. Gdy nie ma poprzedniego treningu, kafel znika, a pozostałe zajmują jego miejsce (rozpiętości kolumn ustawia JS).
