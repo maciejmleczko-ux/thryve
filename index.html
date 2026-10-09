@@ -102,6 +102,7 @@
   --m-plan-c-easy:#ff6343; /* custom / imported plan cards */
   --m-plan-c-mid:var(--m-orange);
   --m-plan-c-hard:#cd1200;
+  --m-sky:#5da9e9;         /* "Powtórzenia": the sky-blue tile on the start card, the Finish screen and the reps chip on Trening */
   --m-plan-accent:#6891ff; /* planned/missed/done markers on History calendar + Dashboard weekly progress */
 
   --m-r-sm:12px;           /* inputs, chips, small tiles */
@@ -353,7 +354,7 @@ html.gymfin-open .bottom-nav{z-index:9600;}   /* the real nav stays on top of th
 .gymfin-stat--mint .gymfin-stat-k{color:rgba(52,57,65,.82);}
 .gymfin-stat--mint .gymfin-stat-v{color:#343941;}
 .gymfin-stat--mint .gymfin-stat-v small{color:rgba(52,57,65,.8);}
-.gymfin-stat--sky{background:#5da9e9;}
+.gymfin-stat--sky{background:var(--m-sky);}
 .gymfin-stat--navy{background:var(--m-plan-hard);cursor:pointer;}
 .gymfin-stat--orange{background:var(--m-orange);}
 .gymfin-stat--plum{background:#8e0045;}
@@ -2414,6 +2415,10 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-chips{display:flex;gap:6px;flex-wrap:wrap;}
 .lg-chip{display:inline-flex;align-items:center;gap:10px;height:28px;padding:0 12px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;font-size:var(--m-fs-2xs);color:#2c2727;white-space:nowrap;font-variant-numeric:tabular-nums;}
 .lg-chip .ph, .lg-chip .ph svg{width:16px;height:16px;display:block;flex:none;color:var(--m-orange);}
+.lg-chip.c-sets,.lg-chip.c-reps{color:#fff;border-color:transparent;}   /* same colours as the start-card tiles: Serie navy, Powtórzenia sky, Przerwa orange */
+.lg-chip.c-sets{background:var(--m-plan-hard);}
+.lg-chip.c-reps{background:var(--m-sky);}
+.lg-chip.c-sets .ph,.lg-chip.c-sets .ph svg,.lg-chip.c-reps .ph,.lg-chip.c-reps .ph svg{color:#fff;}
 .lg-chip.rest{background:var(--m-orange);color:#fff;border-color:transparent;transition:background-color var(--m-dur-quick) ease;}
 .lg-chip.rest .ph,.lg-chip.rest .ph svg{color:#fff;}
 .lg-chip.rest.is-count{background:#cd1200;}
@@ -2609,7 +2614,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-ov-tiles{display:grid;grid-template-columns:24.8% 35.6% minmax(0,1fr);gap:4px;}
 .lg-ov-tile{min-width:0;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;color:#fff;}
 .lg-ov-tile.t-sets{background:var(--m-plan-hard);}
-.lg-ov-tile.t-reps{background:#5da9e9;}
+.lg-ov-tile.t-reps{background:var(--m-sky);}
 .lg-ov-tile.t-rest{background:var(--m-orange);}
 .lg-ov-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:rgba(255,255,255,.82);}
 .lg-ov-tile.t-reps .lg-ov-l, .lg-ov-tile.t-rest .lg-ov-l{color:#e4f2ff;}
@@ -10285,8 +10290,8 @@ function renderExercisePopupV2(animate){
           ${hasOv ? '' : `<button type="button" class="lg-ic note${noteVal?' has-note':''}" onclick="openExNoteV2()" aria-label="${escHtml(t('exNoteLabel','Twoja notatka'))}">${LG_ICONS.note}</button>`}
         </div>
         <div class="lg-chips">
-          <span class="lg-chip">${ph('stack')}<span>${t('statSetsCount', `${ex.sets} serie`, ex.sets)}</span></span>
-          <span class="lg-chip">${ph('arrow-clockwise')}<span>${time ? escHtml(fmtDur(timeDurFor(ex), ex.perSide)) : `${ex.repLow}-${ex.repHigh} ${t('repsUnit','powt.')}`}</span></span>
+          <span class="lg-chip c-sets">${ph('stack')}<span>${t('statSetsCount', `${ex.sets} serie`, ex.sets)}</span></span>
+          <span class="lg-chip c-reps">${ph('arrow-clockwise')}<span>${time ? escHtml(fmtDur(timeDurFor(ex), ex.perSide)) : `${ex.repLow}-${ex.repHigh} ${t('repsUnit','powt.')}`}</span></span>
           ${parseRestSeconds(ex.rest) > 0 ? `<span class="lg-chip rest" id="lgRest">${ph('clock-countdown')}<span id="lgRestTxt">${escHtml(ex.rest)}</span></span>` : ''}
         </div>
       </div>
