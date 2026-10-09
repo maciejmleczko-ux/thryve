@@ -2265,7 +2265,7 @@ body.pev2-bg{background:var(--m-panel);}
    style, so only the duration needs overriding here. Deliberately a
    list, not a global :active — :active also matches ancestors, which
    would speed up the view slide / sheet snapback mid-touch. */
-.plan-pill:active,.topbar-icon-btn:active,.gymfin-cta:active,.gymfin-share:active,.gymfin-stat:active,.ex-tile:active,.save-btn:active,
+.plan-pill:active,.topbar-icon-btn:active,.gymfin-cta:active,.gymfin-share:active,.sh-seg-b:active,.sh-arrow:active,.sh-sw:active,.sh-ic:active,.sh-main:active,.sh-bgi:active,.gymfin-stat:active,.ex-tile:active,.save-btn:active,
 .hist-card.collapsed:active,.acct-photo-pick:active,.acct-cloud-cta:active,.acct-oauth-btn:active,
 .dash-chat-btn:active,.gymv2-chat-btn:active,.plansv2-chat-btn:active,.histv2-chat-btn:active,.statsv2-chat-btn:active,
 .dash-plan-card:active,.v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-edit-plan:active,
@@ -2539,6 +2539,50 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-how-t{margin:0;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);}
 .lg-how-ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);}
 .lg-how--warn{background:#f7f6f8;border-radius:16px;padding:14px 16px;}
+/* --- share sheet (Figma 514:23219) --- */
+#shareOverlay{z-index:9700;}
+#shareSheet{background:#fff;height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;}
+#shareBox{align-items:stretch;gap:0;overflow-y:auto;padding:0 16px calc(16px + env(safe-area-inset-bottom));scrollbar-width:none;}
+#shareBox::-webkit-scrollbar{display:none;}
+#shareBox .lg-bar{padding:6px 1px 12px;}
+.sh-seg{align-self:center;display:flex;gap:4px;padding:2px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);margin:9px 0 12px;}
+.sh-seg-b{border:none;background:transparent;color:#343941;font-family:inherit;font-size:var(--m-fs-2xs);font-weight:600;padding:7px 17px;border-radius:var(--m-r-pill);cursor:pointer;min-height:30px;transition:background-color var(--m-dur-quick) ease,color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.sh-seg-b.is-on{background:var(--m-orange);color:#fff;}
+.sh-stage{position:relative;flex:1;min-height:200px;display:flex;align-items:center;justify-content:center;}
+.sh-viewport{width:100%;height:100%;overflow:hidden;touch-action:pan-y;}
+.sh-track{display:flex;height:100%;will-change:transform;}
+.sh-track.is-snap{transition:transform var(--m-dur-snap) var(--m-ease-spring);}
+.sh-slide{flex:0 0 100%;min-width:0;display:flex;align-items:center;justify-content:center;}
+.sh-card{display:block;border-radius:14px;box-shadow:0 0 0 .5px rgba(52,57,65,.18);background-color:#fff;background-image:conic-gradient(#cfcfcf 25%,#fff 0 50%,#cfcfcf 0 75%,#fff 0);background-size:16px 16px;}
+.sh-card.is-photo{background:none;}
+.sh-card.on-dark{background-image:conic-gradient(#6f6f73 25%,#8b8b90 0 50%,#6f6f73 0 75%,#8b8b90 0);}   /* white type on the transparent card needs a darker chequerboard to be seen */
+.sh-arrow{position:absolute;top:50%;width:44px;height:44px;margin-top:-22px;border:none;background:none;padding:0;display:flex;align-items:center;justify-content:center;color:#000;cursor:pointer;z-index:2;transition:opacity var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.sh-arrow.l{left:0;}.sh-arrow.r{right:0;}
+.sh-arrow svg{width:7px;height:12px;display:block;}
+.sh-arrow[disabled]{opacity:.2;pointer-events:none;}
+.sh-row{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:var(--m-r-md);padding:10px 0 10px 16px;}
+.sh-row-k{flex:none;width:50px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:#343941;}
+.sh-bg{position:relative;flex:1;min-width:0;display:flex;align-items:center;gap:4px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px calc(50% - 20px);-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;}
+.sh-bg::-webkit-scrollbar{display:none;}
+.sh-bgi{flex:none;width:40px;height:64px;padding:0;border:.5px solid #f1d7cb;border-radius:4px;overflow:hidden;scroll-snap-align:center;cursor:pointer;background-color:#fff;background-image:conic-gradient(#cfcfcf 25%,#fff 0 50%,#cfcfcf 0 75%,#fff 0);background-size:8px 8px;transition:transform var(--m-dur-snap) var(--m-ease-spring),box-shadow var(--m-dur-quick) ease;}
+.sh-bgi img{display:block;width:100%;height:100%;object-fit:cover;}
+.sh-bgi.is-on{transform:scale(1.16);box-shadow:0 0 0 1.5px var(--m-orange);}
+.sh-sw-row{display:flex;gap:4px;padding:2px 16px 2px 0;}
+.sh-sw{flex:none;position:relative;width:39px;height:39px;border-radius:50%;padding:0;border:.5px solid #f1d7cb;cursor:pointer;transition:box-shadow var(--m-dur-quick) ease,opacity var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.sh-sw::before{content:"";position:absolute;inset:-3px;}
+.sh-sw.w{background:#fff;border:.8px solid var(--m-orange);}
+.sh-sw.b{background:var(--m-orange);}
+.sh-sw.g{background:#343941;}
+.sh-sw.is-on{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--m-orange);}
+.sh-sw:disabled{opacity:.28;cursor:default;}
+.sh-sw:disabled::after{content:"";position:absolute;left:50%;top:6px;bottom:6px;width:1.5px;background:#fff;box-shadow:0 0 0 .5px rgba(52,57,65,.4);transform:rotate(45deg);}
+.sh-actions{display:flex;gap:12px;align-items:center;margin-top:16px;}
+.sh-ic{flex:none;width:55px;height:55px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;color:#343941;background:rgba(255,255,255,.6);border:.91px solid var(--m-orange);-webkit-backdrop-filter:blur(10.2px);backdrop-filter:blur(10.2px);cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),opacity var(--m-dur-quick) ease;}
+.sh-ic svg{width:24px;height:24px;display:block;}
+.sh-main{flex:1;min-width:0;height:55px;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),opacity var(--m-dur-quick) ease;}
+.sh-actions [disabled]{opacity:.5;pointer-events:none;}
+.sh-hint{margin:6px 0 0;text-align:center;font-size:var(--m-fs-2xs);color:var(--m-muted);}
+@media (prefers-reduced-motion: reduce){ .sh-track.is-snap{transition:none;} .sh-bgi{transition:none;} }
 /* --- set-logging pager: Przegląd → Trening → Jak ćwiczyć (Figma "TRENING - LOGOWANIE ĆWICZENIA", 513:21437).
    Sizes follow Figma; labels under 11px (Figma 10 / 8) stay at the --m-fs-2xs floor like the rest of the app --- */
 .lg-dots{flex:none;display:flex;justify-content:center;gap:12px;height:8px;margin:6px 0 8px;transition:opacity var(--m-dur-fade) ease;}
@@ -3986,6 +4030,13 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 </div>
 
 <!-- Set-logging sub-sheets (Figma 461:7553): exercise note + "jak ćwiczyć". Sit above the logging sheet. -->
+<!-- Share sheet (Figma "05. Share - settings"): format, layout carousel, background slider, text colour, export -->
+<div class="onboard-overlay hidden m-sheet-overlay" id="shareOverlay" onclick="if(event.target===this) closeShareSheet()">
+  <div class="m-sheet" id="shareSheet">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="m-sheet-body" id="shareBox"></div>
+  </div>
+</div>
 <div class="onboard-overlay hidden m-sheet-overlay lg-sub-overlay" id="exNoteOverlayV2" onclick="if(event.target===this) closeExNoteV2()">
   <div class="m-sheet" id="exNoteSheetV2">
     <div class="m-sheet-grab" aria-hidden="true"></div>
@@ -4245,6 +4296,9 @@ const T_EN = {
   shareCardMin: 'MINUTES',
   shareCardPace: 'PACE MIN/KM',
   shareWorkoutText: 'My workout on Mekkio 💪',
+  shareTitle: 'SHARE', shareFmtStories: 'Stories 9:16', shareFormat: 'Format', sharePrev: 'Previous layout', shareNext: 'Next layout', shareBg: 'Background', shareBgNone: 'Transparent background', shareBgPhoto: 'Background',
+  shareText: 'Text', shareColWhite: 'White text', shareColBrand: 'Orange text', shareColGraphite: 'Graphite text', shareSave: 'Save image', shareCopy: 'Copy image', shareCopied: 'Image copied', shareCopyFailed: "Couldn't copy the image",
+  shareBusy: 'Preparing the image…', shareNoSets: 'Log at least one set first', shareDefaultPlan: 'Workout',
   shareRunText: 'My run on Mekkio 🏃',
   runTypeRunWalk: 'Run/walk',
   runTypeContinuous: 'Continuous run',
@@ -7066,7 +7120,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.62.0";
+const APP_VERSION = "4.63.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -7115,6 +7169,14 @@ const DASH_REST_DAY_PL = [
   'Dziś odpoczynek. Wracasz mocniejszy.',
 ];
 const CHANGELOG = {
+  "4.63.0": {
+    pl: [
+      {featured:true, icon:'sparks', badge:'Nowość', title:'Udostępnianie po Twojemu', text:'Karta treningu ma teraz trzy układy i trzy formaty: Stories, 4:5 i 1:1. Wybierz tło (przezroczyste albo zdjęcie) i kolor tekstu. Udostępnisz ją, zapiszesz albo skopiujesz, także prosto z ekranu Gratulacje.'}
+    ],
+    en: [
+      {featured:true, icon:'sparks', badge:'New', title:'Share it your way', text:'The workout card now has three layouts and three formats: Stories, 4:5 and 1:1. Pick a background (transparent or a photo) and a text colour. Share it, save it or copy it, also straight from the Congrats screen.'}
+    ],
+  },
   "4.61.0": {
     pl: [
       {featured:true, icon:'barbell', badge:'Nowość', title:'Ćwiczenie w trzech krokach', text:'Ćwiczenie otwiera się teraz od przeglądu: serie, powtórzenia, przerwa, podpowiedź trenera i cel na dziś. Start przenosi do logowania serii. Przesuń palcem w lewo, a zobaczysz, jak ćwiczyć, z ilustracją, ustawieniem, ruchem i typowym błędem.'}
@@ -11458,7 +11520,7 @@ function showGymFinishV2(summary, onDone){
   };
   gymFinDismissFn = dismiss;   // a bottom-nav tap while the screen is up dismisses it and goes there (see navTap)
   document.getElementById('gymFinCta').onclick = ()=> dismiss();
-  document.getElementById('gymFinShare').onclick = ()=>{ if(summary.workoutId) shareHistCard('workout', summary.workoutId); };
+  document.getElementById('gymFinShare').onclick = ()=>{ if(summary.workoutId) openShareSheet(summary.workoutId, { fromFinish: true }); };
 }
 /* GYM v2 save button: wraps the shared saveWorkout() (production GYM's own
    button is untouched), then shows the finish screen with a summary of the
@@ -11526,6 +11588,58 @@ function workoutIsBodyweightOnly(w){
   return w.exercises.length > 0 && w.exercises.every(ex=>
     ex.sets.every(s=> !(s.weight > 0)));
 }
+/* THE record of a saved workout: one definition for the Gratulacje screen and the share card. Each exercise is compared
+   with the same exercise in the workouts saved before this one (a first-ever exercise sets no record). With several
+   candidates the priority is: weight (heaviest set), volume (session kg, or session reps for a masa ciała exercise),
+   reps (best single set, masa ciała exercises only), time (longest set, not cardio).
+   Returns { kind:'weight'|'volume'|'reps'|'time', unit:'kg'|'reps'|'sec', name, value, prev, perSide? } or null. */
+function workoutRecord(w){
+  const idx = workouts.indexOf(w);
+  const prior = workouts.filter((o, i)=> o !== w && (o.date < w.date || (o.date === w.date && (idx < 0 || i < idx))));
+  const best = { w:{}, vol:{}, repsVol:{}, reps:{}, time:{} };
+  const sums = (ex)=>{
+    const sv = exSetsView(ex), r = { topW:0, vol:0, repsVol:0, topReps:0, topTime:0, perSide:false };
+    sv.forEach(st=>{
+      r.topW = Math.max(r.topW, st.weight || 0);
+      r.vol += (st.weight || 0) * (st.reps || 0);
+      r.repsVol += st.reps || 0;
+      r.topReps = Math.max(r.topReps, st.reps || 0);
+      if(st.durationSec > r.topTime){ r.topTime = st.durationSec; r.perSide = !!st.perSide; }
+    });
+    r.bw = sv.length > 0 && sv.every(st=> !(st.weight > 0)) && r.repsVol > 0;
+    return r;
+  };
+  prior.forEach(o=> o.exercises.forEach(ex=>{
+    const r = sums(ex), n = ex.name, mx = (m, v)=>{ if(v > 0) m[n] = Math.max(m[n] || 0, v); };
+    if(!isCardioName(n)) mx(best.time, r.topTime);
+    mx(best.w, r.topW); mx(best.reps, r.topReps); mx(best.vol, r.vol); mx(best.repsVol, r.repsVol);
+  }));
+  const cand = { weight:null, volume:null, reps:null, time:null };
+  const take = (slot, c)=>{ if(!cand[slot] || c.value > cand[slot].value) cand[slot] = c; };
+  w.exercises.forEach(ex=>{
+    const r = sums(ex), n = ex.name;
+    if(r.topW > 0 && best.w[n] !== undefined && r.topW > best.w[n]) take('weight', { kind:'weight', unit:'kg', name:n, value:r.topW, prev:best.w[n] });
+    if(r.vol > 0 && best.vol[n] !== undefined && r.vol > best.vol[n]) take('volume', { kind:'volume', unit:'kg', name:n, value:r.vol, prev:best.vol[n] });
+    if(r.bw && best.repsVol[n] !== undefined && r.repsVol > best.repsVol[n]) take('volume', { kind:'volume', unit:'reps', name:n, value:r.repsVol, prev:best.repsVol[n], bwOnly:true });
+    if(r.bw && best.reps[n] !== undefined && r.topReps > best.reps[n]) take('reps', { kind:'reps', unit:'reps', name:n, value:r.topReps, prev:best.reps[n] });
+    if(!isCardioName(n) && best.time[n] !== undefined && r.topTime > best.time[n]) take('time', { kind:'time', unit:'sec', name:n, value:r.topTime, prev:best.time[n], perSide:r.perSide });
+  });
+  const hit = cand.weight || cand.volume || cand.reps || cand.time;
+  return hit ? Object.assign({ delta: hit.value - hit.prev }, hit) : null;
+}
+// the record as the Gratulacje screen shows it (see showGymFinishV2): label, name, big value, unit and the "+x vs previous" line
+function gymFinRecordFrom(rec){
+  if(!rec) return null;
+  const vs = t('gymFinRecordVsPrev','względem poprzedniego');
+  const d = rec.delta, plus = (txt)=> d > 0 ? `+${txt} ${vs}` : '';
+  const isKgVol = rec.kind === 'volume' && rec.unit === 'kg';
+  const out = { name: rec.name, label: rec.kind === 'volume' ? t('gymFinRecordVolume','Nowy rekord objętości') : t('gymFinRecordLabel','Nowy rekord'), icon: (rec.kind === 'weight' || isKgVol) ? 'barbell' : 'trophy' };
+  if(rec.kind === 'weight'){ out.value = fmtGymWeight(rec.value); out.unit = 'kg'; out.sub = plus(fmtGymWeight(d) + ' kg'); }
+  else if(isKgVol){ out.value = formatDashNum(Math.round(rec.value), 0); out.unit = 'kg'; out.sub = plus(formatDashNum(Math.round(d), 0) + ' kg'); }
+  else if(rec.unit === 'reps'){ const v = Math.round(rec.value); out.value = String(v); out.unit = gymFinRepsWord(v); out.sub = plus(String(Math.round(d))); }
+  else { out.value = fmtDur(rec.value, rec.perSide); out.unit = ''; out.sub = plus(Math.round(d) + ' s'); }
+  return out;
+}
 // total volume (kg) and reps of one saved workout; strength sets only, same sums saveWorkoutV2() builds for the current session
 function workoutSumStats(w){
   let volume = 0, reps = 0;
@@ -11533,24 +11647,6 @@ function workoutSumStats(w){
   return { volume, reps };
 }
 function saveWorkoutV2(){
-  // --- read history BEFORE saveWorkout() pushes this session ---
-  const priorBestWeight = {};   // best-ever weight per exercise
-  const priorBestVol = {};      // best single-session volume (kg) per exercise
-  const priorBestReps = {};     // best-ever single-set reps per exercise (masa ciała)
-  const priorBestRepsVol = {};  // best single-session total reps per exercise (masa ciała)
-  const priorBestTime = {};     // best single-set time (s) per timed exercise (legacy Plank / Dead Hang read as time)
-  workouts.forEach(w=>{
-    const perEx = {}, perExReps = {};
-    w.exercises.forEach(ex=> exSetsView(ex).forEach(s=>{
-      if(s.durationSec > 0 && !isCardioName(ex.name)) priorBestTime[ex.name] = Math.max(priorBestTime[ex.name] || 0, s.durationSec);
-      if(s.weight > 0) priorBestWeight[ex.name] = Math.max(priorBestWeight[ex.name] || 0, s.weight);
-      if(s.reps > 0) priorBestReps[ex.name] = Math.max(priorBestReps[ex.name] || 0, s.reps);
-      perEx[ex.name] = (perEx[ex.name] || 0) + s.weight * s.reps;
-      perExReps[ex.name] = (perExReps[ex.name] || 0) + (s.reps || 0);
-    }));
-    Object.keys(perEx).forEach(n=>{ priorBestVol[n] = Math.max(priorBestVol[n] || 0, perEx[n]); });
-    Object.keys(perExReps).forEach(n=>{ priorBestRepsVol[n] = Math.max(priorBestRepsVol[n] || 0, perExReps[n]); });
-  });
   // the previous workout (most recent by date), for the "Vs poprzedni" tile
   const prevWorkout = workouts.slice().sort((a,b)=> b.date.localeCompare(a.date))[0] || null;
   const prevStats = prevWorkout ? workoutSumStats(prevWorkout) : null;
@@ -11560,26 +11656,11 @@ function saveWorkoutV2(){
 
   const w = workouts[workouts.length - 1];
   const isBw = workoutIsBodyweightOnly(w);
-  let volume = 0, repsTotal = 0, setCount = 0, weightPR = null, repsPR = null, timePR = null;
-  const exVol = {}, exRepsVol = {};
-  w.exercises.forEach(ex=>{
-    const hadW = priorBestWeight[ex.name] !== undefined;
-    const prevW = priorBestWeight[ex.name] || 0;
-    const hadReps = priorBestReps[ex.name] !== undefined;
-    const prevReps = priorBestReps[ex.name] || 0;
-    const hadTime = priorBestTime[ex.name] !== undefined;
-    const prevTime = priorBestTime[ex.name] || 0;
-    exSetsView(ex).forEach(s=>{
-      if(hadTime && !isCardioName(ex.name) && s.durationSec > prevTime && (!timePR || s.durationSec > timePR.sec)) timePR = { name: ex.name, sec: s.durationSec, perSide: !!s.perSide };
-      volume += s.weight * s.reps;
-      repsTotal += s.reps || 0;
-      setCount += 1;
-      exVol[ex.name] = (exVol[ex.name] || 0) + s.weight * s.reps;
-      exRepsVol[ex.name] = (exRepsVol[ex.name] || 0) + (s.reps || 0);
-      if(hadW && s.weight > prevW && (!weightPR || s.weight > weightPR.weight)) weightPR = { name: ex.name, weight: s.weight };
-      if(hadReps && s.reps > prevReps && (!repsPR || s.reps > repsPR.reps)) repsPR = { name: ex.name, reps: s.reps };
-    });
-  });
+  let volume = 0, repsTotal = 0;
+  w.exercises.forEach(ex=> exSetsView(ex).forEach(st=>{
+    volume += st.weight * st.reps;
+    repsTotal += st.reps || 0;
+  }));
   const exCount = w.exercises.filter(ex=> ex.sets.some(s=> s.weight > 0 || s.reps > 0 || s.durationSec > 0)).length;
 
   // --- calories (F3): estimate from bodyweight-on-the-day + session METs ---
@@ -11596,36 +11677,7 @@ function saveWorkoutV2(){
   const daysSincePrev = prevWorkout ? Math.round((new Date(w.date + 'T00:00:00') - new Date(prevWorkout.date + 'T00:00:00')) / 86400000) : null;
   const vsPrev = (prevMetric > 0 && !workoutIsTimedOnly(w)) ? Math.round(((isBw ? repsTotal : volume) - prevMetric) / prevMetric * 100) : null;
 
-  // --- record row: masa ciała session → longest-set PR, else session-reps
-  // PR; regular session → a weight PR wins, otherwise a kg-volume PR ---
-  const recLabel = t('gymFinRecordLabel','Nowy rekord');
-  const vsTxt = t('gymFinRecordVsPrev','względem poprzedniego');
-  const mkRec = (name, value, unit, delta, deltaUnit, label, icon)=>({ label: label || recLabel, name, value, unit, icon: icon || 'barbell', sub: delta > 0 ? `+${deltaUnit === 'kg' ? fmtGymWeight(delta) : delta}${deltaUnit ? ' ' + deltaUnit : ''} ${vsTxt}` : '' });
-  let record = null;
-  if(isBw){
-    if(repsPR){
-      record = mkRec(repsPR.name, String(repsPR.reps), gymFinRepsWord(repsPR.reps), repsPR.reps - (priorBestReps[repsPR.name] || 0), '', null, 'trophy');
-    } else {
-      let repsVolPR = null;
-      Object.keys(exRepsVol).forEach(n=>{
-        if(priorBestRepsVol[n] !== undefined && exRepsVol[n] > priorBestRepsVol[n] && (!repsVolPR || exRepsVol[n] > repsVolPR.vol)) repsVolPR = { name:n, vol: exRepsVol[n] };
-      });
-      if(repsVolPR){
-        const v = Math.round(repsVolPR.vol);
-        record = mkRec(repsVolPR.name, String(v), gymFinRepsWord(v), v - Math.round(priorBestRepsVol[repsVolPR.name]), '', t('gymFinRecordVolume','Nowy rekord objętości'), 'trophy');
-      }
-    }
-  } else if(weightPR){
-    record = mkRec(weightPR.name, fmtGymWeight(weightPR.weight), 'kg', weightPR.weight - (priorBestWeight[weightPR.name] || 0), 'kg');
-  } else {
-    let volPR = null;
-    Object.keys(exVol).forEach(n=>{
-      if(priorBestVol[n] !== undefined && exVol[n] > priorBestVol[n] && (!volPR || exVol[n] > volPR.vol)) volPR = { name:n, vol: exVol[n] };
-    });
-    if(volPR) record = mkRec(volPR.name, formatDashNum(Math.round(volPR.vol), 0), 'kg', Math.round(volPR.vol - priorBestVol[volPR.name]), 'kg', t('gymFinRecordVolume','Nowy rekord objętości'));
-  }
-
-  if(!record && timePR) record = mkRec(timePR.name, fmtDur(timePR.sec, timePR.perSide), '', timePR.sec - (priorBestTime[timePR.name] || 0), 's', null, 'trophy');
+  const record = gymFinRecordFrom(workoutRecord(w));
 
   showGymFinishV2({
     durationMin: w.durationMin,
@@ -16371,6 +16423,23 @@ function scDrawPaths(ctx, ds, vb, dx, dy, dw, dh, color){
    IG story). Exact type sizes / colours / positions from get_design_context. */
 /* What the user can change on the share sheet. The default is today's card: 9:16, the classic layout, a transparent
    background and white text; buildWorkoutCardBlob(w) without a state must keep producing exactly that PNG. */
+/* Background photos of the share sheet, in slider order (after the transparent one). `allowedColors` = text colours that stay
+   readable on the photo (contrast >= 4.5:1 under the type), `dim` = black layer 0..1, `iconWhite` = wordmark / barbell in white. */
+const SHARE_BG_IMAGES = [1,2,3,4,5].map(n => ({ id:'hero-' + n, group:'hero', file:'icons/share/hero-' + n + '.jpg', dim:0.16, iconWhite:true,
+  allowedColors:['white'], defaultColor:'white', focusY:0.5 }));   // measured: white type reaches >= 4.5:1 on 92-96% of its pixels from dim 0.16; brand and graphite never do
+function scBgPreset(id){ return SHARE_BG_IMAGES.find(p => p.id === id) || null; }
+const _scBgCache = {};
+function scLoadBg(id){   // -> Promise<HTMLImageElement|null>; same-origin, cached
+  const pr = scBgPreset(id);
+  if(!pr) return Promise.resolve(null);
+  if(!_scBgCache[id]) _scBgCache[id] = new Promise(res=>{
+    const im = new Image();
+    im.onload = ()=> res(im);
+    im.onerror = ()=>{ delete _scBgCache[id]; res(null); };
+    im.src = pr.file;
+  });
+  return _scBgCache[id];
+}
 const SC_DEFAULT_STATE = { format:'9:16', layout:'classic', bg:'transparent', color:'white' };
 const SC_FORMATS = { '9:16':[1080,1920], '4:5':[1080,1350], '1:1':[1080,1080] };
 function scNormState(state){
@@ -16380,39 +16449,198 @@ function scNormState(state){
 }
 async function scEnsureFonts(){
   await ensureFontsReady();
-  try{ await Promise.all(['300','400','500','600','700'].map(wt=> document.fonts.load(wt + ' 40px Geist'))); }catch(e){}
+  try{ await Promise.all(['200','300','400','500','600','700'].map(wt=> document.fonts.load(wt + ' 40px Geist'))); }catch(e){}
 }
 /* The same renderer draws the live preview (a small canvas) and the export (1080 px wide). Coordinates stay in 1080-px
    units: the canvas is scaled by canvas.width / 1080. Fonts must already be loaded (scEnsureFonts). */
-function renderWorkoutCard(canvas, w, state){
-  state = scNormState(state);
-  const [fw, fh] = SC_FORMATS[state.format];
-  canvas.height = Math.round(canvas.width * fh / fw);   // the caller sets canvas.width (1080 for export)
-  const ctx = canvas.getContext('2d');       // no bg fill — stays transparent
-  ctx.save();
-  ctx.scale(canvas.width / fw, canvas.width / fw);
-  const CX = fw / 2;
-
+/* Colours the user can pick for the text; the wordmark / barbell / trophy stay brand orange unless a photo needs them white. */
+const SC_TEXT_COLORS = { white:'#ffffff', brand:'#ff3300', graphite:'#343941' };
+function scTextColor(name, a){
+  const hex = SC_TEXT_COLORS[name] || SC_TEXT_COLORS.white;
+  if(a == null || a >= 1) return hex;
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+}
+/* Everything a card shows, read from one saved workout. `record` is the same one the Gratulacje screen shows. */
+function scCardData(w){
   const totalVol = Math.round(w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0));
   const totalReps = w.exercises.reduce((s,e)=> s + exSetsView(e).reduce((s2,st)=> s2 + st.reps, 0), 0);
-  const rec = histWorkoutRecordV2(w);
+  const setCount = w.exercises.reduce((s,e)=> s + exSetsView(e).length, 0);
+  const exCount = w.exercises.filter(ex=> ex.sets.some(s=> s.weight > 0 || s.reps > 0 || s.durationSec > 0)).length || w.exercises.length;
+  const rec = gymFinRecordFrom(workoutRecord(w));
+  return {
+    totalVol, totalReps, setCount, exCount,
+    bodyweight: totalVol === 0,                    // 0 kg: the volume slot shows the sets instead
+    durationMin: w.durationMin || 0,
+    planName: String(w.day || '').trim() || t('shareDefaultPlan','Trening'),
+    record: rec,
+    classicRec: rec ? { name: rec.name, valueText: rec.value, unitText: rec.unit } : null
+  };
+}
+/* Figma sizes are for a 240-unit-wide preview; one unit = 4.4906 px on the 1080 px card (measured on a 4x export). */
+const SC_K = 4.4906;
+function scFont(wt, px){ return `${wt} ${px}px Geist, Inter, sans-serif`; }
+function scCover(ctx, img, W, H, focusY){
+  const sc = Math.max(W / img.width, H / img.height), dw = img.width * sc, dh = img.height * sc;
+  ctx.drawImage(img, (W - dw) / 2, (H - dh) * (focusY == null ? 0.5 : focusY), dw, dh);
+}
+/* Text width including letter-spacing (as CSS counts it), so centring matches Figma. */
+function scMeasure(ctx, text, spacingPx){ scLetterSpacing(ctx, spacingPx || 0); const m = ctx.measureText(text).width; return m; }
+/* A value with a small unit after it ("6400" + "kg"): drawn left to right on one baseline; returns the right edge. */
+function scValueUnit(ctx, x, base, value, vFont, vSp, vCol, unit, uFont, uSp, uCol, gap){
+  ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  ctx.font = vFont; ctx.fillStyle = vCol;
+  const vw = scMeasure(ctx, value, vSp); ctx.fillText(value, x, base);
+  if(!unit) return x + vw;
+  ctx.font = uFont; ctx.fillStyle = uCol; scLetterSpacing(ctx, uSp || 0);
+  const uw = ctx.measureText(unit).width; ctx.fillText(unit, x + vw + gap, base);
+  scLetterSpacing(ctx, 0);
+  return x + vw + gap + uw;
+}
+function scStats(d){
+  const time = d.durationMin ? { v: String(d.durationMin), u: 'min' } : { v: '—', u: '' };
+  const kg = { v: formatDashNum(d.totalVol, 0), u: 'kg' };
+  const row1 = [
+    [t('gymFinTime','CZAS'), time],
+    d.bodyweight ? [t('gymFinSets','SERIE'), { v: String(d.setCount), u: '' }] : [t('gymFinVolume','OBJĘTOŚĆ'), kg],
+    [t('gymFinReps','POWTÓRZENIA'), { v: String(d.totalReps), u: '' }]
+  ];
+  const row2 = d.bodyweight ? [[t('gymFinExercises','ĆWICZENIA'), { v: String(d.exCount), u: '' }]]
+    : [[t('gymFinSets','SERIE'), { v: String(d.setCount), u: '' }], [t('gymFinExercises','ĆWICZENIA'), { v: String(d.exCount), u: '' }]];
+  return { row1, row2 };
+}
+/* Layout "Rekord" (Figma 514:22114, 4:5): wordmark top left, the record as a hero number, a rule, a 3 + 2 stat grid.
+   Positions are the measured ink positions of the Figma export (1080-px units); the block sits 93 px above the bottom edge
+   in 4:5 and 1:1, and is centred in the Stories safe area in 9:16. */
+function scDrawRecord(ctx, d, st, W, H, tcol, iconCol){
+  const K = SC_K, rec = d.record, S = scStats(d);
+  const BLOCK_TOP = 534.4, BLOCK_BOTTOM = 1265.2, SIDE = 92.5;
+  let dy;
+  if(st.format === '9:16') dy = (250 + (H - 300 - 250) / 2) - (BLOCK_TOP + BLOCK_BOTTOM) / 2;
+  else dy = (H - 93.2) - BLOCK_BOTTOM;
+  const Y = v => v + dy;
+  // wordmark
+  scDrawPaths(ctx, SC_LOGO_D, SC_LOGO_VB, 66.3, st.format === '9:16' ? 270 : 71.9, 252.6, 252.6 * 47.8069 / 211.248, iconCol);
+  ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  // label
+  ctx.font = scFont(500, 6 * K); ctx.fillStyle = tcol(0.82);
+  scLetterSpacing(ctx, 0.0842 * 6 * K);
+  ctx.fillText(t('gymFinRecordLabel','NOWY REKORD').toUpperCase(), SIDE, Y(553.5));
+  // hero number + unit
+  const numFont = scFont(200, 60.717 * K), numSp = -0.01 * 60.717 * K;
+  let maxW = 940, numPx = 60.717 * K, kgPx = 24.155 * K;
+  ctx.font = numFont; scLetterSpacing(ctx, numSp);
+  const wNum = ctx.measureText(rec.value).width;
+  let fit = 1;
+  ctx.font = scFont(400, kgPx); scLetterSpacing(ctx, -0.0583 * kgPx);
+  const wUnit = rec.unit ? ctx.measureText(rec.unit).width : 0;
+  const total = wNum + (rec.unit ? 24 + wUnit : 0);
+  if(total > maxW) fit = maxW / total;
+  const nPx = numPx * fit;
+  scValueUnit(ctx, SIDE, Y(782.5), rec.value, scFont(200, nPx), -0.01 * nPx, tcol(1), rec.unit || '', scFont(400, kgPx * fit), -0.0583 * kgPx * fit, tcol(0.8), 24 * fit);
+  // exercise name
+  ctx.font = scFont(400, 8.5 * K); ctx.fillStyle = tcol(1);
+  scLetterSpacing(ctx, 0.0884 * 8.5 * K);
+  ctx.fillText(truncateToWidth(ctx, rec.name.toUpperCase(), 900), SIDE, Y(859));
+  scLetterSpacing(ctx, 0);
+  // rule
+  ctx.fillStyle = tcol(1); ctx.fillRect(65.25, Y(939.7), 774.7, 2.6);
+  // stat grid: three columns, then two
+  const colX = [92.5, 303.4, 554.9];
+  const cell = (label, val, x, baseLabel, baseVal)=>{
+    ctx.font = scFont(500, 6 * K); ctx.fillStyle = tcol(0.82); scLetterSpacing(ctx, 0.0842 * 6 * K);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText(label.toUpperCase(), x, Y(baseLabel));
+    scLetterSpacing(ctx, 0);
+    scValueUnit(ctx, x, Y(baseVal), val.v, scFont(400, 13.133 * K), -0.0385 * 13.133 * K, tcol(1), val.u, scFont(400, 6.0614 * K), 0, tcol(0.8), 2.02 * K);
+  };
+  S.row1.forEach((c, i)=> cell(c[0], c[1], colX[i], 1048.6, 1115.9));
+  S.row2.forEach((c, i)=> cell(c[0], c[1], colX[i], 1196.8, 1265.2));
+}
+/* Layout "Rząd" (Figma 514:22531, 1:1): everything centred in one column: plan name, rule, 3 + 2 stats, rule, record line, wordmark.
+   Measured on the Figma square (1080 px): the block sits low (77 px above the bottom edge); other formats centre it. */
+function scDrawRow(ctx, d, st, W, H, tcol, iconCol){
+  const K = SC_K, S = scStats(d), rec = d.record, CX = W / 2;
+  // block extents, top = plan name cap top, bottom = wordmark bottom
+  const hasRec = !!rec, TOP = 291.2, BOTTOM_REC = 1002.9, BOTTOM_NOREC = 718.9 + 0 + 60;
+  const bottom = hasRec ? BOTTOM_REC : BOTTOM_NOREC;
+  let dy;
+  if(st.format === '1:1') dy = 0;
+  else if(st.format === '9:16') dy = (250 + (H - 300 - 250) / 2) - (TOP + bottom) / 2;
+  else dy = H / 2 - (TOP + bottom) / 2;
+  const Y = v => v + dy;
+  ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  const centred = (text, cx, base, font, spPx, col)=>{
+    ctx.font = font; ctx.fillStyle = col; scLetterSpacing(ctx, spPx);
+    const w0 = ctx.measureText(text).width; ctx.fillText(text, cx - w0 / 2, base); scLetterSpacing(ctx, 0);
+  };
+  const rule = (yc)=>{ ctx.fillStyle = tcol(1); ctx.fillRect(CX - 386.2, yc - 0.675, 772.4, 1.35); };
+  // plan name
+  centred(d.planName.toUpperCase(), CX, Y(319.2), scFont(500, 8.5 * K), 0.2353 * 8.5 * K, tcol(1));
+  rule(Y(345.6));
+  // stats
+  const cellRow = (cells, centers, baseLabel, baseVal)=>{
+    cells.forEach((c, i)=>{
+      centred(c[0].toUpperCase(), centers[i], Y(baseLabel), scFont(500, 5 * K), 0.101 * 5 * K, tcol(1));
+      // value + unit centred as one group
+      const v = c[1].v, u = c[1].u;
+      ctx.font = scFont(400, 16 * K); scLetterSpacing(ctx, -0.0316 * 16 * K);
+      const vw = ctx.measureText(v).width;
+      scLetterSpacing(ctx, 0); ctx.font = scFont(400, 6.0614 * K);
+      const uw = u ? 2.02 * K + ctx.measureText(u).width : 0;
+      scValueUnit(ctx, centers[i] - (vw + uw) / 2, Y(baseVal), v, scFont(400, 16 * K), -0.0316 * 16 * K, tcol(1), u, scFont(400, 6.0614 * K), 0, tcol(1), 2.02 * K);
+    });
+  };
+  cellRow(S.row1, [279.5, 540, 800.5], 422.5, 498.8);
+  cellRow(S.row2, S.row2.length === 2 ? [344.6, 739.3] : [540], 588.7, 666.1);
+  rule(Y(719.5));
+  if(hasRec){
+    centred(t('gymFinRecordLabel','NOWY REKORD').toUpperCase(), CX, Y(796.4), scFont(500, 5 * K), 0.101 * 5 * K, tcol(1));
+    // "<exercise>  <value unit>" on one line; scaled down when too long
+    const f = scFont(400, 12 * K), sp = 0.0626 * 12 * K;
+    const valTxt = (rec.value + (rec.unit ? ' ' + rec.unit : '')).toUpperCase();
+    ctx.font = f; scLetterSpacing(ctx, sp);
+    let name = rec.name.toUpperCase();
+    const gap = 6 * K;
+    let wN = ctx.measureText(name).width, wV = ctx.measureText(valTxt).width;
+    let fit = Math.min(1, 772.4 / (wN + gap + wV));
+    const px = 12 * K * fit;
+    ctx.font = scFont(400, px); scLetterSpacing(ctx, 0.0626 * px);
+    wN = ctx.measureText(name).width; wV = ctx.measureText(valTxt).width;
+    const x0 = CX - (wN + gap * fit + wV) / 2;
+    ctx.fillStyle = tcol(1);
+    ctx.fillText(name, x0, Y(862.9)); ctx.fillText(valTxt, x0 + wN + gap * fit, Y(862.9));
+    scLetterSpacing(ctx, 0);
+    scDrawPaths(ctx, SC_LOGO_D, SC_LOGO_VB, CX - 79.7, Y(963.6), 159.4, 159.4 * 47.8069 / 211.248, iconCol);
+  } else {
+    scDrawPaths(ctx, SC_LOGO_D, SC_LOGO_VB, CX - 79.7, Y(765), 159.4, 159.4 * 47.8069 / 211.248, iconCol);
+  }
+}
+function scDrawClassic(ctx, w, d, st, W, H, tc, iconCol, photo){
+  const CX = W / 2;
+  // Classic is drawn in the 1080×1920 design frame; other formats centre it vertically and shrink it only when it would not fit.
+  const rec = d.classicRec, shiftY = rec ? 0 : 150;
+  if(st.format !== '9:16'){
+    const top = 600 + shiftY, hh = 1800 - top, k = Math.min(1, (H - 140) / hh);
+    ctx.translate(CX, H / 2); ctx.scale(k, k); ctx.translate(-CX, -(top + hh / 2));
+  }
+  const totalVol = d.totalVol, totalReps = d.totalReps;
   // no record card → drop the whole icon+hero+stats block a bit lower so
   // the space it would have taken is shared, not left as a hole
-  const shiftY = rec ? 0 : 150;
 
   // --- barbell icon (rotate 172.14° + y-flip, per Figma) ---
   ctx.save();
   ctx.translate(CX, 726.94 + shiftY);
   ctx.rotate(172.14 * Math.PI / 180);
   ctx.scale(1, -1);
-  scDrawPaths(ctx, SC_BARBELL_D, SC_BARBELL_VB, -126.789, -126.789, 253.578, 253.578, '#ff3300');
+  scDrawPaths(ctx, SC_BARBELL_D, SC_BARBELL_VB, -126.789, -126.789, 253.578, 253.578, iconCol);
   ctx.restore();
 
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
 
   // --- OBJĘTOŚĆ + hero number ---
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fillStyle = tc(0.8);
   ctx.font = '500 26.714px Geist, Inter, sans-serif';
   scLetterSpacing(ctx, 2.6714);
   ctx.fillText(t('gymFinVolume','OBJĘTOŚĆ').toUpperCase(), CX, 886.96 + shiftY);
@@ -16427,26 +16655,26 @@ function renderWorkoutCard(canvas, w, state){
   scLetterSpacing(ctx, 0);
   const kgW = ctx.measureText(' kg').width;
   let x = CX - (volW + kgW) / 2;
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = tc(1);
   ctx.font = '600 155.832px Geist, Inter, sans-serif';
   scLetterSpacing(ctx, 4.675);
   ctx.fillText(volStr, x, 924 + shiftY);
   scLetterSpacing(ctx, 0);
   x += volW;
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fillStyle = tc(0.8);
   ctx.font = '400 62.333px Geist, Inter, sans-serif';
   ctx.fillText(' kg', x, 924 + 93 + shiftY);   // baseline-aligned with the big number
 
   // --- POWTÓRZENIA / CZAS ---
   ctx.textAlign = 'center';
   const colL = 362.5, colR = 717.6;
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fillStyle = tc(0.8);
   ctx.font = '500 26.714px Geist, Inter, sans-serif';
   scLetterSpacing(ctx, 2.6714);
   ctx.fillText(t('gymFinReps','POWTÓRZENIA').toUpperCase(), colL, 1179.7 + shiftY);
   ctx.fillText(t('gymFinTime','CZAS').toUpperCase(), colR, 1179.7 + shiftY);
   scLetterSpacing(ctx, 0);
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = tc(1);
   ctx.font = '600 80.142px Geist, Inter, sans-serif';
   ctx.fillText(String(totalReps), colL, 1216 + shiftY);
   if(w.durationMin){
@@ -16483,12 +16711,12 @@ function renderWorkoutCard(canvas, w, state){
     // same baseline. Draw middle-anchored so it can't drop onto the name below.
     ctx.textBaseline = 'middle';
     ctx.font = '400 58.256px Geist, Inter, sans-serif';
-    const rvNum = fmtGymWeight(rec.weight) + ' ';
+    const rvNum = rec.valueText + ' ';
     ctx.fillText(rvNum, 406.07, 1494.18);
     const rnW = ctx.measureText(rvNum).width;
     ctx.fillStyle = 'rgba(52,57,65,0.8)';
     ctx.font = '400 23.302px Geist, Inter, sans-serif';
-    ctx.fillText('kg', 406.07 + rnW, 1494.18 + 13);   // nudge onto the big number's baseline
+    if(rec.unitText) ctx.fillText(rec.unitText, 406.07 + rnW, 1494.18 + 13);   // nudge onto the big number's baseline
     ctx.textBaseline = 'top';
     ctx.fillStyle = '#96959b';
     ctx.font = '700 11.651px Geist, Inter, sans-serif';
@@ -16499,20 +16727,54 @@ function renderWorkoutCard(canvas, w, state){
   }
 
   // --- wordmark + tagline ---
-  scDrawPaths(ctx, SC_LOGO_D, SC_LOGO_VB, CX - 105.624, 1697, 211.248, 47.806, '#ff3300');
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#ff3300';
-  ctx.font = '300 13.74px Geist, Inter, sans-serif';
-  scLetterSpacing(ctx, 1.374);
-  ctx.fillText('EVERY REP COUNTS.', CX, 1773.28);
-  ctx.fillText('LITERALLY.', CX, 1773.28 + 12.53);
-  scLetterSpacing(ctx, 0);
+  scDrawPaths(ctx, SC_LOGO_D, SC_LOGO_VB, CX - 105.624, 1697, 211.248, 47.806, iconCol);
+  if(!photo){   // the tagline belongs to the transparent card; Figma's photo cards carry only the wordmark
+    ctx.textAlign = 'center';
+    ctx.fillStyle = iconCol;
+    ctx.font = '300 13.74px Geist, Inter, sans-serif';
+    scLetterSpacing(ctx, 1.374);
+    ctx.fillText('EVERY REP COUNTS.', CX, 1773.28);
+    ctx.fillText('LITERALLY.', CX, 1773.28 + 12.53);
+    scLetterSpacing(ctx, 0);
+  }
+}
+/* The same renderer draws the live preview (a small canvas) and the export (1080 px wide). Coordinates stay in 1080-px
+   units: the canvas is scaled by canvas.width / 1080. Fonts must already be loaded (scEnsureFonts), and for a photo
+   background state.bgImg must be a loaded image of the chosen preset (see scLoadBg). */
+function renderWorkoutCard(canvas, w, state){
+  state = scNormState(state);
+  const [fw, fh] = SC_FORMATS[state.format];
+  canvas.height = Math.round(canvas.width * fh / fw);   // the caller sets canvas.width (1080 for export)
+  const ctx = canvas.getContext('2d');       // no bg fill — stays transparent
+  const k = canvas.width / fw;
+  ctx.save();
+  ctx.scale(k, k);
+  const preset = state.bg !== 'transparent' ? scBgPreset(state.bg) : null;
+  const photo = !!(preset && state.bgImg);
+  if(photo){
+    try{ ctx.imageSmoothingQuality = 'high'; }catch(e){}
+    scCover(ctx, state.bgImg, fw, fh, preset.focusY);
+    const dim = preset.dim != null ? preset.dim : 0.35;
+    if(dim > 0){ ctx.fillStyle = `rgba(0,0,0,${dim})`; ctx.fillRect(0, 0, fw, fh); }
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 20 * k;   // soft shadow under the type (blur is in device px)
+  }
+  const d = scCardData(w);
+  const tc = (a)=> scTextColor(state.color, a);
+  const iconCol = (preset && preset.iconWhite) ? '#ffffff' : '#ff3300';
+  if(state.layout === 'record' && d.record) scDrawRecord(ctx, d, state, fw, fh, tc, iconCol);
+  else if(state.layout === 'row') scDrawRow(ctx, d, state, fw, fh, tc, iconCol);
+  else scDrawClassic(ctx, w, d, state, fw, fh, tc, iconCol, photo);
   ctx.restore();
 }
 async function buildWorkoutCardBlob(w, state){
   await scEnsureFonts();
+  state = scNormState(state);
+  if(state.bg !== 'transparent' && !state.bgImg){
+    const img = await scLoadBg(state.bg);
+    if(img) state = Object.assign({}, state, { bgImg: img }); else state = Object.assign({}, state, { bg: 'transparent' });   // a missing photo falls back to transparent
+  }
   const canvas = document.createElement('canvas');
-  const [fw] = SC_FORMATS[scNormState(state).format];
+  const [fw] = SC_FORMATS[state.format];
   canvas.width = fw;
   renderWorkoutCard(canvas, w, state);
   return new Promise(res=> canvas.toBlob(res, 'image/png'));
@@ -16579,13 +16841,236 @@ async function shareBlob(blob, filename, text){
   setTimeout(()=> URL.revokeObjectURL(url), 4000);
   toast(t('imageSaved','Zapisano grafikę na urządzeniu'));
 }
-async function shareWorkoutById(id){
-  const w = workouts.find(x=>x.id===id);
+/* ---- Share sheet: choose format, layout, background and text colour, then share / save / copy the card ----
+   Layout order = the carousel: Klasyczny, Rekord (only when the workout set a record), Rząd. One key in localStorage
+   remembers the choices. Photos are fetched when picked; a failed load drops the background back to transparent. */
+const LS_SHARE_STATE = 'mekkio_share_state_v1';
+let sh = null;   // { w, rec, state, layouts[], bgImg, busy, progScroll, ... } while the sheet is open
+function shLoadState(){
+  let v = null;
+  try{ v = JSON.parse(localStorage.getItem(LS_SHARE_STATE)); }catch(e){}
+  return scNormState(v && typeof v === 'object' ? { format: v.format, layout: v.layout, bg: v.bg, color: v.color } : null);
+}
+function shSaveState(){
+  try{ localStorage.setItem(LS_SHARE_STATE, JSON.stringify({ format: sh.state.format, layout: sh.state.layout, bg: sh.state.bg, color: sh.state.color })); }catch(e){}
+}
+function shAllowedColors(bg){ const p = scBgPreset(bg); return p ? p.allowedColors : ['white','brand','graphite']; }
+function shDefaultColor(bg){ const p = scBgPreset(bg); return p ? p.defaultColor : 'white'; }
+const SH_ARROW_L = '<svg viewBox="0 0 7 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1 1 6l5 5"/></svg>';
+const SH_ARROW_R = '<svg viewBox="0 0 7 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l5 5-5 5"/></svg>';
+function openShareSheet(id, opts){
+  const w = workouts.find(x=> x.id === id);
   if(!w) return;
+  if(!w.exercises.some(e=> exSetsView(e).length)){ toast(t('shareNoSets','Zapisz najpierw choć jedną serię')); return; }
+  const rec = gymFinRecordFrom(workoutRecord(w));
+  const state = scNormState(shLoadState());
+  const layouts = ['classic', ...(rec ? ['record'] : []), 'row'];
+  if(!layouts.includes(state.layout)) state.layout = 'classic';
+  if(opts && opts.fromFinish && rec) state.layout = 'record';   // right after a record the card leads with it
+  if(state.bg !== 'transparent' && !scBgPreset(state.bg)) state.bg = 'transparent';
+  if(!shAllowedColors(state.bg).includes(state.color)) state.color = shDefaultColor(state.bg);
+  sh = { w, rec, state, layouts, bgImg: null, busy: false, progScroll: false, page: layouts.indexOf(state.layout), timers: {} };
+  const box = document.getElementById('shareBox');
+  const fmts = [['9:16', t('shareFmtStories','Stories 9:16')], ['4:5','4:5'], ['1:1','1:1']];
+  const swatch = (c, cls, label)=> `<button type="button" class="sh-sw ${cls}" data-c="${c}" aria-label="${escHtml(label)}" aria-pressed="false" onclick="shSetColor('${c}')"></button>`;
+  const bgThumbs = `<button type="button" class="sh-bgi" data-bg="transparent" aria-label="${escHtml(t('shareBgNone','Przezroczyste tło'))}" aria-pressed="false" onclick="shPickBg('transparent')"></button>`
+    + SHARE_BG_IMAGES.map((pr, i)=> `<button type="button" class="sh-bgi" data-bg="${pr.id}" aria-label="${escHtml(t('shareBgPhoto','Tło') + ' ' + (i + 1))}" aria-pressed="false" onclick="shPickBg('${pr.id}')"><img src="${pr.file}" alt="" decoding="async"></button>`).join('');
+  box.innerHTML = `
+    <div class="lg-bar">
+      <button type="button" class="lg-circ m-press" onclick="closeShareSheet()" aria-label="${escHtml(t('close','Zamknij'))}">${LG_ICONS.x}</button>
+      <span class="lg-bar-title">${escHtml(t('shareTitle','UDOSTĘPNIJ'))}</span>
+      <span class="lg-circ ghost" aria-hidden="true"></span>
+    </div>
+    <div class="sh-seg" role="group" aria-label="${escHtml(t('shareFormat','Format'))}">${fmts.map(f=> `<button type="button" class="sh-seg-b m-press" data-f="${f[0]}" aria-pressed="false" onclick="shSetFormat('${f[0]}')">${escHtml(f[1])}</button>`).join('')}</div>
+    <div class="sh-stage" id="shStage">
+      <button type="button" class="sh-arrow l" id="shPrev" aria-label="${escHtml(t('sharePrev','Poprzedni układ'))}" onclick="shGo(sh.page - 1)">${SH_ARROW_L}</button>
+      <div class="sh-viewport" id="shVp"><div class="sh-track" id="shTrack">${layouts.map(()=> '<div class="sh-slide"><canvas class="sh-card"></canvas></div>').join('')}</div></div>
+      <button type="button" class="sh-arrow r" id="shNext" aria-label="${escHtml(t('shareNext','Następny układ'))}" onclick="shGo(sh.page + 1)">${SH_ARROW_R}</button>
+    </div>
+    <div class="lg-dots" id="shDots">${layouts.map((k,i)=> `<button type="button" class="lg-dot" aria-label="${i + 1}/${layouts.length}" onclick="shGo(${i})"></button>`).join('')}</div>
+    <div class="sh-row"><span class="sh-row-k">${escHtml(t('shareBg','Tło'))}</span><div class="sh-bg" id="shBg" role="listbox" aria-label="${escHtml(t('shareBg','Tło'))}">${bgThumbs}</div></div>
+    <div class="sh-row"><span class="sh-row-k">${escHtml(t('shareText','Tekst'))}</span><div class="sh-sw-row">${swatch('white','w',t('shareColWhite','Biały tekst'))}${swatch('brand','b',t('shareColBrand','Pomarańczowy tekst'))}${swatch('graphite','g',t('shareColGraphite','Grafitowy tekst'))}</div></div>
+    <div class="sh-actions">
+      <button type="button" class="sh-ic m-press" id="shSave" aria-label="${escHtml(t('shareSave','Zapisz obraz'))}" onclick="shExport('save')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5V15m-4.5-4.5L12 15l4.5-4.5M4.5 15v3.5A1.5 1.5 0 0 0 6 20h12a1.5 1.5 0 0 0 1.5-1.5V15"/></svg></button>
+      <button type="button" class="sh-main m-press" id="shShare" onclick="shExport('share')">${escHtml(t('shareTitle','UDOSTĘPNIJ'))}</button>
+      <button type="button" class="sh-ic m-press" id="shCopy" aria-label="${escHtml(t('shareCopy','Kopiuj obraz'))}" onclick="shExport('copy')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="1.5"/><path d="M15.5 8.5V6A1.5 1.5 0 0 0 14 4.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></svg></button>
+    </div>
+    <p class="sh-hint" id="shStatus" aria-live="polite"></p>`;
+  mSheetOpenReset('shareOverlay');
+  document.getElementById('shareOverlay').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+  syncSheetsToVisualViewport();
+  shWire();
+  shSync(true);
+  scEnsureFonts().then(()=> shEnsureBg()).then(()=> shRender());
+}
+function closeShareSheet(viaDrag){
+  mSheetClose('shareOverlay', viaDrag, ()=>{
+    if(document.documentElement.classList.contains('gymfin-open')) document.documentElement.classList.add('modal-lock');
+    sh = null;
+  });
+}
+mSheetDrag('shareOverlay', closeShareSheet);
+// reflect `sh.state` in the controls
+function shSync(initial){
+  const st = sh.state, allowed = shAllowedColors(st.bg);
+  document.querySelectorAll('#shareBox .sh-seg-b').forEach(b=>{ const on = b.dataset.f === st.format; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
+  document.querySelectorAll('#shareBox .sh-sw').forEach(b=>{ const on = b.dataset.c === st.color; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); b.disabled = !allowed.includes(b.dataset.c); });
+  document.querySelectorAll('#shareBox .sh-bgi').forEach(b=>{ const on = b.dataset.bg === st.bg; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
+  document.querySelectorAll('#shDots .lg-dot').forEach((d,i)=> d.classList.toggle('is-on', i === sh.page));
+  document.getElementById('shPrev').disabled = sh.page <= 0;
+  document.getElementById('shNext').disabled = sh.page >= sh.layouts.length - 1;
+  shSize();
+  const track = document.getElementById('shTrack');
+  track.classList.toggle('is-snap', !initial);
+  track.style.transform = `translateX(${-100 * sh.page}%)`;
+  if(initial) requestAnimationFrame(()=> shBgCenter(st.bg, false));
+}
+// card size per format (Figma: 208×371, 240×300, 240×240), shrunk to the room the stage has
+function shSize(){
+  const stage = document.getElementById('shStage'); if(!stage) return;
+  const [fw, fh] = SC_FORMATS[sh.state.format];
+  const maxW = Math.min(240, stage.clientWidth - 90), maxH = Math.min(371, stage.clientHeight);
+  const k = Math.min(maxW / fw, maxH / fh);
+  sh.cw = Math.round(fw * k); sh.ch = Math.round(fh * k);
+  document.querySelectorAll('#shareBox .sh-card').forEach(c=>{ c.style.width = sh.cw + 'px'; c.style.height = sh.ch + 'px'; });
+}
+function shRender(){
+  if(!sh) return;
+  cancelAnimationFrame(sh.raf);
+  sh.raf = requestAnimationFrame(()=>{
+    if(!sh) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const cards = document.querySelectorAll('#shareBox .sh-card');
+    sh.layouts.forEach((layout, i)=>{
+      const c = cards[i]; if(!c) return;
+      c.width = Math.round(sh.cw * dpr);
+      c.classList.toggle('is-photo', !!sh.bgImg && sh.state.bg !== 'transparent');
+      c.classList.toggle('on-dark', sh.state.bg === 'transparent' && sh.state.color === 'white');
+      try{ renderWorkoutCard(c, sh.w, Object.assign({}, sh.state, { layout, bgImg: sh.bgImg })); }catch(e){ console.error('share render', e); }
+    });
+  });
+}
+async function shEnsureBg(){
+  const bg = sh.state.bg;
+  if(bg === 'transparent'){ sh.bgImg = null; return; }
+  const img = await scLoadBg(bg);
+  if(!sh || sh.state.bg !== bg) return;
+  if(img){ sh.bgImg = img; return; }
+  sh.bgImg = null; sh.state.bg = 'transparent';
+  if(!shAllowedColors('transparent').includes(sh.state.color)) sh.state.color = 'white';
+  toast(t('imageGenFailed','Nie udało się wygenerować grafiki'));
+  shSync(); shBgCenter('transparent', true);
+}
+function shSetFormat(f){ if(!sh || sh.state.format === f) return; sh.state.format = f; shSaveState(); shSync(); shRender(); }
+function shSetColor(c){ if(!sh || sh.state.color === c || !shAllowedColors(sh.state.bg).includes(c)) return; sh.state.color = c; shSaveState(); shSync(); shRender(); }
+async function shSetBg(id){
+  if(!sh || sh.state.bg === id) return;
+  sh.state.bg = id;
+  if(!shAllowedColors(id).includes(sh.state.color)) sh.state.color = shDefaultColor(id);   // a colour the photo can't carry falls back to its default
+  shSaveState(); shSync();
+  await shEnsureBg(); shRender();
+}
+function shPickBg(id){ shBgCenter(id, true); shSetBg(id); }   // a tap centres the tile and chooses it at once
+function shGo(i){
+  if(!sh) return;
+  sh.page = Math.max(0, Math.min(sh.layouts.length - 1, i));
+  sh.state.layout = sh.layouts[sh.page]; shSaveState(); shSync();
+}
+// the slider: centre one tile (code-driven scrolling must not re-pick), pick the tile in the middle when scrolling stops
+function shBgCenter(id, smooth){
+  const el = document.querySelector(`#shBg .sh-bgi[data-bg="${id}"]`), sl = document.getElementById('shBg');
+  if(!el || !sl) return;
+  sh.progScroll = true;
+  const left = el.offsetLeft - (sl.clientWidth - el.offsetWidth) / 2;
+  sl.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' });
+  clearTimeout(sh.timers.prog);
+  sh.timers.prog = setTimeout(()=>{ if(sh) sh.progScroll = false; }, smooth ? 520 : 60);
+}
+function shBgNearest(){
+  const sl = document.getElementById('shBg'), mid = sl.scrollLeft + sl.clientWidth / 2;
+  let best = null, bd = 1e9;
+  sl.querySelectorAll('.sh-bgi').forEach(el=>{ const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid); if(d < bd){ bd = d; best = el; } });
+  return best && best.dataset.bg;
+}
+function shWire(){
+  const sl = document.getElementById('shBg');
+  // only a scroll the finger started (or the wheel) may pick a tile; code-driven scrolls (tap, restore) never do
+  const settle = ()=>{ if(!sh || sh.progScroll || !sh.userScroll) return; sh.userScroll = false; const id = shBgNearest(); if(id && id !== sh.state.bg) shSetBg(id); };
+  ['touchstart','pointerdown','wheel'].forEach(ev=> sl.addEventListener(ev, ()=>{ sh.userScroll = true; }, { passive: true }));
+  sl.addEventListener('scroll', ()=>{ clearTimeout(sh.timers.scroll); sh.timers.scroll = setTimeout(settle, 110); }, { passive: true });
+  if('onscrollend' in window) sl.addEventListener('scrollend', settle);
+  sl.addEventListener('keydown', e=>{
+    if(e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const ids = [...sl.querySelectorAll('.sh-bgi')].map(x=> x.dataset.bg), i = ids.indexOf(sh.state.bg) + (e.key === 'ArrowRight' ? 1 : -1);
+    if(i >= 0 && i < ids.length){ e.preventDefault(); shPickBg(ids[i]); sl.querySelector(`[data-bg="${ids[i]}"]`).focus(); }
+  });
+  // horizontal swipe on the card: the track follows the finger 1:1, then snaps (same gesture as the Stats carousel)
+  const vp = document.getElementById('shVp'), track = document.getElementById('shTrack');
+  let x0 = 0, y0 = 0, axis = '', drag = false, lastX = 0, lastT = 0, prevX = 0, prevT = 0, curT = 0;
+  vp.addEventListener('touchstart', e=>{
+    if(e.touches.length !== 1){ axis = 'skip'; return; }
+    const p = e.touches[0]; x0 = p.clientX; y0 = p.clientY; axis = ''; drag = false; curT = 0;
+    prevX = lastX = p.clientX; prevT = lastT = e.timeStamp;
+  }, { passive: true });
+  vp.addEventListener('touchmove', e=>{
+    if(axis === 'skip' || e.touches.length !== 1) return;
+    const p = e.touches[0], dx = p.clientX - x0, dy = p.clientY - y0;
+    if(!axis){
+      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'; drag = axis === 'x';
+      if(drag) track.classList.remove('is-snap');
+    }
+    if(!drag) return;
+    prevX = lastX; prevT = lastT; lastX = p.clientX; lastT = e.timeStamp;
+    const w = vp.clientWidth || 1, edge = (dx > 0 && sh.page === 0) || (dx < 0 && sh.page === sh.layouts.length - 1);
+    curT = edge ? dx * 0.25 : dx;
+    track.style.transform = `translateX(${(-sh.page * w + curT).toFixed(1)}px)`;
+  }, { passive: true });
+  const end = e=>{
+    if(!drag) return; drag = false;
+    const w = vp.clientWidth || 1, dx = e.changedTouches[0].clientX - x0, dt = Math.max(1, lastT - prevT), vel = (lastX - prevX) / dt;
+    const flick = Math.abs(vel) > 0.5 && Math.abs(dx) > 24 && (vel < 0) === (dx < 0);
+    let to = sh.page; if(Math.abs(dx) > w * 0.22 || flick) to += dx < 0 ? 1 : -1;
+    track.style.transform = `translateX(${-sh.page * w + curT}px)`; void track.offsetWidth;
+    shGo(to);
+  };
+  vp.addEventListener('touchend', end, { passive: true });
+  vp.addEventListener('touchcancel', end, { passive: true });
+  window.addEventListener('resize', shOnResize);
+}
+function shOnResize(){ if(!sh){ window.removeEventListener('resize', shOnResize); return; } shSize(); shRender(); }
+async function shExport(kind){
+  if(!sh || sh.busy) return;
+  const w = sh.w, name = `mekkio-${t('shareFileWorkout','trening')}-${w.date}.png`;
+  const buttons = document.querySelectorAll('#shareBox .sh-actions button');
+  const setBusy = (on)=>{ sh.busy = on; buttons.forEach(b=> b.disabled = on); document.getElementById('shStatus').textContent = on ? t('shareBusy','Przygotowuję obraz…') : ''; };
+  setBusy(true);
   try{
-    const blob = await buildWorkoutCardBlob(w);
-    await shareBlob(blob, `mekkio-${t('shareFileWorkout','trening')}-${w.date}.png`, t('shareWorkoutText','Mój trening w Mekkio 💪'));
-  }catch(err){ toast(t('imageGenFailed','Nie udało się wygenerować grafiki')); }
+    const state = Object.assign({}, sh.state, { bgImg: sh.bgImg });
+    if(kind === 'copy'){
+      if(!(navigator.clipboard && window.ClipboardItem)) throw new Error('no clipboard');
+      // Safari needs the write inside the tap, so the blob is handed over as a promise
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': buildWorkoutCardBlob(w, state) })]);
+      toast(t('shareCopied','Skopiowano obraz'));
+    } else {
+      const blob = await buildWorkoutCardBlob(w, state);
+      if(kind === 'save') scSaveBlob(blob, name);
+      else await shareBlob(blob, name, t('shareWorkoutText','Mój trening w Mekkio 💪'));
+    }
+  }catch(err){
+    console.error('share export', err);
+    toast(kind === 'copy' ? t('shareCopyFailed','Nie udało się skopiować obrazu') : t('imageGenFailed','Nie udało się wygenerować grafiki'));
+  }
+  if(sh) setBusy(false);
+}
+function scSaveBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=> URL.revokeObjectURL(url), 4000);
+  toast(t('imageSaved','Zapisano grafikę na urządzeniu'));
 }
 async function shareRunById(id){
   const r = runs.find(x=>x.id===id);
@@ -16596,7 +17081,7 @@ async function shareRunById(id){
   }catch(err){ toast(t('imageGenFailed','Nie udało się wygenerować grafiki')); }
 }
 function shareHistCard(kind, id){
-  if(kind==='workout') shareWorkoutById(id);
+  if(kind==='workout') openShareSheet(id);
   else shareRunById(id);
 }
 

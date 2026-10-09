@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.62.0 (2026-10-09)
+- **Aktualna wersja:** 4.63.0 (2026-10-10)
 - **Liczba wersji:** 249 · **commitów:** 594
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -74,6 +74,7 @@ Stan na 4.44.0.
 | Manifest / ikony | `manifest.json`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon.png` | |
 | Animacja sukcesu | `lottie.min.js`, `success.json` | ekran końca treningu (od 4.11.0) |
 | Ikony ćwiczeń | `icons/exercises/` | render 3D od 4.43.0 |
+| Udostępnianie treningu | `index.html` (`renderWorkoutCard`, `openShareSheet`, `workoutRecord`), `icons/share/hero-1..5.jpg` | od 4.63.0; klucz `mekkio_share_state_v1` (format, układ, tło, kolor); oryginały teł w `assets-src/share-originals/` (poza repo) |
 | Polityka prywatności | `polityka-prywatnosci.html` | od 4.40.0 (RODO) |
 | Schemat bazy | `supabase-schema.sql` | idempotentny, można puszczać ponownie |
 | Edge Functions | `supabase/functions/ai-proxy`, `supabase/functions/delete-account`, `supabase/functions/apple-store-token`, `supabase/functions/_shared/apple.ts` | proxy do Claude, usuwanie konta (unieważnia też token Apple), zapis tokenu Apple po logowaniu; sekrety `APPLE_TEAM_ID`/`APPLE_KEY_ID`/`APPLE_PRIVATE_KEY` |
@@ -116,6 +117,23 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.63.0 · MINOR · 2026-10-10
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Karta treningu ma teraz trzy układy i trzy formaty: Stories, 4:5 i 1:1. Wybierz tło (przezroczyste albo zdjęcie) i kolor tekstu. Udostępnisz ją, zapiszesz albo skopiujesz, także prosto z ekranu Gratulacje.
+
+- **Arkusz „Udostępnij”** (Figma 514:23219): dolny arkusz `#shareOverlay` (`openShareSheet(id)`, `closeShareSheet`, `mSheetDrag`): przełącznik formatu, karuzela układów (Klasyczny, Rekord, Rząd; Rekord tylko gdy był rekord) ze swipe'em jak w Stats, rząd TŁO (slider ze snapem: przezroczyste + 5 zdjęć hero; wybiera kafelek na środku, tap centruje), rząd TEKST (biały, pomarańczowy, grafitowy; kolory niedozwolone na zdjęciu są `disabled`), przyciski Zapisz / Udostępnij / Kopiuj. Wybór pamięta `localStorage` (`mekkio_share_state_v1`: format, układ, tło, kolor).
+- **Renderer:** `renderWorkoutCard(canvas, w, state)` rysuje i podgląd, i eksport 1080 px. Stan domyślny (9:16, Klasyczny, przezroczyste, biały) daje **ten sam PNG co przed zmianą** (porównanie pikseli na 4 treningach, 0 różnic). Układy Rekord (Figma 4:5) i Rząd (Figma 1:1) rysowane wg zmierzonych współrzędnych eksportu Figmy; pozostałe sześć kombinacji układ × format wyprowadzone z trzech zaprojektowanych (blok wyśrodkowany, Klasyczny skalowany w dół, gdy się nie mieści). Przy 0 kg w miejscu objętości są serie.
+- **Wspólny rekord:** `workoutRecord(w)` (priorytet: ciężar, objętość, powtórzenia, czas) zasila teraz i ekran Gratulacje (`gymFinRecordFrom`), i kartę. Zniknęły rozbieżności między nimi.
+- **Tła:** `SHARE_BG_IMAGES` (`icons/share/hero-1..5.jpg`, 1080×1920, ok. 220–250 KB; oryginały PNG w `assets-src/share-originals/`, poza repo). Przyciemnienie 16% i tylko biały tekst: pomiar kontrastu ≥ 4,5:1 pod tekstem (≥ 92% pikseli) daje biały od przyciemnienia 0,16; pomarańczowy i grafitowy nie przechodzą na żadnym zdjęciu. Zdjęcia z siłowni (`gym-1..5.jpg`) dojdą osobno; do czasu dostarczenia grupa jest pusta.
+- **Wejścia:** przycisk udostępniania na ekranie Gratulacje (po rekordzie arkusz otwiera się na układzie Rekord) i `shareHistCard('workout', id)` w Historii. Usunięta `shareWorkoutById`.
+- **Service worker:** cache v25, zdjęcia hero w `URLS_TO_CACHE` (działają offline od pierwszego uruchomienia). `native/www` powstaje z `scripts/build-web.sh`, który kopiuje cały `icons/`, więc nic więcej do synchronizacji.
+
+**Commity (1):**
+
+- (hash dopisać przy następnej wersji) 2026-10-10 — 4.63.0: udostępnianie treningu (arkusz, układy, tła, kolory)
 
 ### 4.62.0 · MINOR · 2026-10-09
 
