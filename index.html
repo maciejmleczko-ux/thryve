@@ -2616,16 +2616,19 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-scroll.lg-pg-ov{padding-bottom:32px;}   /* START sits 32px above the sheet's bottom edge, same as the share buttons */
 .lg-pg-ov .lg-head{margin-bottom:42px;}   /* 8 + 42 = the 50px between header and content in Figma */
 .lg-pg-ov .lg-name{font-size:var(--m-fs-2xl);line-height:27.6px;letter-spacing:.0293em;}
-.lg-ov-tiles{display:grid;grid-template-columns:24.8% 35.6% minmax(0,1fr);gap:4px;}
-.lg-ov-tile{min-width:0;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;color:#fff;}
-.lg-ov-tile.t-sets{background:var(--m-plan-hard);}
-.lg-ov-tile.t-reps{background:var(--m-sky);}
-.lg-ov-tile.t-rest{background:var(--m-orange);}
-.lg-ov-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:rgba(255,255,255,.82);}
-.lg-ov-tile.t-reps .lg-ov-l, .lg-ov-tile.t-rest .lg-ov-l{color:#e4f2ff;}
-.lg-ov-v{display:flex;align-items:flex-end;gap:8px;min-width:0;font-size:28px;font-weight:200;letter-spacing:-.0357em;line-height:1;white-space:nowrap;}
-.lg-ov-v.is-long{font-size:var(--m-fs-xl);}
-.lg-ov-v .ph, .lg-ov-v .ph svg{width:16px;height:16px;display:block;flex:none;}
+.lg-ov-tiles{display:grid;grid-template-columns:auto auto minmax(0,1fr);padding:12px 2px;border:.91px solid #f1d7cb;border-radius:var(--m-r-sm);background:#fff;}
+.lg-ov-tile{min-width:0;padding:0 10px;border-left:1px solid #f1d7cb;display:flex;flex-direction:column;gap:10px;color:var(--c);}
+.lg-ov-tile:first-child{border-left:0;}
+.lg-ov-tile.t-sets{--c:var(--m-plan-hard);}
+.lg-ov-tile.t-reps{--c:var(--m-sky);}
+.lg-ov-tile.t-rest{--c:var(--m-orange);}
+/* the three colours match the chips on the Trening page and in the warm-up sheet, so the user learns what is what */
+.lg-ov-l{display:flex;align-items:center;gap:6px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#343941;}
+.lg-ov-l .ph, .lg-ov-l .ph svg{width:14px;height:14px;display:block;flex:none;color:var(--c);}
+.lg-ov-v{min-width:0;font-size:32px;font-weight:200;letter-spacing:-.0357em;line-height:1;white-space:nowrap;}
+.lg-ov-v small{font-size:var(--m-fs-md);font-weight:400;letter-spacing:0;margin-left:2px;}
+@media (max-width:389px){.lg-ov-v{font-size:28px;}}
+@media (max-width:365px){.lg-ov-v{font-size:25px;}}
 .lg-pg-ov .lg-ai{gap:26px;}
 .lg-pg-ov .lg-ai-t{font-size:var(--m-fs-base);font-weight:300;line-height:1.4;}
 .lg-ai-body, .lg-tip-body{display:flex;flex-direction:column;gap:12px;}
@@ -10121,7 +10124,7 @@ function lgOverviewHtml(ex, history, sugg, aiAction, versionPill, rise){
   // numbers that count up when the card opens (the markup already holds the final value)
   const cnt = str => { const n = parseFloat(String(str).replace(/\s/g, '').replace(',', '.')); return Number.isFinite(n) ? `<span class="lg-count" data-t="${n}" data-d="${/[.,]/.test(String(str)) ? 1 : 0}">${str}</span>` : str; };
   const repsTxt = `${ex.repLow}-${ex.repHigh}`, restTxt = parseRestSeconds(ex.rest) > 0 ? String(ex.rest) : '–';
-  const tile = (cls, label, icon, txt, i)=> `<div class="lg-ov-tile ${cls}${riseT(i)}"><span class="lg-ov-l">${escHtml(label)}</span><span class="lg-ov-v${txt.length >= 5 ? ' is-long' : ''}">${ph(icon)}<span>${escHtml(txt)}</span></span></div>`;
+  const tile = (cls, label, icon, txt)=> { const m = /^(.*\d)\s*(s|min)$/.exec(txt); return `<div class="lg-ov-tile ${cls}"><span class="lg-ov-l">${ph(icon)}${escHtml(label)}</span><span class="lg-ov-v"><span>${escHtml(m ? m[1] : txt)}</span>${m ? `<small>${m[2]}</small>` : ''}</span></div>`; };
   const goal = sugg.goal && sugg.goal.w > 0 ? `<div class="lg-ai-goal"><span class="lg-ai-goal-l">${t('lgOvGoal','Cel na dziś')}</span><span class="lg-ai-goal-v">${cnt(kg(sugg.goal.w))}kg x ${sugg.goal.reps}</span></div>` : '';
   // Trener AI (the action from the last workout's analysis) when there is one, otherwise the rule-based training tip: same as before the pager
   const tipHtml = aiAction
@@ -10141,7 +10144,7 @@ function lgOverviewHtml(ex, history, sugg, aiAction, versionPill, rise){
           <button type="button" class="lg-ic note${note?' has-note':''}" onclick="openExNoteV2()" aria-label="${escHtml(t('exNoteLabel','Twoja notatka'))}">${LG_ICONS.note}</button>
         </div>
       </div>
-      <div class="lg-ov-tiles">${tile('t-sets', t('lgOvSets','Serie'), 'stack', String(ex.sets), 0)}${tile('t-reps', t('lgOvReps','Powtórzenia'), 'arrow-clockwise', repsTxt, 1)}${tile('t-rest', t('lgOvRest','Przerwa'), 'clock-countdown', restTxt, 2)}</div>
+      <div class="lg-ov-tiles${riseT(0)}">${tile('t-sets', t('lgOvSets','Serie'), 'stack', String(ex.sets))}${tile('t-reps', t('lgOvReps','Powt.'), 'arrow-clockwise', repsTxt)}${tile('t-rest', t('lgOvRest','Przerwa'), 'clock-countdown', restTxt)}</div>
       ${note ? `<div class="lg-tip lg-ov-note${rise(2)}"><span class="lg-tip-l">${t('exNoteSheetTitle','NOTATKA')}</span><span class="lg-tip-t">${escHtml(note)}</span></div>` : ''}
       ${tipHtml}
       ${rowHtml}
