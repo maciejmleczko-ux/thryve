@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.63.1 (2026-10-10)
-- **Liczba wersji:** 249 · **commitów:** 594
+- **Aktualna wersja:** 4.63.2 (2026-10-11)
+- **Liczba wersji:** 250 · **commitów:** 603
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,29 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.63.2 · PATCH · 2026-10-11
+
+**Dla użytkownika:** drobne poprawki wyglądu karty ćwiczenia i arkuszy rozgrzewki i rozciągania.
+
+- **Przycisk notatki** (ikona obok nazwy ćwiczenia) w standardowym rozmiarze okrągłego przycisku ikony: 40×40 px z ikoną 20 px (było 28 i 15), kropka „jest notatka” 10 px.
+- **Pastylki w arkuszu rozgrzewki i rozciągania** w kolorach jak przy ćwiczeniach: liczba ćwiczeń granatowa (jak Serie), czas pomarańczowy (jak Przerwa, nowa klasa `.lg-chip.c-time`); kolejność jak przy ćwiczeniu (najpierw liczba, potem czas).
+- **Arkusze „Rozgrzewka” i „Rozciąganie”:** przycisk START 32 px od dolnej krawędzi arkusza (jak w „Udostępnij” i przeglądzie ćwiczenia); padding arkusza 0, 32 px na dole przewijanej treści, więc arkusz jest niższy (zmierzone dla obu widoków: lista i bieg).
+- **Karta startowa ćwiczenia: Serie / Powtórzenia / Przerwa** w jednej białej karcie z trzema kolumnami (ramka `#f1d7cb` 0,91 px jak „Rekord” na Gratulacjach, cienkie przegrody). Etykieta grafitowa z małą kolorową ikoną, duża cyfra w kolorze pastylek (granat, błękit, pomarańcz), jednostka „s” mała. Trzy równe kolumny (`repeat(3, minmax(0, 1fr))`), karta niższa (76 px zamiast 86); cyfry 26 px, 24 px poniżej 390 pt, 21 px poniżej 366 pt, „90-120s” mieści się na 393 i 375 pt. Karta wchodzi jako jeden kafel (`m-rise-tile`). Etykieta „Powt.” zamiast „Powtórzenia”.
+
+- **iOS:** Build 38 (4.63.2), archiwum zbudowane i wysłane na TestFlight 2026-10-11. `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
+
+**Commity (9):**
+
+- `fbf15d5` 2026-10-10 — 4.63.1: przycisk notatki w standardowym rozmiarze 40 px
+- `bbd9c57` 2026-10-10 — 4.63.1: pastylki w rozgrzewce i rozciaganiu w kolorach jak przy cwiczeniach
+- `c88be75` 2026-10-10 — 4.63.1: pasek Rozgrzewka/Rozciaganie: przezroczyste ikony, 2 px wiekszy odstep
+- `847706c` 2026-10-10 — 4.63.1: nowy projekt banerow Rozgrzewka/Rozciaganie (nazwa light, pastylki, ikony osobno)
+- `ee5a364` 2026-10-10 — 4.63.1: banery Rozgrzewka/Rozciaganie: tytul, 3 ikony w odstepie 14 px, pastylki
+- `0b57321` 2026-10-10 — 4.63.1: banery z powrotem w pierwotnym wygladzie (pastylki w arkuszu zostaja)
+- `98736de` 2026-10-10 — 4.63.1: arkusze Rozgrzewka/Rozciaganie: START 32 px od dolu, nizszy arkusz
+- `d7e4283` 2026-10-10 — 4.63.1: karta startowa cwiczenia: Serie/Powtorzenia/Przerwa w jednej bialej karcie
+- `3d5559e` 2026-10-11 — 4.63.1: karta Serie/Powt./Przerwa: rowny podzial na trzy kolumny
+
 ### 4.63.1 · PATCH · 2026-10-10
 
 **Dla użytkownika:** poprawki po teście 4.63.0 na iPhonie: odstęp przycisków od dołu (32 px), większy podgląd karty do udostępnienia, nowe przyciski w oknie „Przerwać trening?”.
@@ -129,10 +152,6 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Haptyka w „Udostępnij”:** lekkie stuknięcie przy zmianie formatu, koloru, tła (dotyk) i układu karty (po zatrzymaniu się na innym), „tyknięcie” selekcji dla każdego zdjęcia mijającego środek podczas przewijania slidera (`haptic('tick')`, bez dźwięku linijki), sukces po zapisie i skopiowaniu, ostrzeżenie przy błędzie, lekkie stuknięcie na przycisku udostępniania na Gratulacjach.
 - **Notatka na karcie startowej:** brzoskwiniowe tło `#ffe6dc`, etykieta `#cd1200`, tekst `#5a1a0c`, mniejszy padding (12/16, odstęp 8), żeby nie była drugą ciemną kartą obok wskazówki treningowej. Po START elementy strony Trening wchodzą po kolei (`m-rise`, 140 ms zwłoki, gdy strona wsuwa się pod palec), a gwiazdka Trenera AI robi jeden delikatny „pulsik” (skala 1,28 i 14°, `--m-dur-pop`) po wejściu karty.
 - **Pastylki na ekranie Trening** (serie, powtórzenia, przerwa) w kolorach kafli z karty startowej, żeby użytkownik uczył się, co jest czym: Serie granatowe (`--m-plan-hard`), Powtórzenia błękitne (nowy token `--m-sky: #5da9e9`, używany też na kaflu karty startowej i na ekranie Gratulacje), Przerwa pomarańczowa (jak dotąd); biały tekst i ikony.
-- **Przycisk notatki** (ikona obok nazwy ćwiczenia) w standardowym rozmiarze okrągłego przycisku ikony: 40×40 px z ikoną 20 px (było 28 i 15), kropka „jest notatka” 10 px.
-- **Pastylki w arkuszu rozgrzewki i rozciągania** w kolorach jak przy ćwiczeniach: liczba ćwiczeń granatowa (jak Serie), czas pomarańczowy (jak Przerwa, nowa klasa `.lg-chip.c-time`); kolejność jak przy ćwiczeniu (najpierw liczba, potem czas).
-- **Arkusze „Rozgrzewka” i „Rozciąganie”:** przycisk START 32 px od dolnej krawędzi arkusza (jak w „Udostępnij” i przeglądzie ćwiczenia); padding arkusza 0, 32 px na dole przewijanej treści, więc arkusz jest niższy (zmierzone dla obu widoków: lista i bieg).
-- **Karta startowa ćwiczenia: Serie / Powtórzenia / Przerwa** w jednej białej karcie z trzema kolumnami (ramka `#f1d7cb` 0,91 px jak „Rekord” na Gratulacjach, cienkie przegrody). Etykieta grafitowa z małą kolorową ikoną, duża cyfra w kolorze pastylek (granat, błękit, pomarańcz), jednostka „s” mała. Trzy równe kolumny (`repeat(3, minmax(0, 1fr))`), karta niższa (76 px zamiast 86); cyfry 26 px, 24 px poniżej 390 pt, 21 px poniżej 366 pt, „90-120s” mieści się na 393 i 375 pt. Karta wchodzi jako jeden kafel (`m-rise-tile`). Etykieta „Powt.” zamiast „Powtórzenia”.
 - **Okno potwierdzenia** (`gymConfirmV2`: „Przerwać trening?”, „Zakończyć trening?” i pozostałe) wg Figmy 519:23635: karta 323 px, padding 30, 12 px promienia i cień, tytuł 20/400 wersalikami (`letter-spacing .04em`), tekst 12 px, 41 px odstępu do przycisków. Przyciski 55 px, 14/500, `letter-spacing .12em`, wersaliki: potwierdzenie pomarańczowe, „Wróć” z pomarańczową obwódką, 14 px między nimi, jeden pod drugim.
 
 - **iOS:** Build 37 (4.63.1), archiwum zbudowane i wysłane na TestFlight 2026-10-10; obejmuje poprawki z tego wpisu. `version.json` zostaje na 22 do końca przetwarzania buildu w TestFlight.
