@@ -127,7 +127,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 **Commity (1):**
 
-- (hash dopisać przy następnej wersji) 2026-10-12 — 4.63.5: paleta: tokeny i scalenie literalow
+- `82b3c21` 2026-10-12 — 4.63.5: paleta: tokeny i scalenie literalow
 
 ### 4.63.4 · PATCH · 2026-10-12
 
