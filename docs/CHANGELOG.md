@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.63.3 (2026-10-12)
+- **Aktualna wersja:** 4.63.4 (2026-10-12)
 - **Liczba wersji:** 251 · **commitów:** 604
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.63.4 · PATCH · 2026-10-12
+
+- **Ekran Gratulacje: stałe kolory metryk** (Figma 528:7547). Czas `#8E0045` (śliwka, dawniej mięta), Kalorie `#FFBB00` z ciemnym tekstem (dawniej granat), Objętość `#CD1200` (dawniej pomarańcz akcentu), „Vs poprzedni” grafit `#343941` (dawniej śliwka), Ćwiczenia bez zmian `#5DA9E9`. Nowe tokeny `--m-metric-time/-kcal/-volume` i `--m-muted-text` w `:root`; klasy kafli zmienione na semantyczne (`--time`, `--kcal`, `--volume`, `--vs`). Reszta aplikacji jeszcze nie przepięta na kolory metryk.
+
+**Commity (1):**
+
+- (hash dopisać przy następnej wersji) 2026-10-12 — 4.63.4: Gratulacje: stale kolory metryk
+
 ### 4.63.3 · PATCH · 2026-10-12
 
 **Dla użytkownika:** na karcie startowej ćwiczenia prognoza ciężaru nazywa się „Szacowany max” (z podpisem, z jakiego zestawu wynika), a „Powtórzenia” mają czytelniejszy zielony kolor.
@@ -127,7 +135,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 **Commity (1):**
 
-- (hash dopisać przy następnej wersji) 2026-10-12 — 4.63.3: szacowany max zamiast rekordu e1RM, zielony kolor powtorzen
+- `eb2366f` 2026-10-12 — 4.63.3: szacowany max zamiast rekordu e1RM, zielony kolor powtorzen
 
 ### 4.63.2 · PATCH · 2026-10-11
 

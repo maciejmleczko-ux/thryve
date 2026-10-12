@@ -105,6 +105,11 @@
   --m-sky:#5da9e9;         /* the sky-blue "Ćwiczenia" tile on the Finish screen */
   --m-reps:#1f996e;        /* "Powtórzenia": green on the start card and the reps chip on Trening (3.6:1 on white; the old sky blue was 2.5:1) */
   --m-plan-accent:#6891ff; /* planned/missed/done markers on History calendar + Dashboard weekly progress */
+  --m-muted-text:#6c6b78;  /* secondary text on light surfaces (5.2:1 on white); --m-muted stays icons/hints only */
+  /* fixed metric colours, same everywhere in the app (Figma "Mekkio / Colors" metric/*) */
+  --m-metric-time:#8e0045;   /* Czas treningu: plum */
+  --m-metric-kcal:#ffbb00;   /* Kalorie: amber, dark text */
+  --m-metric-volume:#cd1200; /* Objętość: red, not the orange accent */
 
   --m-r-sm:12px;           /* inputs, chips, small tiles */
   --m-r-md:16px;           /* cards, panels */
@@ -351,16 +356,16 @@ html.gymfin-open .bottom-nav{z-index:9600;}   /* the real nav stays on top of th
 .gymfin-stat-k{margin:0;line-height:1;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.82);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gymfin-stat-v{margin:0;display:flex;align-items:flex-end;gap:4px;font-size:26px;font-weight:200;letter-spacing:-.0385em;line-height:.8;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .gymfin-stat-v small{font-size:var(--m-fs-xs);font-weight:400;letter-spacing:0;color:rgba(255,255,255,.8);}
-.gymfin-stat--mint{background:#2cda9d;}
-.gymfin-stat--mint .gymfin-stat-k{color:rgba(52,57,65,.82);}
-.gymfin-stat--mint .gymfin-stat-v{color:#343941;}
-.gymfin-stat--mint .gymfin-stat-v small{color:rgba(52,57,65,.8);}
+.gymfin-stat--time{background:var(--m-metric-time);}
 .gymfin-stat--sky{background:var(--m-sky);}
-.gymfin-stat--navy{background:var(--m-plan-hard);cursor:pointer;}
-.gymfin-stat--orange{background:var(--m-orange);}
-.gymfin-stat--plum{background:#8e0045;}
-.gymfin-stat--plum .gymfin-stat-v{align-items:center;gap:8px;}
-.gymfin-stat--plum .ph, .gymfin-stat--plum .ph svg{width:24px;height:24px;display:block;}
+.gymfin-stat--kcal{background:var(--m-metric-kcal);cursor:pointer;}
+.gymfin-stat--kcal .gymfin-stat-k{color:rgba(52,57,65,.82);}
+.gymfin-stat--kcal .gymfin-stat-v{color:var(--m-ink);}
+.gymfin-stat--kcal .gymfin-stat-v small{color:var(--m-muted-text);}
+.gymfin-stat--volume{background:var(--m-metric-volume);}
+.gymfin-stat--vs{background:var(--m-ink);}
+.gymfin-stat--vs .gymfin-stat-v{align-items:center;gap:8px;}
+.gymfin-stat--vs .ph, .gymfin-stat--vs .ph svg{width:24px;height:24px;display:block;}
 .gymfin-stat-cap{margin:2px 0 0;font-size:var(--m-fs-2xs);font-weight:400;line-height:1;letter-spacing:-.02em;white-space:nowrap;color:rgba(255,255,255,.8);}
 
 /* actions: share (glass circle) + ZAKOŃCZ, sitting above the real bottom nav (nav = 20px + 62px, then 30px) */
@@ -2931,11 +2936,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <div class="gymfin-stats" id="gymFinStats">
-        <div class="gymfin-stat gymfin-stat--mint"><p class="gymfin-stat-k" data-i18n="gymFinTime">Czas</p><p class="gymfin-stat-v" id="gymFinTimeV">—</p></div>
+        <div class="gymfin-stat gymfin-stat--time"><p class="gymfin-stat-k" data-i18n="gymFinTime">Czas</p><p class="gymfin-stat-v" id="gymFinTimeV">—</p></div>
         <div class="gymfin-stat gymfin-stat--sky"><p class="gymfin-stat-k" data-i18n="gymFinExercises">Ćwiczenia</p><p class="gymfin-stat-v" id="gymFinExV">0</p></div>
-        <button type="button" class="gymfin-stat gymfin-stat--navy" id="gymFinKcal" hidden onclick="gymFinEditKcal()"><p class="gymfin-stat-k" id="gymFinKcalK" data-i18n="gymFinKcal">Kalorie</p><p class="gymfin-stat-v" id="gymFinKcalV">—</p></button>
-        <div class="gymfin-stat gymfin-stat--orange gymfin-stat--wide"><p class="gymfin-stat-k" data-i18n="gymFinVolume">Objętość</p><p class="gymfin-stat-v" id="gymFinVolV">0</p></div>
-        <div class="gymfin-stat gymfin-stat--plum gymfin-stat--wide" id="gymFinVs" hidden>
+        <button type="button" class="gymfin-stat gymfin-stat--kcal" id="gymFinKcal" hidden onclick="gymFinEditKcal()"><p class="gymfin-stat-k" id="gymFinKcalK" data-i18n="gymFinKcal">Kalorie</p><p class="gymfin-stat-v" id="gymFinKcalV">—</p></button>
+        <div class="gymfin-stat gymfin-stat--volume gymfin-stat--wide"><p class="gymfin-stat-k" data-i18n="gymFinVolume">Objętość</p><p class="gymfin-stat-v" id="gymFinVolV">0</p></div>
+        <div class="gymfin-stat gymfin-stat--vs gymfin-stat--wide" id="gymFinVs" hidden>
           <p class="gymfin-stat-k" data-i18n="gymFinVs">Vs poprzedni</p>
           <div><p class="gymfin-stat-v"><span class="ph" id="gymFinVsArrow"></span><span id="gymFinVsV">+0%</span></p><p class="gymfin-stat-cap" data-i18n="gymFinVsCap">względem ostatniego treningu</p></div>
         </div>
@@ -7178,7 +7183,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.63.3";
+const APP_VERSION = "4.63.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
