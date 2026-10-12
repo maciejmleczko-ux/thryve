@@ -119,6 +119,11 @@
   --m-mint:#2cda9d;        /* fills with dark text; --m-reps is the on-white green */
   --m-mint-ink:#166d4f;    /* text on white (6.3:1) */
   --m-mint-tint:#b9f3de;
+  --m-page-top:#fbece3;    /* Dashboard page gradient: cream top... */
+  --m-page-bot:#e2e2e1;    /* ...to grey bottom (also the body colour behind the dashboard) */
+  --m-glass:rgba(255,255,255,.84); /* frosted tile fill on the Dashboard (Figma 'white 84%') */
+  --m-navy-wash:#e0e6f7;   /* pale blue tile: Konsystencja, SERII mini-tile */
+  --m-red-wash:#fbe2dd;    /* pale red tile: OBJETOSC mini-tile */
   --m-plum:#8e0045;
   --m-plum-ink:#470023;
   --m-plum-tint:#d9aac1;
@@ -191,7 +196,7 @@ html.dashboard-lock, html.dashboard-lock body{overflow:hidden;height:100dvh;touc
 html.dashboard-lock.dashboard-scrollable, html.dashboard-lock.dashboard-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;overscroll-behavior-y:none;}
 html.dashboard-lock body{padding-bottom:0;}
 html.dashboard-lock .app{padding-bottom:0;}
-body.dashboard-bg{background:var(--dash-page-bot);}
+body.dashboard-bg{background:var(--m-page-bot);}
 /* PLANS v2 — same "fixed screen, real scroll only when actually needed"
    recipe as Dashboard above. STANDING RULE: every new v3 screen gets
    this same 3-part treatment (see [[feedback_thryve_animation_vocabulary]]):
@@ -995,20 +1000,24 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    DASHBOARD v2.1 — home screen (Figma FugBXsSVc6rQIDmLXwepMv, section
    542:12608, 8 states). The app boots straight here. Scoped under
    .dash-* / #view-dashboard; colours/radii from the --m-* tokens.
-   Page tones that are not tokens yet live in the three --dash-* vars
-   below (candidates for --m-* tokens, listed in the Phase 2 report).
+   Page tones are the --m-page-top / --m-page-bot / --m-glass tokens.
    ============================================================ */
-:root{
-  --dash-page-top:#fbece3;          /* Figma page gradient, cream */
-  --dash-page-bot:#e2e2e1;          /* ...to grey */
-  --dash-glass:rgba(255,255,255,.84); /* Figma tile fill */
-}
-/* Page gradient: Figma's photo strip is not in the repo, so the top 308px is
-   plain --m-bg (the photo's grey) and the real gradient takes over from there
-   (same stop positions as Figma's 4694px-tall base rectangle). */
+/* Page, bottom to top (Figma 533:8434-8436): --m-bg base, the blurred ribbed
+   photo (566x1007 at x -95, with its own white 144deg fade), then the base
+   gradient (transparent until 308px, cream by 589px, grey at 4908px, same
+   stops as Figma's 4694px-tall rectangle). The photo is only a CSS
+   background, so it never blocks the first render; the gradients paint
+   the same page even before it arrives. */
 #view-dashboard{
   min-height:100dvh;
-  background:linear-gradient(180deg, var(--m-bg) 0, var(--m-bg) 308px, var(--dash-page-top) 589px, var(--dash-page-bot) 4908px);
+  background-color:var(--m-bg);
+  background-image:
+    linear-gradient(180deg, transparent 0, transparent 308px, var(--m-page-top) 589px, var(--m-page-bot) 4908px),
+    linear-gradient(144deg, rgba(255,255,255,.78) 23%, rgba(255,255,255,0) 100%),
+    url(icons/backgrounds/dashboard.webp);
+  background-repeat:no-repeat;
+  background-position:0 0, -95px 0, -95px 0;
+  background-size:100% 100%, 566px 1007px, 566px 1007px;
 }
 /* Top: Figma's greeting sits at y=100 on a frame that includes the status bar,
    so greeting top = --top-inset + 41px (= 100 on a 54px-inset iPhone). Bottom:
@@ -1113,7 +1122,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 
 /* ---- glass tiles: rest day (04) and "Trenuj po swojemu" (08) ---- */
 .dash-pair{display:flex;flex-direction:column;gap:1px;}
-.dash-tile{position:relative;display:block;width:100%;margin:0;padding:12px 12px 12px 34px;border:0;background:var(--dash-glass);box-shadow:0 0 0 .5px var(--m-panel);color:var(--m-ink);font-family:inherit;text-align:left;}
+.dash-tile{position:relative;display:block;width:100%;margin:0;padding:12px 12px 12px 34px;border:0;background:var(--m-glass);box-shadow:0 0 0 .5px var(--m-panel);color:var(--m-ink);font-family:inherit;text-align:left;}
 .dash-tile--top{border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;}
 .dash-tile--bot{border-radius:0 0 var(--m-r-sm) var(--m-r-sm);}
 .dash-tile--solo{border-radius:var(--m-r-sm);}
@@ -1145,8 +1154,8 @@ button.dash-tile{cursor:pointer;}
 
 /* ---- "Pierwsze kroki" (06) ---- */
 .dash-steps{display:flex;flex-direction:column;gap:1px;}
-.dash-steps-h{margin:0;padding:12px;border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;background:var(--dash-glass);font-size:var(--m-fs-2xs);font-weight:600;line-height:22px;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
-.dash-step{display:flex;align-items:center;gap:14px;width:100%;min-height:57px;margin:0;padding:12px;border:0;background:var(--dash-glass);color:var(--m-ink);font-family:inherit;font-size:var(--m-fs-base);font-weight:400;line-height:18px;text-align:left;cursor:pointer;}
+.dash-steps-h{margin:0;padding:12px;border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;background:var(--m-glass);font-size:var(--m-fs-2xs);font-weight:600;line-height:22px;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
+.dash-step{display:flex;align-items:center;gap:14px;width:100%;min-height:57px;margin:0;padding:12px;border:0;background:var(--m-glass);color:var(--m-ink);font-family:inherit;font-size:var(--m-fs-base);font-weight:400;line-height:18px;text-align:left;cursor:pointer;}
 .dash-step:last-child{border-radius:0 0 var(--m-r-sm) var(--m-r-sm);}
 .dash-step-dot{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;box-sizing:border-box;border-radius:50%;border:.8px solid var(--m-orange);background:rgba(255,255,255,.6);color:#fff;}
 .dash-step-dot svg{display:block;width:11px;height:11px;}
@@ -14143,8 +14152,12 @@ let dashTickIv = 0;
 const DASH_SVG_CHECK = (w, h)=> `<svg viewBox="0 0 24 24" width="${w}" height="${h}" fill="none" aria-hidden="true"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 // headline = 1-3 sentences, each on its own line (Figma breaks after each sentence)
+// Display-only: "Fullbody workout" -> "Fullbody" (the plan's stored name is untouched)
+function dashPlanShortName(name){
+  return String(name || '').replace(/\s+workout\s*$/i, '').trim() || String(name || '');
+}
 function dashHeadlineParts(m){
-  const h = m.hero, n = h.planName || '';
+  const h = m.hero, n = dashPlanShortName(h.planName);
   switch(h.state){
     case 'train':          return [t('dashHlTrain', `${n} czeka.`, n), t('dashHlTrain2', 'Krok po kroku.')];
     case 'inprogress':     return [t('dashHlProg', 'Trening trwa.'), t('dashHlProg2', 'Dokończ!!!')];
@@ -14167,7 +14180,7 @@ const dashArrowRight = ()=> ph('arrow-left');
 function dashHeroHtml(m, animate){
   const h = m.hero;
   const rc = i => animate ? ` m-rise-tile" style="--i:${i}` : '';       // class suffix + style, used as class="…${rc(1)}"
-  const title = escHtml(h.planName || t('dashOwnWorkout', 'Własny trening'));
+  const title = escHtml(h.planName ? dashPlanShortName(h.planName) : t('dashOwnWorkout', 'Własny trening'));
   const btn = (kind, label) => `<button type="button" class="dash-hero-btn m-press" onclick="dashCta('${kind}')">${label}</button>`;
   switch(h.state){
     case 'train':
@@ -14229,7 +14242,7 @@ function dashHeroHtml(m, animate){
       const plans = [main].concat(rec.others || []).filter(Boolean);
       const heroHtml = main ? `<div class="dash-hero${rc(1)}">
         <p class="dash-hero-eyebrow">${t('dashRecommended', 'Polecany dla Ciebie')}</p>
-        <h2 class="dash-hero-title">${escHtml(main.name)}</h2>
+        <h2 class="dash-hero-title">${escHtml(dashPlanShortName(main.name))}</h2>
         ${dashPlanStats(main.exercisesPerDay, main.estMin)}
         <button type="button" class="dash-hero-btn m-press" onclick="dashCta('noplan-new','${escHtml(main.id)}')">${t('dashChoose', 'Wybierz')}</button>
       </div>` : '';
@@ -14240,7 +14253,7 @@ function dashHeroHtml(m, animate){
         const id = escHtml(p.id);
         return `<div class="dash-pwrap">
           <div class="dash-pcard m-press${i === 0 ? ' dash-pcard--ink' : ''}" role="button" tabindex="0" style="background:${colors[i % colors.length]}" onclick="dashCta('noplan-new-open','${id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-            <p class="dash-pcard-name">${escHtml(p.name)}</p>
+            <p class="dash-pcard-name">${escHtml(dashPlanShortName(p.name))}</p>
             <div class="dash-pcard-meta">${dashStat(ph('barbell'), escHtml(planExCountText(p.exercisesPerDay)))}${dashStat(ph('clock-countdown'), '~' + p.estMin + ' min')}${dashStat(ph('chart-line'), escHtml(diff))}</div>
           </div>
           <button type="button" class="dash-pick m-press${i === 0 ? ' is-on' : ''}" style="color:${i === 0 ? 'var(--m-mint-ink)' : colors[i % colors.length]}" aria-label="${t('dashPickPlan', 'Wybierz plan')}: ${escHtml(p.name)}" onclick="event.stopPropagation();dashCta('noplan-new-pick','${id}')">${DASH_SVG_CHECK(16, 16)}</button>

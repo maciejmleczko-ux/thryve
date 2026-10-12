@@ -1,6 +1,7 @@
-const CACHE_NAME = 'mekkio-cache-v26';
+const CACHE_NAME = 'mekkio-cache-v27';
 // icons/share/* = backgrounds of the share sheet, kept offline from the first launch
-const URLS_TO_CACHE = ['./', './index.html', './lottie.min.js', './success.json',
+// icons/backgrounds/dashboard.webp = Dashboard header photo (~39 KB)
+const URLS_TO_CACHE = ['./', './index.html', './lottie.min.js', './success.json', './icons/backgrounds/dashboard.webp',
   ...[1,2,3,4,5].flatMap(n => ['./icons/share/hero-' + n + '.jpg', './icons/share/gym-' + n + '.jpg'])];
 
 self.addEventListener('install', (event) => {
