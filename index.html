@@ -171,32 +171,27 @@ body{
    of the screen instead of a cut-off strip. */
 body.gymv2-bg{background:var(--m-panel);}
 html.gymv2-bg,html.gymv2-bg body{overscroll-behavior-y:none;}
-/* Dashboard preview: designed to read as a single fixed screen, not a
-   scrolling page (standard iPhone viewport only — other sizes come
-   later). Toggled on <html> because whichever of html/body is the
-   browser's "scrolling element" varies — overflow:hidden has to hit
-   both to be reliable.
-   Base state is fully rigid (overflow:hidden, touch-action:none) — zero
-   scroll capability, zero touch give, when content fits (the common
-   case). renderDashboard() measures the real content height after
-   rendering and adds .dashboard-scrollable only when it actually
-   overflows the viewport (e.g. the "Trener AI" box expanded) — that
-   variant switches to overflow-y:auto + touch-action:pan-y so a genuine
-   drag can reach the rest of the content. overscroll-behavior-y:none
-   (Maciej, 2026-09-16) hard-stops it at both ends instead of the default
-   iOS rubber-band bounce — .dash-root's own padding-bottom (126px) is
-   already tuned so the last real tile's bottom edge rests ~20px above
-   the floating nav at max scroll; the old bounce let a drag travel past
-   that and briefly show empty space before springing back. So: no
-   scroll at all when nothing needs it, hard-bounded scroll only when
-   something does.
-   body.dashboard-bg is the other half of this — the light background
-   needs to extend under any bounce/overscroll, or that gap shows the
-   app's normal dark body color instead of feeling like a continuation
-   of the screen (same technique as .gymv2-bg above). */
+/* Dashboard v2.1 — scrolls freely, same 3-part scroll-lock recipe as every v3
+   screen (see PLANS v2 below). Toggled on <html> because whichever of
+   html/body is the browser's "scrolling element" varies — overflow has to
+   hit both to be reliable.
+   Rigid by default (overflow:hidden, touch-action:none: zero touch give when
+   the content happens to fit). renderDashboard() measures the real content
+   bottom against the floating nav's top and adds .dashboard-scrollable only
+   when it overflows (dashRefreshScroll()), which switches to overflow-y:auto
+   + touch-action:pan-y. overscroll-behavior-y:none (Maciej, 2026-09-16)
+   hard-stops the drag at both ends instead of the iOS rubber-band: the page
+   gradient lives on #view-dashboard, so a bounce would reveal body's flat
+   colour instead.
+   No nav clearance comes from .app / body here (both 0 in lock): .dash-root
+   owns the whole 126px + safe-area at the bottom, so the page gradient
+   reaches the very bottom edge instead of body's colour showing in a strip.
+   body.dashboard-bg is the other half — see below. */
 html.dashboard-lock, html.dashboard-lock body{overflow:hidden;height:100dvh;touch-action:none;}
 html.dashboard-lock.dashboard-scrollable, html.dashboard-lock.dashboard-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;overscroll-behavior-y:none;}
-body.dashboard-bg{background:var(--m-bg);}
+html.dashboard-lock body{padding-bottom:0;}
+html.dashboard-lock .app{padding-bottom:0;}
+body.dashboard-bg{background:var(--dash-page-bot);}
 /* PLANS v2 — same "fixed screen, real scroll only when actually needed"
    recipe as Dashboard above. STANDING RULE: every new v3 screen gets
    this same 3-part treatment (see [[feedback_thryve_animation_vocabulary]]):
@@ -997,42 +992,30 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .icon-suggest span{font-size:var(--m-fs-xs);font-weight:700;color:var(--text-dark);opacity:.75;}
 
 /* ============================================================
-   DASHBOARD — home screen of the Figma "v3" ("Mekkio") redesign,
-   now the app's main layout (the app boots straight here; see the
-   previewMode note near the router). Scoped entirely under
-   .dash-* / #view-dashboard: its own font (Geist) and color set,
-   deliberately not touching the app-wide --bg/--card/--orange
-   tokens the old (now dead-code) screens still use.
+   DASHBOARD v2.1 — home screen (Figma FugBXsSVc6rQIDmLXwepMv, section
+   542:12608, 8 states). The app boots straight here. Scoped under
+   .dash-* / #view-dashboard; colours/radii from the --m-* tokens.
+   Page tones that are not tokens yet live in the three --dash-* vars
+   below (candidates for --m-* tokens, listed in the Phase 2 report).
    ============================================================ */
-#view-dashboard{
-  min-height:100vh;
-  background:
-    radial-gradient(120% 55% at 55% 14%, rgba(247,190,110,.55) 0%, rgba(247,190,110,0) 55%),
-    radial-gradient(90% 45% at 88% 28%, rgba(244,190,205,.4) 0%, rgba(244,190,205,0) 60%),
-    radial-gradient(100% 55% at 8% 78%, rgba(244,190,205,.32) 0%, rgba(244,190,205,0) 60%),
-    var(--m-bg);
+:root{
+  --dash-page-top:#fbece3;          /* Figma page gradient, cream */
+  --dash-page-bot:#e2e2e1;          /* ...to grey */
+  --dash-glass:rgba(255,255,255,.84); /* Figma tile fill */
 }
-/* top padding matches .dash-chat-btn's own `top` (16px + safe area) so the
-   greeting's first line sits level with the feedback circle.
-   Flex column + min-height:100dvh so that when the content is shorter than
-   the screen the slack collects under the greeting (.dash-hero margin-top:
-   auto) and the last tile stays anchored: padding-bottom 126px = the nav's
-   20px bottom offset + ~82px height + 24px breathing room, so the week
-   card's bottom line sits 24px above the menu. renderDashboard() sizes its
-   scroll check off the natural content height, not this padded box. */
-.dash-root{position:relative;display:flex;flex-direction:column;min-height:100dvh;box-sizing:border-box;padding:calc(16px + var(--top-inset)) 10px 126px;}
-/* Scrollable state only (content genuinely overflows, e.g. "Trener AI"
-   expanded on a short phone): .dash-root's own 126px was tuned for the
-   PINNED case above (margin-top:auto collapses the slack, last tile
-   settles against this padding). Once real scrolling is in play, .app's
-   own shared padding-bottom (110px, every scrolling route relies on it
-   for nav clearance — see the .app padding-bottom comment near
-   #bottomNav) is what actually determines the resting gap at max scroll,
-   and the two stack, so 126px here would double up and leave a much
-   bigger gap than intended. 12px is the measured amount that lands the
-   last tile's bottom exactly 20px above the nav on top of .app's 110px
-   (Maciej, 2026-09-16: wanted a hard 20px stop, not the original ~8px). */
-html.dashboard-scrollable .dash-root{padding-bottom:12px;}
+/* Page gradient: Figma's photo strip is not in the repo, so the top 308px is
+   plain --m-bg (the photo's grey) and the real gradient takes over from there
+   (same stop positions as Figma's 4694px-tall base rectangle). */
+#view-dashboard{
+  min-height:100dvh;
+  background:linear-gradient(180deg, var(--m-bg) 0, var(--m-bg) 308px, var(--dash-page-top) 589px, var(--dash-page-bot) 4908px);
+}
+/* Top: Figma's greeting sits at y=100 on a frame that includes the status bar,
+   so greeting top = --top-inset + 41px (= 100 on a 54px-inset iPhone). Bottom:
+   126px = the floating nav's 20px offset + 62px height + breathing room, plus
+   the home-indicator safe area (.app and body clearance are zeroed in
+   html.dashboard-lock so this is the only bottom padding). */
+.dash-root{position:relative;box-sizing:border-box;padding:calc(var(--top-inset) + 41px) 10px calc(126px + env(safe-area-inset-bottom,0px));}
 /* Safari/WebKit can size an inline <svg> with no explicit width/height
    to 0 inside a flex container (spec's "defaults to 100%" isn't applied
    reliably) — force it everywhere in this screen as a CSS-layer backstop,
@@ -1055,18 +1038,17 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
 /* account entry reuses .dash-chat-btn's position/size but the glyph is a
    self-contained badge SVG (orange disc + white user) — no button bg, full-bleed icon. */
 .dash-acct-btn, .gymv2-acct-btn, .plansv2-acct-btn, .histv2-acct-btn, .statsv2-acct-btn{background:none;padding:0;}
-.dash-acct-btn{width:48px;height:48px;}
-.dash-acct-btn .ph{width:48px;height:48px;}
+.dash-acct-btn{width:40px;height:40px;box-shadow:0 0 0 .5px var(--m-orange-tint);}   /* Figma: 40px disc, .5px outside outline */
+.dash-acct-btn .ph{width:40px;height:40px;}
+.dash-acct-btn::after{content:"";position:absolute;inset:-4px;}   /* 40px disc, 48px touch target */
 /* subpage headers: keep the row's 40px scale, glyph fills the badge */
 .gymv2-acct-btn .ph, .plansv2-acct-btn .ph, .histv2-acct-btn .ph, .statsv2-acct-btn .ph{width:40px;height:40px;}
-/* greeting hugs the top (see .dash-root padding). margin-bottom is the
-   MINIMUM gap to the first tile (used as-is when the dashboard scrolls);
-   when it fits on one screen, .dash-hero's margin-top:auto adds the extra
-   slack here so the stack breathes and the last tile anchors to the menu. */
-.dash-header{width:85%;margin-bottom:36px;}
-.dash-hi{margin:0 0 4px;font-size:var(--m-fs-md);font-weight:400;color:var(--m-ink);}
-.dash-headline{margin:0;font-size:var(--m-fs-2xl);line-height:1.15;font-weight:600;color:var(--m-ink);letter-spacing:-.02em;}
-
+/* Greeting + headline. min-height 177px = Figma's greeting top (y100) to the
+   column start (y277) whatever the headline's line count (2 or 3). */
+.dash-header{min-height:177px;}
+.dash-hi{margin:0 0 6px;font-size:var(--m-fs-xs);font-weight:700;line-height:1.02;color:var(--m-ink);}
+.dash-headline{margin:0;max-width:286px;font-size:32px;font-weight:300;line-height:1.04;letter-spacing:-.02em;color:var(--m-ink);}
+.dash-headline span{display:block;}
 /* Section label + card eyebrow — one spec each (audit W4). The per-screen
    selectors keep only their own margins; shared typography + the light/dark
    colour split live here. Base eyebrow colour is --m-muted (light cards);
@@ -1075,7 +1057,7 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
 .plansv2-customize-label, .pev2-section-name, .pev2-section-num{
   font-size:var(--m-fs-base);font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--m-ink);
 }
-.dash-eyebrow, .dash-mini-label, .gymv2-plan-eyebrow, .plansv2-customize-hero-eyebrow,
+.dash-eyebrow, .gymv2-plan-eyebrow, .plansv2-customize-hero-eyebrow,
 .statsv2-ring-eyebrow, .statsv2-bar-eyebrow, .statsv2-ytd-eyebrow,
 .statsv2-record-eyebrow, .statsv2-detail-chart-eyebrow, .statsv2-log-eyebrow{
   font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--m-muted);
@@ -1086,54 +1068,108 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
 }
 .dash-eyebrow{margin:0;}
 
-.dash-hero{background:var(--m-orange);border-radius:var(--m-r-md);padding:14px;color:#fff;margin-top:auto;margin-bottom:8px;}
-.dash-hero-stats{display:flex;flex-direction:column;gap:8px;margin:10px 0 12px;}
-.dash-hero-row{display:flex;align-items:center;gap:16px;}
-.dash-hero-row .ph{width:36px;height:36px;flex-shrink:0;}
-.dash-hero-num{margin:0;font-size:var(--m-fs-hero);font-weight:400;letter-spacing:-.02em;}
-.dash-hero-num small{font-size:var(--m-fs-base);font-weight:400;color:rgba(255,255,255,.8);margin-left:4px;}
-.dash-hero-badges{display:flex;gap:12px;flex-wrap:wrap;}
-.dash-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 18px;border-radius:var(--m-r-pill);font-size:var(--m-fs-xs);font-weight:600;}
-.dash-badge.outline{border:1px solid rgba(255,255,255,.8);color:#fff;}
-.dash-badge.fill{background:rgba(255,255,255,.85);color:var(--m-orange);}
-.dash-badge.fill .ph{width:16px;height:16px;}
+/* Content column: hero first, then one <section> per card group (filled by
+   Phase 3, empty ones collapse). Figma gap 4; states 06/07 use 20. */
+.dash-col{display:flex;flex-direction:column;gap:4px;}
+.dash-col[data-state="planready"],.dash-col[data-state="noplan-new"]{gap:20px;}
+#dashHero{display:flex;flex-direction:column;gap:inherit;}   /* hero + its attached lists keep the column's own gap */
+.dash-col > :empty{display:none;}
 
-.dash-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-.dash-plan-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:14px;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
-.dash-plan-card:active{transform:scale(.97);}
-.dash-plan-name{margin:0 0 4px;font-size:var(--m-fs-lg);font-weight:500;line-height:1.2;letter-spacing:.02em;text-transform:uppercase;}
-.dash-plan-count{margin:0;font-size:var(--m-fs-base);font-weight:300;color:rgba(255,255,255,.85);}
-.dash-mini-col{display:flex;flex-direction:column;gap:8px;}
-.dash-mini-card{background:var(--m-card);border-radius:var(--m-r-md);padding:12px 14px;}
-.dash-mini-label{margin:0 0 6px;}
-.dash-mini-row{display:flex;align-items:flex-end;justify-content:space-between;}
-.dash-mini-num{margin:0;font-size:var(--m-fs-xl);font-weight:400;color:var(--m-ink);}
-.dash-mini-row .ph{width:39px;height:31px;color:var(--m-orange);}
-.dash-mini-sub{margin:2px 0 0;font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--m-muted);}
-.dash-trend{display:flex;align-items:flex-end;gap:2px;height:27px;}
-.dash-trend span{flex:1;min-width:3px;border-radius:3px;background:var(--m-orange);transform-origin:bottom;}
+/* ---- hero (Figma 533:8451 and variants) ---- */
+.dash-hero{padding:12px;border-radius:var(--m-r-sm);background:var(--m-orange);box-shadow:0 0 0 .5px var(--m-orange-tint);color:#fff;}
+.dash-hero-eyebrow{margin:0;display:flex;align-items:center;gap:8px;font-size:var(--m-fs-2xs);font-weight:500;line-height:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--m-orange-tint);}
+.dash-hero-eyebrow svg{display:block;width:14px;height:12px;flex:none;}
+/* The title box is trimmed to cap height (Figma "vertical trim"): 26px for the 36px type. */
+.dash-hero-title{margin:8px 0 0;font-size:36px;font-weight:200;line-height:26px;letter-spacing:.04em;text-transform:uppercase;overflow-wrap:anywhere;}
+@supports (text-box:trim-both cap alphabetic){
+  .dash-hero-title{line-height:1.1;text-box:trim-both cap alphabetic;}
+}
+.dash-hero-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;min-height:16px;margin-top:20px;}
+.dash-stat{display:inline-flex;align-items:center;gap:12px;font-size:var(--m-fs-2xs);font-weight:600;line-height:16px;color:var(--m-orange-tint-2);}
+.dash-stat .ph{width:16px;height:16px;flex:none;}
+.dash-stat .ph svg{width:16px;height:16px;}
+.dash-stat svg{display:block;width:16px;height:16px;flex:none;}
+.dash-stat .dash-flip{transform:scaleX(-1);}
+.dash-hero-btn{display:flex;align-items:center;justify-content:center;width:100%;height:55px;margin-top:20px;padding:0 30px;border:0;border-radius:var(--m-r-pill);background:var(--m-plan-c-hard);color:#fff;font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
 
-.dash-week-card{background:var(--m-plan-hard);border-radius:var(--m-r-md);padding:14px;color:#fff;}
-.dash-week-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.dash-week-count{margin:0;font-size:var(--m-fs-xs);font-weight:700;}
-.dash-week-days{display:flex;justify-content:space-between;}
-.dash-week-day{display:flex;flex-direction:column;align-items:center;gap:6px;}
-.dash-week-day span:first-child{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.dash-week-day.rest span:first-child{background:rgba(255,255,255,.101961);}
-/* Same three plan states as the History calendar (Figma 177:10109) — see
-   renderDashboard()'s dashWeekDays block for the priority logic. */
-.dash-week-day.planned span:first-child{border:1.5px solid rgba(255,255,255,.75);}
-.dash-week-day.missed span:first-child{border:1.5px dashed var(--m-plan-accent);}
-.dash-week-day.done span:first-child{background:var(--m-plan-accent);}
-.dash-week-day span:first-child .ph{width:30px;height:30px;display:block;flex-shrink:0;}
-.dash-week-day span:first-child .ph svg{display:block;width:100%;height:100%;}
-.dash-week-day.done span:first-child .ph{color:#fff;}
-.dash-week-day.today span:first-child{background:#fff;border:none;}
-.dash-week-day.today span:first-child .ph{color:var(--m-plan-hard);}
-/* Ring around "today", only when today is also a plan day — same
-   white-wins-but-don't-hide-the-plan-info treatment as the calendar. */
-.dash-week-day.today.has-ring span:first-child{outline:1.5px solid #fff;outline-offset:2px;}
-.dash-week-day em{font-style:normal;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.85);}
+/* in progress (02): progress bar + chips, white button */
+.dash-hero--prog .dash-prog{height:9px;margin-top:40px;border-radius:var(--m-r-pill);background:var(--m-plan-c-easy);overflow:hidden;}
+.dash-prog > span{display:block;height:100%;border-radius:var(--m-r-pill);background:#fff;}
+.dash-hero--prog .dash-hero-meta{margin-top:0;min-height:34px;gap:4px 14px;}
+.dash-hero--prog .dash-stat{color:#fff;}
+.dash-hero--prog .dash-hero-btn{margin-top:10px;background:#fff;color:var(--m-orange);}
+
+/* done (03): mint is a FILL only, so all text on it is dark (--m-ink / --m-mint-ink) */
+.dash-hero--done{background:var(--m-mint);}
+.dash-hero--done .dash-hero-eyebrow{color:var(--m-ink);}
+.dash-hero--done .dash-hero-title{color:var(--m-mint-ink);}
+.dash-hero--done .dash-stat{color:var(--m-ink);}
+.dash-hero--done .dash-hero-btn{background:#fff;color:var(--m-mint-ink);}
+
+/* no plan, has history (08): blue head + "Trenuj po swojemu" tile under it */
+.dash-hero--nop{border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;background:var(--m-plan-mid);box-shadow:none;}
+.dash-hero--nop .dash-hero-eyebrow{color:rgba(255,255,255,.8);}
+.dash-hero--nop .dash-hero-btn{margin-top:20px;background:#fff;color:var(--m-plan-hard);}
+
+/* ---- glass tiles: rest day (04) and "Trenuj po swojemu" (08) ---- */
+.dash-pair{display:flex;flex-direction:column;gap:1px;}
+.dash-tile{position:relative;display:block;width:100%;margin:0;padding:12px 12px 12px 34px;border:0;background:var(--dash-glass);box-shadow:0 0 0 .5px var(--m-panel);color:var(--m-ink);font-family:inherit;text-align:left;}
+.dash-tile--top{border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;}
+.dash-tile--bot{border-radius:0 0 var(--m-r-sm) var(--m-r-sm);}
+.dash-tile--solo{border-radius:var(--m-r-sm);}
+button.dash-tile{cursor:pointer;}
+.dash-tile-row{display:flex;align-items:center;gap:12px;height:17px;}
+.dash-tile-lbl{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-muted-text);}
+.dash-pill{display:inline-flex;align-items:center;justify-content:center;height:17px;padding:0 24px;border-radius:var(--m-r-pill);font-size:var(--m-fs-2xs);font-weight:500;line-height:1.4;letter-spacing:.1em;text-transform:uppercase;color:var(--m-card);}
+.dash-pill--rest{background:var(--m-muted-text);}
+.dash-pill--plan{background:var(--m-orange);}
+.dash-free{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:8px;}
+.dash-tile--bot.dash-free-solo{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:79px;}
+.dash-free-solo .dash-circ{margin-top:0;}
+.dash-free-t{display:block;font-size:18px;font-weight:400;line-height:23px;}
+.dash-free-d{display:block;max-width:185px;margin-top:8px;font-size:var(--m-fs-xs);font-weight:400;line-height:16px;}
+.dash-circ{display:flex;align-items:center;justify-content:center;flex:none;width:55px;height:55px;margin-top:-1px;border-radius:50%;background:var(--m-orange);box-shadow:0 0 0 .5px var(--m-orange-tint);color:#fff;}
+.dash-circ .ph{width:16px;height:16px;transform:rotate(180deg);}
+.dash-circ .ph svg{width:16px;height:16px;}
+/* timeline: filled dot (today) -> dashed line -> hollow dot (next training) */
+.dash-tile--tl::before{content:"";position:absolute;left:6px;top:16px;width:8px;height:8px;border-radius:50%;background:var(--m-orange);}
+.dash-tile--top.dash-tile--tl::after{content:"";position:absolute;left:9.5px;top:28px;bottom:0;border-left:1px dashed var(--m-orange);}
+.dash-tile--bot.dash-tile--tl::before{left:6.25px;top:16.5px;width:7.5px;height:7.5px;box-sizing:border-box;background:transparent;border:.52px solid var(--m-orange);}
+.dash-tile--bot.dash-tile--tl::after{content:"";position:absolute;left:9.5px;top:0;height:16px;border-left:1px dashed var(--m-orange);}
+.dash-tile-title{margin:8px 0 0;font-size:36px;font-weight:200;line-height:26px;letter-spacing:.04em;text-transform:uppercase;overflow-wrap:anywhere;}
+@supports (text-box:trim-both cap alphabetic){
+  .dash-tile-title{line-height:1.1;text-box:trim-both cap alphabetic;}
+}
+.dash-tile .dash-hero-meta{margin-top:20px;}
+.dash-tile .dash-stat{color:var(--m-muted-text);}
+
+/* ---- "Pierwsze kroki" (06) ---- */
+.dash-steps{display:flex;flex-direction:column;gap:1px;}
+.dash-steps-h{margin:0;padding:12px;border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;background:var(--dash-glass);font-size:var(--m-fs-2xs);font-weight:600;line-height:22px;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
+.dash-step{display:flex;align-items:center;gap:14px;width:100%;min-height:57px;margin:0;padding:12px;border:0;background:var(--dash-glass);color:var(--m-ink);font-family:inherit;font-size:var(--m-fs-base);font-weight:400;line-height:18px;text-align:left;cursor:pointer;}
+.dash-step:last-child{border-radius:0 0 var(--m-r-sm) var(--m-r-sm);}
+.dash-step-dot{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;box-sizing:border-box;border-radius:50%;border:.8px solid var(--m-orange);background:rgba(255,255,255,.6);color:#fff;}
+.dash-step-dot svg{display:block;width:11px;height:11px;}
+.dash-step.is-done .dash-step-dot{background:var(--m-orange);border-color:var(--m-orange-tint);}
+.dash-step.is-done{color:var(--m-muted-text);}
+
+/* ---- other Mekkio plans + create (07) ---- */
+.dash-plans-h{margin:0 0 8px;font-size:var(--m-fs-2xs);font-weight:600;line-height:16px;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
+.dash-plans{width:100%;}
+.dash-pwrap{position:relative;height:126px;margin-left:18px;}
+.dash-pwrap + .dash-pwrap{margin-top:-16px;}
+/* ticket card: round notch cut out of the left edge, the pick button sits in it */
+.dash-pcard{position:absolute;inset:0;padding:16px 16px 0 31px;border-radius:var(--m-r-sm);cursor:pointer;color:#fff;
+  -webkit-mask-image:radial-gradient(circle 29px at 0 63px,transparent 28.5px,#000 29px);mask-image:radial-gradient(circle 29px at 0 63px,transparent 28.5px,#000 29px);}
+.dash-pcard--ink{color:var(--m-ink);}
+.dash-pcard-name{margin:0;font-size:var(--m-fs-lg);font-weight:300;line-height:1.1;letter-spacing:.04em;text-transform:uppercase;overflow-wrap:anywhere;}
+.dash-pcard-meta{display:flex;flex-wrap:wrap;gap:4px 16px;position:absolute;left:31px;bottom:34px;}
+.dash-pcard-meta .dash-stat{gap:4px;color:inherit;font-weight:400;}
+.dash-pick{position:absolute;z-index:1;left:-18px;top:45px;display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.6);box-shadow:0 0 0 .5px var(--m-orange-tint);cursor:pointer;}
+.dash-pick::after{content:"";position:absolute;inset:-4px;}
+.dash-pick.is-on{background:var(--m-mint);}
+.dash-pick svg{display:block;width:16px;height:16px;}
+.dash-create{display:flex;align-items:center;justify-content:center;align-self:center;width:267px;max-width:100%;height:55px;margin:0;padding:0 30px;border:0;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
 
 /* AI asystent — "Trener AI" card (Figma node 320:16638, "AI BOX" — originally
    an inline accordion; Maciej 2026-09-16 moved the actual content into a
@@ -1144,7 +1180,7 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
    background layers clipped to padding-box / border-box) since CSS can't
    put a gradient directly on border-color, plus the design's inset purple
    glow — same treatment reused on .ai-popup-box for a consistent identity. */
-.dash-ai-card{border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:8px;
+.dash-ai-card{border-radius:var(--m-r-md);padding:16px;color:#fff;
   border:1px solid transparent;
   background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,var(--m-ai-from) 0%,var(--m-ai-to) 83%) border-box;
   box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,.5);
@@ -1157,51 +1193,19 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
 .dash-ai-head .dash-eyebrow{margin:0;}
 .dash-ai-caret{width:12px;height:12px;flex-shrink:0;color:#fff;transform:rotate(-90deg);}
 
-/* Short phones: the 390×844 tuning + a real ~50px notch inset tips a 3-line
-   greeting past one screen on an iPhone 13 mini / SE, so renderDashboard()
-   flips on .dashboard-scrollable and the dashboard starts to move. Reclaim
-   ~44px of the flexible spacing to make it fit again; padding-bottom (the
-   24px gap above the nav) is kept — the greeting gap is what gives.
-   Driven by a JS class, NOT `@media (max-height)`: Safari reports a shrunken
-   viewport height while its URL bar is up, so a media query fires this on
-   big phones too (17 Pro in a browser tab). renderDashboard() adds
-   .dash-compact only when the real content actually overflows. */
-html.dash-compact .dash-root{padding-top:calc(12px + var(--top-inset));}
-html.dash-compact .dash-header{margin-bottom:18px;}
-html.dash-compact .dash-headline{font-size:var(--m-fs-xl);line-height:1.1;}
-html.dash-compact .dash-hero{padding:12px;}
-html.dash-compact .dash-hero-stats{margin:8px 0;gap:6px;}
-html.dash-compact .dash-grid2{gap:6px;margin-bottom:6px;}
-html.dash-compact .dash-week-card{padding:12px;}
-html.dash-compact .dash-week-head{margin-bottom:10px;}
-
-/* ---- subtle motion: staggered reveal on entry, bars grow in, checks pop ---- */
+/* ---- keyframes shared with the other v2 screens (GYM / Plans / History /
+   Stats reuse them). Dashboard entrance itself is .m-rise / .m-rise-tile,
+   added by renderDashboard(animate) only when the screen was just opened. ---- */
 @media (prefers-reduced-motion: no-preference){
   @keyframes dashRise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-  /* chat-btn + screen header rise-in, every v2 screen (audit W5 — was 5 copies) */
-  .dash-chat-btn,.dash-header,
+  /* chat-btn + screen header rise-in on the four subpages (audit W5) */
   .gymv2-chat-btn,.gymv2-header,
   .plansv2-chat-btn,.plansv2-header,
   .histv2-chat-btn,.histv2-header,
   .statsv2-chat-btn,.statsv2-header{animation:dashRise var(--m-dur-in) var(--m-ease) backwards;}
-  /* Each "tile" card fades in on its own — renderDashboard() sets a slightly
-     randomized animation-delay per element so the stagger feels alive
-     instead of a mechanically identical sequence every time. Longer travel
-     + duration than dashRise above so the deceleration at the tail end
-     actually reads instead of flashing by. */
   @keyframes dashTileRise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
-  .dash-hero,.dash-plan-card,.dash-mini-card,.dash-week-card,.dash-ai-card{animation:dashTileRise var(--m-dur-tile) var(--m-ease) backwards;}
-
-  /* Weekly-progress day circles fade in one after another, timed to start
-     only once the .dash-week-card itself has mostly finished revealing —
-     renderDashboard() sets --day-base on #dashWeekDays to the card's own
-     (randomized) delay + a buffer, and --i on each circle for the stagger. */
   @keyframes dashDayIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-  .dash-week-day{animation:dashDayIn var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(var(--day-base,650ms) + var(--i,0) * 70ms);}
-
   @keyframes dashBarGrow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
-  .dash-trend span{animation:dashBarGrow var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(var(--i,0) * 18ms + .2s);}
-
 }
 
 /* ============================================================
@@ -2299,7 +2303,7 @@ body.pev2-bg{background:var(--m-panel);}
 .plan-pill:active,.topbar-icon-btn:active,.gymfin-cta:active,.gymfin-share:active,.sh-seg-b:active,.sh-arrow:active,.sh-sw:active,.sh-ic:active,.sh-main:active,.sh-bgi:active,.gymfin-stat:active,.ex-tile:active,.save-btn:active,
 .hist-card.collapsed:active,.acct-photo-pick:active,.acct-cloud-cta:active,.acct-oauth-btn:active,
 .dash-chat-btn:active,.gymv2-chat-btn:active,.plansv2-chat-btn:active,.histv2-chat-btn:active,.statsv2-chat-btn:active,
-.dash-plan-card:active,.v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-edit-plan:active,
+.v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-edit-plan:active,
 .gymv2-tile:active,.gymv2-tile-swap:active,.gymv2-done-row:active,.gymv2-save:active,
 .plansv2-btn-outline:active,.plansv2-btn-fill:active,.plansv2-card:active,.plansv2-choice-chip:active,
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
@@ -3003,68 +3007,36 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
   <!-- ===================== DASHBOARD (v3 "Mekkio" home — the app boots here) ===================== -->
   <section class="view active" id="view-dashboard">
-    <div class="dash-root">
-      <button type="button" class="dash-chat-btn dash-acct-btn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+    <div class="dash-root" id="dashRoot">
+      <button type="button" class="dash-chat-btn dash-acct-btn" id="dashAcctBtn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
 
-      <div class="dash-header">
+      <div class="dash-header" id="dashHeader">
         <p class="dash-hi" id="dashHi"></p>
         <h1 class="dash-headline" id="dashHeadline"></h1>
       </div>
 
-      <div class="dash-hero">
-        <p class="dash-eyebrow" data-i18n="dashWeekSummary">Podsumowanie tygodnia</p>
-        <div class="dash-hero-stats">
-          <div class="dash-hero-row"><span class="ph" data-ph="dash-barbell"></span><p class="dash-hero-num" id="dashKg">0 <small>kg</small></p></div>
-          <div class="dash-hero-row"><span class="ph" data-ph="dash-repeat"></span><p class="dash-hero-num" id="dashReps">0 <small>powtórzeń</small></p></div>
-        </div>
-        <div class="dash-hero-badges">
-          <span class="dash-badge outline" id="dashSessions">0 treningów</span>
-          <span class="dash-badge fill"><span class="ph" data-ph="clock-countdown"></span><span id="dashMinutes">0 min aktywności</span></span>
-        </div>
-      </div>
-
-      <div class="dash-ai-card" id="dashAiCard" hidden>
-        <button type="button" class="dash-ai-head" id="dashAiToggle" onclick="openAiPopup()" aria-haspopup="dialog">
-          <span class="dash-ai-head-left">
-            <span class="ph" data-ph="sparks"></span>
-            <p class="dash-eyebrow">Trener AI</p>
-          </span>
-          <span class="ph dash-ai-caret" data-ph="caret-down"></span>
-        </button>
-      </div>
-
-      <div class="dash-grid2">
-        <div class="dash-plan-card" onclick="goRoute('plans-v2')">
-          <p class="dash-eyebrow" data-i18n="dashYourPlan">Twój plan</p>
-          <div>
-            <p class="dash-plan-name" id="dashPlanName">—</p>
-            <p class="dash-plan-count" id="dashPlanCount"></p>
+      <!-- Content column. #dashHero is filled by renderDashHero() (7 hero states).
+           The <section>s below are Phase 3's slots, in Figma 01's order; empty ones
+           collapse (.dash-col > :empty). #dashSecCoach holds the existing Trener AI
+           teaser (#dashAiCard) until Phase 3 restyles it. -->
+      <div class="dash-col" id="dashCol">
+        <div id="dashHero"></div>
+        <section id="dashSecWeek" aria-label="Ten tydzień, rekord, odznaka"></section>
+        <section id="dashSecConsistency" aria-label="Konsystencja"></section>
+        <section id="dashSecLast" aria-label="Ostatni trening"></section>
+        <section id="dashSecCoach" aria-label="Trener AI" hidden>
+          <div class="dash-ai-card" id="dashAiCard" hidden>
+            <button type="button" class="dash-ai-head" id="dashAiToggle" onclick="openAiPopup()" aria-haspopup="dialog">
+              <span class="dash-ai-head-left">
+                <span class="ph" data-ph="sparks"></span>
+                <p class="dash-eyebrow">Trener AI</p>
+              </span>
+              <span class="ph dash-ai-caret" data-ph="caret-down"></span>
+            </button>
           </div>
-        </div>
-        <div class="dash-mini-col">
-          <div class="dash-mini-card">
-            <p class="dash-mini-label" id="dashPrLabel">Nowy rekord</p>
-            <div class="dash-mini-row">
-              <div>
-                <p class="dash-mini-num" id="dashPrNum">—</p>
-                <p class="dash-mini-sub" id="dashPrName"></p>
-              </div>
-              <span class="ph" data-ph="trophy"></span>
-            </div>
-          </div>
-          <div class="dash-mini-card">
-            <p class="dash-mini-label" data-i18n="dashVolumeTrend">Trend objętości</p>
-            <div class="dash-trend" id="dashTrend"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="dash-week-card">
-        <div class="dash-week-head">
-          <p class="dash-eyebrow" data-i18n="dashWeeklyProgress">Postęp tygodniowy</p>
-          <p class="dash-week-count" id="dashWeekCount"></p>
-        </div>
-        <div class="dash-week-days" id="dashWeekDays"></div>
+        </section>
+        <section id="dashSecPlanWeek" aria-label="Plan tygodnia"></section>
+        <section id="dashSecBody" aria-label="Waga i kalorie"></section>
       </div>
     </div>
   </section>
@@ -7209,52 +7181,6 @@ function weightSparkSvg(pts){
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
 const APP_VERSION = "4.63.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
-/* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
-   has already trained today (see renderDashboard()) — one is picked at
-   random on each visit. Mix of humor/lekka ironia/motywacja on purpose,
-   per Maciej's request. Not localized (T_EN) — the whole Dashboard
-   preview is Polish-only for now, same as the rest of its copy. */
-const DASH_CONGRATS_PL = [
-  'Trening odhaczony, kanapa poczeka.',
-  'Zrobione. „Może jutro” przegrało.',
-  'Brawo, nie oszukałeś siebie.',
-  'Trening z głowy. Sam sobie pogratulujesz.',
-  'Wjechało! Jutro schody dadzą w kość.',
-  'Kolejny trening z głowy. Progres rośnie.',
-  'Zaliczone. Lenistwo zasłużone.',
-  'Zrobione, i już się nie cofnie. Dobra robota.',
-  'Trening skończony. Wymówki na jutro.',
-  'Ciało już wie, że robisz to na serio. Szacunek.',
-];
-/* Headline for a day with a scheduled workout the user hasn't done yet —
-   {plan} gets replaced with plan.name. Same idea as DASH_CONGRATS_PL,
-   a bit of the same edge allowed, just forward-looking instead of
-   congratulatory. */
-const DASH_PLAN_DAY_PL = [
-  'Dziś {plan}. Dasz radę!',
-  '{plan} czeka. Zrobisz to sam.',
-  'Na dziś: {plan}. Chodźmy.',
-  '{plan} dziś. Godzinka i koniec.',
-  'Bez dyskusji, dziś {plan}.',
-  '{plan}. Nie znajdziesz wymówki.',
-  '{plan} czeka. Wchodzimy.',
-  '{plan} czeka. Krok po kroku.',
-  '{plan} dziś. Podziękujesz sobie.',
-  'Dziś {plan}. Bez marudzenia.',
-];
-/* Headline for a rest day / no workout scheduled — general, no plan
-   reference. Calmer tone than the other two pools on purpose, it's a
-   rest day, nothing to push here. */
-const DASH_REST_DAY_PL = [
-  'Dziś odpoczynek. Dobrze go wykorzystaj.',
-  'Regeneracja to też trening.',
-  'Wolne od planu, ciało samo zdecyduje.',
-  'Dziś nic nie musisz.',
-  'Ten odpoczynek jest zaplanowany.',
-  'Dziś luz. Postęp lubi też ciszę.',
-  'Przerwa też się liczy do planu.',
-  'Dziś odpoczynek. Wracasz mocniejszy.',
-];
 const CHANGELOG = {
   "4.62.0": {
     pl: [
@@ -8211,9 +8137,9 @@ function goRoute(route){
   }
   document.body.style.paddingBottom = route==='welcome' ? '0' : '';
   document.documentElement.classList.toggle('dashboard-lock', route==='dashboard');
-  // renderDashboard() re-decides .dashboard-scrollable / .dash-compact on every
-  // entry; make sure a stale one from a previous visit never lingers off-dashboard.
-  if(route!=='dashboard') document.documentElement.classList.remove('dashboard-scrollable', 'dash-compact');
+  // renderDashboard() re-decides .dashboard-scrollable on every entry;
+  // make sure a stale one from a previous visit never lingers off-dashboard.
+  if(route!=='dashboard') document.documentElement.classList.remove('dashboard-scrollable');
   document.body.classList.toggle('dashboard-bg', route==='dashboard');
   // Plan editor v2 shares Plans v2's scroll-lock mechanics (same
   // scroll-only-when-needed treatment — it's the same "Plans" flow,
@@ -8232,7 +8158,7 @@ function goRoute(route){
   document.body.classList.toggle('histv2-bg', route==='history-v2');
   document.documentElement.classList.toggle('histv2-bg', route==='history-v2');
   document.querySelector('.topbar').classList.toggle('hidden', isV3);
-  if(route==='dashboard'){ previewMode = true; renderDashboard(); }
+  if(route==='dashboard'){ previewMode = true; renderDashboard(true); }
   if(route==='gym-v2'){ previewMode = true; renderGymV2(); }
   if(route==='plans-v2'){ previewMode = true; renderPlansListV2(true); }
   if(route==='plan-editor-v2'){ previewMode = true; refreshPlanEditorV2Scroll(); }
@@ -14201,134 +14127,237 @@ function dashboardModel(now){
   };
 }
 
-let lastDashPrName = null; // so the "rekord" tile doesn't repeat back-to-back
-function renderDashboard(){
-  const weekDates = dashboardWeekDates();
-  const todayIso = todayStr();
-  const todayKey = dayKeyFromDate(todayIso);
+/* ============================================================
+   DASHBOARD v2.1 — render, phase 2 (shell + hero). Everything is driven by
+   dashboardModel() (above): hero.state picks one of 7 hero layouts (the
+   "last week" state 05 is a week-card matter, its hero is "train").
+   The cards under the hero (Phase 3) go into the empty <section>s of
+   #dashCol, in Figma 01's order. Copy is PL (t(key, 'pl')), draft — it
+   still goes through /człowiek.
+   Motion: entrance (.m-rise / .m-rise-tile) ONLY when `animate` is true,
+   i.e. renderDashboard() was called by goRoute (screen just opened). Every
+   other render (name edit, tab refocus, plan picked, AI refresh) is silent.
+   ============================================================ */
+let dashLastModel = null;
+let dashTickIv = 0;
+const DASH_SVG_CHECK = (w, h)=> `<svg viewBox="0 0 24 24" width="${w}" height="${h}" fill="none" aria-hidden="true"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
-  document.getElementById('dashHi').textContent = profileName ? t('dashHi', `Cześć ${profileName}`, profileName) : t('dashHiPlain','Cześć');
-
-  const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
-  const todayExNames = plan ? (plan.schedule[todayKey]||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name)) : [];
-  const trainedToday = workouts.some(w=>w.date===todayIso) || runs.some(r=>r.date===todayIso);
-  document.getElementById('dashHeadline').textContent = trainedToday
-    ? DASH_CONGRATS_PL[Math.floor(Math.random()*DASH_CONGRATS_PL.length)]
-    : todayExNames.length
-      ? DASH_PLAN_DAY_PL[Math.floor(Math.random()*DASH_PLAN_DAY_PL.length)].replace('{plan}', planDisplayName(plan))
-      : DASH_REST_DAY_PL[Math.floor(Math.random()*DASH_REST_DAY_PL.length)];
-
-  const allSets = dashboardAllSets();
-  const weekSets = allSets.filter(s=>weekDates.includes(s.date));
-  const weekKg = weekSets.reduce((sum,s)=>sum+s.weight*s.reps,0);
-  // Second hero number switched from weekly running distance to weekly
-  // rep count (Maciej, 2026-09-04: paused running-feature development
-  // for now — "co moge w podsumowaniu tygodnia pokazac zamiast KM?").
-  // Picked over total-sets for the bigger, more satisfying number (see
-  // [[project_thryve_roadmap]]); reuses weekSets, same source as weekKg,
-  // so it's zero when nothing's logged rather than ever NaN-ing.
-  const weekReps = weekSets.reduce((sum,s)=>sum+s.reps,0);
-  const weekRuns = runs.filter(r=>weekDates.includes(r.date));
-  const weekWorkouts = workouts.filter(w=>weekDates.includes(w.date));
-  const sessionCount = weekWorkouts.length + weekRuns.length;
-  // "min aktywności" used to only count running time — GYM workouts have
-  // real measured durations now (workout.durationMin, added build 27-28),
-  // so fold those in too. Older saved workouts (before that feature
-  // shipped) have no durationMin — || 0 just excludes them from the
-  // minutes total rather than producing NaN.
-  const weekGymMin = weekWorkouts.reduce((sum,w)=>sum+(w.durationMin||0),0);
-  const weekRunMin = weekRuns.reduce((sum,r)=>sum+r.time,0);
-  const weekMin = weekGymMin + weekRunMin;
-
-  animateDashNumber(document.getElementById('dashKg'), weekKg, 0, '<small>kg</small>');
-  animateDashNumber(document.getElementById('dashReps'), weekReps, 0, '<small>powtórzeń</small>');
-  document.getElementById('dashSessions').textContent = t('dashSessions', `${sessionCount} ${plTreningWord(sessionCount)}`, sessionCount);
-  document.getElementById('dashMinutes').textContent = t('dashMinutesActivity', `${Math.round(weekMin)} min aktywności`, Math.round(weekMin));
-
-  document.getElementById('dashPlanName').textContent = plan ? planDisplayName(plan) : t('dashNoPlanChosen','Brak wybranego planu');
-  if(plan){
-    const uniqueNames = new Set();
-    PLAN_DAYS.forEach(d=> (plan.schedule[d]||[]).forEach(e=>{ if(!BOOKEND_EX_NAMES.has(e.name)) uniqueNames.add(e.name); }));
-    document.getElementById('dashPlanCount').textContent = planExCountText(uniqueNames.size);
-  } else {
-    document.getElementById('dashPlanCount').textContent = '';
+// headline = 1-3 sentences, each on its own line (Figma breaks after each sentence)
+function dashHeadlineParts(m){
+  const h = m.hero, n = h.planName || '';
+  switch(h.state){
+    case 'train':          return [t('dashHlTrain', `${n} czeka.`, n), t('dashHlTrain2', 'Krok po kroku.')];
+    case 'inprogress':     return [t('dashHlProg', 'Trening trwa.'), t('dashHlProg2', 'Dokończ!!!')];
+    case 'done':           return [t('dashHlDone', 'Trening zrobiony!'), t('dashHlDone2', 'Teraz regeneracja.')];
+    case 'rest':           return [t('dashHlRest', 'Dziś odpoczynek.'), t('dashHlRest2', 'Dobrze go wykorzystaj.')];
+    case 'planready':      return [t('dashHlReady', 'Plan gotowy.'), t('dashHlReady2', 'Czas na pierwszy krok.')];
+    case 'noplan-new':     return [t('dashHlNew', 'Zacznij od planu.'), t('dashHlNew2', 'Reszta pójdzie sama.')];
+    default:               return [t('dashHlNoPlan', 'Bez planu'), t('dashHlNoPlan2', 'ani rusz.')];
   }
+}
+function dashStat(iconHtml, text, id){
+  return `<span class="dash-stat">${iconHtml}<span${id ? ` id="${id}"` : ''}>${text}</span></span>`;
+}
+function dashPlanStats(exCount, estMin){
+  return `<div class="dash-hero-meta">${dashStat(ph('barbell'), escHtml(planExCountText(exCount)))}${dashStat(ph('clock-countdown'), '~' + estMin + ' min')}</div>`;
+}
+// the circle with an arrow (04 / 08 "Trenuj po swojemu"): the arrow is the left arrow icon turned around
+const dashArrowRight = ()=> ph('arrow-left');
 
-  // "Rekord" tile — the heaviest set for EACH exercise is a record; show a
-  // random one, a different pick each time you land on the dashboard rather
-  // than always the single global max. "Nowy rekord" only when that best
-  // was set in your most recent session.
-  const prBest = {};
-  allSets.forEach(s=>{
-    const b = prBest[s.name];
-    if(!b || s.weight > b.weight
-        || (s.weight === b.weight && (s.reps > b.reps || (s.reps === b.reps && s.date > b.date)))){
-      prBest[s.name] = s;
+function dashHeroHtml(m, animate){
+  const h = m.hero;
+  const rc = i => animate ? ` m-rise-tile" style="--i:${i}` : '';       // class suffix + style, used as class="…${rc(1)}"
+  const title = escHtml(h.planName || t('dashOwnWorkout', 'Własny trening'));
+  const btn = (kind, label) => `<button type="button" class="dash-hero-btn m-press" onclick="dashCta('${kind}')">${label}</button>`;
+  switch(h.state){
+    case 'train':
+    case 'planready': {
+      const info = h.state === 'train' ? h : (h.todayIsTraining ? h.today : (h.next || h.today));
+      const html = `<div class="dash-hero${rc(1)}">
+        <p class="dash-hero-eyebrow">${t('dashYourPlan', 'Twój plan')}</p>
+        <h2 class="dash-hero-title">${title}</h2>
+        ${dashPlanStats(info.exerciseCount, info.estMin)}
+        ${btn(h.state, t('dashStart', 'Start'))}
+      </div>`;
+      if(h.state !== 'planready') return html;
+      const row = (done, label, kind) => `<button type="button" class="dash-step m-press${done ? ' is-done' : ''}" onclick="dashCta('${kind}')"><span class="dash-step-dot">${done ? DASH_SVG_CHECK(11, 11) : ''}</span><span>${label}</span></button>`;
+      return html + `<div class="dash-steps${rc(2)}">
+        <p class="dash-steps-h">${t('dashSteps', 'Pierwsze kroki')}</p>
+        ${row(true, t('dashStep1', 'Wybierz plan'), 'planready-plans')}
+        ${row(false, t('dashStep2', 'Zrób pierwszy trening'), 'planready-gym')}
+        ${row(false, t('dashStep3', 'Zobacz swój progres'), 'planready-stats')}
+      </div>`;
     }
-  });
-  const prPool = Object.values(prBest);
-  let pr = null;
-  if(prPool.length){
-    const choices = prPool.length > 1 ? prPool.filter(p=> p.name !== lastDashPrName) : prPool;
-    pr = choices[Math.floor(Math.random() * choices.length)];
-    lastDashPrName = pr.name;
+    case 'inprogress': {
+      return `<div class="dash-hero dash-hero--prog${rc(1)}">
+        <p class="dash-hero-eyebrow">${t('dashYourPlan', 'Twój plan')}</p>
+        <h2 class="dash-hero-title">${title}</h2>
+        <div class="dash-prog" role="progressbar" aria-valuemin="0" aria-valuemax="${h.exercisesTotal}" aria-valuenow="${h.exercisesDone}"><span style="width:${Math.round(h.ratio * 1000) / 10}%"></span></div>
+        <div class="dash-hero-meta">${dashStat(DASH_SVG_CHECK(16, 16), `${h.exercisesDone}/${h.exercisesTotal} ${t('gymPillExercises', 'ćwiczeń')}`)}${dashStat(ph('clock-counter-clockwise', 'dash-flip'), fmtLiveClock(h.elapsedMs), 'dashHeroClock')}</div>
+        ${btn('inprogress', t('dashContinue', 'Kontynuuj'))}
+      </div>`;
+    }
+    case 'done': {
+      const chips = [];
+      if(h.minutes > 0) chips.push(dashStat(ph('clock-counter-clockwise', 'dash-flip'), `${h.minutes} min`));
+      if(h.volumeKg > 0) chips.push(dashStat(ph('barbell'), `${formatDashNum(h.volumeKg, 0)} kg`));
+      if(h.record) chips.push(dashStat(ph('trophy'), t('dashOneRecord', '1 rekord')));
+      return `<div class="dash-hero dash-hero--done${rc(1)}">
+        <p class="dash-hero-eyebrow">${DASH_SVG_CHECK(14, 12)}${t('dashDoneToday', 'Dziś zaliczone')}</p>
+        <h2 class="dash-hero-title">${title}</h2>
+        <div class="dash-hero-meta">${chips.join('')}</div>
+        ${btn('done', t('dashSummary', 'Podsumowanie'))}
+      </div>`;
+    }
+    case 'rest': {
+      const nx = h.next;
+      const dayName = nx ? (nx.inDays === 1 ? t('dashTomorrow', 'Jutro') : GYMV2_DAY_NAMES_PL[new Date(nx.date + 'T00:00:00').getDay()]) : '';
+      const timeline = nx ? ' dash-tile--tl' : '';
+      const top = `<button type="button" class="dash-tile ${nx ? 'dash-tile--top' : 'dash-tile--solo'}${timeline} m-press" onclick="dashCta('rest')">
+        <span class="dash-tile-row"><span class="dash-tile-lbl">${t('dashToday', 'Dziś')}</span><span class="dash-pill dash-pill--rest">${t('dashRestDay', 'Wolny dzień')}</span></span>
+        <span class="dash-free"><span><span class="dash-free-t">${t('dashFreeT', 'Trenuj po swojemu')}</span><span class="dash-free-d">${t('dashFreeD', 'Wybierz ćwiczenia, dodaj własne albo powtórz ostatni trening.')}</span></span><span class="dash-circ">${dashArrowRight()}</span></span>
+      </button>`;
+      const bot = nx ? `<div class="dash-tile dash-tile--bot${timeline}">
+        <div class="dash-tile-row"><span class="dash-tile-lbl">${escHtml(dayName)}</span><span class="dash-pill dash-pill--plan">${t('dashPlanPill', 'Plan')}</span></div>
+        <h2 class="dash-tile-title">${title}</h2>
+        ${dashPlanStats(nx.exerciseCount, nx.estMin)}
+      </div>` : '';
+      return `<div class="dash-pair${rc(1)}">${top}${bot}</div>`;
+    }
+    case 'noplan-new': {
+      const rec = h.recommended || {}, main = rec.plan;
+      const plans = [main].concat(rec.others || []).filter(Boolean);
+      const heroHtml = main ? `<div class="dash-hero${rc(1)}">
+        <p class="dash-hero-eyebrow">${t('dashRecommended', 'Polecany dla Ciebie')}</p>
+        <h2 class="dash-hero-title">${escHtml(main.name)}</h2>
+        ${dashPlanStats(main.exercisesPerDay, main.estMin)}
+        <button type="button" class="dash-hero-btn m-press" onclick="dashCta('noplan-new','${escHtml(main.id)}')">${t('dashChoose', 'Wybierz')}</button>
+      </div>` : '';
+      const colors = ['var(--m-mint)', 'var(--m-plan-hard)', 'var(--m-plum)'];
+      const cards = plans.map((p, i)=>{
+        const plan = trainingPlans.find(x=>x.id === p.id);
+        const diff = planDifficultyLabel((plan && planLevelKey(plan)) || planDifficultyKey(p.exercisesPerDay));
+        const id = escHtml(p.id);
+        return `<div class="dash-pwrap">
+          <div class="dash-pcard m-press${i === 0 ? ' dash-pcard--ink' : ''}" role="button" tabindex="0" style="background:${colors[i % colors.length]}" onclick="dashCta('noplan-new-open','${id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+            <p class="dash-pcard-name">${escHtml(p.name)}</p>
+            <div class="dash-pcard-meta">${dashStat(ph('barbell'), escHtml(planExCountText(p.exercisesPerDay)))}${dashStat(ph('clock-countdown'), '~' + p.estMin + ' min')}${dashStat(ph('chart-line'), escHtml(diff))}</div>
+          </div>
+          <button type="button" class="dash-pick m-press${i === 0 ? ' is-on' : ''}" style="color:${i === 0 ? 'var(--m-mint-ink)' : colors[i % colors.length]}" aria-label="${t('dashPickPlan', 'Wybierz plan')}: ${escHtml(p.name)}" onclick="event.stopPropagation();dashCta('noplan-new-pick','${id}')">${DASH_SVG_CHECK(16, 16)}</button>
+        </div>`;
+      }).join('');
+      const list = plans.length ? `<div class="dash-plans${rc(2)}"><p class="dash-plans-h">${t('dashOtherPlans', 'Inne plany Mekkio')}</p>${cards}</div>` : '';
+      return heroHtml + list + `<button type="button" class="dash-create m-press${rc(3)}" onclick="dashCta('noplan-new-create')">${t('dashCreatePlan', 'Stwórz własny plan')}</button>`;
+    }
+    default: { // noplan-history
+      return `<div class="dash-pair${rc(1)}">
+        <div class="dash-hero dash-hero--nop">
+          <p class="dash-hero-eyebrow">${t('dashNoPlanChosen', 'Brak wybranego planu')}</p>
+          <h2 class="dash-hero-title">${t('dashPickPlanTitle', 'Wybierz plan')}</h2>
+          ${btn('noplan-history', t('dashPlans', 'Plany'))}
+        </div>
+        <button type="button" class="dash-tile dash-tile--bot dash-free-solo m-press" onclick="dashCta('noplan-history-free')">
+          <span><span class="dash-free-t">${t('dashFreeT', 'Trenuj po swojemu')}</span><span class="dash-free-d">${t('dashFreeD', 'Wybierz ćwiczenia, dodaj własne albo powtórz ostatni trening.')}</span></span><span class="dash-circ">${dashArrowRight()}</span>
+        </button>
+      </div>`;
+    }
   }
-  const latestWorkoutDate = workouts.reduce((d,w)=> w.date > d ? w.date : d, '');
-  document.getElementById('dashPrNum').innerHTML = pr ? `${pr.weight} <span style="font-size:var(--m-fs-base);">kg</span>` : '—';
-  document.getElementById('dashPrName').textContent = pr ? pr.name : '';
-  document.getElementById('dashPrLabel').textContent = (pr && pr.date === latestWorkoutDate)
-    ? t('dashNewRecord','Nowy rekord') : t('dashRecord','Rekord');
+}
 
-  const trendDays = [];
-  for(let i=13;i>=0;i--){ const dd=new Date(todayIso+'T00:00:00'); dd.setDate(dd.getDate()-i); trendDays.push(dateStr(dd)); }
-  const trendVol = trendDays.map(d=> allSets.filter(s=>s.date===d).reduce((sum,s)=>sum+s.weight*s.reps,0));
-  const maxVol = Math.max(1, ...trendVol);
-  document.getElementById('dashTrend').innerHTML = trendVol.map((v,i)=>{
-    const h = Math.max(3, Math.round(v/maxVol*27));
-    const op = v ? (0.35 + (v/maxVol)*0.65) : 0.15;
-    return `<span style="height:${h}px;opacity:${op.toFixed(2)};--i:${i}"></span>`;
-  }).join('');
+/* CTA router. Every CTA is tracked as /event/dash-cta-<kind> (GoatCounter). */
+function dashCta(kind, arg){
+  trackEvent('/event/dash-cta-' + kind);
+  switch(kind){
+    case 'train': case 'inprogress': case 'planready': case 'planready-gym':
+    case 'rest': case 'noplan-history-free':
+      goRoute('gym-v2'); break;                       // GYM handles rest day / no plan itself (free-form grid + repeat last)
+    case 'done': dashOpenTodaySummary(); break;
+    case 'noplan-history': case 'planready-plans': goRoute('plans-v2'); break;
+    case 'planready-stats': goRoute('stats-v2'); break;
+    case 'noplan-new': case 'noplan-new-pick':        // star the plan, then the dashboard becomes "plan ready"
+      if(arg){ toggleStarredPlan(arg); renderDashShell(false); }
+      break;
+    case 'noplan-new-open': openPlanEditorV2(arg); break;   // same as tapping a card on Plans
+    case 'noplan-new-create': openPlanEditorV2(null); break;
+  }
+}
+// "Podsumowanie": History on today, today's (last) workout expanded
+function dashOpenTodaySummary(){
+  const iso = todayStr(), d = new Date();
+  calStateV2 = { year: d.getFullYear(), month: d.getMonth() };
+  selectedHistDateV2 = iso;
+  histExpandedV2 = {};
+  const last = workouts.filter(w=>w.date === iso).pop() || runs.filter(r=>r.date === iso).pop();
+  if(last) histExpandedV2[last.id] = true;
+  goRoute('history-v2');
+}
 
-  // "dni zaliczone" counts every day actually trained this week (gym or run),
-  // not just days the current plan schedules — otherwise editing the plan's
-  // training days (frequency / which weekdays) retroactively drops a workout
-  // you really did, including today's, out of the tally. total is the plan's
-  // scheduled days (falls back to done with no plan), so an over-target week
-  // reads e.g. 3 / 2 and the Stats ring laps past 100%. Keep this in sync
-  // with statsV2WeeklyProgress(), which does the same for the Stats ring.
-  const scheduledDays = weekDates.filter(d=> plan && (plan.schedule[dayKeyFromDate(d)]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
-  const trainedDays = weekDates.filter(d=> workouts.some(w=>w.date===d) || runs.some(r=>r.date===d));
-  const weekDone = trainedDays.length;
-  const weekTotal = scheduledDays.length || weekDone;
-  document.getElementById('dashWeekCount').textContent = t('dashWeekCount', `${weekDone} / ${weekTotal} dni zaliczone`, weekDone, weekTotal);
-  document.getElementById('dashWeekDays').innerHTML = weekDates.map((d,i)=>{
-    const isDone = trainedDays.includes(d);
-    const isScheduled = scheduledDays.includes(d);
-    const isToday = d===todayIso;
-    let stateClass;
-    if(isDone) stateClass = 'done';
-    else if(isScheduled && d<todayIso) stateClass = 'missed';
-    else if(isScheduled) stateClass = 'planned';
-    else stateClass = 'rest';
-    if(isToday) stateClass += ' today' + (isScheduled ? ' has-ring' : '');
-    return `<div class="dash-week-day ${stateClass}" style="--i:${i}">
-      <span>${isDone?ph('dash-check'):''}</span>
-      <em>${planDayLabel(dayKeyFromDate(d))}</em>
-    </div>`;
-  }).join('');
+// live clock in the "in progress" hero; stops itself once the dashboard isn't the active route
+function dashStopTick(){ if(dashTickIv){ clearInterval(dashTickIv); dashTickIv = 0; } }
+function dashStartTick(){
+  dashStopTick();
+  if(!document.getElementById('dashHeroClock') || !gymLive.running) return;
+  dashTickIv = setInterval(()=>{
+    const el = document.getElementById('dashHeroClock');
+    if(!el || currentRoute !== 'dashboard'){ dashStopTick(); return; }
+    el.textContent = fmtLiveClock(liveElapsedMs(Date.now()));
+  }, 1000);
+}
 
-  // Re-roll the fade-in stagger every time the dashboard is (re)entered —
-  // a small base step per tile keeps the order top-to-bottom, and the
-  // random jitter on top stops it from feeling like a fixed animation.
-  document.querySelectorAll('#view-dashboard .dash-hero, #view-dashboard .dash-plan-card, #view-dashboard .dash-mini-card, #view-dashboard .dash-week-card, #view-dashboard .dash-ai-card').forEach((el, i)=>{
-    const delayMs = Math.round(i * 80 + Math.random() * 100);
-    el.style.animationDelay = delayMs + 'ms';
-    if(el.classList.contains('dash-week-card')){
-      // Let the little day-progress circles start their own one-by-one
-      // reveal only once this card has mostly finished appearing.
-      document.getElementById('dashWeekDays').style.setProperty('--day-base', (delayMs + 550) + 'ms');
-    }
-  });
+// (Re)start an entrance on a static element: remove the class, force a reflow, add it back
+function dashRise(el, animate){
+  if(!el) return;
+  el.classList.remove('m-rise');
+  if(animate){ el.style.setProperty('--i', 0); void el.offsetWidth; el.classList.add('m-rise'); }
+}
+
+// greeting + headline + hero. Cheap, no AI; safe to call whenever the data may have changed.
+function renderDashShell(animate){
+  const m = dashLastModel = dashboardModel();
+  document.getElementById('dashHi').textContent = profileName ? t('dashHi', `Cześć ${profileName}`, profileName) : t('dashHiPlain', 'Cześć');
+  document.getElementById('dashHeadline').innerHTML = dashHeadlineParts(m).map(s=>`<span>${escHtml(s)}</span>`).join('');
+  document.getElementById('dashCol').dataset.state = m.hero.state;
+  document.getElementById('dashHero').innerHTML = dashHeroHtml(m, animate);
+  dashRise(document.getElementById('dashHeader'), animate);
+  dashRise(document.getElementById('dashAcctBtn'), animate);
+  dashStartTick();
+  dashRefreshScroll();
+}
+
+/* Scroll-lock (CLAUDE.md pkt 6): the screen scrolls only when the real content
+   bottom (last visible column child, layout metrics — immune to the entrance
+   transforms) sits below the floating nav's top edge. Re-run on render, AI card
+   show/hide, resize and any size change of the root (fonts, Phase 3 cards). */
+function dashRefreshScroll(){
+  const root = document.getElementById('dashRoot'), col = document.getElementById('dashCol'), nav = document.getElementById('bottomNav');
+  if(!root || !col || !nav || root.offsetParent === null) return;
+  let last = null;
+  for(let i = col.children.length - 1; i >= 0; i--){
+    const c = col.children[i];
+    if(!c.hidden && c.offsetHeight > 0){ last = c; break; }
+  }
+  const sy = document.body.scrollTop || document.documentElement.scrollTop || window.scrollY || 0;
+  const contentBottom = last ? root.getBoundingClientRect().top + sy + last.offsetTop + last.offsetHeight : 0;
+  const nr = nav.getBoundingClientRect();
+  const navTop = nr.height ? nr.top : window.innerHeight - 82;
+  const needsScroll = contentBottom > navTop;
+  document.documentElement.classList.toggle('dashboard-scrollable', needsScroll);
+  if(!needsScroll){
+    // locking back to overflow:hidden freezes scrollTop — reset it or the screen can stay stuck offset
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
+}
+window.addEventListener('resize', ()=>{ if(currentRoute === 'dashboard') dashRefreshScroll(); });
+if(typeof ResizeObserver === 'function'){
+  // toggling .dashboard-scrollable never changes the root's own size, so this cannot loop
+  new ResizeObserver(()=>{ if(currentRoute === 'dashboard') dashRefreshScroll(); }).observe(document.getElementById('dashRoot'));
+}
+// App brought back to the foreground (maybe the next day, maybe synced): refresh the hero silently
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && currentRoute === 'dashboard') renderDashShell(false); });
+
+function renderDashboard(animate){
+  renderDashShell(!!animate);
 
   // AI asystent — Krok 1: analiza OSTATNIEGO treningu (2026-09-16), z
   // "pro tip"-owym kontekstem policzonym W KODZIE (nie zostawionym modelowi
@@ -14439,12 +14468,10 @@ function renderDashboard(){
   }
   lastAiWorkoutPayload = lastWorkoutPayload; // read by the popup's stat tiles when opened
   renderDashboardAiSummary(lastWorkoutPayload, lastWorkout ? lastWorkout.id : null);
-
-  fitDashboardToScreen();
 }
 
 /* AI asystent — Krok 1: narracyjne podsumowanie OSTATNIEGO TRENINGU (czarna
-   karta między .dash-hero i .dash-grid2) — przepisane z tygodnia na
+   karta w slocie #dashSecCoach pod hero) — przepisane z tygodnia na
    pojedynczy trening 2026-09-16. Guests and "never trained" users never
    call the backend — no session to auth with, and nothing to summarise.
    Cached in localStorage keyed on the workout's own id (unique, stable per
@@ -14460,9 +14487,13 @@ let lastAiSummaryData = null; // {summary, analysis, actions[]} once fetched/cac
 // Reveal the (always-collapsed) teaser card. Only called the first time it
 // appears in a page load — see the `if(card.hidden)` call sites below —
 // harmless to call again since it's idempotent.
-function showDashAiCard(card){
-  card.hidden = false;
-  fitDashboardToScreen();
+function showDashAiCard(card){ dashSetAiCard(card, true); }
+// the card lives in #dashSecCoach: the slot hides with it so its column gap collapses too
+function dashSetAiCard(card, show){
+  card.hidden = !show;
+  const sec = document.getElementById('dashSecCoach');
+  if(sec) sec.hidden = !show;
+  dashRefreshScroll();
 }
 function openAiPopup(){
   if(!lastAiWorkoutPayload) return;
@@ -14496,7 +14527,7 @@ function closeAiPopup(){
 async function renderDashboardAiSummary(payload, workoutId){
   const card = document.getElementById('dashAiCard');
   if(!cloudSession || !workoutId){
-    card.hidden = true;
+    dashSetAiCard(card, false);
     return;
   }
 
@@ -14522,80 +14553,14 @@ async function renderDashboardAiSummary(payload, workoutId){
   const res = await callAI('last_workout_summary', payload);
   if(res.error || typeof res.summary !== 'string'){
     console.error('last_workout_summary AI call failed', res.error);
-    card.hidden = true;
-    fitDashboardToScreen();
+    dashSetAiCard(card, false);
     return;
   }
   lastAiSummaryData = { summary: res.summary, analysis: res.analysis || '', actions: Array.isArray(res.actions) ? res.actions : [] };
   try {
     localStorage.setItem(LS_AI_LAST_WORKOUT_SUMMARY, JSON.stringify({ userId: cloudSession.user.id, fingerprint, data: lastAiSummaryData }));
   } catch(e){}
-  fitDashboardToScreen();
 }
-
-/* Decide, from the REAL laid-out content, whether the dashboard needs its
-   spacing compacted (short phones — 13 mini / SE) and/or scroll unlocked.
-   Deferred a tick so it runs after renderDashboard()'s tile innerHTML has
-   settled. setTimeout (not rAF) so it still fires when the tab is
-   backgrounded. Class-driven, NOT @media(max-height): Safari reports a
-   shrunken viewport height while its URL bar is up, so a media query fires
-   the "small phone" styles on big phones too (17 Pro in a browser tab). */
-let _fitDashT = 0;
-let _fitDashSettleT = 0;
-// isSettleCheck: internal — a single delayed re-verification, not a public
-// parameter. Maciej found a real bug (2026-09-16, short phone): a call that
-// landed while the "Trener AI" card's async content/height was still
-// settling (network response landing, web-font swap, etc.) could measure a
-// smaller in-between size, wrongly conclude everything fits, and leave the
-// dashboard non-scrollable even though "Postęp tygodniowy" was genuinely
-// cut off below the fold — and nothing re-checked afterward to catch it.
-// One extra pass ~500ms after the normal (debounced) one is cheap and
-// self-corrects that, without turning into a ResizeObserver-on-the-element-
-// it-itself-resizes loop (tried that, it oscillates forever — see git log).
-function fitDashboardToScreen(isSettleCheck){
-  clearTimeout(_fitDashT);
-  _fitDashT = setTimeout(()=>{
-    const dashRoot = document.querySelector('.dash-root');
-    if(!dashRoot || dashRoot.offsetParent === null) return;   // not visible yet
-    const root = document.documentElement;
-    const mb = el => el ? (parseFloat(getComputedStyle(el).marginBottom) || 0) : 0;
-    const h  = el => el ? el.offsetHeight : 0;
-    const hdr  = dashRoot.querySelector('.dash-header');
-    const hero = dashRoot.querySelector('.dash-hero');
-    const grid = dashRoot.querySelector('.dash-grid2');
-    const week = dashRoot.querySelector('.dash-week-card');
-    const ai = dashRoot.querySelector('.dash-ai-card'); // 0 while [hidden] — no card, no height
-    // NATURAL content height: tile offsetHeights (transform-immune during the
-    // entrance animation) + fixed margins + the root's padding. .dash-hero's
-    // margin-top is `auto` — the flexible slack that anchors the last tile
-    // when things DO fit — so it's excluded: this is the "no slack" height.
-    const measure = () => {
-      const rs = getComputedStyle(dashRoot);
-      return parseFloat(rs.paddingTop) + parseFloat(rs.paddingBottom)
-        + h(hdr) + mb(hdr) + h(hero) + mb(hero) + h(ai) + mb(ai) + h(grid) + mb(grid) + h(week);
-    };
-    // 6px tolerance for sub-pixel rounding / web-font swap. Two stages:
-    // compact the flexible spacing first, only unlock scroll if it still
-    // overflows.
-    const fits = () => measure() <= window.innerHeight + 6;
-    root.classList.remove('dash-compact');
-    void dashRoot.offsetHeight;
-    let compact = false, scrollable = false;
-    if(!fits()){
-      root.classList.add('dash-compact');
-      void dashRoot.offsetHeight;
-      compact = true;
-      scrollable = !fits();
-    }
-    root.classList.toggle('dash-compact', compact);
-    root.classList.toggle('dashboard-scrollable', scrollable);
-  }, 60);
-  if(!isSettleCheck){
-    clearTimeout(_fitDashSettleT);
-    _fitDashSettleT = setTimeout(()=> fitDashboardToScreen(true), 550);
-  }
-}
-window.addEventListener('resize', ()=>{ if(currentRoute==='dashboard') fitDashboardToScreen(); });
 
 /* ============================================================
    GYM v2 — second screen of the "v3" preview (see [[project_thryve_roadmap]]).
