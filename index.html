@@ -13644,8 +13644,8 @@ function updateTodayPlanBanner(){
    DASHBOARD — the app's home screen. Pulls real numbers from the
    existing workouts/runs/plan data — nothing here is placeholder/fake.
    ============================================================ */
-function dashboardWeekDates(){
-  const d = new Date(todayStr()+'T00:00:00');
+function dashboardWeekDates(iso){   // iso opcjonalne (model dashboardu wstrzykuje „dziś”); domyślnie prawdziwe dziś
+  const d = new Date((iso||todayStr())+'T00:00:00');
   const mondayOffset = (d.getDay()+6)%7;
   const start = new Date(d); start.setDate(d.getDate()-mondayOffset);
   const out = [];
@@ -13688,6 +13688,495 @@ function animateDashNumber(el, target, decimals, suffixHtml){
   }
   requestAnimationFrame(frame);
 }
+/* ============================================================
+   DASHBOARD v2.1 — warstwa danych (faza 1, bez UI).
+   Czyste funkcje: czytają workouts / runs / plany / weightLog / gymLive,
+   niczego nie zapisują (ani localStorage, ani Supabase) i nie dotykają
+   DOM. dashboardModel(now) zwraca dane do 8 stanów hero i kart pod nim;
+   `now` da się wstrzyknąć (testy). Renderuje to dopiero faza 2/3.
+   ============================================================ */
+// Jedyny szew bramki płatnej (Mekkio+). Dziś wszystko jest darmowe; docelowo
+// podmieni się tu na prawdziwy stan subskrypcji. Bez UI paywalla.
+function isPremium(){ return true; }
+
+function dashAddDays(iso, n){
+  const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return dateStr(d);
+}
+function dashDaysBetween(a, b){
+  return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 86400000);
+}
+const DASH_WEEKSTART_CACHE = new Map();   // iso -> poniedziałek tygodnia (czysta funkcja daty; pamięć podręczna, bo liczy się dla każdej serii)
+function dashWeekStartIso(iso){
+  let r = DASH_WEEKSTART_CACHE.get(iso);
+  if(!r){ r = dashAddDays(iso, -((new Date(iso+'T00:00:00').getDay()+6)%7)); DASH_WEEKSTART_CACHE.set(iso, r); }
+  return r;
+}
+function dashSigned(v){
+  const r = Math.round(v);
+  return r > 0 ? '+'+formatDashNum(r, 0) : r < 0 ? '−'+formatDashNum(-r, 0) : '0';
+}
+function dashPlWeeksWord(n){
+  const mod10 = n % 10, mod100 = n % 100;
+  if(n === 1) return 'tydzień';
+  if(mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return 'tygodnie';
+  return 'tygodni';
+}
+function dashTrainedOn(iso){ return workouts.some(w=>w.date===iso) || runs.some(r=>r.date===iso); }
+// poniedziałek tygodnia -> zbiór dni z treningiem (siłownia + bieg)
+function dashWeekDayMap(){
+  const m = new Map();
+  workouts.concat(runs).forEach(x=>{
+    const ws = dashWeekStartIso(x.date);
+    if(!m.has(ws)) m.set(ws, new Set());
+    m.get(ws).add(x.date);
+  });
+  return m;
+}
+
+// suma okna dat [from..to] włącznie: kg, powtórzenia, sesje (siłownia + bieg), minuty — te same
+// liczby co kafle „Ten tydzień” w renderDashboard() (sets z dashboardAllSets(), minuty = durationMin + czas biegu)
+function dashWindowStats(from, to, sets){
+  let kg = 0, reps = 0, sessions = 0, min = 0;
+  sets.forEach(s=>{ if(s.date>=from && s.date<=to){ kg += s.weight*s.reps; reps += s.reps; } });
+  workouts.forEach(w=>{ if(w.date>=from && w.date<=to){ sessions++; min += w.durationMin||0; } });
+  runs.forEach(r=>{ if(r.date>=from && r.date<=to){ sessions++; min += r.time||0; } });
+  return { kg: Math.round(kg), reps, sessions, min: Math.round(min) };
+}
+function dashWindowKcal(from, to){   // wzór statsV2WeeklyKcal(), ale dla dowolnego okna
+  let kcal = 0, sessions = 0;
+  workouts.forEach(w=>{
+    if(w.date < from || w.date > to) return;
+    const k = workoutKcalShown(w);
+    if(k != null){ kcal += k; sessions++; }
+  });
+  return { kcal: Math.round(kcal), sessions };
+}
+function dashDelta(a, b){
+  const d = { kg: a.kg-b.kg, reps: a.reps-b.reps, sessions: a.sessions-b.sessions, min: a.min-b.min };
+  return { ...d, text: { kg: dashSigned(d.kg), reps: dashSigned(d.reps), sessions: dashSigned(d.sessions), min: dashSigned(d.min) } };
+}
+
+// plan na dowolny dzień: ćwiczenia bez rozgrzewki/rozciągania + szacowane minuty
+// (ta sama formuła co planAvgMinutesPerDay(), dla jednego dnia; Plans v2 pokazuje min. 15)
+function dashPlanDayInfo(plan, dayKey){
+  const list = ((plan && plan.schedule[dayKey]) || []).filter(e=>!BOOKEND_EX_NAMES.has(e.name));
+  let reps = 0, timed = 0;
+  list.forEach(e=>{ if(isTimeEx(e)) timed += timedExerciseMin(e); else reps++; });
+  const blocks = Math.ceil((blockSeconds(buildWarmupBlock(list)) + blockSeconds(buildStretchBlock(list))) / 60);
+  return {
+    dayKey,
+    exerciseCount: new Set(list.map(e=>e.name)).size,
+    estMin: list.length ? Math.max(15, reps*5 + timed + blocks) : 0,
+    names: list.map(e=>e.name),
+  };
+}
+function dashPlanSummary(plan){
+  if(!plan) return null;
+  const days = planActiveDays(plan);
+  return {
+    id: plan.id, name: planDisplayName(plan), builtin: !!plan.builtin,
+    days: days.length, dayKeys: days,
+    exercisesPerDay: planAvgExercisesPerDay(plan),
+    estMin: Math.max(15, planAvgMinutesPerDay(plan)),
+    level: planLevelKey(plan),
+  };
+}
+// najbliższy dzień treningowy planu: od `fromIso` (włącznie), max 7 dni naprzód; inDays liczone od `refIso` (dziś)
+function dashNextPlanDay(plan, fromIso, refIso){
+  if(!plan) return null;
+  for(let i=0;i<7;i++){
+    const iso = dashAddDays(fromIso, i), key = dayKeyFromDate(iso);
+    const info = dashPlanDayInfo(plan, key);
+    if(info.exerciseCount > 0) return { ...info, date: iso, inDays: dashDaysBetween(refIso, iso), label: planDayLabel(key) };
+  }
+  return null;
+}
+// nazwa planu, z którego pochodzi zapisany trening (workout.day to tylko „A”/„B”/„własny”):
+// plan, którego jakiś dzień ma te same ćwiczenia (>=50% wspólnych); null = własny trening
+function dashWorkoutPlanName(w){
+  const names = new Set(w.exercises.map(e=>e.name).filter(n=>!BOOKEND_EX_NAMES.has(n)));
+  let best = null, bestScore = 0;
+  trainingPlans.forEach(p=> PLAN_DAYS.forEach(d=>{
+    const dn = new Set((p.schedule[d]||[]).map(e=>e.name).filter(n=>!BOOKEND_EX_NAMES.has(n)));
+    if(!dn.size) return;
+    let common = 0; names.forEach(n=>{ if(dn.has(n)) common++; });
+    const score = common / (names.size + dn.size - common);
+    if(score > bestScore){ bestScore = score; best = p; }
+  }));
+  return best && bestScore >= 0.5 ? planDisplayName(best) : null;
+}
+
+// szew: polecany plan dla nowego użytkownika. Dziś stały Fullbody 3x, bez wnioskowania z `profile`;
+// docelowo podmieni się na generatePlanScheduleV2 po wdrożeniu onboardingu. + 2 „inne plany Mekkio”
+function recommendedPlanFor(profile){
+  const avail = defaultTrainingPlans().filter(p=>!deletedBuiltinPlans.has(p.id));
+  const main = avail.find(p=>p.id==='plan_a') || avail[0] || null;
+  const rest = avail.filter(p=>p!==main);
+  const others = ['plan_ppl','plan_ul'].map(id=>rest.find(p=>p.id===id)).filter(Boolean);
+  rest.forEach(p=>{ if(others.length < 2 && !others.includes(p)) others.push(p); });
+  return { plan: dashPlanSummary(main), others: others.slice(0,2).map(dashPlanSummary), source: 'default' };
+}
+
+// postęp rozpoczętego treningu — te same liczby co pigułka „x/y ćwiczeń” w GYM (renderGymGridV2),
+// ale bez zależności od tego, czy GYM był już wyrenderowany
+function dashGymProgress(now){
+  const names = new Set();
+  const planEx = repeatMode ? repeatMode.names.map(name=>({name})) : (todayPlanExerciseNames() || []);
+  planEx.forEach(e=>{ if(!BOOKEND_EX_NAMES.has(e.name) && e.type!=='checklist') names.add(todaySwaps[e.name] ? todaySwaps[e.name].name : e.name); });
+  extraGymTiles.forEach(e=>{ if(e.type!=='checklist') names.add(e.name); });
+  const real = sessionExercises.filter(e=>e.type!=='checklist' && !BOOKEND_EX_NAMES.has(e.name));
+  real.forEach(e=>names.add(e.name));
+  const ms = liveElapsedMs(now.getTime());
+  return {
+    exercisesDone: real.length, exercisesTotal: names.size,
+    ratio: names.size ? Math.min(1, real.length / names.size) : 0,
+    elapsedMs: ms, elapsedMin: Math.floor(ms/60000), running: !!gymLive.running,
+    volumeKg: gymSessionVolumeKg(),
+  };
+}
+
+// oś rekordów z całej historii w jednym przebiegu: rekord = ćwiczenie pobite względem WCZEŚNIEJSZYCH
+// treningów (pierwsze podejście do ćwiczenia rekordu nie robi). Te same reguły co workoutRecord() —
+// keep in sync — ale dla każdego treningu i ćwiczenia, nie tylko „jeden na trening”
+function dashRecordEvents(){
+  const order = workouts.map((w,i)=>({w,i})).sort((a,b)=> a.w.date < b.w.date ? -1 : a.w.date > b.w.date ? 1 : a.i-b.i);
+  const best = { w:{}, vol:{}, repsVol:{}, reps:{}, time:{} };
+  const events = [];
+  order.forEach(({w})=>{
+    const upd = [];
+    w.exercises.forEach(ex=>{
+      const n = ex.name, sv = exSetsView(ex);
+      const r = { topW:0, vol:0, repsVol:0, topReps:0, topTime:0 };
+      sv.forEach(st=>{
+        r.topW = Math.max(r.topW, st.weight||0);
+        r.vol += (st.weight||0) * (st.reps||0);
+        r.repsVol += st.reps||0;
+        r.topReps = Math.max(r.topReps, st.reps||0);
+        r.topTime = Math.max(r.topTime, st.durationSec||0);
+      });
+      const bw = sv.length > 0 && sv.every(st=>!(st.weight>0)) && r.repsVol > 0;
+      const kinds = [];
+      if(r.topW > 0 && best.w[n] !== undefined && r.topW > best.w[n]) kinds.push('weight');
+      if(r.vol > 0 && best.vol[n] !== undefined && r.vol > best.vol[n]) kinds.push('volume');
+      if(bw && best.repsVol[n] !== undefined && r.repsVol > best.repsVol[n]) kinds.push('volume');
+      if(bw && best.reps[n] !== undefined && r.topReps > best.reps[n]) kinds.push('reps');
+      if(!isCardioName(n) && best.time[n] !== undefined && r.topTime > best.time[n]) kinds.push('time');
+      if(kinds.length) events.push({ date: w.date, name: n, kinds, workoutId: w.id });
+      upd.push([n, r]);
+    });
+    // najlepsze wyniki aktualizujemy dopiero po całym treningu (dwa wpisy tego samego ćwiczenia nie biją się nawzajem)
+    upd.forEach(([n, r])=>{
+      const mx = (m, v)=>{ if(v > 0) m[n] = Math.max(m[n] || 0, v); };
+      if(!isCardioName(n)) mx(best.time, r.topTime);
+      mx(best.w, r.topW); mx(best.reps, r.topReps); mx(best.vol, r.vol); mx(best.repsVol, r.repsVol);
+    });
+  });
+  return events;
+}
+
+// Odznaki — jedna tablica danych (nazwy i kryteria uzgodnione z Maciejem 2026-09-16, po /człowiek i poprawnej
+// polszczyźnie). check(c) zwraca { earnedOn: 'YYYY-MM-DD'|null, value, goal } wyłącznie z historii (bez nowych kluczy).
+// `icon` to tylko klucz opisu z ustaleń; grafiki przypisuje UI.
+const DASH_BADGES = [
+  { id:'first',      icon:'barbell-flash',  name:'Pierwszy raz się liczy',        text:'Zalogowałeś swój pierwszy trening w Mekkio.',
+    check:c=>({ earnedOn: c.chrono.length ? c.chrono[0].date : null, value: Math.min(1, c.chrono.length), goal: 1 }) },
+  { id:'fullweek',   icon:'medal-star',     name:'Tydzień bez wymówek',           text:'Ukończyłeś wszystkie zaplanowane dni tygodnia.',
+    check:c=>{
+      let on = null;
+      if(c.required > 0) for(const ws of c.weekStarts){ const s = c.weekDays.get(ws); if(s.size >= c.required){ on = [...s].sort().pop(); break; } }
+      const cur = c.weekDays.get(c.curWeekStart);
+      return { earnedOn: on, value: cur ? cur.size : 0, goal: c.required || null };
+    } },
+  { id:'firstpr',    icon:'weight-wreath',  name:'Pierwszy, ale nie ostatni',     text:'Twój pierwszy nowy rekord ciężaru na jakimkolwiek ćwiczeniu.',
+    check:c=>{ const e = c.events.find(x=>x.kinds.includes('weight')); return { earnedOn: e ? e.date : null, value: e ? 1 : 0, goal: 1 }; } },
+  { id:'pr25',       icon:'trophy-star',    name:'Rekordzista z krwi i kości',    text:'25 rekordów łącznie.',
+    check:c=>({ earnedOn: c.events.length >= 25 ? c.events[24].date : null, value: Math.min(25, c.events.length), goal: 25 }) },
+  { id:'beatweek',   icon:'target',         name:'Zeszły tydzień nie miał szans', text:'Pobiłeś objętość zeszłego tygodnia.',
+    check:c=>{
+      let on = null;
+      for(const ws of c.weekStarts){
+        const prev = c.weekKg.get(dashAddDays(ws,-7)) || 0;
+        if(prev > 0 && (c.weekKg.get(ws)||0) > prev){ on = [...c.weekDays.get(ws)].sort().pop(); break; }
+      }
+      return { earnedOn: on, value: on ? 1 : 0, goal: 1 };
+    } },
+  { id:'ton',        icon:'bicep',          name:'Tona dobrej roboty',            text:'Przekroczyłeś 1000 kg łącznej objętości podniesionej w Mekkio.',
+    check:c=>{
+      let sum = 0, on = null;
+      for(const w of c.chrono){ sum += workoutSumStats(w).volume; if(sum >= 1000){ on = w.date; break; } }
+      return { earnedOn: on, value: Math.min(1000, Math.round(c.totalKg)), goal: 1000 };
+    } },
+  { id:'bodyweight', icon:'deadlift',       name:'Ważysz mniej niż podnosisz',    text:'Podniosłeś w jednym secie więcej niż wynosi Twoja waga ciała.',
+    check:c=>{
+      let on = null, maxSet = 0;
+      for(const w of c.chrono){
+        const bw = weightAtDate(w.date);
+        w.exercises.forEach(ex=> exSetsView(ex).forEach(s=>{
+          maxSet = Math.max(maxSet, s.weight||0);
+          if(!on && bw && (s.weight||0) > bw) on = w.date;
+        }));
+      }
+      return { earnedOn: on, value: maxSet, goal: currentWeightKg() || null };
+    } },
+  { id:'growth3',    icon:'chart-up',       name:'Rośniesz w oczach',             text:'3 tygodnie z rzędu z lepszym wynikiem niż tydzień wcześniej.',
+    check:c=>{
+      let run = 0, on = null;
+      if(c.weekStarts.length){
+        for(let ws = c.weekStarts[0]; ws <= c.curWeekStart; ws = dashAddDays(ws, 7)){
+          const prev = c.weekKg.get(dashAddDays(ws,-7)) || 0;
+          if(prev > 0 && (c.weekKg.get(ws)||0) > prev) run++; else run = 0;
+          if(run >= 3 && !on) on = [...c.weekDays.get(ws)].sort().pop();
+        }
+      }
+      return { earnedOn: on, value: Math.min(3, run), goal: 3 };
+    } },
+  { id:'allround',   icon:'clipboard-pr',   name:'Silny na wszystkich frontach',  text:'Rekord w 5 różnych ćwiczeniach.',
+    check:c=>{
+      const seen = new Set(); let on = null;
+      for(const e of c.events){ seen.add(e.name); if(!on && seen.size >= 5) on = e.date; }
+      return { earnedOn: on, value: Math.min(5, seen.size), goal: 5 };
+    } },
+];
+function dashBadges(plan, todayIso){
+  const sets = dashboardAllSets();
+  const chrono = workouts.map((w,i)=>({w,i})).sort((a,b)=> a.w.date < b.w.date ? -1 : a.w.date > b.w.date ? 1 : a.i-b.i).map(x=>x.w);
+  const weekDays = dashWeekDayMap(), weekKg = new Map();
+  sets.forEach(s=>{ const ws = dashWeekStartIso(s.date); weekKg.set(ws, (weekKg.get(ws)||0) + s.weight*s.reps); });
+  const c = {
+    chrono, events: dashRecordEvents(), weekDays, weekKg,
+    weekStarts: [...weekDays.keys()].sort(),
+    curWeekStart: dashWeekStartIso(todayIso),
+    required: plan ? planActiveDays(plan).length : 0,
+    totalKg: sets.reduce((sum,s)=>sum+s.weight*s.reps, 0),
+  };
+  const all = DASH_BADGES.map(b=>{
+    const r = b.check(c);
+    return { id:b.id, icon:b.icon, name:b.name, text:b.text, earned: !!r.earnedOn, earnedOn: r.earnedOn, value: r.value, goal: r.goal,
+             ratio: r.goal ? Math.min(1, r.value / r.goal) : 0 };
+  });
+  const earned = all.filter(b=>b.earned);
+  // najświeższa zdobyta (data, a przy remisie ta dalej na liście); „następna” = niezdobyta z największym postępem
+  const latest = earned.slice().sort((a,b)=> a.earnedOn < b.earnedOn ? 1 : a.earnedOn > b.earnedOn ? -1 : all.indexOf(b) - all.indexOf(a))[0] || null;
+  const next = all.filter(b=>!b.earned).sort((a,b)=> b.ratio - a.ratio || all.indexOf(a) - all.indexOf(b))[0] || null;
+  return { latest, next, earned: earned.length, total: all.length, all };
+}
+
+// seria TYGODNIOWA (D4): tydzień się liczy, gdy dni z treningiem >= dni planowe obecnego planu.
+// Dzień wolny nie przerywa, tydzień bez planu = brak serii, bieżący niedokończony tydzień nie przerywa
+function dashStreak(plan, todayIso){
+  const required = plan ? planActiveDays(plan).length : 0;
+  const map = dashWeekDayMap();
+  const curStart = dashWeekStartIso(todayIso);
+  const daysIn = ws=> map.has(ws) ? map.get(ws).size : 0;
+  const curDone = daysIn(curStart);
+  const curOk = required > 0 && curDone >= required;
+  let weeks = curOk ? 1 : 0;
+  if(required > 0 && map.size){
+    const earliestWs = [...map.keys()].sort()[0];
+    for(let ws = dashAddDays(curStart,-7); ws >= earliestWs; ws = dashAddDays(ws,-7)){
+      if(daysIn(ws) >= required) weeks++; else break;
+    }
+  }
+  return { weeks, required, thisWeekDone: curDone, thisWeekQualified: curOk };
+}
+
+// „ostatni rekord”, deterministycznie: najświeższy trening z rekordem wg workoutRecord(); gdy historia
+// nie ma jeszcze żadnego (np. pierwszy trening), najcięższy wynik z ostatniego treningu wg statsV2ExerciseRecord()
+function dashLastRecord(){
+  const sorted = workouts.map((w,i)=>({w,i})).sort((a,b)=> b.w.date.localeCompare(a.w.date) || b.i-a.i).map(x=>x.w);
+  if(!sorted.length) return null;
+  const latestId = sorted[0].id;
+  for(const w of sorted.slice(0, 40)){
+    const rec = workoutRecord(w);
+    if(rec) return { source:'workout', kind:rec.kind, unit:rec.unit, name:rec.name, value:rec.value, prev:rec.prev, delta:rec.delta,
+                     date:w.date, workoutId:w.id, fresh: w.id === latestId, display: gymFinRecordFrom(rec), target:'stats-v2' };
+  }
+  let top = null;
+  sorted[0].exercises.forEach(ex=>{
+    const r = statsV2ExerciseRecord(ex.name);
+    if(!r) return;
+    const cand = r.ciezar ? { kind:'weight', unit:'kg', value:r.ciezar.weight } : (r.seria && r.isBodyweight) ? { kind:'reps', unit:'reps', value:r.seria.reps } : null;
+    if(cand && (!top || (cand.unit === 'kg' && (top.unit !== 'kg' || cand.value > top.value)))) top = { ...cand, name: ex.name };
+  });
+  return top ? { source:'best', ...top, prev:null, delta:null, date:sorted[0].date, workoutId:latestId, fresh:true, display:null, target:'stats-v2' } : null;
+}
+
+function dashLastWorkout(){
+  const w = lastSavedWorkout();
+  if(!w) return null;
+  const st = workoutSumStats(w);
+  let sets = 0;
+  w.exercises.forEach(ex=>{ sets += exSetsView(ex).length; });
+  const rec = workoutRecord(w);
+  return {
+    id: w.id, date: w.date, dateLabel: fmtDateHuman(w.date),
+    planName: dashWorkoutPlanName(w), dayLabel: w.day || null,   // planName null = własny trening
+    minutes: w.durationMin || null, exerciseCount: w.exercises.length,
+    volumeKg: Math.round(st.volume), reps: st.reps, sets,
+    record: rec ? { kind:rec.kind, unit:rec.unit, name:rec.name, value:rec.value, delta:rec.delta, display: gymFinRecordFrom(rec) } : null,
+    canRepeat: true,   // „Powtórz ten trening” = repeatLastWorkoutV2()
+  };
+}
+
+function dashConsistency(todayIso){
+  const logs = datesWithLogs();
+  const y = +todayIso.slice(0,4), m = +todayIso.slice(5,7)-1;
+  const months = [];
+  for(let i=2;i>=0;i--){
+    const first = new Date(y, m-i, 1), dim = new Date(first.getFullYear(), first.getMonth()+1, 0).getDate();
+    const key = `${first.getFullYear()}-${String(first.getMonth()+1).padStart(2,'0')}`;
+    const days = [];
+    for(let d=1; d<=dim; d++){
+      const iso = `${key}-${String(d).padStart(2,'0')}`;
+      days.push({ day:d, date:iso, count: logs.get(iso)||0, trained: logs.has(iso), future: iso > todayIso });
+    }
+    months.push({ key, year:first.getFullYear(), month:first.getMonth()+1, name: MONTH_NAMES[first.getMonth()],
+                  daysInMonth: dim, firstWeekday: (first.getDay()+6)%7, trainedDays: days.filter(x=>x.trained).length, days });
+  }
+  return { months };
+}
+
+function dashWeightBlock(todayIso){
+  const log = weightLog.filter(e=> e && isFinite(e.kg) && e.date <= todayIso);
+  if(!log.length) return { hasData:false, kg:null, date:null, daysSince:null, delta30:null, points:[] };
+  const last = log[log.length-1];
+  const cutoff = dashAddDays(todayIso, -30);
+  let base = null; log.forEach(e=>{ if(e.date <= cutoff) base = e; });
+  const inWin = log.filter(e=>e.date > cutoff);
+  const ref = base || (inWin.length > 1 ? inWin[0] : null);
+  return {
+    hasData:true, kg:last.kg, date:last.date, daysSince: dashDaysBetween(last.date, todayIso),
+    delta30: ref ? Math.round((last.kg - ref.kg)*10)/10 : null,
+    points: (base ? [base] : []).concat(inWin).map(e=>({ date:e.date, kg:e.kg })),
+  };
+}
+
+// jedna linijka z reguł lokalnych (free, bez AI, działa dla gościa); pierwsza pasująca wygrywa
+function dashCoachRule(ctx){
+  const { hasPlan, hasHistory, lastWorkout, streak, week, todayIso } = ctx;
+  let id = null, text = null;
+  const gapDays = lastWorkout ? dashDaysBetween(lastWorkout.date, todayIso) : 0;
+  if(hasPlan && !hasHistory){
+    id = 'first'; text = t('dashRuleFirst','Na pierwszy trening weź lżejsze ciężary i zostaw sobie zapas na ostatnią serię.');
+  } else if(lastWorkout && lastWorkout.record && gapDays <= 2){
+    id = 'record'; text = t('dashRuleRecord', `Nowy rekord w ćwiczeniu ${lastWorkout.record.name}. Zanim dołożysz ciężar, powtórz ten wynik jeszcze raz.`, lastWorkout.record.name);
+  } else if(streak.weeks >= 2){
+    id = 'streak'; text = t('dashRuleStreak', `${streak.weeks} ${dashPlWeeksWord(streak.weeks)} z rzędu z kompletem treningów z planu. Trzymaj ten rytm.`, streak.weeks);
+  } else if(hasPlan && lastWorkout && gapDays >= 5){
+    id = 'gap'; text = t('dashRuleGap', `Minęło ${gapDays} dni od ostatniego treningu. Wróć do planu choćby lżejszą wersją.`, gapDays);
+  } else if(week.mode === 'current' && week.hasPrev && week.delta.kg > 0){
+    id = 'volume-up'; text = t('dashRuleVolumeUp', `W tym tygodniu podnosisz więcej niż tydzień temu: ${week.delta.text.kg} kg.`, week.delta.text.kg);
+  } else if(week.mode === 'current' && week.hasPrev && week.delta.kg < 0){
+    id = 'volume-down'; text = t('dashRuleVolumeDown','Na razie podnosisz mniej niż tydzień temu. Jeśli to lżejszy tydzień z założenia, wszystko gra.');
+  }
+  return { id, text, aiEnabled: isPremium() && !!cloudSession };
+}
+
+function dashboardModel(now){
+  now = now || new Date();
+  const todayIso = dateStr(now), todayKey = dayKeyFromDate(todayIso);
+  const plan = starredPlanId ? (trainingPlans.find(p=>p.id===starredPlanId) || null) : null;
+  const hasPlan = !!plan;
+  const hasHistory = workouts.length > 0 || runs.length > 0;
+  const sets = dashboardAllSets();
+  const todayInfo = plan ? dashPlanDayInfo(plan, todayKey) : null;
+  const trainedToday = dashTrainedOn(todayIso);
+
+  // ---- ten tydzień (D2 + D3) ----
+  const weekStart = dashWeekStartIso(todayIso), prevStart = dashAddDays(weekStart,-7), prevEnd = dashAddDays(weekStart,-1);
+  const curTotals = dashWindowStats(weekStart, todayIso, sets);
+  const lastFull = dashWindowStats(prevStart, prevEnd, sets);
+  let week;
+  if(curTotals.sessions === 0 && lastFull.sessions > 0){
+    // D2: do pierwszego treningu bieżącego tygodnia pokazujemy zeszły tydzień (porównany z jeszcze wcześniejszym)
+    const p2 = dashWindowStats(dashAddDays(weekStart,-14), dashAddDays(weekStart,-8), sets);
+    week = { mode:'lastweek', label:t('dashNewWeek','Nowy tydzień'), from:prevStart, to:prevEnd, ...lastFull,
+             compare:{ from:dashAddDays(weekStart,-14), to:dashAddDays(weekStart,-8), days:7 }, hasPrev: p2.sessions > 0, delta: dashDelta(lastFull, p2), prev: p2 };
+  } else {
+    // D3: porównujemy do OSTATNIEGO ZAKOŃCZONEGO dnia — dziś wlicza się dopiero, gdy trening dziś jest zapisany
+    const winEnd = trainedToday ? todayIso : dashAddDays(todayIso,-1);
+    const len = Math.max(0, dashDaysBetween(weekStart, winEnd) + 1);
+    const zero = { kg:0, reps:0, sessions:0, min:0 };
+    const cw = len ? dashWindowStats(weekStart, winEnd, sets) : zero;
+    const pw = len ? dashWindowStats(prevStart, dashAddDays(prevStart, len-1), sets) : zero;
+    week = { mode:'current', label:null, from:weekStart, to:todayIso, ...curTotals,
+             compare:{ from:prevStart, to: len ? dashAddDays(prevStart, len-1) : null, days:len }, hasPrev: pw.sessions > 0, delta: dashDelta(cw, pw), prev: pw };
+  }
+  // kalorie: sumy tygodnia + delta w tym samym oknie porównawczym co objętość
+  const kcalTotal = dashWindowKcal(week.from, week.to);
+  const kcalCur = week.mode === 'lastweek' ? kcalTotal : dashWindowKcal(week.from, week.compare.days ? dashAddDays(week.from, week.compare.days-1) : dashAddDays(week.from,-1));
+  const kcalPrev = week.compare.to ? dashWindowKcal(week.compare.from, week.compare.to) : { kcal:0, sessions:0 };
+  const avgWeeks = [1,2,3,4].map(i=> dashWindowKcal(dashAddDays(weekStart,-7*i), dashAddDays(weekStart,-7*i+6))).filter(x=>x.sessions>0);
+  const kcal = {
+    hasData: workouts.some(w=>workoutKcalShown(w) != null),
+    thisWeek: kcalTotal.kcal, prevWeek: kcalPrev.kcal, hasPrev: kcalPrev.sessions > 0,
+    delta: kcalCur.kcal - kcalPrev.kcal, deltaText: dashSigned(kcalCur.kcal - kcalPrev.kcal),
+    avgPerWeek: avgWeeks.length ? Math.round(avgWeeks.reduce((s,x)=>s+x.kcal,0) / avgWeeks.length) : null,
+  };
+
+  const streak = dashStreak(plan, todayIso);
+  const lastWorkout = dashLastWorkout();
+
+  // ---- plan tygodnia ----
+  const weekDates = dashboardWeekDates(todayIso);
+  const prog = weeklyProgressFor(weekDates);
+  const planWeek = {
+    done: prog.done, total: prog.total,
+    days: weekDates.map(d=>{
+      const done = prog.trainedDays.includes(d), scheduled = prog.scheduledDays.includes(d);
+      return { date:d, key:dayKeyFromDate(d), label:planDayLabel(dayKeyFromDate(d)), isToday: d===todayIso, scheduled, done,
+               state: done ? 'done' : (scheduled && d < todayIso) ? 'missed' : scheduled ? 'planned' : 'rest' };
+    }),
+  };
+
+  // ---- hero: jeden z 8 stanów (kolejność = priorytet) ----
+  const base = { plan: dashPlanSummary(plan), planName: plan ? planDisplayName(plan) : null };
+  let hero;
+  if(gymHasProgress()){
+    hero = { state:'inprogress', ...base, ...dashGymProgress(now) };
+  } else if(trainedToday){
+    // „zrobiony dziś” wygrywa też bez planu — świeżo zakończony trening nie powinien zamienić się w „Wybierz plan”
+    const todays = workouts.filter(w=>w.date===todayIso), todaysRuns = runs.filter(r=>r.date===todayIso);
+    let vol = 0, reps = 0, nSets = 0, min = 0, exs = 0, kcalSum = 0, kcalAny = false;
+    todays.forEach(w=>{
+      const s = workoutSumStats(w); vol += s.volume; reps += s.reps;
+      w.exercises.forEach(ex=>{ nSets += exSetsView(ex).length; });
+      exs += w.exercises.length; min += w.durationMin||0;
+      const k = workoutKcalShown(w); if(k != null){ kcalSum += k; kcalAny = true; }
+    });
+    todaysRuns.forEach(r=>{ min += r.time||0; });
+    const rec = todays.length ? workoutRecord(todays[todays.length-1]) : null;
+    hero = { state:'done', ...base, workouts: todays.length, runs: todaysRuns.length, volumeKg: Math.round(vol), reps, sets: nSets,
+             minutes: Math.round(min), exerciseCount: exs, kcal: kcalAny ? Math.round(kcalSum) : null,
+             record: rec ? { kind:rec.kind, unit:rec.unit, name:rec.name, value:rec.value, delta:rec.delta, display: gymFinRecordFrom(rec) } : null };
+  } else if(!hasPlan){
+    hero = hasHistory
+      ? { state:'noplan-history', ...base }
+      : { state:'noplan-new', ...base, recommended: recommendedPlanFor(null) };
+  } else if(!hasHistory){
+    hero = { state:'planready', ...base, today: todayInfo, todayIsTraining: todayInfo.exerciseCount > 0, next: dashNextPlanDay(plan, todayIso, todayIso) };
+  } else if(todayInfo.exerciseCount > 0){
+    hero = { state:'train', ...base, ...todayInfo };
+  } else {
+    const next = dashNextPlanDay(plan, dashAddDays(todayIso,1), todayIso);
+    hero = { state:'rest', ...base, next, tomorrowIsTraining: !!next && next.inDays === 1 };
+  }
+
+  return {
+    now: now.getTime(), today: todayIso, guest: !cloudSession, premium: isPremium(),
+    hasPlan, hasHistory,
+    hero, week, streak,
+    record: dashLastRecord(),
+    badge: dashBadges(plan, todayIso),
+    consistency: dashConsistency(todayIso),
+    lastWorkout,
+    coachRule: dashCoachRule({ hasPlan, hasHistory, lastWorkout, streak, week, todayIso }),
+    planWeek,
+    weight: dashWeightBlock(todayIso),
+    kcal,
+  };
+}
+
 let lastDashPrName = null; // so the "rekord" tile doesn't repeat back-to-back
 function renderDashboard(){
   const weekDates = dashboardWeekDates();
@@ -15152,7 +15641,11 @@ function statsV2WeeklyProgress(){
   // trained this week, total = plan-scheduled days (or trained, no plan). Keeps a
   // real workout in the tally even after its weekday is edited out of the
   // plan. See renderDashboard() for the full reasoning.
-  const weekDates = dashboardWeekDates();
+  const { done, total } = weeklyProgressFor(dashboardWeekDates());
+  return { done, total };
+}
+// wspólna logika „dni zaliczone” dla dowolnego tygodnia (Stats + dashboardModel().planWeek) — keep in sync z renderDashboard()
+function weeklyProgressFor(weekDates){
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   const scheduledDays = weekDates.filter(d=> plan && (plan.schedule[dayKeyFromDate(d)]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
   const trainedDays = weekDates.filter(d=> workouts.some(w=>w.date===d) || runs.some(r=>r.date===d));
@@ -15160,7 +15653,7 @@ function statsV2WeeklyProgress(){
   // total = the plan's target, so an over-target week (3 of 2) can lap the
   // ring past 100% and show "Ponad plan"; without a plan there's no target,
   // so fall back to done (a full ring, not an empty one).
-  return { done, total: scheduledDays.length || done };
+  return { done, total: scheduledDays.length || done, scheduledDays, trainedDays };
 }
 // contiguous 6-calendar-month window ending `pageOffset*6` months before
 // the current month (pageOffset=0 -> most recent 6, including this month)
