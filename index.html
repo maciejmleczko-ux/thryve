@@ -102,7 +102,8 @@
   --m-plan-c-easy:#ff6343; /* custom / imported plan cards */
   --m-plan-c-mid:var(--m-orange);
   --m-plan-c-hard:#cd1200;
-  --m-sky:#5da9e9;         /* "Powtórzenia": the sky-blue tile on the start card, the Finish screen and the reps chip on Trening */
+  --m-sky:#5da9e9;         /* the sky-blue "Ćwiczenia" tile on the Finish screen */
+  --m-reps:#1f996e;        /* "Powtórzenia": green on the start card and the reps chip on Trening (3.6:1 on white; the old sky blue was 2.5:1) */
   --m-plan-accent:#6891ff; /* planned/missed/done markers on History calendar + Dashboard weekly progress */
 
   --m-r-sm:12px;           /* inputs, chips, small tiles */
@@ -2422,7 +2423,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-chip.c-time{background:var(--m-orange);color:#fff;border-color:transparent;}   /* time = orange, as the rest chip of an exercise */
 .lg-chip.c-time .ph,.lg-chip.c-time .ph svg{color:#fff;}
 .lg-chip.c-sets{background:var(--m-plan-hard);}
-.lg-chip.c-reps{background:var(--m-sky);}
+.lg-chip.c-reps{background:var(--m-reps);}
 .lg-chip.c-sets .ph,.lg-chip.c-sets .ph svg,.lg-chip.c-reps .ph,.lg-chip.c-reps .ph svg{color:#fff;}
 .lg-chip.rest{background:var(--m-orange);color:#fff;border-color:transparent;transition:background-color var(--m-dur-quick) ease;}
 .lg-chip.rest .ph,.lg-chip.rest .ph svg{color:#fff;}
@@ -2620,7 +2621,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-ov-tile{min-width:0;padding:0 6px 0 12px;border-left:1px solid #f1d7cb;display:flex;flex-direction:column;gap:10px;color:var(--c);}
 .lg-ov-tile:first-child{border-left:0;}
 .lg-ov-tile.t-sets{--c:var(--m-plan-hard);}
-.lg-ov-tile.t-reps{--c:var(--m-sky);}
+.lg-ov-tile.t-reps{--c:var(--m-reps);}
 .lg-ov-tile.t-rest{--c:var(--m-orange);}
 /* the three colours match the chips on the Trening page and in the warm-up sheet, so the user learns what is what */
 .lg-ov-l{display:flex;align-items:center;gap:6px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#343941;}
@@ -2647,6 +2648,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-mini{min-width:0;min-height:135px;background:#ededed;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;gap:10px;}
 .lg-mini-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(44,39,39,.8);}
 .lg-mini-v{font-size:40px;font-weight:200;letter-spacing:-.02em;line-height:40px;color:#2c2727;white-space:nowrap;}
+.lg-mini-from{font-size:var(--m-fs-xs);font-weight:400;color:rgba(44,39,39,.6);line-height:1.15;margin-top:-4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .lg-mini-v small{font-size:var(--m-fs-md);font-weight:400;letter-spacing:0;margin-left:4px;color:rgba(44,39,39,.8);}
 .lg-mini-s{display:flex;align-items:center;gap:8px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#2c2727;}
 .lg-mini-s.is-trend{gap:4px;}
@@ -4178,7 +4180,7 @@ const T_EN = {
   gymUnsavedTitle: 'Changes not saved', gymUnsavedBody: 'This exercise was already done. To save your changes, go back and tap ✓.', gymUnsavedYes: 'Leave without saving', gymUnsavedNo: 'Back',
   gymEmptyTitle: 'The workout is empty', gymEmptyBody: "You haven't logged an exercise yet. Add the first one?", gymEmptyYes: 'Add exercise',
   gymLeaveLogging: 'Leave logging', gymAddExerciseDone: 'Add exercise to workout', gymSwipeHint: 'Swipe a set left to delete it', gymLogWarn: 'Log at least one set to add the exercise.', gymExtraSet: 'Extra set',
-  lgOvGoal: 'Goal for today', lgOvLast: 'Last time', lgOvRecord: 'RECORD', lgOvRecordE1rm: 'E1RM RECORD', lgOvRepsWord: 'reps', lgOvWeeks: 'in 4 wks', lgOvSets: 'Sets', lgOvReps: 'Reps', lgOvRest: 'Rest',
+  lgOvGoal: 'Goal for today', lgOvLast: 'Last time', lgOvRecord: 'RECORD', lgOvRecordE1rm: 'ESTIMATED MAX', lgOvFrom: 'from', lgOvRepsWord: 'reps', lgOvWeeks: 'in 4 wks', lgOvSets: 'Sets', lgOvReps: 'Reps', lgOvRest: 'Rest',
   trainerAi: 'AI COACH', exNoteSheetTitle: 'NOTE', exHowtoTitle: 'How to do it', exHowtoSheetTitle: 'HOW TO DO IT', exHowtoSetup: 'SETUP', exHowtoMove: 'MOVEMENT', exHowtoMistake: 'COMMON MISTAKE',
   planPill: 'Training plans',
   planOnboardingIntro: "Before you start, pick a ready-made plan or build your own — you'll see it right away in GYM.",
@@ -7176,7 +7178,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.63.2";
+const APP_VERSION = "4.63.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -10099,13 +10101,14 @@ function lgOverviewData(ex){
     const el = all.filter(statsV2E1rmEligible), e1 = x=> statsV2Epley(x.weight, x.reps);
     if(el.length){
       const best = Math.max(...el.map(e1));
+      const bestSet = el.reduce((a, x)=> e1(x) > e1(a) ? x : a, el[0]);   // the real set behind the estimate, shown under the number
       const age = x=> Math.round((new Date(todayStr()+'T00:00:00') - new Date(x.date+'T00:00:00')) / 86400000);
       const older = el.filter(x=> age(x) >= 28);
       const delta = older.length ? Math.round((best - Math.max(...older.map(e1))) * 10) / 10 : 0;
       const byDay = {};
       el.forEach(x=>{ byDay[x.date] = Math.max(byDay[x.date] || 0, e1(x)); });
       const spark = Object.keys(byDay).sort().slice(-6).map(d=> byDay[d]);
-      rec = { big: fmtKgLocal(Math.round(best)), unit: 'kg', label: t('lgOvRecordE1rm','REKORD E1RM'), delta: delta >= 1 ? delta : 0, spark };
+      rec = { big: fmtKgLocal(Math.round(best)), unit: 'kg', label: t('lgOvRecordE1rm','SZACOWANY MAX'), from: `${t('lgOvFrom','z')} ${fmtKgLocal(bestSet.weight)} kg × ${bestSet.reps}`, delta: delta >= 1 ? delta : 0, spark };
     }
   }
   return { last, rec };
@@ -10133,7 +10136,7 @@ function lgOverviewHtml(ex, history, sugg, aiAction, versionPill, rise){
   const d = lgOverviewData(ex);
   const rowHtml = d ? `<div class="lg-ov-row">
       <div class="lg-mini${riseT(4)}"><span class="lg-mini-l">${t('lgOvLast','Ostatnio')} • ${escHtml(fmtDayMonShort(d.last.date))}</span><span class="lg-mini-v">${cnt(d.last.big)}<small>${escHtml(d.last.unit)}</small></span><span class="lg-mini-s"><b>${escHtml(d.last.sub)}</b><span>${t('lgOvRepsWord','powtórzeń')}</span></span></div>
-      ${d.rec ? `<div class="lg-mini${riseT(5)}"><span class="lg-mini-l">${escHtml(d.rec.label)}</span><span class="lg-mini-v">${cnt(d.rec.big)}<small>${escHtml(d.rec.unit)}</small></span>${d.rec.delta ? `<span class="lg-mini-s is-trend"><span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span><b>${kg(d.rec.delta)}kg</b><span>${t('lgOvWeeks','w 4 tyg.')}</span></span>` : ''}${lgSparkSvg(d.rec.spark, animate)}</div>` : ''}
+      ${d.rec ? `<div class="lg-mini${riseT(5)}"><span class="lg-mini-l">${escHtml(d.rec.label)}</span><span class="lg-mini-v">${cnt(d.rec.big)}<small>${escHtml(d.rec.unit)}</small></span>${d.rec.from ? `<span class="lg-mini-from">${escHtml(d.rec.from)}</span>` : ''}${d.rec.delta ? `<span class="lg-mini-s is-trend"><span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span><b>${kg(d.rec.delta)}kg</b><span>${t('lgOvWeeks','w 4 tyg.')}</span></span>` : ''}${lgSparkSvg(d.rec.spark, animate)}</div>` : ''}
     </div>` : '';
   const note = exerciseNotes[ex.name] || '';
   return `<div class="lg-scroll lg-pg-ov" id="lgOv">
