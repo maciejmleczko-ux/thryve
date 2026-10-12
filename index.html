@@ -106,10 +106,34 @@
   --m-reps:#1f996e;        /* "Powtórzenia": green on the start card and the reps chip on Trening (3.6:1 on white; the old sky blue was 2.5:1) */
   --m-plan-accent:#6891ff; /* planned/missed/done markers on History calendar + Dashboard weekly progress */
   --m-muted-text:#6c6b78;  /* secondary text on light surfaces (5.2:1 on white); --m-muted stays icons/hints only */
+  --m-line:#c7c6cb;        /* dividers, disabled */
+  --m-border:#e6e2ec;      /* hairline borders */
+  --m-danger:var(--m-plan-c-hard); /* error = #cd1200 + icon/message, never colour alone */
+  --m-orange-ink:#801a00;  /* text on orange tints (10:1) */
+  --m-orange-tint:#f1d7cb;
+  --m-orange-tint-2:#ffe9e3;
+  --m-navy-tint:#b7c0e1;
+  --m-navy-ink:#0d1637;
+  --m-sky-ink:#2f5575;     /* text on white (7.8:1) */
+  --m-sky-tint:#c9e2f8;
+  --m-mint:#2cda9d;        /* fills with dark text; --m-reps is the on-white green */
+  --m-mint-ink:#166d4f;    /* text on white (6.3:1) */
+  --m-mint-tint:#b9f3de;
+  --m-plum:#8e0045;
+  --m-plum-ink:#470023;
+  --m-plum-tint:#d9aac1;
+  --m-amber:#ffbb00;       /* warning + Kalorie; dark text */
+  --m-amber-2:#ffc07a;
+  --m-amber-tint:#ffd885;
+  --m-ai-from:#fa1228;     /* Trener AI gradient border, only there */
+  --m-ai-to:#5a00d1;
   /* fixed metric colours, same everywhere in the app (Figma "Mekkio / Colors" metric/*) */
-  --m-metric-time:#8e0045;   /* Czas treningu: plum */
-  --m-metric-kcal:#ffbb00;   /* Kalorie: amber, dark text */
   --m-metric-volume:#cd1200; /* Objętość: red, not the orange accent */
+  --m-metric-sets:var(--m-plan-hard);  /* Serie */
+  --m-metric-reps:var(--m-reps);       /* Powtórzenia */
+  --m-metric-exercises:var(--m-sky);   /* Ćwiczenia */
+  --m-metric-time:var(--m-plum);       /* Czas treningu */
+  --m-metric-kcal:var(--m-amber);      /* Kalorie (dark text) */
 
   --m-r-sm:12px;           /* inputs, chips, small tiles */
   --m-r-md:16px;           /* cards, panels */
@@ -571,7 +595,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .save-btn:active{transform:scale(.97);}
 @media (prefers-reduced-motion: no-preference){
   .save-btn.success{animation:saveSuccess var(--m-dur-pop) ease;}
-  @keyframes saveSuccess{0%{transform:scale(1);}35%{transform:scale(1.04);background:#3ecf8e;}100%{transform:scale(1);}}
+  @keyframes saveSuccess{0%{transform:scale(1);}35%{transform:scale(1.04);background:#2CDA9D;}100%{transform:scale(1);}}
 }
 .share-btn{display:none;} /* temporarily disabled until the share-card template is ready, was: display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 40px);margin:12px auto 0;
   background:var(--light-2);border:1px solid var(--border);border-radius:var(--m-r-sm);padding:14px;color:var(--text-dark);
@@ -668,7 +692,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .onboard-actions button{flex:1;border:none;border-radius:var(--m-r-pill);padding:13px;font-weight:700;font-size:var(--m-fs-sm);cursor:pointer;font-family:inherit;}
 .onboard-actions .skip{background:var(--light-2);color:var(--text-dark);}
 .onboard-actions .save{background:var(--orange);color:#fff;}
-.onboard-actions .save.danger{background:#c00;}
+.onboard-actions .save.danger{background:#CD1200;}
 .onboard-actions button:disabled{opacity:.5;cursor:default;}
 .onboard-box textarea{width:100%;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:var(--m-fs-base);line-height:1.5;color:var(--text-dark);font-family:inherit;margin-bottom:16px;resize:vertical;min-height:100px;}
 
@@ -678,7 +702,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .ai-popup-box{position:relative;width:100%;max-width:360px;box-sizing:border-box;max-height:calc(100dvh - 84px);overflow-y:auto;
   border-radius:var(--m-r-md);padding:20px;color:#fff;
   border:1px solid transparent;
-  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
+  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,var(--m-ai-from) 0%,var(--m-ai-to) 83%) border-box;
   box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,.5), 0 20px 50px rgba(0,0,0,.5);
 }
 .ai-popup-close{position:absolute;top:16px;right:16px;width:28px;height:28px;background:none;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
@@ -770,14 +794,14 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    identity as .dash-ai-card / .ai-popup-box (Maciej, 2026-09-16). */
 .acct-rows--ai{
   border:1px solid transparent;
-  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
+  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,var(--m-ai-from) 0%,var(--m-ai-to) 83%) border-box;
   box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,.5);
 }
 .acct-rows--ai .acct-row{color:#fff;border-top-color:rgba(255,255,255,.15);}
 .acct-rows--ai .acct-row .acct-v{color:rgba(255,255,255,.6);}
 .acct-rows--ai .acct-row:active{background:rgba(255,255,255,.08);}
 .acct-hint{margin:7px 3px 0;font-size:var(--m-fs-2xs);color:var(--m-muted);}
-.acct-row.danger,.acct-row.danger .acct-lead .ph{color:#c00;}
+.acct-row.danger,.acct-row.danger .acct-lead .ph{color:#CD1200;}
 .acct-foot{margin:auto 0 0;padding-top:18px;font-size:var(--m-fs-2xs);color:var(--m-muted);text-align:center;line-height:1.5;}
 /* above the account panel (95) AND the GYM finish screen (9500) — weight /
    edit-kcal sheets can be opened straight from the finish screen. */
@@ -824,7 +848,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .acct-cloud-cta:active{transform:scale(.96);}
 .acct-cloud-mode-link{display:block;width:100%;background:none;border:0;color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;padding:4px 0;font-family:inherit;text-align:center;}
 .acct-cloud-forgot{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);cursor:pointer;padding:6px 0 0;font-family:inherit;align-self:flex-end;}
-.acct-auth-error{margin:6px 0 0;font-size:var(--m-fs-2xs);color:#c00;line-height:1.4;}
+.acct-auth-error{margin:6px 0 0;font-size:var(--m-fs-2xs);color:#CD1200;line-height:1.4;}
 .acct-oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;border:1px solid #dadce0;border-radius:var(--m-r-pill);padding:12px;font-size:var(--m-fs-base);font-weight:500;color:#3c4043;font-family:inherit;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),background var(--m-dur-quick) ease;}
 .acct-oauth-btn:active{transform:scale(.97);background:#f7f7f8;}
 .acct-oauth-btn.apple{background:#000;border-color:#000;color:#fff;}
@@ -1122,7 +1146,7 @@ html.dashboard-scrollable .dash-root{padding-bottom:12px;}
    glow — same treatment reused on .ai-popup-box for a consistent identity. */
 .dash-ai-card{border-radius:var(--m-r-md);padding:16px;color:#fff;margin-bottom:8px;
   border:1px solid transparent;
-  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,#FA1228 0%,#5A00D1 83%) border-box;
+  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,var(--m-ai-from) 0%,var(--m-ai-to) 83%) border-box;
   box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,.5);
 }
 .dash-ai-head{display:flex;align-items:center;justify-content:space-between;width:100%;
@@ -1408,12 +1432,12 @@ html.dash-compact .dash-week-head{margin-bottom:10px;}
    edge-to-edge, not just a same-width sliver); only one is opacity:1 at
    a time, toggled by attachPlanSwipeV2() from the live drag direction. */
 .plansv2-card-wrap{position:relative;overflow:hidden;border-radius:var(--m-r-md);touch-action:pan-y;}
-.plansv2-card-delete{position:absolute;inset:0;border-radius:var(--m-r-md);background:#f00;display:flex;align-items:center;justify-content:flex-end;padding-right:28px;color:#fff;cursor:pointer;opacity:0;pointer-events:none;}
+.plansv2-card-delete{position:absolute;inset:0;border-radius:var(--m-r-md);background:#CD1200;display:flex;align-items:center;justify-content:flex-end;padding-right:28px;color:#fff;cursor:pointer;opacity:0;pointer-events:none;}
 .plansv2-card-delete .ph{width:32px;height:32px;transition:transform var(--m-dur-quick) ease;}
 /* Past the full-swipe threshold: bump the icon so it's obvious that
    releasing now deletes, rather than just snapping open to the reveal. */
 .plansv2-card-wrap.plansv2-will-delete .plansv2-card-delete .ph{transform:scale(1.35);}
-.plansv2-card-share{position:absolute;inset:0;border-radius:var(--m-r-md);background:#f5b942;display:flex;align-items:center;justify-content:flex-start;padding-left:28px;color:#2c2727;cursor:pointer;opacity:0;pointer-events:none;}
+.plansv2-card-share{position:absolute;inset:0;border-radius:var(--m-r-md);background:#FFBB00;display:flex;align-items:center;justify-content:flex-start;padding-left:28px;color:#2c2727;cursor:pointer;opacity:0;pointer-events:none;}
 .plansv2-card-share .ph{width:32px;height:32px;transition:transform var(--m-dur-quick) ease;}
 .plansv2-card-wrap.plansv2-will-share .plansv2-card-share .ph{transform:scale(1.35);}
 .plansv2-card{border-radius:var(--m-r-md);padding:16px;display:flex;align-items:center;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:inherit;text-align:left;position:relative;transition:transform var(--m-dur-press-out) var(--m-ease);touch-action:pan-y;}
@@ -1672,7 +1696,7 @@ body.pev2-bg{background:var(--m-panel);}
 .pev2-select-count{font-size:var(--m-fs-2xs);color:#5b5555;font-weight:600;margin-right:auto;}
 .pev2-select-action{border:1px solid var(--m-orange);border-radius:var(--m-r-pill);padding:7px 14px;background:none;color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:700;cursor:pointer;font-family:inherit;}
 .pev2-select-action.hidden{display:none;}
-.pev2-select-action.danger{border-color:#c00;color:#c00;}
+.pev2-select-action.danger{border-color:#CD1200;color:#CD1200;}
 .pev2-select-exit{border:none;background:none;color:#5b5555;font-size:var(--m-fs-base);cursor:pointer;padding:4px 6px;line-height:1;font-family:inherit;}
 /* Equipment-filter icon row (exercise picker / plan editor / swap sheet).
    Tried a bottom-nav-style sliding blob here first — Maciej felt the
@@ -1797,8 +1821,8 @@ body.pev2-bg{background:var(--m-panel);}
 .exv2-card{flex:1;min-height:0;display:flex;flex-direction:column;gap:24px;background:transparent;border-radius:0;padding:7px 18px 4px;width:100%;box-sizing:border-box;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
 .exv2-header-group{display:flex;flex-direction:column;gap:8px;}
 .exv2-title-block{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;}
-.exv2-pill{display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 12px;border-radius:var(--m-r-pill);background:#a4bdff;}
-.exv2-pill span{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:#0e267b;white-space:nowrap;}
+.exv2-pill{display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 12px;border-radius:var(--m-r-pill);background:#B7C0E1;}
+.exv2-pill span{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:#0D1637;white-space:nowrap;}
 /* Periodized plans only — which execution version (Max/Objętość/Siła/
    Gęstość) today's set of this exercise is, next to the muscle-group pill. */
 .exv2-pill--version{background:var(--m-orange);}
@@ -1824,18 +1848,18 @@ body.pev2-bg{background:var(--m-panel);}
 /* #6 — sticky per-exercise note */
 .exv2-note{background:#e7ecff;border-radius:var(--m-r-sm);padding:10px 14px;display:flex;align-items:flex-start;gap:11px;text-align:left;}
 .exv2-note-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
-.exv2-note-k{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#2c3fae;}
-.exv2-note-v{font-size:var(--m-fs-sm);color:#2c3fae;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere;}
-.exv2-note-edit{flex-shrink:0;width:18px;height:18px;border:0;background:none;padding:0;cursor:pointer;color:#2c3fae;}
+.exv2-note-k{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#2642A4;}
+.exv2-note-v{font-size:var(--m-fs-sm);color:#2642A4;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere;}
+.exv2-note-edit{flex-shrink:0;width:18px;height:18px;border:0;background:none;padding:0;cursor:pointer;color:#2642A4;}
 .exv2-note-edit .ph,.exv2-note-edit svg{display:block;width:100%;height:100%;}
 .exv2-note.is-edit{flex-direction:column;gap:8px;}
 .exv2-note-input{width:100%;box-sizing:border-box;border:1px solid #c2ccf2;border-radius:10px;padding:9px 11px;font-family:inherit;font-size:var(--m-fs-sm);color:var(--m-ink);background:#fff;line-height:1.45;resize:none;}
 .exv2-note-actions{display:flex;gap:8px;justify-content:flex-end;width:100%;}
 .exv2-note-actions button{border:0;border-radius:var(--m-r-pill);padding:7px 15px;font-family:inherit;font-size:var(--m-fs-xs);font-weight:700;cursor:pointer;}
-.exv2-note-cancel{background:rgba(44,63,174,.12);color:#2c3fae;}
-.exv2-note-save{background:#2c3fae;color:#fff;}
+.exv2-note-cancel{background:rgba(38,66,164,.12);color:#2642A4;}
+.exv2-note-save{background:#2642A4;color:#fff;}
 .exv2-note-hint{margin:0;font-size:var(--m-fs-2xs);color:#6f78b8;line-height:1.4;}
-.exv2-note-add{display:flex;align-items:center;gap:8px;width:100%;background:none;border:1px dashed #b9c2ef;border-radius:var(--m-r-sm);padding:10px 14px;font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#2c3fae;cursor:pointer;text-align:left;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.exv2-note-add{display:flex;align-items:center;gap:8px;width:100%;background:none;border:1px dashed #b9c2ef;border-radius:var(--m-r-sm);padding:10px 14px;font-family:inherit;font-size:var(--m-fs-xs);font-weight:600;color:#2642A4;cursor:pointer;text-align:left;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .exv2-note-add .ph,.exv2-note-add svg{width:15px;height:15px;flex-shrink:0;}
 .exv2-note-add:active{transform:scale(.99);}
 .exv2-series-section{display:flex;flex-direction:column;gap:16px;}
@@ -1898,7 +1922,7 @@ body.pev2-bg{background:var(--m-panel);}
 .swapv2-close svg{display:block;width:100%;height:100%;}
 .swapv2-instead{font-size:var(--m-fs-sm);color:#5b5555;margin:0;}
 .swapv2-instead b{color:#2c2727;}
-.swapv2-group-chip{align-self:flex-start;display:inline-flex;align-items:center;height:22px;padding:0 12px;border-radius:var(--m-r-pill);background:#dfe6ff;color:#2c3fae;font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+.swapv2-group-chip{align-self:flex-start;display:inline-flex;align-items:center;height:22px;padding:0 12px;border-radius:var(--m-r-pill);background:#dfe6ff;color:#2642A4;font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
 /* alternatives are a tile grid + selection badge — same component as
    "Wybierz ćwiczenie" (buildExerciseTileV2 / .gymv2-grid / .gymv2-tile-
    selected + .gymv2-tile-check). */
@@ -2208,7 +2232,7 @@ body.pev2-bg{background:var(--m-panel);}
 .statsv2-detail-wave svg{width:100%;height:100%;overflow:visible;}
 .statsv2-detail-wave-labels{display:flex;justify-content:space-between;margin-top:4px;}
 .statsv2-detail-wave-labels span{font-size:var(--m-fs-xs);color:var(--m-ink);letter-spacing:.48px;}
-.statsv2-pr-tag{position:absolute;transform:translate(-50%,-100%);background:#ffb608;color:#2c1500;font-size:var(--m-fs-2xs);font-weight:500;padding:4px 6px;border-radius:6px;white-space:nowrap;pointer-events:none;}
+.statsv2-pr-tag{position:absolute;transform:translate(-50%,-100%);background:#FFBB00;color:#2c1500;font-size:var(--m-fs-2xs);font-weight:500;padding:4px 6px;border-radius:6px;white-space:nowrap;pointer-events:none;}
 /* Maciej: "punkty z PR na wykresach to powinna byc kropka nie owal" —
    the dots used to be SVG <circle> elements inside an svg stretched
    with preserveAspectRatio="none" (needed so the wavy line fills the
@@ -2345,8 +2369,8 @@ body.gymv2-bg .gy-bg{display:block;}
 .gy-pills{display:flex;gap:4px;margin:0 0 16px;}
 .gy-pill{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:34px;padding:6px 14px;box-sizing:border-box;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);font-size:var(--m-fs-2xs);font-weight:600;color:var(--m-ink);white-space:nowrap;font-variant-numeric:tabular-nums;}
 .gy-pill svg,.gy-pill .ph,.gy-pill .ph svg{width:16px;height:16px;flex:none;display:block;}
-.gy-pill-time{flex:1;min-width:0;background:var(--m-orange);border-color:transparent;color:#fff;transition:background-color var(--m-dur-quick) ease;}
-.gy-pill-time.is-paused{background:rgba(255,51,0,.42);}
+.gy-pill-time{flex:1;min-width:0;background:var(--m-metric-time);border-color:transparent;color:#fff;transition:background-color var(--m-dur-quick) ease;}
+.gy-pill-time.is-paused{background:rgba(142,0,69,.42);}
 #view-gym-v2 .gymv2-no-plan{margin-bottom:14px;}
 #view-gym-v2 .gymv2-repeat{height:60px;padding:6px 14px;gap:12px;box-sizing:border-box;background:rgba(59,99,203,.6);border:.5px solid #f1d7cb;border-radius:var(--m-r-pill);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);margin-bottom:26px;}
 #view-gym-v2 .gymv2-repeat-ico{width:34px;height:34px;background:var(--m-plan-hard);color:#fff;}
@@ -2359,7 +2383,7 @@ body.gymv2-bg .gy-bg{display:block;}
 #view-gym-v2 .gymv2-tile.is-partial{border:1px solid var(--m-orange);}
 #view-gym-v2 .gymv2-tile-done{top:9px;right:9px;width:14px;height:14px;}
 #view-gym-v2 .gymv2-tile-done svg{width:14px;height:14px;}
-.gymv2-tile-partial{position:absolute;top:7px;right:7px;z-index:1;padding:2px 8px;border-radius:54px;background:#869edc;color:#fff;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.06em;line-height:1.3;pointer-events:none;}
+.gymv2-tile-partial{position:absolute;top:7px;right:7px;z-index:1;padding:2px 8px;border-radius:54px;background:#708FE1;color:#fff;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.06em;line-height:1.3;pointer-events:none;}
 .gymv2-save-wrap{padding:22px 10px 0;}
 #view-gym-v2 .gymv2-save{height:55px;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;}
 
@@ -2406,7 +2430,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-scroll::-webkit-scrollbar{display:none;}
 .lg-head{display:flex;flex-direction:column;gap:8px;}
 .lg-tags{display:flex;gap:4px;flex-wrap:wrap;}
-.lg-tag{display:inline-flex;align-items:center;height:20px;padding:0 12px;border-radius:var(--m-r-pill);background:#a4bdff;color:#0e267b;font-size:var(--m-fs-2xs);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+.lg-tag{display:inline-flex;align-items:center;height:20px;padding:0 12px;border-radius:var(--m-r-pill);background:#B7C0E1;color:#0D1637;font-size:var(--m-fs-2xs);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
 .lg-tag--v{background:var(--m-orange);color:#fff;}
 .lg-name-row{display:flex;align-items:center;gap:10px;min-height:32px;}
 .lg-name{flex:1;min-width:0;font-size:var(--m-fs-xl);font-weight:300;letter-spacing:.0367em;text-transform:uppercase;color:#2c2727;line-height:1.15;}
@@ -2425,7 +2449,7 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-chip{display:inline-flex;align-items:center;gap:10px;height:28px;padding:0 12px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid #f1d7cb;font-size:var(--m-fs-2xs);color:#2c2727;white-space:nowrap;font-variant-numeric:tabular-nums;}
 .lg-chip .ph, .lg-chip .ph svg{width:16px;height:16px;display:block;flex:none;color:var(--m-orange);}
 .lg-chip.c-sets,.lg-chip.c-reps{color:#fff;border-color:transparent;}   /* same colours as the start-card tiles: Serie navy, Powtórzenia sky, Przerwa orange */
-.lg-chip.c-time{background:var(--m-orange);color:#fff;border-color:transparent;}   /* time = orange, as the rest chip of an exercise */
+.lg-chip.c-time{background:var(--m-metric-time);color:#fff;border-color:transparent;}   /* Czas treningu = plum (fixed metric colour) */
 .lg-chip.c-time .ph,.lg-chip.c-time .ph svg{color:#fff;}
 .lg-chip.c-sets{background:var(--m-plan-hard);}
 .lg-chip.c-reps{background:var(--m-reps);}
@@ -3878,7 +3902,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <p data-i18n="importChoiceBody">Masz już zapisane dane na tym urządzeniu. Dołączyć do nich to, co jest w pliku, czy zastąpić je plikiem?</p>
     <div class="btns" style="margin-top:16px;flex-direction:column;">
       <button type="button" class="save" onclick="applyImport('merge')" data-i18n="importChoiceMerge">Połącz</button>
-      <button type="button" class="cancel" style="color:#e5484d;font-weight:700;" onclick="applyImport('replace')" data-i18n="importChoiceReplace">Zastąp wszystko</button>
+      <button type="button" class="cancel" style="color:#CD1200;font-weight:700;" onclick="applyImport('replace')" data-i18n="importChoiceReplace">Zastąp wszystko</button>
       <button type="button" class="cancel" onclick="closeImportChoice()" data-i18n="cancel">Anuluj</button>
     </div>
   </div>
@@ -4627,7 +4651,7 @@ const EX_TILE_ADD_SVG = `<svg width="116" height="136" viewBox="0 0 116 136" fil
 <rect x="0.5" y="0.5" width="114.667" height="134.211" rx="15.5" stroke="#CD1200" stroke-dasharray="6 4"/>
 <g transform="translate(0 14)">
 <path d="M40.8483 88.3025V81.2025H43.2083C44.3416 81.2025 45.2116 81.5125 45.8183 82.1325C46.4316 82.7458 46.7383 83.6225 46.7383 84.7625C46.7383 85.8958 46.4383 86.7692 45.8383 87.3825C45.2383 87.9958 44.3816 88.3025 43.2683 88.3025H40.8483ZM42.1483 87.1725H43.2083C43.9483 87.1725 44.4983 86.9725 44.8583 86.5725C45.2183 86.1725 45.3983 85.5692 45.3983 84.7625C45.3983 83.9425 45.2183 83.3325 44.8583 82.9325C44.4983 82.5325 43.9483 82.3325 43.2083 82.3325H42.1483V87.1725ZM51.3774 88.4625C50.6774 88.4625 50.0741 88.3158 49.5674 88.0225C49.0607 87.7225 48.6707 87.2958 48.3974 86.7425C48.1307 86.1892 47.9974 85.5292 47.9974 84.7625C47.9974 83.9958 48.1307 83.3358 48.3974 82.7825C48.6707 82.2225 49.0607 81.7925 49.5674 81.4925C50.0741 81.1925 50.6774 81.0425 51.3774 81.0425C52.0907 81.0425 52.6974 81.1925 53.1974 81.4925C53.7041 81.7925 54.0907 82.2225 54.3574 82.7825C54.6307 83.3358 54.7674 83.9958 54.7674 84.7625C54.7674 85.5292 54.6307 86.1892 54.3574 86.7425C54.0907 87.2958 53.7041 87.7225 53.1974 88.0225C52.6974 88.3158 52.0907 88.4625 51.3774 88.4625ZM51.3774 87.3325C51.8107 87.3325 52.1774 87.2325 52.4774 87.0325C52.7841 86.8258 53.0174 86.5325 53.1774 86.1525C53.3441 85.7658 53.4274 85.3025 53.4274 84.7625C53.4274 84.2225 53.3441 83.7592 53.1774 83.3725C53.0174 82.9858 52.7841 82.6892 52.4774 82.4825C52.1774 82.2758 51.8107 82.1725 51.3774 82.1725C50.9574 82.1725 50.5941 82.2758 50.2874 82.4825C49.9807 82.6892 49.7441 82.9858 49.5774 83.3725C49.4174 83.7592 49.3374 84.2225 49.3374 84.7625C49.3374 85.3025 49.4174 85.7658 49.5774 86.1525C49.7441 86.5325 49.9807 86.8258 50.2874 87.0325C50.5941 87.2325 50.9574 87.3325 51.3774 87.3325ZM56.2381 88.3025V81.2025H58.5981C59.7314 81.2025 60.6014 81.5125 61.2081 82.1325C61.8214 82.7458 62.1281 83.6225 62.1281 84.7625C62.1281 85.8958 61.8281 86.7692 61.2281 87.3825C60.6281 87.9958 59.7714 88.3025 58.6581 88.3025H56.2381ZM57.5381 87.1725H58.5981C59.3381 87.1725 59.8881 86.9725 60.2481 86.5725C60.6081 86.1725 60.7881 85.5692 60.7881 84.7625C60.7881 83.9425 60.6081 83.3325 60.2481 82.9325C59.8881 82.5325 59.3381 82.3325 58.5981 82.3325H57.5381V87.1725ZM62.7664 88.3025L65.3264 81.2025H66.9164L69.4764 88.3025H68.1164L67.5264 86.6225H64.7164L64.1264 88.3025H62.7664ZM65.0964 85.5125H67.1464L66.1264 82.5125L65.0964 85.5125ZM72.823 88.4625C72.3097 88.4625 71.8664 88.3525 71.493 88.1325C71.1197 87.9058 70.833 87.5958 70.633 87.2025C70.4397 86.8025 70.3397 86.3492 70.333 85.8425L71.643 85.7725C71.6564 86.2925 71.763 86.6825 71.963 86.9425C72.1697 87.2025 72.4564 87.3325 72.823 87.3325C73.1964 87.3325 73.4864 87.2025 73.693 86.9425C73.8997 86.6758 74.003 86.2858 74.003 85.7725V81.2025H75.303V85.7725C75.303 86.3192 75.1997 86.7958 74.993 87.2025C74.7864 87.6025 74.4964 87.9125 74.123 88.1325C73.7564 88.3525 73.323 88.4625 72.823 88.4625ZM32.9876 98.4625C32.3409 98.4625 31.7709 98.3158 31.2776 98.0225C30.7843 97.7225 30.3976 97.2992 30.1176 96.7525C29.8376 96.1992 29.6976 95.5358 29.6976 94.7625C29.6976 94.0025 29.8343 93.3458 30.1076 92.7925C30.3809 92.2325 30.7643 91.8025 31.2576 91.5025C31.7509 91.1958 32.3309 91.0425 32.9976 91.0425C33.9043 91.0425 34.6076 91.2692 35.1076 91.7225C35.6076 92.1692 35.9343 92.7958 36.0876 93.6025L34.7276 93.6725C34.6409 93.2058 34.4543 92.8392 34.1676 92.5725C33.8809 92.3058 33.4909 92.1725 32.9976 92.1725C32.5976 92.1725 32.2509 92.2792 31.9576 92.4925C31.6643 92.7058 31.4376 93.0058 31.2776 93.3925C31.1176 93.7792 31.0376 94.2358 31.0376 94.7625C31.0376 95.2958 31.1176 95.7558 31.2776 96.1425C31.4443 96.5225 31.6743 96.8158 31.9676 97.0225C32.2609 97.2292 32.6009 97.3325 32.9876 97.3325C33.5143 97.3325 33.9209 97.1892 34.2076 96.9025C34.5009 96.6092 34.6876 96.2092 34.7676 95.7025L36.1276 95.7725C36.0343 96.3258 35.8543 96.8058 35.5876 97.2125C35.3209 97.6125 34.9676 97.9225 34.5276 98.1425C34.0943 98.3558 33.5809 98.4625 32.9876 98.4625ZM32.4076 90.6025L33.0176 89.2025H34.3076L33.4076 90.6025H32.4076ZM38.9395 98.3025L37.0395 91.2025H38.4095L39.7095 96.5025L41.0195 91.2025H42.2295L43.5395 96.5025L44.8295 91.2025H46.2095L44.3095 98.3025H42.8695L41.6295 93.4425L40.3895 98.3025H38.9395ZM47.5277 98.3025V91.2025H48.8277V98.3025H47.5277ZM53.5919 98.4625C52.9452 98.4625 52.3752 98.3158 51.8819 98.0225C51.3886 97.7225 51.0019 97.2992 50.7219 96.7525C50.4419 96.1992 50.3019 95.5358 50.3019 94.7625C50.3019 94.0025 50.4386 93.3458 50.7119 92.7925C50.9852 92.2325 51.3686 91.8025 51.8619 91.5025C52.3552 91.1958 52.9352 91.0425 53.6019 91.0425C54.5086 91.0425 55.2119 91.2692 55.7119 91.7225C56.2119 92.1692 56.5386 92.7958 56.6919 93.6025L55.3319 93.6725C55.2452 93.2058 55.0586 92.8392 54.7719 92.5725C54.4852 92.3058 54.0952 92.1725 53.6019 92.1725C53.2019 92.1725 52.8552 92.2792 52.5619 92.4925C52.2686 92.7058 52.0419 93.0058 51.8819 93.3925C51.7219 93.7792 51.6419 94.2358 51.6419 94.7625C51.6419 95.2958 51.7219 95.7558 51.8819 96.1425C52.0486 96.5225 52.2786 96.8158 52.5719 97.0225C52.8652 97.2292 53.2052 97.3325 53.5919 97.3325C54.1186 97.3325 54.5252 97.1892 54.8119 96.9025C55.1052 96.6092 55.2919 96.2092 55.3719 95.7025L56.7319 95.7725C56.6386 96.3258 56.4586 96.8058 56.1919 97.2125C55.9252 97.6125 55.5719 97.9225 55.1319 98.1425C54.6986 98.3558 54.1852 98.4625 53.5919 98.4625ZM57.7782 98.3025V97.1825L61.3082 92.3325H57.9282V91.2025H62.8882V92.3225L59.3282 97.1725H63.0082V98.3025H57.7782ZM64.4309 98.3025V91.2025H69.2109V92.3325H65.7309V94.1825H69.0909V95.3025H65.7309V97.1725H69.2909V98.3025H64.4309ZM70.9149 98.3025V91.2025H72.4349L75.4949 96.5425V91.2025H76.7949V98.3025H75.2349L72.2149 93.1125V98.3025H70.9149ZM78.6391 98.3025V91.2025H79.9391V98.3025H78.6391ZM81.7832 98.3025V91.2025H86.5632V92.3325H83.0832V94.1825H86.4432V95.3025H83.0832V97.1725H86.6432V98.3025H81.7832Z" fill="var(--m-orange)"/>
-<path d="M75.6929 39.9468C75.6929 40.2576 75.5694 40.5557 75.3496 40.7754C75.1299 40.9952 74.8318 41.1187 74.521 41.1187H58.5054V57.1343C58.5054 57.4451 58.3819 57.7431 58.1621 57.9629C57.9424 58.1827 57.6443 58.3062 57.3335 58.3062C57.0227 58.3062 56.7246 58.1827 56.5049 57.9629C56.2851 57.7431 56.1616 57.4451 56.1616 57.1343V41.1187H40.146C39.8352 41.1187 39.5371 40.9952 39.3174 40.7754C39.0976 40.5557 38.9741 40.2576 38.9741 39.9468C38.9741 39.636 39.0976 39.3379 39.3174 39.1181C39.5371 38.8984 39.8352 38.7749 40.146 38.7749H56.1616V22.7593C56.1616 22.4485 56.2851 22.1504 56.5049 21.9306C56.7246 21.7109 57.0227 21.5874 57.3335 21.5874C57.6443 21.5874 57.9424 21.7109 58.1621 21.9306C58.3819 22.1504 58.5054 22.4485 58.5054 22.7593V38.7749H74.521C74.8318 38.7749 75.1299 38.8984 75.3496 39.1181C75.5694 39.3379 75.6929 39.636 75.6929 39.9468Z" fill="#FF7458"/>
+<path d="M75.6929 39.9468C75.6929 40.2576 75.5694 40.5557 75.3496 40.7754C75.1299 40.9952 74.8318 41.1187 74.521 41.1187H58.5054V57.1343C58.5054 57.4451 58.3819 57.7431 58.1621 57.9629C57.9424 58.1827 57.6443 58.3062 57.3335 58.3062C57.0227 58.3062 56.7246 58.1827 56.5049 57.9629C56.2851 57.7431 56.1616 57.4451 56.1616 57.1343V41.1187H40.146C39.8352 41.1187 39.5371 40.9952 39.3174 40.7754C39.0976 40.5557 38.9741 40.2576 38.9741 39.9468C38.9741 39.636 39.0976 39.3379 39.3174 39.1181C39.5371 38.8984 39.8352 38.7749 40.146 38.7749H56.1616V22.7593C56.1616 22.4485 56.2851 22.1504 56.5049 21.9306C56.7246 21.7109 57.0227 21.5874 57.3335 21.5874C57.6443 21.5874 57.9424 21.7109 58.1621 21.9306C58.3819 22.1504 58.5054 22.4485 58.5054 22.7593V38.7749H74.521C74.8318 38.7749 75.1299 38.8984 75.3496 39.1181C75.5694 39.3379 75.6929 39.636 75.6929 39.9468Z" fill="#FF6343"/>
 </g>
 </svg>`;
 // "Wybierz inne ćwiczenie" tile — Maciej's own design (2026-09-01,
@@ -7183,7 +7207,7 @@ function weightSparkSvg(pts){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.63.4";
+const APP_VERSION = "4.63.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 /* Dashboard headline shown instead of "Dziś X. Dasz radę!" once the user
    has already trained today (see renderDashboard()) — one is picked at
@@ -14245,7 +14269,7 @@ function applyRepeatLastWorkout(){
    glass tile + icon + live label instead of the baked EX_TILE_*_SVG (those stay
    for the plan editor). */
 const GY_SEARCH_ICON = '<svg class="gy-tile-ic" viewBox="0 0 49 48" fill="none"><path d="M48.296 45.1318L36.357 33.2515C39.7615 29.3555 41.5131 24.2963 41.242 19.1403C40.9711 13.9844 38.699 9.13457 34.9046 5.61317C31.1102 2.09177 26.0901 0.173797 20.9023 0.26377C15.7145 0.353626 10.7645 2.44432 7.09568 6.09512C3.42682 9.74591 1.32577 14.6715 1.23547 19.8337C1.14505 24.9958 3.07252 29.9914 6.61135 33.7671C10.1502 37.5428 15.0241 39.8037 20.2055 40.0733C25.3869 40.3428 30.4712 38.6001 34.3865 35.2123L46.3256 47.0925C46.5898 47.3376 46.9395 47.471 47.3006 47.4646C47.6618 47.4583 48.0064 47.3127 48.2619 47.0585C48.5173 46.8043 48.6636 46.4614 48.6701 46.102C48.6764 45.7425 48.5423 45.3947 48.296 45.1318ZM4.09044 20.2152C4.09044 16.831 5.09885 13.5229 6.98837 10.7091C8.87777 7.8953 11.5633 5.7022 14.7053 4.40705C17.8473 3.11202 21.3047 2.7732 24.6403 3.43344C27.9758 4.09368 31.0397 5.72327 33.4445 8.11621C35.8493 10.5091 37.4869 13.5579 38.1504 16.877C38.8139 20.1962 38.4734 23.6365 37.172 26.7631C35.8704 29.8896 33.6665 32.5619 30.8387 34.442C28.011 36.3221 24.6866 37.3256 21.2856 37.3256C16.7268 37.3202 12.3564 35.5156 9.13284 32.308C5.90941 29.1004 4.09592 24.7515 4.09044 20.2152Z" fill="#FF3300"/></svg>';
-const GY_PLUS_ICON = '<svg class="gy-tile-ic" viewBox="0 0 49 48" fill="none"><path d="M45.9718 23.735C45.9718 24.1029 45.8256 24.4558 45.5654 24.7159C45.3053 24.9762 44.9524 25.1224 44.5844 25.1224H25.6233V44.0826C25.6233 44.4506 25.4771 44.8034 25.2169 45.0636C24.9568 45.3238 24.6039 45.47 24.2359 45.47C23.868 45.47 23.515 45.3238 23.2549 45.0636C22.9947 44.8034 22.8485 44.4506 22.8485 44.0826V25.1224H3.88743C3.51947 25.1224 3.16655 24.9762 2.90644 24.7159C2.64622 24.4558 2.5 24.1029 2.5 23.735C2.5 23.3671 2.64622 23.0141 2.90644 22.7539C3.16655 22.4938 3.51947 22.3476 3.88743 22.3476H22.8485V3.38737C22.8485 3.01942 22.9947 2.66651 23.2549 2.4063C23.515 2.14621 23.868 2 24.2359 2C24.6039 2 24.9568 2.14621 25.2169 2.4063C25.4771 2.66651 25.6233 3.01942 25.6233 3.38737V22.3476H44.5844C44.9524 22.3476 45.3053 22.4938 45.5654 22.7539C45.8256 23.0141 45.9718 23.3671 45.9718 23.735Z" fill="#FF7458"/></svg>';
+const GY_PLUS_ICON = '<svg class="gy-tile-ic" viewBox="0 0 49 48" fill="none"><path d="M45.9718 23.735C45.9718 24.1029 45.8256 24.4558 45.5654 24.7159C45.3053 24.9762 44.9524 25.1224 44.5844 25.1224H25.6233V44.0826C25.6233 44.4506 25.4771 44.8034 25.2169 45.0636C24.9568 45.3238 24.6039 45.47 24.2359 45.47C23.868 45.47 23.515 45.3238 23.2549 45.0636C22.9947 44.8034 22.8485 44.4506 22.8485 44.0826V25.1224H3.88743C3.51947 25.1224 3.16655 24.9762 2.90644 24.7159C2.64622 24.4558 2.5 24.1029 2.5 23.735C2.5 23.3671 2.64622 23.0141 2.90644 22.7539C3.16655 22.4938 3.51947 22.3476 3.88743 22.3476H22.8485V3.38737C22.8485 3.01942 22.9947 2.66651 23.2549 2.4063C23.515 2.14621 23.868 2 24.2359 2C24.6039 2 24.9568 2.14621 25.2169 2.4063C25.4771 2.66651 25.6233 3.01942 25.6233 3.38737V22.3476H44.5844C44.9524 22.3476 45.3053 22.4938 45.5654 22.7539C45.8256 23.0141 45.9718 23.3671 45.9718 23.735Z" fill="#FF6343"/></svg>';
 function GY_SEARCH_TILE_HTML(){ return GY_SEARCH_ICON + `<span class="gy-tile-lbl">${t('gymV2PickOther','Wybierz inne ćwiczenie')}</span>`; }
 function GY_ADD_TILE_HTML(){ return GY_PLUS_ICON + `<span class="gy-tile-lbl">${t('addNew','Dodaj ćwiczenie')}</span>`; }
 function renderGymGridV2(animate){
@@ -15640,7 +15664,7 @@ function renderStatsV2Overview(){
   const barsHtml = window6.map((m,i)=>{
     const h = Math.max(4, Math.round(m.kg/maxKg*112));
     const vivid = i>=3;
-    const bg = vivid ? 'background:linear-gradient(180deg,#ffbb00,#ff8843 55%,var(--m-orange));' : 'background:var(--m-orange);opacity:.6;';
+    const bg = vivid ? 'background:linear-gradient(180deg,#ffbb00,#FF6343 55%,var(--m-orange));' : 'background:var(--m-orange);opacity:.6;';
     return `<div class="statsv2-bar-col"><div class="bar statsv2-bar-anim" style="--i:${i};height:${h}px;${bg}"></div><span>${MONTH_ABBR_PL[m.month-1]}</span></div>`;
   }).join('');
 
@@ -15696,7 +15720,7 @@ function renderStatsV2Overview(){
         <p class="statsv2-scard-delta">${total} ${LANG==='en'?'in 6 months':'w 6 miesiącach'}</p>
         <div class="statsv2-bar-row" style="margin-top:14px;">${months.map((m,i)=>{
           const h = Math.max(4, Math.round(m.n/maxN*112));
-          return `<div class="statsv2-bar-col"><div class="bar statsv2-bar-anim" style="--i:${i};height:${h}px;background:linear-gradient(180deg,#ffbb00,#ff8843 55%,var(--m-orange));${m.n>0?'':'opacity:.35;'}"></div><span>${MONTH_ABBR_PL[m.month-1]}</span></div>`;
+          return `<div class="statsv2-bar-col"><div class="bar statsv2-bar-anim" style="--i:${i};height:${h}px;background:linear-gradient(180deg,#ffbb00,#FF6343 55%,var(--m-orange));${m.n>0?'':'opacity:.35;'}"></div><span>${MONTH_ABBR_PL[m.month-1]}</span></div>`;
         }).join('')}</div>
       </div></div>`;
   })();
@@ -15928,7 +15952,7 @@ function renderStatsV2Detail(name){
             // a dot on every plotted point, with a 2 pt card-coloured ring
             // that lifts it off the gradient line (past PRs keep the dark fill)
             if(series.prMonths.has(p.key)) return `<div class="statsv2-chart-dot" style="width:10px;height:10px;background:#221b17;border:2px solid #ff8a3d;left:${L}%;top:${T}%;"></div>`;
-            return `<div class="statsv2-chart-dot" style="width:10px;height:10px;background:#ffc542;border:2px solid var(--m-card);left:${L}%;top:${T}%;"></div>`;
+            return `<div class="statsv2-chart-dot" style="width:10px;height:10px;background:#FFBB00;border:2px solid var(--m-card);left:${L}%;top:${T}%;"></div>`;
           }).join('')}
         </div>
         <div class="statsv2-detail-wave-labels">${dLabels.map(p=> p.month ? `<span>${MONTH_ABBR_PL[p.month-1]}</span>` : `<span>${new Date(p.date+'T00:00:00').getDate()}.${String(new Date(p.date+'T00:00:00').getMonth()+1).padStart(2,'0')}</span>`).join('')}</div>
