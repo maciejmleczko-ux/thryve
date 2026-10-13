@@ -5501,7 +5501,7 @@ const LS_WORKOUTS = "fitlog_workouts_v1";
 const LS_RUNS = "fitlog_runs_v1";
 const LS_CUSTOM_EX = "fitlog_custom_exercises_v1";
 function loadWorkouts(){ try{ const a = JSON.parse(localStorage.getItem(LS_WORKOUTS)) || []; a.forEach(w=> w && cleanExerciseList(w.exercises)); return a; }catch(e){ return []; } }
-function saveWorkouts(arr){ arr.forEach(w=> w && cleanExerciseList(w.exercises)); localStorage.setItem(LS_WORKOUTS, JSON.stringify(arr)); scheduleCloudPush(); }
+function saveWorkouts(arr){ if(recViewDepth > 0){ console.warn('saveWorkouts skipped: a screen is rendering on a filtered copy of the history'); return; } arr.forEach(w=> w && cleanExerciseList(w.exercises)); try{ recInvalidate(); }catch(e){} localStorage.setItem(LS_WORKOUTS, JSON.stringify(arr)); scheduleCloudPush(); }
 function loadRuns(){ try{ return JSON.parse(localStorage.getItem(LS_RUNS)) || []; }catch(e){ return []; } }
 function saveRuns(arr){ localStorage.setItem(LS_RUNS, JSON.stringify(arr)); }
 function loadCustomExercises(){ try{ return cleanExerciseList(JSON.parse(localStorage.getItem(LS_CUSTOM_EX)) || []); }catch(e){ return []; } }
@@ -11649,7 +11649,7 @@ function showGymFinishV2(summary, onDone){
     document.getElementById('gymFinRecordLabel').textContent = rec.label || t('gymFinRecordLabel', 'Nowy rekord');
     document.getElementById('gymFinRecordEx').textContent = rec.name;
     document.getElementById('gymFinRecordV').textContent = rec.value;
-    document.getElementById('gymFinRecordU').textContent = rec.unit || '';
+    document.getElementById('gymFinRecordU').textContent = rec.unitSig || rec.unit || '';
     document.getElementById('gymFinRecordSub').textContent = rec.sub || '';
     document.getElementById('gymFinRecordSub').hidden = !rec.sub;
     document.getElementById('gymFinRecordIco').innerHTML = ph(rec.icon || 'barbell');
@@ -11757,9 +11757,10 @@ function gymFinRepsWord(n){
    "Ostatnio X → dziś Y" on the finish screen, a plain "X → Y" in history. */
 function buildProgressCard(exercises, priorTopSetFn, today){
   const gains = [];
-  exercises.forEach(ex=>{
+  (Array.isArray(exercises) ? exercises : []).forEach(ex=>{
+    if(!ex || typeof ex.name !== 'string') return;
     const prev = priorTopSetFn(ex.name);
-    const now = gymFinTopSet(ex.sets);
+    const now = gymFinTopSet(recSetsOf(ex));
     if(!prev || !now) return;
     if(now.weight > prev.weight){
       gains.push({ kind:'weight', ex:ex.name, delta:+(now.weight - prev.weight).toFixed(2), from:prev.weight, to:now.weight, atReps:now.reps });
@@ -11797,44 +11798,280 @@ function workoutIsBodyweightOnly(w){
   return w.exercises.length > 0 && w.exercises.every(ex=>
     ex.sets.every(s=> !(s.weight > 0)));
 }
-/* THE record of a saved workout: one definition for the Gratulacje screen and the share card. Each exercise is compared
-   with the same exercise in the workouts saved before this one (a first-ever exercise sets no record). With several
-   candidates the priority is: weight (heaviest set), volume (session kg, or session reps for a masa ciała exercise),
-   reps (best single set, masa ciała exercises only), time (longest set, not cardio).
-   Returns { kind:'weight'|'volume'|'reps'|'time', unit:'kg'|'reps'|'sec', name, value, prev, perSide? } or null. */
-function workoutRecord(w){
-  const idx = workouts.indexOf(w);
-  const prior = workouts.filter((o, i)=> o !== w && (o.date < w.date || (o.date === w.date && (idx < 0 || i < idx))));
-  const best = { w:{}, vol:{}, repsVol:{}, reps:{}, time:{} };
-  const sums = (ex)=>{
-    const sv = exSetsView(ex), r = { topW:0, vol:0, repsVol:0, topReps:0, topTime:0, perSide:false };
-    sv.forEach(st=>{
-      r.topW = Math.max(r.topW, st.weight || 0);
-      r.vol += (st.weight || 0) * (st.reps || 0);
-      r.repsVol += st.reps || 0;
-      r.topReps = Math.max(r.topReps, st.reps || 0);
-      if(st.durationSec > r.topTime){ r.topTime = st.durationSec; r.perSide = !!st.perSide; }
-    });
-    r.bw = sv.length > 0 && sv.every(st=> !(st.weight > 0)) && r.repsVol > 0;
-    return r;
-  };
-  prior.forEach(o=> o.exercises.forEach(ex=>{
-    const r = sums(ex), n = ex.name, mx = (m, v)=>{ if(v > 0) m[n] = Math.max(m[n] || 0, v); };
-    if(!isCardioName(n)) mx(best.time, r.topTime);
-    mx(best.w, r.topW); mx(best.reps, r.topReps); mx(best.vol, r.vol); mx(best.repsVol, r.repsVol);
-  }));
-  const cand = { weight:null, volume:null, reps:null, time:null };
-  const take = (slot, c)=>{ if(!cand[slot] || c.value > cand[slot].value) cand[slot] = c; };
+/* ============================================================
+   SILNIK REKORDÓW (F1, 4.66.0): jedna definicja rekordu dla dashboardu, Historii, Postępów, ekranu Gratulacje,
+   karty udostępniania, karty startowej ćwiczenia i odznak. Czyste funkcje: bez DOM, bez zapisu, bez kluczy
+   localStorage. Historię czytają z podanej listy albo z globalnego `workouts`.
+
+   DEFINICJE (zatwierdzone przez Macieja 2026-10-13):
+   - REKORD ćwiczenia = najcięższy faktycznie podniesiony ciężar (seria z ciężarem i co najmniej 1 powtórzeniem),
+     w podpisie z powtórzeniami ("22 kg × 10"). Masa ciała (same powtórzenia, bez kg): najwięcej powtórzeń w serii.
+     Ćwiczenia czasowe: najdłuższy czas serii. Kardio nie jest rekordem siłowym (pomijane w całości).
+   - Pierwsze wykonanie ćwiczenia niczego nie bije (nie ma z czym porównać), remis NIE jest rekordem, a ten sam
+     ciężar z większą liczbą powtórzeń też nie (to widać w "Twoim postępie" i w prognozie maxa).
+   - REKORD OBJĘTOŚCI TRENINGU = suma kg × powt. całego treningu (trening bez żadnego ciężaru: suma powtórzeń,
+     osobno), liczony tylko względem wcześniejszych treningów. Nie liczy się do odznak za rekordy ćwiczeń.
+   - PROGNOZA MAXA (dawniej "Szacowany max", Epley, tylko serie do STATSV2_E1RM_REP_CAP powt.) to osobna liczba:
+     NIGDY nie jest rekordem i nie wyzwala tagów rekordu.
+   KOLEJNOŚĆ: treningi sortowane po dacie, a w obrębie dnia po pozycji w tablicy. Trening jest porównywany tylko z tymi,
+   które są w tej kolejności PRZED nim (dwa treningi tego samego dnia: drugi bije pierwszy, nie odwrotnie).
+   Wpisy bez poprawnej daty (dashValidIso) albo bez tablicy `exercises` są pomijane.
+
+   KONTRAKT (dane zwracane są tylko do odczytu; nie modyfikuj ich):
+     exerciseRecords(name[, list]) -> null | { name, weight, reps, time, sessions, firstDate, lastDate, events }
+        weight: { value, reps, date, workoutId, history:[{date,value}] } | null   (reps = najwięcej powt. przy tym ciężarze,
+                date = kiedy ciężar padł po raz pierwszy)
+        reps:   { value, date, workoutId, history } | null                         (masa ciała)
+        time:   { value, perSide, date, workoutId, history } | null                (sekundy)
+        events: rekordy tego ćwiczenia (zdarzenia, patrz niżej), chronologicznie
+     workoutRecordsFor(w[, list]) -> { records:[zdarzenie], volume: zdarzenie|null, headline: zdarzenie|null, prevTop(name) }
+        records = rekordy ćwiczeń osiągnięte w tym treningu względem WCZEŚNIEJSZEJ historii; headline = jeden "główny" (ciężar >
+        powtórzenia > czas > objętość treningu); prevTop(name) = najlepsza seria tego ćwiczenia z poprzedniego treningu
+     recordTimeline([list]) -> zdarzenia całej historii, chronologicznie (rekordy ćwiczeń + rekordy objętości treningu)
+     latestWorkoutWithRecord([list]) -> { workout, result } | null    (najświeższy trening z jakimkolwiek rekordem)
+     projectedMax(name[, list]) -> null | { value, weight, reps, date, byMonth:Map('RRRR-MM' -> {value,weight,reps}) }
+   Zdarzenie: { kind:'weight'|'reps'|'time'|'volume', unit:'kg'|'reps'|'sec', name, value, prev, delta, date, workoutId,
+                reps? (kind weight: powtórzenia w serii), perSide? (time), bwOnly? (volume w powtórzeniach), pos }
+   WYDAJNOŚĆ: cała historia liczona jednym przebiegiem O(treningi × serie), indeks jest cache'owany dla tej samej tablicy
+   (saveWorkouts() go unieważnia), więc wywołania w pętlach i w kilku kartach jednego renderu kosztują O(1).
+   ============================================================ */
+var recIdxCache = null;   // var, nie let: saveWorkouts() może zawołać recInvalidate() zanim skrypt dojdzie do tej linii
+function recInvalidate(){ recIdxCache = null; }
+function recNum(x){ const n = typeof x === 'number' ? x : parseFloat(x); return isFinite(n) && n > 0 ? n : 0; }
+// serie ćwiczenia w postaci do liczenia (stare Plank/Dead Hang jako czas); zepsuty wpis daje pustą listę, nie wyjątek
+function recSetsOf(ex){
+  if(!ex || ex.type === 'checklist' || !Array.isArray(ex.sets)) return [];
+  try{ return exSetsView(ex).filter(s=> s && typeof s === 'object'); }catch(e){ return []; }
+}
+function recChrono(src){
+  const out = [];
+  (Array.isArray(src) ? src : []).forEach((w, i)=>{ if(w && typeof w === 'object' && Array.isArray(w.exercises) && dashValidIso(w.date)) out.push({ w, i }); });
+  out.sort((a, b)=> a.w.date < b.w.date ? -1 : a.w.date > b.w.date ? 1 : a.i - b.i);
+  return out.map(x=> x.w);
+}
+// jeden trening: wyniki każdego ćwiczenia (dwa wpisy tego samego ćwiczenia w treningu łączą się w jeden wynik) + sumy treningu
+function recAnalyze(w){
+  const per = new Map();
+  let vol = 0, repsAll = 0;
   w.exercises.forEach(ex=>{
-    const r = sums(ex), n = ex.name;
-    if(r.topW > 0 && best.w[n] !== undefined && r.topW > best.w[n]) take('weight', { kind:'weight', unit:'kg', name:n, value:r.topW, prev:best.w[n] });
-    if(r.vol > 0 && best.vol[n] !== undefined && r.vol > best.vol[n]) take('volume', { kind:'volume', unit:'kg', name:n, value:r.vol, prev:best.vol[n] });
-    if(r.bw && best.repsVol[n] !== undefined && r.repsVol > best.repsVol[n]) take('volume', { kind:'volume', unit:'reps', name:n, value:r.repsVol, prev:best.repsVol[n], bwOnly:true });
-    if(r.bw && best.reps[n] !== undefined && r.topReps > best.reps[n]) take('reps', { kind:'reps', unit:'reps', name:n, value:r.topReps, prev:best.reps[n] });
-    if(!isCardioName(n) && best.time[n] !== undefined && r.topTime > best.time[n]) take('time', { kind:'time', unit:'sec', name:n, value:r.topTime, prev:best.time[n], perSide:r.perSide });
+    if(!ex || typeof ex.name !== 'string' || !ex.name || isCardioName(ex.name)) return;
+    const sets = recSetsOf(ex);
+    if(!sets.length) return;
+    let p = per.get(ex.name);
+    if(!p){ p = { name: ex.name, topW: 0, topWReps: 0, topReps: 0, topTime: 0, perSide: false, weighted: false, repsNoW: 0, topSet: null, e1: null }; per.set(ex.name, p); }
+    sets.forEach(s=>{
+      const wt = recNum(s.weight), rp = recNum(s.reps), du = recNum(s.durationSec);
+      if(du > p.topTime){ p.topTime = du; p.perSide = !!s.perSide; }
+      if(wt > 0 && rp > 0){
+        p.weighted = true;
+        if(wt > p.topW || (wt === p.topW && rp > p.topWReps)){ p.topW = wt; p.topWReps = rp; }
+        vol += wt * rp;
+        if(rp <= STATSV2_E1RM_REP_CAP){ const e = statsV2Epley(wt, rp); if(!p.e1 || e > p.e1.value) p.e1 = { value: e, weight: wt, reps: rp }; }
+      } else if(wt === 0 && rp > 0){
+        p.repsNoW += rp; if(rp > p.topReps) p.topReps = rp;
+        repsAll += rp;
+      }
+      // najlepsza seria do karty "Twój postęp": najcięższa, przy remisie z większą liczbą powtórzeń (jak gymFinTopSet)
+      if(wt > 0 || rp > 0){ if(!p.topSet || wt > p.topSet.weight || (wt === p.topSet.weight && rp > p.topSet.reps)) p.topSet = { weight: wt, reps: rp }; }
+    });
   });
-  const hit = cand.weight || cand.volume || cand.reps || cand.time;
-  return hit ? Object.assign({ delta: hit.value - hit.prev }, hit) : null;
+  per.forEach(p=>{ p.bw = !p.weighted && p.repsNoW > 0; });
+  return { per, vol, repsAll, bwOnly: vol === 0 && repsAll > 0 };
+}
+function recBuildIndex(src){
+  const order = recChrono(src);
+  const state = new Map(), byWorkout = new Map(), byId = new Map(), timeline = [];
+  const volBest = { kg: null, reps: null };
+  const newState = name => ({ name, w: null, r: null, t: null, hw: [], hr: [], ht: [], proj: null, projByMonth: new Map(), sessions: 0, firstDate: null, lastDate: null, lastTop: null, events: [] });
+  order.forEach((w, pos)=>{
+    const an = recAnalyze(w);
+    const records = [], prevTop = new Map();
+    const push = (st, ev)=>{ ev.pos = pos; ev.date = w.date; ev.workoutId = w.id; ev.delta = ev.value - ev.prev; records.push(ev); timeline.push(ev); if(st) st.events.push(ev); };
+    an.per.forEach(p=>{
+      let st = state.get(p.name);
+      if(!st){ st = newState(p.name); state.set(p.name, st); }
+      prevTop.set(p.name, st.lastTop);
+      if(p.topW > 0){
+        if(st.w && p.topW > st.w.value) push(st, { kind: 'weight', unit: 'kg', name: p.name, value: p.topW, reps: p.topWReps, prev: st.w.value });
+        if(!st.w || p.topW > st.w.value){ st.w = { value: p.topW, reps: p.topWReps, date: w.date, workoutId: w.id }; st.hw.push({ date: w.date, value: p.topW }); }
+        else if(p.topW === st.w.value && p.topWReps > st.w.reps) st.w.reps = p.topWReps;
+      }
+      if(p.bw){
+        if(st.r && p.topReps > st.r.value) push(st, { kind: 'reps', unit: 'reps', name: p.name, value: p.topReps, prev: st.r.value });
+        if(!st.r || p.topReps > st.r.value){ st.r = { value: p.topReps, date: w.date, workoutId: w.id }; st.hr.push({ date: w.date, value: p.topReps }); }
+      }
+      if(p.topTime > 0){
+        if(st.t && p.topTime > st.t.value) push(st, { kind: 'time', unit: 'sec', name: p.name, value: p.topTime, perSide: p.perSide, prev: st.t.value });
+        if(!st.t || p.topTime > st.t.value){ st.t = { value: p.topTime, perSide: p.perSide, date: w.date, workoutId: w.id }; st.ht.push({ date: w.date, value: p.topTime }); }
+      }
+      if(p.e1){
+        if(!st.proj || p.e1.value > st.proj.value) st.proj = { value: p.e1.value, weight: p.e1.weight, reps: p.e1.reps, date: w.date };
+        const mk = w.date.slice(0, 7), cur = st.projByMonth.get(mk);
+        if(!cur || p.e1.value > cur.value) st.projByMonth.set(mk, { value: p.e1.value, weight: p.e1.weight, reps: p.e1.reps });
+      }
+      if(p.topSet) st.lastTop = p.topSet;
+      st.sessions++;
+      if(!st.firstDate) st.firstDate = w.date;
+      st.lastDate = w.date;
+    });
+    // rekord objętości treningu: tylko względem wcześniejszych treningów (pierwszy trening niczego nie bije)
+    let volume = null;
+    const vUnit = an.bwOnly ? 'reps' : 'kg', vVal = an.bwOnly ? an.repsAll : an.vol;
+    if(vVal > 0){
+      const b = volBest[vUnit];
+      if(b && vVal > b.value){ volume = { kind: 'volume', unit: vUnit, name: null, value: vVal, prev: b.value, bwOnly: an.bwOnly }; push(null, volume); }
+      if(!b || vVal > b.value) volBest[vUnit] = { value: vVal, date: w.date, workoutId: w.id };
+    }
+    const res = { records: records.filter(r=> r.kind !== 'volume'), volume, headline: null, prevTop, pos };
+    res.headline = recHeadline(res.records, volume);
+    byWorkout.set(w, res);
+    if(w.id != null && !byId.has(w.id)) byId.set(w.id, res);
+  });
+  return { src, len: Array.isArray(src) ? src.length : 0, order, state, byWorkout, byId, timeline, volBest };
+}
+// jeden "główny" rekord treningu: ciężar > powtórzenia > czas > objętość treningu; w obrębie rodzaju większa wartość
+function recHeadline(records, volume){
+  let best = null;
+  ['weight', 'reps', 'time'].some(k=>{
+    records.forEach(r=>{ if(r.kind === k && (!best || r.value > best.value)) best = r; });
+    return !!best;
+  });
+  return best || volume || null;
+}
+function recIndex(list){
+  const src = list || workouts;
+  const c = recIdxCache;
+  if(c && c.src === src && c.len === (Array.isArray(src) ? src.length : 0)) return c;
+  return (recIdxCache = recBuildIndex(src));
+}
+function recLookup(idx, w){
+  if(!w) return null;
+  return idx.byWorkout.get(w) || (w.id != null ? idx.byId.get(w.id) : null) || null;
+}
+function recResultView(res){
+  const prevTop = res.prevTop;
+  return { records: res.records, volume: res.volume, headline: res.headline, prevTop: name=> (prevTop.get(name) || null) };
+}
+function workoutRecordsFor(w, list){
+  const empty = { records: [], volume: null, headline: null, prevTop: ()=> null };
+  if(!w || typeof w !== 'object') return empty;
+  const idx = recIndex(list);
+  let res = recLookup(idx, w);
+  if(!res && Array.isArray(idx.src)){
+    // trening spoza listy (jeszcze niezapisany): liczymy go jako ostatni w swoim dniu; zwykła ścieżka tego nie robi
+    res = recLookup(recBuildIndex(idx.src.concat([w])), w);
+  }
+  return res ? recResultView(res) : empty;
+}
+function exerciseRecords(name, list){
+  const st = recIndex(list).state.get(name);
+  if(!st) return null;
+  return {
+    name: st.name,
+    weight: st.w ? { value: st.w.value, reps: st.w.reps, date: st.w.date, workoutId: st.w.workoutId, history: st.hw } : null,
+    reps: st.r ? { value: st.r.value, date: st.r.date, workoutId: st.r.workoutId, history: st.hr } : null,
+    time: st.t ? { value: st.t.value, perSide: st.t.perSide, date: st.t.date, workoutId: st.t.workoutId, history: st.ht } : null,
+    sessions: st.sessions, firstDate: st.firstDate, lastDate: st.lastDate, events: st.events,
+  };
+}
+function recordTimeline(list){ return recIndex(list).timeline; }
+function latestWorkoutWithRecord(list){
+  const idx = recIndex(list);
+  for(let i = idx.order.length - 1; i >= 0; i--){
+    const res = idx.byWorkout.get(idx.order[i]);
+    if(res && res.headline) return { workout: idx.order[i], result: recResultView(res) };
+  }
+  return null;
+}
+function projectedMax(name, list){
+  const st = recIndex(list).state.get(name);
+  return st && st.proj ? { value: st.proj.value, weight: st.proj.weight, reps: st.proj.reps, date: st.proj.date, byMonth: st.projByMonth } : null;
+}
+// wartość rekordu (historia [{date,value}] rosnąca) na koniec danego dnia; 0 gdy jeszcze nie było wyniku
+function recValueAsOf(history, iso){
+  let v = 0;
+  (history || []).forEach(h=>{ if(h.date <= iso) v = h.value; });
+  return v;
+}
+// nazwa pod rekordem objętości treningu: nazwa dnia/planu z zapisu albo "Cały trening"
+function recWorkoutLabel(w){
+  const d = w && typeof w.day === 'string' ? w.day.trim() : '';
+  return d.length > 1 ? d : t('recWholeWorkout', 'Cały trening');
+}
+// rekord (główny) zapisanego treningu w kształcie używanym przez Gratulacje, kartę udostępniania i dashboard
+function workoutRecord(w){
+  const h = workoutRecordsFor(w).headline;
+  if(!h) return null;
+  const out = Object.assign({}, h);
+  if(out.kind === 'volume') out.name = recWorkoutLabel(w);
+  return out;
+}
+
+/* ---- Odporność ekranów Historia i Postępy na zepsute dane (F1) ----
+   Te ekrany czytają surowe globalne `workouts`/`runs`, a import albo synchronizacja mogą wnieść wpis ze złą datą,
+   bez listy ćwiczeń, z serią bez liczb itd. Tak samo jak dashboardModel() podmieniamy je NA CZAS RENDERU na przefiltrowane
+   kopie (poprawna data RRRR-MM-DD z istniejącym dniem, `exercises` jest tablicą, ćwiczenia to obiekty z tablicą serii,
+   liczby skończone) i zawsze przywracamy w finally. Nic nie jest zapisywane: saveWorkouts() w trakcie takiego renderu
+   jest wstrzymane, żeby przefiltrowana lista nigdy nie nadpisała pełnej. Wyjątek renderu kończy się stanem zastępczym,
+   nie wyjątkiem w goRoute(). Gdy wszystkie wpisy są czyste, zwracamy TĘ SAMĄ tablicę (cache silnika rekordów działa dalej). */
+var recViewDepth = 0;   // var z tego samego powodu co recIdxCache
+function recCleanNum(v){ const n = typeof v === 'number' ? v : parseFloat(v); return isFinite(n) ? n : 0; }
+function recCleanSet(s){
+  if(!s || typeof s !== 'object') return null;
+  const bad = k=> !(typeof s[k] === 'number' && isFinite(s[k]));
+  const fix = bad('weight') || bad('reps') || (s.durationSec !== undefined && bad('durationSec'));
+  if(!fix) return s;
+  const c = Object.assign({}, s, { weight: recCleanNum(s.weight), reps: recCleanNum(s.reps) });
+  if(s.durationSec !== undefined) c.durationSec = recCleanNum(s.durationSec);
+  return c;
+}
+function recCleanWorkout(w){
+  if(!w || typeof w !== 'object' || !dashValidIso(w.date) || !Array.isArray(w.exercises)) return null;
+  let dirty = false;
+  const exs = [];
+  w.exercises.forEach(ex=>{
+    if(!ex || typeof ex !== 'object'){ dirty = true; return; }
+    if(!Array.isArray(ex.sets)){ dirty = true; exs.push(Object.assign({}, ex, { sets: [] })); return; }
+    let setsDirty = false;
+    const sets = ex.sets.map(s=>{ const c = recCleanSet(s); if(c !== s) setsDirty = true; return c; }).filter(Boolean);
+    if(sets.length !== ex.sets.length) setsDirty = true;
+    if(setsDirty){ dirty = true; exs.push(Object.assign({}, ex, { sets })); } else exs.push(ex);
+  });
+  return dirty ? Object.assign({}, w, { exercises: exs }) : w;
+}
+function recCleanWorkouts(list){
+  if(!Array.isArray(list)) return [];
+  let same = true;
+  const out = [];
+  list.forEach(w=>{ const c = recCleanWorkout(w); if(c !== w) same = false; if(c) out.push(c); });
+  return same ? list : out;
+}
+function recCleanRuns(list){
+  if(!Array.isArray(list)) return [];
+  let same = true;
+  const out = [];
+  list.forEach(r=>{
+    if(!r || typeof r !== 'object' || !dashValidIso(r.date)){ same = false; return; }
+    const bad = k=> !(typeof r[k] === 'number' && isFinite(r[k]));
+    if(bad('distance') || bad('time') || bad('pace')){ same = false; out.push(Object.assign({}, r, { distance: recCleanNum(r.distance), time: recCleanNum(r.time), pace: recCleanNum(r.pace) })); }
+    else out.push(r);
+  });
+  return same ? list : out;
+}
+function recGuardedRender(screen, fn, onFail){
+  if(recViewDepth > 0) return fn();   // zagnieżdżone wywołanie: dane już przefiltrowane, wyjątek złapie zewnętrzne
+  const keepW = workouts, keepR = runs;
+  recViewDepth++;
+  try{
+    workouts = recCleanWorkouts(keepW);
+    runs = recCleanRuns(keepR);
+    return fn();
+  }catch(err){
+    console.error(screen + ' render failed', err);
+    try{ onFail(err); }catch(e2){}
+  }finally{
+    workouts = keepW; runs = keepR; recViewDepth--;
+  }
 }
 // the record as the Gratulacje screen shows it (see showGymFinishV2): label, name, big value, unit and the "+x vs previous" line
 function gymFinRecordFrom(rec){
@@ -11843,7 +12080,8 @@ function gymFinRecordFrom(rec){
   const d = rec.delta, plus = (txt)=> d > 0 ? `+${txt} ${vs}` : '';
   const isKgVol = rec.kind === 'volume' && rec.unit === 'kg';
   const out = { name: rec.name, label: rec.kind === 'volume' ? t('gymFinRecordVolume','Nowy rekord objętości') : t('gymFinRecordLabel','Nowy rekord'), icon: (rec.kind === 'weight' || isKgVol) ? 'barbell' : 'trophy' };
-  if(rec.kind === 'weight'){ out.value = fmtGymWeight(rec.value); out.unit = 'kg'; out.sub = plus(fmtGymWeight(d) + ' kg'); }
+  // unitSig = podpis rekordu z powtórzeniami ("kg × 10"), tylko dla Gratulacji i dashboardu; karta udostępniania zostaje przy value/unit
+  if(rec.kind === 'weight'){ out.value = fmtGymWeight(rec.value); out.unit = 'kg'; out.reps = rec.reps || 0; out.unitSig = rec.reps > 0 ? 'kg × ' + rec.reps : 'kg'; out.sub = plus(fmtGymWeight(d) + ' kg'); }
   else if(isKgVol){ out.value = formatDashNum(Math.round(rec.value), 0); out.unit = 'kg'; out.sub = plus(formatDashNum(Math.round(d), 0) + ' kg'); }
   else if(rec.unit === 'reps'){ const v = Math.round(rec.value); out.value = String(v); out.unit = gymFinRepsWord(v); out.sub = plus(String(Math.round(d))); }
   else { out.value = fmtDur(rec.value, rec.perSide); out.unit = ''; out.sub = plus(Math.round(d) + ' s'); }
@@ -13940,43 +14178,10 @@ function dashGymProgress(now){
   };
 }
 
-// oś rekordów z całej historii w jednym przebiegu: rekord = ćwiczenie pobite względem WCZEŚNIEJSZYCH
-// treningów (pierwsze podejście do ćwiczenia rekordu nie robi). Te same reguły co workoutRecord() —
-// keep in sync — ale dla każdego treningu i ćwiczenia, nie tylko „jeden na trening”
+// oś rekordów ćwiczeń dla odznak: z silnika rekordów (recordTimeline), ta sama definicja co dashboard, Historia, Postępy i Gratulacje.
+// Rekord objętości TRENINGU jest osobny i nie wchodzi do odznak za rekordy ćwiczeń. Kształt zdarzenia zostaje: { date, name, kinds, workoutId }
 function dashRecordEvents(){
-  const order = workouts.map((w,i)=>({w,i})).sort((a,b)=> a.w.date < b.w.date ? -1 : a.w.date > b.w.date ? 1 : a.i-b.i);
-  const best = { w:{}, vol:{}, repsVol:{}, reps:{}, time:{} };
-  const events = [];
-  order.forEach(({w})=>{
-    const upd = [];
-    w.exercises.forEach(ex=>{
-      const n = ex.name, sv = exSetsView(ex);
-      const r = { topW:0, vol:0, repsVol:0, topReps:0, topTime:0 };
-      sv.forEach(st=>{
-        r.topW = Math.max(r.topW, st.weight||0);
-        r.vol += (st.weight||0) * (st.reps||0);
-        r.repsVol += st.reps||0;
-        r.topReps = Math.max(r.topReps, st.reps||0);
-        r.topTime = Math.max(r.topTime, st.durationSec||0);
-      });
-      const bw = sv.length > 0 && sv.every(st=>!(st.weight>0)) && r.repsVol > 0;
-      const kinds = [];
-      if(r.topW > 0 && best.w[n] !== undefined && r.topW > best.w[n]) kinds.push('weight');
-      if(r.vol > 0 && best.vol[n] !== undefined && r.vol > best.vol[n]) kinds.push('volume');
-      if(bw && best.repsVol[n] !== undefined && r.repsVol > best.repsVol[n]) kinds.push('volume');
-      if(bw && best.reps[n] !== undefined && r.topReps > best.reps[n]) kinds.push('reps');
-      if(!isCardioName(n) && best.time[n] !== undefined && r.topTime > best.time[n]) kinds.push('time');
-      if(kinds.length) events.push({ date: w.date, name: n, kinds, workoutId: w.id });
-      upd.push([n, r]);
-    });
-    // najlepsze wyniki aktualizujemy dopiero po całym treningu (dwa wpisy tego samego ćwiczenia nie biją się nawzajem)
-    upd.forEach(([n, r])=>{
-      const mx = (m, v)=>{ if(v > 0) m[n] = Math.max(m[n] || 0, v); };
-      if(!isCardioName(n)) mx(best.time, r.topTime);
-      mx(best.w, r.topW); mx(best.reps, r.topReps); mx(best.vol, r.vol); mx(best.repsVol, r.repsVol);
-    });
-  });
-  return events;
+  return recordTimeline().filter(e=> e.kind !== 'volume').map(e=>({ date: e.date, name: e.name, kinds: [e.kind], workoutId: e.workoutId, value: e.value, reps: e.reps }));
 }
 
 // Odznaki — jedna tablica danych (nazwy i kryteria uzgodnione z Maciejem 2026-09-16, po /człowiek i poprawnej
@@ -14089,25 +14294,26 @@ function dashStreak(plan, todayIso){
   return { weeks, required, thisWeekDone: curDone, thisWeekQualified: curOk };
 }
 
-// „ostatni rekord”, deterministycznie: najświeższy trening z rekordem wg workoutRecord(); gdy historia
-// nie ma jeszcze żadnego (np. pierwszy trening), najcięższy wynik z ostatniego treningu wg statsV2ExerciseRecord()
+// „ostatni rekord”, deterministycznie: najświeższy trening z rekordem wg silnika rekordów (bez limitu 40 treningów: indeks jest policzony raz);
+// gdy historia nie ma jeszcze żadnego (np. pierwszy trening), najcięższy wynik z ostatniego treningu
 function dashLastRecord(){
-  const sorted = workouts.map((w,i)=>({w,i})).sort((a,b)=> b.w.date.localeCompare(a.w.date) || b.i-a.i).map(x=>x.w);
-  if(!sorted.length) return null;
-  const latestId = sorted[0].id;
-  for(const w of sorted.slice(0, 40)){
-    const rec = workoutRecord(w);
-    if(rec) return { source:'workout', kind:rec.kind, unit:rec.unit, name:rec.name, value:rec.value, prev:rec.prev, delta:rec.delta,
-                     date:w.date, workoutId:w.id, fresh: w.id === latestId, display: gymFinRecordFrom(rec), target:'stats-v2' };
+  const order = recChrono(workouts);
+  if(!order.length) return null;
+  const newest = order[order.length - 1];
+  const hit = latestWorkoutWithRecord();
+  if(hit){
+    const w = hit.workout, rec = workoutRecord(w);
+    return { source:'workout', kind:rec.kind, unit:rec.unit, name:rec.name, value:rec.value, prev:rec.prev, delta:rec.delta,
+             date:w.date, workoutId:w.id, fresh: w === newest || (w.id != null && w.id === newest.id), display: gymFinRecordFrom(rec), target:'stats-v2' };
   }
   let top = null;
-  sorted[0].exercises.forEach(ex=>{
-    const r = statsV2ExerciseRecord(ex.name);
+  newest.exercises.forEach(ex=>{
+    const r = ex && typeof ex.name === 'string' ? exerciseRecords(ex.name) : null;
     if(!r) return;
-    const cand = r.ciezar ? { kind:'weight', unit:'kg', value:r.ciezar.weight } : (r.seria && r.isBodyweight) ? { kind:'reps', unit:'reps', value:r.seria.reps } : null;
+    const cand = r.weight ? { kind:'weight', unit:'kg', value:r.weight.value, reps:r.weight.reps } : r.reps ? { kind:'reps', unit:'reps', value:r.reps.value } : null;
     if(cand && (!top || (cand.unit === 'kg' && (top.unit !== 'kg' || cand.value > top.value)))) top = { ...cand, name: ex.name };
   });
-  return top ? { source:'best', ...top, prev:null, delta:null, date:sorted[0].date, workoutId:latestId, fresh:true, display:null, target:'stats-v2' } : null;
+  return top ? { source:'best', ...top, prev:null, delta:null, date:newest.date, workoutId:newest.id, fresh:true, display:null, target:'stats-v2' } : null;
 }
 
 function dashLastWorkout(){
@@ -14547,7 +14753,7 @@ function dashWeekHtml(m, animate, rc){
   if(rec){
     const d = rec.display;
     const val = d ? d.value : (rec.unit === 'kg' ? fmtGymWeight(rec.value) : String(Math.round(rec.value)));
-    const unit = d ? d.unit : (rec.unit === 'kg' ? 'kg' : gymFinRepsWord(Math.round(rec.value)));
+    const unit = d ? (d.unitSig || d.unit) : (rec.unit === 'kg' ? (rec.reps > 0 ? 'kg × ' + rec.reps : 'kg') : gymFinRepsWord(Math.round(rec.value)));
     recHtml = `<button type="button" class="dash-card dash-rec m-press${rc(3)}" onclick="dashCta('record')" aria-label="${t('dashRecord', 'Rekord')}: ${escHtml(rec.name)}, ${escHtml(val + (unit ? ' ' + unit : ''))}">
       <span class="dash-hd"><span class="dash-lbl">${t('dashRecord', 'Rekord')}${rec.fresh ? `<i class="dash-dot-new" aria-hidden="true"></i><span class="dash-sr"> ${t('dashRecordNew', 'nowy')}</span>` : ''}</span>${dashCaret()}</span>
       <span class="dash-rec-body">
@@ -15745,6 +15951,12 @@ function toggleHistExpandV2(key){
    state simply wasn't there yet. Same anti-pattern this app's own
    Plan Editor v2/picker comments already warn about. */
 function renderCalendarV2(animate){
+  return recGuardedRender('history', ()=> renderCalendarV2Core(animate), ()=>{
+    const wrap = document.getElementById('histDetailV2');
+    if(wrap) wrap.innerHTML = `<div class="histv2-empty">${t('histRenderError', 'Nie udało się wyświetlić historii. Spróbuj ponownie za chwilę.')}</div>`;
+  });
+}
+function renderCalendarV2Core(animate){
   document.getElementById('histCalMonthLabelV2').textContent = MONTH_NAMES[calStateV2.month];
   document.getElementById('histCalYearLabelV2').textContent = calStateV2.year;
   const dowRow = document.getElementById('histCalDowRowV2');
@@ -15861,56 +16073,19 @@ function performHistRunDeleteV2(id){
   toast(t('runDeleted','Bieg usunięty'));
   renderCalendarV2();
 }
-/* Did this workout set a weight-PR? For each exercise, compare its top set
-   here against the same exercise in EARLIER workouts (matches the finish
-   screen's "new record" — a first-ever exercise doesn't count). */
+/* Rekord treningu w kartach Historii: z silnika rekordów (ta sama definicja co Gratulacje, dashboard i Postępy).
+   Cienkie opakowania zostają dla starych wywołań: rekord ćwiczenia, rekord objętości treningu i poprzednia
+   najlepsza seria ćwiczenia (karta "Twój postęp"). */
 function histWorkoutRecordV2(w){
-  let pr = null;
-  w.exercises.forEach(ex=>{
-    let priorBest = null;
-    workouts.forEach(o=>{
-      if(o.id === w.id || o.date >= w.date) return;
-      o.exercises.forEach(oe=>{
-        if(oe.name !== ex.name) return;
-        oe.sets.forEach(s=>{ if(s.weight > 0 && (priorBest === null || s.weight > priorBest)) priorBest = s.weight; });
-      });
-    });
-    if(priorBest === null) return;
-    let top = 0;
-    ex.sets.forEach(s=>{ if(s.weight > top) top = s.weight; });
-    if(top > priorBest && (!pr || top > pr.weight)) pr = { name: ex.name, weight: top };
-  });
-  return pr;
+  const h = workoutRecordsFor(w).headline;
+  return h && h.kind !== 'volume' ? { name: h.name, kind: h.kind, weight: h.kind === 'weight' ? h.value : 0, value: h.value, reps: h.reps || 0 } : null;
 }
-/* Top set of the previous workout of `exName` before this card's date —
-   feeds buildProgressCard() in the expanded history card. */
 function histPriorTopSet(w, exName){
-  let best = null;
-  workouts.forEach(o=>{
-    if(o.id === w.id || o.date >= w.date) return;
-    const oe = o.exercises.find(e=> e.name === exName);
-    if(oe && (!best || o.date > best.date)) best = { date: o.date, sets: oe.sets };
-  });
-  return best ? gymFinTopSet(best.sets) : null;
+  return workoutRecordsFor(w).prevTop(exName);
 }
-/* Session-volume PR for an exercise vs every earlier workout — the
-   fallback for the record row when there's no weight PR (mirrors #7). */
 function histWorkoutVolRecordV2(w){
-  let best = null;
-  w.exercises.forEach(ex=>{
-    const nowVol = ex.sets.reduce((s,st)=> s + st.weight * st.reps, 0);
-    if(nowVol <= 0) return;
-    let priorBestVol = null;
-    workouts.forEach(o=>{
-      if(o.id === w.id || o.date >= w.date) return;
-      const oe = o.exercises.find(e=> e.name === ex.name);
-      if(!oe) return;
-      const v = oe.sets.reduce((s,st)=> s + st.weight * st.reps, 0);
-      if(priorBestVol === null || v > priorBestVol) priorBestVol = v;
-    });
-    if(priorBestVol !== null && nowVol > priorBestVol && (!best || nowVol > best.vol)) best = { name: ex.name, vol: nowVol };
-  });
-  return best;
+  const v = workoutRecordsFor(w).volume;
+  return v ? { name: recWorkoutLabel(w), vol: v.value, unit: v.unit } : null;
 }
 function histWorkoutCardInner(w){
   const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
@@ -15930,8 +16105,7 @@ function histWorkoutCardInner(w){
     <p class="histv2-card-title">${t('histWorkoutVolTitle', `${w.exercises.length} ${plExercisesWord(w.exercises.length)}`, w.exercises.length)}</p>
     <p class="histv2-card-sub">${workoutIsTimedOnly(w) ? `łączny czas ${fmtDur(workoutTimedTotalSec(w))}` : t('histWorkoutVolSub', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol))}</p>`;
   }
-  const rec = histWorkoutRecordV2(w);
-  const volRec = rec ? null : histWorkoutVolRecordV2(w);
+  const recD = gymFinRecordFrom(workoutRecord(w));
   const progress = buildProgressCard(w.exercises, name => histPriorTopSet(w, name), false);
   const timeCell = w.durationMin
     ? `<p class="v">${w.durationMin}<small>min</small></p>`
@@ -15965,12 +16139,9 @@ function histWorkoutCardInner(w){
             : `<span class="histv2-wkcal-tag">szacunek</span>`}
       </div>`;
     })()}
-    ${rec ? `<div class="histv2-wrecord">${ph('trophy')}<div>
-      <p class="histv2-wrecord-k">${t('gymFinRecordLabel','Nowy rekord')}</p>
-      <p class="histv2-wrecord-v">${escHtml(rec.name)} — ${fmtGymWeight(rec.weight)} kg</p>
-    </div></div>` : volRec ? `<div class="histv2-wrecord">${ph('trophy')}<div>
-      <p class="histv2-wrecord-k">${t('gymFinRecordVolume','Nowy rekord objętości')}</p>
-      <p class="histv2-wrecord-v">${escHtml(volRec.name)} · ${formatDashNum(Math.round(volRec.vol),0)} kg</p>
+    ${recD ? `<div class="histv2-wrecord">${ph('trophy')}<div>
+      <p class="histv2-wrecord-k">${escHtml(recD.label)}</p>
+      <p class="histv2-wrecord-v">${escHtml(recD.name || '')} — ${escHtml(recD.value + (recD.unitSig || recD.unit ? ' ' + (recD.unitSig || recD.unit) : ''))}</p>
     </div></div>` : ''}
     <div class="histv2-ex-list">
       ${w.exercises.map((e,i)=>`
@@ -16045,6 +16216,12 @@ function buildHistCardV2(kind, item, orderIdx, animate){
   return wrap;
 }
 function renderHistDetailV2(animate){
+  return recGuardedRender('history', ()=> renderHistDetailV2Core(animate), ()=>{
+    const wrap = document.getElementById('histDetailV2');
+    if(wrap) wrap.innerHTML = `<div class="histv2-empty">${t('histRenderError', 'Nie udało się wyświetlić historii. Spróbuj ponownie za chwilę.')}</div>`;
+  });
+}
+function renderHistDetailV2Core(animate){
   const wrap = document.getElementById('histDetailV2');
   const animCls = animate ? ' histv2-anim-in' : '';
   if(!selectedHistDateV2){ wrap.innerHTML = renderHistMonthSummaryV2(animCls); return; }
@@ -17101,6 +17278,12 @@ function statsV2CardioHtml(){
       </div>`;
 }
 function renderStatsV2(animate, drawLines){
+  return recGuardedRender('stats', ()=> renderStatsV2Core(animate, drawLines), ()=>{
+    const body = document.getElementById('statsV2Body');
+    if(body) body.innerHTML = `<div class="statsv2-empty">${t('statsRenderError', 'Nie udało się wyświetlić postępów. Spróbuj ponownie za chwilę.')}</div>`;
+  });
+}
+function renderStatsV2Core(animate, drawLines){
   if(drawLines === undefined) drawLines = animate;
   const body = document.getElementById('statsV2Body');
   statsV2TeardownReveal();
