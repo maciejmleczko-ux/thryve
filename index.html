@@ -12242,12 +12242,13 @@ function builtinMetaFor(id){
 // strictly whitelisted copy (meta can come from a share code, a backup file or the cloud)
 function cleanPlanMeta(m){
   if(!m || typeof m !== 'object' || Array.isArray(m)) return null;
-  const str = (v, max)=> (typeof v === 'string' && cleanName(v).trim()) ? cleanName(v).trim().slice(0, max) : null;
+  // same character stripping as cleanName(), but with its own length cap (cleanName cuts at 80)
+  const str = (v, max)=>{ const s = typeof v === 'string' ? v.replace(/[<>"`\\]/g, '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max) : ''; return s || null; };
   return {
     source: PLAN_META_SOURCES.includes(m.source) ? m.source : 'own',
     goal: str(m.goal, 60),
     level: str(m.level, 30),
-    equipment: Array.isArray(m.equipment) ? m.equipment.map(x=> str(x, 40)).filter(Boolean).slice(0, 12) : [],
+    equipment: Array.isArray(m.equipment) ? m.equipment.map(x=> str(x, 60)).filter(Boolean).slice(0, 12) : [],
     description: str(m.description, 400),
   };
 }
