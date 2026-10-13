@@ -122,7 +122,7 @@
   --m-page-top:#fbece3;    /* Dashboard page gradient: cream top... */
   --m-page-bot:#e2e2e1;    /* ...to grey bottom (also the body colour behind the dashboard) */
   --m-glass:rgba(255,255,255,.84); /* frosted tile fill on the Dashboard (Figma 'white 84%') */
-  --m-navy-wash:#e0e6f7;   /* pale blue tile: Konsystencja, SERII mini-tile */
+  --m-navy-tile:#e0e6f7;   /* pale blue tile: Konsystencja, SERII mini-tile (Figma 542:10833). NOT audyt-kolorow's proposed --m-navy-wash #e7ecff (different value) */
   --m-red-wash:#fbe2dd;    /* pale red tile: OBJETOSC mini-tile */
   --m-plum:#8e0045;
   --m-plum-ink:#470023;
@@ -135,11 +135,12 @@
   --m-ai-fill-from:#3a0058; /* Trener AI card fill: deep plum -> violet (Figma 533:8672) */
   --m-ai-fill-mid:#340050;
   --m-ai-fill-to:#a700ff;
-  --m-ai-glow:rgba(161,0,255,.94);   /* its inset glows */
-  --m-ai-glow-2:rgba(222,116,255,.5);
+  --m-ai-inset:rgba(161,0,255,.94);   /* Trener AI card's inset glows (kept off the name --m-ai-glow proposed in audyt-kolorow.md) */
+  --m-ai-inset-2:rgba(222,116,255,.5);
   --m-white:#fff;           /* text / fills on coloured tiles (was a literal #fff in the Dashboard rules) */
   --m-on-dark-1:rgba(255,255,255,.8);  /* secondary text / outlines on dark-blue + orange tiles */
   --m-on-dark-2:rgba(255,255,255,.7);  /* tertiary text on --m-plan-hard (4.5:1; Figma's .6 is 3.8:1) */
+  --m-on-dark-3:rgba(255,255,255,.6);  /* translucent white FILL (empty step dot, unselected plan pick; Figma .6). Never for text: 3.8:1 on --m-plan-hard */
   /* fixed metric colours, same everywhere in the app (Figma "Mekkio / Colors" metric/*) */
   --m-metric-volume:#cd1200; /* Objętość: red, not the orange accent */
   --m-metric-sets:var(--m-plan-hard);  /* Serie */
@@ -235,6 +236,8 @@ body.statsv2-bg{background:var(--m-panel);}
 body.histv2-bg{background:var(--m-panel);}
 /* Same technique, reused for modals — background stays put while a popup is open. */
 html.modal-lock, html.modal-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
+/* Otwarty modal na przewijalnym dashboardzie: bez tej reguły (0,2,x) wygrywałby .dashboard-scrollable i tło dałoby się przewijać pod arkuszem */
+html.modal-lock.dashboard-lock.dashboard-scrollable, html.modal-lock.dashboard-lock.dashboard-scrollable body{overflow:hidden;touch-action:none;overscroll-behavior:none;}
 button{font-family:inherit;}
 .app{max-width:440px;margin:0 auto;position:relative;min-height:100vh;padding-bottom:110px;}
 
@@ -1100,7 +1103,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 @supports (text-box:trim-both cap alphabetic){
   .dash-hero-title{line-height:1.1;text-box:trim-both cap alphabetic;}
 }
-.dash-hero-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;min-height:16px;margin-top:20px;}
+.dash-hero-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;min-height:16px;margin-top:20px;}   /* Figma stats-row gap 12 */
 .dash-stat{display:inline-flex;align-items:center;gap:12px;font-size:var(--m-fs-2xs);font-weight:600;line-height:16px;color:var(--m-orange-tint-2);}
 .dash-stat .ph{width:16px;height:16px;flex:none;}
 .dash-stat .ph svg{width:16px;height:16px;}
@@ -1111,7 +1114,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 /* in progress (02): progress bar + chips, white button */
 .dash-hero--prog .dash-prog{height:9px;margin-top:40px;border-radius:var(--m-r-pill);background:var(--m-plan-c-easy);overflow:hidden;}
 .dash-prog > span{display:block;height:100%;border-radius:var(--m-r-pill);background:var(--m-white);}
-.dash-hero--prog .dash-hero-meta{margin-top:0;min-height:34px;gap:4px 14px;}
+.dash-hero--prog .dash-hero-meta{margin-top:0;min-height:34px;gap:4px 10px;}   /* Figma chip row gap 10 */
 .dash-hero--prog .dash-stat{color:var(--m-white);}
 .dash-hero--prog .dash-hero-btn{margin-top:10px;background:var(--m-white);color:var(--m-orange);}
 
@@ -1120,15 +1123,17 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-hero--done .dash-hero-eyebrow{color:var(--m-ink);}
 .dash-hero--done .dash-hero-title{color:var(--m-mint-ink);}
 .dash-hero--done .dash-stat{color:var(--m-ink);}
+.dash-hero--done .dash-hero-meta{gap:4px 20px;}   /* Figma 03 chip row gap 20 */
 .dash-hero--done .dash-hero-btn{background:var(--m-white);color:var(--m-mint-ink);}
 
 /* no plan, has history (08): blue head + "Trenuj po swojemu" tile under it */
 .dash-hero--nop{border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;background:var(--m-plan-mid);box-shadow:none;}
-.dash-hero--nop .dash-hero-eyebrow{color:var(--m-on-dark-1);}
+.dash-hero--nop .dash-hero-eyebrow{color:var(--m-white);}   /* .8 white on --m-plan-mid is below 4.5:1 */
 .dash-hero--nop .dash-hero-btn{margin-top:20px;background:var(--m-white);color:var(--m-plan-hard);}
 
 /* ---- glass tiles: rest day (04) and "Trenuj po swojemu" (08) ---- */
-.dash-pair{display:flex;flex-direction:column;gap:1px;}
+.dash-pair{display:flex;flex-direction:column;gap:1px;}   /* 04: Figma 1px between the two tiles */
+.dash-pair--flush{gap:0;}   /* 08: head + "Trenuj po swojemu" form one block, no gap */
 .dash-tile{position:relative;display:block;width:100%;margin:0;padding:12px 12px 12px 34px;border:0;background:var(--m-glass);box-shadow:0 0 0 .5px var(--m-panel);color:var(--m-ink);font-family:inherit;text-align:left;}
 .dash-tile--top{border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;}
 .dash-tile--bot{border-radius:0 0 var(--m-r-sm) var(--m-r-sm);}
@@ -1136,7 +1141,7 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 button.dash-tile{cursor:pointer;}
 .dash-tile-row{display:flex;align-items:center;gap:12px;height:17px;}
 .dash-tile-lbl{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-muted-text);}
-.dash-pill{display:inline-flex;align-items:center;justify-content:center;height:17px;padding:0 24px;border-radius:var(--m-r-pill);font-size:var(--m-fs-2xs);font-weight:500;line-height:1.4;letter-spacing:.1em;text-transform:uppercase;color:var(--m-card);}
+.dash-pill{display:inline-flex;align-items:center;justify-content:center;height:17px;padding:0 24px;border-radius:var(--m-r-pill);font-size:var(--m-fs-2xs);font-weight:500;line-height:1.4;letter-spacing:.1em;text-transform:uppercase;color:var(--m-white);}
 .dash-pill--rest{background:var(--m-muted-text);}
 .dash-pill--plan{background:var(--m-orange);}
 .dash-free{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:8px;}
@@ -1164,8 +1169,8 @@ button.dash-tile{cursor:pointer;}
 .dash-steps-h{margin:0;padding:12px;border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;background:var(--m-glass);font-size:var(--m-fs-2xs);font-weight:600;line-height:22px;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
 .dash-step{display:flex;align-items:center;gap:14px;width:100%;min-height:57px;margin:0;padding:12px;border:0;background:var(--m-glass);color:var(--m-ink);font-family:inherit;font-size:var(--m-fs-base);font-weight:400;line-height:18px;text-align:left;cursor:pointer;}
 .dash-step:last-child{border-radius:0 0 var(--m-r-sm) var(--m-r-sm);}
-.dash-step-dot{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;box-sizing:border-box;border-radius:50%;border:.8px solid var(--m-orange);background:rgba(255,255,255,.6);color:var(--m-white);}
-.dash-step-dot svg{display:block;width:11px;height:11px;}
+.dash-step-dot{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;box-sizing:border-box;border-radius:50%;border:.8px solid var(--m-orange);background:var(--m-on-dark-3);color:var(--m-white);}
+.dash-step-dot svg{display:block;width:12px;height:12px;}
 .dash-step.is-done .dash-step-dot{background:var(--m-orange);border-color:var(--m-orange-tint);}
 .dash-step.is-done{color:var(--m-muted-text);}
 
@@ -1181,7 +1186,7 @@ button.dash-tile{cursor:pointer;}
 .dash-pcard-name{margin:0;font-size:var(--m-fs-lg);font-weight:300;line-height:1.1;letter-spacing:.04em;text-transform:uppercase;overflow-wrap:anywhere;}
 .dash-pcard-meta{display:flex;flex-wrap:wrap;gap:4px 16px;position:absolute;left:31px;bottom:34px;}
 .dash-pcard-meta .dash-stat{gap:4px;color:inherit;font-weight:400;}
-.dash-pick{position:absolute;z-index:1;left:-18px;top:45px;display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.6);box-shadow:0 0 0 .5px var(--m-orange-tint);cursor:pointer;}
+.dash-pick{position:absolute;z-index:1;left:-18px;top:45px;display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:0;border-radius:50%;background:var(--m-on-dark-3);box-shadow:0 0 0 .5px var(--m-orange-tint);cursor:pointer;}
 .dash-pick::after{content:"";position:absolute;inset:-4px;}
 .dash-pick.is-on{background:var(--m-mint);}
 .dash-pick svg{display:block;width:16px;height:16px;}
@@ -1190,6 +1195,7 @@ button.dash-tile{cursor:pointer;}
 /* ---- Dashboard cards under the hero (Phase 3; Figma 01 533:8433). One <section>
    slot per group, filled by renderDashCards(). Tiles are frosted white
    (--m-glass); text 11px floor everywhere; SVGs always carry explicit sizes. ---- */
+.dash-err{margin:0;font-size:var(--m-fs-xs);line-height:1.4;color:var(--m-ink);}   /* fallback when the model/render throws */
 .dash-card{display:block;width:100%;margin:0;padding:12px;border:0;border-radius:var(--m-r-sm);background:var(--m-glass);color:var(--m-ink);font-family:inherit;text-align:left;}
 button.dash-card{cursor:pointer;}
 .dash-lbl{margin:0;font-size:var(--m-fs-2xs);font-weight:500;line-height:14px;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-muted-text);}
@@ -1206,7 +1212,7 @@ button.dash-card{cursor:pointer;}
 .dash-wk{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:20px;padding:12px;border-radius:var(--m-r-sm);background:var(--m-plan-hard);color:var(--m-white);}
 .dash-wk-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:17px;}
 .dash-wk .dash-lbl{color:var(--m-on-dark-1);white-space:nowrap;}
-.dash-range{flex:none;display:inline-flex;align-items:center;justify-content:center;height:17px;padding:0 12px;border-radius:var(--m-r-pill);background:var(--m-plan-easy);color:var(--m-card);font-size:var(--m-fs-2xs);font-weight:500;line-height:1.4;letter-spacing:.1em;text-transform:uppercase;}
+.dash-range{flex:none;display:inline-flex;align-items:center;justify-content:center;height:17px;padding:0 12px;border-radius:var(--m-r-pill);background:var(--m-plan-easy);color:var(--m-white);font-size:var(--m-fs-2xs);font-weight:500;line-height:1.4;letter-spacing:.1em;text-transform:uppercase;}
 .dash-wk-body{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:16px;}
 .dash-wk-rows{display:flex;flex-direction:column;gap:12px;}
 .dash-wk-row{display:flex;align-items:center;gap:13.5px;min-width:0;}
@@ -1219,7 +1225,7 @@ button.dash-card{cursor:pointer;}
 .dash-wk-delta{margin:0;min-height:16px;font-size:var(--m-fs-2xs);font-weight:400;line-height:16px;color:var(--m-on-dark-2);}
 .dash-wk-chips{display:flex;flex-wrap:wrap;gap:6px 10px;}
 .dash-wk-chip{flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:5px;min-height:26.5px;padding:5px 12px;border-radius:var(--m-r-pill);font-size:var(--m-fs-2xs);font-weight:500;line-height:1.2;white-space:nowrap;color:var(--m-white);box-shadow:inset 0 0 0 .85px var(--m-on-dark-1);}
-.dash-wk-chip--min{background:var(--m-plan-mid);color:var(--m-card);box-shadow:none;}
+.dash-wk-chip--min{background:var(--m-plan-mid);color:var(--m-white);box-shadow:none;}
 .dash-wk-chip svg{display:block;flex:none;width:13.5px;height:13.5px;}
 @media (max-width:359px){ .dash-wk-ico{display:none;} .dash-wk-chip{padding:5px 8px;} .dash-range{padding:0 6px;letter-spacing:.04em;} }
 .dash-wkcol{flex:0 0 133px;display:flex;flex-direction:column;gap:4px;}
@@ -1240,9 +1246,9 @@ button.dash-card{cursor:pointer;}
 .dash-bdg-name{margin:0;font-size:var(--m-fs-2xs);font-weight:500;line-height:14px;letter-spacing:.1818em;text-transform:uppercase;text-align:center;color:var(--m-ink);overflow-wrap:anywhere;}
 
 /* consistency (542:10833) */
-.dash-cons{display:flex;flex-direction:column;gap:20px;background:var(--m-navy-wash);}
+.dash-cons{display:flex;flex-direction:column;gap:20px;background:var(--m-navy-tile);}
 .dash-cons .dash-lbl{color:var(--m-ink);opacity:.77;}
-.dash-chip-streak{flex:none;display:inline-flex;align-items:center;justify-content:center;height:17px;padding:0 12px;border-radius:var(--m-r-pill);background:var(--m-plan-mid);color:var(--m-card);font-size:var(--m-fs-2xs);font-weight:500;line-height:1.4;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+.dash-chip-streak{flex:none;display:inline-flex;align-items:center;justify-content:center;height:17px;padding:0 12px;border-radius:var(--m-r-pill);background:var(--m-plan-mid);color:var(--m-white);font-size:var(--m-fs-2xs);font-weight:500;line-height:1.4;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
 .dash-months{display:flex;justify-content:center;gap:20px;}
 .dash-month{flex:none;width:88px;display:flex;flex-direction:column;align-items:center;gap:12px;}
 .dash-month-n{margin:0;font-size:var(--m-fs-2xs);font-weight:500;line-height:14px;letter-spacing:.18em;text-transform:uppercase;text-align:center;color:var(--m-plan-hard);}
@@ -1266,23 +1272,23 @@ button.dash-card{cursor:pointer;}
 .dash-mini-v .dash-num{font-size:var(--m-fs-lg);letter-spacing:-.02em;}
 .dash-mini-v small{margin-bottom:-4px;font-size:var(--m-fs-2xs);font-weight:400;line-height:14px;}
 .dash-mini--vol{background:var(--m-red-wash);color:var(--m-metric-volume);}
-.dash-mini--sets{background:var(--m-navy-wash);color:var(--m-metric-sets);}
+.dash-mini--sets{background:var(--m-navy-tile);color:var(--m-metric-sets);}
 .dash-mini--rec{background:var(--m-orange-tint);color:var(--m-ink);}
 .dash-repeat{display:flex;align-items:center;justify-content:center;gap:20px;width:100%;height:50px;margin:0;padding:0 16px;border:0;border-radius:var(--m-r-pill);background:none;box-shadow:inset 0 0 0 1px var(--m-orange);color:var(--m-orange);font-family:inherit;font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
 .dash-repeat svg{display:block;flex:none;width:30px;height:16px;}
 
 /* Trener AI (533:8672): one card, rule line for everyone, AI summary on top when on */
-.dash-coach{display:flex;flex-direction:column;gap:25px;width:100%;min-height:108px;margin:0;padding:16px;border-radius:var(--m-r-sm);color:var(--m-card);font-family:inherit;text-align:left;
+.dash-coach{display:flex;flex-direction:column;gap:25px;width:100%;min-height:108px;margin:0;padding:16px;border-radius:var(--m-r-sm);color:var(--m-white);font-family:inherit;text-align:left;
   border:.5px solid transparent;
   background:linear-gradient(90deg,var(--m-ai-fill-from) 0%,var(--m-ai-fill-mid) 55%,var(--m-ai-fill-to) 175%) padding-box,linear-gradient(142deg,var(--m-ai-from) 0%,var(--m-ai-to) 83%) border-box;
-  box-shadow:inset 0 0 15.4px var(--m-ai-glow),inset 0 0 6px var(--m-ai-glow-2);}
+  box-shadow:inset 0 0 15.4px var(--m-ai-inset),inset 0 0 6px var(--m-ai-inset-2);}
 button.dash-coach{cursor:pointer;}
 .dash-coach-hd{display:flex;align-items:center;gap:15px;min-height:16px;}
 .dash-coach-hd .ph{flex:none;width:16px;height:16px;color:var(--m-white);}
 .dash-coach-hd .ph svg{display:block;width:16px;height:16px;}
 .dash-coach-hd .dash-eyebrow{margin:0;color:var(--m-on-dark-1);letter-spacing:.01em;}
 .dash-coach-hd .dash-caret{margin-left:-3px;color:var(--m-white);}
-.dash-coach-t{margin:0;font-size:var(--m-fs-xs);font-weight:300;line-height:1.4;color:var(--m-card);overflow-wrap:anywhere;}
+.dash-coach-t{margin:0;font-size:var(--m-fs-xs);font-weight:300;line-height:1.4;color:var(--m-white);overflow-wrap:anywhere;}
 .dash-coach-t.is-ai{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
 
 /* plan of the week (533:8684) */
@@ -1306,8 +1312,8 @@ button.dash-coach{cursor:pointer;}
 .dash-body{display:flex;gap:4px;align-items:stretch;}
 .dash-bt{display:flex;flex-direction:column;gap:10px;min-width:0;}
 .dash-bt-top{display:flex;flex-direction:column;gap:4px;}
-.dash-bt--w{flex:137 1 0;}
-.dash-bt--k{flex:214 1 0;}
+.dash-bt--w{flex:137 1 137px;}
+.dash-bt--k{flex:214 1 214px;}
 .dash-bt-v{display:flex;align-items:baseline;gap:4px;white-space:nowrap;}
 .dash-bt-v .dash-num{font-size:32px;}
 .dash-bt-v small{margin-bottom:-4px;font-size:var(--m-fs-2xs);font-weight:400;line-height:14px;color:var(--m-muted-text);}
@@ -7276,21 +7282,6 @@ function weightTrend(days){
   const base = (inWin.length ? inWin[0] : weightLog[0]).kg;
   const pts = (inWin.length >= 2 ? inWin : weightLog).slice(-10);
   return { cur, delta: +(cur - base).toFixed(1), pts, lastDate: lastWeightDate() };
-}
-function weightSparkSvg(pts){
-  if(!pts || pts.length < 2) return '';
-  const W = 312, H = 54, pad = 5;
-  const ks = pts.map(p=> p.kg);
-  const mn = Math.min(...ks), mx = Math.max(...ks), span = (mx - mn) || 1;
-  const xy = pts.map((p,i)=>[
-    (i / (pts.length - 1)) * W,
-    pad + (1 - (p.kg - mn) / span) * (H - pad * 2)
-  ]);
-  const d = xy.map((c,i)=> (i ? 'L' : 'M') + c[0].toFixed(1) + ' ' + c[1].toFixed(1)).join(' ');
-  const last = xy[xy.length - 1];
-  return `<svg class="statsv2-kcal-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`
-    + `<path d="${d}" fill="none" stroke="var(--m-plan-mid)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
-    + `<circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3.5" fill="var(--m-orange)"/></svg>`;
 }
 
 /* ---------- what's new / changelog ----------
@@ -13747,12 +13738,12 @@ function formatDashNum(v, decimals){
   const loc = LANG==='en' ? 'en-US' : 'pl-PL';
   return decimals===0 ? Math.round(v).toLocaleString(loc) : (Math.round(v*10)/10).toLocaleString(loc);
 }
-function animateDashNumber(el, target, decimals, suffixHtml){
+function animateDashNumber(el, target, decimals, suffixHtml, delayMs){
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(reduceMotion || !target){ el.innerHTML = `${formatDashNum(target, decimals)} ${suffixHtml}`; return; }
-  const duration = 700, start = performance.now();
+  const duration = 700, wait = delayMs > 0 ? delayMs : 0, t0 = performance.now() + wait;   // wait = kafel dopiero ląduje, liczba rusza po nim
   function frame(now){
-    const p = Math.min(1, (now-start)/duration);
+    const p = Math.min(1, Math.max(0, (now-t0)/duration));
     const eased = 1 - Math.pow(1-p, 3);
     el.innerHTML = `${formatDashNum(target*eased, decimals)} ${suffixHtml}`;
     if(p<1) requestAnimationFrame(frame);
@@ -14111,13 +14102,17 @@ function dashConsistency(todayIso){
 }
 
 function dashWeightBlock(todayIso){
-  const log = weightLog.filter(e=> e && isFinite(e.kg) && e.date <= todayIso);
+  // kg tylko liczbowe (liczba albo liczba w tekście z chmury); null / '' / 'abc' pomijamy, żeby nie wyszło „NaN”
+  const log = weightLog.map(e=> e && ((typeof e.kg === 'number') || (typeof e.kg === 'string' && e.kg.trim() !== '')) ? { ...e, kg: +e.kg } : null)
+    .filter(e=> e && isFinite(e.kg) && dashValidIso(e.date) && e.date <= todayIso);
   if(!log.length) return { hasData:false, kg:null, date:null, daysSince:null, delta30:null, points:[] };
   const last = log[log.length-1];
   const cutoff = dashAddDays(todayIso, -30);
   let base = null; log.forEach(e=>{ if(e.date <= cutoff) base = e; });
   const inWin = log.filter(e=>e.date > cutoff);
-  const ref = base || (inWin.length > 1 ? inWin[0] : null);
+  // delta30 tylko gdy jest do czego porównać: jedyny/ostatni wpis nie jest własnym punktem odniesienia
+  const ref0 = base || (inWin.length > 1 ? inWin[0] : null);
+  const ref = ref0 && ref0 !== last ? ref0 : null;
   return {
     hasData:true, kg:last.kg, date:last.date, daysSince: dashDaysBetween(last.date, todayIso),
     delta30: ref ? Math.round((last.kg - ref.kg)*10)/10 : null,
@@ -14146,7 +14141,31 @@ function dashCoachRule(ctx){
   return { id, text, aiEnabled: isPremium() && !!cloudSession };
 }
 
+// Poprawna data zapisu: RRRR-MM-DD i istniejący dzień kalendarza (nie '2026-02-31', nie '', nie liczba)
+function dashValidIso(d){
+  if(typeof d !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+  const dt = new Date(d+'T00:00:00');
+  return !isNaN(dt.getTime()) && dateStr(dt) === d;
+}
+/* Wejście modelu: wpisy bez poprawnej daty albo z datą z przyszłości nie istnieją dla dashboardu
+   (nie są „Ostatnim treningiem”, nie liczą się do tygodnia ani serii). Pomocnicze funkcje czytają
+   globalne `workouts`/`runs`, więc na czas liczenia (synchronicznie) podmieniamy je na przefiltrowane
+   kopie i zawsze przywracamy — nic nie jest zapisywane. */
 function dashboardModel(now){
+  now = now || new Date();
+  const todayIso = dateStr(now);
+  const okW = w => w && dashValidIso(w.date) && w.date <= todayIso && Array.isArray(w.exercises);
+  const okR = r => r && dashValidIso(r.date) && r.date <= todayIso;
+  const keepW = workouts, keepR = runs;
+  try{
+    workouts = keepW.filter(okW);
+    runs = keepR.filter(okR);
+    return dashboardModelCore(now);
+  } finally {
+    workouts = keepW; runs = keepR;
+  }
+}
+function dashboardModelCore(now){
   now = now || new Date();
   const todayIso = dateStr(now), todayKey = dayKeyFromDate(todayIso);
   const plan = starredPlanId ? (trainingPlans.find(p=>p.id===starredPlanId) || null) : null;
@@ -14264,7 +14283,12 @@ function dashboardModel(now){
    ============================================================ */
 let dashLastModel = null;
 let dashTickIv = 0;
-const DASH_SVG_CHECK = (w, h)=> `<svg viewBox="0 0 24 24" width="${w}" height="${h}" fill="none" aria-hidden="true"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// Ptaszek: ścieżka zajmuje ~55% viewBox 24, więc viewBox przycinamy do glifu. `g` = szerokość glifu (z obrysem)
+// w pikselach wewnątrz pudełka w×h (Figma: 12 px w eyebrow 14×12 i w chipie 16, 16 px w kółku dnia, 10,67 w kółku kroku).
+const DASH_SVG_CHECK = (w, h, g)=>{
+  const V = 14.9 * w / (g || w), vh = V * h / w;
+  return `<svg viewBox="${(12.05 - V / 2).toFixed(2)} ${(12.4 - vh / 2).toFixed(2)} ${V.toFixed(2)} ${vh.toFixed(2)}" width="${w}" height="${h}" fill="none" aria-hidden="true"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+};
 
 // headline = 1-3 sentences, each on its own line (Figma breaks after each sentence)
 // Display-only: "Fullbody workout" -> "Fullbody" (the plan's stored name is untouched)
@@ -14308,7 +14332,7 @@ function dashHeroHtml(m, animate){
         ${btn(h.state, t('dashStart', 'Start'))}
       </div>`;
       if(h.state !== 'planready') return html;
-      const row = (done, label, kind) => `<button type="button" class="dash-step m-press${done ? ' is-done' : ''}" onclick="dashCta('${kind}')"><span class="dash-step-dot">${done ? DASH_SVG_CHECK(11, 11) : ''}</span><span>${label}</span></button>`;
+      const row = (done, label, kind) => `<button type="button" class="dash-step m-press${done ? ' is-done' : ''}" onclick="dashCta('${kind}')"><span class="dash-step-dot">${done ? DASH_SVG_CHECK(12, 12, 10.67) : ''}</span><span>${label}</span></button>`;
       return html + `<div class="dash-steps${rc(2)}">
         <p class="dash-steps-h">${t('dashSteps', 'Pierwsze kroki')}</p>
         ${row(true, t('dashStep1', 'Wybierz plan'), 'planready-plans')}
@@ -14321,7 +14345,7 @@ function dashHeroHtml(m, animate){
         <p class="dash-hero-eyebrow">${t('dashYourPlan', 'Twój plan')}</p>
         <h2 class="dash-hero-title">${title}</h2>
         <div class="dash-prog" role="progressbar" aria-valuemin="0" aria-valuemax="${h.exercisesTotal}" aria-valuenow="${h.exercisesDone}"><span style="width:${Math.round(h.ratio * 1000) / 10}%"></span></div>
-        <div class="dash-hero-meta">${dashStat(DASH_SVG_CHECK(16, 16), `${h.exercisesDone}/${h.exercisesTotal} ${t('gymPillExercises', 'ćwiczeń')}`)}${dashStat(ph('clock-counter-clockwise', 'dash-flip'), fmtLiveClock(h.elapsedMs), 'dashHeroClock')}</div>
+        <div class="dash-hero-meta">${dashStat(DASH_SVG_CHECK(16, 16, 12), `${h.exercisesDone}/${h.exercisesTotal} ${t('gymPillExercises', 'ćwiczeń')}`)}${dashStat(ph('clock-counter-clockwise', 'dash-flip'), fmtLiveClock(h.elapsedMs), 'dashHeroClock')}</div>
         ${btn('inprogress', t('dashContinue', 'Kontynuuj'))}
       </div>`;
     }
@@ -14331,7 +14355,7 @@ function dashHeroHtml(m, animate){
       if(h.volumeKg > 0) chips.push(dashStat(ph('barbell'), `${formatDashNum(h.volumeKg, 0)} kg`));
       if(h.record) chips.push(dashStat(ph('trophy'), t('dashOneRecord', '1 rekord')));
       return `<div class="dash-hero dash-hero--done${rc(1)}">
-        <p class="dash-hero-eyebrow">${DASH_SVG_CHECK(14, 12)}${t('dashDoneToday', 'Dziś zaliczone')}</p>
+        <p class="dash-hero-eyebrow">${DASH_SVG_CHECK(14, 12, 12)}${t('dashDoneToday', 'Dziś zaliczone')}</p>
         <h2 class="dash-hero-title">${title}</h2>
         <div class="dash-hero-meta">${chips.join('')}</div>
         ${btn('done', t('dashSummary', 'Podsumowanie'))}
@@ -14371,14 +14395,14 @@ function dashHeroHtml(m, animate){
             <p class="dash-pcard-name">${escHtml(dashPlanShortName(p.name))}</p>
             <div class="dash-pcard-meta">${dashStat(ph('barbell'), escHtml(planExCountText(p.exercisesPerDay)))}${dashStat(ph('clock-countdown'), '~' + p.estMin + ' min')}${dashStat(ph('chart-line'), escHtml(diff))}</div>
           </div>
-          <button type="button" class="dash-pick m-press${i === 0 ? ' is-on' : ''}" style="color:${i === 0 ? 'var(--m-mint-ink)' : colors[i % colors.length]}" aria-label="${t('dashPickPlan', 'Wybierz plan')}: ${escHtml(p.name)}" onclick="event.stopPropagation();dashCta('noplan-new-pick','${id}')">${DASH_SVG_CHECK(16, 16)}</button>
+          <button type="button" class="dash-pick m-press${i === 0 ? ' is-on' : ''}" style="color:${i === 0 ? 'var(--m-mint-ink)' : colors[i % colors.length]}" aria-label="${t('dashPickPlan', 'Wybierz plan')}: ${escHtml(p.name)}" onclick="event.stopPropagation();dashCta('noplan-new-pick','${id}')">${DASH_SVG_CHECK(16, 16, 12)}</button>
         </div>`;
       }).join('');
       const list = plans.length ? `<div class="dash-plans${rc(2)}"><p class="dash-plans-h">${t('dashOtherPlans', 'Inne plany Mekkio')}</p>${cards}</div>` : '';
       return heroHtml + list + `<button type="button" class="dash-create m-press${rc(3)}" onclick="dashCta('noplan-new-create')">${t('dashCreatePlan', 'Stwórz własny plan')}</button>`;
     }
     default: { // noplan-history
-      return `<div class="dash-pair${rc(1)}">
+      return `<div class="dash-pair dash-pair--flush${rc(1)}">
         <div class="dash-hero dash-hero--nop">
           <p class="dash-hero-eyebrow">${t('dashNoPlanChosen', 'Brak wybranego planu')}</p>
           <h2 class="dash-hero-title">${t('dashPickPlanTitle', 'Wybierz plan')}</h2>
@@ -14566,12 +14590,12 @@ function dashPlanWeekHtml(m, animate, rc){
   if(!m.hasPlan || !pw || !pw.total) return '';
   const days = pw.days.map(d=>{
     const st = d.state, cls = st === 'done' ? 'is-done' : st === 'missed' ? 'is-missed' : st === 'planned' ? 'is-planned' : 'is-rest';
-    return `<span class="dash-day${d.isToday ? ' is-today' : ''}"><span class="dash-dc ${cls}">${st === 'done' ? DASH_SVG_CHECK(20, 20) : ''}</span><span>${escHtml(d.label)}</span></span>`;
+    return `<span class="dash-day${d.isToday ? ' is-today' : ''}"><span class="dash-dc ${cls}">${st === 'done' ? DASH_SVG_CHECK(20, 20, 16) : ''}</span><span>${escHtml(d.label)}</span></span>`;
   }).join('');
   return `<button type="button" class="dash-card dash-pw m-press${rc(8)}" onclick="dashCta('planweek')" aria-label="${t('dashPlanWeek', 'Plan tygodnia')}: ${pw.done}/${pw.total}">
     <span class="dash-hd"><span class="dash-lbl">${t('dashPlanWeek', 'Plan tygodnia')}</span>${dashCaret()}</span>
     <span class="dash-days">${days}</span>
-    <span class="dash-pw-chip">${DASH_SVG_CHECK(16, 16)}${pw.done}/${pw.total} ${plTreningWord(pw.total)}</span>
+    <span class="dash-pw-chip">${DASH_SVG_CHECK(16, 16, 12)}${pw.done}/${pw.total} ${plTreningWord(pw.total)}</span>
   </button>`;
 }
 
@@ -14596,7 +14620,7 @@ function dashSparkHtml(cls, pts, W, H, delay){   // pts: [{x 0..1, y value}]
 }
 function dashBodyHtml(m, animate, rc){
   const wt = m.weight, k = m.kcal;
-  const delay = 700;
+  const delay = 0;   // dashStartCardFx() sets the real draw delay from the tile's own entrance
   // weight
   let wHtml;
   if(wt.hasData){
@@ -14647,13 +14671,26 @@ function dashBodyHtml(m, animate, rc){
   return `<div class="dash-body">${wHtml}${kHtml}</div>`;
 }
 
-// run the entrance extras ONLY for an "opened" render: count-up numbers + chart line draw-in
+// run the entrance extras ONLY for an "opened" render: count-up numbers + chart line draw-in.
+// Zasada „dziecko startuje, gdy rodzic prawie wylądował” (CLAUDE.md pkt 4): oba ruchy czekają na
+// kafel, w którym siedzą. Czas liczymy z jego RZECZYWISTEJ animacji (opóźnienie z --i + czas z
+// --m-dur-tile / --m-dur-in), więc zmiana tokenu przesuwa też liczbę i linię.
+const DASH_LANDED = .6;   // ułamek czasu wejścia kafla, po którym jest już prawie nieprzezroczysty
+function dashTileLandMs(el){
+  const tile = el.closest('.m-rise-tile, .m-rise');
+  if(!tile) return 0;
+  const cs = getComputedStyle(tile);
+  if(cs.animationName === 'none') return 0;      // ograniczony ruch / brak animacji wejścia
+  const ms = v => { const x = String(v).split(',')[0].trim(); return x.endsWith('ms') ? parseFloat(x) : parseFloat(x) * 1000; };
+  return Math.round(ms(cs.animationDelay) + ms(cs.animationDuration) * DASH_LANDED);
+}
 function dashStartCardFx(root){
   root.querySelectorAll('[data-countup]').forEach(el=>{
-    const v = +el.dataset.countup;
-    animateDashNumber(el, v, 0, '');
-    setTimeout(()=>{ if(el.isConnected) el.textContent = formatDashNum(v, 0); }, 1200);   // rAF can be suspended in the background
+    const v = +el.dataset.countup, wait = dashTileLandMs(el);
+    animateDashNumber(el, v, 0, '', wait);
+    setTimeout(()=>{ if(el.isConnected) el.textContent = formatDashNum(v, 0); }, wait + 1200);   // rAF can be suspended in the background
   });
+  root.querySelectorAll('.statsv2-draw-path').forEach(path=>{ path.dataset.drawDelay = dashTileLandMs(path); });
   statsV2AnimateDrawPaths(root);
 }
 
@@ -14691,12 +14728,26 @@ function dashRise(el, animate){
 
 // greeting + headline + hero. Cheap, no AI; safe to call whenever the data may have changed.
 function renderDashShell(animate){
-  const m = dashLastModel = dashboardModel();
-  document.getElementById('dashHi').textContent = profileName ? t('dashHi', `Cześć ${profileName}`, profileName) : t('dashHiPlain', 'Cześć');
-  document.getElementById('dashHeadline').innerHTML = dashHeadlineParts(m).map(s=>`<span>${escHtml(s)}</span>`).join('');
-  document.getElementById('dashCol').dataset.state = m.hero.state;
-  document.getElementById('dashHero').innerHTML = dashHeroHtml(m, animate);
-  renderDashCards(m, animate);
+  // Wejście na ekran: scrollerem jest body (html jest zablokowany), więc window.scrollTo z goRoute go nie rusza
+  if(animate){ document.body.scrollTop = 0; document.documentElement.scrollTop = 0; }
+  try{
+    const m = dashLastModel = dashboardModel();
+    document.getElementById('dashHi').textContent = profileName ? t('dashHi', `Cześć ${profileName}`, profileName) : t('dashHiPlain', 'Cześć');
+    document.getElementById('dashHeadline').innerHTML = dashHeadlineParts(m).map(s=>`<span>${escHtml(s)}</span>`).join('');
+    document.getElementById('dashCol').dataset.state = m.hero.state;
+    document.getElementById('dashHero').innerHTML = dashHeroHtml(m, animate);
+    renderDashCards(m, animate);
+  } catch(err){
+    // błąd modelu/renderu nie może wywrócić goRoute: minimalny stan zastępczy, błąd do konsoli
+    console.error('dashboard render failed', err);
+    dashLastModel = null;
+    const col = document.getElementById('dashCol');
+    if(col){
+      col.dataset.state = 'error';
+      document.getElementById('dashHero').innerHTML = `<div class="dash-card"><p class="dash-err">${t('dashRenderError', 'Nie udało się wczytać ekranu głównego. Spróbuj ponownie za chwilę.')}</p></div>`;
+      col.querySelectorAll('section').forEach(sec=>{ sec.innerHTML = ''; });
+    }
+  }
   dashRise(document.getElementById('dashHeader'), animate);
   dashRise(document.getElementById('dashAcctBtn'), animate);
   dashStartTick();
@@ -14736,6 +14787,10 @@ if(typeof ResizeObserver === 'function'){
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && currentRoute === 'dashboard') renderDashShell(false); });
 
 function renderDashboard(animate){
+  try{ renderDashboardInner(animate); }
+  catch(err){ console.error('dashboard render failed', err); renderDashShell(!!animate); }
+}
+function renderDashboardInner(animate){
   // AI asystent — Krok 1: analiza OSTATNIEGO treningu (2026-09-16), z
   // "pro tip"-owym kontekstem policzonym W KODZIE (nie zostawionym modelowi
   // do zgadywania z surowych liczb) — balans partii mięśniowych, zaniedbane
@@ -14899,7 +14954,7 @@ function closeAiPopup(){
 }
 // Sync half: decides what the Trener AI card can show. Returns a fetch job when nothing is cached.
 function dashAiPrepare(payload, workoutId){
-  if(!cloudSession || !workoutId){
+  if(!isPremium() || !cloudSession || !workoutId){
     dashAiStatus = 'off'; lastAiSummaryData = null;
     return null;
   }
