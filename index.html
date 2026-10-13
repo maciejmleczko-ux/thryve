@@ -1166,13 +1166,13 @@ button.dash-tile{cursor:pointer;}
 
 /* ---- "Pierwsze kroki" (06) ---- */
 .dash-steps{display:flex;flex-direction:column;gap:1px;}
-.dash-steps-h{margin:0;padding:12px;border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;background:var(--m-glass);font-size:var(--m-fs-2xs);font-weight:600;line-height:22px;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
+.dash-steps-h{margin:0;padding:12px;min-height:46px;box-sizing:border-box;border-radius:var(--m-r-sm) var(--m-r-sm) 0 0;background:var(--m-glass);font-size:var(--m-fs-2xs);font-weight:600;line-height:14px;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
 .dash-step{display:flex;align-items:center;gap:14px;width:100%;min-height:57px;margin:0;padding:12px;border:0;background:var(--m-glass);color:var(--m-ink);font-family:inherit;font-size:var(--m-fs-base);font-weight:400;line-height:18px;text-align:left;cursor:pointer;}
 .dash-step:last-child{border-radius:0 0 var(--m-r-sm) var(--m-r-sm);}
 .dash-step-dot{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;box-sizing:border-box;border-radius:50%;border:.8px solid var(--m-orange);background:var(--m-on-dark-3);color:var(--m-white);}
 .dash-step-dot svg{display:block;width:12px;height:12px;}
 .dash-step.is-done .dash-step-dot{background:var(--m-orange);border-color:var(--m-orange-tint);}
-.dash-step.is-done{color:var(--m-muted-text);}
+.dash-step.is-done > span:last-child{opacity:.75;}   /* Figma: finished step text is --m-ink at 75% */
 
 /* ---- other Mekkio plans + create (07) ---- */
 .dash-plans-h{margin:0 0 8px;font-size:var(--m-fs-2xs);font-weight:600;line-height:16px;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
@@ -1184,7 +1184,8 @@ button.dash-tile{cursor:pointer;}
   -webkit-mask-image:radial-gradient(circle 29px at 0 63px,transparent 28.5px,black 29px);mask-image:radial-gradient(circle 29px at 0 63px,transparent 28.5px,black 29px);}
 .dash-pcard--ink{color:var(--m-ink);}
 .dash-pcard-name{margin:0;font-size:var(--m-fs-lg);font-weight:300;line-height:1.1;letter-spacing:.04em;text-transform:uppercase;overflow-wrap:anywhere;}
-.dash-pcard-meta{display:flex;flex-wrap:wrap;gap:4px 16px;position:absolute;left:31px;bottom:34px;}
+.dash-pcard-meta{display:flex;flex-wrap:wrap;gap:4px 16px;position:absolute;left:31px;bottom:32px;}   /* 16px above the visible bottom of a card (the next card covers its last 16px) */
+.dash-pwrap:last-child .dash-pcard-meta{bottom:16px;}   /* last card is not covered, nothing to clear */
 .dash-pcard-meta .dash-stat{gap:4px;color:inherit;font-weight:400;}
 .dash-pick{position:absolute;z-index:1;left:-18px;top:45px;display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:0;border-radius:50%;background:var(--m-on-dark-3);box-shadow:0 0 0 .5px var(--m-orange-tint);cursor:pointer;}
 .dash-pick::after{content:"";position:absolute;inset:-4px;}
@@ -1280,7 +1281,7 @@ button.dash-card{cursor:pointer;}
 /* Trener AI (533:8672): one card, rule line for everyone, AI summary on top when on */
 .dash-coach{display:flex;flex-direction:column;gap:25px;width:100%;min-height:108px;margin:0;padding:16px;border-radius:var(--m-r-sm);color:var(--m-white);font-family:inherit;text-align:left;
   border:.5px solid transparent;
-  background:linear-gradient(90deg,var(--m-ai-fill-from) 0%,var(--m-ai-fill-mid) 55%,var(--m-ai-fill-to) 175%) padding-box,linear-gradient(142deg,var(--m-ai-from) 0%,var(--m-ai-to) 83%) border-box;
+  background:linear-gradient(90deg,var(--m-ai-fill-from) 0%,var(--m-ai-fill-mid) 55%,var(--m-ai-fill-to) 175%) padding-box,linear-gradient(142deg,color-mix(in srgb,var(--m-ai-from) 22%,var(--m-ai-fill-to)) 0%,color-mix(in srgb,var(--m-ai-to) 45%,var(--m-ai-fill-to)) 83%) border-box;   /* hairline softened to the Figma look (533:8672) */
   box-shadow:inset 0 0 15.4px var(--m-ai-inset),inset 0 0 6px var(--m-ai-inset-2);}
 button.dash-coach{cursor:pointer;}
 .dash-coach-hd{display:flex;align-items:center;gap:15px;min-height:16px;}
@@ -4547,20 +4548,12 @@ const T_EN = {
   gotIt: 'Got it',
 
   /* ---- v2 screens (U2 PL/EN pass, 2026-09-02) ---- */
-  dashWeekSummary: 'This week',
   dashYourPlan: 'Your plan',
-  dashNewRecord: 'New record',
   dashRecord: 'Record',
-  dashVolumeTrend: 'Volume trend',
-  dashWeeklyProgress: 'Weekly progress',
-  dashNoPlanPicked: 'No plan selected',
   dashHiPlain: 'Hi',
   dashHi: n => `Hi ${n}`,
-  dashMinutesActivity: n => `${n} min active`,
   dashSessions: n => `${n} workout${n===1?'':'s'}`,
-  dashWeekCount: (d,t) => `${d} / ${t} days done`,
   dashAiLoading: 'Analyzing your last workout…',
-  dashHeadlineRest: 'Nothing planned for today. Rest up.',
   gymV2NoPlanMsg: "You don't have a starred plan yet.",
   gymV2CreatePlan: 'Create or pick a plan',
   gymV2ExercisesInPlan: 'Exercises in your plan',
@@ -4689,6 +4682,34 @@ const T_EN = {
   planDifficultyMedium: 'Medium',
   planDifficultyHard: 'Hard',
   dashNoPlanChosen: 'No plan selected',
+  /* ---- Dashboard v2.1 (2026-10-13): every t('dash…') the screen uses; PL stays the fallback in the call ---- */
+  dashHlTrain: n => `${n} is waiting.`, dashHlTrain2: 'Step by step.',
+  dashHlProg: 'Workout in progress.', dashHlProg2: 'Finish it!!!',
+  dashHlDone: 'Workout done!', dashHlDone2: 'Now recover.',
+  dashHlRest: 'Rest day today.', dashHlRest2: 'Make the most of it.',
+  dashHlReady: 'Plan ready.', dashHlReady2: 'Time for the first step.',
+  dashHlNew: 'Start with a plan.', dashHlNew2: 'The rest will follow.',
+  dashHlNoPlan: 'No plan,', dashHlNoPlan2: 'no progress.',
+  dashStart: 'Start', dashContinue: 'Continue', dashSummary: 'Summary', dashChoose: 'Choose', dashPlans: 'Plans',
+  dashDoneToday: 'Done today', dashOneRecord: '1 record', dashOwnWorkout: 'Custom workout',
+  dashToday: 'Today', dashTomorrow: 'Tomorrow', dashRestDay: 'Rest day', dashPlanPill: 'Plan',
+  dashFreeT: 'Train your way', dashFreeD: 'Pick exercises, add your own or repeat your last workout.',
+  dashSteps: 'First steps', dashStep1: 'Choose a plan', dashStep2: 'Do your first workout', dashStep3: 'See your progress',
+  dashRecommended: 'Recommended for you', dashOtherPlans: 'More Mekkio plans', dashCreatePlan: 'Create your own plan',
+  dashPickPlan: 'Choose a plan', dashPickPlanTitle: 'Choose a plan',
+  dashThisWeek: 'This week', dashLastWeek: 'Last week', dashNewWeek: 'New week', dashRepsWord: 'reps',
+  dashBadge: 'Badge', dashRecordNew: 'new', dashConsistency: 'Consistency', dashStreak: n => `${n}-week streak`,
+  dashLastWorkout: 'Last workout', dashRepeat: 'Repeat this workout', dashVolume: 'Volume', dashSets: 'Sets',
+  dashCoach: 'AI Coach', dashPlanWeek: 'Weekly plan',
+  dashWeight: 'Weight', dashKcal: 'Calories', dashAddWeight: 'Add weight', dashDays: 'days',
+  dashDeltaSame: 'no change', dashVsLast: 'vs last week', dashKcalThisWeek: 'this week', dashKcalLastWeek: 'last week',
+  dashRuleFirst: 'Take lighter weights for your first workout and keep something in reserve for the last set.',
+  dashRuleRecord: name => `New record in ${name}. Before you add weight, repeat this result once more.`,
+  dashRuleStreak: n => `${n} weeks in a row with all your planned workouts done. Keep this rhythm.`,
+  dashRuleGap: n => `It has been ${n} days since your last workout. Get back to your plan, even with a lighter version.`,
+  dashRuleVolumeUp: kg => `You are lifting more than last week so far: ${kg} kg.`,
+  dashRuleVolumeDown: 'You are lifting less than last week so far. If it is a planned lighter week, all is well.',
+  dashRenderError: 'Could not load the home screen. Try again in a moment.',
   histEmptyMonth: m => `No activity logged — ${m}`,
   histWorkoutVolSub: v => `${v} kg volume`,
   histV2Summary: 'SUMMARY',
