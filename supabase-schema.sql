@@ -92,6 +92,9 @@ create table if not exists public.plans (
 );
 -- 4.47.19: undulating periodization flag (plan.periodized) — was local-only and got lost on re-login / other device.
 alter table public.plans add column if not exists periodized boolean not null default false;
+-- 4.66.0 (F3): plan.meta {source, goal, level, equipment[], description}; brak = plan sprzed 4.66.0.
+-- To samo w supabase/migrations/20261013_workouts_plan_meta.sql (do uruchomienia na istniejacej bazie).
+alter table public.plans add column if not exists meta jsonb;
 
 create index if not exists plans_owner_id_idx on public.plans(owner_id);
 
@@ -133,6 +136,11 @@ create table if not exists public.workouts (
   kcal_user numeric,
   created_at timestamptz not null default now()
 );
+
+-- 4.66.0 (F3): dzien STARTU treningu (`date` = dzien zapisu) i id planu aktywnego w chwili zapisu
+-- (plan_id = local_id planu, bez FK: plan moze zostac usuniety, trening zostaje). Null = stary trening / bez planu.
+alter table public.workouts add column if not exists start_date date;
+alter table public.workouts add column if not exists plan_id text;
 
 create index if not exists workouts_user_id_idx on public.workouts(user_id);
 create index if not exists workouts_user_date_idx on public.workouts(user_id, date);
