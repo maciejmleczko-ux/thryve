@@ -8101,6 +8101,11 @@ function dateStr(d){
 function todayStr(){
   return dateStr(new Date());
 }
+/* Dzień treningu do liczenia „w którym dniu to było”: dzień STARTU (startDate, od 4.66.0),
+   a dla starszych treningów date. `date` zostaje dniem zapisu (trening zaczęty o 23:50
+   i zapisany po północy ma date = następny dzień, startDate = poprzedni). Na razie tylko
+   pomocnik: ekrany nadal czytają date. */
+function workoutDay(w){ return (w && (w.startDate || w.date)) || ''; }
 function fmtDateHuman(iso){
   const [y,m,d] = iso.split('-');
   if(LANG==='en'){
@@ -8984,8 +8989,8 @@ function todayPlanExerciseNames(){
   if(!starredPlanId) return null;
   const plan = trainingPlans.find(p=>p.id===starredPlanId);
   if(!plan) return null;
-  const list = plan.schedule[dayKeyFromDate(todayStr())];
-  if(!list || !list.length) return null;
+  const list = planExercisesFor(plan, todayStr());
+  if(!list.length) return null;
   if(!plan.periodized) return list.map(withLibraryTime);
   // Periodized plan: tag each non-bookend exercise with the cycle its
   // position in the day earns it — a new array, the plan's own stored
@@ -11480,6 +11485,19 @@ function showEmptyWorkoutPopup(msg){
 function closeEmptyWorkoutPopup(){
   document.getElementById('emptyWorkoutOverlay').classList.add('hidden');
 }
+// Dzień startu bieżącej sesji z gymSessionStartAt. Porzucona sesja (ostatnie dotknięcie
+// dawniej niż GYM_SESSION_STALE_GAP_MIN temu) nie jest startem tego treningu: wtedy dziś.
+function workoutStartDateNow(){
+  const now = Date.now();
+  if(gymSessionStartAt && gymSessionActiveEndAt && (now - gymSessionActiveEndAt) / 60000 <= GYM_SESSION_STALE_GAP_MIN){
+    return dateStr(new Date(gymSessionStartAt));
+  }
+  return todayStr();
+}
+// id aktywnego (oznaczonego gwiazdką) planu, o ile ten plan nadal istnieje; inaczej null
+function activePlanIdNow(){
+  return (starredPlanId && trainingPlans.some(p=>p.id===starredPlanId)) ? starredPlanId : null;
+}
 function saveWorkout(){
   if(!sessionExercises.length){ showEmptyWorkoutPopup(t('addAtLeastOneExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
   const result = sessionExercises.filter(ex=>ex.type!=='checklist').map(ex=>({
@@ -11504,6 +11522,8 @@ function saveWorkout(){
   const workout = {
     id: 'w_' + Date.now(),
     date: todayStr(),
+    startDate: workoutStartDateNow(),   // lokalny dzień STARTU treningu (RRRR-MM-DD); date = dzień zapisu
+    planId: activePlanIdNow(),          // plan aktywny w chwili zapisu; null = trening bez planu
     day: cls.label,
     exercises: result,
     durationMin: computeGymSessionDurationMin(), // null if no tile was ever tapped this session
@@ -12150,11 +12170,50 @@ function libEx(...names){
     return {...found};
   });
 }
+/* plan.meta (od 4.66.0): {source:'mekkio'|'own'|'ai'|'import', goal, level, equipment:[], description}.
+   Brak pola = plan sprzed 4.66.0; czytaj przez planMetaOf(), która dla planów Mekkio
+   odtwarza meta z definicji. UI jeszcze go nie pokazuje. */
+const PLAN_META_SOURCES = ['mekkio','own','ai','import'];
+function blankPlanMeta(source){ return {source: source || 'own', goal: null, level: null, equipment: [], description: null}; }
+function builtinMetaFromDef(def){
+  return {
+    source: 'mekkio',
+    goal: def.goal || null,
+    level: def.level || null,
+    equipment: def.equipment ? String(def.equipment).split(',').map(x=>x.trim()).filter(Boolean) : [],
+    description: (def.notes && def.notes.pl) || null,
+  };
+}
+// plan Mekkio (wbudowany): meta z definicji; plany bez definicji (Fullbody, PPL, Upper/Lower) mają samo źródło
+function builtinMetaFor(id){
+  const def = BUILTIN_PLAN_DEF_BY_ID.get(id);
+  if(def) return builtinMetaFromDef(def);
+  return ['plan_a','plan_b','plan_ppl','plan_ul'].includes(id) ? blankPlanMeta('mekkio') : null;
+}
+// strictly whitelisted copy (meta can come from a share code, a backup file or the cloud)
+function cleanPlanMeta(m){
+  if(!m || typeof m !== 'object' || Array.isArray(m)) return null;
+  const str = (v, max)=> (typeof v === 'string' && cleanName(v).trim()) ? cleanName(v).trim().slice(0, max) : null;
+  return {
+    source: PLAN_META_SOURCES.includes(m.source) ? m.source : 'own',
+    goal: str(m.goal, 60),
+    level: str(m.level, 30),
+    equipment: Array.isArray(m.equipment) ? m.equipment.map(x=> str(x, 40)).filter(Boolean).slice(0, 12) : [],
+    description: str(m.description, 400),
+  };
+}
+// jedyny odczyt meta planu: zapisane pole albo (plan Mekkio bez pola) meta z definicji; null = nieznane
+function planMetaOf(p){ return p ? (p.meta || builtinMetaFor(p.id) || null) : null; }
+// meta planu po edycji / forku: zachowuje cel, poziom, sprzęt i opis, źródło = 'own'
+function planMetaForEdit(p){
+  const base = planMetaOf(p) || blankPlanMeta('own');
+  return {...base, equipment: [...(base.equipment || [])], source: 'own'};
+}
 function planFromBuiltinDef(def){
   const schedule = emptySchedule();
   def.blocks.forEach(b=> b.days.forEach(d=>{ schedule[d] = libEx(...b.ex); }));
   ensureWarmupStretch(schedule);
-  return {id:def.id, tier:def.tier, name:def.name.pl, builtin:true, schedule};
+  return {id:def.id, tier:def.tier, name:def.name.pl, builtin:true, schedule, meta: builtinMetaFromDef(def)};
 }
 // Name / difficulty of a built-in plan shown in the user's language; a plan the user renamed keeps its own name.
 function planDisplayName(p){
@@ -12183,11 +12242,11 @@ function allBuiltinPlans(){
     // only ever adds a default plan that's still missing, so an existing
     // user's saved plan_b is untouched by this, only fresh installs stop
     // getting a second card.
-    {id:'plan_a', tier:'free', name:'Fullbody workout', builtin:true, schedule: scheduleOnDays(['mon','wed','fri'], GYM_PLAN.A)},
-    {id:'plan_ppl', tier:'free', name:'Push / Pull / Legs', builtin:true, schedule: {
+    {id:'plan_a', tier:'free', name:'Fullbody workout', builtin:true, meta: blankPlanMeta('mekkio'), schedule: scheduleOnDays(['mon','wed','fri'], GYM_PLAN.A)},
+    {id:'plan_ppl', tier:'free', name:'Push / Pull / Legs', builtin:true, meta: blankPlanMeta('mekkio'), schedule: {
       ...emptySchedule(), mon: pushDay, wed: pullDay, fri: legsDay,
     }},
-    {id:'plan_ul', tier:'free', name:'Upper / Lower Split', builtin:true, schedule: {
+    {id:'plan_ul', tier:'free', name:'Upper / Lower Split', builtin:true, meta: blankPlanMeta('mekkio'), schedule: {
       ...emptySchedule(), mon: upperA, tue: lowerA, thu: upperB, fri: lowerB,
     }},
     ...NEW_BUILTIN_PLAN_DEFS.map(planFromBuiltinDef),
@@ -12265,6 +12324,9 @@ function migratePlan(p){
   }
   cleanPlanInPlace(plan);
   applyExerciseRenames(plan.schedule); // fixes stale name/icon on exercises renamed after the plan was saved
+  // plan.meta: sanitize what came from storage / backup; a Mekkio plan without it gets it from its definition
+  if(plan.meta !== undefined){ const m = cleanPlanMeta(plan.meta); if(m) plan.meta = m; else delete plan.meta; }
+  if(!plan.meta && plan.builtin){ const m = builtinMetaFor(plan.id); if(m) plan.meta = m; }
   return plan;
 }
 // Resets a builtin plan's schedule to a fresh hardcoded default — ONLY
@@ -12344,8 +12406,54 @@ function startPlanOnboarding(){
   planOnboardingActive = true;
   goRoute('plans-v2');
 }
+/* JEDYNY odczyt „co jest w planie w danym dniu” (od 4.66.0). Dziś zwraca szablon tygodnia
+   (plan.schedule[dzień]); wyjątki jednorazowe dojdą tylko tutaj.
+   planExercisesFor(plan, iso): ćwiczenia na konkretną datę RRRR-MM-DD, zawsze tablica (ta sama
+   referencja co w planie, nie kopia). planDayExercises(plan, dayKey): szablon dla dnia tygodnia
+   ('mon'..'sun'), do zliczania struktury planu bez daty. */
+function planDayExercises(plan, dayKey){ return (plan && plan.schedule && plan.schedule[dayKey]) || []; }
+function planExercisesFor(plan, iso){ return planDayExercises(plan, dayKeyFromDate(iso)); }
 function planActiveDays(p){
-  return PLAN_DAYS.filter(d=>(p.schedule[d]||[]).length>0);
+  return PLAN_DAYS.filter(d=>planDayExercises(p, d).length>0);
+}
+/* Historia planu z istniejących danych (bez nowych kluczy): plan, wg którego liczymy tydzień
+   w przeszłości, bierzemy z workout.planId treningów z tego tygodnia (pn–nd).
+   planHistoryIndex(): Map poniedziałek tygodnia -> [{date, planId}] posortowane po dacie
+   (budować raz na render i podawać dalej, żeby nie skanować treningów dla każdego dnia).
+   planForDate(iso, idx?): plan z planId NAJBLIŻSZEGO (w dniach) treningu tego tygodnia, który
+   ma planId istniejącego planu; remis = wcześniejszy. null = plan nieznany (tydzień bez
+   treningów, treningi sprzed 4.66.0 bez planId, trening bez planu, plan już usunięty). */
+function planHistoryIndex(){
+  const m = new Map();
+  (workouts || []).forEach(w=>{
+    if(!w || typeof w.date !== 'string') return;
+    const ws = dashWeekStartIso(w.date);
+    if(!m.has(ws)) m.set(ws, []);
+    m.get(ws).push({date: w.date, planId: w.planId});
+  });
+  m.forEach(list=> list.sort((a, b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  return m;
+}
+function planForDate(iso, idx){
+  const list = (idx || planHistoryIndex()).get(dashWeekStartIso(iso));
+  if(!list) return null;
+  let best = null, bestDist = Infinity;
+  list.forEach(e=>{
+    if(typeof e.planId !== 'string') return;
+    const plan = trainingPlans.find(p=>p.id === e.planId);
+    if(!plan) return;
+    const dist = Math.abs(dashDaysBetween(iso, e.date));
+    if(dist < bestDist){ best = plan; bestDist = dist; }
+  });
+  return best;
+}
+/* Plan obowiązujący dla dnia iso przy liczeniu „zaplanowany / opuszczony / zaliczone dni”:
+   bieżący i przyszłe tygodnie = obecny plan (curPlan); tygodnie w przeszłości = planForDate.
+   known=false gdy nie da się ustalić planu tamtego tygodnia. */
+function planForWeekDay(iso, todayIso, curPlan, idx){
+  if(dashWeekStartIso(iso) >= dashWeekStartIso(todayIso)) return {plan: curPlan, known: true};
+  const plan = planForDate(iso, idx);
+  return plan ? {plan, known: true} : {plan: null, known: false};
 }
 function planTotalExercises(p){
   // excludes the auto-managed warm-up/stretch bookends — this counts real exercises only
@@ -12730,13 +12838,14 @@ function applyPlanCustomizeV2(){
     // stays untouched, this becomes the user's own plan, and takes over
     // the star if the automatic plan was the active one.
     const newId = 'plan_' + Date.now();
-    trainingPlans.push({id:newId, name: planDisplayName(plan), builtin:false, schedule, customizationV2});
+    trainingPlans.push({id:newId, name: planDisplayName(plan), builtin:false, schedule, customizationV2, meta: planMetaForEdit(plan)});
     if(starredPlanId === plan.id){ starredPlanId = newId; localStorage.setItem(LS_STARRED_PLAN, newId); }
   } else {
     // Already the user's own plan (a previous fork) — further
     // "Dostosuj" runs refine it in place instead of forking again.
     plan.schedule = schedule;
     plan.customizationV2 = customizationV2;
+    plan.meta = planMetaForEdit(plan);
   }
   saveTrainingPlansList();
   closePlanCustomizeV2();
@@ -13408,15 +13517,15 @@ function savePlanEditor(){
       // (2026-08-29). See PLANSV2_CUSTOMIZABLE_IDS / planIsDostosujable()
       // for the equivalent fork done by "Dostosuj plan".
       savedId = 'plan_' + Date.now();
-      trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule});
+      trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule, meta: planMetaForEdit(original)});
       if(starredPlanId === original.id){ starredPlanId = savedId; localStorage.setItem(LS_STARRED_PLAN, savedId); }
     } else {
-      trainingPlans[idx] = {...original, name: editingPlan.name, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule};
+      trainingPlans[idx] = {...original, name: editingPlan.name, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule, meta: planMetaForEdit(original)};
       savedId = editingPlan.id;
     }
   } else {
     savedId = 'plan_'+Date.now();
-    trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule});
+    trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule, meta: blankPlanMeta('own')});
   }
   saveTrainingPlansList();
   toast(t('planSaved','Plan zapisany'));
@@ -13448,7 +13557,16 @@ function planShareCode(plan){
   PLAN_DAYS.forEach(d=>{
     plainSchedule[d] = (plan.schedule[d]||[]).map(ex=> byName.has(ex.name) ? ex.name : ex);
   });
-  const plainPayload = JSON.stringify({n: plan.name, s: plainSchedule});
+  // opcjonalne „m” (od 4.66.0): cel, poziom, sprzęt, opis; starsza apka je pomija, stare kody go nie mają
+  const meta = planMetaOf(plan), m = {};
+  if(meta){
+    if(meta.goal) m.g = meta.goal;
+    if(meta.level) m.l = meta.level;
+    if(meta.equipment && meta.equipment.length) m.e = meta.equipment;
+    if(meta.description) m.d = meta.description;
+  }
+  const mPart = Object.keys(m).length ? {m} : {};
+  const plainPayload = JSON.stringify({n: plan.name, s: plainSchedule, ...mPart});
 
   // De-dup exercises into a per-plan dictionary and reference them by index —
   // default plans often repeat the exact same day 2-3x a week (e.g. Fullbody
@@ -13468,7 +13586,7 @@ function planShareCode(plan){
       return dictIndex.get(key);
     });
   });
-  const dictPayload = JSON.stringify({n: plan.name, d: dict, s: dictSchedule});
+  const dictPayload = JSON.stringify({n: plan.name, d: dict, s: dictSchedule, ...mPart});
 
   return b64urlEncode(dictPayload.length < plainPayload.length ? dictPayload : plainPayload);
 }
@@ -13590,7 +13708,15 @@ function decodePlanPayload(code){
       return sanitizeImportedExercise(entry);
     });
   });
-  return d ? {n: name, d, s} : {n: name, s};
+  // opcjonalne „m” = meta planu {g,l,e,d}; zły kształt nie psuje importu, po prostu go pomijamy
+  let m = null;
+  if(raw.m && typeof raw.m === 'object' && !Array.isArray(raw.m)){
+    m = cleanPlanMeta({goal: raw.m.g, level: raw.m.l, equipment: raw.m.e, description: raw.m.d, source: 'import'});
+    if(m && !m.goal && !m.level && !m.equipment.length && !m.description) m = null;
+  }
+  const out = d ? {n: name, d, s} : {n: name, s};
+  if(m) out.m = m;
+  return out;
 }
 function checkForImportedPlan(){
   const encoded = new URLSearchParams(location.search).get('importPlan');
@@ -13650,7 +13776,8 @@ function confirmImportPlan(){
   });
   ensureWarmupStretch(schedule);
   const id = 'plan_imported_'+Date.now();
-  trainingPlans.push({id, name: pendingImportPlan.n, builtin:false, schedule});
+  const importedMeta = pendingImportPlan.m ? {...pendingImportPlan.m, source: 'import'} : blankPlanMeta('import');
+  trainingPlans.push({id, name: pendingImportPlan.n, builtin:false, schedule, meta: importedMeta});
   saveTrainingPlansList();
   pendingImportPlan = null;
   document.getElementById('importPlanOverlay').classList.add('hidden');
@@ -13737,7 +13864,7 @@ function updateTodayPlanBanner(){
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   if(!plan){ banner.classList.add('hidden'); return; }
   const iso = document.getElementById('gymDate').value || todayStr();
-  const exercises = plan.schedule[dayKeyFromDate(iso)] || [];
+  const exercises = planExercisesFor(plan, iso);
   banner.classList.remove('hidden');
   document.getElementById('todayPlanName').textContent = planDisplayName(plan);
   document.getElementById('todayPlanExercises').textContent = exercises.length
@@ -13863,8 +13990,9 @@ function dashDelta(a, b){
 
 // plan na dowolny dzień: ćwiczenia bez rozgrzewki/rozciągania + szacowane minuty
 // (ta sama formuła co planAvgMinutesPerDay(), dla jednego dnia; Plans v2 pokazuje min. 15)
-function dashPlanDayInfo(plan, dayKey){
-  const list = ((plan && plan.schedule[dayKey]) || []).filter(e=>!BOOKEND_EX_NAMES.has(e.name));
+function dashPlanDayInfo(plan, iso){
+  const dayKey = dayKeyFromDate(iso);
+  const list = planExercisesFor(plan, iso).filter(e=>!BOOKEND_EX_NAMES.has(e.name));
   let reps = 0, timed = 0;
   list.forEach(e=>{ if(isTimeEx(e)) timed += timedExerciseMin(e); else reps++; });
   const blocks = Math.ceil((blockSeconds(buildWarmupBlock(list)) + blockSeconds(buildStretchBlock(list))) / 60);
@@ -13891,7 +14019,7 @@ function dashNextPlanDay(plan, fromIso, refIso){
   if(!plan) return null;
   for(let i=0;i<7;i++){
     const iso = dashAddDays(fromIso, i), key = dayKeyFromDate(iso);
-    const info = dashPlanDayInfo(plan, key);
+    const info = dashPlanDayInfo(plan, iso);
     if(info.exerciseCount > 0) return { ...info, date: iso, inDays: dashDaysBetween(refIso, iso), label: planDayLabel(key) };
   }
   return null;
@@ -13902,7 +14030,7 @@ function dashWorkoutPlanName(w){
   const names = new Set(w.exercises.map(e=>e.name).filter(n=>!BOOKEND_EX_NAMES.has(n)));
   let best = null, bestScore = 0;
   trainingPlans.forEach(p=> PLAN_DAYS.forEach(d=>{
-    const dn = new Set((p.schedule[d]||[]).map(e=>e.name).filter(n=>!BOOKEND_EX_NAMES.has(n)));
+    const dn = new Set(planDayExercises(p, d).map(e=>e.name).filter(n=>!BOOKEND_EX_NAMES.has(n)));
     if(!dn.size) return;
     let common = 0; names.forEach(n=>{ if(dn.has(n)) common++; });
     const score = common / (names.size + dn.size - common);
@@ -14075,6 +14203,10 @@ function dashBadges(plan, todayIso){
 function dashStreak(plan, todayIso){
   const required = plan ? planActiveDays(plan).length : 0;
   const map = dashWeekDayMap();
+  // tydzień z przeszłości: wymagane dni wg planu z workout.planId tamtego tygodnia (planForDate);
+  // nieznany plan tygodnia (stare treningi, tydzień tylko z biegiem) = obecny plan, jak dotąd
+  const planIdx = planHistoryIndex();
+  const requiredFor = ws=>{ const p = planForDate(ws, planIdx); const n = p ? planActiveDays(p).length : 0; return n > 0 ? n : required; };
   const curStart = dashWeekStartIso(todayIso);
   const daysIn = ws=> map.has(ws) ? map.get(ws).size : 0;
   const curDone = daysIn(curStart);
@@ -14083,7 +14215,7 @@ function dashStreak(plan, todayIso){
   if(required > 0 && map.size){
     const earliestWs = [...map.keys()].sort()[0];
     for(let ws = dashAddDays(curStart,-7); ws >= earliestWs; ws = dashAddDays(ws,-7)){
-      if(daysIn(ws) >= required) weeks++; else break;
+      if(daysIn(ws) >= requiredFor(ws)) weeks++; else break;
     }
   }
   return { weeks, required, thisWeekDone: curDone, thisWeekQualified: curOk };
@@ -14216,7 +14348,7 @@ function dashboardModelCore(now){
   const hasPlan = !!plan;
   const hasHistory = workouts.length > 0 || runs.length > 0;
   const sets = dashboardAllSets();
-  const todayInfo = plan ? dashPlanDayInfo(plan, todayKey) : null;
+  const todayInfo = plan ? dashPlanDayInfo(plan, todayIso) : null;
   const trainedToday = dashTrainedOn(todayIso);
 
   // ---- ten tydzień (D2 + D3) ----
@@ -15094,7 +15226,7 @@ function renderGymV2(){
   /* "Ćwiczenia w planie" only makes sense when today HAS plan exercises.
      On a rest day: if there's a repeat set or a session going, relabel it
      neutrally; otherwise hide the header + grid and show a rest-day note. */
-  const planToday = plan ? (plan.schedule[dayKeyFromDate(iso)]||[]).filter(e=>!BOOKEND_EX_NAMES.has(e.name)).length : 0;
+  const planToday = plan ? planExercisesFor(plan, iso).filter(e=>!BOOKEND_EX_NAMES.has(e.name)).length : 0;
   const hasWork = sessionExercises.length || extraGymTiles.length;
   const head = document.getElementById('gymV2SectionHead');
   const label = document.getElementById('gymV2SectionLabel');
@@ -15759,6 +15891,7 @@ function renderCalendarV2(animate){
   const prevMonthDays = new Date(year, month, 0).getDate();
   const logged = datesWithLogs();
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
+  const planIdx = planHistoryIndex();   // plan tygodnia z workout.planId; nieznany plan = dzień neutralny (bez „missed”)
   const todayIso = todayStr();
   const monthKey = `${year}-${String(month+1).padStart(2,'0')}`;
   // A day stays selected across month nav only while it's still in the
@@ -15779,7 +15912,8 @@ function renderCalendarV2(animate){
   }
   for(let d=1; d<=daysInMonth; d++){
     const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isPlanDay = !!(plan && (plan.schedule[dayKeyFromDate(iso)]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
+    const wp = planForWeekDay(iso, todayIso, plan, planIdx);
+    const isPlanDay = wp.known && !!(wp.plan && planExercisesFor(wp.plan, iso).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
     const cls = ['histv2-cal-day'];
     if(logged.get(iso)) cls.push('has-log');
     else if(isPlanDay && iso < todayIso) cls.push('missed');
@@ -16118,7 +16252,13 @@ function statsV2WeeklyProgress(){
 // wspólna logika „dni zaliczone” dla dowolnego tygodnia (Stats + dashboardModel().planWeek) — keep in sync z renderDashboard()
 function weeklyProgressFor(weekDates){
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
-  const scheduledDays = weekDates.filter(d=> plan && (plan.schedule[dayKeyFromDate(d)]||[]).some(e=>!BOOKEND_EX_NAMES.has(e.name)));
+  // tydzień z przeszłości liczy się wg planu z workout.planId; gdy nieznany, wg bieżącego (jak dotąd)
+  const planIdx = planHistoryIndex(), todayIso = todayStr();
+  const scheduledDays = weekDates.filter(d=>{
+    const wp = planForWeekDay(d, todayIso, plan, planIdx);
+    const p = wp.known ? wp.plan : plan;
+    return p && planExercisesFor(p, d).some(e=>!BOOKEND_EX_NAMES.has(e.name));
+  });
   const trainedDays = weekDates.filter(d=> workouts.some(w=>w.date===d) || runs.some(r=>r.date===d));
   const done = trainedDays.length;
   // total = the plan's target, so an over-target week (3 of 2) can lap the
