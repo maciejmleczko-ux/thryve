@@ -3390,7 +3390,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="histv2-header">
         <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
         <span class="ph" data-ph="calendar-dots"></span>
-        <h1>DZIENNIK</h1>
+        <h1 data-i18n="histV2Title">HISTORIA</h1>
         <button type="button" class="histv2-chat-btn histv2-acct-btn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
       </div>
 
@@ -3459,7 +3459,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <button class="nav-item" data-route="dashboard" onclick="navTap('dashboard')" aria-label="Pulpit" data-i18n-aria="navA11yDashboard"><span class="ph" data-ph="nav-house"></span></button>
     <button class="nav-item" data-route="plans" onclick="navTap('plans')" aria-label="Plany" data-i18n-aria="navA11yPlans"><span class="ph" data-ph="nav-plans"></span></button>
     <button class="nav-item nav-item-lg" data-route="gym" onclick="navTap('gym')" aria-label="Trening" data-i18n-aria="navA11yGym"><span class="ph" data-ph="gym-nav"></span></button>
-    <button class="nav-item" data-route="history" onclick="navTap('history')" aria-label="Dziennik" data-i18n-aria="navA11yHistory"><span class="ph" data-ph="nav-calendar"></span></button>
+    <button class="nav-item" data-route="history" onclick="navTap('history')" aria-label="Historia" data-i18n-aria="navA11yHistory"><span class="ph" data-ph="nav-calendar"></span></button>
     <button class="nav-item" data-route="stats" onclick="navTap('stats')" aria-label="Postępy" data-i18n-aria="navA11yStats"><span class="ph" data-ph="nav-chart"></span></button>
   </nav>
 
@@ -4308,7 +4308,7 @@ const T_EN = {
   gymUnsavedTitle: 'Changes not saved', gymUnsavedBody: 'This exercise was already done. To save your changes, go back and tap ✓.', gymUnsavedYes: 'Leave without saving', gymUnsavedNo: 'Back',
   gymEmptyTitle: 'The workout is empty', gymEmptyBody: "You haven't logged an exercise yet. Add the first one?", gymEmptyYes: 'Add exercise',
   gymLeaveLogging: 'Leave logging', gymAddExerciseDone: 'Add exercise to workout', gymSwipeHint: 'Swipe a set left to delete it', gymLogWarn: 'Log at least one set to add the exercise.', gymExtraSet: 'Extra set',
-  lgOvGoal: 'Goal for today', lgOvLast: 'Last time', lgOvRecord: 'RECORD', lgOvRecordE1rm: 'ESTIMATED MAX', lgOvFrom: 'from', lgOvRepsWord: 'reps', lgOvWeeks: 'in 4 wks', lgOvSets: 'Sets', lgOvReps: 'Reps', lgOvRest: 'Rest',
+  lgOvGoal: 'Goal for today', lgOvLast: 'Last time', lgOvRecord: 'RECORD', lgOvRecordE1rm: 'PROJECTED MAX', lgOvFrom: 'from', lgOvRepsWord: 'reps', lgOvWeeks: 'in 4 wks', lgOvSets: 'Sets', lgOvReps: 'Reps', lgOvRest: 'Rest',
   trainerAi: 'AI COACH', exNoteSheetTitle: 'NOTE', exHowtoTitle: 'How to do it', exHowtoSheetTitle: 'HOW TO DO IT', exHowtoSetup: 'SETUP', exHowtoMove: 'MOVEMENT', exHowtoMistake: 'COMMON MISTAKE',
   planPill: 'Training plans',
   planOnboardingIntro: "Before you start, pick a ready-made plan or build your own — you'll see it right away in GYM.",
@@ -4389,7 +4389,14 @@ const T_EN = {
   navA11yDashboard: 'Dashboard',
   navA11yPlans: 'Plans',
   navA11yGym: 'Workout',
-  navA11yHistory: 'Log',
+  navA11yHistory: 'History',
+  histV2Title: 'HISTORY',
+  histRenderError: 'Could not show your history. Try again in a moment.',
+  statsRenderError: 'Could not show your progress. Try again in a moment.',
+  recWholeWorkout: 'Whole workout',
+  stV2ProjectedMax: 'Projected max',
+  stV2ProjFrom: 'from',
+  stV2TagRekord: 'record',
   navA11yStats: 'Progress',
   gymFinTitle: 'GOOD JOB',
   gymFinSub: 'You have earned a lifetime gym pass.',
@@ -4647,7 +4654,7 @@ const T_EN = {
   stV2CurrentRecord: n => `Current record — ${n}`,
   stV2DeltaSinceLastMonth: 'vs last month',
   stV2FirstResult: 'First recorded result',
-  stV2Est1RM: 'EST. 1RM',
+  stV2Est1RM: 'PROJ. 1RM',
   stV2TotalSets: 'Total sets',
   stV2LastTrained: 'LAST',
   stV2WeightProgress: 'Weight progress',
@@ -4658,9 +4665,6 @@ const T_EN = {
   stV2TimeProgress: 'Time progress',
   gymFinTimedBlock: 'Timed', gymFinTotalTime: 'Total time', crTitle: 'Results', crSave: 'Save', crSkip: 'Skip', crAddWeight: 'Add your body weight in your account to estimate calories.',
   crHintPrev: 'Grey values: from last time',
-  stV2TagSila: 'strength',
-  stV2TagCiezar: 'weight',
-  stV2TagObjetosc: 'volume',
   stV2Next: 'Next',
   stV2ThisWeekShort: 'This',
   stV2WeightTitle: 'Body weight · 90 days',
@@ -8215,7 +8219,7 @@ const NAV_ITEMS_V3 = [
   {route:'dashboard', icon:'nav-house', label:'Pulpit', labelKey:'navA11yDashboard'},
   {route:'plans', icon:'nav-plans', label:'Plany', labelKey:'navA11yPlans'},
   {route:'gym', icon:'gym-nav', cls:'nav-item-lg', label:'Trening', labelKey:'navA11yGym'},
-  {route:'history', icon:'nav-calendar', label:'Dziennik', labelKey:'navA11yHistory'},
+  {route:'history', icon:'nav-calendar', label:'Historia', labelKey:'navA11yHistory'},
   {route:'stats', icon:'nav-chart', label:'Postępy', labelKey:'navA11yStats'},
 ];
 function renderBottomNavForContext(){
@@ -10205,20 +10209,23 @@ function lgOverviewData(ex){
   const all = statsV2ExerciseSets(ex.name);
   let rec = null;
   if(bw){
-    const best = Math.max(0, ...all.map(x=> x.reps));
-    if(best > 0) rec = { big: String(best), unit: t('repsUnit','powt.'), label: t('lgOvRecord','REKORD') };
+    // REKORD ćwiczenia z masą ciała = najwięcej powtórzeń w serii (silnik rekordów)
+    const er = exerciseRecords(ex.name);
+    if(er && er.reps && er.reps.value > 0) rec = { big: String(er.reps.value), unit: t('repsUnit','powt.'), label: t('lgOvRecord','REKORD') };
   } else {
+    // PROGNOZA MAXA (Epley z najlepszej serii do 12 powt.), osobna liczba od rekordu; zawsze podpisana jako prognoza
     const el = all.filter(statsV2E1rmEligible), e1 = x=> statsV2Epley(x.weight, x.reps);
-    if(el.length){
-      const best = Math.max(...el.map(e1));
-      const bestSet = el.reduce((a, x)=> e1(x) > e1(a) ? x : a, el[0]);   // the real set behind the estimate, shown under the number
+    const pm = projectedMax(ex.name);
+    if(el.length && pm){
+      const best = pm.value;
+      const bestSet = { weight: pm.weight, reps: pm.reps };   // the real set behind the forecast, shown under the number
       const age = x=> Math.round((new Date(todayStr()+'T00:00:00') - new Date(x.date+'T00:00:00')) / 86400000);
       const older = el.filter(x=> age(x) >= 28);
       const delta = older.length ? Math.round((best - Math.max(...older.map(e1))) * 10) / 10 : 0;
       const byDay = {};
       el.forEach(x=>{ byDay[x.date] = Math.max(byDay[x.date] || 0, e1(x)); });
       const spark = Object.keys(byDay).sort().slice(-6).map(d=> byDay[d]);
-      rec = { big: fmtKgLocal(Math.round(best)), unit: 'kg', label: t('lgOvRecordE1rm','SZACOWANY MAX'), from: `${t('lgOvFrom','z')} ${fmtKgLocal(bestSet.weight)} kg × ${bestSet.reps}`, delta: delta >= 1 ? delta : 0, spark };
+      rec = { big: fmtKgLocal(Math.round(best)), unit: 'kg', label: t('lgOvRecordE1rm','PROGNOZA MAXA'), from: `${t('lgOvFrom','z')} ${fmtKgLocal(bestSet.weight)} kg × ${bestSet.reps}`, delta: delta >= 1 ? delta : 0, spark };
     }
   }
   return { last, rec };
@@ -16425,37 +16432,36 @@ function statsV2RelativeDate(iso){
 // still count toward volume + longest-set, just not e1RM / "siła".
 const STATSV2_E1RM_REP_CAP = 12;
 function statsV2E1rmEligible(s){ return s.weight > 0 && s.reps >= 1 && s.reps <= STATSV2_E1RM_REP_CAP; }
-// Four separate exercise records, each its own running best:
-//   siła   — highest estimated 1RM (Epley), sets ≤ 12 reps
-//   ciężar — heaviest single set (any rep count)
-//   objętość — biggest single-session volume Σ(weight×reps) for this exercise
-//   seria  — most reps in one set
-// Plus a month-over-month e1RM delta for the trend arrow.
+// Rekord ćwiczenia z silnika rekordów (exerciseRecords): najcięższy ciężar z powtórzeniami; masa ciała: najwięcej
+// powtórzeń; czasowe: najdłuższy czas. PROGNOZA MAXA (projectedMax, Epley) to osobna liczba, nigdy rekord.
+// Obok rekordu zostają dwie zwykłe statystyki (nie rekordy): największa objętość ćwiczenia w jednej sesji i najdłuższa seria.
+// Strzałka/delta = o ile rekord urósł od końca zeszłego miesiąca.
 function statsV2ExerciseRecord(name){
   const sets = statsV2ExerciseSets(name);
   if(!sets.length) return null;
   const isBodyweightEx = statsV2IsBodyweight(name);
+  const er = exerciseRecords(name) || { weight: null, reps: null, time: null, events: [] };
 
-  let sila = null, ciezar = null, seria = null;
+  // headline record: time exercise -> longest time; otherwise heaviest weight, else most reps (masa ciała)
+  let record = null;
+  if(statsV2IsTime(name) && er.time) record = { kind: 'time', value: er.time.value, perSide: er.time.perSide, date: er.time.date, history: er.time.history };
+  else if(er.weight) record = { kind: 'weight', value: er.weight.value, reps: er.weight.reps, date: er.weight.date, history: er.weight.history };
+  else if(er.reps) record = { kind: 'reps', value: er.reps.value, date: er.reps.date, history: er.reps.history };
+  else if(er.time) record = { kind: 'time', value: er.time.value, perSide: er.time.perSide, date: er.time.date, history: er.time.history };
+
+  const pm = projectedMax(name);
+  const prognoza = pm ? { value: pm.value, weight: pm.weight, reps: pm.reps } : null;
+
+  let seria = null;
   sets.forEach(s=>{
-    if(statsV2E1rmEligible(s)){
-      const e = statsV2Epley(s.weight, s.reps);
-      if(!sila || e > sila.e1rm) sila = { e1rm: e, weight: s.weight, reps: s.reps };
-    }
-    if(s.weight > 0 && (!ciezar || s.weight > ciezar.weight || (s.weight === ciezar.weight && s.reps > ciezar.reps))){
-      ciezar = { weight: s.weight, reps: s.reps };
-    }
     if(s.reps > 0 && (!seria || s.reps > seria.reps || (s.reps === seria.reps && s.weight > seria.weight))){
       seria = { reps: s.reps, weight: s.weight };
     }
   });
-  // masa ciała: weight is always 0, so sila/ciezar above naturally stay
-  // null (correct — no fake kg record). seria (best single-set reps) is
-  // already reps-only and needs no branch.
 
   // biggest single-session volume — group by the actual workout, not the
   // date (two sessions the same day stay separate). masa ciała: total reps
-  // that session instead of kg×reps.
+  // that session instead of kg×reps. A stat, not a record.
   let objetosc = null;
   workouts.forEach(w=>{
     const ex = w.exercises.find(e=>e.name===name);
@@ -16466,45 +16472,29 @@ function statsV2ExerciseRecord(name){
     if(vol > 0 && (!objetosc || vol > objetosc.vol)) objetosc = { vol, date: w.date };
   });
 
-  // month-over-month trend for the arrow: e1RM normally, best single-set
-  // reps for masa ciała (didn't move when you only added weight — N/A here
-  // since there's never weight, but reps growth still deserves the arrow).
-  // Same fallbacks as before: no data this month → all-time best so the
-  // arrow doesn't read as a crash; no earlier-month data → "Pierwszy
-  // zapisany wynik".
+  // growth of the record since the end of last month (the arrow); "Pierwszy zapisany wynik" when nothing predates this month
   const today = new Date(todayStr()+'T00:00:00');
   const thisMonthKey = statsV2MonthKey(todayStr());
-  const prevMonthKey = statsV2MonthKey(dateStr(new Date(today.getFullYear(), today.getMonth()-1, 1)));
-  let e1rmThisMonth = 0, e1rmPrevMonth = 0, repsThisMonth = 0, repsPrevMonth = 0;
-  sets.forEach(s=>{
-    const k = statsV2MonthKey(s.date);
-    if(statsV2E1rmEligible(s)){
-      const e = statsV2Epley(s.weight, s.reps);
-      if(k===thisMonthKey && e > e1rmThisMonth) e1rmThisMonth = e;
-      if(k===prevMonthKey && e > e1rmPrevMonth) e1rmPrevMonth = e;
-    }
-    if(s.reps > 0){
-      if(k===thisMonthKey && s.reps > repsThisMonth) repsThisMonth = s.reps;
-      if(k===prevMonthKey && s.reps > repsPrevMonth) repsPrevMonth = s.reps;
-    }
-  });
-  const trendNow = e1rmThisMonth || (sila ? sila.e1rm : 0);
-  const trendRepsNow = repsThisMonth || (seria ? seria.reps : 0);
+  const prevMonthEnd = dateStr(new Date(today.getFullYear(), today.getMonth(), 0));
   const hasPriorMonthData = sets.some(s => statsV2MonthKey(s.date) < thisMonthKey);
+  const growth = record ? Math.max(0, record.value - recValueAsOf(record.history, prevMonthEnd)) : 0;
 
   return {
-    sila, ciezar, objetosc, seria,
+    record, prognoza, objetosc, seria,
     isBodyweight: isBodyweightEx,
-    // headline number for the card: the e1RM record, or heaviest set if no
-    // rep-eligible set exists (all sets > 12 reps / bodyweight)
-    weight: sila ? sila.weight : (ciezar ? ciezar.weight : 0),
-    est1RM: sila ? Math.round(sila.e1rm) : (ciezar ? ciezar.weight : 0),
     totalSets: sets.length,
     lastTrained: statsV2RelativeDate(sets[sets.length-1].date),
-    deltaKg: Math.round(trendNow - e1rmPrevMonth),
-    deltaReps: trendRepsNow - repsPrevMonth,
+    deltaKg: record && record.kind === 'weight' ? Math.round(growth * 100) / 100 : 0,
+    deltaReps: record && record.kind !== 'weight' ? Math.round(growth) : 0,
     firstResult: !hasPriorMonthData,
   };
+}
+// które rodzaje rekordów rysuje wykres ćwiczenia (ten sam rodzaj co metryka linii): czas, powtórzenia (masa ciała) albo ciężar
+function statsV2PrDates(name, keyFn){
+  const kinds = statsV2IsTime(name) ? ['time'] : statsV2IsBodyweight(name) ? ['reps'] : ['weight'];
+  const er = exerciseRecords(name), out = new Set();
+  if(er) er.events.forEach(e=>{ if(kinds.includes(e.kind)) out.add(keyFn(e.date)); });
+  return out;
 }
 // running all-time-best weight per month for this exercise, PR-flagged,
 // windowed to the last `rangeMonths` (0/falsy = everything)
@@ -16527,12 +16517,12 @@ function statsV2ExerciseMonthlySeries(name, rangeMonths){
   const today = new Date(todayStr()+'T00:00:00');
   const cursor = new Date(first.getFullYear(), first.getMonth(), 1);
   let runningBest = 0;
-  const prMonths = new Set();
+  const prMonths = statsV2PrDates(name, statsV2MonthKey);   // miesiące z rekordem wg silnika (pierwszy wynik rekordem nie jest)
   const points = [];
   while(cursor <= today){
     const key = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}`;
     const monthMax = monthlyBest.get(key) || 0;
-    if(monthMax > runningBest){ runningBest = monthMax; prMonths.add(key); }
+    if(monthMax > runningBest){ runningBest = monthMax; }
     points.push({key, year:cursor.getFullYear(), month:cursor.getMonth()+1, weight: runningBest});
     cursor.setMonth(cursor.getMonth()+1);
   }
@@ -16568,61 +16558,26 @@ function statsV2ExerciseDailySeries(name){
   // chart reflects real history instead of pretending the record reset.
   let runningBest = 0;
   sets.filter(s=>s.date<windowStart).forEach(s=>{ const v=metric(s); if(v>runningBest) runningBest = v; });
-  const prMonths = new Set();
+  const prMonths = statsV2PrDates(name, d=> d);   // dni z rekordem wg silnika
   const points = days.map(d=>{
     const w = dailyBest.get(d);
-    if(w > runningBest){ runningBest = w; prMonths.add(d); }
+    if(w > runningBest){ runningBest = w; }
     return { key: d, date: d, weight: runningBest };
   });
   return { points, prMonths };
 }
-// one row per day this exercise was logged (a session), most recent
-// first, flagged if that session's top set was a genuine all-time PR
+// one row per workout this exercise was logged in (a session), most recent
+// first; isRecord = that session set a record of the exercise (engine: a tie or a first result is not one)
 function statsV2ExerciseSessions(name){
-  const isBodyweightEx = statsV2IsBodyweight(name);
   const rows = workouts.filter(w=> w.exercises.some(e=>e.name===name))
     .map(w=>{
       const ex = w.exercises.find(e=>e.name===name), sv = exSetsView(ex);
       // timed: seconds stand in for reps (see statsV2IsBodyweight)
-      return { date: w.date, sets: statsV2IsTime(name) ? sv.filter(s=>s.durationSec>0).map(s=>({ ...s, weight: 0, reps: s.durationSec })) : sv };
+      return { date: w.date, sets: statsV2IsTime(name) ? sv.filter(s=>s.durationSec>0).map(s=>({ ...s, weight: 0, reps: s.durationSec })) : sv,
+               isRecord: workoutRecordsFor(w).records.some(r=> r.name === name) };
     })
     .filter(r=> r.sets.length)
     .sort((a,b)=> a.date.localeCompare(b.date));
-  // three running bests, each moving forward in time — a session gets a
-  // tag for every one it beats outright (a tie is not a new record).
-  // masa ciała never has weight>0, so the e1rm/topWeight bests above would
-  // sit frozen at 0 forever and no session would ever flag a PR — swap to
-  // longest-set-reps ("seria") + total-reps-this-session ("objętość").
-  let bestE1rm = 0, bestWeight = 0, bestVol = 0, bestReps = 0, bestRepsVol = 0;
-  rows.forEach(r=>{
-    let e1rm = 0, topWeight = 0, vol = 0, topReps = 0, repsVol = 0;
-    r.sets.forEach(s=>{
-      const w = s.weight||0, reps = s.reps||0;
-      vol += w * reps;
-      repsVol += reps;
-      if(w > topWeight) topWeight = w;
-      if(reps > topReps) topReps = reps;
-      if(statsV2E1rmEligible(s)){
-        const e = statsV2Epley(w, reps);
-        if(e > e1rm) e1rm = e;
-      }
-    });
-    if(isBodyweightEx){
-      r.prSeria    = topReps > bestReps;
-      r.prObjetosc = repsVol > bestRepsVol;
-      r.isPr = r.prSeria; // trophy stays on the headline record
-      if(topReps > bestReps) bestReps = topReps;
-      if(repsVol > bestRepsVol) bestRepsVol = repsVol;
-    } else {
-      r.prSila     = e1rm > bestE1rm;
-      r.prCiezar   = topWeight > bestWeight;
-      r.prObjetosc = vol > bestVol;
-      r.isPr = r.prSila; // trophy stays on the strength record
-      if(e1rm > bestE1rm) bestE1rm = e1rm;
-      if(topWeight > bestWeight) bestWeight = topWeight;
-      if(vol > bestVol) bestVol = vol;
-    }
-  });
   return rows.reverse();
 }
 // simple, dependency-free smoothing: cubic bezier per segment with
@@ -16980,13 +16935,8 @@ function renderStatsV2Detail(name){
     const setsStr = rec.isBodyweight
       ? r.sets.map(s=>`${s.reps} ${statsV2Unit(name)}`).join(' · ')
       : r.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ');
-    const tags = [
-      r.prSila     ? `<span class="statsv2-log-tag">${t('stV2TagSila','siła')}</span>` : '',
-      r.prCiezar   ? `<span class="statsv2-log-tag">${t('stV2TagCiezar','ciężar')}</span>` : '',
-      r.prSeria    ? `<span class="statsv2-log-tag">${t('stV2TagSeria','seria')}</span>` : '',
-      r.prObjetosc ? `<span class="statsv2-log-tag">${t('stV2TagObjetosc','objętość')}</span>` : '',
-    ].join('');
-    const flagged = r.prSila || r.prCiezar || r.prSeria || r.prObjetosc;
+    const tags = r.isRecord ? `<span class="statsv2-log-tag">${t('stV2TagRekord','rekord')}</span>` : '';
+    const flagged = r.isRecord;
     return `
       <div class="statsv2-log-row${flagged?' is-pr':''}">
         <div class="statsv2-log-date"><strong>${dateShort}</strong><span>${weekday}</span></div>
@@ -17005,33 +16955,28 @@ function renderStatsV2Detail(name){
   // the one arrow-up-right SVG for both directions (a vertical flip turns
   // "up-right" into "down-right") rather than adding a near-duplicate icon.
   // masa ciała: the trend arrow/delta track best reps, not e1RM/kg.
-  const deltaVal = rec.isBodyweight ? rec.deltaReps : rec.deltaKg;
-  const deltaArrow = (rec.firstResult || deltaVal === 0)
+  const R = rec.record, isKgRecord = !!R && R.kind === 'weight';
+  const deltaVal = isKgRecord ? rec.deltaKg : rec.deltaReps;
+  const deltaArrow = (rec.firstResult || !deltaVal)
     ? ''
     : deltaVal > 0
       ? `<span class="ph statsv2-record-arrow">${PH['arrow-up-right']}</span>`
       : `<span class="ph statsv2-record-arrow down">${PH['arrow-up-right']}</span>`;
   const deltaText = rec.firstResult
     ? t('stV2FirstResult','Pierwszy zapisany wynik')
-    : rec.isBodyweight
-      ? `${deltaVal>=0?'+':''}${deltaVal} ${statsV2IsTime(name) ? 'sek.' : statsV2Unit(name)} ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`
-      : `${deltaVal>=0?'+':''}${deltaVal} kg ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`;
+    : isKgRecord
+      ? `${deltaVal>=0?'+':''}${deltaVal} kg ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`
+      : `${deltaVal>=0?'+':''}${deltaVal} ${R && R.kind === 'time' ? 'sek.' : statsV2Unit(name)} ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`;
 
   const fmtW = w => (typeof fmtGymWeight === 'function') ? fmtGymWeight(w) : String(w);
-  // Headline = the strength (e1RM) record. If no rep-eligible set exists
-  // (everything bodyweight or > 12 reps) fall back to the heaviest set,
-  // then to the longest set — which is the only branch masa ciała ever
-  // reaches, since sila/ciezar stay null when weight is always 0.
-  const headNum = rec.sila
-    ? `${fmtW(rec.sila.weight)}<small>kg</small> <span class="statsv2-record-num-x">× ${rec.sila.reps}</span>`
-    : rec.ciezar
-      ? `${fmtW(rec.ciezar.weight)}<small>kg</small> <span class="statsv2-record-num-x">× ${rec.ciezar.reps}</span>`
-      : `${rec.seria ? rec.seria.reps : 0}<small>${statsV2Unit(name)}</small>`;
-  const e1rmLine = rec.sila
-    ? `≈ 1RM ${Math.round(rec.sila.e1rm)} kg${deltaText ? ' · ' + deltaText : ''}`
-    : deltaText;
+  // Headline = the RECORD (engine): heaviest weight with its reps, masa ciała: most reps, timed: longest time.
+  // PROGNOZA MAXA (Epley) is its own row below, always labelled as a forecast, never as a record.
+  const headNum = !R ? `${rec.seria ? rec.seria.reps : 0}<small>${statsV2Unit(name)}</small>`
+    : R.kind === 'weight' ? `${fmtW(R.value)}<small>kg</small> <span class="statsv2-record-num-x">× ${R.reps}</span>`
+    : R.kind === 'time' ? `${Math.round(R.value)}<small>s</small>`
+    : `${R.value}<small>${statsV2Unit(name)}</small>`;
   const recRows = [
-    rec.ciezar ? `<div class="statsv2-record-row">${ph('barbell','statsv2-record-ric')}<span class="statsv2-record-rk">${t('stV2RecHeaviest','Najcięższy ciężar')}</span><span class="statsv2-record-rv">${fmtW(rec.ciezar.weight)} kg <small>× ${rec.ciezar.reps}</small></span></div>` : '',
+    rec.prognoza ? `<div class="statsv2-record-row">${ph('chart-line-up','statsv2-record-ric')}<span class="statsv2-record-rk">${t('stV2ProjectedMax','Prognoza maxa')}</span><span class="statsv2-record-rv">≈ ${Math.round(rec.prognoza.value)} kg <small>${t('stV2ProjFrom','z')} ${fmtW(rec.prognoza.weight)} × ${rec.prognoza.reps}</small></span></div>` : '',
     rec.objetosc ? `<div class="statsv2-record-row">${ph('medal','statsv2-record-ric')}<span class="statsv2-record-rk">${t('stV2RecVolume','Największa objętość sesji')}</span><span class="statsv2-record-rv">${rec.isBodyweight ? `${Math.round(rec.objetosc.vol)} ${statsV2Unit(name)}` : `${formatDashNum(Math.round(rec.objetosc.vol),0)} kg`}</span></div>` : '',
   ].join('');
   const seriaFoot = rec.seria
@@ -17048,7 +16993,7 @@ function renderStatsV2Detail(name){
           <span class="statsv2-record-num">${headNum}</span>
           ${deltaArrow}
         </div>
-        <p class="statsv2-record-delta">${e1rmLine}</p>
+        <p class="statsv2-record-delta">${deltaText}</p>
         <div class="statsv2-record-sep"></div>
         ${recRows}
         <p class="statsv2-record-foot">${seriaFoot}</p>
