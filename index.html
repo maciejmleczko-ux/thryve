@@ -6094,15 +6094,39 @@ function syncSig(v){
   for(let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
   return (h >>> 0).toString(36) + ':' + str.length.toString(36);
 }
-function cloudPlanRow(p, uid){
-  return { owner_id: uid, local_id: String(p.id), name: p.name, schedule: p.schedule || {}, is_active: p.id === starredPlanId, periodized: !!p.periodized };
+/* Kolumny dodane w 4.66.0 (migracja supabase/migrations/20261013_workouts_plan_meta.sql, uruchamia ją
+   Maciej): plans.meta, workouts.start_date, workouts.plan_id. Dopóki ich nie ma w bazie, wysyłka z nimi
+   kończy się błędem kolumny (PGRST204 / 42703); wtedy upsertChunked powtarza zapis bez nich i ustawia
+   flagę poniżej. Flaga żyje TYLKO w pamięci sesji (nie w localStorage): po restarcie apka znowu próbuje
+   z nowymi polami. Pola dopisujemy do wiersza tylko gdy rekord je ma, więc stare rekordy mają wiersz
+   i podpis identyczne jak przed 4.66.0 (brak masowego ponownego wysyłania). */
+let _cloudNewColsOk = true;
+const CLOUD_NEW_COLS = ['meta', 'start_date', 'plan_id'];
+const stripCloudNewCols = row => { const r = {...row}; CLOUD_NEW_COLS.forEach(c=>{ delete r[c]; }); return r; };
+function isCloudNewColsError(err){
+  if(!err) return false;
+  const msg = [err.message, err.details, err.hint].filter(Boolean).join(' ');
+  const colError = err.code === 'PGRST204' || err.code === '42703'
+    || /column .* does not exist|could not find the .* column/i.test(msg);
+  return colError && /\b(meta|start_date|plan_id)\b/.test(msg);
 }
-function cloudWorkoutRow(w, uid){
-  return { user_id: uid, local_id: String(w.id), date: w.date, duration_min: w.durationMin || null,
+const ISO_DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+function cloudPlanRow(p, uid, withNew){
+  const row = { owner_id: uid, local_id: String(p.id), name: p.name, schedule: p.schedule || {}, is_active: p.id === starredPlanId, periodized: !!p.periodized };
+  if((withNew === undefined ? _cloudNewColsOk : withNew) && p.meta && typeof p.meta === 'object') row.meta = p.meta;
+  return row;
+}
+function cloudWorkoutRow(w, uid, withNew){
+  const row = { user_id: uid, local_id: String(w.id), date: w.date, duration_min: w.durationMin || null,
     exercises: w.exercises || [], kcal_estimated: w.kcalEstimated ?? null, kcal_user: w.kcalUser ?? null };
+  if(withNew === undefined ? _cloudNewColsOk : withNew){
+    if(typeof w.startDate === 'string' && ISO_DAY_RE.test(w.startDate)) row.start_date = w.startDate;
+    if(typeof w.planId === 'string' && w.planId) row.plan_id = w.planId;
+  }
+  return row;
 }
-const planSig = p => { const r = cloudPlanRow(p, ''); delete r.owner_id; return syncSig(r); };
-const workoutSig = w => { const r = cloudWorkoutRow(w, ''); delete r.user_id; return syncSig(r); };
+const planSig = (p, withNew) => { const r = cloudPlanRow(p, '', withNew); delete r.owner_id; return syncSig(r); };
+const workoutSig = (w, withNew) => { const r = cloudWorkoutRow(w, '', withNew); delete r.user_id; return syncSig(r); };
 function localProfileFields(){
   return { weight_log: weightLog, body_data: bodyData || {}, display_name: profileName || null,
     custom_exercises: customExercises, exercise_notes: exerciseNotes, avatar: avatarDataUrl || null };
@@ -6162,7 +6186,15 @@ async function selectAllRows(table, ownerCol, uid, orderCol){
 }
 async function upsertChunked(table, rows, onConflict){
   for(let i = 0; i < rows.length; i += 200){
-    const { error } = await supabaseClient.from(table).upsert(rows.slice(i, i + 200), { onConflict });
+    let chunk = rows.slice(i, i + 200);
+    if(!_cloudNewColsOk) chunk = chunk.map(stripCloudNewCols);
+    let { error } = await supabaseClient.from(table).upsert(chunk, { onConflict });
+    if(error && _cloudNewColsOk && isCloudNewColsError(error)){
+      // migracja 4.66.0 jeszcze niewykonana w bazie: zapis bez nowych pól, pamiętaj do końca sesji
+      _cloudNewColsOk = false;
+      console.warn('cloud push: brak kolumn 4.66.0 w bazie, wysyłam bez nich', error.code || error.message);
+      ({ error } = await supabaseClient.from(table).upsert(chunk.map(stripCloudNewCols), { onConflict }));
+    }
     if(error) return error;
   }
   return null;
@@ -6186,7 +6218,7 @@ async function pushCloudChanges(uid, state, cloudIds){
   if(dirtyPlans.length){
     // Signatures taken BEFORE the await: an edit made while the request is
     // in flight must still look dirty afterwards.
-    const sigs = dirtyPlans.map(planSig);
+    const sigsFull = dirtyPlans.map(p=>planSig(p, true)), sigsLegacy = dirtyPlans.map(p=>planSig(p, false));
     // First sync into an account that already has an active plan: the
     // account's choice stays (same rule as other conflicts) — otherwise two
     // rows would be is_active and the pull would pick one at random. The
@@ -6198,7 +6230,12 @@ async function pushCloudChanges(uid, state, cloudIds){
       return row;
     }), 'owner_id,local_id');
     if(err){ console.error('cloud push plans', err); res.plansOk = false; }
-    else { dirtyPlans.forEach((p, i)=>{ state.plans[String(p.id)] = sigs[i]; }); res.pushed = true; }
+    else {
+      // podpis tego, co faktycznie poszło: po fallbacku (brak kolumn) bez nowych pól,
+      // dzięki temu po migracji rekord z nowymi polami znowu wygląda na zmieniony i się wypchnie
+      const sigs = _cloudNewColsOk ? sigsFull : sigsLegacy;
+      dirtyPlans.forEach((p, i)=>{ state.plans[String(p.id)] = sigs[i]; }); res.pushed = true;
+    }
   }
 
   const dirtyWorkouts = (workouts || []).filter(w=>{
@@ -6207,10 +6244,13 @@ async function pushCloudChanges(uid, state, cloudIds){
     return state.workouts[id] !== workoutSig(w);
   });
   if(dirtyWorkouts.length){
-    const sigs = dirtyWorkouts.map(workoutSig);
+    const sigsFull = dirtyWorkouts.map(w=>workoutSig(w, true)), sigsLegacy = dirtyWorkouts.map(w=>workoutSig(w, false));
     const err = await upsertChunked('workouts', dirtyWorkouts.map(w => cloudWorkoutRow(w, uid)), 'user_id,local_id');
     if(err){ console.error('cloud push workouts', err); res.workoutsOk = false; }
-    else { dirtyWorkouts.forEach((w, i)=>{ state.workouts[String(w.id)] = sigs[i]; }); res.pushed = true; }
+    else {
+      const sigs = _cloudNewColsOk ? sigsFull : sigsLegacy;
+      dirtyWorkouts.forEach((w, i)=>{ state.workouts[String(w.id)] = sigs[i]; }); res.pushed = true;
+    }
   }
 
   // Profile (after this device's first full sync — that one is handled in
@@ -6376,7 +6416,7 @@ async function syncCloudData(){
       const keptPlans = (trainingPlans || []).filter(p => !cloudPlanIds.has(String(p.id)) && !(String(p.id) in state.plans));
       trainingPlans = allPlans.data.map(row => {
         const id = row.local_id || row.id;
-        return {
+        const plan = {
           ...(localById.get(String(id)) || {}),
           id,
           name: row.name,
@@ -6384,6 +6424,11 @@ async function syncCloudData(){
           periodized: !!row.periodized,   // column since 4.47.19 — before that the flag never left the device
           builtin: builtinIds.has(id)
         };
+        // meta: column since 4.66.0; missing column or empty value keeps the local one (no error)
+        const meta = cleanPlanMeta(row.meta);
+        if(meta) plan.meta = meta;
+        else if(!plan.meta && plan.builtin){ const bm = builtinMetaFor(id); if(bm) plan.meta = bm; }
+        return plan;
       }).concat(keptPlans);
       const activeRow = allPlans.data.find(r => r.is_active);
       starredPlanId = activeRow ? (activeRow.local_id || activeRow.id) : null;
@@ -6401,7 +6446,7 @@ async function syncCloudData(){
       const keptWorkouts = (workouts || []).filter(w => !cloudWorkoutIds.has(String(w.id)) && !(String(w.id) in state.workouts));
       workouts = allWorkouts.data.map(row => {
         const id = row.local_id || row.id;
-        return {
+        const w = {
           ...(localById.get(String(id)) || {}),
           id,
           date: row.date,
@@ -6410,6 +6455,10 @@ async function syncCloudData(){
           kcalEstimated: row.kcal_estimated,
           kcalUser: row.kcal_user
         };
+        // start_date / plan_id: columns since 4.66.0; missing column or null keeps the local value (no error)
+        if(typeof row.start_date === 'string' && ISO_DAY_RE.test(row.start_date.slice(0, 10))) w.startDate = row.start_date.slice(0, 10);
+        if(typeof row.plan_id === 'string' && row.plan_id) w.planId = row.plan_id;
+        return w;
       }).concat(keptWorkouts);
       workouts.forEach(w=> cleanExerciseList(w.exercises));
       localStorage.setItem(LS_WORKOUTS, JSON.stringify(workouts));
