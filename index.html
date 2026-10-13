@@ -1414,6 +1414,8 @@ button.dash-coach{cursor:pointer;}
   text-align:center;box-sizing:border-box;
 }
 .gymv2-no-plan{margin-bottom:24px;}
+/* stan błędu renderu (Historia, Postępy): komunikat + drugorzędny przycisk z obrysem (jak .exv2-btn-outline), min. 44 pt */
+.rec-retry{display:block;margin:16px auto 0;min-height:44px;min-width:44px;box-sizing:border-box;border:1px solid var(--m-plan-c-easy);border-radius:var(--m-r-pill);padding:12px 24px;background:none;font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);font-family:inherit;cursor:pointer;text-align:center;}
 .gymv2-no-plan.hidden{display:none;}
 .gymv2-no-plan p{margin:0 0 12px;}
 .gymv2-no-plan .add-pill{margin:0 auto;}
@@ -2394,7 +2396,7 @@ body.pev2-bg{background:var(--m-panel);}
 .statsv2-log-main{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
 .statsv2-log-sets-v{font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);letter-spacing:.36px;text-align:right;}
 .statsv2-log-tags{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px;}
-.statsv2-log-tag{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--m-ink);color:#fff;border-radius:var(--m-r-pill);padding:2px 7px;line-height:1.5;}
+.statsv2-log-tag{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--m-ink);color:#fff;border-radius:var(--m-r-pill);padding:2px 7px;line-height:1.5;}
 .statsv2-log-trophy{width:26px;height:26px;color:var(--m-orange);flex-shrink:0;}
 
 /* .statsv2-empty — see the shared empty-state rule near .gymv2-no-plan */
@@ -4392,11 +4394,13 @@ const T_EN = {
   navA11yHistory: 'History',
   histV2Title: 'HISTORY',
   histRenderError: 'Could not show your history. Try again in a moment.',
+  renderRetry: 'Try again',
   statsRenderError: 'Could not show your progress. Try again in a moment.',
   recWholeWorkout: 'Whole workout',
   stV2ProjectedMax: 'Projected max',
   stV2ProjFrom: 'from',
   stV2TagRekord: 'record',
+  stV2PrTag: v => `Record ${v}`,
   navA11yStats: 'Progress',
   gymFinTitle: 'GOOD JOB',
   gymFinSub: 'You have earned a lifetime gym pass.',
@@ -4654,11 +4658,9 @@ const T_EN = {
   stV2CurrentRecord: n => `Current record — ${n}`,
   stV2DeltaSinceLastMonth: 'vs last month',
   stV2FirstResult: 'First recorded result',
-  stV2Est1RM: 'PROJ. 1RM',
   stV2TotalSets: 'Total sets',
   stV2LastTrained: 'LAST',
   stV2WeightProgress: 'Weight progress',
-  stV2RecHeaviest: 'Heaviest weight',
   stV2RecVolume: 'Biggest session volume',
   stV2RecLongestSet: 'Longest set',
   stV2RepsShort: 'reps',
@@ -4708,7 +4710,7 @@ const T_EN = {
   dashWeight: 'Weight', dashKcal: 'Calories', dashAddWeight: 'Add weight', dashDays: 'days',
   dashDeltaSame: 'no change', dashVsLast: 'vs last week', dashKcalThisWeek: 'this week', dashKcalLastWeek: 'last week',
   dashRuleFirst: 'Take lighter weights for your first workout and keep something in reserve for the last set.',
-  dashRuleRecord: name => `New record in ${name}. Before you add weight, repeat this result once more.`,
+  dashRuleRecord: name => `New record in ${name}. Repeat it once more before you raise the bar.`,
   dashRuleStreak: n => `${n} weeks in a row with all your planned workouts done. Keep this rhythm.`,
   dashRuleGap: n => `It has been ${n} days since your last workout. Get back to your plan, even with a lighter version.`,
   dashRuleVolumeUp: kg => `You are lifting more than last week so far: ${kg} kg.`,
@@ -12142,6 +12144,10 @@ function recCleanRuns(list){
   });
   return same ? list : out;
 }
+// stan zastępczy po wyjątku renderu: komunikat (role=alert) + przycisk "Spróbuj ponownie" ponawiający render ekranu
+function recErrorHtml(cls, msgKey, msgPl, retryJs){
+  return `<div class="${cls}" role="alert">${t(msgKey, msgPl)}<button type="button" class="rec-retry m-press" onclick="${retryJs}">${t('renderRetry', 'Spróbuj ponownie')}</button></div>`;
+}
 function recGuardedRender(screen, fn, onFail){
   if(recViewDepth > 0) return fn();   // zagnieżdżone wywołanie: dane już przefiltrowane, wyjątek złapie zewnętrzne
   const keepW = workouts, keepR = runs;
@@ -14583,7 +14589,7 @@ function dashCoachRule(ctx){
   if(hasPlan && !hasHistory){
     id = 'first'; text = t('dashRuleFirst','Na pierwszy trening weź lżejsze ciężary i zostaw sobie zapas na ostatnią serię.');
   } else if(lastWorkout && lastWorkout.record && lastWorkout.record.kind !== 'volume' && gapDays <= 2){   // reguła nazywa ćwiczenie, więc nie dla rekordu objętości całego treningu
-    id = 'record'; text = t('dashRuleRecord', `Nowy rekord w ćwiczeniu ${lastWorkout.record.name}. Zanim dołożysz ciężar, powtórz ten wynik jeszcze raz.`, lastWorkout.record.name);
+    id = 'record'; text = t('dashRuleRecord', `Nowy rekord w ćwiczeniu ${lastWorkout.record.name}. Zanim podniesiesz poprzeczkę, powtórz ten wynik jeszcze raz.`, lastWorkout.record.name);
   } else if(streak.weeks >= 2){
     id = 'streak'; text = t('dashRuleStreak', `${streak.weeks} ${dashPlWeeksWord(streak.weeks)} z rzędu z kompletem treningów z planu. Trzymaj ten rytm.`, streak.weeks);
   } else if(hasPlan && lastWorkout && gapDays >= 5){
@@ -16158,7 +16164,7 @@ function toggleHistExpandV2(key){
 function renderCalendarV2(animate){
   return recGuardedRender('history', ()=> renderCalendarV2Core(animate), ()=>{
     const wrap = document.getElementById('histDetailV2');
-    if(wrap) wrap.innerHTML = `<div class="histv2-empty">${t('histRenderError', 'Nie udało się wyświetlić historii. Spróbuj ponownie za chwilę.')}</div>`;
+    if(wrap) wrap.innerHTML = recErrorHtml('histv2-empty', 'histRenderError', 'Nie udało się wyświetlić historii. Spróbuj ponownie za chwilę.', 'renderCalendarV2(false)');
   });
 }
 function renderCalendarV2Core(animate){
@@ -16280,19 +16286,9 @@ function performHistRunDeleteV2(id){
   toast(t('runDeleted','Bieg usunięty'));
   renderCalendarV2();
 }
-/* Rekord treningu w kartach Historii: z silnika rekordów (ta sama definicja co Gratulacje, dashboard i Postępy).
-   Cienkie opakowania zostają dla starych wywołań: rekord ćwiczenia, rekord objętości treningu i poprzednia
-   najlepsza seria ćwiczenia (karta "Twój postęp"). */
-function histWorkoutRecordV2(w){
-  const h = workoutRecordsFor(w).headline;
-  return h && h.kind !== 'volume' ? { name: h.name, kind: h.kind, weight: h.kind === 'weight' ? h.value : 0, value: h.value, reps: h.reps || 0 } : null;
-}
+/* Poprzednia najlepsza seria ćwiczenia w karcie Historii "Twój postęp" (z silnika rekordów, ta sama definicja co Gratulacje, dashboard i Postępy). */
 function histPriorTopSet(w, exName){
   return workoutRecordsFor(w).prevTop(exName);
-}
-function histWorkoutVolRecordV2(w){
-  const v = workoutRecordsFor(w).volume;
-  return v ? { name: recWorkoutLabel(w), vol: v.value, unit: v.unit } : null;
 }
 function histWorkoutCardInner(w){
   const totalVol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
@@ -16425,7 +16421,7 @@ function buildHistCardV2(kind, item, orderIdx, animate){
 function renderHistDetailV2(animate){
   return recGuardedRender('history', ()=> renderHistDetailV2Core(animate), ()=>{
     const wrap = document.getElementById('histDetailV2');
-    if(wrap) wrap.innerHTML = `<div class="histv2-empty">${t('histRenderError', 'Nie udało się wyświetlić historii. Spróbuj ponownie za chwilę.')}</div>`;
+    if(wrap) wrap.innerHTML = recErrorHtml('histv2-empty', 'histRenderError', 'Nie udało się wyświetlić historii. Spróbuj ponownie za chwilę.', 'renderHistDetailV2(false)');
   });
 }
 function renderHistDetailV2Core(animate){
@@ -17211,7 +17207,7 @@ function renderStatsV2Detail(name){
           ${ranges.map(([m,label],i)=>`<button type="button" class="statsv2-range-chip${i===ranges.length-1?' wide':''}${statsV2Range===m?' active':''}" onclick="setStatsV2RangeV2(${m})">${label}</button>`).join('')}
         </div>
         <div class="statsv2-detail-wave">
-          ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(Math.max(0,p.y-p.r-6)/(dH+16)*100).toFixed(1)}%;">PR ${p.weight}${rec.isBodyweight ? ' ' + statsV2Unit(name) : 'kg'}</div>`).join('')}
+          ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(Math.max(0,p.y-p.r-6)/(dH+16)*100).toFixed(1)}%;">${t('stV2PrTag', v=>`Rekord ${v}`, p.weight + ' ' + (rec.isBodyweight ? statsV2Unit(name) : 'kg'))}</div>`).join('')}
           <svg viewBox="0 0 ${dW} ${dH+16}" preserveAspectRatio="none">${detailComet.svg}</svg>
           ${chartPts.map((p,i)=>{
             const L = (p.x/dW*100).toFixed(1), T = (p.y/(dH+16)*100).toFixed(1);
@@ -17431,7 +17427,7 @@ function statsV2CardioHtml(){
 function renderStatsV2(animate, drawLines){
   return recGuardedRender('stats', ()=> renderStatsV2Core(animate, drawLines), ()=>{
     const body = document.getElementById('statsV2Body');
-    if(body) body.innerHTML = `<div class="statsv2-empty">${t('statsRenderError', 'Nie udało się wyświetlić postępów. Spróbuj ponownie za chwilę.')}</div>`;
+    if(body) body.innerHTML = recErrorHtml('statsv2-empty', 'statsRenderError', 'Nie udało się wyświetlić postępów. Spróbuj ponownie za chwilę.', 'renderStatsV2(false)');
   });
 }
 function renderStatsV2Core(animate, drawLines){
@@ -18605,6 +18601,8 @@ function importData(evt){
       const data = JSON.parse(e.target.result);
       if(!Array.isArray(data.workouts) || !Array.isArray(data.runs)) throw new Error('bad format');
       migrateLegacyExerciseNames(data.workouts);
+      // startDate z kopii zapasowej: tylko poprawny dzień RRRR-MM-DD; zepsute pole znika z treningu (sam trening zostaje)
+      data.workouts.forEach(w=>{ if(w && typeof w === 'object' && w.startDate !== undefined && !dashValidIso(w.startDate)) delete w.startDate; });
       if(data.profileName && !profileName){
         profileName = data.profileName;
         localStorage.setItem(LS_PROFILE_NAME, profileName);
