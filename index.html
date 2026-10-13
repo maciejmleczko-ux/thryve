@@ -13969,20 +13969,20 @@ function dashRecordEvents(){
 // polszczyźnie). check(c) zwraca { earnedOn: 'YYYY-MM-DD'|null, value, goal } wyłącznie z historii (bez nowych kluczy).
 // `icon` to tylko klucz opisu z ustaleń; grafiki przypisuje UI.
 const DASH_BADGES = [
-  { id:'first',      icon:'barbell-flash',  name:'Pierwszy raz się liczy',        text:'Pierwszy trening zapisany w Mekkio.',
+  { id:'first',      icon:'barbell-flash',  name:'Chrzest Żelaza',                 text:'Pierwszy trening zapisany w Mekkio.',
     check:c=>({ earnedOn: c.chrono.length ? c.chrono[0].date : null, value: Math.min(1, c.chrono.length), goal: 1 }) },
-  { id:'fullweek',   icon:'medal-star',     name:'Tydzień bez wymówek',           text:'Komplet treningów z planu w jednym tygodniu.',
+  { id:'fullweek',   icon:'medal-star',     name:'Pełny Etat',                     text:'Komplet treningów z planu w jednym tygodniu.',
     check:c=>{
       let on = null;
       if(c.required > 0) for(const ws of c.weekStarts){ const s = c.weekDays.get(ws); if(s.size >= c.required){ on = [...s].sort().pop(); break; } }
       const cur = c.weekDays.get(c.curWeekStart);
       return { earnedOn: on, value: cur ? cur.size : 0, goal: c.required || null };
     } },
-  { id:'firstpr',    icon:'weight-wreath',  name:'Pierwszy, ale nie ostatni',     text:'Pierwszy nowy rekord ciężaru.',
+  { id:'firstpr',    icon:'weight-wreath',  name:'Pierwsza Krew',                  text:'Pierwszy nowy rekord ciężaru.',
     check:c=>{ const e = c.events.find(x=>x.kinds.includes('weight')); return { earnedOn: e ? e.date : null, value: e ? 1 : 0, goal: 1 }; } },
-  { id:'pr25',       icon:'trophy-star',    name:'Rekordzista z krwi i kości',    text:'25 rekordów łącznie.',
+  { id:'pr25',       icon:'trophy-star',    name:'Ściana Chwały',                  text:'25 rekordów łącznie.',
     check:c=>({ earnedOn: c.events.length >= 25 ? c.events[24].date : null, value: Math.min(25, c.events.length), goal: 25 }) },
-  { id:'beatweek',   icon:'target',         name:'Zeszły tydzień nie miał szans', text:'Objętość większa niż w zeszłym tygodniu.',
+  { id:'beatweek',   icon:'target',         name:'Nokaut Tygodnia',                text:'Objętość większa niż w zeszłym tygodniu.',
     check:c=>{
       let on = null;
       for(const ws of c.weekStarts){
@@ -13991,13 +13991,13 @@ const DASH_BADGES = [
       }
       return { earnedOn: on, value: on ? 1 : 0, goal: 1 };
     } },
-  { id:'ton',        icon:'bicep',          name:'Tona dobrej roboty',            text:'Ponad 1000 kg łącznej objętości w Mekkio.',
+  { id:'ton',        icon:'bicep',          name:'Wagon Towarowy',                 text:'Ponad 1000 kg łącznej objętości w Mekkio.',
     check:c=>{
       let sum = 0, on = null;
       for(const w of c.chrono){ sum += workoutSumStats(w).volume; if(sum >= 1000){ on = w.date; break; } }
       return { earnedOn: on, value: Math.min(1000, Math.round(c.totalKg)), goal: 1000 };
     } },
-  { id:'bodyweight', icon:'deadlift',       name:'Ważysz mniej niż podnosisz',    text:'Jedna seria z ciężarem większym niż Twoja waga.',
+  { id:'bodyweight', icon:'deadlift',       name:'Waga Ciężka',                    text:'Jedna seria z ciężarem większym niż Twoja waga.',
     check:c=>{
       let on = null, maxSet = 0;
       for(const w of c.chrono){
@@ -14009,7 +14009,7 @@ const DASH_BADGES = [
       }
       return { earnedOn: on, value: maxSet, goal: currentWeightKg() || null };
     } },
-  { id:'growth3',    icon:'chart-up',       name:'Rośniesz w oczach',             text:'3 tygodnie z rzędu z większą objętością niż tydzień wcześniej.',
+  { id:'growth3',    icon:'chart-up',       name:'Rakieta',                        text:'3 tygodnie z rzędu z większą objętością niż tydzień wcześniej.',
     check:c=>{
       let run = 0, on = null;
       if(c.weekStarts.length){
@@ -14021,7 +14021,7 @@ const DASH_BADGES = [
       }
       return { earnedOn: on, value: Math.min(3, run), goal: 3 };
     } },
-  { id:'allround',   icon:'clipboard-pr',   name:'Silny na wszystkich frontach',  text:'Rekord w 5 różnych ćwiczeniach.',
+  { id:'allround',   icon:'clipboard-pr',   name:'Człowiek orkiestra',             text:'Rekord w 5 różnych ćwiczeniach.',
     check:c=>{
       const seen = new Set(); let on = null;
       for(const e of c.events){ seen.add(e.name); if(!on && seen.size >= 5) on = e.date; }
