@@ -14,7 +14,7 @@ Stan na 2026-10-13, gałąź worktree `worktree-agent-a513c9fd14c2c551d`. „Prz
 
 Tylko dwie odznaki zależą od silnika rekordów w sposób, który zmienia wynik: **Ściana Chwały** (25 rekordów) i **Człowiek orkiestra** (rekord w 5 ćwiczeniach). **Pierwsza Krew** (pierwszy rekord ciężaru) nie zmienia się na żadnej z historii. Pozostałe 7 odznak (Chrzest Żelaza, Pełny Etat, Nokaut Tygodnia, Wagon Towarowy, Waga Ciężka, Rakieta, Gryf Mocy) nie używa rekordów i jest bez zmian na wszystkich historiach.
 
-Zmiana dotyka wyłącznie użytkowników, którzy do tej pory zbierali „rekordy” samą objętością (dokładanie serii i powtórzeń przy stałym ciężarze). Każdy, kto zwiększa ciężar, ma te same odznaki co wcześniej, z tymi samymi datami.
+Zmiana dotyka wyłącznie użytkowników, którzy do tej pory zbierali „rekordy” samą objętością (dokładanie serii i powtórzeń przy stałym ciężarze). Odznaki nie są jednak identyczne u każdego, kto zwiększa ciężar. U osób, które łączą progres ciężaru z progresem samej objętości (dokładanie serii i powtórzeń), część dawnych „rekordów” przestaje być rekordami. Wtedy data **Ściany Chwały** przesuwa się później (w historiach kontrolnych QA R3, R6, R7, R10, R2 i R8 o 6 dni do 6 tygodni), a część odznak może zniknąć (zależnie od tego, ilu rekordów brakuje do progu 25 albo 5 ćwiczeń). Bez zmian zostają odznaki u osób, które zwiększają wyłącznie ciężar (historie A–E, G–I i K poniżej).
 
 | Odznaka | A | B | C | D | E | F | G | H | I | J | K |
 |---|---|---|---|---|---|---|---|---|---|---|---|
