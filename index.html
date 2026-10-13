@@ -4700,7 +4700,7 @@ const T_EN = {
   dashThisWeek: 'This week', dashLastWeek: 'Last week', dashNewWeek: 'New week', dashRepsWord: 'reps',
   dashBadge: 'Badge', dashRecordNew: 'new', dashConsistency: 'Consistency', dashStreak: n => `${n}-week streak`,
   dashLastWorkout: 'Last workout', dashRepeat: 'Repeat this workout', dashVolume: 'Volume', dashSets: 'Sets',
-  dashCoach: 'AI Coach', dashPlanWeek: 'Weekly plan',
+  dashCoach: 'AI Coach', dashPlanWeek: 'Weekly plan', dashTreningWord: n => n === 1 ? 'workout' : 'workouts',
   dashWeight: 'Weight', dashKcal: 'Calories', dashAddWeight: 'Add weight', dashDays: 'days',
   dashDeltaSame: 'no change', dashVsLast: 'vs last week', dashKcalThisWeek: 'this week', dashKcalLastWeek: 'last week',
   dashRuleFirst: 'Take lighter weights for your first workout and keep something in reserve for the last set.',
@@ -14515,7 +14515,7 @@ function dashWeekHtml(m, animate, rc){
           ${row(DASH_ICO_WEIGHT, w.kg, 'kg', delta(w.delta.text.kg, w.delta.kg, 'kg'))}
           ${row(DASH_ICO_REPS, w.reps, t('dashRepsWord', 'powtórzeń'), delta(w.delta.text.reps, w.delta.reps, t('dashRepsWord', 'powtórzeń')))}
         </div>
-        <div class="dash-wk-chips"><span class="dash-wk-chip">${w.sessions} ${plTreningWord(w.sessions)}</span><span class="dash-wk-chip dash-wk-chip--min">${DASH_SVG_CLOCK}${formatDashNum(w.min, 0)} min</span></div>
+        <div class="dash-wk-chips"><span class="dash-wk-chip">${w.sessions} ${t('dashTreningWord', plTreningWord(w.sessions), w.sessions)}</span><span class="dash-wk-chip dash-wk-chip--min">${DASH_SVG_CLOCK}${formatDashNum(w.min, 0)} min</span></div>
       </div>
     </div>`;
   // right column: record + badge (each only when there is something to show)
@@ -14616,7 +14616,7 @@ function dashPlanWeekHtml(m, animate, rc){
   return `<button type="button" class="dash-card dash-pw m-press${rc(8)}" onclick="dashCta('planweek')" aria-label="${t('dashPlanWeek', 'Plan tygodnia')}: ${pw.done}/${pw.total}">
     <span class="dash-hd"><span class="dash-lbl">${t('dashPlanWeek', 'Plan tygodnia')}</span>${dashCaret()}</span>
     <span class="dash-days">${days}</span>
-    <span class="dash-pw-chip">${DASH_SVG_CHECK(16, 16, 12)}${pw.done}/${pw.total} ${plTreningWord(pw.total)}</span>
+    <span class="dash-pw-chip">${DASH_SVG_CHECK(16, 16, 12)}${pw.done}/${pw.total} ${t('dashTreningWord', plTreningWord(pw.total), pw.total)}</span>
   </button>`;
 }
 
