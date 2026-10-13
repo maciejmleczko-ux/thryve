@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.63.5 (2026-10-12)
-- **Liczba wersji:** 251 · **commitów:** 604
+- **Aktualna wersja:** 4.64.0 (2026-10-13)
+- **Liczba wersji:** 252 · **commitów:** 621
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -58,7 +58,7 @@ Szukanie: `Cmd+F` po nazwie ekranu (GYM, Dashboard, Stats, BUILDER), funkcji (sy
 
 Wpisy dla użytkownika (PL + EN) siedzą w obiekcie `CHANGELOG` w `index.html`. Ekran „Historia zmian” w panelu konta pokazuje je wszystkie. Ten dokument jest ich technicznym odpowiednikiem: obejmuje **każdą** wersję, także PATCH, i podaje commity.
 
-Service worker (`sw.js`) działa w trybie network-first, więc nowa wersja dociera bez zmiany `CACHE_NAME` (obecnie `mekkio-cache-v24`). Nazwę cache podbija się tylko przy zmianie samego `sw.js` albo listy plików w cache.
+Service worker (`sw.js`) działa w trybie network-first, więc nowa wersja dociera bez zmiany `CACHE_NAME` (obecnie `mekkio-cache-v27`). Nazwę cache podbija się tylko przy zmianie samego `sw.js` albo listy plików w cache.
 
 ---
 
@@ -117,6 +117,34 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.64.0 · MINOR · 2026-10-13
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Ekran główny przewija się i pokazuje więcej: plan na dziś, tydzień na tle poprzedniego, rekord, odznakę, serię tygodni, ostatni trening i wskazówkę trenera. W dni wolne podpowiada, jak potrenować po swojemu.
+
+- **Dashboard v2.1 według Figmy 542:12608 (8 stanów):** dzień treningowy, trening w toku, trening zrobiony, dzień wolny (wariant „Dziś / Jutro”), początek tygodnia, plan gotowy bez treningów, brak planu (nowy) i brak planu z historią. Ekran przewija się swobodnie; usunięte `fitDashboardToScreen` i klasa `dash-compact`, scroll-lock wg wzorca z CLAUDE.md (`dashboard-lock` + `dashboard-scrollable`).
+- **Warstwa danych:** czysta funkcja `dashboardModel(now)` (wrapper z filtrem złych dat + `dashboardModelCore`), `isPremium()` (jedyny szew bramki płatnej, dziś `true`; bramkuje też samo wywołanie AI), `recommendedPlanFor(profile)` (stały Fullbody 3x do czasu onboardingu). Delty tygodnia do ostatniego zakończonego dnia, seria tygodniowa wobec planu, bez nowych kluczy localStorage ani pól w chmurze.
+- **Karty:** Ten / Zeszły tydzień + Rekord + Odznaka, Konsystencja (heatmapa 3 mies. + seria), Ostatni trening (+ „Powtórz ten trening”), Trener AI w jednej karcie (linijka z reguł dla wszystkich, warstwa AI za `isPremium()`), Plan tygodnia, Waga i Kalorie (delty neutralne, osie ze skrótami miesięcy).
+- **Odznaki:** prosty silnik z 10 odznak liczonych z historii (m.in. „Gryf Mocy” = 10 zapisanych treningów, reguła robocza). Jedna grafika (`icons/badges/medal-barbell.svg`) do czasu etapu Profil.
+- **Tło nagłówka:** `icons/backgrounds/dashboard.webp` (39 KB); `sw.js` v27 (nowe pliki w cache).
+- **Tokeny:** `--m-page-top/-bot`, `--m-glass`, `--m-white`, `--m-navy-tile`, `--m-red-wash`, `--m-on-dark-1/-2/-3`, `--m-ai-fill-from/-mid/-to`, `--m-ai-inset/-inset-2`.
+- **Znany wyjątek kontrastu (decyzja według Figmy):** białe i jasne teksty na pomarańczu `#FF3300` mają 2,7–3,7:1 („Powtórz ten trening”, „Kontynuuj”, eyebrow i staty hero, pill „Plan”, badge zakresu dni).
+- **Czeka na test na iPhonie (PWA):** rubber-band i `100dvh`, `:active` na dotyku, `mask-image` i `color-mix` w Safari. Karty planów w stanie 7 bez tekstur z Figmy (świadomie, płaskie kolory).
+
+**Commity (16):**
+
+- `99e6146` 2026-10-13 — Dashboard v2.1: copy po przeglądzie /człowiek (opisy odznak w formie bezosobowej, Dokończ!)
+- `4f14278` 2026-10-13 — faza 4: poprawki po QA (bramka isPremium dla AI, model odporny na złe dane, scroll i modal-lock, ruch dziecka po rodzicu, wierność wg Figmy, tokeny, tłumaczenia EN)
+- `b7f3e80`, `2f85ace`, `35f5549` 2026-10-13 — faza 4 (WIP)
+- `1d782a9` 2026-10-13 — faza 3: karty pod hero, Trener AI w jednej karcie, tokeny
+- `13aea9a`, `0486223`, `c396f89`, `f093bf5` 2026-10-13 — faza 3: korekty wg Figmy
+- `eced429` 2026-10-13 — faza 3B–G: karty pod hero, odznaka Gryf Mocy
+- `7b571cb` 2026-10-13 — faza 3A: dashPlanShortName, tło nagłówka, tokeny
+- `a1e33c9` 2026-10-12 — faza 2: powłoka ekranu + hero w 7 stanach, swobodny scroll
+- `e9b2557` 2026-10-12 — merge main (4.63.5) do gałęzi dashboardu
+- `cae9ae0` 2026-10-12 — faza 1: `dashboardModel()`, `isPremium()`, `recommendedPlanFor()`
 
 ### 4.63.5 · PATCH · 2026-10-12
 
