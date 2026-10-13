@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.64.0 (2026-10-13)
-- **Liczba wersji:** 252 · **commitów:** 621
+- **Aktualna wersja:** 4.65.0 (2026-10-13)
+- **Liczba wersji:** 253 · **commitów:** 622
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -117,6 +117,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.65.0 · MINOR · 2026-10-13
+
+**Dla użytkownika:** 14 nowych ćwiczeń z gumą oporową z ikonami (męskimi i żeńskimi) i opisami „Jak ćwiczyć” PL/EN (wpis „Co nowego” do napisania osobno).
+
+- **Nowe ćwiczenia (14, sprzęt `gumy`):** Band Chest Press, Band Chest Fly, Band Row, Band Pulldown, Band Shoulder Press, Band Lateral Raise, Band Biceps Curl, Band Triceps Pushdown, Band Overhead Triceps Extension, Band Squat, Band Romanian Deadlift, Band Glute Bridge, Band Pallof Press, Band Woodchopper. Wpisane w `GYM_PLAN_EXTRA_V2` (`day:'E'`), więc jak dotąd nie trafiają do automatycznie generowanych planów; wszystkie 3 × 10–20 powtórzeń (Pallof Press i Woodchopper na stronę), przerwy 45–60 s.
+- **Ikony:** 14 męskich PNG 360×360 w `icons/exercises/` i 14 żeńskich w `icons/exercises/female/` (z paczek `mekkio_ikony_paczka_15_gumy_360.zip` i `mekkio_ikony_gumy_zenskie_360.zip`; z żeńskich usunięty przyrostek `_female`, bo mechanizm 4.57.0 wybiera ten sam slug w osobnym folderze). Slugi w `EXERCISE_ICON_PNG_SLUGS` i `EXERCISE_ICON_PNG_SLUGS_F`, `ICON_VER` 7 → 8. Stare ćwiczenia z gumą (np. `band_pull_apart`) bez zmian.
+- **Opisy „Jak ćwiczyć”:** 14 wpisów w `EXERCISE_HOWTO` i `EXERCISE_HOWTO_EN` (po 198 kluczy, identyczny zestaw).
+- Plany, w tym „Dom: hantle i gumy”, bez zmian.
+
+**Commity:** wpis dopisany w commicie tej zmiany.
+
 
 ### 4.64.0 · MINOR · 2026-10-13
 
