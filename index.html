@@ -5505,7 +5505,7 @@ const LS_WORKOUTS = "fitlog_workouts_v1";
 const LS_RUNS = "fitlog_runs_v1";
 const LS_CUSTOM_EX = "fitlog_custom_exercises_v1";
 function loadWorkouts(){ try{ const a = JSON.parse(localStorage.getItem(LS_WORKOUTS)) || []; a.forEach(w=> w && cleanExerciseList(w.exercises)); return a; }catch(e){ return []; } }
-function saveWorkouts(arr){ if(recViewDepth > 0){ console.warn('saveWorkouts skipped: a screen is rendering on a filtered copy of the history'); return; } arr.forEach(w=> w && cleanExerciseList(w.exercises)); try{ recInvalidate(); }catch(e){} localStorage.setItem(LS_WORKOUTS, JSON.stringify(arr)); scheduleCloudPush(); }
+function saveWorkouts(arr){ if(recViewDepth > 0){ console.error('saveWorkouts called while a screen renders on a filtered copy of the history: deferred until the render ends'); recPendingSave = true; return; } arr.forEach(w=> w && cleanExerciseList(w.exercises)); try{ recInvalidate(); }catch(e){} localStorage.setItem(LS_WORKOUTS, JSON.stringify(arr)); scheduleCloudPush(); }
 function loadRuns(){ try{ return JSON.parse(localStorage.getItem(LS_RUNS)) || []; }catch(e){ return []; } }
 function saveRuns(arr){ localStorage.setItem(LS_RUNS, JSON.stringify(arr)); }
 function loadCustomExercises(){ try{ return cleanExerciseList(JSON.parse(localStorage.getItem(LS_CUSTOM_EX)) || []); }catch(e){ return []; } }
@@ -11926,6 +11926,7 @@ function recChrono(src){
   return out.map(x=> x.w);
 }
 // jeden trening: wyniki każdego ćwiczenia (dwa wpisy tego samego ćwiczenia w treningu łączą się w jeden wynik) + sumy treningu
+function recRound6(v){ return Math.round(v * 1e6) / 1e6; }
 function recAnalyze(w){
   const per = new Map();
   let vol = 0, repsAll = 0;
@@ -11952,6 +11953,8 @@ function recAnalyze(w){
     });
   });
   per.forEach(p=>{ p.bw = !p.weighted && p.repsNoW > 0; });
+  // sumy zmiennoprzecinkowe zależą od kolejności serii (28,7×8 + 30,9×5 + 42,1×8 w innej kolejności różni się o ~1e-13): zaokrąglamy do 1e-6, żeby nie było fałszywego rekordu
+  vol = recRound6(vol);
   return { per, vol, repsAll, bwOnly: vol === 0 && repsAll > 0 };
 }
 function recBuildIndex(src){
@@ -11962,7 +11965,7 @@ function recBuildIndex(src){
   order.forEach((w, pos)=>{
     const an = recAnalyze(w);
     const records = [], prevTop = new Map();
-    const push = (st, ev)=>{ ev.pos = pos; ev.date = w.date; ev.workoutId = w.id; ev.delta = ev.value - ev.prev; records.push(ev); timeline.push(ev); if(st) st.events.push(ev); };
+    const push = (st, ev)=>{ ev.pos = pos; ev.date = w.date; ev.workoutId = w.id; ev.delta = recRound6(ev.value - ev.prev); records.push(ev); timeline.push(ev); if(st) st.events.push(ev); };
     an.per.forEach(p=>{
       let st = state.get(p.name);
       if(!st){ st = newState(p.name); state.set(p.name, st); }
@@ -12088,9 +12091,10 @@ function workoutRecord(w){
    bez listy ćwiczeń, z serią bez liczb itd. Tak samo jak dashboardModel() podmieniamy je NA CZAS RENDERU na przefiltrowane
    kopie (poprawna data RRRR-MM-DD z istniejącym dniem, `exercises` jest tablicą, ćwiczenia to obiekty z tablicą serii,
    liczby skończone) i zawsze przywracamy w finally. Nic nie jest zapisywane: saveWorkouts() w trakcie takiego renderu
-   jest wstrzymane, żeby przefiltrowana lista nigdy nie nadpisała pełnej. Wyjątek renderu kończy się stanem zastępczym,
+   jest odroczone do końca renderu (zapis idzie wtedy na prawdziwej tablicy), żeby przefiltrowana lista nigdy nie nadpisała pełnej. Wyjątek renderu kończy się stanem zastępczym,
    nie wyjątkiem w goRoute(). Gdy wszystkie wpisy są czyste, zwracamy TĘ SAMĄ tablicę (cache silnika rekordów działa dalej). */
 var recViewDepth = 0;   // var z tego samego powodu co recIdxCache
+var recPendingSave = false;   // zapis zgłoszony w trakcie renderu na kopii: wykonujemy go na prawdziwej tablicy po zdjęciu blokady
 function recCleanNum(v){ const n = typeof v === 'number' ? v : parseFloat(v); return isFinite(n) ? n : 0; }
 function recCleanSet(s){
   if(!s || typeof s !== 'object') return null;
@@ -12108,7 +12112,7 @@ function recCleanWorkout(w){
   for(let i = 0; i < w.exercises.length && !dirty; i++){
     const ex = w.exercises[i];
     if(!ex || typeof ex !== 'object' || !Array.isArray(ex.sets)){ dirty = true; break; }
-    for(let j = 0; j < ex.sets.length; j++){ if(recCleanSet(ex.sets[j]) !== ex.sets[j]){ dirty = true; break; } }
+    for(let j = 0; j < ex.sets.length; j++){ const sj = ex.sets[j]; if(!sj || recCleanSet(sj) !== sj){ dirty = true; break; } }
   }
   if(!dirty) return w;
   const exs = [];
@@ -12123,7 +12127,7 @@ function recCleanWorkouts(list){
   if(!Array.isArray(list)) return [];
   let same = true;
   const out = [];
-  list.forEach(w=>{ const c = recCleanWorkout(w); if(c !== w) same = false; if(c) out.push(c); });
+  list.forEach(w=>{ const c = recCleanWorkout(w); if(!c || c !== w) same = false; if(c) out.push(c); });
   return same ? list : out;
 }
 function recCleanRuns(list){
@@ -12151,6 +12155,10 @@ function recGuardedRender(screen, fn, onFail){
     try{ onFail(err); }catch(e2){}
   }finally{
     workouts = keepW; runs = keepR; recViewDepth--;
+    if(recViewDepth === 0 && recPendingSave){
+      recPendingSave = false;
+      try{ saveWorkouts(workouts); }catch(e3){ console.error('deferred saveWorkouts failed', e3); }
+    }
   }
 }
 // the record as the Gratulacje screen shows it (see showGymFinishV2): label, name, big value, unit and the "+x vs previous" line
@@ -14605,7 +14613,7 @@ function dashboardModel(now){
   const okR = r => r && dashValidIso(r.date) && r.date <= todayIso;
   const keepW = workouts, keepR = runs;
   try{
-    workouts = keepW.filter(okW);
+    workouts = recCleanWorkouts(keepW).filter(okW);   // ćwiczenia/serie bez obiektu lub tablicy też odpadają (to samo czyszczenie co Historia i Postępy)
     runs = keepR.filter(okR);
     return dashboardModelCore(now);
   } finally {
@@ -14614,7 +14622,7 @@ function dashboardModel(now){
 }
 function dashboardModelCore(now){
   now = now || new Date();
-  const todayIso = dateStr(now), todayKey = dayKeyFromDate(todayIso);
+  const todayIso = dateStr(now);
   const plan = starredPlanId ? (trainingPlans.find(p=>p.id===starredPlanId) || null) : null;
   const hasPlan = !!plan;
   const hasHistory = workouts.length > 0 || runs.length > 0;
@@ -15240,7 +15248,7 @@ function renderDashboard(animate){
 // treningi, które dashboard w ogóle widzi: poprawna data, nie z przyszłości, ma listę ćwiczeń (tak samo jak dashboardModel)
 function dashValidWorkouts(){
   const today = dateStr(new Date());
-  return workouts.filter(w=> w && dashValidIso(w.date) && w.date <= today && Array.isArray(w.exercises));
+  return recCleanWorkouts(workouts).filter(w=> w && dashValidIso(w.date) && w.date <= today && Array.isArray(w.exercises));
 }
 function renderDashboardInner(animate){
   const workouts = dashValidWorkouts();   // shadows the global on purpose: payload for the AI card is built only from valid entries
