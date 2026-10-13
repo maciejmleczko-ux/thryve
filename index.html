@@ -13991,11 +13991,12 @@ const DASH_BADGES = [
       }
       return { earnedOn: on, value: on ? 1 : 0, goal: 1 };
     } },
-  { id:'ton',        icon:'bicep',          name:'Wagon Towarowy',                 text:'Ponad 1000 kg łącznej objętości w Mekkio.',
+  { id:'ton',        icon:'bicep',          name:'Wagon Towarowy',                 text:'Ponad 100 t łącznej objętości w Mekkio.',
     check:c=>{
+      const GOAL = 100000;   // 100 t; 1000 kg bylo osiagane juz w pierwszym treningu
       let sum = 0, on = null;
-      for(const w of c.chrono){ sum += workoutSumStats(w).volume; if(sum >= 1000){ on = w.date; break; } }
-      return { earnedOn: on, value: Math.min(1000, Math.round(c.totalKg)), goal: 1000 };
+      for(const w of c.chrono){ sum += workoutSumStats(w).volume; if(sum >= GOAL){ on = w.date; break; } }
+      return { earnedOn: on, value: Math.min(GOAL, Math.round(c.totalKg)), goal: GOAL };
     } },
   { id:'bodyweight', icon:'deadlift',       name:'Waga Ciężka',                    text:'Jedna seria z ciężarem większym niż Twoja waga.',
     check:c=>{
