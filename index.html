@@ -14790,7 +14790,13 @@ function renderDashboard(animate){
   try{ renderDashboardInner(animate); }
   catch(err){ console.error('dashboard render failed', err); renderDashShell(!!animate); }
 }
+// treningi, które dashboard w ogóle widzi: poprawna data, nie z przyszłości, ma listę ćwiczeń (tak samo jak dashboardModel)
+function dashValidWorkouts(){
+  const today = dateStr(new Date());
+  return workouts.filter(w=> w && dashValidIso(w.date) && w.date <= today && Array.isArray(w.exercises));
+}
 function renderDashboardInner(animate){
+  const workouts = dashValidWorkouts();   // shadows the global on purpose: payload for the AI card is built only from valid entries
   // AI asystent — Krok 1: analiza OSTATNIEGO treningu (2026-09-16), z
   // "pro tip"-owym kontekstem policzonym W KODZIE (nie zostawionym modelowi
   // do zgadywania z surowych liczb) — balans partii mięśniowych, zaniedbane
