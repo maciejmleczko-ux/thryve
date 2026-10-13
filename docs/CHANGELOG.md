@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.65.0 (2026-10-13)
+- **Aktualna wersja:** 4.66.0 (2026-10-14)
 - **Liczba wersji:** 253 · **commitów:** 622
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -117,6 +117,25 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.66.0 · MINOR · 2026-10-14
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Rekord oznacza teraz zawsze najcięższy ciężar, jaki udało Ci się podnieść. Prognoza maxa to osobna liczba i tylko prognoza. Dziennik nazywa się teraz Historia.
+
+**Fundament pod nowe ekrany (etapy F1, F3 i poprawki F4):**
+
+- **Jeden silnik rekordów** (`exerciseRecords`, `workoutRecordsFor`, `recordTimeline`, `projectedMax`) zamiast czterech osobnych implementacji. Rekord = najcięższy faktycznie podniesiony ciężar (ćwiczenia z masą ciała: najwięcej powtórzeń, czasowe: najdłuższy czas), z powtórzeniami w podpisie („22 kg × 10”); osobno rekord objętości całego treningu. Remis i pierwsze wykonanie nie są rekordem, seria „ciężar × 0 powtórzeń” się nie liczy. Używają go dashboard, Historia, Postępy, Gratulacje, karta udostępniania i odznaki. Przetestowany na 650 losowych historiach względem niezależnej implementacji (0 rozbieżności).
+- **Nazwy:** „SZACOWANY MAX” → „PROGNOZA MAXA” (EN „PROJECTED MAX”), ekran „DZIENNIK” → „HISTORIA” (EN „HISTORY”). Prognoza maxa (e1RM) zawsze jako prognoza, osobny wiersz w Postępach.
+- **Odznaki:** reguły na nowym silniku. Zmieniają się tylko „Ściana Chwały” i „Człowiek orkiestra” u osób, które zbierały „rekordy” samą objętością; u łączących progres ciężaru i objętości data „Ściany Chwały” przesuwa się później. Zestawienie: `docs/f1-zestawienie-odznak.md`.
+- **Odporność:** Historia i Postępy czyszczą dane (zła data, `null`, uszkodzone serie) i mają stan błędu z przyciskiem „Spróbuj ponownie” (`role="alert"`); dashboard używa tego samego czyszczenia. Zapis treningów w trakcie renderu na kopii jest odkładany, nie gubiony.
+- **Nowe pola danych (F3):** przy treningu `startDate` (dzień startu) i `planId` (plan aktywny w chwili zapisu), przy planie `meta` (źródło, cel, poziom, sprzęt, opis); kod udostępnienia planu rozszerzony wstecznie zgodnie (opcjonalne `m`). Stare treningi i plany działają jak dotąd. Kalendarz Historii i seria tygodniowa liczą plan tygodnia z `planId` treningów, więc zmiana planu nie przepisuje przeszłości; tygodnie bez znanego planu są neutralne (bez „opuszczone”). Jedna funkcja odczytu planu `planExercisesFor(plan, iso)`.
+- **Migracja bazy (do uruchomienia ręcznie w Supabase):** `supabase/migrations/20261013_workouts_plan_meta.sql` (`workouts.start_date`, `workouts.plan_id`, `plans.meta`), instrukcja w `docs/f3-migracja.md`. Do czasu migracji klient zapisuje lokalnie i wysyła bez nowych pól, bez błędów.
+- Reguła trenera przy rekordzie neutralna dla ciężaru, czasu i powtórzeń; walidacja `startDate` przy imporcie kopii; usunięty martwy kod i osierocone klucze tłumaczeń.
+- Pozostawione świadomie: karta udostępniania bez „× powt.”, nazwy ćwiczeń rozróżniają wielkość liter, GYM bez straży na uszkodzone dane (zachowanie sprzed zmian).
+
+**Commity (z wersji 4.65.0):** zobacz `git log 553fdf6..` (etapy F1, F3, F4).
 
 ### 4.65.0 · MINOR · 2026-10-13
 
