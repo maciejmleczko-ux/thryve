@@ -14198,6 +14198,9 @@ function dashRecordEvents(){
 // Odznaki — jedna tablica danych (nazwy i kryteria uzgodnione z Maciejem 2026-09-16, po /człowiek i poprawnej
 // polszczyźnie). check(c) zwraca { earnedOn: 'YYYY-MM-DD'|null, value, goal } wyłącznie z historii (bez nowych kluczy).
 // `icon` to tylko klucz opisu z ustaleń; grafiki przypisuje UI.
+// c.events = rekordy ćwiczeń z silnika rekordów (dashRecordEvents → recordTimeline): Pierwsza Krew = pierwszy rekord ciężaru, Ściana Chwały =
+// liczba rekordów ćwiczeń (ciężar / powtórzenia przy masie ciała / czas), Człowiek orkiestra = rekord w 5 różnych ćwiczeniach.
+// Rekord objętości całego treningu jest osobny i nie liczy się do żadnej odznaki.
 const DASH_BADGES = [
   { id:'first',      icon:'barbell-flash',  name:'Chrzest Żelaza',                 text:'Pierwszy trening zapisany w Mekkio.',
     check:c=>({ earnedOn: c.chrono.length ? c.chrono[0].date : null, value: Math.min(1, c.chrono.length), goal: 1 }) },
