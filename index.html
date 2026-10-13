@@ -1229,15 +1229,15 @@ button.dash-card{cursor:pointer;}
 .dash-wk-chip--min{background:var(--m-plan-mid);color:var(--m-white);box-shadow:none;}
 .dash-wk-chip svg{display:block;flex:none;width:13.5px;height:13.5px;}
 @media (max-width:359px){ .dash-wk-ico{display:none;} .dash-wk-chip{padding:5px 8px;} .dash-range{padding:0 6px;letter-spacing:.04em;} }
-.dash-wkcol{flex:0 0 133px;display:flex;flex-direction:column;gap:4px;}
+.dash-wkcol{flex:0 0 133px;min-width:0;display:flex;flex-direction:column;gap:4px;}
 .dash-wkcol > *{flex:1 1 auto;}
 .dash-wkrow--solo .dash-wkcol{display:none;}
-.dash-rec{display:flex;flex-direction:column;gap:12px;}
+.dash-rec{display:flex;flex-direction:column;gap:12px;min-width:0;}
 .dash-rec-body{display:flex;align-items:flex-end;justify-content:space-between;gap:4px;flex:1;}
 .dash-rec-val{min-width:0;flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:12px;}
-.dash-rec-num{display:flex;align-items:baseline;gap:2.5px;white-space:nowrap;}
+.dash-rec-num{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 2.5px;}   /* kolumna ma stałe 133px: podpis z powtórzeniami („kg × 11”) zawija się pod liczbę zamiast rozpychać kafle */
 .dash-rec-num .dash-num{font-size:26px;}
-.dash-rec-num small{margin-bottom:-4px;font-size:var(--m-fs-xs);font-weight:400;line-height:16px;}
+.dash-rec-num small{margin-bottom:-4px;font-size:var(--m-fs-xs);font-weight:400;line-height:16px;white-space:nowrap;}
 .dash-rec-name{margin:0;font-size:var(--m-fs-2xs);font-weight:500;line-height:1.1;letter-spacing:.0615em;text-transform:uppercase;color:var(--m-plan-hard);overflow-wrap:anywhere;}
 .dash-rec-cup{flex:none;width:33px;height:26px;color:var(--m-orange);}
 .dash-rec-cup svg{display:block;width:33px;height:26px;}
@@ -2361,7 +2361,7 @@ body.pev2-bg{background:var(--m-panel);}
 .statsv2-record-ric{width:18px;height:18px;color:#fff;flex-shrink:0;}
 .statsv2-record-rk{flex:1;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.85);letter-spacing:.4px;text-transform:uppercase;}
 .statsv2-record-rv{font-size:var(--m-fs-sm);color:#fff;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0;}
-.statsv2-record-rv small{font-weight:400;color:rgba(255,255,255,.75);}
+.statsv2-record-rv small{font-size:var(--m-fs-2xs);font-weight:400;color:rgba(255,255,255,.75);}
 .statsv2-record-foot{margin:10px 0 0;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.8);line-height:1.5;}
 .statsv2-record-foot strong{color:#fff;font-weight:600;}
 
@@ -4697,7 +4697,7 @@ const T_EN = {
   dashHlNew: 'Start with a plan.', dashHlNew2: 'The rest will follow.',
   dashHlNoPlan: 'No plan,', dashHlNoPlan2: 'no progress.',
   dashStart: 'Start', dashContinue: 'Continue', dashSummary: 'Summary', dashChoose: 'Choose', dashPlans: 'Plans',
-  dashDoneToday: 'Done today', dashOneRecord: '1 record', dashOwnWorkout: 'Custom workout',
+  dashDoneToday: 'Done today', dashRecordsN: n => `${n} ${n === 1 ? 'record' : 'records'}`, dashOwnWorkout: 'Custom workout',
   dashToday: 'Today', dashTomorrow: 'Tomorrow', dashRestDay: 'Rest day', dashPlanPill: 'Plan',
   dashFreeT: 'Train your way', dashFreeD: 'Pick exercises, add your own or repeat your last workout.',
   dashSteps: 'First steps', dashStep1: 'Choose a plan', dashStep2: 'Do your first workout', dashStep3: 'See your progress',
@@ -14225,6 +14225,14 @@ function plTreningWord(n){
   if(mod10>=2 && mod10<=4 && !(mod100>=12 && mod100<=14)) return 'treningi';
   return 'treningów';
 }
+function plRekordWord(n){
+  const mod10=n%10, mod100=n%100;
+  if(n===1) return 'rekord';
+  if(mod10>=2 && mod10<=4 && !(mod100>=12 && mod100<=14)) return 'rekordy';
+  return 'rekordów';
+}
+// ile rekordów padło w treningu (rekordy ćwiczeń + rekord objętości): ta sama liczba w kafelku „Ostatni trening” i w hero „Dziś zaliczone”
+function workoutRecordCount(w){ const r = workoutRecordsFor(w); return r.records.length + (r.volume ? 1 : 0); }
 function formatDashNum(v, decimals){
   const loc = LANG==='en' ? 'en-US' : 'pl-PL';
   return decimals===0 ? Math.round(v).toLocaleString(loc) : (Math.round(v*10)/10).toLocaleString(loc);
@@ -14547,7 +14555,7 @@ function dashLastWorkout(){
     minutes: w.durationMin || null, exerciseCount: w.exercises.length,
     volumeKg: Math.round(st.volume), reps: st.reps, sets,
     record: rec ? { kind:rec.kind, unit:rec.unit, name:rec.name, value:rec.value, delta:rec.delta, display: gymFinRecordFrom(rec) } : null,
-    recordCount: (()=>{ const r = workoutRecordsFor(w); return r.records.length + (r.volume ? 1 : 0); })(),   // ile rekordów padło w tym treningu (kafel „Rekord”)
+    recordCount: workoutRecordCount(w),   // ile rekordów padło w tym treningu (kafel „Rekord”)
     canRepeat: true,   // „Powtórz ten trening” = repeatLastWorkoutV2()
   };
 }
@@ -14708,9 +14716,10 @@ function dashboardModelCore(now){
     });
     todaysRuns.forEach(r=>{ min += r.time||0; });
     const rec = todays.length ? workoutRecord(todays[todays.length-1]) : null;
+    const recCount = todays.length ? workoutRecordCount(todays[todays.length-1]) : 0;
     hero = { state:'done', ...base, workouts: todays.length, runs: todaysRuns.length, volumeKg: Math.round(vol), reps, sets: nSets,
              minutes: Math.round(min), exerciseCount: exs, kcal: kcalAny ? Math.round(kcalSum) : null,
-             record: rec ? { kind:rec.kind, unit:rec.unit, name:rec.name, value:rec.value, delta:rec.delta, display: gymFinRecordFrom(rec) } : null };
+             record: rec ? { kind:rec.kind, unit:rec.unit, name:rec.name, value:rec.value, delta:rec.delta, display: gymFinRecordFrom(rec) } : null, recordCount: recCount };
   } else if(!hasPlan){
     hero = hasHistory
       ? { state:'noplan-history', ...base }
@@ -14822,7 +14831,7 @@ function dashHeroHtml(m, animate){
       const chips = [];
       if(h.minutes > 0) chips.push(dashStat(ph('clock-counter-clockwise', 'dash-flip'), `${h.minutes} min`));
       if(h.volumeKg > 0) chips.push(dashStat(ph('barbell'), `${formatDashNum(h.volumeKg, 0)} kg`));
-      if(h.record) chips.push(dashStat(ph('trophy'), t('dashOneRecord', '1 rekord')));
+      if(h.recordCount > 0) chips.push(dashStat(ph('trophy'), t('dashRecordsN', `${h.recordCount} ${plRekordWord(h.recordCount)}`, h.recordCount)));
       return `<div class="dash-hero dash-hero--done${rc(1)}">
         <p class="dash-hero-eyebrow">${DASH_SVG_CHECK(14, 12, 12)}${t('dashDoneToday', 'Dziś zaliczone')}</p>
         <h2 class="dash-hero-title">${title}</h2>
@@ -16693,6 +16702,7 @@ function statsV2ExerciseRecord(name){
     record, prognoza, objetosc, seria,
     isBodyweight: isBodyweightEx,
     totalSets: sets.length,
+    sessions: workouts.filter(w=>w.exercises.some(e=>e.name===name)).length,   // ile treningów zawiera to ćwiczenie (napis „Pierwszy zapisany wynik” tylko przy jednym)
     lastTrained: statsV2RelativeDate(sets[sets.length-1].date),
     deltaKg: record && record.kind === 'weight' ? Math.round(growth * 100) / 100 : 0,
     deltaReps: record && record.kind !== 'weight' ? Math.round(growth) : 0,
@@ -17172,11 +17182,14 @@ function renderStatsV2Detail(name){
     : deltaVal > 0
       ? `<span class="ph statsv2-record-arrow">${PH['arrow-up-right']}</span>`
       : `<span class="ph statsv2-record-arrow down">${PH['arrow-up-right']}</span>`;
+  // „Pierwszy zapisany wynik” tylko przy dokładnie jednej sesji; wiele sesji bez danych sprzed tego miesiąca = bez wiersza delty; wzrost 0 = „bez zmian”
   const deltaText = rec.firstResult
-    ? t('stV2FirstResult','Pierwszy zapisany wynik')
-    : isKgRecord
-      ? `${deltaVal>=0?'+':''}${deltaVal} kg ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`
-      : `${deltaVal>=0?'+':''}${deltaVal} ${R && R.kind === 'time' ? 'sek.' : statsV2Unit(name)} ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`;
+    ? (rec.sessions === 1 ? t('stV2FirstResult','Pierwszy zapisany wynik') : '')
+    : !deltaVal
+      ? `${t('dashDeltaSame','bez zmian')} ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`
+      : isKgRecord
+        ? `+${deltaVal} kg ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`
+        : `+${deltaVal} ${R && R.kind === 'time' ? 'sek.' : statsV2Unit(name)} ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`;
 
   const fmtW = w => (typeof fmtGymWeight === 'function') ? fmtGymWeight(w) : String(w);
   // Headline = the RECORD (engine): heaviest weight with its reps, masa ciała: most reps, timed: longest time.
@@ -17203,7 +17216,7 @@ function renderStatsV2Detail(name){
           <span class="statsv2-record-num">${headNum}</span>
           ${deltaArrow}
         </div>
-        <p class="statsv2-record-delta">${deltaText}</p>
+        ${deltaText ? `<p class="statsv2-record-delta">${deltaText}</p>` : ''}
         <div class="statsv2-record-sep"></div>
         ${recRows}
         <p class="statsv2-record-foot">${seriaFoot}</p>
