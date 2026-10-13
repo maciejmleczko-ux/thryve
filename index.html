@@ -12034,17 +12034,21 @@ function recCleanSet(s){
 }
 function recCleanWorkout(w){
   if(!w || typeof w !== 'object' || !dashValidIso(w.date) || !Array.isArray(w.exercises)) return null;
+  // szybka ścieżka (prawie zawsze): nic nie trzeba poprawiać, zwracamy ten sam obiekt bez alokacji
   let dirty = false;
+  for(let i = 0; i < w.exercises.length && !dirty; i++){
+    const ex = w.exercises[i];
+    if(!ex || typeof ex !== 'object' || !Array.isArray(ex.sets)){ dirty = true; break; }
+    for(let j = 0; j < ex.sets.length; j++){ if(recCleanSet(ex.sets[j]) !== ex.sets[j]){ dirty = true; break; } }
+  }
+  if(!dirty) return w;
   const exs = [];
   w.exercises.forEach(ex=>{
-    if(!ex || typeof ex !== 'object'){ dirty = true; return; }
-    if(!Array.isArray(ex.sets)){ dirty = true; exs.push(Object.assign({}, ex, { sets: [] })); return; }
-    let setsDirty = false;
-    const sets = ex.sets.map(s=>{ const c = recCleanSet(s); if(c !== s) setsDirty = true; return c; }).filter(Boolean);
-    if(sets.length !== ex.sets.length) setsDirty = true;
-    if(setsDirty){ dirty = true; exs.push(Object.assign({}, ex, { sets })); } else exs.push(ex);
+    if(!ex || typeof ex !== 'object') return;
+    if(!Array.isArray(ex.sets)){ exs.push(Object.assign({}, ex, { sets: [] })); return; }
+    exs.push(Object.assign({}, ex, { sets: ex.sets.map(recCleanSet).filter(Boolean) }));
   });
-  return dirty ? Object.assign({}, w, { exercises: exs }) : w;
+  return Object.assign({}, w, { exercises: exs });
 }
 function recCleanWorkouts(list){
   if(!Array.isArray(list)) return [];
@@ -14336,6 +14340,7 @@ function dashLastWorkout(){
     minutes: w.durationMin || null, exerciseCount: w.exercises.length,
     volumeKg: Math.round(st.volume), reps: st.reps, sets,
     record: rec ? { kind:rec.kind, unit:rec.unit, name:rec.name, value:rec.value, delta:rec.delta, display: gymFinRecordFrom(rec) } : null,
+    recordCount: (()=>{ const r = workoutRecordsFor(w); return r.records.length + (r.volume ? 1 : 0); })(),   // ile rekordów padło w tym treningu (kafel „Rekord”)
     canRepeat: true,   // „Powtórz ten trening” = repeatLastWorkoutV2()
   };
 }
@@ -14384,7 +14389,7 @@ function dashCoachRule(ctx){
   const gapDays = lastWorkout ? dashDaysBetween(lastWorkout.date, todayIso) : 0;
   if(hasPlan && !hasHistory){
     id = 'first'; text = t('dashRuleFirst','Na pierwszy trening weź lżejsze ciężary i zostaw sobie zapas na ostatnią serię.');
-  } else if(lastWorkout && lastWorkout.record && gapDays <= 2){
+  } else if(lastWorkout && lastWorkout.record && lastWorkout.record.kind !== 'volume' && gapDays <= 2){   // reguła nazywa ćwiczenie, więc nie dla rekordu objętości całego treningu
     id = 'record'; text = t('dashRuleRecord', `Nowy rekord w ćwiczeniu ${lastWorkout.record.name}. Zanim dołożysz ciężar, powtórz ten wynik jeszcze raz.`, lastWorkout.record.name);
   } else if(streak.weeks >= 2){
     id = 'streak'; text = t('dashRuleStreak', `${streak.weeks} ${dashPlWeeksWord(streak.weeks)} z rzędu z kompletem treningów z planu. Trzymaj ten rytm.`, streak.weeks);
@@ -14800,7 +14805,7 @@ function dashLastHtml(m, animate, rc){
   const chips = [];
   if(lw.minutes > 0) chips.push(`<span class="dash-last-chip">${lw.minutes} min</span>`);
   if(lw.exerciseCount > 0) chips.push(`<span class="dash-last-chip">${escHtml(planExCountText(lw.exerciseCount))}</span>`);
-  const recN = lw.record ? 1 : 0;
+  const recN = lw.recordCount != null ? lw.recordCount : (lw.record ? 1 : 0);
   const mini = (cls, label, v, unit)=> `<div class="dash-mini ${cls}"><span class="dash-lbl">${label}</span><span class="dash-mini-v"><span class="dash-num">${v}</span>${unit ? `<small>${unit}</small>` : ''}</span></div>`;
   return `<div class="dash-card dash-last${rc(6)}">
     <button type="button" class="dash-last-main m-press" onclick="dashCta('last')" aria-label="${t('dashLastWorkout', 'Ostatni trening')}: ${title}, ${escHtml(dashShortDate(lw.date))}">
