@@ -111,6 +111,10 @@
   --m-danger:var(--m-plan-c-hard); /* error = #cd1200 + icon/message, never colour alone */
   --m-orange-ink:#801a00;  /* text on orange tints (10:1) */
   --m-orange-tint:#f1d7cb;
+  --m-orange-soft:#ff9b82;  /* thin outline of the orange X button in .m-sheet2 (Figma popupy-v2) */
+  --m-orange-on-dark:var(--m-plan-c-easy); /* "COFNIJ" on the black toast (7.1:1) */
+  --m-grab:#ccc;            /* sheet grabber in .m-sheet2 */
+  --m-black:#000;           /* toast pill */
   --m-orange-tint-2:#ffe9e3;
   --m-navy-tint:#b7c0e1;
   --m-navy-ink:#0d1637;
@@ -921,14 +925,69 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .chl-end{text-align:center;font-size:var(--m-fs-2xs);color:var(--m-muted);padding:14px 0 2px;}
 
 /* ---------- misc ---------- */
-/* Figma 448:5703 — black bubble, full width minus 20px gutters, left-aligned
-   12px Geist. Line-height loosened from Figma's 12.12px so a wrapped
-   message stays readable; vertical padding trimmed to keep the 1-line
-   height at ~36px like the design. */
-.toast{position:fixed;left:50%;bottom:110px;width:min(349px, calc(100% - 40px));box-sizing:border-box;transform:translateX(-50%) translateY(20px);background:#000;color:#fdfbff;
-  padding:10px 16px;border-radius:8.65px;font-family:'Geist',sans-serif;font-size:var(--m-fs-xs);font-weight:400;line-height:1.35;text-align:left;opacity:0;pointer-events:none;transition:opacity var(--m-dur-fade) ease,transform var(--m-dur-fade) var(--m-ease);z-index:9700;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* Toast — pastylka (Figma popupy-v2 573:13726, promień 99): czarna, tekst 13 px, hug szerokości.
+   Warianty: .has-undo (akcja COFNIJ, pole dotyku 44 pt wystaje poza pastylkę, 6 s) i .is-error (#CD1200).
+   Ruch tylko przez transition (opacity + transform), by zmiana kierunku była płynna; visibility zamyka
+   przyciski ukrytego toastu przed fokusem i dotykiem po wygaszeniu. */
+.toast{position:fixed;left:50%;bottom:110px;width:max-content;max-width:calc(100% - 40px);box-sizing:border-box;transform:translateX(-50%) translateY(20px);background:var(--m-black);color:var(--m-card);
+  display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 24px;border-radius:var(--m-r-pill);font-family:var(--m-font);font-size:var(--m-fs-sm);font-weight:400;line-height:1.35;text-align:center;opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity var(--m-dur-fade) ease,transform var(--m-dur-fade) var(--m-ease),background-color var(--m-dur-quick) ease,visibility 0s linear var(--m-dur-fade);z-index:9700;}
+.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);transition-delay:0s;}
+.toast.is-error{background:var(--m-danger);}
+.toast.has-undo{padding-right:12px;}
+.toast.has-undo.show{pointer-events:auto;}
+.toast-undo{flex:none;min-width:44px;min-height:44px;margin:-13px 0;padding:0 12px;border:0;background:none;color:var(--m-orange-on-dark);font:inherit;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.toast-undo:active{transform:scale(.95);transition-duration:var(--m-dur-press-in);}
 @media (prefers-reduced-motion: reduce){ .toast,.toast.show{transform:translateX(-50%);} }
+
+/* ============================================================
+   .m-sheet2 — nowy szkielet arkusza (Figma popupy-v2, ramki 01–24; karta: docs/popupy-spec.md).
+   WŁĄCZANY KLASĄ na overlayu (.plansv2-customize-overlay.m-sheet2 albo .m-sheet-overlay.m-sheet2);
+   istniejące okna bez tej klasy wyglądają jak dawniej. Ruch, mSheetDrag, html.modal-lock i reset
+   m-sheet-entered zostają z rodziny .plansv2-customize-* / .m-sheet.
+   Układ: stack > uchwyt + .plansv2-customize-card (przewijana: .m2-head + treść) + .m2-actions
+   (przypięte: przycisk główny 55 px, 32 px od dołu arkusza). Tło białe, rogi 34, cień 0 13 66 .18.
+   ============================================================ */
+.m-sheet2 .plansv2-customize-stack,.m-sheet2 .m-sheet{background:var(--m-white);box-shadow:0 13px 66px rgba(0,0,0,.18);padding-bottom:32px;}
+.m-sheet2 .m-sheet-grab{width:53px;height:3.5px;margin:5px auto 0;border-radius:99px;background:var(--m-grab);}
+.m-sheet2 .plansv2-customize-card{gap:0;padding:0 16px;}
+.m2-head{display:flex;flex-direction:column;width:100%;padding-top:10px;}
+.m2-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;}
+.m2-title{margin:0;font-size:var(--m-fs-lg);font-weight:400;line-height:1.2;letter-spacing:.05em;text-transform:uppercase;color:var(--m-ink);}
+/* ✕: okrąg 40 pt (Figma), pole dotyku 44 pt */
+.m2-x{position:relative;flex:none;width:44px;height:44px;margin-right:-2px;padding:0;border:0;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font:inherit;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.m2-x::before{content:'';position:absolute;inset:2px;border-radius:50%;background:var(--m-orange);border:.56px solid var(--m-orange-soft);box-sizing:border-box;}
+.m2-x svg{position:relative;width:18px;height:18px;display:block;}
+.m2-sub{margin:9px 0 0;font-size:var(--m-fs-xs);line-height:1.5;color:var(--m-ink);}
+.m2-body{display:flex;flex-direction:column;align-items:stretch;width:100%;margin-top:26px;}
+.m2-actions{flex:none;width:100%;box-sizing:border-box;padding:16px 16px 0;display:flex;flex-direction:column;gap:12px;}
+/* przycisk główny / drugorzędny: 55 pt, Medium 14, .12em */
+.m2-btn{width:100%;height:55px;border:1px solid transparent;border-radius:var(--m-r-pill);background:var(--m-orange);color:var(--m-white);font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;padding:0 30px;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-quick) ease;}
+.m2-btn:active{transform:scale(.97);}
+.m2-btn:disabled{background:var(--m-line);color:var(--m-muted-text);cursor:default;}
+.m2-btn:disabled:active{transform:none;}
+.m2-btn--ghost{background:none;border-color:var(--m-orange);color:var(--m-ink);}
+.m2-btn--danger{background:none;border-color:var(--m-danger);color:var(--m-danger);}
+.m2-btn[hidden]{display:none;}
+/* pole „etykieta + wartość" (np. DATA): karta 323, obrys --m-orange-tint (decyzja 4), min. 44 pt */
+.m2-field{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:8px 12px;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);background:var(--m-white);font-family:inherit;color:var(--m-ink);text-align:left;}
+.m2-field + .m2-field{margin-top:-1px;}
+.m2-field-l{font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;text-transform:uppercase;color:var(--m-ink);}
+.m2-field-v{display:flex;align-items:center;gap:8px;font-size:var(--m-fs-base);font-weight:500;line-height:1.1;color:var(--m-ink);}
+.m2-field-v svg{width:11.5px;height:6.5px;flex:none;display:block;}
+.m2-field input[type=date]{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;font-size:var(--m-fs-md);cursor:pointer;-webkit-appearance:none;appearance:none;}
+.m2-field:focus-within{border-color:var(--m-orange);}
+
+/* ============================================================
+   Klawiatura Mekkio (mkPad) — nowy wygląd z Figmy popupy-v2: 3 kolumny, klawisz 49,5 px, #ECEAF1,
+   rogi 12, cyfry Geist ExtraLight 26, odstęp 4, szerokość 313. Osobna od .lg-key (okno logowania serii).
+   ============================================================ */
+.mk-pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:min(313px,100%);margin:0 auto;}
+.mk-key{height:49.5px;border:0;border-radius:var(--m-r-sm);background:var(--m-bg);color:var(--m-ink);font-family:inherit;font-size:26px;font-weight:200;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.mk-key:active{transform:scale(.95);}
+.mk-key svg{width:24px;height:24px;display:block;}
+.mk-key:disabled{visibility:hidden;}
+@media (max-height:700px){ .mk-key{height:44px;} }
 
 .rotate-lock-overlay{display:none;position:fixed;inset:0;z-index:99999;background:var(--bg);color:var(--light);
   flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:0 40px;}
@@ -2555,7 +2614,7 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
-.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
+.m2-btn:active,.m2-x:active,.mk-key:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
 /* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
 #view-gym-v2 .gymv2-tile.gymv2-search-tile, #view-gym-v2 .gymv2-tile.gymv2-add-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:13px;padding:4.5px 0 0;box-sizing:border-box;background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);}
 #view-gym-v2 .gymv2-tile.gymv2-search-tile{border:.5px solid #f1d7cb;}
@@ -3603,7 +3662,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <div class="rotate-lock-overlay">
   <div class="rotate-lock-icon"></div>
@@ -4395,6 +4454,7 @@ const LANG = (navigator.language || '').toLowerCase().startsWith('pl') ? 'pl' : 
 document.title = 'Mekkio — Every rep counts. Literally.';
 document.documentElement.lang = LANG;
 const T_EN = {
+  toastUndo: 'UNDO', mkDelete: 'Delete digit',
   gymTitleTraining: 'WORKOUT', gymAbortTitle: 'Abort workout', gymFinishTitle: 'Finish workout',
   gymV2YourExercises: 'Your exercises', gymV2FinishWorkout: 'FINISH WORKOUT', gymPillExercises: 'exercises', gymPaused: 'Paused',
   gymAbortTitleDlg: 'Abort workout?', gymAbortBody: 'Everything you logged in this workout today will be deleted.', gymAbortYes: 'Abort', gymAbortNo: 'Back to workout',
@@ -8203,12 +8263,97 @@ function trackEvent(path, title){
     window.goatcounter.count({path, title, event: true});
   }
 }
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+/* toast(msg) — krótki komunikat (2 s). toast(msg, {undo: fn}) — z akcją „COFNIJ” (6 s, pole dotyku 44 pt);
+   toast(msg, {error: true}) — wariant błędu (#CD1200). Jeden toast naraz: nowy zastępuje poprzedni
+   (porzuca jego akcję cofnięcia). Wygląd: pastylka .toast w CSS, ruch przez transition. */
+const TOAST_MS = 2200, TOAST_UNDO_MS = 6000;
+function toast(msg, opts){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  opts = opts || {};
+  const undo = typeof opts.undo === 'function' ? opts.undo : null;
   clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+  el.classList.toggle('is-error', !!opts.error);
+  el.classList.toggle('has-undo', !!undo);
+  el.textContent = '';
+  const m = document.createElement('span');
+  m.className = 'toast-msg';
+  m.textContent = msg;
+  el.appendChild(m);
+  if(undo){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'toast-undo';
+    b.textContent = t('toastUndo', 'COFNIJ');
+    b.onclick = ()=>{
+      b.onclick = null;   // jedno cofnięcie na toast
+      clearTimeout(window.__toastTimer);
+      el.classList.remove('show');
+      try{ undo(); }catch(e){ console.error('toast undo', e); }
+    };
+    el.appendChild(b);
+  }
+  el.classList.add('show');
+  window.__toastTimer = setTimeout(()=>el.classList.remove('show'), undo ? TOAST_UNDO_MS : TOAST_MS);
+}
+/* ---------- Klawiatura Mekkio (mkPad): nowy wygląd, parametryzowana ----------
+   Osobna od klawiatury logowania serii (lgPad / .lg-key, bez zmian). Użycie:
+     const pad = mkPad(hostEl, { maxDigits:3, decimals:1, min:30, max:300, value:'83,4', onChange: st=>… });
+   maxDigits = cyfry części całkowitej, decimals = miejsca po przecinku (0 = klawisz dziesiętny nieaktywny
+   i niewidoczny: liczby całkowite). Separator: przecinek (PL) albo kropka (EN). min/max nie blokują
+   wpisywania (okno samo pokazuje błąd poza zakresem); stan w onChange: { text, value, status, hasDecimal }
+   gdzie status = 'empty' | 'ok' | 'low' | 'high'. Pierwszy znak po pad.set(v, {fresh:true}) zastępuje
+   wartość startową zamiast ją dopisywać. */
+const MK_DEL_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5h10a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 19 19H9l-5.5-7L9 5Zm3.5 4.5 5 5m0-5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function mkPad(host, opts){
+  const o = Object.assign({ maxDigits:3, decimals:0, min:null, max:null, onChange:null, value:'' }, opts || {});
+  const sep = LANG === 'en' ? '.' : ',';
+  let buf = '', fresh = false;   // buf: kanonicznie cyfry i '.', separator pokazujemy lokalnie
+  const norm = v => String(v == null ? '' : v).replace(',', '.').replace(/[^0-9.]/g, '');
+  const num = ()=> (buf === '' || buf === '.') ? null : parseFloat(buf);
+  const state = ()=>{
+    const v = num();
+    let status = 'ok';
+    if(v == null) status = 'empty';
+    else if(o.min != null && v < o.min) status = 'low';
+    else if(o.max != null && v > o.max) status = 'high';
+    return { text: buf.replace('.', sep), raw: buf, value: v, status, hasDecimal: buf.includes('.') };
+  };
+  const emit = ()=>{ if(typeof o.onChange === 'function') o.onChange(state()); };
+  const press = k=>{
+    haptic('light');
+    if(k === 'del'){ buf = fresh ? '' : buf.slice(0, -1); fresh = false; emit(); return; }
+    if(fresh){ buf = ''; fresh = false; }
+    if(k === 'dec'){
+      if(!o.decimals || buf.includes('.')) return;
+      buf = (buf === '' ? '0' : buf) + '.';
+    } else {
+      const [ip, dp] = buf.split('.');
+      if(buf.includes('.')){ if((dp || '').length >= o.decimals) return; buf += k; }
+      else {
+        if(ip === '0'){ buf = k; }                       // bez wiodących zer: „05” -> „5”
+        else if(ip.length < o.maxDigits) buf += k;
+        else return;
+      }
+    }
+    emit();
+  };
+  host.classList.add('mk-pad');
+  host.innerHTML = ['1','2','3','4','5','6','7','8','9'].map(k=>`<button type="button" class="mk-key" data-k="${k}">${k}</button>`).join('')
+    + `<button type="button" class="mk-key" data-k="dec"${o.decimals ? '' : ' disabled aria-hidden="true" tabindex="-1"'}>${sep}</button>`
+    + '<button type="button" class="mk-key" data-k="0">0</button>'
+    + `<button type="button" class="mk-key" data-k="del" aria-label="${t('mkDelete', 'Usuń znak')}">${MK_DEL_SVG}</button>`;
+  host.addEventListener('click', e=>{
+    const b = e.target.closest && e.target.closest('.mk-key');
+    if(b && host.contains(b) && !b.disabled) press(b.dataset.k);
+  });
+  const api = {
+    get: state,
+    set(v, so){ buf = norm(v); fresh = !!(so && so.fresh) && buf !== ''; emit(); },
+    clear(){ buf = ''; fresh = false; emit(); },
+  };
+  api.set(o.value, { fresh: !!o.value });
+  return api;
 }
 function pulseSaveBtn(btn){
   if(!btn) return;
