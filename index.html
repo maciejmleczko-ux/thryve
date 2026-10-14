@@ -2356,7 +2356,6 @@ body.pev2-bg{background:var(--m-panel);}
 .statsv2-record-stats{display:flex;gap:28px;}
 .statsv2-record-stat span{display:block;font-size:var(--m-fs-2xs);color:#fff;letter-spacing:.4px;margin-bottom:4px;}
 .statsv2-record-stat strong{font-size:var(--m-fs-md);color:#fff;font-weight:600;}
-.statsv2-record-num-x{font-size:var(--m-fs-lg);color:rgba(255,255,255,.82);letter-spacing:0;}
 .statsv2-record-row{display:flex;align-items:center;gap:10px;padding:7px 0;}
 .statsv2-record-ric{width:18px;height:18px;color:#fff;flex-shrink:0;}
 .statsv2-record-rk{flex:1;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.85);letter-spacing:.4px;text-transform:uppercase;}
@@ -11867,7 +11866,7 @@ function buildProgressCard(exercises, priorTopSetFn, today){
   }
   return {
     headline: '+' + fmtGymWeight(g.delta) + ' kg',
-    exLine: g.ex + ' · ' + fmtGymWeight(g.to) + ' kg × ' + g.atReps,
+    exLine: g.ex + ' · ' + fmtGymWeight(g.to) + ' kg',
     deltaLine: today
       ? t('gymFinWas', `Ostatnio ${fmtGymWeight(g.from)} → dziś ${fmtGymWeight(g.to)} kg`, fmtGymWeight(g.from), fmtGymWeight(g.to) + ' kg')
       : `${fmtGymWeight(g.from)} → ${fmtGymWeight(g.to)} kg`
@@ -12182,8 +12181,8 @@ function gymFinRecordFrom(rec){
   const d = rec.delta, plus = (txt)=> d > 0 ? `+${txt} ${vs}` : '';
   const isKgVol = rec.kind === 'volume' && rec.unit === 'kg';
   const out = { name: rec.name, label: rec.kind === 'volume' ? t('gymFinRecordVolume','Nowy rekord objętości') : t('gymFinRecordLabel','Nowy rekord'), icon: (rec.kind === 'weight' || isKgVol) ? 'barbell' : 'trophy' };
-  // unitSig = podpis rekordu z powtórzeniami ("kg × 10"), tylko dla Gratulacji i dashboardu; karta udostępniania zostaje przy value/unit
-  if(rec.kind === 'weight'){ out.value = fmtGymWeight(rec.value); out.unit = 'kg'; out.reps = rec.reps || 0; out.unitSig = rec.reps > 0 ? 'kg × ' + rec.reps : 'kg'; out.sub = plus(fmtGymWeight(d) + ' kg'); }
+  // rekord = sam najcięższy ciężar, bez serii ("102,5 kg"); reps zostają w danych (out.reps), ale nie są pokazywane
+  if(rec.kind === 'weight'){ out.value = fmtGymWeight(rec.value); out.unit = 'kg'; out.reps = rec.reps || 0; out.unitSig = 'kg'; out.sub = plus(fmtGymWeight(d) + ' kg'); }
   else if(isKgVol){ out.value = formatDashNum(Math.round(rec.value), 0); out.unit = 'kg'; out.sub = plus(formatDashNum(Math.round(d), 0) + ' kg'); }
   else if(rec.unit === 'reps'){ const v = Math.round(rec.value); out.value = String(v); out.unit = gymFinRepsWord(v); out.sub = plus(String(Math.round(d))); }
   else { out.value = fmtDur(rec.value, rec.perSide); out.unit = ''; out.sub = plus(Math.round(d) + ' s'); }
@@ -14981,7 +14980,7 @@ function dashWeekHtml(m, animate, rc){
   if(rec){
     const d = rec.display;
     const val = d ? d.value : (rec.unit === 'kg' ? fmtGymWeight(rec.value) : String(Math.round(rec.value)));
-    const unit = d ? (d.unitSig || d.unit) : (rec.unit === 'kg' ? (rec.reps > 0 ? 'kg × ' + rec.reps : 'kg') : gymFinRepsWord(Math.round(rec.value)));
+    const unit = d ? (d.unitSig || d.unit) : (rec.unit === 'kg' ? 'kg' : gymFinRepsWord(Math.round(rec.value)));
     recHtml = `<button type="button" class="dash-card dash-rec m-press${rc(3)}" onclick="dashCta('record')" aria-label="${t('dashRecord', 'Rekord')}: ${escHtml(rec.name)}, ${escHtml(val + (unit ? ' ' + unit : ''))}">
       <span class="dash-hd"><span class="dash-lbl">${t('dashRecord', 'Rekord')}${rec.fresh ? `<i class="dash-dot-new" aria-hidden="true"></i><span class="dash-sr"> ${t('dashRecordNew', 'nowy')}</span>` : ''}</span>${dashCaret()}</span>
       <span class="dash-rec-body">
@@ -17192,10 +17191,10 @@ function renderStatsV2Detail(name){
         : `+${deltaVal} ${R && R.kind === 'time' ? 'sek.' : statsV2Unit(name)} ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`;
 
   const fmtW = w => (typeof fmtGymWeight === 'function') ? fmtGymWeight(w) : String(w);
-  // Headline = the RECORD (engine): heaviest weight with its reps, masa ciała: most reps, timed: longest time.
+  // Headline = the RECORD (engine): heaviest weight (shown without reps), masa ciała: most reps, timed: longest time.
   // PROGNOZA MAXA (Epley) is its own row below, always labelled as a forecast, never as a record.
   const headNum = !R ? `${rec.seria ? rec.seria.reps : 0}<small>${statsV2Unit(name)}</small>`
-    : R.kind === 'weight' ? `${fmtW(R.value)}<small>kg</small> <span class="statsv2-record-num-x">× ${R.reps}</span>`
+    : R.kind === 'weight' ? `${fmtW(R.value)}<small>kg</small>`
     : R.kind === 'time' ? `${Math.round(R.value)}<small>s</small>`
     : `${R.value}<small>${statsV2Unit(name)}</small>`;
   const recRows = [
