@@ -1154,6 +1154,35 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .pf-body-v{display:flex;align-items:center;justify-content:center;height:35px;font-size:28px;font-weight:200;line-height:1.1;letter-spacing:-.0357em;color:var(--m-orange);white-space:nowrap;}
 .pf-body-v--none{color:var(--m-muted-text);}
 .pf-foot{margin:26px 0 0;text-align:center;font-size:var(--m-fs-2xs);font-weight:400;line-height:1.2;color:var(--m-muted-text);}
+/* ---- Profil: odznaki (sekcja + arkusz). Jedna grafika, niezdobyte szare liczone w kodzie, pierścień postępu rysowany kodem (statyczny). ---- */
+.pf-bdg{position:relative;flex:none;display:block;width:51px;height:51px;}
+.pf-bdg img{display:block;width:51px;height:51px;}
+.pf-bdg--off img{filter:grayscale(1) brightness(1.25) contrast(.85) opacity(.75);}
+.pf-bdg svg{position:absolute;left:0;top:0;display:block;width:51px;height:51px;}
+.pf-cnt{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-width:62px;height:19px;padding:0 14px;border-radius:99px;background:var(--m-plan-easy);color:var(--m-white);font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;text-transform:none;white-space:nowrap;}   /* biały na --m-plan-easy ok. 3,3:1 (Figma), do decyzji Macieja */
+.pf-bdg-row{display:flex;align-items:center;justify-content:space-between;padding:2px 0;}
+.pf-bdg-lines{display:flex;flex-direction:column;gap:4px;margin-top:26px;}
+.pf-bdg-line{display:flex;align-items:baseline;justify-content:space-between;gap:12px;min-height:19px;}
+.pf-bdg-line .pf-row-s{display:block;margin-top:2px;color:var(--m-muted-text);font-size:var(--m-fs-xs);}
+.pf-bdg-r{flex:none;font-size:var(--m-fs-xs);color:var(--m-muted-text);white-space:nowrap;}
+.pf-sheet-h{align-items:center;gap:12px;}
+.pf-sheet-h h1{margin:0;font-size:var(--m-fs-lg);font-weight:400;letter-spacing:.04em;text-transform:uppercase;color:var(--m-ink);}
+.pf-sheet-x{position:relative;box-sizing:border-box;flex:none;width:40px;height:40px;margin:0 0 0 auto;padding:6px;border:.56px solid var(--m-orange);border-radius:50%;background:var(--m-orange);color:var(--m-white);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.pf-sheet-x::after{content:"";position:absolute;inset:-2px;}   /* 40 px wizualnie, 44 px do kliknięcia */
+.pf-sheet-x .ph{display:block;width:100%;height:100%;}
+.pf-sheet-x .ph svg{display:block;width:100%;height:100%;}
+.pf-sheet-x:active{transform:scale(.94);transition-duration:var(--m-dur-press-in);}
+#profileBadgesSheet .plansv2-customize-stack{min-height:70%;}
+#profileBadgesSheet .plansv2-customize-card{gap:16px;padding:16px 16px 6px;}
+.pf-bgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 5px;}
+.pf-bcard{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;background:var(--m-glass);border:.85px solid var(--m-orange-tint);border-radius:var(--m-r-sm);text-align:center;}
+.pf-bcard-n{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1818em;text-transform:uppercase;color:var(--m-ink);}
+.pf-bcard-d{margin:0;font-size:var(--m-fs-2xs);font-weight:400;line-height:1.3;color:var(--m-muted-text);max-width:105px;}
+.pf-bcard-f{margin-top:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:19px;justify-content:flex-end;}
+.pf-bcard-t{font-size:var(--m-fs-2xs);color:var(--m-ink);}
+.pf-bar{position:relative;width:95px;max-width:100%;height:6px;border-radius:3px;background:var(--m-line);overflow:hidden;}
+.pf-bar i{position:absolute;left:0;top:0;width:100%;height:100%;background:var(--m-orange);border-radius:3px;transform-origin:left center;transform:scaleX(var(--r,0));}
+.pf-bcard--off .pf-bcard-n{color:var(--m-muted-text);}
 @media (max-width:339px){ .profil-name{font-size:30px;} .pf-weight-main{gap:10px;} .pf-chart{width:112px;} .pf-chart svg{width:112px;} .pf-stat-v{font-size:24px;} .pf-body-v{font-size:24px;} }
 /* Greeting + headline. min-height 177px = Figma's greeting top (y100) to the
    column start (y277) whatever the headline's line count (2 or 3). */
@@ -2534,7 +2563,7 @@ body.pev2-bg{background:var(--m-panel);}
 .plan-pill:active,.topbar-icon-btn:active,.gymfin-cta:active,.gymfin-share:active,.sh-seg-b:active,.sh-arrow:active,.sh-sw:active,.sh-ic:active,.sh-main:active,.sh-bgi:active,.gymfin-stat:active,.ex-tile:active,.save-btn:active,
 .hist-card.collapsed:active,.acct-photo-pick:active,.acct-cloud-cta:active,.acct-oauth-btn:active,
 .dash-chat-btn:active,.gymv2-chat-btn:active,.plansv2-chat-btn:active,.histv2-chat-btn:active,.statsv2-chat-btn:active,
-.profil-back:active,.profil-gear:active,.profil-av:active,.pf-link:active,.pf-row:active,.pf-btn:active,.pf-body-c:active,.profil-id-txt:active,
+.profil-back:active,.profil-gear:active,.pf-sheet-x:active,.profil-av:active,.pf-link:active,.pf-row:active,.pf-btn:active,.pf-body-c:active,.profil-id-txt:active,
 .v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-edit-plan:active,
 .gymv2-tile:active,.gymv2-tile-swap:active,.gymv2-done-row:active,.gymv2-save:active,
 .plansv2-btn-outline:active,.plansv2-btn-fill:active,.plansv2-card:active,.plansv2-choice-chip:active,
@@ -3976,6 +4005,20 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
      Reads body weight into the weight log and watch workouts' calories into
      matching Mekkio workouts (see syncHealthData()). Nothing is written to
      Health and none of it is sent to the AI proxy. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="profileBadgesSheet" onclick="if(event.target===this) closeProfileBadgesSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-title-row pf-sheet-h">
+        <h1 data-i18n="pfBadges">ODZNAKI</h1>
+        <span class="pf-cnt" id="pfBadgesCnt"></span>
+        <button type="button" class="pf-sheet-x" onclick="closeProfileBadgesSheet()" aria-label="Zamknij" data-i18n-title="pfClose"><span class="ph" data-ph="x"></span></button>
+      </div>
+      <div class="pf-bgrid" id="pfBadgesGrid"></div>
+    </div>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden plansv2-customize-overlay" id="healthSheet" onclick="if(event.target===this) closeHealthSheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
@@ -5858,7 +5901,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet'];
+const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -8396,7 +8439,7 @@ Object.assign(T_EN, {
   pfRecords: 'RECORDS', pfAll: 'ALL', pfNoRecTitle: 'Your records will show up here.', pfNoRecText: 'You\'ll see the first one after your first workout.', pfStart: 'START A WORKOUT',
   pfBody: 'BODY', pfWeight: 'WEIGHT', pfDays30: '/ 30 days', pfHeight: 'HEIGHT', pfAge: 'AGE', pfSex: 'SEX', pfAddWeight: 'ADD WEIGHT',
   pfNoWeightTitle: 'Add your weight to track changes', pfWeightRow: 'Weight', pfWeightRowSub: 'Add your first entry', pfBodyRow: 'Height, age, sex', pfBodyRowSub: 'Used to estimate calories',
-  pfYears: 'yrs', pfMale: 'Male', pfFemale: 'Female',
+  pfBadges: 'BADGES', pfClose: 'Close', pfBadgesAria: (a, b) => `Badges earned: ${a} of ${b}`, pfBadgeTodoFirst: 'Save your first workout.', pfYears: 'yrs', pfMale: 'Male', pfFemale: 'Female',
 });
 // wspólny wrapper oczyszczonych danych (wyciągnięty z dashboardModel): fn liczy na przefiltrowanych kopiach, oryginały zawsze wracają
 function dashWithCleanData(now, fn){
@@ -8429,6 +8472,7 @@ function profileModel(now){
       today: todayIso, signedIn, name: profileName || '', hasPhoto: !!avatarDataUrl,
       workoutCount: workouts.length, volumeKg: volume, recordCount: recEvents.length, records: wRecs, since: first,
       weight, body: { heightCm: +bodyData.heightCm || null, age: +bodyData.age || null, sex: bodyData.sex === 'f' || bodyData.sex === 'm' ? bodyData.sex : null },
+      badges: dashBadgesCore(todayIso),
       isNew: !profileName && !avatarDataUrl && !signedIn && workouts.length === 0 && !weight.hasData,
     };
   });
@@ -8464,6 +8508,62 @@ function pfChartSvg(points){
   const x3 = lbl.map((l, i)=> i === 1 && (l === lbl[0] || l === lbl[2]) ? '' : l);
   return `<div class="pf-chart" aria-hidden="true"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" fill="none"><path d="${d}" stroke="var(--m-mint)" stroke-width="1.91" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="pf-chart-x">${x3.map(l=>`<span>${l}</span>`).join('')}</div></div>`;
 }
+// ---- odznaki w Profilu: rząd 5 ikon (3 ostatnio zdobyte + 2 najbliższe do zdobycia), dwie linie pod nim i arkusz z siatką ----
+const PF_BADGE_TODO = { first: ['pfBadgeTodoFirst', 'Zapisz pierwszy trening.'] };   // opis „co zrobić” dla pustego stanu (opis z DASH_BADGES mówi o zdobyciu)
+function pfBadgePicks(b){
+  const earned = b.all.filter(x=> x.earned).sort((x, y)=> x.earnedOn < y.earnedOn ? 1 : x.earnedOn > y.earnedOn ? -1 : b.all.indexOf(y) - b.all.indexOf(x));
+  const open = b.all.filter(x=> !x.earned).sort((x, y)=> y.ratio - x.ratio || b.all.indexOf(x) - b.all.indexOf(y));
+  let ne = Math.min(3, earned.length), no = Math.min(2, open.length);
+  if(ne + no < 5){ if(earned.length > ne) ne = Math.min(earned.length, 5 - no); if(ne + no < 5) no = Math.min(open.length, 5 - ne); }
+  return earned.slice(0, ne).concat(open.slice(0, no));
+}
+// postęp „x / y jednostka”; null, gdy odznaka nie ma liczbowego celu (cel 1: zrobione albo nie)
+function pfBadgeProgress(b){
+  if(!b.goal || b.goal <= 1) return null;
+  if(b.id === 'ton') return `${formatDashNum(b.value / 1000, 1)} / ${formatDashNum(b.goal / 1000, 1)} t`;
+  if(b.id === 'bodyweight') return `${fmtKg(b.value)} / ${fmtKg(b.goal)} kg`;
+  return `${b.value} / ${b.goal}`;
+}
+function pfBadgeIcon(b){
+  let ring = '';
+  if(!b.earned){
+    const C = 2 * Math.PI * 24.4, len = Math.max(2, C * b.ratio);
+    ring = `<svg viewBox="0 0 51 51" width="51" height="51" fill="none" aria-hidden="true"><circle cx="25.5" cy="25.5" r="24.4" stroke="var(--m-orange)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="${len.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 25.5 25.5)"/></svg>`;
+  }
+  return `<span class="pf-bdg${b.earned ? '' : ' pf-bdg--off'}"><img src="${badgeIconSrc(b.id)}" width="51" height="51" alt="" decoding="async" onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src=BADGE_FALLBACK_ICON}">${ring}</span>`;
+}
+function pfFmtFullDate(iso){ const [y, m, d] = iso.split('-'); return `${+d} ${PF_MON_SHORT[+m - 1]} ${y}`; }
+function profileBadgesHtml(m, riseCls){
+  const b = m.badges, E = escHtml;
+  const picks = pfBadgePicks(b);
+  const icons = picks.map(pfBadgeIcon).join('');
+  const lines = [];
+  if(b.latest) lines.push(`<div class="pf-bdg-line"><span class="pf-row-n">${E(b.latest.name)}</span><span class="pf-bdg-r">${E(fmtDayMonShort(b.latest.earnedOn))}</span></div>`);
+  if(b.next){
+    const prog = pfBadgeProgress(b.next);
+    const todo = PF_BADGE_TODO[b.next.id];
+    const hint = prog ? '' : (todo ? t(todo[0], todo[1]) : b.next.text);
+    // dwie linie jak w Figmie; opis zamiast liczby (cel 1) idzie pod nazwę
+    lines.push(`<div class="pf-bdg-line"><span class="pf-row-l"><span class="pf-row-n">${E(b.next.name)}</span>${hint ? `<span class="pf-row-s">${E(hint)}</span>` : ''}</span>${prog ? `<span class="pf-bdg-r">${E(prog)}</span>` : ''}</div>`);
+  }
+  const link = `<button type="button" class="pf-link m-press" onclick="openProfileBadgesSheet()" aria-label="${E(t('pfBadgesAria', `Zdobyte odznaki: ${b.earned} z ${b.total}`, b.earned, b.total))}">${t('pfAll', 'WSZYSTKIE')}<span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></button>`;
+  return `<section class="pf-sec${riseCls}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('pfBadges', 'ODZNAKI')}<span class="pf-cnt">${b.earned}/${b.total}</span></h2>${link}</div>
+    <div class="pf-card"><div class="pf-bdg-row">${icons}</div><div class="pf-hsep" style="margin:14px 0 0"></div><div class="pf-bdg-lines" style="margin-top:12px">${lines.join('')}</div></div></section>`;
+}
+function openProfileBadgesSheet(){
+  let b;
+  try{ b = badgesModel(); }catch(err){ console.error('badges model failed', err); return; }
+  document.getElementById('pfBadgesCnt').textContent = `${b.earned}/${b.total}`;
+  document.getElementById('pfBadgesGrid').innerHTML = b.all.map(x=>{
+    const prog = pfBadgeProgress(x);
+    const foot = x.earned
+      ? `<span class="pf-pill">${escHtml(pfFmtFullDate(x.earnedOn))}</span>`
+      : `${prog ? `<span class="pf-bcard-t">${escHtml(prog)}</span>` : ''}<span class="pf-bar" aria-hidden="true"><i style="--r:${x.ratio.toFixed(3)}"></i></span>`;
+    return `<div class="pf-bcard${x.earned ? '' : ' pf-bcard--off'}">${pfBadgeIcon(x)}<p class="pf-bcard-n">${escHtml(x.name)}</p><p class="pf-bcard-d">${escHtml(x.text)}</p><div class="pf-bcard-f">${foot}</div></div>`;
+  }).join('');
+  acctSheetOpen('profileBadgesSheet');   // resetPlansCustomizeSheet czyści m-sheet-entered, więc wejście gra przy każdym otwarciu
+}
+function closeProfileBadgesSheet(viaDrag){ acctSheetClose('profileBadgesSheet', viaDrag); }
 let profileLastModel = null;
 function profileOpenRecord(i){
   const r = profileLastModel && profileLastModel.records[i];
@@ -9648,7 +9748,7 @@ mSheetDrag('whatsnewOverlay', closeWhatsNew);
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet']
+['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 
 /* ---- "Zamień ćwiczenie" sheet (stage 3, idea #5) — rides .m-sheet ---- */
@@ -14790,6 +14890,20 @@ const DASH_BADGES = [
   { id:'gryf',       icon:'barbell',        name:'Gryf Mocy',                     text:'10 zapisanych treningów w Mekkio.',
     check:c=>({ earnedOn: c.chrono.length >= 10 ? c.chrono[9].date : null, value: Math.min(10, c.chrono.length), goal: 10 }) },
 ];
+// ---- wspólny silnik odznak (K3): jedno wejście dla Dashboardu i Profilu ----
+// Dashboard woła dashBadgesCore() w środku dashboardModel (dane już oczyszczone), Profil i jego arkusz przez badgesModel().
+// Reguły siedzą wyłącznie w DASH_BADGES / dashBadges(); żadnej drugiej tablicy.
+function dashActivePlan(){ return starredPlanId ? (trainingPlans.find(p=>p.id===starredPlanId) || null) : null; }
+function dashBadgesCore(todayIso){ return dashBadges(dashActivePlan(), todayIso); }
+function badgesModel(now){
+  now = now || new Date();
+  return dashWithCleanData(now, (n, todayIso)=> dashBadgesCore(todayIso));
+}
+// Jedna grafika dla wszystkich odznak. Gdy w icons/badges/ leży własny <id>.svg, dopisz id do BADGE_OWN_ICONS: wtedy zastępuje wspólną
+// (lista jest po to, żeby przeglądarka nie odpytywała o nieistniejące pliki i nie sypała 404 w konsoli).
+const BADGE_OWN_ICONS = new Set([]);
+const BADGE_FALLBACK_ICON = 'icons/badges/medal-barbell.svg';
+function badgeIconSrc(id){ return BADGE_OWN_ICONS.has(id) ? `icons/badges/${id}.svg` : BADGE_FALLBACK_ICON; }
 function dashBadges(plan, todayIso){
   const sets = dashboardAllSets();
   const chrono = workouts.map((w,i)=>({w,i})).sort((a,b)=> a.w.date < b.w.date ? -1 : a.w.date > b.w.date ? 1 : a.i-b.i).map(x=>x.w);
@@ -15046,7 +15160,7 @@ function dashboardModelCore(now){
     hasPlan, hasHistory,
     hero, week, streak,
     record: dashLastRecord(),
-    badge: dashBadges(plan, todayIso),
+    badge: dashBadgesCore(todayIso),
     consistency: dashConsistency(todayIso),
     lastWorkout,
     coachRule: dashCoachRule({ hasPlan, hasHistory, lastWorkout, streak, week, todayIso }),
@@ -15301,7 +15415,7 @@ function dashWeekHtml(m, animate, rc){
   const b = m.badge && m.badge.latest;
   const bdgHtml = b ? `<div class="dash-card dash-bdg${rc(4)}">
       <div class="dash-hd"><p class="dash-lbl">${t('dashBadge', 'Odznaka')}</p></div>
-      <div class="dash-bdg-body"><img src="icons/badges/medal-barbell.svg" width="51" height="51" alt="" decoding="async"><p class="dash-bdg-name">${escHtml(b.name)}</p></div>
+      <div class="dash-bdg-body"><img src="${badgeIconSrc(b.id)}" width="51" height="51" alt="" decoding="async"><p class="dash-bdg-name">${escHtml(b.name)}</p></div>
     </div>` : '';
   const col = recHtml || bdgHtml ? `<div class="dash-wkcol">${recHtml}${bdgHtml}</div>` : '';
   return `<div class="dash-wkrow${col ? '' : ' dash-wkrow--solo'}">${tile}${col}</div>`;
