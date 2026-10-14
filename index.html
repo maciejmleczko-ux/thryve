@@ -4398,7 +4398,9 @@ const T_EN = {
   recWholeWorkout: 'Whole workout',
   stV2ProjectedMax: 'Projected max',
   stV2ProjFrom: 'from',
-  stV2TagRekord: 'record',
+  stV2TagCiezar: 'weight',
+  stV2TagSeria: 'set',
+  stV2TagObjetosc: 'volume',
   stV2PrTag: v => `Record ${v}`,
   navA11yStats: 'Progress',
   gymFinTitle: 'GOOD JOB',
@@ -11896,6 +11898,9 @@ function workoutIsBodyweightOnly(w){
      ciężar z większą liczbą powtórzeń też nie (to widać w "Twoim postępie" i w prognozie maxa).
    - REKORD OBJĘTOŚCI TRENINGU = suma kg × powt. całego treningu (trening bez żadnego ciężaru: suma powtórzeń,
      osobno), liczony tylko względem wcześniejszych treningów. Nie liczy się do odznak za rekordy ćwiczeń.
+   - REKORD OBJĘTOŚCI ĆWICZENIA (`exVolumes`, osobno od `records`) = suma kg × powt. tego ćwiczenia w treningu (masa ciała: suma
+     powt.; czasowe: brak), względem wcześniejszych treningów z tym ćwiczeniem. Plakietka OBJĘTOŚĆ w historii serii, wiersz
+     w Gratulacjach (gdy brak rekordu ciężaru), liczy się do „N rekordów” w treningu, NIE do odznak i NIE do rekordów ciężaru.
    - PROGNOZA MAXA (dawniej "Szacowany max", Epley, tylko serie do STATSV2_E1RM_REP_CAP powt.) to osobna liczba:
      NIGDY nie jest rekordem i nie wyzwala tagów rekordu.
    KOLEJNOŚĆ: treningi sortowane po dacie, a w obrębie dnia po pozycji w tablicy. Trening jest porównywany tylko z tymi,
@@ -11944,14 +11949,14 @@ function recAnalyze(w){
     const sets = recSetsOf(ex);
     if(!sets.length) return;
     let p = per.get(ex.name);
-    if(!p){ p = { name: ex.name, topW: 0, topWReps: 0, topReps: 0, topTime: 0, perSide: false, weighted: false, repsNoW: 0, topSet: null, e1: null }; per.set(ex.name, p); }
+    if(!p){ p = { name: ex.name, topW: 0, topWReps: 0, topReps: 0, topTime: 0, perSide: false, weighted: false, repsNoW: 0, topSet: null, e1: null, vol: 0 }; per.set(ex.name, p); }
     sets.forEach(s=>{
       const wt = recNum(s.weight), rp = recNum(s.reps), du = recNum(s.durationSec);
       if(du > p.topTime){ p.topTime = du; p.perSide = !!s.perSide; }
       if(wt > 0 && rp > 0){
         p.weighted = true;
         if(wt > p.topW || (wt === p.topW && rp > p.topWReps)){ p.topW = wt; p.topWReps = rp; }
-        vol += wt * rp;
+        vol += wt * rp; p.vol += wt * rp;
         if(rp <= STATSV2_E1RM_REP_CAP){ const e = statsV2Epley(wt, rp); if(!p.e1 || e > p.e1.value) p.e1 = { value: e, weight: wt, reps: rp }; }
       } else if(wt === 0 && rp > 0){
         p.repsNoW += rp; if(rp > p.topReps) p.topReps = rp;
@@ -11961,7 +11966,7 @@ function recAnalyze(w){
       if(wt > 0 || rp > 0){ if(!p.topSet || wt > p.topSet.weight || (wt === p.topSet.weight && rp > p.topSet.reps)) p.topSet = { weight: wt, reps: rp }; }
     });
   });
-  per.forEach(p=>{ p.bw = !p.weighted && p.repsNoW > 0; });
+  per.forEach(p=>{ p.bw = !p.weighted && p.repsNoW > 0; p.vol = recRound6(p.vol); });
   // sumy zmiennoprzecinkowe zależą od kolejności serii (28,7×8 + 30,9×5 + 42,1×8 w innej kolejności różni się o ~1e-13): zaokrąglamy do 1e-6, żeby nie było fałszywego rekordu
   vol = recRound6(vol);
   return { per, vol, repsAll, bwOnly: vol === 0 && repsAll > 0 };
@@ -11970,10 +11975,10 @@ function recBuildIndex(src){
   const order = recChrono(src);
   const state = new Map(), byWorkout = new Map(), byId = new Map(), timeline = [];
   const volBest = { kg: null, reps: null };
-  const newState = name => ({ name, w: null, r: null, t: null, hw: [], hr: [], ht: [], proj: null, projByMonth: new Map(), sessions: 0, firstDate: null, lastDate: null, lastTop: null, events: [] });
+  const newState = name => ({ name, w: null, r: null, t: null, hw: [], hr: [], ht: [], proj: null, v: { kg: null, reps: null }, projByMonth: new Map(), sessions: 0, firstDate: null, lastDate: null, lastTop: null, events: [] });
   order.forEach((w, pos)=>{
     const an = recAnalyze(w);
-    const records = [], prevTop = new Map();
+    const records = [], exVolumes = [], prevTop = new Map();
     const push = (st, ev)=>{ ev.pos = pos; ev.date = w.date; ev.workoutId = w.id; ev.delta = recRound6(ev.value - ev.prev); records.push(ev); timeline.push(ev); if(st) st.events.push(ev); };
     an.per.forEach(p=>{
       let st = state.get(p.name);
@@ -11991,6 +11996,14 @@ function recBuildIndex(src){
       if(p.topTime > 0){
         if(st.t && p.topTime > st.t.value) push(st, { kind: 'time', unit: 'sec', name: p.name, value: p.topTime, perSide: p.perSide, prev: st.t.value });
         if(!st.t || p.topTime > st.t.value){ st.t = { value: p.topTime, perSide: p.perSide, date: w.date, workoutId: w.id }; st.ht.push({ date: w.date, value: p.topTime }); }
+      }
+      // rekord objętości ĆWICZENIA w treningu (suma kg × powt.; masa ciała: suma powt.; czasowe bez): osobno od `records`,
+      // nie liczy się do odznak ani do rekordów ciężaru; pierwszy trening z ćwiczeniem i remis niczego nie biją
+      const xu = p.weighted ? 'kg' : p.bw ? 'reps' : null, xv = p.weighted ? p.vol : p.bw ? p.repsNoW : 0;
+      if(xu && xv > 0){
+        const b = st.v[xu];
+        if(b && xv > b.value){ exVolumes.push({ kind: 'exvolume', unit: xu, name: p.name, value: xv, prev: b.value, delta: recRound6(xv - b.value), pos, date: w.date, workoutId: w.id }); }
+        if(!b || xv > b.value) st.v[xu] = { value: xv, date: w.date, workoutId: w.id };
       }
       if(p.e1){
         if(!st.proj || p.e1.value > st.proj.value) st.proj = { value: p.e1.value, weight: p.e1.weight, reps: p.e1.reps, date: w.date };
@@ -12010,20 +12023,21 @@ function recBuildIndex(src){
       if(b && vVal > b.value){ volume = { kind: 'volume', unit: vUnit, name: null, value: vVal, prev: b.value, bwOnly: an.bwOnly }; push(null, volume); }
       if(!b || vVal > b.value) volBest[vUnit] = { value: vVal, date: w.date, workoutId: w.id };
     }
-    const res = { records: records.filter(r=> r.kind !== 'volume'), volume, headline: null, prevTop, pos };
-    res.headline = recHeadline(res.records, volume);
+    const res = { records: records.filter(r=> r.kind !== 'volume'), volume, exVolumes, headline: null, prevTop, pos };
+    res.headline = recHeadline(res.records, volume, exVolumes);
     byWorkout.set(w, res);
     if(w.id != null && !byId.has(w.id)) byId.set(w.id, res);
   });
   return { src, len: Array.isArray(src) ? src.length : 0, order, state, byWorkout, byId, timeline, volBest };
 }
 // jeden "główny" rekord treningu: ciężar > powtórzenia > czas > objętość treningu; w obrębie rodzaju większa wartość
-function recHeadline(records, volume){
+function recHeadline(records, volume, exVolumes){
   let best = null;
   ['weight', 'reps', 'time'].some(k=>{
     records.forEach(r=>{ if(r.kind === k && (!best || r.value > best.value)) best = r; });
     return !!best;
   });
+  if(!best && !volume && exVolumes && exVolumes.length){ exVolumes.forEach(r=>{ if(!best || r.delta > best.delta) best = r; }); }
   return best || volume || null;
 }
 function recIndex(list){
@@ -12038,10 +12052,10 @@ function recLookup(idx, w){
 }
 function recResultView(res){
   const prevTop = res.prevTop;
-  return { records: res.records, volume: res.volume, headline: res.headline, prevTop: name=> (prevTop.get(name) || null) };
+  return { records: res.records, volume: res.volume, exVolumes: res.exVolumes, headline: res.headline, prevTop: name=> (prevTop.get(name) || null) };
 }
 function workoutRecordsFor(w, list){
-  const empty = { records: [], volume: null, headline: null, prevTop: ()=> null };
+  const empty = { records: [], volume: null, exVolumes: [], headline: null, prevTop: ()=> null };
   if(!w || typeof w !== 'object') return empty;
   const idx = recIndex(list);
   let res = recLookup(idx, w);
@@ -12179,8 +12193,9 @@ function gymFinRecordFrom(rec){
   if(!rec) return null;
   const vs = t('gymFinRecordVsPrev','względem poprzedniego');
   const d = rec.delta, plus = (txt)=> d > 0 ? `+${txt} ${vs}` : '';
-  const isKgVol = rec.kind === 'volume' && rec.unit === 'kg';
-  const out = { name: rec.name, label: rec.kind === 'volume' ? t('gymFinRecordVolume','Nowy rekord objętości') : t('gymFinRecordLabel','Nowy rekord'), icon: (rec.kind === 'weight' || isKgVol) ? 'barbell' : 'trophy' };
+  const isVol = rec.kind === 'volume' || rec.kind === 'exvolume';
+  const isKgVol = isVol && rec.unit === 'kg';
+  const out = { name: rec.name, label: isVol ? t('gymFinRecordVolume','Nowy rekord objętości') : t('gymFinRecordLabel','Nowy rekord'), icon: (rec.kind === 'weight' || isKgVol) ? 'barbell' : 'trophy' };
   // rekord = sam najcięższy ciężar, bez serii ("102,5 kg"); reps zostają w danych (out.reps), ale nie są pokazywane
   if(rec.kind === 'weight'){ out.value = fmtGymWeight(rec.value); out.unit = 'kg'; out.reps = rec.reps || 0; out.unitSig = 'kg'; out.sub = plus(fmtGymWeight(d) + ' kg'); }
   else if(isKgVol){ out.value = formatDashNum(Math.round(rec.value), 0); out.unit = 'kg'; out.sub = plus(formatDashNum(Math.round(d), 0) + ' kg'); }
@@ -14231,7 +14246,7 @@ function plRekordWord(n){
   return 'rekordów';
 }
 // ile rekordów padło w treningu (rekordy ćwiczeń + rekord objętości): ta sama liczba w kafelku „Ostatni trening” i w hero „Dziś zaliczone”
-function workoutRecordCount(w){ const r = workoutRecordsFor(w); return r.records.length + (r.volume ? 1 : 0); }
+function workoutRecordCount(w){ const r = workoutRecordsFor(w); return r.records.length + (r.volume ? 1 : 0) + r.exVolumes.length; }
 function formatDashNum(v, decimals){
   const loc = LANG==='en' ? 'en-US' : 'pl-PL';
   return decimals===0 ? Math.round(v).toLocaleString(loc) : (Math.round(v*10)/10).toLocaleString(loc);
@@ -16786,14 +16801,17 @@ function statsV2ExerciseDailySeries(name){
   return { points, prMonths };
 }
 // one row per workout this exercise was logged in (a session), most recent
-// first; isRecord = that session set a record of the exercise (engine: a tie or a first result is not one)
+// first; prCiezar/prSeria/prObjetosc = records of the exercise set in that session (engine: a tie or a first result is not one)
 function statsV2ExerciseSessions(name){
   const rows = workouts.filter(w=> w.exercises.some(e=>e.name===name))
     .map(w=>{
       const ex = w.exercises.find(e=>e.name===name), sv = exSetsView(ex);
       // timed: seconds stand in for reps (see statsV2IsBodyweight)
       return { date: w.date, sets: statsV2IsTime(name) ? sv.filter(s=>s.durationSec>0).map(s=>({ ...s, weight: 0, reps: s.durationSec })) : sv,
-               isRecord: workoutRecordsFor(w).records.some(r=> r.name === name) };
+               ...(()=>{ const R = workoutRecordsFor(w); return {
+                 prCiezar:   R.records.some(r=> r.name === name && r.kind === 'weight'),
+                 prSeria:    R.records.some(r=> r.name === name && (r.kind === 'reps' || r.kind === 'time')),
+                 prObjetosc: R.exVolumes.some(r=> r.name === name) }; })() };
     })
     .filter(r=> r.sets.length)
     .sort((a,b)=> a.date.localeCompare(b.date));
@@ -17154,8 +17172,13 @@ function renderStatsV2Detail(name){
     const setsStr = rec.isBodyweight
       ? r.sets.map(s=>`${s.reps} ${statsV2Unit(name)}`).join(' · ')
       : r.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ');
-    const tags = r.isRecord ? `<span class="statsv2-log-tag">${t('stV2TagRekord','rekord')}</span>` : '';
-    const flagged = r.isRecord;
+    // SIŁA (szacowany max) nie jest rekordem, więc nie ma plakietki; patrz „Prognoza maxa”
+    const tags = [
+      r.prCiezar   ? `<span class="statsv2-log-tag">${t('stV2TagCiezar','ciężar')}</span>` : '',
+      r.prSeria    ? `<span class="statsv2-log-tag">${t('stV2TagSeria','seria')}</span>` : '',
+      r.prObjetosc ? `<span class="statsv2-log-tag">${t('stV2TagObjetosc','objętość')}</span>` : '',
+    ].join('');
+    const flagged = r.prCiezar || r.prSeria || r.prObjetosc;
     return `
       <div class="statsv2-log-row${flagged?' is-pr':''}">
         <div class="statsv2-log-date"><strong>${dateShort}</strong><span>${weekday}</span></div>
