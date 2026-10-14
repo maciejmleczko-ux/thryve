@@ -234,6 +234,16 @@ body.plansv2-bg{background:var(--m-panel);}
    overscroll bounce on both screens. */
 body.statsv2-bg{background:var(--m-panel);}
 body.histv2-bg{background:var(--m-panel);}
+/* PROFIL v2 — ta sama receta co Plany (lock + scrollable + bg), ale ekran jest
+   zawsze przewijany (długi), a menu dolne jest ukryte, więc nie ma nawet
+   zapasu na nie: .app i body bez dolnego paddingu, tło zbiega do --m-page-bot. */
+html.profil-lock, html.profil-lock body{overflow:hidden;height:100dvh;touch-action:none;}
+html.profil-lock.profil-scrollable, html.profil-lock.profil-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}
+html.profil-lock body{padding-bottom:0;}
+html.profil-lock .app{padding-bottom:0;}
+body.profil-bg{background:var(--m-page-bot);}
+/* Otwarty modal na Profilu (np. stary panel konta z zębatki): jak na dashboardzie, tło pod arkuszem nie może się przewijać */
+html.modal-lock.profil-lock.profil-scrollable, html.modal-lock.profil-lock.profil-scrollable body{overflow:hidden;touch-action:none;overscroll-behavior:none;}
 /* Same technique, reused for modals — background stays put while a popup is open. */
 html.modal-lock, html.modal-lock body{overflow:hidden;height:100dvh;touch-action:none;overscroll-behavior:none;}
 /* Otwarty modal na przewijalnym dashboardzie: bez tej reguły (0,2,x) wygrywałby .dashboard-scrollable i tło dałoby się przewijać pod arkuszem */
@@ -433,7 +443,7 @@ html.gymfin-open .bottom-nav{z-index:9600;}   /* the real nav stays on top of th
   .gymfin-root.anim-in .gymfin-actions{animation:loadv2Rise var(--m-dur-in) var(--m-ease) backwards;animation-delay:.74s;}
 }
 @media (prefers-reduced-motion: reduce){ .gymfin-root{transition:none;} }
-html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow, html.statsv2-bg .app-glow, html.histv2-bg .app-glow{display:none;}
+html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-glow, html.statsv2-bg .app-glow, html.histv2-bg .app-glow{display:none;}
 @media (prefers-reduced-motion: no-preference){
   .app-glow{animation:glowDrift 24s ease-in-out infinite;}
   @keyframes glowDrift{
@@ -1019,6 +1029,18 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
    stops as Figma's 4694px-tall rectangle). The photo is only a CSS
    background, so it never blocks the first render; the gradients paint
    the same page even before it arrives. */
+#view-profile-v2{
+  min-height:100dvh;
+  background-color:var(--m-bg);
+  /* Figma 560:6731: to samo zdjęcie i ten sam gradient strony co Pulpit, plus biała poświata 144° nad zdjęciem */
+  background-image:
+    linear-gradient(180deg, transparent 0, transparent 308px, var(--m-page-top) 589px, var(--m-page-bot) 4908px),
+    linear-gradient(144deg, rgba(255,255,255,.78) 23%, rgba(255,255,255,0) 100%),
+    url(icons/backgrounds/dashboard.webp);
+  background-repeat:no-repeat;
+  background-position:0 0, -95px 0, -95px 0;
+  background-size:100% 100%, 566px 1007px, 566px 1007px;
+}
 #view-dashboard{
   min-height:100dvh;
   background-color:var(--m-bg);
@@ -1062,6 +1084,16 @@ html.dashboard-lock .app-glow, html.plansv2-lock .app-glow, html.gymv2-bg .app-g
 .dash-acct-btn::after{content:"";position:absolute;inset:-4px;}   /* 40px disc, 48px touch target */
 /* subpage headers: keep the row's 40px scale, glyph fills the badge */
 .gymv2-acct-btn .ph, .plansv2-acct-btn .ph, .histv2-acct-btn .ph, .statsv2-acct-btn .ph{width:40px;height:40px;}
+/* Profil: nagłówek z Figmy 560:6731 — strzałka 40 px (po lewej), tytuł, zębatka 40 px (po prawej); cel dotyku 44 pt przez ::after */
+.profil-root .ph{display:block;width:18px;height:18px;}
+.profil-root .ph svg{display:block;width:100%;height:100%;}
+.profil-panel{box-sizing:border-box;padding:max(14px, calc(var(--top-inset) - 8px)) 10px calc(28px + env(safe-area-inset-bottom,0px));}
+.profil-header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:40px;}
+.profil-title{margin:0;font-size:var(--m-fs-xs);font-weight:600;letter-spacing:.0833em;text-transform:uppercase;color:var(--m-ink);text-align:center;}
+.profil-back, .profil-gear{position:relative;width:40px;height:40px;padding:0;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.profil-back::after, .profil-gear::after{content:"";position:absolute;inset:-2px;}   /* 40 px wizualnie, 44 px do kliknięcia */
+.profil-back{margin-left:1px;justify-self:start;background:none;color:var(--m-ink);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}
+.profil-gear{justify-self:end;background:rgba(255,255,255,.6);color:var(--m-orange);box-shadow:0 0 0 .5px var(--m-orange-tint);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
 /* Greeting + headline. min-height 177px = Figma's greeting top (y100) to the
    column start (y277) whatever the headline's line count (2 or 3). */
 .dash-header{min-height:177px;}
@@ -3146,7 +3178,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <!-- ===================== DASHBOARD (v3 "Mekkio" home — the app boots here) ===================== -->
   <section class="view active" id="view-dashboard">
     <div class="dash-root" id="dashRoot">
-      <button type="button" class="dash-chat-btn dash-acct-btn" id="dashAcctBtn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+      <button type="button" class="dash-chat-btn dash-acct-btn" id="dashAcctBtn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
 
       <div class="dash-header" id="dashHeader">
         <p class="dash-hi" id="dashHi"></p>
@@ -3232,7 +3264,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <span class="ph" data-ph="barbell"></span>
           <h1>PLANS</h1>
         </div>
-        <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+        <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
       </div>
 
       <div class="plansv2-actions">
@@ -3338,7 +3370,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <span class="ph" data-ph="barbell"></span>
           <h1>KREATOR</h1>
         </div>
-        <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+        <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
       </div>
 
       <div class="pev2-body">
@@ -3392,7 +3424,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
         <span class="ph" data-ph="calendar-dots"></span>
         <h1 data-i18n="histV2Title">HISTORIA</h1>
-        <button type="button" class="histv2-chat-btn histv2-acct-btn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+        <button type="button" class="histv2-chat-btn histv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
       </div>
 
       <div class="histv2-cal-card">
@@ -3439,10 +3471,24 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <span class="ph" data-ph="chart-line-up"></span>
           <h1>POSTĘPY</h1>
         </div>
-        <button type="button" class="statsv2-chat-btn statsv2-acct-btn" onclick="openAccountPanel()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+        <button type="button" class="statsv2-chat-btn statsv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
       </div>
 
       <div id="statsV2Body"></div>
+    </div>
+  </section>
+
+  <!-- ===================== PROFIL v2 (Figma 560:6731) — K1: tylko szkielet (nagłówek + tło).
+       Wejście: openProfileV2() z awatara; trasa 'profile-v2' (push/pop, menu dolne ukryte), patrz goRoute().
+       Treść dochodzi w K2+. ===================== -->
+  <section class="view profil-root" id="view-profile-v2">
+    <div class="profil-panel" id="profilPanel">
+      <div class="profil-header">
+        <button type="button" class="profil-back m-press" onclick="profileBack()" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="caret-left"></span></button>
+        <h1 class="profil-title">PROFIL</h1>
+        <button type="button" class="profil-gear m-press" onclick="openAccountPanel()" title="Ustawienia i konto" aria-label="Ustawienia i konto"><span class="ph" data-ph="gear"></span></button>
+      </div>
+      <div id="profilBody"></div>
     </div>
   </section>
 
@@ -4902,6 +4948,8 @@ Object.assign(PH, {"trash": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\
 "clock-countdown": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M14.5 8.54125C14.3938 9.77623 13.937 10.9552 13.1835 11.9394C12.43 12.9236 11.4111 13.6722 10.2466 14.097C9.08212 14.5218 7.82054 14.6052 6.61028 14.3373C5.40002 14.0695 4.29143 13.4615 3.41494 12.5851C2.53845 11.7086 1.93052 10.6 1.66268 9.38972C1.39484 8.17946 1.47822 6.91788 1.90302 5.75339C2.32782 4.58891 3.07636 3.56998 4.06059 2.81647C5.04481 2.06296 6.22377 1.60623 7.45875 1.5C7.52441 1.49458 7.5905 1.50215 7.65323 1.52227C7.71597 1.5424 7.77413 1.57468 7.82439 1.61728C7.87464 1.65988 7.91602 1.71196 7.94615 1.77055C7.97629 1.82914 7.99458 1.89309 8 1.95875C8.00542 2.02441 7.99785 2.0905 7.97773 2.15323C7.9576 2.21597 7.92532 2.27413 7.88272 2.32439C7.84012 2.37464 7.78804 2.41602 7.72945 2.44615C7.67086 2.47629 7.60691 2.49458 7.54125 2.5C6.49599 2.58981 5.49813 2.97629 4.66507 3.61398C3.83201 4.25166 3.19841 5.11402 2.83883 6.09958C2.47924 7.08514 2.40863 8.1529 2.6353 9.17723C2.86197 10.2016 3.37649 11.1398 4.11833 11.8817C4.86016 12.6235 5.79844 13.138 6.82277 13.3647C7.8471 13.5914 8.91486 13.5208 9.90042 13.1612C10.886 12.8016 11.7483 12.168 12.386 11.3349C13.0237 10.5019 13.4102 9.50401 13.5 8.45875C13.5109 8.32614 13.5741 8.20331 13.6756 8.11728C13.7771 8.03125 13.9086 7.98906 14.0413 8C14.1739 8.01094 14.2967 8.07411 14.3827 8.17561C14.4688 8.27712 14.5109 8.40864 14.5 8.54125ZM7.5 4.5V8C7.5 8.13261 7.55268 8.25979 7.64645 8.35355C7.74021 8.44732 7.86739 8.5 8 8.5H11.5C11.6326 8.5 11.7598 8.44732 11.8536 8.35355C11.9473 8.25979 12 8.13261 12 8C12 7.86739 11.9473 7.74021 11.8536 7.64645C11.7598 7.55268 11.6326 7.5 11.5 7.5H8.5V4.5C8.5 4.36739 8.44732 4.24021 8.35355 4.14645C8.25979 4.05268 8.13261 4 8 4C7.86739 4 7.74021 4.05268 7.64645 4.14645C7.55268 4.24021 7.5 4.36739 7.5 4.5ZM10 3C10.1483 3 10.2933 2.95601 10.4167 2.8736C10.54 2.79119 10.6361 2.67406 10.6929 2.53701C10.7497 2.39997 10.7645 2.24917 10.7356 2.10368C10.7067 1.9582 10.6352 1.82456 10.5303 1.71967C10.4254 1.61478 10.2918 1.54335 10.1463 1.51441C10.0008 1.48547 9.85003 1.50032 9.71299 1.55709C9.57594 1.61386 9.45881 1.70999 9.3764 1.83332C9.29399 1.95666 9.25 2.10166 9.25 2.25C9.25 2.44891 9.32902 2.63968 9.46967 2.78033C9.61032 2.92098 9.80109 3 10 3ZM12.25 4.5C12.3983 4.5 12.5433 4.45601 12.6667 4.3736C12.79 4.29119 12.8861 4.17406 12.9429 4.03701C12.9997 3.89997 13.0145 3.74917 12.9856 3.60368C12.9567 3.4582 12.8852 3.32456 12.7803 3.21967C12.6754 3.11478 12.5418 3.04335 12.3963 3.01441C12.2508 2.98547 12.1 3.00032 11.963 3.05709C11.8259 3.11386 11.7088 3.20999 11.6264 3.33332C11.544 3.45666 11.5 3.60166 11.5 3.75C11.5 3.94891 11.579 4.13968 11.7197 4.28033C11.8603 4.42098 12.0511 4.5 12.25 4.5ZM13.75 6.75C13.8983 6.75 14.0433 6.70601 14.1667 6.6236C14.29 6.54119 14.3861 6.42406 14.4429 6.28701C14.4997 6.14997 14.5145 5.99917 14.4856 5.85368C14.4567 5.7082 14.3852 5.57456 14.2803 5.46967C14.1754 5.36478 14.0418 5.29335 13.8963 5.26441C13.7508 5.23547 13.6 5.25032 13.463 5.30709C13.3259 5.36386 13.2088 5.45999 13.1264 5.58332C13.044 5.70666 13 5.85166 13 6C13 6.19891 13.079 6.38968 13.2197 6.53033C13.3603 6.67098 13.5511 6.75 13.75 6.75Z\"/></svg>",
 "chart-line": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M14.5 13C14.5 13.1326 14.4473 13.2598 14.3536 13.3536C14.2598 13.4473 14.1326 13.5 14 13.5H2C1.86739 13.5 1.74021 13.4473 1.64645 13.3536C1.55268 13.2598 1.5 13.1326 1.5 13V3C1.5 2.86739 1.55268 2.74021 1.64645 2.64645C1.74021 2.55268 1.86739 2.5 2 2.5C2.13261 2.5 2.25979 2.55268 2.35355 2.64645C2.44732 2.74021 2.5 2.86739 2.5 3V8.89812L5.67063 6.125C5.7569 6.04947 5.86652 6.0059 5.9811 6.00157C6.09569 5.99725 6.20828 6.03244 6.3 6.10125L9.97563 8.85812L13.6706 5.625C13.7191 5.57704 13.7768 5.5395 13.8403 5.51467C13.9038 5.48985 13.9717 5.47827 14.0398 5.48065C14.1079 5.48303 14.1749 5.49931 14.2365 5.5285C14.2981 5.55769 14.3531 5.59917 14.398 5.65038C14.443 5.7016 14.4771 5.76148 14.4981 5.82633C14.5191 5.89119 14.5266 5.95965 14.5201 6.02752C14.5137 6.09538 14.4935 6.16122 14.4607 6.22097C14.4279 6.28073 14.3832 6.33314 14.3294 6.375L10.3294 9.875C10.2431 9.95053 10.1335 9.9941 10.0189 9.99843C9.90431 10.0028 9.79173 9.96756 9.7 9.89875L6.02438 7.14313L2.5 10.2269V12.5H14C14.1326 12.5 14.2598 12.5527 14.3536 12.6464C14.4473 12.7402 14.5 12.8674 14.5 13Z\"/></svg>",
 "plus-icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"50\" height=\"50\" viewBox=\"0 0 50 50\" fill=\"currentColor\"><path d=\"M43.3594 25C43.3594 25.3108 43.2359 25.6089 43.0161 25.8286C42.7964 26.0484 42.4983 26.1719 42.1875 26.1719H26.1719V42.1875C26.1719 42.4983 26.0484 42.7964 25.8286 43.0161C25.6089 43.2359 25.3108 43.3594 25 43.3594C24.6892 43.3594 24.3911 43.2359 24.1714 43.0161C23.9516 42.7964 23.8281 42.4983 23.8281 42.1875V26.1719H7.8125C7.5017 26.1719 7.20363 26.0484 6.98386 25.8286C6.76409 25.6089 6.64063 25.3108 6.64062 25C6.64062 24.6892 6.76409 24.3911 6.98386 24.1714C7.20363 23.9516 7.5017 23.8281 7.8125 23.8281H23.8281V7.8125C23.8281 7.5017 23.9516 7.20363 24.1714 6.98386C24.3911 6.76409 24.6892 6.64063 25 6.64062C25.3108 6.64063 25.6089 6.76409 25.8286 6.98386C26.0484 7.20363 26.1719 7.5017 26.1719 7.8125V23.8281H42.1875C42.4983 23.8281 42.7964 23.9516 43.0161 24.1714C43.2359 24.3911 43.3594 24.6892 43.3594 25Z\"/></svg>"});
+/* Profil (Figma 560:6731): zębatka i strzałka w lewo, kolor z currentColor */
+Object.assign(PH, {"gear": "<svg viewBox=\"0 0 18 18\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M9.00211 5.62711C8.3346 5.62711 7.68207 5.82505 7.12706 6.1959C6.57204 6.56675 6.13946 7.09385 5.88401 7.71055C5.62857 8.32725 5.56173 9.00585 5.69196 9.66054C5.82218 10.3152 6.14362 10.9166 6.61562 11.3886C7.08763 11.8606 7.68899 12.182 8.34368 12.3123C8.99836 12.4425 9.67696 12.3756 10.2937 12.1202C10.9104 11.8648 11.4375 11.4322 11.8083 10.8772C12.1792 10.3221 12.3771 9.66962 12.3771 9.00211C12.3762 8.10729 12.0203 7.24938 11.3876 6.61665C10.7548 5.98392 9.89693 5.62804 9.00211 5.62711ZM9.00211 11.2521C8.5571 11.2521 8.12209 11.1201 7.75208 10.8729C7.38206 10.6257 7.09368 10.2743 6.92338 9.86315C6.75308 9.45201 6.70852 8.99961 6.79534 8.56316C6.88216 8.1267 7.09645 7.72579 7.41112 7.41112C7.72579 7.09645 8.1267 6.88216 8.56316 6.79534C8.99961 6.70852 9.45201 6.75308 9.86315 6.92338C10.2743 7.09368 10.6257 7.38206 10.8729 7.75208C11.1201 8.12209 11.2521 8.5571 11.2521 9.00211C11.2521 9.59885 11.0151 10.1711 10.5931 10.5931C10.1711 11.0151 9.59885 11.2521 9.00211 11.2521ZM15.1896 9.15398C15.1924 9.05273 15.1924 8.95148 15.1896 8.85023L16.2387 7.53961C16.2937 7.47079 16.3318 7.39002 16.3498 7.3038C16.3679 7.21758 16.3655 7.12831 16.3427 7.0432C16.1708 6.39675 15.9135 5.77606 15.5777 5.1975C15.5338 5.12178 15.4727 5.05738 15.3995 5.00941C15.3263 4.96143 15.2428 4.93122 15.1559 4.92117L13.488 4.73555C13.4187 4.66242 13.3484 4.59211 13.2771 4.52461L13.0802 2.85258C13.0701 2.76554 13.0398 2.68207 12.9917 2.60882C12.9436 2.53558 12.879 2.47458 12.8032 2.4307C12.2244 2.09555 11.6038 1.83855 10.9575 1.6664C10.8723 1.64376 10.783 1.64145 10.6968 1.65964C10.6106 1.67784 10.5298 1.71604 10.4611 1.77117L9.15398 2.81461C9.05273 2.81461 8.95148 2.81461 8.85023 2.81461L7.53961 1.76765C7.47079 1.71265 7.39002 1.67457 7.3038 1.6565C7.21758 1.63842 7.12831 1.64085 7.0432 1.66359C6.39685 1.83588 5.77621 2.09312 5.1975 2.42859C5.12178 2.47256 5.05738 2.53359 5.00941 2.60683C4.96143 2.68007 4.93122 2.76349 4.92117 2.85047L4.73555 4.52109C4.66242 4.59094 4.59211 4.66125 4.52461 4.73203L2.85258 4.92398C2.76554 4.93411 2.68207 4.96443 2.60882 5.01253C2.53558 5.06062 2.47458 5.12517 2.4307 5.20101C2.09555 5.7798 1.83855 6.40043 1.6664 7.04672C1.64376 7.13188 1.64145 7.22118 1.65964 7.3074C1.67784 7.39363 1.71604 7.47437 1.77117 7.54312L2.81461 8.85023C2.81461 8.95148 2.81461 9.05273 2.81461 9.15398L1.76765 10.4646C1.71265 10.5334 1.67457 10.6142 1.6565 10.7004C1.63842 10.7866 1.64085 10.8759 1.66359 10.961C1.83557 11.6075 2.09283 12.2282 2.42859 12.8067C2.47256 12.8824 2.53359 12.9468 2.60683 12.9948C2.68007 13.0428 2.76349 13.073 2.85047 13.083L4.51828 13.2687C4.58812 13.3418 4.65844 13.4121 4.72922 13.4796L4.92398 15.1516C4.93411 15.2387 4.96443 15.3221 5.01253 15.3954C5.06062 15.4686 5.12517 15.5296 5.20101 15.5735C5.7798 15.9087 6.40043 16.1657 7.04672 16.3378C7.13188 16.3605 7.22118 16.3628 7.3074 16.3446C7.39363 16.3264 7.47437 16.2882 7.54312 16.233L8.85023 15.1896C8.95148 15.1924 9.05273 15.1924 9.15398 15.1896L10.4646 16.2387C10.5334 16.2937 10.6142 16.3318 10.7004 16.3498C10.7866 16.3679 10.8759 16.3655 10.961 16.3427C11.6075 16.1708 12.2282 15.9135 12.8067 15.5777C12.8824 15.5338 12.9468 15.4727 12.9948 15.3995C13.0428 15.3263 13.073 15.2428 13.083 15.1559L13.2687 13.488C13.3418 13.4187 13.4121 13.3484 13.4796 13.2771L15.1516 13.0802C15.2387 13.0701 15.3221 13.0398 15.3954 12.9917C15.4686 12.9436 15.5296 12.879 15.5735 12.8032C15.9087 12.2244 16.1657 11.6038 16.3378 10.9575C16.3605 10.8723 16.3628 10.783 16.3446 10.6968C16.3264 10.6106 16.2882 10.5298 16.233 10.4611L15.1896 9.15398ZM14.0576 8.69695C14.0695 8.90021 14.0695 9.104 14.0576 9.30726C14.0492 9.44642 14.0928 9.58374 14.1799 9.69258L15.1777 10.9392C15.0632 11.3031 14.9166 11.656 14.7396 11.9939L13.1505 12.1739C13.0122 12.1893 12.8844 12.2554 12.792 12.3595C12.6566 12.5118 12.5125 12.6559 12.3602 12.7912C12.2561 12.8837 12.19 13.0115 12.1746 13.1498L11.9981 14.7375C11.6603 14.9146 11.3073 15.0611 10.9434 15.1755L9.69609 14.1778C9.59628 14.0981 9.47229 14.0547 9.34453 14.0548H9.31078C9.10752 14.0667 8.90373 14.0667 8.70047 14.0548C8.56131 14.0464 8.42399 14.09 8.31516 14.1771L7.065 15.1755C6.70115 15.0611 6.3482 14.9145 6.01031 14.7375L5.83031 13.1505C5.81495 13.0122 5.74881 12.8844 5.64469 12.792C5.49247 12.6566 5.34831 12.5125 5.21297 12.3602C5.12053 12.2561 4.99276 12.19 4.85437 12.1746L3.26672 11.9974C3.08966 11.6596 2.94307 11.3066 2.82867 10.9427L3.8264 9.69539C3.91353 9.58655 3.95712 9.44924 3.94875 9.31008C3.9368 9.10682 3.9368 8.90303 3.94875 8.69976C3.95712 8.5606 3.91353 8.42329 3.8264 8.31445L2.82867 7.065C2.94316 6.70115 3.08975 6.3482 3.26672 6.01031L4.85367 5.83031C4.99206 5.81495 5.11983 5.74881 5.21226 5.64469C5.34761 5.49247 5.49176 5.34831 5.64398 5.21297C5.74852 5.12047 5.81493 4.99241 5.83031 4.85367L6.0068 3.26672C6.34465 3.08966 6.69761 2.94307 7.06148 2.82867L8.30883 3.8264C8.41767 3.91353 8.55498 3.95712 8.69414 3.94875C8.8974 3.9368 9.10119 3.9368 9.30445 3.94875C9.44361 3.95712 9.58093 3.91353 9.68976 3.8264L10.9392 2.82867C11.3031 2.94316 11.656 3.08975 11.9939 3.26672L12.1739 4.85367C12.1893 4.99206 12.2554 5.11983 12.3595 5.21226C12.5118 5.34761 12.6559 5.49176 12.7912 5.64398C12.8837 5.74811 13.0115 5.81425 13.1498 5.82961L14.7375 6.00609C14.9146 6.34395 15.0611 6.6969 15.1755 7.06078L14.1778 8.30812C14.0899 8.41788 14.0462 8.55661 14.0555 8.69695H14.0576Z\" fill=\"currentColor\"/></svg>", "caret-left": "<svg viewBox=\"0 0 18 18\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M11.8458 14.0269C12.0043 14.1854 12.0934 14.4003 12.0934 14.6245C12.0934 14.8487 12.0043 15.0637 11.8458 15.2222C11.6873 15.3807 11.4723 15.4697 11.2482 15.4697C11.024 15.4697 10.809 15.3807 10.6505 15.2222L5.02551 9.59717C4.94685 9.51878 4.88444 9.42564 4.84185 9.32308C4.79927 9.22052 4.77734 9.11056 4.77734 8.99951C4.77734 8.88846 4.79927 8.7785 4.84185 8.67594C4.88444 8.57339 4.94685 8.48024 5.02551 8.40185L10.6505 2.77685C10.809 2.61835 11.024 2.5293 11.2482 2.5293C11.4723 2.5293 11.6873 2.61835 11.8458 2.77685C12.0043 2.93536 12.0934 3.15035 12.0934 3.37451C12.0934 3.59867 12.0043 3.81366 11.8458 3.97217L6.81918 8.99881L11.8458 14.0269Z\" fill=\"currentColor\"/></svg>"});
 function ph(name, cls){ return `<span class="ph ${cls||''}">${PH[name]}</span>`; }
 
 /* Resolve all __PH_*__ placeholders in the static markup into real icon
@@ -8260,7 +8308,26 @@ function commitViewTransition(){
    removed every old #view-* screen, so there's nothing to fall back to. */
 let previewMode = true;
 const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2', history: 'history-v2', stats: 'stats-v2' };
-const V3_ROUTE_ALIAS = { 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats' }; // which nav icon a v3 route should light up
+// Profil nie ma własnej ikony w menu (menu jest tam ukryte): alias wskazuje zakładkę ekranu, z którego weszliśmy,
+// żeby wyjście z Profilu nie wyglądało jak zmiana zakładki (bez poślizgu kulki i obrotu ikony).
+let profileReturnRoute = 'dashboard';   // tylko w pamięci, NIE klucz localStorage
+const V3_ROUTE_ALIAS = { 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats',
+  get 'profile-v2'(){ return V3_ROUTE_ALIAS[profileReturnRoute] || profileReturnRoute; } }; // which nav icon a v3 route should light up
+const PROFILE_SOURCES = new Set(['dashboard','gym-v2','plans-v2','plan-editor-v2','history-v2','stats-v2']);   // ekrany, z których awatar wchodzi w Profil
+function openProfileV2(){
+  if(currentRoute !== 'profile-v2') profileReturnRoute = PROFILE_SOURCES.has(currentRoute) ? currentRoute : 'dashboard';
+  goRoute('profile-v2');
+}
+function profileBack(){ goRoute(PROFILE_SOURCES.has(profileReturnRoute) ? profileReturnRoute : 'dashboard'); }
+function renderProfileV2(animate){ profileRefreshScroll(); }
+// Profil jest długi i zawsze przewijany, gdy treść wyjdzie poza ekran (menu jest ukryte, więc porównujemy z dołem okna).
+function profileRefreshScroll(){
+  const panel = document.getElementById('profilPanel');
+  let needsScroll = false;
+  if(panel) needsScroll = panel.getBoundingClientRect().top + panel.scrollHeight > window.innerHeight;
+  document.documentElement.classList.toggle('profil-scrollable', needsScroll);
+  if(!needsScroll){ document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }
+}
 function navTap(route){
   const target = (previewMode && PREVIEW_ROUTES[route]) ? PREVIEW_ROUTES[route] : route;
   // Maciej: the History nav icon always lands on today — after browsing
@@ -8312,6 +8379,7 @@ function positionNavBlob(animate){
   const blob = nav.querySelector('.nav-blob');
   const act = nav.querySelector('.nav-item.active');
   if(!blob || !act) return;
+  if(!act.offsetWidth) return;   // menu ukryte (Profil): pomiar dałby 0 / NaN i zepsuł kulkę po powrocie
   // Transform-only (GPU): translate the blob's centre onto the active
   // item's centre, scale to its size. No left/width/height = no layout.
   const s = act.offsetWidth / NAV_BLOB_BASE;
@@ -8332,14 +8400,17 @@ function goRoute(route){
   // Tab switches swap instantly, like a native tab bar; the incoming
   // screen's own tile entrance is the only motion. A slide is kept
   // only for drilling into / back out of the plan editor (push/pop).
+  // Push/pop: Plany <-> Edytor oraz każdy ekran z awatarem <-> Profil (wejście = forward, powrót = back).
   const drill = (currentRoute === 'plans-v2' && route === 'plan-editor-v2')
-             || (currentRoute === 'plan-editor-v2' && route === 'plans-v2');
-  const forward = route === 'plan-editor-v2';
+             || (currentRoute === 'plan-editor-v2' && route === 'plans-v2')
+             || (route === 'profile-v2' && PROFILE_SOURCES.has(currentRoute))
+             || (currentRoute === 'profile-v2' && PROFILE_SOURCES.has(route));
+  const forward = (route === 'plan-editor-v2' && currentRoute === 'plans-v2') || route === 'profile-v2';
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward, !drill);
-  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2' || route==='history-v2' || route==='stats-v2';
-  document.getElementById('bottomNav').style.display = 'flex';
+  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2' || route==='history-v2' || route==='stats-v2' || route==='profile-v2';
+  document.getElementById('bottomNav').style.display = route==='profile-v2' ? 'none' : 'flex';
   document.getElementById('bottomNav').classList.toggle('bottom-nav-light', isV3);
   // Only rebuild the button set when the v3-ness actually changes — every
   // goRoute() call within the same context (e.g. gym-v2 -> plans-v2, both
@@ -8370,6 +8441,9 @@ function goRoute(route){
   // just one screen deeper) but has its own red page background
   // (.pev2-bg) instead of Plans v2's flat lilac (.plansv2-bg) — see the
   // comment on .pev2-card's CSS.
+  document.documentElement.classList.toggle('profil-lock', route==='profile-v2');
+  if(route!=='profile-v2') document.documentElement.classList.remove('profil-scrollable');
+  document.body.classList.toggle('profil-bg', route==='profile-v2');
   document.documentElement.classList.toggle('plansv2-lock', route==='plans-v2' || route==='plan-editor-v2');
   document.body.classList.toggle('plansv2-bg', route==='plans-v2');
   document.body.classList.toggle('pev2-bg', route==='plan-editor-v2');
@@ -8388,6 +8462,7 @@ function goRoute(route){
   if(route==='plan-editor-v2'){ previewMode = true; refreshPlanEditorV2Scroll(); }
   if(route==='history-v2'){ previewMode = true; renderCalendarV2(true); }
   if(route==='stats-v2'){ previewMode = true; statsV2CaroPage = 0; renderStatsV2(true); }
+  if(route==='profile-v2'){ previewMode = true; renderProfileV2(true); }
   commitViewTransition();
   window.scrollTo(0,0);
 }
@@ -8405,7 +8480,7 @@ function goRoute(route){
     if(!isTextField(e.target)) return;
     setTimeout(()=>{
       if(isTextField(document.activeElement)) return;
-      nav.style.display = currentRoute==='welcome' ? 'none' : 'flex';
+      nav.style.display = (currentRoute==='welcome' || currentRoute==='profile-v2') ? 'none' : 'flex';
     }, 60);
   });
 })();
