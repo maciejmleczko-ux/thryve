@@ -1183,6 +1183,34 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .pf-bar{position:relative;width:95px;max-width:100%;height:6px;border-radius:3px;background:var(--m-line);overflow:hidden;}
 .pf-bar i{position:absolute;left:0;top:0;width:100%;height:100%;background:var(--m-orange);border-radius:3px;transform-origin:left center;transform:scaleX(var(--r,0));}
 .pf-bcard--off .pf-bcard-n{color:var(--m-muted-text);}
+/* ---- Profil: arkusz Rekordy (Figma 560:8932). Wygląd z Figmy, pola kliku 44 pt przez ::after / margines. ---- */
+#profileRecordsSheet .plansv2-customize-stack{min-height:70%;}
+#profileRecordsSheet .plansv2-customize-card{gap:21px;padding:16px 16px 6px;overflow-x:hidden;}
+.pf-rm-tabs{align-self:center;display:flex;align-items:center;gap:4px;padding:2px;box-sizing:border-box;background:rgba(255,255,255,.6);border:.5px solid var(--m-orange-tint);border-radius:var(--m-r-pill);-webkit-backdrop-filter:blur(7.23px);backdrop-filter:blur(7.23px);}
+.pf-rm-seg{position:relative;box-sizing:border-box;padding:7px 30px;border:0;border-radius:var(--m-r-pill);background:transparent;color:var(--m-ink);font:inherit;font-size:var(--m-fs-2xs);font-weight:600;line-height:13px;cursor:pointer;transition:background var(--m-dur-quick) ease,color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.pf-rm-seg::after{content:"";position:absolute;inset:-9px -2px;}   /* 27 px wizualnie, 45 px do kliknięcia */
+.pf-rm-seg[aria-pressed="true"]{background:var(--m-orange);color:var(--m-white);}
+.pf-rm-seg:active{transform:scale(.97);}
+.pf-rm-body{display:flex;flex-direction:column;gap:12px;touch-action:pan-y;transition:opacity var(--m-dur-quick) ease;}
+.pf-rm-top{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.pf-rm-nav{display:flex;align-items:center;justify-content:space-between;width:277px;max-width:100%;}
+.pf-rm-arw{position:relative;flex:none;box-sizing:border-box;width:44px;height:44px;margin:0 -18.75px;padding:0;border:0;background:none;color:var(--m-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.pf-rm-arw:disabled{opacity:.25;cursor:default;}
+.pf-rm-arw:active:not(:disabled){transform:scale(.97);}
+.pf-rm-arw .pf-ico{display:block;width:7px;height:12px;}
+.pf-rm-arw svg{display:block;width:7px;height:12px;}
+.pf-rm-head{flex:none;min-width:195px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;}
+.pf-rm-title{margin:0;font-size:18px;font-weight:400;line-height:1.2;color:var(--m-ink);}   /* 18 px: Figma, poza skalą tokenów (jak .pf-empty-t) */
+.pf-rm-pills{display:flex;justify-content:center;gap:4px;white-space:nowrap;}
+.pf-pill--gray{background:var(--m-line);color:var(--m-ink);}
+.pf-rm-dots{display:flex;align-items:center;justify-content:center;gap:3.45px;min-height:4px;}
+.pf-rm-dot{flex:none;width:4px;height:4px;border-radius:99px;background:rgba(163,163,163,.56);opacity:.7;}
+.pf-rm-dot--on{width:12px;background:var(--m-orange);opacity:1;}
+.pf-rm-card{box-sizing:border-box;width:100%;padding:8px 12px;background:rgba(255,255,255,.6);border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);-webkit-backdrop-filter:blur(24.5px);backdrop-filter:blur(24.5px);}
+.pf-rm-card .pf-row-r{font-size:var(--m-fs-2xs);}
+.pf-rm-hint{margin:8px 0 0;text-align:center;font-size:var(--m-fs-2xs);font-weight:400;line-height:1.3;color:var(--m-muted-text);}
+.pf-rm-hint span{display:block;}
+.pf-rm-empty{box-sizing:border-box;width:100%;padding:18px;background:rgba(255,255,255,.6);border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);}
 @media (max-width:339px){ .profil-name{font-size:30px;} .pf-weight-main{gap:10px;} .pf-chart{width:112px;} .pf-chart svg{width:112px;} .pf-stat-v{font-size:24px;} .pf-body-v{font-size:24px;} }
 /* Greeting + headline. min-height 177px = Figma's greeting top (y100) to the
    column start (y277) whatever the headline's line count (2 or 3). */
@@ -2563,7 +2591,7 @@ body.pev2-bg{background:var(--m-panel);}
 .plan-pill:active,.topbar-icon-btn:active,.gymfin-cta:active,.gymfin-share:active,.sh-seg-b:active,.sh-arrow:active,.sh-sw:active,.sh-ic:active,.sh-main:active,.sh-bgi:active,.gymfin-stat:active,.ex-tile:active,.save-btn:active,
 .hist-card.collapsed:active,.acct-photo-pick:active,.acct-cloud-cta:active,.acct-oauth-btn:active,
 .dash-chat-btn:active,.gymv2-chat-btn:active,.plansv2-chat-btn:active,.histv2-chat-btn:active,.statsv2-chat-btn:active,
-.profil-back:active,.profil-gear:active,.pf-sheet-x:active,.profil-av:active,.pf-link:active,.pf-row:active,.pf-btn:active,.pf-body-c:active,.profil-id-txt:active,
+.profil-back:active,.profil-gear:active,.pf-sheet-x:active,.pf-rm-seg:active,.pf-rm-arw:active,.profil-av:active,.pf-link:active,.pf-row:active,.pf-btn:active,.pf-body-c:active,.profil-id-txt:active,
 .v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-edit-plan:active,
 .gymv2-tile:active,.gymv2-tile-swap:active,.gymv2-done-row:active,.gymv2-save:active,
 .plansv2-btn-outline:active,.plansv2-btn-fill:active,.plansv2-card:active,.plansv2-choice-chip:active,
@@ -4015,6 +4043,23 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <button type="button" class="pf-sheet-x" onclick="closeProfileBadgesSheet()" aria-label="Zamknij" data-i18n-title="pfClose"><span class="ph" data-ph="x"></span></button>
       </div>
       <div class="pf-bgrid" id="pfBadgesGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden plansv2-customize-overlay" id="profileRecordsSheet" onclick="if(event.target===this) closeProfileRecordsSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="fbv2-title-row pf-sheet-h">
+        <h1 data-i18n="pfRecords">REKORDY</h1>
+        <button type="button" class="pf-sheet-x" onclick="closeProfileRecordsSheet()" aria-label="Zamknij" data-i18n-title="pfClose"><span class="ph" data-ph="x"></span></button>
+      </div>
+      <div class="pf-rm-tabs" role="group">
+        <button type="button" class="pf-rm-seg" id="pfRecTabMonths" aria-pressed="true" onclick="pfRecSetTab('months')" data-i18n="pfRecMonths">Miesiące</button>
+        <button type="button" class="pf-rm-seg" id="pfRecTabExercises" aria-pressed="false" onclick="pfRecSetTab('exercises')" data-i18n="pfRecExercises">Ćwiczenia</button>
+      </div>
+      <div class="pf-rm-body" id="pfRecBody"></div>
     </div>
   </div>
 </div>
@@ -5901,7 +5946,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet'];
+const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -8564,6 +8609,254 @@ function openProfileBadgesSheet(){
   acctSheetOpen('profileBadgesSheet');   // resetPlansCustomizeSheet czyści m-sheet-entered, więc wejście gra przy każdym otwarciu
 }
 function closeProfileBadgesSheet(viaDrag){ acctSheetClose('profileBadgesSheet', viaDrag); }
+/* ---- Profil: arkusz Rekordy (tylko odczyt). Rekordy wyłącznie z silnika (recordTimeline / exerciseRecords) na oczyszczonych kopiach historii.
+   Miesiące: tylko te z rekordami, od najstarszego do najnowszego (otwiera się na najnowszym). Swipe jak w kalendarzu Historii:
+   treść wylatuje, miesiąc podmieniany poza ekranem, nowa wlatuje (WAAPI + setTimeout jako zabezpieczenie dla PWA w tle). ---- */
+Object.assign(T_EN, {
+  pfRecMonths: 'Months', pfRecExercises: 'Exercises',
+  pfRecN: n => `${n} ${n === 1 ? 'record' : 'records'}`, pfRecW: n => `${n} ${n === 1 ? 'workout' : 'workouts'}`,
+  pfRecPrev: 'Previous month', pfRecNext: 'Next month',
+  pfRecHintSwipe: 'Swipe left or right to change month.', pfRecHintTap: 'Tap a record to see the workout.',
+});
+function profileRecordsModel(now){
+  now = now || new Date();
+  return dashWithCleanData(now, ()=>{
+    const ev = recordTimeline().filter(e=> e.kind !== 'volume');
+    const byMonth = new Map();
+    ev.forEach(e=>{ const k = e.date.slice(0, 7); if(!byMonth.has(k)) byMonth.set(k, []); byMonth.get(k).push(e); });
+    const wCount = new Map();
+    workouts.forEach(w=>{ const k = w.date.slice(0, 7); wCount.set(k, (wCount.get(k) || 0) + 1); });
+    const months = [...byMonth.keys()].sort().map(k=>({
+      key: k, year: +k.slice(0, 4), month: +k.slice(5, 7) - 1, workouts: wCount.get(k) || 0,
+      records: byMonth.get(k).slice().sort((a, b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : b.pos - a.pos)
+        .map(e=>({ kind: e.kind, name: e.name, value: e.value, delta: e.delta, date: e.date, workoutId: e.workoutId, perSide: e.perSide })),
+    }));
+    // rekord życiowy ćwiczenia: ciężar; masa ciała: powtórzenia; czasowe: czas
+    const names = new Set();
+    workouts.forEach(w=> w.exercises.forEach(x=>{ if(x && typeof x.name === 'string') names.add(x.name); }));
+    const exercises = [];
+    names.forEach(n=>{
+      const r = exerciseRecords(n);
+      if(!r) return;
+      const pick = r.weight ? { kind: 'weight', v: r.weight } : r.reps ? { kind: 'reps', v: r.reps } : r.time ? { kind: 'time', v: r.time } : null;
+      if(pick) exercises.push({ kind: pick.kind, name: n, value: pick.v.value, delta: 0, date: pick.v.date, workoutId: pick.v.workoutId, perSide: pick.v.perSide });
+    });
+    exercises.sort((a, b)=> a.name.localeCompare(b.name, LANG === 'en' ? 'en' : 'pl'));
+    return { months, exercises };
+  });
+}
+function pfRecValue(r){
+  if(r.kind === 'reps') return `${r.value} ${t('repsUnit', 'powt.')}`;
+  if(r.kind === 'time') return fmtDur(r.value, r.perSide);
+  return `${fmtGymWeight(r.value)} kg`;
+}
+function pfRecDelta(r){
+  if(r.kind === 'reps') return `+${r.delta} ${t('repsUnit', 'powt.')}`;
+  if(r.kind === 'time') return `+${fmtDur(r.delta)}`;
+  return `+${fmtGymWeight(r.delta)} kg`;
+}
+function pfRecRowsHtml(list, withDelta){
+  const E = escHtml;
+  return list.map((r, i)=> `<button type="button" class="pf-row m-press" onclick="pfRecOpen(${i})" aria-label="${E(r.name)}, ${E(pfRecValue(r))}, ${E(fmtDayMonShort(r.date))}">
+    <span class="pf-row-l"><span class="pf-row-n">${E(r.name)}</span><span class="pf-row-s">${E(fmtDayMonShort(r.date))}</span></span>
+    <span class="pf-row-r"><span>${E(pfRecValue(r))}</span>${withDelta && r.delta > 0 ? `<span class="pf-pill">${E(pfRecDelta(r))}</span>` : ''}</span></button>`).join('');
+}
+function pfRecHeadHtml(mo){
+  const E = escHtml, nr = mo.records.length;
+  return `<h3 class="pf-rm-title">${E(MONTH_NAMES[mo.month])} ${mo.year}</h3><div class="pf-rm-pills"><span class="pf-pill">${E(t('pfRecN', `${nr} ${plRekordWord(nr)}`, nr))}</span><span class="pf-pill pf-pill--gray">${E(t('pfRecW', `${mo.workouts} ${plTreningWord(mo.workouts)}`, mo.workouts))}</span></div>`;
+}
+function pfRecDotsHtml(n, idx){
+  const MAX = 30;   // przy bardzo wielu miesiącach pokazujemy okno kropek wokół bieżącego
+  let from = 0, to = n;
+  if(n > MAX){ from = Math.max(0, Math.min(n - MAX, idx - Math.floor(MAX / 2))); to = from + MAX; }
+  let h = '';
+  for(let i = from; i < to; i++) h += `<i class="pf-rm-dot${i === idx ? ' pf-rm-dot--on' : ''}"></i>`;
+  return h;
+}
+const PF_ARW_L = `<svg viewBox="0 0 6.5 11.5" width="7" height="12" fill="none" aria-hidden="true"><path d="M5.5 1 1 5.75 5.5 10.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const PF_ARW_R = `<svg viewBox="0 0 6.5 11.5" width="7" height="12" fill="none" aria-hidden="true"><path d="M1 1 5.5 5.75 1 10.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+let pfRec = null;
+function pfRecMs(name){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return /ms$/.test(v) ? parseFloat(v) : parseFloat(v) * 1000;
+}
+const pfRecReduce = ()=> !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function pfRecMoving(){ return ['pfRecHead', 'pfRecList'].map(id=> document.getElementById(id)).filter(Boolean); }
+function pfRecSetX(x){ pfRecMoving().forEach(e=>{ e.style.transform = x ? `translateX(${x.toFixed(1)}px)` : ''; }); }
+function pfRecKill(){ pfRecMoving().forEach(e=>{ if(e.getAnimations) e.getAnimations().forEach(a=> a.cancel()); }); }
+function pfRecWidth(){ const s = document.querySelector('#profileRecordsSheet .plansv2-customize-stack'); return (s && s.clientWidth) || 355; }
+// jedna animacja ruchu obu elementów; kończy się na onfinish albo na setTimeout (PWA w tle zawiesza animacje)
+function pfRecAnim(from, to, dur, easing, onDone){
+  let done = false;
+  const fin = ()=>{ if(done) return; done = true; onDone(); };
+  pfRecMoving().forEach((e, i)=>{
+    const a = e.animate([{ transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }], { duration: dur, easing, fill: 'forwards' });
+    if(i === 0) a.onfinish = fin;
+  });
+  setTimeout(fin, dur + 50);
+}
+function pfRecMonthsBodyHtml(S){
+  const months = S.m.months;
+  if(!months.length) return pfRecEmptyHtml();
+  const mo = months[S.idx], n = months.length;
+  return `<div class="pf-rm-top">
+      <div class="pf-rm-nav">
+        <button type="button" class="pf-rm-arw" id="pfRecPrev" onclick="pfRecStep(-1)" aria-label="${escHtml(t('pfRecPrev', 'Poprzedni miesiąc'))}"><span class="pf-ico" style="width:7px;height:12px">${PF_ARW_L}</span></button>
+        <div class="pf-rm-head" id="pfRecHead" aria-live="polite">${pfRecHeadHtml(mo)}</div>
+        <button type="button" class="pf-rm-arw" id="pfRecNext" onclick="pfRecStep(1)" aria-label="${escHtml(t('pfRecNext', 'Następny miesiąc'))}"><span class="pf-ico" style="width:7px;height:12px">${PF_ARW_R}</span></button>
+      </div>
+      <div class="pf-rm-dots" id="pfRecDots" aria-hidden="true">${pfRecDotsHtml(n, S.idx)}</div>
+    </div>
+    <div class="pf-rm-card" id="pfRecList"><div class="pf-rows">${pfRecRowsHtml(mo.records, true)}</div></div>
+    <p class="pf-rm-hint">${n > 1 ? `<span>${escHtml(t('pfRecHintSwipe', 'Przesuń w lewo lub w prawo, żeby zmienić miesiąc.'))}</span>` : ''}<span>${escHtml(t('pfRecHintTap', 'Tapnij rekord, żeby zobaczyć trening.'))}</span></p>`;
+}
+function pfRecEmptyHtml(){
+  return `<div class="pf-rm-empty"><h3 class="pf-empty-t">${escHtml(t('pfNoRecTitle', 'Tu pojawią się Twoje rekordy.'))}</h3><p class="pf-empty-d">${escHtml(t('pfNoRecText', 'Pierwszy zobaczysz po pierwszym treningu.'))}</p></div>`;
+}
+function pfRecExercisesBodyHtml(S){
+  if(!S.m.exercises.length) return pfRecEmptyHtml();
+  return `<div class="pf-rm-card"><div class="pf-rows">${pfRecRowsHtml(S.m.exercises, false)}</div></div>
+    <p class="pf-rm-hint"><span>${escHtml(t('pfRecHintTap', 'Tapnij rekord, żeby zobaczyć trening.'))}</span></p>`;
+}
+function pfRecSync(){
+  const S = pfRec; if(!S) return;
+  const prev = document.getElementById('pfRecPrev'), next = document.getElementById('pfRecNext');
+  if(prev) prev.disabled = S.idx <= 0;
+  if(next) next.disabled = S.idx >= S.m.months.length - 1;
+}
+// podmiana treści miesiąca (głowa, kropki, lista) bez ruszania reszty
+function pfRecUpdateMonth(){
+  const S = pfRec; if(!S || S.tab !== 'months' || !S.m.months.length) return;
+  const mo = S.m.months[S.idx];
+  const head = document.getElementById('pfRecHead'), list = document.getElementById('pfRecList'), dots = document.getElementById('pfRecDots');
+  if(head) head.innerHTML = pfRecHeadHtml(mo);
+  if(dots) dots.innerHTML = pfRecDotsHtml(S.m.months.length, S.idx);
+  if(list) list.innerHTML = `<div class="pf-rows">${pfRecRowsHtml(mo.records, true)}</div>`;
+  pfRecSync();
+}
+function pfRecRenderBody(){
+  const S = pfRec, body = document.getElementById('pfRecBody');
+  if(!S || !body) return;
+  body.innerHTML = S.tab === 'months' ? pfRecMonthsBodyHtml(S) : pfRecExercisesBodyHtml(S);
+  pfRecSync();
+}
+function pfRecSetTab(tab){
+  const S = pfRec; if(!S || S.tab === tab) return;
+  if(S.fin) S.fin();
+  S.tab = tab;
+  document.getElementById('pfRecTabMonths').setAttribute('aria-pressed', tab === 'months' ? 'true' : 'false');
+  document.getElementById('pfRecTabExercises').setAttribute('aria-pressed', tab === 'exercises' ? 'true' : 'false');
+  const body = document.getElementById('pfRecBody');
+  clearTimeout(S.tabT);
+  body.style.opacity = '0';   // zmiana treści bez slajdu: tylko opacity w --m-dur-quick
+  S.tabT = setTimeout(()=>{ pfRecRenderBody(); body.style.opacity = ''; }, pfRecMs('--m-dur-quick'));
+}
+function pfRecSpring(fromX){
+  const S = pfRec; if(!S) return;
+  if(!fromX || pfRecReduce()){ pfRecSetX(0); return; }
+  let ended = false;
+  const end = ()=>{ if(ended) return; ended = true; pfRecKill(); pfRecSetX(0); S.fin = null; };
+  S.fin = end;
+  pfRecAnim(fromX, 0, pfRecMs('--m-dur-exit'), MOTION.spring, end);
+}
+// krok o miesiąc: wylot (ease-in), podmiana poza ekranem, wlot (ease-out); trwający slajd kończymy natychmiast, żeby szybkie tapnięcia nie gubiły kroków
+function pfRecStep(dir, o){
+  const S = pfRec; if(!S || S.tab !== 'months' || !S.m.months.length) return;
+  if(S.fin) S.fin();
+  const ni = S.idx + dir, fromX = (o && o.fromX) || 0;
+  if(ni < 0 || ni >= S.m.months.length){ pfRecSpring(fromX); return; }
+  if(pfRecReduce()){ S.idx = ni; pfRecUpdateMonth(); pfRecSetX(0); return; }
+  const w = pfRecWidth(), outX = -dir * w, inX = dir * w;
+  const quick = pfRecMs('--m-dur-quick'), snap = pfRecMs('--m-dur-snap');
+  const speed = Math.min(3.4, Math.max(Math.abs((o && o.vel) || 0), 0.9));   // px/ms
+  const outDur = Math.min(snap, Math.max(quick * 0.8, Math.abs(outX - fromX) / speed));
+  let swapped = false, ended = false;
+  const swap = ()=>{
+    if(swapped) return; swapped = true;
+    pfRecKill(); S.idx = ni; pfRecUpdateMonth(); pfRecSetX(inX);
+  };
+  const end = ()=>{ if(ended) return; ended = true; pfRecKill(); pfRecSetX(0); S.fin = null; };
+  S.fin = ()=>{ swap(); end(); };
+  pfRecAnim(fromX, outX, outDur, MOTION.exit, ()=>{
+    if(ended) return;
+    swap();
+    void document.body.offsetWidth;   // wymusza layout, zanim ruszy wlot
+    pfRecAnim(inX, 0, snap, MOTION.land, end);
+  });
+}
+function pfRecOpen(i){
+  const S = pfRec; if(!S) return;
+  if(Date.now() - (S.lastDrag || 0) < 400) return;   // koniec przeciągania nie jest tapnięciem
+  const r = S.tab === 'months' ? (S.m.months[S.idx] && S.m.months[S.idx].records[i]) : S.m.exercises[i];
+  if(!r) return;
+  closeProfileRecordsSheet();
+  dashOpenHistoryDay(r.date, r.workoutId);   // istniejące wejście: Historia na dniu rekordu, trening rozwinięty
+}
+function pfRecWireSwipe(){
+  const body = document.getElementById('pfRecBody');
+  if(!body || body.dataset.swipeWired) return;
+  body.dataset.swipeWired = '1';
+  let x0 = 0, y0 = 0, axis = '', dragging = false, curT = 0, lastX = 0, lastT = 0, prevX = 0, prevT = 0;
+  body.addEventListener('touchstart', e=>{
+    const S = pfRec;
+    if(!S || S.tab !== 'months' || e.touches.length !== 1){ dragging = false; return; }
+    if(S.fin) S.fin();
+    const p = e.touches[0];
+    x0 = p.clientX; y0 = p.clientY; axis = ''; dragging = false; curT = 0;
+    prevX = lastX = p.clientX; prevT = lastT = e.timeStamp;
+  }, { passive: true });
+  body.addEventListener('touchmove', e=>{
+    const S = pfRec;
+    if(!S || S.tab !== 'months' || e.touches.length !== 1) return;
+    const p = e.touches[0], dx = p.clientX - x0, dy = p.clientY - y0;
+    if(!axis){
+      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';   // blokada osi przy pierwszym ruchu; 'y' zostaje dla przewijania i zamykania sheeta
+      dragging = axis === 'x';
+    }
+    if(!dragging) return;
+    S.lastDrag = Date.now();
+    prevX = lastX; prevT = lastT; lastX = p.clientX; lastT = e.timeStamp;
+    const w = pfRecWidth(), n = S.m.months.length;
+    const atEdge = (dx > 0 && S.idx <= 0) || (dx < 0 && S.idx >= n - 1);
+    let t = atEdge ? dx * 0.3 : dx;   // granica pierwszego/ostatniego miesiąca: opór (rubber-band)
+    if(Math.abs(t) > w * 0.5) t = (t < 0 ? -1 : 1) * (w * 0.5 + (Math.abs(t) - w * 0.5) * 0.3);
+    curT = t;
+    pfRecSetX(t);
+  }, { passive: true });
+  const end = (e, cancelled)=>{
+    const S = pfRec;
+    if(!dragging || !S){ dragging = false; return; }
+    dragging = false;
+    S.lastDrag = Date.now();
+    const w = pfRecWidth(), n = S.m.months.length;
+    const dx = e.changedTouches[0].clientX - x0;
+    const dt = Math.max(1, lastT - prevT), vel = (lastX - prevX) / dt;   // px/ms ze znakiem
+    const flick = Math.abs(vel) > 0.5 && Math.abs(dx) > 24 && (vel < 0) === (dx < 0);
+    const dir = dx < 0 ? 1 : -1, ni = S.idx + dir;
+    if(!cancelled && (Math.abs(dx) > w * 0.22 || flick) && ni >= 0 && ni < n) pfRecStep(dir, { fromX: curT, vel });
+    else pfRecSpring(curT);
+  };
+  body.addEventListener('touchend', e=> end(e, false), { passive: true });
+  body.addEventListener('touchcancel', e=> end(e, true), { passive: true });
+}
+function openProfileRecordsSheet(){
+  let m;
+  try{ m = profileRecordsModel(); }catch(err){ console.error('records model failed', err); return; }
+  if(pfRec){ clearTimeout(pfRec.tabT); if(pfRec.fin) pfRec.fin(); }
+  pfRec = { m, tab: 'months', idx: Math.max(0, m.months.length - 1), fin: null, tabT: null, lastDrag: 0 };
+  document.getElementById('pfRecTabMonths').setAttribute('aria-pressed', 'true');
+  document.getElementById('pfRecTabExercises').setAttribute('aria-pressed', 'false');
+  const body = document.getElementById('pfRecBody');
+  body.style.opacity = '';
+  pfRecWireSwipe();
+  pfRecRenderBody();
+  acctSheetOpen('profileRecordsSheet');   // resetPlansCustomizeSheet czyści m-sheet-entered, więc wejście gra przy każdym otwarciu
+}
+function closeProfileRecordsSheet(viaDrag){
+  if(pfRec){ clearTimeout(pfRec.tabT); if(pfRec.fin) pfRec.fin(); }
+  acctSheetClose('profileRecordsSheet', viaDrag);
+}
 let profileLastModel = null;
 function profileOpenRecord(i){
   const r = profileLastModel && profileLastModel.records[i];
@@ -9750,6 +10043,7 @@ mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
 ['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
+mSheetDrag('profileRecordsSheet', closeProfileRecordsSheet);   // zamknięcie przeciągnięciem kończy też trwający slajd miesięcy
 
 /* ---- "Zamień ćwiczenie" sheet (stage 3, idea #5) — rides .m-sheet ---- */
 const _mSheetTimers = {};
