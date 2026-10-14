@@ -115,6 +115,7 @@
   --m-orange-on-dark:var(--m-plan-c-easy); /* "COFNIJ" on the black toast (7.1:1) */
   --m-grab:#ccc;            /* sheet grabber in .m-sheet2 */
   --m-black:#000;           /* toast pill */
+  --m-badge-sheen:linear-gradient(136deg,#fff 4%,#fcfcfc 30%,#ececec 40%,#fff 65%,#dbdbdb 78%,#fff 100%); /* silver sheen of the badge detail sheet (Figma popupy-v2 08/09) */
   --m-orange-tint-2:#ffe9e3;
   --m-navy-tint:#b7c0e1;
   --m-navy-ink:#0d1637;
@@ -780,7 +781,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
    straight from the finish screen too. Only the few genuinely new bits
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
-#nameEditOverlay,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
+#nameEditOverlay,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#recordDetailSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
 /* mConfirm() is opened from inside the account panel (z 95) and its sheets
    (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
 #mConfirmOverlay{z-index:9650;}
@@ -789,20 +790,12 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .acct-num-row.name{max-width:260px;}
 /* account sub-sheets ride higher and breathe more than the base sheet:
    content hugs the top edge, actions pin to the bottom. */
-#nameEditOverlay .plansv2-customize-stack,
-#bodyDataSheet .plansv2-customize-stack,
 #editKcalSheet .plansv2-customize-stack,
 #authSheet .plansv2-customize-stack{min-height:52%;}
-#nameEditOverlay .plansv2-customize-card,
-#bodyDataSheet .plansv2-customize-card,
 #editKcalSheet .plansv2-customize-card,
 #authSheet .plansv2-customize-card{gap:26px;padding:16px 20px 6px;}
-#nameEditOverlay .plansv2-customize-section,
-#bodyDataSheet .plansv2-customize-section,
 #editKcalSheet .plansv2-customize-section,
 #authSheet .plansv2-customize-section{gap:12px;}
-#nameEditOverlay .plansv2-customize-actions,
-#bodyDataSheet .plansv2-customize-actions,
 #editKcalSheet .plansv2-customize-actions,
 #authSheet .plansv2-customize-actions{margin-top:auto;}
 /* ---- cloud account (Supabase) — Faza 2 / E0 ---- */
@@ -1020,6 +1013,122 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .mk-key svg{width:24px;height:24px;display:block;}
 .mk-key:disabled{visibility:hidden;}
 @media (max-height:700px){ .mk-key{height:44px;} }
+
+/* ---- Dane ciała (#bodyDataSheet, Figma 06): dwa pola z fokusem, trzy pastylki płci, klawiatura mkPad bez przecinka ---- */
+.bd-fields{position:relative;display:flex;flex-direction:column;gap:8px;}
+.bd-field{border-width:1px;padding:0;font:inherit;text-align:left;cursor:pointer;transition:border-color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.bd-field:active{transform:scale(.99);transition-duration:var(--m-dur-press-in);}
+.bd-field.is-on{border-color:var(--m-orange);}
+.bd-field.is-err{border-color:var(--m-danger);}
+.bd-field.is-err .m2-row-v{color:var(--m-danger);}
+.bd-val-empty{color:var(--m-muted-text);}
+.bd-err{position:absolute;left:2px;right:2px;top:calc(100% + 3px);display:flex;align-items:center;gap:6px;font-size:var(--m-fs-xs);line-height:1.2;color:var(--m-danger);pointer-events:none;}
+.bd-err svg{width:14px;height:14px;flex:none;display:block;}
+.bd-sex{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:26px;}
+.bd-sx{position:relative;box-sizing:border-box;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);background:var(--m-white);color:var(--m-ink);font:inherit;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-quick) ease,color var(--m-dur-quick) ease;}
+.bd-sx:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
+.bd-sx[aria-checked="true"]{background:var(--m-orange);color:var(--m-white);}
+.bd-sx svg{width:41px;height:41px;display:block;}
+#bodyDataSheet .ws-pad{margin-top:20px;}
+@media (max-height:620px){   /* iPhone SE (568 pt): zagęszczenie, żeby klawiatura 44 pt i ZAPISZ mieściły się bez przewijania */
+  #bodyDataSheet .plansv2-customize-stack{padding-bottom:20px;}
+  #bodyDataSheet .m2-sub{margin-top:2px;font-size:var(--m-fs-2xs);line-height:1.35;}
+  #bodyDataSheet .m2-btn{height:50px;}
+  #bodyDataSheet .m2-actions{padding-top:10px;}
+  .bd-fields{gap:6px;}
+  .bd-field .m2-row{min-height:42px;}
+  .bd-sex{margin-top:18px;}
+  .bd-sx{min-height:48px;gap:2px;padding:4px;}
+  #bodyDataSheet .m2-head{padding-top:0;}
+  #bodyDataSheet .m2-body{margin-top:4px;}
+  .bd-sx svg{width:22px;height:22px;}
+  #bodyDataSheet .ws-pad{margin-top:6px;}
+}
+
+/* ---- Imię i zdjęcie (#nameEditOverlay, Figma 07) ---- */
+.nm-photo{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:6px;}
+.nm-av{position:relative;width:168px;height:168px;flex:none;border-radius:50%;overflow:hidden;box-sizing:border-box;border:2px solid var(--m-orange-tint);background:var(--m-orange);color:var(--m-white);display:flex;align-items:center;justify-content:center;}
+.nm-av .acct-photo{width:100%;height:100%;}
+.nm-av .ph{display:block;width:100%;height:100%;}
+.nm-av .ph svg{display:block;width:100%;height:100%;}
+.nm-btns{display:flex;justify-content:center;gap:20px;}
+.nm-ico{position:relative;flex:none;box-sizing:border-box;width:55px;height:55px;padding:0;border-radius:50%;border:.9px solid var(--m-orange);background:var(--m-orange);color:var(--m-white);display:flex;align-items:center;justify-content:center;cursor:pointer;font:inherit;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.nm-ico:active{transform:scale(.94);transition-duration:var(--m-dur-press-in);}
+.nm-ico svg{width:24px;height:24px;display:block;}
+.nm-ico--ghost{background:var(--m-white);color:var(--m-ink);}
+.nm-ico[hidden]{display:none;}
+.nm-ico input{display:none;}
+.nm-name{display:flex;flex-direction:column;align-items:center;margin-top:20px;}
+.nm-name label{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-ink);padding:10px 0 2px;}
+.nm-name input{width:100%;box-sizing:border-box;margin:0;padding:0 0 4px;border:0;border-bottom:1px solid var(--m-orange-tint);border-radius:0;background:none;text-align:center;font-family:inherit;font-size:48px;font-weight:200;line-height:1.15;letter-spacing:-.02em;color:var(--m-orange);outline:0;transition:border-color var(--m-dur-quick) ease;}
+.nm-name input:focus{border-bottom-color:var(--m-orange);}
+.nm-name input::placeholder{color:var(--m-muted-text);opacity:.6;}
+@media (max-height:620px){
+  .nm-av{width:96px;height:96px;}
+  .nm-photo{gap:8px;margin-top:0;}
+  .nm-ico{width:44px;height:44px;}
+  .nm-name{margin-top:6px;}
+  .nm-name input{font-size:36px;}
+}
+
+/* ---- Szczegół odznaki (#badgeDetailSheet, Figma 08 zdobyta / 09 niezdobyta): srebrny gradient, medalion 170 px ---- */
+#badgeDetailSheet .plansv2-customize-stack{background:var(--m-badge-sheen);}
+.bg-hero{display:flex;flex-direction:column;align-items:center;gap:20px;margin-top:20px;}
+.bg-medal{position:relative;width:170px;height:170px;flex:none;}
+.bg-medal img,.bg-medal svg{position:absolute;left:0;top:0;width:170px;height:170px;display:block;}
+.bg-medal--off img{filter:grayscale(1) brightness(1.25) contrast(.85) opacity(.75);}
+.bg-pill{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:30px;padding:0 18px;border-radius:99px;background:var(--m-mint-tint);color:var(--m-mint-ink);font-size:var(--m-fs-xs);font-weight:400;letter-spacing:.04em;white-space:nowrap;}
+.bg-how{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:20px;text-align:center;color:var(--m-navy-ink);}
+.bg-how-l{font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;text-transform:uppercase;}
+.bg-how-t{font-size:var(--m-fs-md);font-weight:500;line-height:1.25;max-width:280px;}
+.bg-prog{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;margin-top:20px;}
+.bg-prog-t{font-size:var(--m-fs-2xs);color:var(--m-ink);}
+.bg-bar{position:relative;width:100%;height:6px;border-radius:3px;background:var(--m-line);overflow:hidden;}
+.bg-bar i{position:absolute;left:0;top:0;width:100%;height:100%;background:var(--m-orange);border-radius:3px;transform-origin:left center;transform:scaleX(var(--r,0));}
+@media (max-height:620px){
+  .bg-medal,.bg-medal img,.bg-medal svg{width:120px;height:120px;}
+  .bg-hero{gap:12px;margin-top:8px;}
+  .bg-how,.bg-prog{margin-top:10px;}
+}
+.pf-bdg-btn{flex:none;padding:0;margin:0;border:0;background:none;font:inherit;cursor:pointer;display:block;border-radius:50%;}
+button.pf-bcard{font:inherit;color:inherit;cursor:pointer;width:100%;}
+.pf-bcard-n,.pf-bcard-d{display:block;}
+
+/* ---- Szczegół rekordu (#recordDetailSheet, Figma 10): sam ciężar, przyrost, karta z datą / prognozą maxa / objętością ---- */
+#recordDetailSheet .m2-title{overflow-wrap:anywhere;}
+.rd-val{display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:6px;color:var(--m-ink);}
+.rd-num{font-size:80px;font-weight:200;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.rd-num--sm{font-size:56px;}
+.rd-unit{font-size:28px;font-weight:400;line-height:1;opacity:.77;}
+.rd-delta{margin:10px 0 0;text-align:center;font-size:var(--m-fs-base);line-height:1.3;color:var(--m-ink);}
+.rd-card{margin-top:34px;}
+.rd-card .m2-row{min-height:50px;}
+.rd-card .m2-row-v{font-weight:500;}
+.rd-chip{display:inline-flex;align-items:center;box-sizing:border-box;height:30px;padding:0 14px;border-radius:99px;background:var(--m-mint-tint);color:var(--m-mint-ink);font-size:var(--m-fs-base);font-weight:400;}
+#recordDetailSheet .m2-actions{padding-top:24px;}
+@media (max-height:620px){
+  .rd-num{font-size:52px;}
+  .rd-num--sm{font-size:40px;}
+  .rd-unit{font-size:22px;}
+  .rd-card{margin-top:14px;}
+  .rd-card .m2-row{min-height:44px;}
+  #recordDetailSheet .m2-actions{padding-top:12px;}
+}
+
+/* ---- Dialog „Usuń konto” (mConfirm z wariantem gym: styl okna GYM, 323 px; inne mConfirm bez zmian) ---- */
+#mConfirmOverlay.mc-gym .onboard-box{max-width:323px;padding:30px;border-radius:var(--m-r-sm);box-shadow:0 13px 66px rgba(0,0,0,.18);display:flex;flex-direction:column;align-items:center;gap:41px;text-align:center;}
+#mConfirmOverlay.mc-gym .onboard-box h3{margin:0;font-size:var(--m-fs-lg);font-weight:400;letter-spacing:.04em;text-transform:uppercase;color:var(--m-ink);}
+#mConfirmOverlay.mc-gym .onboard-box p{margin:12px auto 0;max-width:260px;font-size:var(--m-fs-xs);line-height:1.3;color:var(--m-muted-text);}
+#mConfirmOverlay.mc-gym .onboard-actions{align-self:stretch;flex-direction:column-reverse;gap:14px;}
+#mConfirmOverlay.mc-gym .onboard-actions button{flex:none;height:55px;padding:12px 30px;border-radius:74px;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;transition:transform var(--m-dur-press-out) var(--m-ease);}
+#mConfirmOverlay.mc-gym .onboard-actions button:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
+#mConfirmOverlay.mc-gym .onboard-actions .skip{background:transparent;color:var(--m-ink);border:1px solid var(--m-orange);}
+#mConfirmOverlay.mc-gym .onboard-actions .save{background:var(--m-orange);color:var(--m-white);border:1px solid transparent;}
+#mConfirmOverlay.mc-gym .onboard-actions .save.danger{background:var(--m-danger);}
+@media (prefers-reduced-motion: no-preference){
+  #mConfirmOverlay.mc-gym:not(.hidden){animation:mSheetBackdropIn var(--m-dur-fade) ease-out;}
+  #mConfirmOverlay.mc-gym:not(.hidden) .onboard-box{animation:gyConfirmIn var(--m-dur-in) var(--m-ease) backwards;}
+}
 
 .rotate-lock-overlay{display:none;position:fixed;inset:0;z-index:99999;background:var(--bg);color:var(--light);
   flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:0 40px;}
@@ -2646,7 +2755,7 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
-.m2-btn:active,.m2-x:active,.mk-key:active,.wl-row:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
+.m2-btn:active,.m2-x:active,.mk-key:active,.bd-field:active,.bd-sx:active,.nm-ico:active,#mConfirmOverlay.mc-gym .onboard-actions button:active,.wl-row:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
 /* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
 #view-gym-v2 .gymv2-tile.gymv2-search-tile, #view-gym-v2 .gymv2-tile.gymv2-add-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:13px;padding:4.5px 0 0;box-sizing:border-box;background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);}
 #view-gym-v2 .gymv2-tile.gymv2-search-tile{border:.5px solid #f1d7cb;}
@@ -3705,39 +3814,33 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
      sheet (grabber + drag-to-close), same shell as "Dodaj ćwiczenie" /
      "Opinia". Separate from #onboardOverlay so the rename doesn't
      re-trigger first-run steps. -->
-<div class="onboard-overlay hidden plansv2-customize-overlay" id="nameEditOverlay" onclick="if(event.target===this) closeNameEdit()">
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="nameEditOverlay" onclick="if(event.target===this) closeNameEdit()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
-      <div class="fbv2-header">
-        <div class="fbv2-title-row">
-          <h1>PROFIL</h1>
-          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeNameEdit()"></span>
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="nmTitle">IMIĘ I ZDJĘCIE</h1>
+          <button type="button" class="m2-x" id="nmClose" aria-label="Zamknij" onclick="closeNameEdit()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
-        <p class="fbv2-subtitle">Imię podpisuje kopie zapasowe i wita Cię na pulpicie.<br>Wszystko zostaje na tym urządzeniu.</p>
+        <p class="m2-sub" id="nmSub">Tak widzisz siebie w aplikacji.</p>
       </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Zdjęcie</p>
-        <div class="acct-photo-row">
-          <span class="acct-photo-preview" id="acctPhotoPreview"><span class="ph" data-ph="account"></span></span>
-          <div class="acct-photo-btns">
-            <label class="acct-photo-pick">Wgraj zdjęcie<input type="file" accept="image/*" id="acctPhotoInput" hidden onchange="setAvatarFromFile(this.files[0]); this.value='';"></label>
-            <button type="button" class="acct-photo-clear" id="acctPhotoClearBtn" hidden onclick="clearAvatar()">Usuń zdjęcie</button>
+      <div class="m2-body" id="nmBody">
+        <div class="nm-photo">
+          <span class="nm-av acct-photo-preview" id="acctPhotoPreview"><span class="ph" data-ph="account"></span></span>
+          <div class="nm-btns">
+            <label class="nm-ico m-press" id="nmPick" role="button" aria-label="Zmień zdjęcie" title="Zmień zdjęcie"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1Zm9-13 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><input type="file" accept="image/*" id="acctPhotoInput" onchange="setAvatarFromFile(this.files[0]); this.value='';"></label>
+            <button type="button" class="nm-ico nm-ico--ghost m-press" id="acctPhotoClearBtn" hidden aria-label="Usuń zdjęcie" title="Usuń zdjęcie" onclick="clearAvatar()"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 12.5h9.4L17.5 7M10 11v5.5M14 11v5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           </div>
         </div>
-      </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Jak Cię nazywać?</p>
-        <div class="acct-num-row name">
-          <div class="exv2-field">
-            <input type="text" id="nameEditInput" placeholder="np. Maciek" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false">
-          </div>
+        <div class="nm-name">
+          <label for="nameEditInput" id="nmLbl">IMIĘ</label>
+          <input type="text" id="nameEditInput" placeholder="np. Maciek" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" onkeydown="nmKey(event)">
         </div>
       </div>
-      <div class="plansv2-customize-actions">
-        <button type="button" class="plansv2-customize-cancel" onclick="closeNameEdit()">ANULUJ</button>
-        <button type="button" class="plansv2-customize-apply" onclick="saveNameEdit()">ZAPISZ</button>
-      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="nmSave" onclick="saveNameEdit()">ZAPISZ</button>
     </div>
   </div>
 </div>
@@ -3798,41 +3901,33 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<div class="onboard-overlay hidden plansv2-customize-overlay" id="bodyDataSheet" onclick="if(event.target===this) closeBodyDataSheet()">
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="bodyDataSheet" onclick="if(event.target===this) closeBodyDataSheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
-      <div class="fbv2-header">
-        <div class="fbv2-title-row">
-          <h1>DANE DO KALORII</h1>
-          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeBodyDataSheet()"></span>
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="bdTitle">DANE CIAŁA</h1>
+          <button type="button" class="m2-x" id="bdClose" aria-label="Zamknij" onclick="closeBodyDataSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
-        <p class="fbv2-subtitle">Używamy ich tylko do szacowania kalorii.<br>Sama masa ciała wystarczy, żeby zacząć liczyć.</p>
+        <p class="m2-sub" id="bdSub">Dane służą tylko do szacowania kalorii. Dane zostają na tym telefonie; przy koncie synchronizują się z chmurą.</p>
       </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Wzrost i wiek</p>
-        <div class="acct-num-row">
-          <div class="exv2-field">
-            <label>Wzrost (cm)</label>
-            <input type="number" inputmode="numeric" step="1" min="120" max="230" id="heightInput" placeholder="181">
-          </div>
-          <div class="exv2-field">
-            <label>Wiek</label>
-            <input type="number" inputmode="numeric" step="1" min="12" max="100" id="ageInput" placeholder="29">
-          </div>
+      <div class="m2-body" id="bdBody">
+        <div class="bd-fields">
+          <button type="button" class="m2-field bd-field" id="bdHeightF" onclick="bdFocus('h')"><span class="m2-row"><span class="m2-row-l" id="bdHeightL">WZROST</span><span class="m2-row-v" id="bdHeightV"></span></span></button>
+          <button type="button" class="m2-field bd-field" id="bdAgeF" onclick="bdFocus('a')"><span class="m2-row"><span class="m2-row-l" id="bdAgeL">WIEK</span><span class="m2-row-v" id="bdAgeV"></span></span></button>
+          <div class="bd-err" id="bdErr" aria-live="polite" hidden></div>
         </div>
-      </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Płeć</p>
-        <div class="plansv2-choice-row" id="sexSeg">
-          <button type="button" class="plansv2-choice-chip" data-sex="f" onclick="pickSex('f')">Kobieta</button>
-          <button type="button" class="plansv2-choice-chip" data-sex="m" onclick="pickSex('m')">Mężczyzna</button>
+        <div class="bd-sex" id="sexSeg" role="radiogroup" aria-label="Płeć">
+          <button type="button" class="bd-sx" role="radio" aria-checked="false" data-sex="f" onclick="pickSex('f')"><svg viewBox="0 0 35 35" fill="none" aria-hidden="true"><circle cx="17.5" cy="12.5" r="8.5" stroke="currentColor" stroke-width="1.5"/><path d="M17.5 21v11M12 27h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span id="bdSexF">KOBIETA</span></button>
+          <button type="button" class="bd-sx" role="radio" aria-checked="false" data-sex="m" onclick="pickSex('m')"><svg viewBox="0 0 35 35" fill="none" aria-hidden="true"><circle cx="14" cy="21" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M20.5 14.5 30 5M23 5h7v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="bdSexM">MĘŻCZYZNA</span></button>
+          <button type="button" class="bd-sx" role="radio" aria-checked="false" data-sex="skip" onclick="pickSex('skip')"><svg viewBox="0 0 35 35" fill="none" aria-hidden="true"><path d="M3 17.5S9 8 17.5 8 32 17.5 32 17.5 26 27 17.5 27 3 17.5 3 17.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="17.5" cy="17.5" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M6 30 29 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span id="bdSexS">POMIŃ</span></button>
         </div>
+        <div class="ws-pad" id="bdPad"></div>
       </div>
-      <div class="plansv2-customize-actions">
-        <button type="button" class="plansv2-customize-cancel" onclick="closeBodyDataSheet()">ANULUJ</button>
-        <button type="button" class="plansv2-customize-apply" onclick="saveBodyDataSheet()">ZAPISZ</button>
-      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="bdSave" onclick="saveBodyDataSheet()">ZAPISZ</button>
     </div>
   </div>
 </div>
@@ -4073,6 +4168,45 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <button type="button" class="pf-rm-seg" id="pfRecTabExercises" aria-pressed="false" onclick="pfRecSetTab('exercises')" data-i18n="pfRecExercises">Ćwiczenia</button>
       </div>
       <div class="pf-rm-body" id="pfRecBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Szczegół odznaki (Figma 08 / 09): wejście z kafla w arkuszu Odznaki i z ikon w sekcji Odznaki; tylko odczyt, bez zapisu stanu -->
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="badgeDetailSheet" onclick="if(event.target===this) closeBadgeDetail()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="bgTitle"></h1>
+          <button type="button" class="m2-x" id="bgClose" aria-label="Zamknij" onclick="closeBadgeDetail()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+      <div class="m2-body" id="bgBody"></div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="bgBtn" onclick="closeBadgeDetail()">ZAMKNIJ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Szczegół rekordu (Figma 10): wejście z wiersza rekordu w arkuszu Rekordy i w sekcji Rekordy Profilu; tylko odczyt -->
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="recordDetailSheet" onclick="if(event.target===this) closeRecordDetail()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="rdTitle"></h1>
+          <button type="button" class="m2-x" id="rdClose" aria-label="Zamknij" onclick="closeRecordDetail()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+      <div class="m2-body" id="rdBody"></div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="rdChart" onclick="recordDetailGo('chart')">ZOBACZ WYKRES</button>
+      <button type="button" class="m2-btn m2-btn--ghost" id="rdWorkout" onclick="recordDetailGo('workout')">ZOBACZ TRENING</button>
     </div>
   </div>
 </div>
@@ -4512,6 +4646,13 @@ document.title = 'Mekkio — Every rep counts. Literally.';
 document.documentElement.lang = LANG;
 const T_EN = {
   toastUndo: 'UNDO', mkDelete: 'Delete digit',
+  bdTitle: 'BODY DATA', bdSub: 'This data is only used to estimate calories. It stays on this phone; with an account it syncs to the cloud.', bdFemale: 'FEMALE', bdMale: 'MALE', bdSkip: 'SKIP',
+  bdRangeH: 'Enter a height from 120 to 230 cm.', bdRangeA: 'Enter an age from 12 to 100.', bdSave: 'SAVE', bdSaved: 'Data saved',
+  nmTitle: 'NAME AND PHOTO', nmSub: 'This is how you see yourself in the app.', nmName: 'NAME', nmPlaceholder: 'e.g. Alex', nmSave: 'SAVE', nmChange: 'Change photo', nmRemove: 'Remove photo',
+  bgHow: 'HOW TO EARN IT', bgEarned: d => `Earned ${d}`, bgClose: 'CLOSE', bgProgress: 'Progress',
+  rdVsPrev: 'compared with the previous one', rdFirst: 'First saved result', rdSet: 'RECORD SET', rdCurrent: 'CURRENT RECORD', rdProj: 'PROJECTED MAX', rdVol: 'BIGGEST VOLUME',
+  rdChart: 'SEE CHART', rdWorkout: 'SEE WORKOUT',
+  delTitle: 'Delete account?', delText: 'This cannot be undone. You will lose the history and plans stored in the cloud, on every device.', delOk: 'Delete', delCancel: 'Cancel',
   wsTitle: 'BODY WEIGHT', wsSub: 'Weigh yourself at the same time of day, ideally in the morning on an empty stomach.', wsDate: 'DATE', wsToday: 'Today', wsYesterday: 'Yesterday',
   wsPrev: x => `Previous ${x}`, wsSame: 'no change', wsFirst: 'This is your first measurement', wsRange: (a, b) => `Enter a weight from ${a} to ${b} kg.`,
   wsSave: 'SAVE', wsSaved: 'Weight saved', wsDeleted: 'Measurement deleted', wsDelete: 'DELETE MEASUREMENT', wsClose: 'Close', wsCloseBtn: 'CLOSE', wsDateAria: 'Measurement date',
@@ -5967,7 +6108,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet'];
+const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -6028,11 +6169,21 @@ function renderAccountPanel(){
 }
 function openAccountPanel(){ openProfileV2(); }   // kontrakt nazwy: każde wejście „w konto” trafia teraz w Profil
 function openNameEdit(){
-  document.getElementById('nameEditInput').value = profileName || '';
+  const $ = id => document.getElementById(id);
+  $('nameEditInput').value = profileName || '';
+  $('nmTitle').textContent = t('nmTitle', 'IMIĘ I ZDJĘCIE');
+  $('nmSub').textContent = t('nmSub', 'Tak widzisz siebie w aplikacji.');
+  $('nmLbl').textContent = t('nmName', 'IMIĘ');
+  $('nameEditInput').placeholder = t('nmPlaceholder', 'np. Maciek');
+  $('nmSave').textContent = t('nmSave', 'ZAPISZ');
+  $('nmClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('nmPick').setAttribute('aria-label', t('nmChange', 'Zmień zdjęcie')); $('nmPick').title = t('nmChange', 'Zmień zdjęcie');
+  $('acctPhotoClearBtn').setAttribute('aria-label', t('nmRemove', 'Usuń zdjęcie')); $('acctPhotoClearBtn').title = t('nmRemove', 'Usuń zdjęcie');
   applyAvatarEverywhere();   // syncs the sheet's photo preview + clear button
   acctSheetOpen('nameEditOverlay');
-  setTimeout(()=>{ try{ document.getElementById('nameEditInput').focus(); }catch(e){} }, 40);
+  if(!profileName) setTimeout(()=>{ try{ $('nameEditInput').focus(); }catch(e){} }, 40);   // bez imienia: od razu do pisania; z imieniem klawiatura nie zasłania zdjęcia
 }
+function nmKey(e){ if(e.key === 'Enter'){ e.preventDefault(); saveNameEdit(); } }
 function closeNameEdit(viaDrag){ acctSheetClose('nameEditOverlay', viaDrag); }
 function saveNameEdit(){
   const val = cleanName(document.getElementById('nameEditInput').value).trim();
@@ -6299,31 +6450,89 @@ function openWeightListSheet(){
 }
 function closeWeightListSheet(viaDrag){ acctSheetClose('weightListSheet', viaDrag); }
 
-/* ---------- body-data sheet (height / age / sex) ---------- */
-let _pickSex = null;
+/* ---------- body-data sheet (nowy szkielet .m-sheet2, Figma popupy-v2 06) ----------
+   Wzrost i wiek wpisywane klawiaturą Mekkio (mkPad, liczby całkowite, bez przecinka), płeć: kobieta / mężczyzna / pomiń
+   (pomiń = brak płci). Pola są opcjonalne: puste zapisują się jako brak; wpisane muszą mieścić się w zakresie
+   (wzrost 120–230 cm, wiek 12–100), inaczej ZAPISZ jest nieaktywny. Kontrakt: openBodyDataSheet(), closeBodyDataSheet(viaDrag),
+   saveBodyDataSheet(), pickSex(); po zapisie renderAccountPanel() i refreshExerciseIcons(). Dane idą do chmury razem z profilem (body_data). */
+const BD_RULES = { h: { min: 120, max: 230 }, a: { min: 12, max: 100 } };
+const BD_ICO_ERR = '<svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 3.8v3.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="10.2" r=".8" fill="currentColor"/></svg>';
+let _pickSex = null;   // 'f' | 'm' | 'skip' | null
+let _bd = null;        // { f:'h'|'a', v:{h,a} (teksty cyfr), pad }
 function pickSex(s){
   _pickSex = s;
-  document.querySelectorAll('#sexSeg .plansv2-choice-chip').forEach(b=> b.classList.toggle('active', b.dataset.sex === s));
+  document.querySelectorAll('#sexSeg .bd-sx').forEach(b=> b.setAttribute('aria-checked', b.dataset.sex === s ? 'true' : 'false'));
+}
+function bdAgeUnit(n){ return LANG === 'en' ? t('pfYears', 'yrs') : plLatWord(n); }
+// 'empty' | 'ok' | 'err' (poza zakresem i nie da się już dopisać) | 'wip' (za mało cyfr, jeszcze w trakcie wpisywania)
+function bdFieldState(k){
+  const raw = _bd.v[k];
+  if(raw === '') return 'empty';
+  const v = parseInt(raw, 10), r = BD_RULES[k];
+  if(v >= r.min && v <= r.max) return 'ok';
+  if(v > r.max) return 'err';
+  return raw.length >= String(r.min).length ? 'err' : 'wip';
+}
+function bdCanSave(){ return ['h', 'a'].every(k=>{ const st = bdFieldState(k); return st === 'empty' || st === 'ok'; }); }
+function bdPaint(){
+  if(!_bd) return;
+  const $ = id => document.getElementById(id);
+  const fields = { h: ['bdHeightF', 'bdHeightV'], a: ['bdAgeF', 'bdAgeV'] };
+  let msg = '';
+  ['h', 'a'].forEach(k=>{
+    const st = bdFieldState(k), raw = _bd.v[k], act = _bd.f === k;
+    const bad = st === 'err' || (st === 'wip' && !act);
+    $(fields[k][0]).classList.toggle('is-on', act && !bad);
+    $(fields[k][0]).classList.toggle('is-err', bad);
+    const ve = $(fields[k][1]);
+    ve.classList.toggle('bd-val-empty', raw === '');
+    ve.textContent = raw === '' ? '—' : (k === 'h' ? `${raw} cm` : `${raw} ${bdAgeUnit(+raw)}`);
+    if(bad && !msg) msg = k === 'h' ? t('bdRangeH', 'Wpisz wzrost od 120 do 230 cm.') : t('bdRangeA', 'Wpisz wiek od 12 do 100 lat.');
+  });
+  const er = $('bdErr');
+  er.hidden = !msg;
+  er.innerHTML = msg ? `${BD_ICO_ERR}<span>${escHtml(msg)}</span>` : '';
+  $('bdSave').disabled = !bdCanSave();
+}
+function bdFocus(k){
+  if(!_bd) return;
+  _bd.f = k;
+  _bd.pad.set(_bd.v[k], { fresh: _bd.v[k] !== '' });   // pierwszy klawisz zastępuje wartość; emit odświeża pola
 }
 function openBodyDataSheet(){
-  document.getElementById('heightInput').value = bodyData.heightCm || '';
-  document.getElementById('ageInput').value = bodyData.age || '';
-  pickSex(bodyData.sex || null);
+  const $ = id => document.getElementById(id);
+  $('bdTitle').textContent = t('bdTitle', 'DANE CIAŁA');
+  $('bdSub').textContent = t('bdSub', 'Dane służą tylko do szacowania kalorii. Dane zostają na tym telefonie; przy koncie synchronizują się z chmurą.');
+  $('bdHeightL').textContent = t('pfHeight', 'WZROST');
+  $('bdAgeL').textContent = t('pfAge', 'WIEK');
+  $('bdSexF').textContent = t('bdFemale', 'KOBIETA');
+  $('bdSexM').textContent = t('bdMale', 'MĘŻCZYZNA');
+  $('bdSexS').textContent = t('bdSkip', 'POMIŃ');
+  $('sexSeg').setAttribute('aria-label', t('pfSex', 'PŁEĆ'));
+  $('bdClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('bdSave').textContent = t('bdSave', 'ZAPISZ');
+  _bd = { f: 'h', v: { h: bodyData.heightCm ? String(bodyData.heightCm) : '', a: bodyData.age ? String(bodyData.age) : '' }, pad: null };
+  // zapisane dane bez płci = „pomiń” (świadomy wybór); zupełnie puste dane = nic nie zaznaczone
+  pickSex(bodyData.sex === 'f' || bodyData.sex === 'm' ? bodyData.sex : (bodyData.heightCm || bodyData.age) ? 'skip' : null);
+  _bd.pad = mkPad($('bdPad'), { maxDigits: 3, decimals: 0, value: _bd.v.h, onChange: st=>{ if(_bd){ _bd.v[_bd.f] = st.raw; bdPaint(); } } });
+  bdPaint();
   acctSheetOpen('bodyDataSheet');
 }
-function closeBodyDataSheet(viaDrag){ acctSheetClose('bodyDataSheet', viaDrag); }
+function closeBodyDataSheet(viaDrag){ _bd = null; acctSheetClose('bodyDataSheet', viaDrag); }
 function saveBodyDataSheet(){
-  const h = parseInt(document.getElementById('heightInput').value, 10);
-  const a = parseInt(document.getElementById('ageInput').value, 10);
+  if(!_bd || !bdCanSave()) return;   // przycisk jest wtedy nieaktywny
+  const h = _bd.v.h === '' ? undefined : parseInt(_bd.v.h, 10);
+  const a = _bd.v.a === '' ? undefined : parseInt(_bd.v.a, 10);
   bodyData = {
-    heightCm: (h >= 120 && h <= 230) ? h : undefined,
-    age: (a >= 12 && a <= 100) ? a : undefined,
-    sex: _pickSex || undefined
+    heightCm: h,
+    age: a,
+    sex: (_pickSex === 'f' || _pickSex === 'm') ? _pickSex : undefined
   };
   saveBodyDataLS(bodyData);
   renderAccountPanel();
   closeBodyDataSheet();
   refreshExerciseIcons();   // the female / male icon set follows the sex chosen here
+  toast(t('bdSaved', 'Zapisano dane'));
 }
 
 /* ---------- AI asystent preferences sheet ---------- */
@@ -7221,7 +7430,7 @@ async function clearCachedCloudResponses(){
    prostsze i bezpieczniejsze niż dorenderowywanie każdego widoku z osobna. */
 const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/delete-account';
 
-function mConfirm({ title, text, ok, cancel = 'Anuluj', danger = false }){
+function mConfirm({ title, text, ok, cancel = 'Anuluj', danger = false, gym = false }){
   return new Promise(resolve=>{
     const ov = document.getElementById('mConfirmOverlay');
     const okBtn = document.getElementById('mConfirmOk');
@@ -7231,7 +7440,8 @@ function mConfirm({ title, text, ok, cancel = 'Anuluj', danger = false }){
     okBtn.textContent = ok;
     cancelBtn.textContent = cancel;
     okBtn.classList.toggle('danger', danger);
-    const done = v=>{ ov.classList.add('hidden'); okBtn.onclick = cancelBtn.onclick = null; resolve(v); };
+    ov.classList.toggle('mc-gym', !!gym);   // wariant w stylu okna GYM (323 px); bez flagi dialog wygląda jak dawniej
+    const done = v=>{ ov.classList.add('hidden'); ov.classList.remove('mc-gym'); okBtn.onclick = cancelBtn.onclick = null; resolve(v); };
     okBtn.onclick = ()=>done(true);
     cancelBtn.onclick = ()=>done(false);
     ov.classList.remove('hidden');
@@ -7241,9 +7451,9 @@ function mConfirm({ title, text, ok, cancel = 'Anuluj', danger = false }){
 async function deleteAccountV2(){
   if(!cloudSession || !cloudSession.access_token) return;
   if(!await mConfirm({
-    title: 'Usunąć konto?',
-    text: 'Tego nie da się cofnąć. Stracisz historię i plany zapisane w chmurze, na wszystkich urządzeniach.',
-    ok: 'Usuń konto', danger: true
+    title: t('delTitle', 'Usunąć konto?'),
+    text: t('delText', 'Tego nie da się cofnąć. Stracisz historię i plany zapisane w chmurze, na wszystkich urządzeniach.'),
+    ok: t('delOk', 'Usuń'), cancel: t('delCancel', 'Anuluj'), danger: true, gym: true
   })) return;
   try {
     const res = await fetch(DELETE_ACCOUNT_URL, {
@@ -8831,7 +9041,7 @@ function pfFmtFullDate(iso){ const [y, m, d] = iso.split('-'); return `${+d} ${P
 function profileBadgesHtml(m, riseCls){
   const b = m.badges, E = escHtml;
   const picks = pfBadgePicks(b);
-  const icons = picks.map(pfBadgeIcon).join('');
+  const icons = picks.map(x=> `<button type="button" class="pf-bdg-btn m-press" onclick="openBadgeDetail('${x.id}')" aria-label="${E(x.name)}">${pfBadgeIcon(x)}</button>`).join('');
   const lines = [];
   if(b.latest) lines.push(`<div class="pf-bdg-line"><span class="pf-row-n">${E(b.latest.name)}</span><span class="pf-bdg-r">${E(fmtDayMonShort(b.latest.earnedOn))}</span></div>`);
   if(b.next){
@@ -8854,11 +9064,109 @@ function openProfileBadgesSheet(){
     const foot = x.earned
       ? `<span class="pf-pill">${escHtml(pfFmtFullDate(x.earnedOn))}</span>`
       : `${prog ? `<span class="pf-bcard-t">${escHtml(prog)}</span>` : ''}<span class="pf-bar" aria-hidden="true"><i style="--r:${x.ratio.toFixed(3)}"></i></span>`;
-    return `<div class="pf-bcard${x.earned ? '' : ' pf-bcard--off'}">${pfBadgeIcon(x)}<p class="pf-bcard-n">${escHtml(x.name)}</p><p class="pf-bcard-d">${escHtml(x.text)}</p><div class="pf-bcard-f">${foot}</div></div>`;
+    return `<button type="button" class="pf-bcard m-press${x.earned ? '' : ' pf-bcard--off'}" onclick="openBadgeDetail('${x.id}')" aria-label="${escHtml(x.name)}">${pfBadgeIcon(x)}<span class="pf-bcard-n">${escHtml(x.name)}</span><span class="pf-bcard-d">${escHtml(x.text)}</span><span class="pf-bcard-f">${foot}</span></button>`;
   }).join('');
   acctSheetOpen('profileBadgesSheet');   // resetPlansCustomizeSheet czyści m-sheet-entered, więc wejście gra przy każdym otwarciu
 }
 function closeProfileBadgesSheet(viaDrag){ acctSheetClose('profileBadgesSheet', viaDrag); }
+/* ---- Profil: okno szczegółu odznaki (Figma 08 zdobyta / 09 niezdobyta). Tylko odczyt, bez zapisu stanu i bez znacznika „nowa”.
+   Dane z wspólnego silnika (badgesModel): nazwa, warunek, data zdobycia; dla niezdobytej jedna wartość postępu (b.ratio) rysuje
+   i pierścień, i pasek, a tekst „x / y” opisuje tę samą liczbę. Medalion: wspólna grafika albo icons/badges/<id>.svg (badgeIconSrc),
+   szara wersja liczona w kodzie (filtr). ---- */
+function bgProgText(b){
+  if(!b.goal || b.goal <= 1) return null;
+  if(b.id === 'ton') return `${formatDashNum(b.value / 1000, 1)} t / ${formatDashNum(b.goal / 1000, 1)} t`;
+  if(b.id === 'bodyweight') return `${fmtKg(b.value)} kg / ${fmtKg(b.goal)} kg`;
+  return `${b.value} / ${b.goal}`;
+}
+function badgeDetailBodyHtml(b){
+  const E = escHtml, prog = bgProgText(b), todo = PF_BADGE_TODO[b.id];
+  let ring = '';
+  if(!b.earned){
+    const C = 2 * Math.PI * 24.4, len = prog ? Math.max(2, C * b.ratio) : 0;
+    ring = `<svg viewBox="0 0 51 51" fill="none" aria-hidden="true"><circle cx="25.5" cy="25.5" r="24.4" stroke="var(--m-line)" stroke-width="2.2"/>${len ? `<circle cx="25.5" cy="25.5" r="24.4" stroke="var(--m-orange)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="${len.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 25.5 25.5)"/>` : ''}</svg>`;
+  }
+  const medal = `<div class="bg-medal${b.earned ? '' : ' bg-medal--off'}"><img src="${badgeIconSrc(b.id)}" width="170" height="170" alt="" decoding="async" onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src=BADGE_FALLBACK_ICON}">${ring}</div>`;
+  const date = b.earned ? pfFmtFullDate(b.earnedOn) : '';
+  const pill = b.earned ? `<span class="bg-pill">${E(t('bgEarned', `Zdobyta ${date}`, date))}</span>` : '';
+  const cond = b.earned ? b.text : (todo ? t(todo[0], todo[1]) : b.text);
+  const how = `<div class="bg-how"><span class="bg-how-l">${E(t('bgHow', 'JAK ZDOBYĆ'))}</span><span class="bg-how-t">${E(cond)}</span></div>`;
+  const pct = Math.round(b.ratio * 100);
+  const bar = (!b.earned && prog) ? `<div class="bg-prog"><span class="bg-prog-t">${E(prog)}</span><span class="bg-bar" role="progressbar" aria-label="${E(t('bgProgress', 'Postęp'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="--r:${b.ratio.toFixed(3)}"></i></span></div>` : '';
+  return `<div class="bg-hero">${medal}${pill}</div>${how}${bar}`;
+}
+function openBadgeDetail(id){
+  let b;
+  try{ b = badgesModel().all.find(x=> x.id === id); }catch(err){ console.error('badge detail failed', err); return; }
+  if(!b) return;
+  document.getElementById('bgTitle').textContent = b.name;
+  document.getElementById('bgBody').innerHTML = badgeDetailBodyHtml(b);
+  document.getElementById('bgClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  document.getElementById('bgBtn').textContent = t('bgClose', 'ZAMKNIJ');
+  acctSheetOpen('badgeDetailSheet');
+}
+function closeBadgeDetail(viaDrag){ acctSheetClose('badgeDetailSheet', viaDrag); }
+
+/* ---- Profil: okno szczegółu rekordu (Figma 10). Tylko odczyt, dane wyłącznie z silnika rekordów (exerciseRecords / projectedMax) na
+   oczyszczonych kopiach historii. Rekord = sam ciężar (bez „× powt.”); masa ciała: powtórzenia; czasowe: czas. Prognoza maxa osobno i zawsze
+   jako prognoza (≈). ZOBACZ WYKRES → Postępy, szczegół ćwiczenia; ZOBACZ TRENING → Historia na dniu rekordu. Okno i arkusz pod nim
+   zamykają się, ekran docelowy otwiera się z Profilu (powrót jak dotąd: profileReturnRoute). ---- */
+let _rd = null;   // { name, date, workoutId }
+function rdValueText(kind, v, perSide){
+  if(kind === 'reps') return `${v} ${t('repsUnit', 'powt.')}`;
+  if(kind === 'time') return fmtDur(v, perSide);
+  return `${fmtGymWeight(v)} kg`;
+}
+function recordDetailHtml(r, ex, pm){
+  const E = escHtml, kind = r.kind === 'reps' || r.kind === 'time' ? r.kind : 'weight';
+  const cur = ex && ex[kind] ? ex[kind] : null;
+  const ev = ex ? ex.events.find(e=> e.kind === kind && e.workoutId === r.workoutId && e.value === r.value) : null;
+  const delta = ev ? ev.delta : (r.delta > 0 ? r.delta : 0);
+  let num, unit = '', numCls = 'rd-num';
+  if(kind === 'weight'){ num = fmtGymWeight(r.value); unit = 'kg'; }
+  else if(kind === 'reps'){ num = String(r.value); unit = t('repsUnit', 'powt.'); }
+  else { num = fmtDur(r.value, r.perSide); numCls += ' rd-num--sm'; }
+  let dTxt = '';
+  if(delta > 0){
+    const d = kind === 'weight' ? `+${fmtGymWeight(delta)} kg` : kind === 'reps' ? `+${delta} ${t('repsUnit', 'powt.')}` : `+${fmtDur(delta)}`;
+    dTxt = `${d} ${t('rdVsPrev', 'względem poprzedniego')}`;
+  } else dTxt = t('rdFirst', 'Pierwszy zapisany wynik');
+  const row = (l, v)=> `<div class="m2-row"><span class="m2-row-l">${E(l)}</span><span class="m2-row-v">${v}</span></div>`;
+  let rows = row(t('rdSet', 'REKORD USTANOWIONY'), E(pfFmtFullDate(r.date)));
+  if(cur && cur.value > r.value) rows += row(t('rdCurrent', 'AKTUALNY REKORD'), E(rdValueText(kind, cur.value, cur.perSide)));
+  if(kind === 'weight' && pm && pm.value > 0) rows += row(t('rdProj', 'PROGNOZA MAXA'), `<span class="rd-chip">≈ ${E(fmtGymWeight(Math.round(pm.value)))} kg</span>`);
+  const vol = ex && ex.volume ? (kind === 'weight' ? ex.volume.kg : kind === 'reps' ? ex.volume.reps : null) : null;
+  if(vol) rows += row(t('rdVol', 'NAJWIĘKSZA OBJĘTOŚĆ'), E(kind === 'weight' ? `${formatDashNum(vol.value, 0)} kg` : `${formatDashNum(vol.value, 0)} ${t('repsUnit', 'powt.')}`));
+  return `<div class="rd-val"><span class="${numCls}">${E(num)}</span>${unit ? `<span class="rd-unit">${E(unit)}</span>` : ''}</div><p class="rd-delta">${E(dTxt)}</p><div class="m2-field rd-card">${rows}</div>`;
+}
+function openRecordDetail(r){
+  if(!r || !r.name) return;
+  let ex = null, pm = null;
+  try{ dashWithCleanData(new Date(), ()=>{ ex = exerciseRecords(r.name); pm = projectedMax(r.name); }); }catch(err){ console.error('record detail failed', err); }
+  _rd = { name: r.name, date: r.date, workoutId: r.workoutId };
+  document.getElementById('rdTitle').textContent = r.name;
+  document.getElementById('rdBody').innerHTML = recordDetailHtml(r, ex, pm);
+  document.getElementById('rdClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  document.getElementById('rdChart').textContent = t('rdChart', 'ZOBACZ WYKRES');
+  document.getElementById('rdWorkout').textContent = t('rdWorkout', 'ZOBACZ TRENING');
+  acctSheetOpen('recordDetailSheet');
+}
+function closeRecordDetail(viaDrag){ _rd = null; acctSheetClose('recordDetailSheet', viaDrag); }
+function recordDetailGo(where){
+  const rd = _rd;
+  if(!rd) return;
+  closeRecordDetail();
+  const rs = document.getElementById('profileRecordsSheet');
+  if(rs && !rs.classList.contains('hidden')) closeProfileRecordsSheet();
+  if(where === 'chart'){
+    selectedStatsExerciseV2 = rd.name;   // jak selectStatsExerciseV2: bez przełączania, z tym samym doborem zakresu
+    let has = false;
+    try{ dashWithCleanData(new Date(), ()=>{ has = statsV2ExerciseDailySeries(rd.name).points.length > 0; }); }catch(e){}
+    statsV2Range = has ? 1 : 6;
+    goRoute('stats-v2');
+  } else dashOpenHistoryDay(rd.date, rd.workoutId);
+}
+
 /* ---- Profil: arkusz Rekordy (tylko odczyt). Rekordy wyłącznie z silnika (recordTimeline / exerciseRecords) na oczyszczonych kopiach historii.
    Miesiące: tylko te z rekordami, od najstarszego do najnowszego (otwiera się na najnowszym). Swipe jak w kalendarzu Historii:
    treść wylatuje, miesiąc podmieniany poza ekranem, nowa wlatuje (WAAPI + setTimeout jako zabezpieczenie dla PWA w tle). ---- */
@@ -8866,7 +9174,7 @@ Object.assign(T_EN, {
   pfRecMonths: 'Months', pfRecExercises: 'Exercises',
   pfRecN: n => `${n} ${n === 1 ? 'record' : 'records'}`, pfRecW: n => `${n} ${n === 1 ? 'workout' : 'workouts'}`,
   pfRecPrev: 'Previous month', pfRecNext: 'Next month',
-  pfRecHintSwipe: 'Swipe sideways to change month.', pfRecHintTap: 'Tap a record to see the workout.',
+  pfRecHintSwipe: 'Swipe sideways to change month.', pfRecHintTap: 'Tap a record to see its details.',
 });
 function profileRecordsModel(now){
   now = now || new Date();
@@ -8958,7 +9266,7 @@ function pfRecMonthsBodyHtml(S){
       <div class="pf-rm-dots" id="pfRecDots" aria-hidden="true">${pfRecDotsHtml(n, S.idx)}</div>
     </div>
     <div class="pf-rm-card" id="pfRecList"><div class="pf-rows">${pfRecRowsHtml(mo.records, true)}</div></div>
-    <p class="pf-rm-hint">${n > 1 ? `<span>${escHtml(t('pfRecHintSwipe', 'Przesuń w bok, żeby zmienić miesiąc.'))}</span>` : ''}<span>${escHtml(t('pfRecHintTap', 'Dotknij rekordu, żeby zobaczyć trening.'))}</span></p>`;
+    <p class="pf-rm-hint">${n > 1 ? `<span>${escHtml(t('pfRecHintSwipe', 'Przesuń w bok, żeby zmienić miesiąc.'))}</span>` : ''}<span>${escHtml(t('pfRecHintTap', 'Dotknij rekordu, żeby zobaczyć szczegóły.'))}</span></p>`;
 }
 function pfRecEmptyHtml(){
   return `<div class="pf-rm-empty"><h3 class="pf-empty-t">${escHtml(t('pfNoRecTitle', 'Tu pojawią się Twoje rekordy.'))}</h3><p class="pf-empty-d">${escHtml(t('pfNoRecText', 'Pierwszy zobaczysz po zapisaniu treningu.'))}</p></div>`;
@@ -8966,7 +9274,7 @@ function pfRecEmptyHtml(){
 function pfRecExercisesBodyHtml(S){
   if(!S.m.exercises.length) return pfRecEmptyHtml();
   return `<div class="pf-rm-card"><div class="pf-rows">${pfRecRowsHtml(S.m.exercises, false)}</div></div>
-    <p class="pf-rm-hint"><span>${escHtml(t('pfRecHintTap', 'Dotknij rekordu, żeby zobaczyć trening.'))}</span></p>`;
+    <p class="pf-rm-hint"><span>${escHtml(t('pfRecHintTap', 'Dotknij rekordu, żeby zobaczyć szczegóły.'))}</span></p>`;
 }
 function pfRecSync(){
   const S = pfRec; if(!S) return;
@@ -9039,8 +9347,7 @@ function pfRecOpen(i){
   if(Date.now() - (S.lastDrag || 0) < 400) return;   // koniec przeciągania nie jest tapnięciem
   const r = S.tab === 'months' ? (S.m.months[S.idx] && S.m.months[S.idx].records[i]) : S.m.exercises[i];
   if(!r) return;
-  closeProfileRecordsSheet();
-  dashOpenHistoryDay(r.date, r.workoutId);   // istniejące wejście: Historia na dniu rekordu, trening rozwinięty
+  openRecordDetail(r);   // okno szczegółu rekordu; stamtąd ZOBACZ WYKRES / ZOBACZ TRENING
 }
 function pfRecWireSwipe(){
   const body = document.getElementById('pfRecBody');
@@ -9110,7 +9417,7 @@ function closeProfileRecordsSheet(viaDrag){
 let profileLastModel = null;
 function profileOpenRecord(i){
   const r = profileLastModel && profileLastModel.records[i];
-  if(r) dashOpenHistoryDay(r.date, r.workoutId);   // istniejące wejście: Historia na dniu rekordu, trening rozwinięty
+  if(r) openRecordDetail(r);   // okno szczegółu rekordu; stamtąd ZOBACZ WYKRES / ZOBACZ TRENING
 }
 function profileHtml(m, animate){
   const rc = i => animate ? ` m-rise-tile" style="--i:${i}` : '';
@@ -10385,8 +10692,11 @@ mSheetDrag('whatsnewOverlay', closeWhatsNew);
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
+['nameEditOverlay','weightListSheet','weightSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
+mSheetDrag('bodyDataSheet', closeBodyDataSheet);     // zamknięcie przeciągnięciem czyści też stan okna (klawiatura, pola)
+mSheetDrag('badgeDetailSheet', closeBadgeDetail);
+mSheetDrag('recordDetailSheet', closeRecordDetail);
 mSheetDrag('profileRecordsSheet', closeProfileRecordsSheet);   // zamknięcie przeciągnięciem kończy też trwający slajd miesięcy
 
 /* ---- "Zamień ćwiczenie" sheet (stage 3, idea #5) — rides .m-sheet ---- */
@@ -13114,6 +13424,7 @@ function exerciseRecords(name, list){
     weight: st.w ? { value: st.w.value, reps: st.w.reps, date: st.w.date, workoutId: st.w.workoutId, history: st.hw } : null,
     reps: st.r ? { value: st.r.value, date: st.r.date, workoutId: st.r.workoutId, history: st.hr } : null,
     time: st.t ? { value: st.t.value, perSide: st.t.perSide, date: st.t.date, workoutId: st.t.workoutId, history: st.ht } : null,
+    volume: { kg: st.v.kg, reps: st.v.reps },   // największa objętość ćwiczenia w jednym treningu: { value, date, workoutId } | null (osobno od rekordów)
     sessions: st.sessions, firstDate: st.firstDate, lastDate: st.lastDate, events: st.events,
   };
 }
