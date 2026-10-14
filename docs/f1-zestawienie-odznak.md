@@ -4,7 +4,7 @@ Stan na 2026-10-13, gałąź worktree `worktree-agent-a513c9fd14c2c551d`. „Prz
 
 ## Co się zmieniło w definicji
 
-- Rekord ćwiczenia: najcięższy faktycznie podniesiony ciężar (seria z ciężarem i co najmniej 1 powtórzeniem), w podpisie z powtórzeniami. Masa ciała: najwięcej powtórzeń w serii. Czasowe: najdłuższy czas. Kardio nigdy.
+- Rekord ćwiczenia: najcięższy faktycznie podniesiony ciężar (seria z ciężarem i co najmniej 1 powtórzeniem), pokazywany sam ciężar, bez serii. Masa ciała: najwięcej powtórzeń w serii. Czasowe: najdłuższy czas. Kardio nigdy.
 - Wzrost samej objętości ćwiczenia (więcej serii albo powtórzeń przy tym samym ciężarze) NIE jest już rekordem ćwiczenia. Rekord objętości jest osobny i dotyczy całego treningu.
 - Seria „ciężar bez powtórzeń” nie liczy się do rekordu.
 - Pierwsze wykonanie ćwiczenia, remis i ten sam ciężar z większą liczbą powtórzeń nie są rekordem (jak dotąd).
@@ -103,7 +103,7 @@ Karta „Rekord” na dashboardzie: przed: Barbell Back Squat, 80 kg (best); po:
 
 ### Historia C: 10 treningów (progres co 2. trening, 4 ćwiczenia) [10 wpisów]
 
-Brak zmian w odznakach. Zmienia się tylko podpis rekordu: „100 kg” → „100 kg × 5” (ciężar z powtórzeniami).
+Brak zmian w odznakach. Podpis rekordu zostaje samym ciężarem („100 kg”), bez serii.
 
 Karta „Rekord” na dashboardzie: przed: Barbell Back Squat, 100 kg | Nowy rekord (workout); po: Barbell Back Squat, 100 kg × 5 | Nowy rekord (workout).
 
@@ -278,7 +278,7 @@ Na tych 11 historiach data Pierwszej Krwi jest identyczna. Różnica pojawiłaby
 
 ## Zmiany poza odznakami, które zobaczy użytkownik
 
-- Podpis rekordu z powtórzeniami: dashboard (karta „Rekord”), ekran Gratulacje i rozwinięta karta w Historii pokazują „100 kg × 5” zamiast samego „100 kg”. Karta udostępniania nadal pokazuje sam ciężar (układ dopasowany do Figmy).
+- Podpis rekordu: dashboard (karta „Rekord”), ekran Gratulacje, rozwinięta karta w Historii i Postępy pokazują sam ciężar („100 kg”), bez serii. Powtórzenia zostają w danych i rozstrzygają remis.
 - Rekord objętości jest teraz rekordem CAŁEGO treningu (suma kg × powt.), nie jednego ćwiczenia; pod liczbą stoi nazwa dnia/planu z zapisu treningu albo „Cały trening”. Trening bez żadnego ciężaru liczy się w powtórzeniach i porównuje się tylko z takimi treningami.
 - Kafel „Rekord” w „Ostatnim treningu” na dashboardzie liczy wszystkie rekordy z tego treningu (dotąd 0 albo 1).
 - Reguła trenera „Nowy rekord w ćwiczeniu X” nie odpala się dla rekordu objętości całego treningu (nie ma ćwiczenia do nazwania).
