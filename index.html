@@ -3699,7 +3699,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <section class="view histv2-root" id="view-history-v2">
     <div class="histv2-panel">
       <div class="histv2-header">
-        <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
+        <button type="button" class="v2-hdr-back" onclick="histV2Back()" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
         <span class="ph" data-ph="calendar-dots"></span>
         <h1 data-i18n="histV2Title">HISTORIA</h1>
         <button type="button" class="histv2-chat-btn histv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
@@ -4652,7 +4652,7 @@ const T_EN = {
   bgHow: 'HOW TO EARN IT', bgEarned: d => `Earned ${d}`, bgClose: 'CLOSE', bgProgress: 'Progress',
   rdVsPrev: 'compared with the previous one', rdFirst: 'First saved result', rdSet: 'RECORD SET', rdCurrent: 'CURRENT RECORD', rdProj: 'PROJECTED MAX', rdVol: 'BIGGEST VOLUME',
   rdChart: 'SEE CHART', rdWorkout: 'SEE WORKOUT',
-  delTitle: 'Delete account?', delText: 'This cannot be undone. You will lose the history and plans stored in the cloud, on every device.', delOk: 'Delete', delCancel: 'Cancel',
+  delTitle: 'Delete account?', delText: 'This cannot be undone. You will lose the history and plans stored in the cloud, and the data on this phone.', delOk: 'Delete', delCancel: 'Cancel',
   wsTitle: 'BODY WEIGHT', wsSub: 'Weigh yourself at the same time of day, ideally in the morning on an empty stomach.', wsDate: 'DATE', wsToday: 'Today', wsYesterday: 'Yesterday',
   wsPrev: x => `Previous ${x}`, wsSame: 'no change', wsFirst: 'This is your first measurement', wsRange: (a, b) => `Enter a weight from ${a} to ${b} kg.`,
   wsSave: 'SAVE', wsSaved: 'Weight saved', wsDeleted: 'Measurement deleted', wsDelete: 'DELETE MEASUREMENT', wsClose: 'Close', wsCloseBtn: 'CLOSE', wsDateAria: 'Measurement date',
@@ -7452,7 +7452,7 @@ async function deleteAccountV2(){
   if(!cloudSession || !cloudSession.access_token) return;
   if(!await mConfirm({
     title: t('delTitle', 'Usunąć konto?'),
-    text: t('delText', 'Tego nie da się cofnąć. Stracisz historię i plany zapisane w chmurze, na wszystkich urządzeniach.'),
+    text: t('delText', 'Tego nie da się cofnąć. Stracisz historię i plany zapisane w chmurze oraz dane na tym telefonie.'),
     ok: t('delOk', 'Usuń'), cancel: t('delCancel', 'Anuluj'), danger: true, gym: true
   })) return;
   try {
@@ -8924,7 +8924,8 @@ let previewMode = true;
 const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2', history: 'history-v2', stats: 'stats-v2' };
 // Profil nie ma własnej ikony w menu (menu jest tam ukryte): alias wskazuje zakładkę ekranu, z którego weszliśmy,
 // żeby wyjście z Profilu nie wyglądało jak zmiana zakładki (bez poślizgu kulki i obrotu ikony).
-let profileReturnRoute = 'dashboard';   // tylko w pamięci, NIE klucz localStorage
+let profileReturnRoute = 'dashboard';
+let profileDetailReturn = null;   // 'stats-v2' | 'history-v2': wejście z okna szczegółu rekordu w Profilu; strzałka wstecz wraca do Profilu (tylko w pamięci)   // tylko w pamięci, NIE klucz localStorage
 const V3_ROUTE_ALIAS = { 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats',
   get 'profile-v2'(){ return V3_ROUTE_ALIAS[profileReturnRoute] || profileReturnRoute; },
   get 'profile-settings-v2'(){ return V3_ROUTE_ALIAS[profileReturnRoute] || profileReturnRoute; } }; // which nav icon a v3 route should light up
@@ -9172,8 +9173,9 @@ function recordDetailGo(where){
     let has = false;
     try{ dashWithCleanData(new Date(), ()=>{ has = statsV2ExerciseDailySeries(rd.name).points.length > 0; }); }catch(e){}
     statsV2Range = has ? 1 : 6;
+    profileDetailReturn = 'stats-v2';
     goRoute('stats-v2');
-  } else dashOpenHistoryDay(rd.date, rd.workoutId);
+  } else { profileDetailReturn = 'history-v2'; dashOpenHistoryDay(rd.date, rd.workoutId); }
 }
 
 /* ---- Profil: arkusz Rekordy (tylko odczyt). Rekordy wyłącznie z silnika (recordTimeline / exerciseRecords) na oczyszczonych kopiach historii.
@@ -9674,6 +9676,7 @@ function positionNavBlob(animate){
 }
 window.addEventListener('resize', ()=> positionNavBlob(false));
 function goRoute(route){
+  if(profileDetailReturn && route !== profileDetailReturn && route !== 'profile-v2') profileDetailReturn = null;   // wyszedłeś inną drogą: strzałka znów działa jak zwykle
   // Tab switches swap instantly, like a native tab bar; the incoming
   // screen's own tile entrance is the only motion. A slide is kept
   // only for drilling into / back out of the plan editor (push/pop).
@@ -18898,8 +18901,13 @@ function closeStatsDetailV2(){
    stats overview; from the overview itself there's nothing above it in
    this section, so it leaves to the Dashboard like the other v2 tabs. */
 function statsV2Back(){
+  if(profileDetailReturn && profileDetailReturn === 'stats-v2'){ profileDetailReturn = null; selectedStatsExerciseV2 = null; goRoute('profile-v2'); return; }
   if(selectedStatsExerciseV2) closeStatsDetailV2();
   else goRoute('dashboard');
+}
+function histV2Back(){
+  if(profileDetailReturn === 'history-v2'){ profileDetailReturn = null; goRoute('profile-v2'); return; }
+  goRoute('dashboard');
 }
 function statsV2MoveBarPage(delta){
   statsV2BarPage = Math.max(0, statsV2BarPage + delta);

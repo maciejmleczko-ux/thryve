@@ -131,7 +131,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **Nowe okna:** szczegół odznaki (`#badgeDetailSheet`, jedna wartość postępu dla pierścienia, paska i tekstu) i szczegół rekordu (`#recordDetailSheet`: sam ciężar, przyrost, Prognoza maxa osobno, największa objętość; „Zobacz wykres” / „Zobacz trening”). Dotknięcie rekordu otwiera teraz okno, a nie od razu trening.
 - **Dialog „Usuń konto”:** wariant `gym:true` wspólnego `mConfirm`, 323 px; przepływ usuwania bez zmian.
 - Silnik rekordów: tylko odczytowe pole `volume` w `exerciseRecords`. Nowy token `--m-badge-sheen`. Bez nowych kluczy localStorage ani kolumn Supabase.
-- Znane: powrót po „Zobacz wykres/trening” schodzi do Dashboardu, nie do Profilu; nazwy odznak w oknie tylko PL.
+- Powrót: strzałka wstecz w Postępach i Historii po „Zobacz wykres/trening” wraca do Profilu (`profileDetailReturn`, tylko w pamięci, czyszczone przy wyjściu inną drogą). Dialog „Usuń konto” mówi też o danych na telefonie. Znane: nazwy odznak w oknie tylko PL.
 
 **Commity (2):**
 
