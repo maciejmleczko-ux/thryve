@@ -780,7 +780,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
    straight from the finish screen too. Only the few genuinely new bits
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
-#nameEditOverlay,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet{z-index:9600;}
+#nameEditOverlay,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
 /* mConfirm() is opened from inside the account panel (z 95) and its sheets
    (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
 #mConfirmOverlay{z-index:9650;}
@@ -790,22 +790,18 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 /* account sub-sheets ride higher and breathe more than the base sheet:
    content hugs the top edge, actions pin to the bottom. */
 #nameEditOverlay .plansv2-customize-stack,
-#weightSheet .plansv2-customize-stack,
 #bodyDataSheet .plansv2-customize-stack,
 #editKcalSheet .plansv2-customize-stack,
 #authSheet .plansv2-customize-stack{min-height:52%;}
 #nameEditOverlay .plansv2-customize-card,
-#weightSheet .plansv2-customize-card,
 #bodyDataSheet .plansv2-customize-card,
 #editKcalSheet .plansv2-customize-card,
 #authSheet .plansv2-customize-card{gap:26px;padding:16px 20px 6px;}
 #nameEditOverlay .plansv2-customize-section,
-#weightSheet .plansv2-customize-section,
 #bodyDataSheet .plansv2-customize-section,
 #editKcalSheet .plansv2-customize-section,
 #authSheet .plansv2-customize-section{gap:12px;}
 #nameEditOverlay .plansv2-customize-actions,
-#weightSheet .plansv2-customize-actions,
 #bodyDataSheet .plansv2-customize-actions,
 #editKcalSheet .plansv2-customize-actions,
 #authSheet .plansv2-customize-actions{margin-top:auto;}
@@ -822,12 +818,6 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .acct-oauth-divider::before,.acct-oauth-divider::after{content:'';flex:1;height:1px;background:#e6e2ec;}
 .acct-oauth-divider span{font-size:var(--m-fs-2xs);color:var(--m-muted);text-transform:uppercase;letter-spacing:.06em;}
 .acct-auth-error.info{color:var(--m-ink);}
-.acct-wlog{border:1px solid #c7c6cb;border-radius:var(--m-r-sm);overflow:hidden;background:var(--m-card);}
-.acct-wlog-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px;font-size:var(--m-fs-sm);color:var(--m-ink);border-top:1px solid rgba(0,0,0,.06);}
-.acct-wlog-row:first-child{border-top:0;}
-.acct-wlog-row .d{color:var(--m-muted);}
-.acct-wlog-row .d b{color:var(--m-ink);font-weight:600;}
-.acct-wlog-empty{padding:11px 14px;font-size:var(--m-fs-2xs);color:var(--m-muted);}
 .acct-revert{align-self:flex-start;background:none;border:0;color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;font-family:inherit;padding:2px 0;cursor:pointer;}
 .acct-revert[hidden]{display:none;}
 /* Przypomnienie o treningu — iOS-style toggle. Ciągle używany element =
@@ -950,7 +940,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
    ============================================================ */
 .m-sheet2 .plansv2-customize-stack,.m-sheet2 .m-sheet{background:var(--m-white);box-shadow:0 13px 66px rgba(0,0,0,.18);padding-bottom:32px;}
 .m-sheet2 .m-sheet-grab{width:53px;height:3.5px;margin:5px auto 0;border-radius:99px;background:var(--m-grab);}
-.m-sheet2 .plansv2-customize-card{gap:0;padding:0 16px;}
+.m-sheet2 .plansv2-customize-card{gap:0;padding:0 16px 12px;}
 .m2-head{display:flex;flex-direction:column;width:100%;padding-top:10px;}
 .m2-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;}
 .m2-title{margin:0;font-size:var(--m-fs-lg);font-weight:400;line-height:1.2;letter-spacing:.05em;text-transform:uppercase;color:var(--m-ink);}
@@ -969,20 +959,62 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .m2-btn--ghost{background:none;border-color:var(--m-orange);color:var(--m-ink);}
 .m2-btn--danger{background:none;border-color:var(--m-danger);color:var(--m-danger);}
 .m2-btn[hidden]{display:none;}
-/* pole „etykieta + wartość" (np. DATA): karta 323, obrys --m-orange-tint (decyzja 4), min. 44 pt */
-.m2-field{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:8px 12px;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);background:var(--m-white);font-family:inherit;color:var(--m-ink);text-align:left;}
-.m2-field + .m2-field{margin-top:-1px;}
-.m2-field-l{font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;text-transform:uppercase;color:var(--m-ink);}
-.m2-field-v{display:flex;align-items:center;gap:8px;font-size:var(--m-fs-base);font-weight:500;line-height:1.1;color:var(--m-ink);}
-.m2-field-v svg{width:11.5px;height:6.5px;flex:none;display:block;}
-.m2-field input[type=date]{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;font-size:var(--m-fs-md);cursor:pointer;-webkit-appearance:none;appearance:none;}
+/* karta pól „etykieta + wartość" (np. DATA, ŹRÓDŁO): 323, obrys --m-orange-tint (decyzja 4), wiersze min. 44 pt */
+.m2-field{display:flex;flex-direction:column;width:100%;box-sizing:border-box;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);background:var(--m-white);color:var(--m-ink);}
+.m2-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;box-sizing:border-box;padding:8px 12px;font-family:inherit;color:var(--m-ink);text-align:left;border-radius:var(--m-r-sm);}
+.m2-row + .m2-row{border-top:.5px solid var(--m-line);border-top-left-radius:0;border-top-right-radius:0;}
+.m2-row-l{font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;text-transform:uppercase;color:var(--m-ink);}
+.m2-row-v{display:flex;align-items:center;gap:8px;font-size:var(--m-fs-base);font-weight:500;line-height:1.1;color:var(--m-ink);text-align:right;}
+.m2-row-v svg{width:11.5px;height:6.5px;flex:none;display:block;}
+.m2-row input[type=date]{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;font-size:var(--m-fs-md);cursor:pointer;-webkit-appearance:none;appearance:none;}
 .m2-field:focus-within{border-color:var(--m-orange);}
+
+/* ---- Okno wagi (#weightSheet) i tymczasowa lista pomiarów (#weightListSheet) na szkielecie .m-sheet2 ---- */
+.ws-val{display:flex;align-items:baseline;justify-content:center;gap:5px;margin-top:20px;color:var(--m-ink);}
+.ws-num{font-size:80px;font-weight:200;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.ws-unit{font-size:28px;font-weight:400;line-height:1;opacity:.77;}
+.ws-val.is-err .ws-num{color:var(--m-danger);}
+.ws-info{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;min-height:37px;margin-top:8px;font-size:var(--m-fs-base);line-height:1.3;color:var(--m-ink);text-align:center;}
+.ws-info p{margin:0;}
+.ws-delta{display:flex;align-items:center;gap:5px;color:var(--m-muted-text);}
+.ws-delta svg{width:14px;height:14px;flex:none;display:block;}
+.ws-err{display:flex;align-items:center;gap:6px;color:var(--m-danger);}
+.ws-err svg{width:14px;height:14px;flex:none;display:block;}
+.ws-pad{margin-top:32px;}
+.ws-note{margin:24px 0 0;display:flex;flex-direction:column;gap:12px;text-align:center;font-size:var(--m-fs-xs);line-height:1.5;color:var(--m-muted-text);}
+.ws-note p{margin:0;}
+.m-sheet2 [hidden]{display:none !important;}
+/* niski ekran (iPhone SE 568 pt): zagęszczenie, żeby klawiatura i przycisk mieściły się bez przewijania */
+@media (max-height:620px){
+  .m-sheet2 .m2-sub{margin-top:4px;}
+  .m-sheet2 .m2-body{margin-top:6px;}
+  .m-sheet2 .plansv2-customize-card{padding-bottom:0;}
+  .m-sheet2 .m2-actions{padding-top:12px;gap:8px;}
+  .m-sheet2 .m2-head{padding-top:4px;}
+  .m2-body > .m2-btn--danger{height:44px;margin-top:12px;flex:none;}
+  .ws-val{margin-top:10px;}
+  .ws-num{font-size:52px;}
+  .ws-unit{font-size:22px;}
+  .ws-info{flex-direction:row;flex-wrap:wrap;justify-content:center;column-gap:12px;min-height:19px;margin-top:6px;}
+  .ws-pad{margin-top:12px;}
+  .ws-note{margin-top:16px;}
+}
+.wl-list{display:flex;flex-direction:column;width:100%;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);overflow:hidden;background:var(--m-white);}
+.wl-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:56px;box-sizing:border-box;padding:8px 12px;border:0;background:none;font-family:inherit;color:var(--m-ink);text-align:left;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.wl-row + .wl-row{border-top:.5px solid var(--m-line);}
+.wl-row:active{transform:scale(.99);}
+.wl-l{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.wl-v{font-size:var(--m-fs-md);font-weight:500;line-height:1.1;}
+.wl-s{font-size:var(--m-fs-2xs);line-height:1.2;color:var(--m-muted-text);}
+.wl-r{display:flex;align-items:center;gap:8px;flex:none;font-size:var(--m-fs-xs);color:var(--m-muted-text);}
+.wl-r svg{width:14px;height:14px;display:block;flex:none;}
+.wl-empty{margin:0;padding:18px 12px;text-align:center;font-size:var(--m-fs-xs);line-height:1.5;color:var(--m-muted-text);}
 
 /* ============================================================
    Klawiatura Mekkio (mkPad) — nowy wygląd z Figmy popupy-v2: 3 kolumny, klawisz 49,5 px, #ECEAF1,
    rogi 12, cyfry Geist ExtraLight 26, odstęp 4, szerokość 313. Osobna od .lg-key (okno logowania serii).
    ============================================================ */
-.mk-pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:min(313px,100%);margin:0 auto;}
+.mk-pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:min(313px,100%);margin-left:auto;margin-right:auto;}
 .mk-key{height:49.5px;border:0;border-radius:var(--m-r-sm);background:var(--m-bg);color:var(--m-ink);font-family:inherit;font-size:26px;font-weight:200;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .mk-key:active{transform:scale(.95);}
 .mk-key svg{width:24px;height:24px;display:block;}
@@ -2614,7 +2646,7 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
-.m2-btn:active,.m2-x:active,.mk-key:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
+.m2-btn:active,.m2-x:active,.mk-key:active,.wl-row:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
 /* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
 #view-gym-v2 .gymv2-tile.gymv2-search-tile, #view-gym-v2 .gymv2-tile.gymv2-add-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:13px;padding:4.5px 0 0;box-sizing:border-box;background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);}
 #view-gym-v2 .gymv2-tile.gymv2-search-tile{border:.5px solid #f1d7cb;}
@@ -3710,33 +3742,58 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<div class="onboard-overlay hidden plansv2-customize-overlay" id="weightSheet" onclick="if(event.target===this) closeWeightSheet()">
+<!-- TYMCZASOWE do czasu ekranu Waga w Postępach (S9): lista pomiarów z edycją; wejście z Profilu → Ciało → „Wszystkie”. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="weightListSheet" onclick="if(event.target===this) closeWeightListSheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
-      <div class="fbv2-header">
-        <div class="fbv2-title-row">
-          <h1>MASA CIAŁA</h1>
-          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeWeightSheet()"></span>
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="wlTitle">POMIARY WAGI</h1>
+          <button type="button" class="m2-x" id="wlClose" aria-label="Zamknij" onclick="closeWeightListSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
-        <p class="fbv2-subtitle">Zapiszemy dzisiejszą datę.<br>Waż się o tej samej porze, najlepiej rano na czczo.</p>
+        <p class="m2-sub" id="wlSub">Dotknij pomiaru, żeby go zmienić.</p>
       </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Waga</p>
-        <div class="acct-num-row solo">
-          <div class="exv2-field">
-            <input type="number" inputmode="decimal" step="0.1" min="30" max="300" id="weightInput" placeholder="kg">
+      <div class="m2-body" id="wlBody"></div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="wlAdd" onclick="openWeightSheet()">DODAJ POMIAR</button>
+    </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="weightSheet" onclick="if(event.target===this) closeWeightSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="wsTitle">MASA CIAŁA</h1>
+          <button type="button" class="m2-x" id="wsClose" aria-label="Zamknij" onclick="closeWeightSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="wsSub">Waż się o tej samej porze, najlepiej rano na czczo.</p>
+      </div>
+      <div class="m2-body" id="wsBody">
+        <div class="m2-field" id="wsField">
+          <div class="m2-row" id="wsDateRow">
+            <span class="m2-row-l" id="wsDateLbl">DATA</span>
+            <span class="m2-row-v"><span id="wsDateTxt"></span><svg id="wsChev" viewBox="0 0 12 7" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <input type="date" id="wsDateInput" aria-label="Data pomiaru" min="2000-01-01">
+          </div>
+          <div class="m2-row" id="wsSrcRow" hidden>
+            <span class="m2-row-l" id="wsSrcLbl">ŹRÓDŁO</span>
+            <span class="m2-row-v" id="wsSrcTxt">Apple Zdrowie</span>
           </div>
         </div>
+        <div class="ws-val" id="wsVal"><span class="ws-num" id="wsNum">0</span><span class="ws-unit">kg</span></div>
+        <div class="ws-info" id="wsInfo" aria-live="polite"></div>
+        <div class="ws-pad" id="wsPad"></div>
+        <div class="ws-note" id="wsNote" hidden><p id="wsNote1"></p><p id="wsNote2"></p></div>
       </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Ostatnie wpisy</p>
-        <div class="acct-wlog" id="weightLogList"></div>
-      </div>
-      <div class="plansv2-customize-actions">
-        <button type="button" class="plansv2-customize-cancel" onclick="closeWeightSheet()">ANULUJ</button>
-        <button type="button" class="plansv2-customize-apply" onclick="saveWeightSheet()">ZAPISZ POMIAR</button>
-      </div>
+    </div>
+    <div class="m2-actions" id="wsActions">
+      <button type="button" class="m2-btn" id="wsSave" onclick="saveWeightSheet()">ZAPISZ</button>
+      <button type="button" class="m2-btn m2-btn--danger" id="wsDelete" onclick="deleteWeightEntry()" hidden>USUŃ POMIAR</button>
     </div>
   </div>
 </div>
@@ -4455,6 +4512,13 @@ document.title = 'Mekkio — Every rep counts. Literally.';
 document.documentElement.lang = LANG;
 const T_EN = {
   toastUndo: 'UNDO', mkDelete: 'Delete digit',
+  wsTitle: 'BODY WEIGHT', wsSub: 'Weigh yourself at the same time of day, ideally in the morning on an empty stomach.', wsDate: 'DATE', wsToday: 'Today', wsYesterday: 'Yesterday',
+  wsPrev: x => `Previous ${x}`, wsSame: 'no change', wsFirst: 'This is your first measurement', wsRange: (a, b) => `Enter a weight from ${a} to ${b} kg.`,
+  wsSave: 'SAVE', wsSaved: 'Weight saved', wsDeleted: 'Measurement deleted', wsDelete: 'DELETE MEASUREMENT', wsClose: 'Close', wsCloseBtn: 'CLOSE', wsDateAria: 'Measurement date',
+  wsEditTitle: 'EDIT MEASUREMENT', wsEditSub: 'Change the value or the date of this measurement.',
+  wsHealthTitle: 'WEIGHT MEASUREMENT', wsHealthSub: 'This measurement comes from the Health app.', wsSource: 'SOURCE', wsHealthName: 'Apple Health',
+  wsHealthNote1: 'You can only change it in the Health app.', wsHealthNote2: 'Mekkio will pick up the corrected value the next time you open it.',
+  wlTitle: 'WEIGHT LOG', wlSub: 'Tap a measurement to change it.', wlAdd: 'ADD MEASUREMENT', wlEmpty: 'No measurements yet. Add the first one with the button below.', wlManual: 'Manual', pfWeightAll: 'All weight measurements',
   gymTitleTraining: 'WORKOUT', gymAbortTitle: 'Abort workout', gymFinishTitle: 'Finish workout',
   gymV2YourExercises: 'Your exercises', gymV2FinishWorkout: 'FINISH WORKOUT', gymPillExercises: 'exercises', gymPaused: 'Paused',
   gymAbortTitleDlg: 'Abort workout?', gymAbortBody: 'Everything you logged in this workout today will be deleted.', gymAbortYes: 'Abort', gymAbortNo: 'Back to workout',
@@ -5903,7 +5967,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet'];
+const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -6035,40 +6099,205 @@ function clearAvatar(){
   scheduleCloudPush();
 }
 
-/* ---------- weight sheet ---------- */
-function renderWeightLogList(){
-  const el = document.getElementById('weightLogList');
-  if(!el) return;
-  if(!weightLog.length){ el.innerHTML = '<div class="acct-wlog-empty">Brak pomiarów. To będzie pierwszy.</div>'; return; }
-  const rows = weightLog.slice(-5).reverse();
-  el.innerHTML = rows.map((e,idx)=>{
-    const prev = rows[idx+1];
-    const delta = prev ? +(e.kg - prev.kg).toFixed(1) : null;
-    const dTxt = (delta != null && Math.abs(delta) >= 0.05)
-      ? ` <b>${delta > 0 ? '+' : '−'}${Math.abs(delta).toFixed(1).replace('.', ',')}</b>` : '';
-    return `<div class="acct-wlog-row"><span>${fmtKg(e.kg)} kg</span><span class="d">${fmtDate(e.date)}${dTxt}</span></div>`;
-  }).join('');
+/* ---------- weight sheet (nowy szkielet .m-sheet2, Figma popupy-v2 01–05) ----------
+   Jedno okno, trzy tryby: 'add' (MASA CIAŁA: nowy lub zastępowany pomiar z wybranego dnia),
+   'edit' (EDYTUJ POMIAR: wartość, data, usunięcie z „Cofnij”), 'health' (POMIAR WAGI: podgląd pomiaru
+   z Apple Zdrowie, tylko do odczytu). Jedna waga na dzień: zapis na zajęty dzień zastępuje wartość
+   (logWeight). Pomiar z Zdrowia to wpis z src:'health'. Kontrakt: openWeightSheet(), closeWeightSheet(viaDrag),
+   saveWeightSheet(), hook #acctWeightV w Profilu. */
+const WS_MIN = 30, WS_MAX = 300;   // ta sama granica co dawna walidacja (kg)
+let _ws = null;                    // { mode, origDate, date, pad, touched, silent }
+const WS_ICO_DOWN = '<svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 2v10m0 0L3 8m4 4l4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const WS_ICO_UP = '<svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 12V2m0 0L3 6m4-4l4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const WS_ICO_ERR = '<svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 3.8v3.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="10.2" r=".8" fill="currentColor"/></svg>';
+function wsFmt(n){ return Number(n).toFixed(1).replace('.', LANG === 'en' ? '.' : ','); }
+function wsDateOk(d){ return typeof d === 'string' && ISO_DAY_RE.test(d); }
+function wsEntry(d){ return weightLog.find(e=> e && e.date === d) || null; }
+// poprzedni pomiar = najpóźniejszy wcześniejszy niż `date` (bez pomiaru, który właśnie edytujemy)
+function wsPrev(date, skipDate){
+  let p = null;
+  weightLog.forEach(e=>{ if(e && wsDateOk(e.date) && e.date < date && e.date !== skipDate && (!p || e.date > p.date)) p = e; });
+  return p;
 }
-function openWeightSheet(){
-  const cw = currentWeightKg();
-  document.getElementById('weightInput').value = cw != null ? cw : '';
-  renderWeightLogList();
+function wsDateLabel(iso){
+  const dm = fmtDayMonShort(iso), y = new Date(); y.setDate(y.getDate() - 1);
+  if(iso === todayStr()) return t('wsToday', 'Dziś') + ', ' + dm;
+  if(iso === dateStr(y)) return t('wsYesterday', 'Wczoraj') + ', ' + dm;
+  return dm;
+}
+function wsPaint(st){
+  if(!_ws) return;
+  const $ = id => document.getElementById(id);
+  const health = _ws.mode === 'health', edit = _ws.mode === 'edit';
+  $('wsDateTxt').textContent = wsDateLabel(_ws.date);
+  const di = $('wsDateInput');
+  if(di.value !== _ws.date) di.value = _ws.date;
+  if(health){
+    const en = wsEntry(_ws.origDate);
+    $('wsNum').textContent = en ? wsFmt(en.kg) : '0';
+    $('wsVal').classList.remove('is-err');
+    return;
+  }
+  st = st || (_ws.pad && _ws.pad.get());
+  if(!st) return;
+  // błąd dopiero, gdy wartości nie da się już „dopisać” do poprawnej: >300, albo <30 z częścią dziesiętną
+  const err = st.status === 'high' || (st.status === 'low' && st.hasDecimal && st.value > 0);
+  const canSave = st.status === 'ok';
+  $('wsNum').textContent = st.text === '' ? '0' : st.text;
+  $('wsVal').classList.toggle('is-err', err);
+  $('wsSave').disabled = !canSave;
+  const info = $('wsInfo'), prev = wsPrev(_ws.date, edit ? _ws.origDate : null);
+  let html = '';
+  if(err){
+    html = `<p class="ws-err">${WS_ICO_ERR}<span>${escHtml(t('wsRange', `Wpisz wagę od ${WS_MIN} do ${WS_MAX} kg.`, WS_MIN, WS_MAX))}</span></p>`;
+  } else if(prev){
+    html = `<p>${escHtml(t('wsPrev', `Poprzednio ${wsFmt(prev.kg)}`, wsFmt(prev.kg)))}</p>`;
+    if(canSave){
+      const d = Math.round((st.value - prev.kg) * 10) / 10;
+      html += d === 0
+        ? `<p class="ws-delta">${escHtml(t('wsSame', 'bez zmian'))}</p>`
+        : `<p class="ws-delta">${d < 0 ? WS_ICO_DOWN : WS_ICO_UP}<span>${d < 0 ? '−' : '+'}${wsFmt(Math.abs(d))} kg</span></p>`;
+    }
+  } else if(!weightLog.some(e=> e && e.date !== (edit ? _ws.origDate : null))){
+    html = `<p>${escHtml(t('wsFirst', 'To Twój pierwszy pomiar'))}</p>`;
+  }
+  info.innerHTML = html;
+}
+function wsOpen(mode, date){
+  const $ = id => document.getElementById(id);
+  const health = mode === 'health', edit = mode === 'edit';
+  _ws = { mode, origDate: date || null, date: date || todayStr(), pad: null, touched: false, silent: true };
+  // teksty (PL z t(), EN w T_EN)
+  $('wsTitle').textContent = health ? t('wsHealthTitle', 'POMIAR WAGI') : edit ? t('wsEditTitle', 'EDYTUJ POMIAR') : t('wsTitle', 'MASA CIAŁA');
+  $('wsSub').textContent = health ? t('wsHealthSub', 'Ten pomiar pochodzi z aplikacji Zdrowie.')
+    : edit ? t('wsEditSub', 'Zmień wartość albo datę tego pomiaru.') : t('wsSub', 'Waż się o tej samej porze, najlepiej rano na czczo.');
+  $('wsDateLbl').textContent = t('wsDate', 'DATA');
+  $('wsSrcLbl').textContent = t('wsSource', 'ŹRÓDŁO');
+  $('wsSrcTxt').textContent = t('wsHealthName', 'Apple Zdrowie');
+  $('wsNote1').textContent = t('wsHealthNote1', 'Zmienisz go tylko w aplikacji Zdrowie.');
+  $('wsNote2').textContent = t('wsHealthNote2', 'Mekkio pobierze poprawioną wartość przy następnym otwarciu.');
+  $('wsClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('wsDateInput').setAttribute('aria-label', t('wsDateAria', 'Data pomiaru'));
+  $('wsDateInput').max = todayStr();
+  $('wsDateInput').hidden = health;
+  $('wsChev').hidden = health;
+  $('wsSrcRow').hidden = !health;
+  $('wsInfo').hidden = health;
+  $('wsPad').hidden = health;
+  $('wsNote').hidden = !health;
+  $('wsField').toggleAttribute('data-ro', health);
+  $('wsDelete').hidden = !edit;
+  // niski ekran: przycisk usuwania wędruje pod klawiaturę (w przewijaną treść), żeby klawiatura mieściła się w całości
+  $(window.matchMedia('(max-height:620px)').matches ? 'wsBody' : 'wsActions').appendChild($('wsDelete'));
+  $('wsDelete').textContent = t('wsDelete', 'USUŃ POMIAR');
+  const sv = $('wsSave');
+  sv.textContent = health ? t('wsCloseBtn', 'ZAMKNIJ') : t('wsSave', 'ZAPISZ');
+  sv.disabled = false;
+  if(health){ wsPaint(); }
+  else {
+    // dodawanie zaczyna od zera (Figma 02); zajęty dzień podpowiada swoją wartość (zapis ją zastąpi)
+    const cur = wsEntry(_ws.date);
+    _ws.pad = mkPad($('wsPad'), { maxDigits: 3, decimals: 1, min: WS_MIN, max: WS_MAX, value: cur ? String(cur.kg) : '',
+      onChange: st=>{ if(_ws && !_ws.silent) _ws.touched = true; wsPaint(st); } });
+    _ws.silent = false;
+  }
   acctSheetOpen('weightSheet');
-  setTimeout(()=>{ try{ document.getElementById('weightInput').focus(); }catch(e){} }, 40);
 }
-function closeWeightSheet(viaDrag){ acctSheetClose('weightSheet', viaDrag); }
-function saveWeightSheet(){
-  const kg = parseFloat(String(document.getElementById('weightInput').value).replace(',', '.'));
-  if(!(kg >= 30 && kg <= 300)){ toast('Podaj wagę między 30 a 300 kg'); return; }
-  logWeight(kg, todayStr());
+function openWeightSheet(){ wsOpen('add'); }
+// edycja pomiaru z listy: ręczny pomiar = okno edycji, pomiar z Apple Zdrowie = podgląd tylko do odczytu
+function openWeightEdit(date){
+  const en = wsDateOk(date) ? wsEntry(date) : null;
+  if(!en) return;
+  wsOpen(en.src === 'health' ? 'health' : 'edit', date);
+}
+function closeWeightSheet(viaDrag){ _ws = null; acctSheetClose('weightSheet', viaDrag); }
+// zmiana daty w nakładce <input type=date>: w trybie dodawania, dopóki nic nie wpisano, podpowiada wartość tego dnia
+(function(){
+  const di = document.getElementById('wsDateInput');
+  if(!di) return;
+  di.addEventListener('change', ()=>{
+    if(!_ws || _ws.mode === 'health' || !wsDateOk(di.value) || di.value > todayStr()){ if(_ws) di.value = _ws.date; return; }
+    _ws.date = di.value;
+    if(_ws.mode === 'add' && !_ws.touched){
+      const en = wsEntry(_ws.date);
+      _ws.silent = true; _ws.pad.set(en ? String(en.kg) : '', { fresh: !!en }); _ws.silent = false;
+    } else wsPaint();
+  });
+})();
+function wsRefreshAll(){
   renderAccountPanel();
   if(currentRoute === 'dashboard') renderDashShell(false);   // weight tile refreshes silently
   if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
   if(document.getElementById('histDetailV2') && selectedHistDateV2) renderHistDetailV2(false);
   if(typeof cr !== 'undefined' && cr && popupExercise) crPaintDerived();   // the cardio results sheet may be waiting for a weight
-  closeWeightSheet();
-  toast('Zapisano pomiar');
+  renderWeightList();
 }
+function saveWeightSheet(){
+  if(!_ws) return;
+  if(_ws.mode === 'health'){ closeWeightSheet(); return; }
+  const st = _ws.pad && _ws.pad.get();
+  if(!st || st.status !== 'ok') return;   // przycisk jest wtedy nieaktywny; bez toastu
+  if(_ws.mode === 'edit' && _ws.origDate !== _ws.date){
+    const i = weightLog.findIndex(e=> e && e.date === _ws.origDate);
+    if(i >= 0) weightLog.splice(i, 1);   // zmiana daty = przeniesienie pomiaru (zapis na zajęty dzień zastępuje tamten)
+  }
+  logWeight(st.value, _ws.date);
+  wsRefreshAll();
+  closeWeightSheet();
+  toast(t('wsSaved', 'Zapisano wagę'));
+}
+/* Usunięcie pomiaru. Chmura: weight_log jest scalany wpis po wpisie z bazą (state.base), więc lokalnie
+   usunięty wpis jest też usuwany w chmurze przy najbliższej wysyłce i nie wraca przy pull (patrz
+   mergeProfileField). „Cofnij” dodaje ten sam wpis z powrotem (nowa zmiana lokalna). */
+function deleteWeightEntry(){
+  if(!_ws || _ws.mode !== 'edit') return;
+  const i = weightLog.findIndex(e=> e && e.date === _ws.origDate);
+  if(i < 0){ closeWeightSheet(); return; }
+  const entry = { ...weightLog[i] };
+  weightLog.splice(i, 1);
+  saveWeightLog(weightLog);
+  recomputeWorkoutCalories();
+  wsRefreshAll();
+  closeWeightSheet();
+  toast(t('wsDeleted', 'Usunięto pomiar'), { undo: ()=> restoreWeightEntry(entry) });
+}
+function restoreWeightEntry(entry){
+  if(!entry || weightLog.some(e=> e && e.date === entry.date)) return;   // w międzyczasie ktoś zapisał ten dzień: nie nadpisuj
+  weightLog.push(entry);
+  weightLog.sort((a,b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  saveWeightLog(weightLog);
+  recomputeWorkoutCalories();
+  wsRefreshAll();
+}
+
+/* TYMCZASOWE do czasu ekranu Waga w Postępach (S9): mały arkusz „POMIARY WAGI” z listą pomiarów
+   (data, kg, różnica, źródło). Wejście: Profil → Ciało → „Wszystkie”. Dotknięcie wiersza otwiera
+   okno Edytuj pomiar albo podgląd pomiaru z Apple Zdrowie. Do usunięcia razem z ekranem Waga. */
+function renderWeightList(){
+  const body = document.getElementById('wlBody');
+  if(!body) return;
+  const rows = weightLog.filter(e=> e && wsDateOk(e.date) && Number.isFinite(+e.kg)).slice().sort((a,b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+  if(!rows.length){ body.innerHTML = `<p class="wl-empty">${escHtml(t('wlEmpty', 'Brak pomiarów. Pierwszy dodasz przyciskiem poniżej.'))}</p>`; return; }
+  body.innerHTML = '<div class="wl-list">' + rows.map((e, i)=>{
+    const prev = rows[i + 1], d = prev ? Math.round((e.kg - prev.kg) * 10) / 10 : null;
+    const dTxt = d ? `<span>${d < 0 ? '−' : '+'}${wsFmt(Math.abs(d))}</span>` : '';
+    const dIco = d ? (d < 0 ? WS_ICO_DOWN : WS_ICO_UP) : '';
+    const src = e.src === 'health' ? t('wsHealthName', 'Apple Zdrowie') : t('wlManual', 'Ręcznie');
+    return `<button type="button" class="wl-row" onclick="openWeightEdit('${e.date}')" aria-label="${escHtml(wsFmt(e.kg) + ' kg, ' + fmtDayMonShort(e.date) + ', ' + src)}">`
+      + `<span class="wl-l"><span class="wl-v">${wsFmt(e.kg)} kg</span><span class="wl-s">${escHtml(fmtDayMonShort(e.date))} · ${escHtml(src)}</span></span>`
+      + `<span class="wl-r">${dIco}${dTxt}</span></button>`;
+  }).join('') + '</div>';
+}
+function openWeightListSheet(){
+  const $ = id => document.getElementById(id);
+  $('wlTitle').textContent = t('wlTitle', 'POMIARY WAGI');
+  $('wlSub').textContent = t('wlSub', 'Dotknij pomiaru, żeby go zmienić.');
+  $('wlAdd').textContent = t('wlAdd', 'DODAJ POMIAR');
+  $('wlClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  renderWeightList();
+  acctSheetOpen('weightListSheet');
+}
+function closeWeightListSheet(viaDrag){ acctSheetClose('weightListSheet', viaDrag); }
 
 /* ---------- body-data sheet (height / age / sex) ---------- */
 let _pickSex = null;
@@ -8343,10 +8572,12 @@ function mkPad(host, opts){
     + `<button type="button" class="mk-key" data-k="dec"${o.decimals ? '' : ' disabled aria-hidden="true" tabindex="-1"'}>${sep}</button>`
     + '<button type="button" class="mk-key" data-k="0">0</button>'
     + `<button type="button" class="mk-key" data-k="del" aria-label="${t('mkDelete', 'Usuń znak')}">${MK_DEL_SVG}</button>`;
-  host.addEventListener('click', e=>{
+  if(host._mkClick) host.removeEventListener('click', host._mkClick);   // ponowna inicjalizacja na tym samym hoście: bez podwójnych kliknięć
+  host._mkClick = e=>{
     const b = e.target.closest && e.target.closest('.mk-key');
     if(b && host.contains(b) && !b.disabled) press(b.dataset.k);
-  });
+  };
+  host.addEventListener('click', host._mkClick);
   const api = {
     get: state,
     set(v, so){ buf = norm(v); fresh = !!(so && so.fresh) && buf !== ''; emit(); },
@@ -8935,7 +9166,8 @@ function profileHtml(m, animate){
     const hooks = `<span hidden><span id="acctHeightV">${b.heightCm ? `${b.heightCm} cm` : '—'}</span><span id="acctAgeV">${b.age ? `${b.age} ${LANG==='en' ? t('pfYears', 'yrs') : plLatWord(b.age)}` : '—'}</span><span id="acctSexV">${b.sex === 'f' ? t('pfFemale', 'Kobieta') : b.sex === 'm' ? t('pfMale', 'Mężczyzna') : '—'}</span><span id="acctWeightUpd">${E(lastUpdTxt)}</span></span>`;
     bodyBody = `<div class="pf-card"><h3 class="pf-empty-t" style="margin-bottom:14px">${t('pfNoWeightTitle', 'Dodaj wagę, żeby śledzić zmiany')}</h3><div class="pf-rows">${row(t('pfWeightRow', 'Waga'), t('pfWeightRowSub', 'Dodaj pierwszy wpis'), 'openWeightSheet()', 'acctWeightV')}${row(t('pfBodyRow', 'Wzrost, wiek, płeć'), bodySub, 'openBodyDataSheet()', '', hooks)}</div></div>`;
   }
-  const bodySec = sec(t('pfBody', 'CIAŁO'), '', bodyBody, 4);
+  // TYMCZASOWE do czasu ekranu Waga w Postępach: wejście w listę pomiarów (edycja / usuwanie) z sekcji Ciało
+  const bodySec = sec(t('pfBody', 'CIAŁO'), wt.hasData ? linkBtn('openWeightListSheet()', t('pfWeightAll', 'Wszystkie pomiary wagi')) : '', bodyBody, 4);
   // ---- Cele i trener (stan nowego gościa: ukryte, ID zostają w DOM) ----
   const chev = `<span class="pf-ico pf-ico--16 pf-chev">${PF_ICO.caret16}</span>`;
   const fillTxt = t('pfFill', 'Uzupełnij');
@@ -10145,7 +10377,7 @@ mSheetDrag('whatsnewOverlay', closeWhatsNew);
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
+['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 mSheetDrag('profileRecordsSheet', closeProfileRecordsSheet);   // zamknięcie przeciągnięciem kończy też trwający slajd miesięcy
 
