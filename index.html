@@ -896,6 +896,10 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .acct-toggle.on{background:var(--m-orange);}
 .acct-toggle-knob{position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transform:translateX(0);transition:transform var(--m-dur-quick) var(--m-ease);}
 .acct-toggle.on .acct-toggle-knob{transform:translateX(18px);}
+/* Ustawienia (Figma 560:8786): przełącznik 38×23, gałka 19 px; ten sam komponent, tylko mniejszy wymiar */
+.acct-toggle--s{width:38px;height:23px;}
+.acct-toggle--s .acct-toggle-knob{width:19px;height:19px;}
+.acct-toggle--s.on .acct-toggle-knob{transform:translateX(15px);}
 /* GYM finish — calories row */
 /* History detail — calories row */
 .histv2-wkcal{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:11px 13px;margin-top:10px;cursor:pointer;}
@@ -1029,7 +1033,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
    stops as Figma's 4694px-tall rectangle). The photo is only a CSS
    background, so it never blocks the first render; the gradients paint
    the same page even before it arrives. */
-#view-profile-v2{
+#view-profile-v2, #view-profile-settings-v2{
   min-height:100dvh;
   background-color:var(--m-bg);
   /* Figma 560:6731: to samo zdjęcie i ten sam gradient strony co Pulpit, plus biała poświata 144° nad zdjęciem */
@@ -1211,6 +1215,21 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .pf-rm-hint{margin:8px 0 0;text-align:center;font-size:var(--m-fs-2xs);font-weight:400;line-height:1.3;color:var(--m-muted-text);}
 .pf-rm-hint span{display:block;}
 .pf-rm-empty{box-sizing:border-box;width:100%;padding:18px;background:rgba(255,255,255,.6);border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);}
+/* K5: Cele i trener, Połączenia, karta Ustawienia i konto + ekran Ustawień (Figma 560:8368). Te same klocki co reszta Profilu (.pf-card / .pf-row). */
+.pf-card[hidden], .pf-sec[hidden], .pf-row[hidden], .pf-pill[hidden], .set-hint[hidden], .profil-since[hidden]{display:none;}
+.pf-ico--16{width:16px;height:16px;}
+.pf-chev{color:var(--m-ink);}
+a.pf-row{text-decoration:none;}
+.pf-row--info{cursor:default;}
+.pf-row--danger .pf-row-n{color:var(--m-danger);}
+.pf-row-l .pf-pill{align-self:flex-start;margin-top:4px;}
+.pf-row-r .pf-pill--tint{margin:0;}
+.pf-pill--tint{background:var(--m-orange-tint);color:var(--m-danger);}
+.pf-rows--dyn > .pf-row{border-bottom:0;}
+.pf-rows--dyn > .pf-row:not([hidden]) ~ .pf-row:not([hidden]){border-top:.5px solid var(--m-muted);}
+.set-stack{display:flex;flex-direction:column;gap:20px;margin-top:27px;}
+.set-hint{margin:8px 3px 0;font-size:var(--m-fs-2xs);font-weight:400;line-height:1.3;color:var(--m-muted-text);}
+.profil-header-gap{display:block;width:40px;height:40px;}
 @media (max-width:339px){ .profil-name{font-size:30px;} .pf-weight-main{gap:10px;} .pf-chart{width:112px;} .pf-chart svg{width:112px;} .pf-stat-v{font-size:24px;} .pf-body-v{font-size:24px;} }
 /* Greeting + headline. min-height 177px = Figma's greeting top (y100) to the
    column start (y277) whatever the headline's line count (2 or 3). */
@@ -3132,6 +3151,8 @@ function setSoundOn(on){
   try{ localStorage.setItem(LS_SOUND, soundOn ? '1' : '0'); }catch(e){}
   const t = document.getElementById('acctSoundToggle');
   if(t) t.classList.toggle('on', soundOn);
+  const sr = document.getElementById('setSoundRow');
+  if(sr) sr.setAttribute('aria-checked', soundOn ? 'true' : 'false');
   if(soundOn) SFX.play('done');
 }
 function haptic(kind){
@@ -3605,9 +3626,22 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="profil-header">
         <button type="button" class="profil-back m-press" onclick="profileBack()" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="caret-left"></span></button>
         <h1 class="profil-title">PROFIL</h1>
-        <button type="button" class="profil-gear m-press" onclick="openAccountPanel()" title="Ustawienia i konto" aria-label="Ustawienia i konto"><span class="ph" data-ph="gear"></span></button>
+        <button type="button" class="profil-gear m-press" onclick="openProfileSettingsV2()" title="Ustawienia i konto" aria-label="Ustawienia i konto"><span class="ph" data-ph="gear"></span></button>
       </div>
       <div id="profilBody"></div>
+    </div>
+  </section>
+
+  <!-- ===================== USTAWIENIA (Figma 560:8368) — podekran Profilu (push/pop, trasa 'profile-settings-v2').
+       Treść buduje buildProfileSettingsV2(); stary panel konta (#accountOverlay) został zastąpiony tym ekranem. ===================== -->
+  <section class="view profil-root" id="view-profile-settings-v2">
+    <div class="profil-panel" id="profilSettingsPanel">
+      <div class="profil-header">
+        <button type="button" class="profil-back m-press" onclick="profileSettingsBack()" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="caret-left"></span></button>
+        <h1 class="profil-title" data-i18n="setTitle">USTAWIENIA</h1>
+        <span class="profil-header-gap" aria-hidden="true"></span>
+      </div>
+      <div id="profilSettingsBody"></div>
     </div>
   </section>
 
@@ -5946,7 +5980,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['accountOverlay','nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet'];
+const ACCT_SHEETS = ['nameEditOverlay','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -5985,64 +6019,36 @@ function acctSheetClose(id, viaDrag){
   if(viaDrag){ _acctSheetT[id] = setTimeout(finish, 20); }
   else { overlay.classList.add('plansv2-customize-closing'); _acctSheetT[id] = setTimeout(finish, 260); }
 }
+/* Dawny panel boczny #accountOverlay zastąpił ekran Profil (+ podekran Ustawienia). Zostają nazwy z kontraktu:
+   renderAccountPanel() odświeża dane, które żyją w DOM Ustawień (kopia, dźwięk, konto, przypomnienie, Zdrowie) i, gdy Profil jest na ekranie, sam Profil;
+   openAccountPanel() otwiera Profil. Hooki acct* mieszkają w Profilu (renderowane przez profileHtml) albo w Ustawieniach (buildProfileSettingsV2). */
+const AI_GOAL_LABELS = {masa:'Masa', sila:'Siła', wytrzymalosc:'Wytrzymałość', ogolna:'Ogólna sprawność'};
 function renderAccountPanel(){
-  const named = !!profileName;
   const inCloud = !!(cloudSession && cloudSession.user);
   const set = (id, txt)=>{ const e = document.getElementById(id); if(e) e.textContent = txt; };
-  set('acctName', named ? profileName : 'Gość');
-  set('acctSub', inCloud
-    ? (named ? 'Zsynchronizowane w chmurze · zmień imię' : 'Zsynchronizowane w chmurze')
-    : named
-      ? 'Dane tylko na tym urządzeniu · zmień imię'
-      : 'Działasz jako gość — dane tylko na tym urządzeniu');
   set('acctVer', APP_VERSION);
-  set('acctChlVer', 'v' + APP_VERSION);
-  set('acctFootData', inCloud ? 'dane zsynchronizowane z chmurą' : 'dane treningowe tylko na tym urządzeniu');
-  // With an account the cloud is the backup, so the section becomes a plain
-  // RODO art. 20 data export; import (the guest → other device path) is
-  // only offered to guests.
-  set('acctBackupSec', inCloud ? 'Twoje dane' : 'Kopia zapasowa');
-  set('acctExportLabel', inCloud ? 'Pobierz moje dane' : 'Twórz kopię zapasową');
+  set('setVer', APP_VERSION);
+  set('acctChlVer', APP_VERSION);
+  // teksty o danych muszą zgadzać się z syncem w chmurze: po zalogowaniu treningi, plany i profil są w chmurze, bez konta tylko na telefonie
+  set('acctFootData', inCloud ? t('setFootCloud', 'Dane synchronizują się z chmurą') : t('setFootLocal', 'Dane są tylko na tym telefonie'));
+  // z kontem chmura jest kopią, więc wiersz to zwykły eksport danych (RODO art. 20); wczytanie kopii (droga gościa na inny telefon) tylko bez konta
+  set('acctExportLabel', inCloud ? t('setExportCloud', 'Pobierz moje dane') : t('setExportLocal', 'Utwórz kopię zapasową'));
+  set('setExportSub', inCloud ? t('setExportCloudSub', 'Kopia zapasowa w pliku') : t('setExportLocalSub', 'Plik .json'));
   const impRow = document.getElementById('acctImportRow');
   if(impRow) impRow.hidden = !!inCloud;
   set('acctBackupHint', inCloud
-    ? 'Treningi są bezpieczne w chmurze. Tu pobierzesz wszystkie swoje dane w jednym pliku.'
-    : 'Bez konta treningi są tylko na tym telefonie. Warto co jakiś czas zrobić kopię.');
-  const cw = currentWeightKg();
-  set('acctWeightV', cw != null ? fmtKg(cw) + ' kg' : 'Uzupełnij');
-  set('acctHeightV', bodyData.heightCm ? bodyData.heightCm + ' cm' : 'Uzupełnij');
-  set('acctAgeV', bodyData.age ? bodyData.age + ' lat' : '—');
-  set('acctSexV', bodyData.sex === 'f' ? 'Kobieta' : bodyData.sex === 'm' ? 'Mężczyzna' : '—');
-  const AI_GOAL_LABELS = {masa:'Masa', sila:'Siła', wytrzymalosc:'Wytrzymałość', ogolna:'Ogólna sprawność'};
-  set('acctAiGoalV', AI_GOAL_LABELS[aiPrefs.goal] || 'Uzupełnij');
-  set('acctAiAvoidV', aiPrefs.avoid ? (aiPrefs.avoid.length > 24 ? aiPrefs.avoid.slice(0,24)+'…' : aiPrefs.avoid) : 'Uzupełnij');
-  const upd = document.getElementById('acctWeightUpd');
-  if(upd){ const d = lastWeightDate(); upd.textContent = d ? 'Ostatnia aktualizacja wagi: ' + fmtDate(d) : ''; upd.hidden = !d; }
+    ? t('setBackupCloud', 'Treningi i plany są bezpieczne w chmurze. Tu pobierzesz swoje dane w jednym pliku.')
+    : t('setBackupLocal', 'Bez konta dane są tylko na tym telefonie. Zrób kopię albo załóż konto.'));
   renderAcctCloudCard();
   renderReminderRow();
   renderHealthRow();
   const st = document.getElementById('acctSoundToggle');
   if(st) st.classList.toggle('on', soundOn);
-  if(currentRoute === 'profile-v2' && typeof renderProfileV2 === 'function') renderProfileV2(false);   // zapis wagi / ciała / imienia / zdjęcia odświeża Profil bez animacji wejścia
+  const sr = document.getElementById('setSoundRow');
+  if(sr) sr.setAttribute('aria-checked', soundOn ? 'true' : 'false');
+  if(currentRoute === 'profile-v2' && typeof renderProfileV2 === 'function') renderProfileV2(false);   // zapis wagi / ciała / imienia / zdjęcia / celu AI odświeża Profil bez animacji wejścia
 }
-let _acctPanelCloseT = null;
-function openAccountPanel(){
-  renderAccountPanel();
-  const o = document.getElementById('accountOverlay');
-  clearTimeout(_acctPanelCloseT);
-  o.classList.remove('acct-closing');
-  showSheet('accountOverlay');
-}
-function closeAccountPanel(){
-  const o = document.getElementById('accountOverlay');
-  o.classList.add('acct-closing');   // backdrop fades, panel slides out (same curve as the sheets)
-  clearTimeout(_acctPanelCloseT);
-  _acctPanelCloseT = setTimeout(()=>{
-    o.classList.add('hidden');
-    o.classList.remove('acct-closing');
-    acctLockCheck();
-  }, 240);
-}
+function openAccountPanel(){ openProfileV2(); }   // kontrakt nazwy: każde wejście „w konto” trafia teraz w Profil
 function openNameEdit(){
   document.getElementById('nameEditInput').value = profileName || '';
   applyAvatarEverywhere();   // syncs the sheet's photo preview + clear button
@@ -6186,15 +6192,10 @@ function pickAiGoal(g){
 function openAiPrefsSheet(){
   pickAiGoal(aiPrefs.goal || null);
   document.getElementById('aiAvoidInput').value = aiPrefs.avoid || '';
-  // Hide the account panel underneath — it was never actually hidden by
-  // acctSheetOpen() (just visually covered by this sheet's own backdrop),
-  // which showed through around this sheet's edges (Maciej, 2026-09-17).
-  document.getElementById('accountOverlay').classList.add('hidden');
-  acctSheetOpen('aiPrefsSheet');
+  acctSheetOpen('aiPrefsSheet');   // arkusz nakłada się na ekran Profil (nie ma już panelu bocznego do chowania)
 }
 function closeAiPrefsSheet(viaDrag){
   acctSheetClose('aiPrefsSheet', viaDrag);
-  document.getElementById('accountOverlay').classList.remove('hidden');
 }
 function saveAiPrefsSheet(){
   if(!cloudSession || !cloudSession.user){ toast('Zaloguj się, żeby zapisać preferencje'); return; }
@@ -6713,7 +6714,7 @@ async function syncCloudData(){
     saveCloudSyncState(state);
 
     goRoute(currentRoute); // re-render whatever screen is currently on-screen with the synced data
-    if(!document.getElementById('accountOverlay').classList.contains('hidden')) renderAccountPanel(); // it's an overlay, not part of currentRoute
+    if(isProfileRoute(currentRoute)) renderAccountPanel(); // dane w Ustawieniach (kopia, konto) odświeża renderAccountPanel; Profil goRoute() wyżej
     if(push.pushed || firstProfilePush) toast('Zsynchronizowano z chmurą');
   } catch(e){
     console.error('syncCloudData failed', e);
@@ -6772,28 +6773,25 @@ function dismissCloudReminder(){
 }
 
 function renderAcctCloudCard(){
-  const cta = document.getElementById('acctCloudCta');
-  const signedBox = document.getElementById('acctCloudSignedIn');
-  const danger = document.getElementById('acctDangerZone');
-  if(!cta || !signedBox) return;
-  if(!SUPABASE_CONFIGURED){
-    cta.hidden = true;
-    signedBox.hidden = true;
-    if(danger) danger.hidden = true;
-    return;
-  }
-  if(cloudSession && cloudSession.user){
-    cta.hidden = true;
-    signedBox.hidden = false;
-    if(danger) danger.hidden = false;
-    const emailEl = document.getElementById('acctCloudEmail');
+  // karta „Zapisz swoje dane” w Profilu (acctCloudCta) i wiersze KONTO w Ustawieniach; każdy element może nie istnieć (inny ekran nie jest wyrenderowany)
+  const el = id => document.getElementById(id);
+  const cta = el('acctCloudCta'), card = cta && cta.closest('[data-pf-login]');
+  const inCloud = !!(cloudSession && cloudSession.user);
+  const guestShown = SUPABASE_CONFIGURED && !inCloud, accShown = SUPABASE_CONFIGURED && inCloud;
+  if(card) card.hidden = !guestShown;
+  const loginRow = el('setLoginRow'); if(loginRow) loginRow.hidden = !guestShown;
+  ['acctCloudSignedIn', 'setSignOutRow', 'acctDangerZone'].forEach(id=>{ const e = el(id); if(e) e.hidden = !accShown; });
+  const sec = el('setAccountSec'); if(sec) sec.hidden = !SUPABASE_CONFIGURED;
+  if(accShown){
+    const emailEl = el('acctCloudEmail');
     // "Hide My Email" on Sign in with Apple gives a random relay address.
     const email = cloudSession.user.email || '';
-    if(emailEl) emailEl.textContent = /@privaterelay\.appleid\.com$/i.test(email) ? 'Ukryty e-mail (Apple)' : email;
-  } else {
-    cta.hidden = false;
-    signedBox.hidden = true;
-    if(danger) danger.hidden = true;
+    if(emailEl) emailEl.textContent = /@privaterelay\.appleid\.com$/i.test(email) ? t('setAppleRelay', 'Ukryty e-mail (Apple)') : email;
+    const prov = (cloudSession.user.app_metadata && cloudSession.user.app_metadata.provider) || '';
+    const provEl = el('setProvider');
+    if(provEl) provEl.textContent = prov === 'apple' ? t('setViaApple', 'Zalogowany przez Apple')
+      : prov === 'google' ? t('setViaGoogle', 'Zalogowany przez Google')
+      : prov === 'email' ? t('setViaEmail', 'Zalogowany e-mailem') : t('setSignedIn', 'Zalogowany');
   }
 }
 
@@ -6827,8 +6825,7 @@ function openAuthSheet(mode){
   setAuthMode(mode || 'login');
   document.getElementById('authEmailInput').value = '';
   document.getElementById('authPasswordInput').value = '';
-  closeAccountPanel();
-  setTimeout(()=> acctSheetOpen('authSheet'), 200); // po animacji zamykania panelu konta
+  acctSheetOpen('authSheet');   // arkusz logowania nakłada się na Profil / Ustawienia (SIWA i Google są wewnątrz authSheet)
 }
 function closeAuthSheet(viaDrag){ acctSheetClose('authSheet', viaDrag); }
 
@@ -6840,7 +6837,6 @@ function openNewPasswordSheet(){
   if(err){ err.hidden = true; err.textContent = ''; }
   const btn = document.getElementById('newPwSubmitBtn');
   if(btn){ btn.disabled = false; btn.textContent = 'ZAPISZ'; }
-  closeAccountPanel();
   acctSheetOpen('newPasswordSheet');
 }
 function closeNewPasswordSheet(viaDrag){ acctSheetClose('newPasswordSheet', viaDrag); }
@@ -6926,7 +6922,7 @@ async function submitAuthForm(){
     }
     closeAuthSheet();
     toast(wasSignup ? 'Konto założone' : 'Zalogowano');
-    openAccountPanel();
+    renderAccountPanel();   // zostajemy na ekranie, z którego otwarto logowanie (Profil albo Ustawienia); sync odświeży resztę
   } catch(e){
     if(errEl){ errEl.textContent = 'Coś poszło nie tak. Spróbuj ponownie.'; errEl.hidden = false; }
   } finally {
@@ -7250,13 +7246,19 @@ let workoutReminder = (()=>{
   }catch(e){ return { enabled:false, time:'18:00' }; }
 })();
 function saveWorkoutReminderState(){ localStorage.setItem(LS_WORKOUT_REMINDER, JSON.stringify(workoutReminder)); }
+// pastylka „PN, ŚR, PT • 18:00”: dni z planu oznaczonego gwiazdką + godzina; wyłączone przypomnienie = brak pastylki
+const PF_DAY_SHORT = LANG === 'en' ? { mon:'MO', tue:'TU', wed:'WE', thu:'TH', fri:'FR', sat:'SA', sun:'SU' } : { mon:'PN', tue:'WT', wed:'ŚR', thu:'CZ', fri:'PT', sat:'SB', sun:'ND' };
+function reminderPillText(){
+  if(!workoutReminder.enabled) return '';
+  let days = [];
+  try{ const p = trainingPlans.find(x=> x.id === starredPlanId); if(p) days = planActiveDays(p); }catch(e){}
+  return (days.length ? days.map(d=> PF_DAY_SHORT[d]).join(', ') + ' • ' : '') + workoutReminder.time;
+}
 function renderReminderRow(){
-  const sec = document.getElementById('acctReminderSec'), rows = document.getElementById('acctReminderRows');
-  if(!sec || !rows) return;
-  if(!IS_NATIVE){ sec.hidden = true; rows.hidden = true; return; }
-  sec.hidden = false; rows.hidden = false;
-  const v = document.getElementById('acctReminderV');
-  if(v) v.textContent = workoutReminder.enabled ? ('Włączone, ' + workoutReminder.time) : 'Wyłączone';
+  const row = document.getElementById('acctReminderRows');   // wiersz w Ustawieniach (wiersz w Profilu: #pfReminderRow, widoczność ustala profileHtml)
+  if(row) row.hidden = !IS_NATIVE;
+  const txt = reminderPillText();
+  ['setReminderV', 'acctReminderV'].forEach(id=>{ const e = document.getElementById(id); if(e){ e.textContent = txt; e.hidden = !txt; } });
 }
 const REMINDER_DAY_LABEL = { mon:'pon', tue:'wt', wed:'śr', thu:'czw', fri:'pt', sat:'sob', sun:'nd' };
 function reminderPlanHint(){
@@ -7267,7 +7269,6 @@ function reminderPlanHint(){
   return 'Dni: ' + days.map(d=> REMINDER_DAY_LABEL[d]).join(', ') + ' — na podstawie planu „' + planDisplayName(p) + '”.';
 }
 function openReminderSheet(){
-  closeAccountPanel();
   const toggle = document.getElementById('reminderToggle');
   const label = document.getElementById('reminderToggleRow').querySelector('span');
   const timeRow = document.getElementById('reminderTimeRow');
@@ -7276,7 +7277,7 @@ function openReminderSheet(){
   timeRow.style.display = workoutReminder.enabled ? '' : 'none';
   document.getElementById('reminderTimeInput').value = workoutReminder.time;
   document.getElementById('reminderHint').textContent = reminderPlanHint();
-  setTimeout(()=> acctSheetOpen('reminderSheet'), 200); // po animacji zamykania panelu konta
+  acctSheetOpen('reminderSheet');
 }
 function closeReminderSheet(viaDrag){ acctSheetClose('reminderSheet', viaDrag); }
 function toggleReminderEnabled(){
@@ -7393,19 +7394,17 @@ const HEALTH_WEIGHT_DAYS = 90;
 let healthState = (()=>{ try{ const v = JSON.parse(localStorage.getItem(LS_HEALTH)); return (v && typeof v === 'object') ? v : { enabled:false }; }catch(e){ return { enabled:false }; } })();
 function saveHealthState(){ localStorage.setItem(LS_HEALTH, JSON.stringify(healthState)); }
 function renderHealthRow(){
-  const sec = document.getElementById('acctHealthSec'), rows = document.getElementById('acctHealthRows');
-  if(!sec || !rows) return;
+  const row = document.getElementById('acctHealthRows');   // wiersz w Ustawieniach (wiersz w Profilu: #pfHealthRow)
   const show = IS_NATIVE && !!capPlugin('HealthPlugin');
-  sec.hidden = !show; rows.hidden = !show;
-  const v = document.getElementById('acctHealthV');
-  if(v) v.textContent = healthState.enabled ? 'Włączone' : 'Wyłączone';
+  if(row) row.hidden = !show;
+  const v = document.getElementById('acctHealthV');   // pastylka „Połączono” w Profilu; wyłączone = brak pastylki
+  if(v){ v.textContent = t('pfConnected', 'Połączono'); v.hidden = !healthState.enabled; }
 }
 function setHealthToggleUI(on){
   document.getElementById('healthToggle').classList.toggle('on', on);
   document.getElementById('healthToggleRow').querySelector('span').textContent = on ? 'Włączone' : 'Wyłączone';
 }
 function openHealthSheet(){
-  closeAccountPanel();
   setHealthToggleUI(!!healthState.enabled);
   const st = document.getElementById('healthStatus');
   st.hidden = !healthState.lastSync;
@@ -7413,7 +7412,7 @@ function openHealthSheet(){
     const d = new Date(healthState.lastSync);
     st.textContent = 'Ostatnie sprawdzenie: ' + (dateStr(d) === todayStr() ? 'dziś' : fmtDate(dateStr(d))) + ', ' + d.toTimeString().slice(0,5) + '.';
   }
-  setTimeout(()=> acctSheetOpen('healthSheet'), 200); // po animacji zamykania panelu konta
+  acctSheetOpen('healthSheet');
 }
 function closeHealthSheet(viaDrag){ acctSheetClose('healthSheet', viaDrag); }
 function toggleHealthEnabled(){ setHealthToggleUI(!document.getElementById('healthToggle').classList.contains('on')); }
@@ -8463,13 +8462,17 @@ const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2', history: 'history-v2'
 // żeby wyjście z Profilu nie wyglądało jak zmiana zakładki (bez poślizgu kulki i obrotu ikony).
 let profileReturnRoute = 'dashboard';   // tylko w pamięci, NIE klucz localStorage
 const V3_ROUTE_ALIAS = { 'gym-v2': 'gym', 'plans-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats',
-  get 'profile-v2'(){ return V3_ROUTE_ALIAS[profileReturnRoute] || profileReturnRoute; } }; // which nav icon a v3 route should light up
+  get 'profile-v2'(){ return V3_ROUTE_ALIAS[profileReturnRoute] || profileReturnRoute; },
+  get 'profile-settings-v2'(){ return V3_ROUTE_ALIAS[profileReturnRoute] || profileReturnRoute; } }; // which nav icon a v3 route should light up
 const PROFILE_SOURCES = new Set(['dashboard','gym-v2','plans-v2','plan-editor-v2','history-v2','stats-v2']);   // ekrany, z których awatar wchodzi w Profil
+const isProfileRoute = r => r === 'profile-v2' || r === 'profile-settings-v2';   // Profil i jego podekran Ustawienia: menu ukryte, wspólne tło i blokada przewijania
 function openProfileV2(){
-  if(currentRoute !== 'profile-v2') profileReturnRoute = PROFILE_SOURCES.has(currentRoute) ? currentRoute : 'dashboard';
+  if(!isProfileRoute(currentRoute)) profileReturnRoute = PROFILE_SOURCES.has(currentRoute) ? currentRoute : 'dashboard';
   goRoute('profile-v2');
 }
 function profileBack(){ goRoute(PROFILE_SOURCES.has(profileReturnRoute) ? profileReturnRoute : 'dashboard'); }
+function openProfileSettingsV2(){ goRoute('profile-settings-v2'); }   // push z zębatki / karty „Ustawienia i konto”
+function profileSettingsBack(){ goRoute('profile-v2'); }              // pop: strzałka wstecz wraca do Profilu
 /* ============================================================
    PROFIL v2 (Figma 560:6731 / 560:7900): ekran tylko do odczytu.
    Dane liczy profileModel() na TYCH SAMYCH oczyszczonych kopiach historii co dashboard (dashWithCleanData),
@@ -8504,7 +8507,8 @@ function profileModel(now){
   now = now || new Date();
   return dashWithCleanData(now, (n, todayIso)=>{
     const recEvents = dashRecordEvents();
-    const wRecs = recordTimeline().filter(e=> e.kind === 'weight').slice().sort((a, b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : b.pos - a.pos).slice(0, 3);
+    // te same rodzaje rekordów co kafel REKORDÓW (dashRecordEvents): ciężar, powtórzenia, czas (bez rekordu objętości)
+    const wRecs = recordTimeline().filter(e=> e.kind !== 'volume').slice().sort((a, b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : b.pos - a.pos).slice(0, 3);
     let volume = 0;
     workouts.forEach(w=>{ try{ volume += workoutSumStats(w).volume; }catch(e){} });
     // „W Mekkio od …”: najwcześniejsza data treningu albo wpisu wagi (bez nowego pola)
@@ -8875,10 +8879,10 @@ function profileHtml(m, animate){
   let subTxt = '';
   if(!named && !m.hasPhoto) subTxt = t('pfAddNamePhoto', 'Dodaj imię i zdjęcie');
   else if(m.since){ const [y, mo] = m.since.split('-'); const when = `${PF_MON_GEN[+mo - 1]} ${y}`; subTxt = t('pfSince', `W Mekkio od ${when}`, when); }
-  const idHtml = `<div class="profil-id${animate ? ' m-rise' : ''}">${av}<button type="button" class="profil-id-txt m-press" onclick="openNameEdit()"><h2 class="profil-name">${named ? E(m.name) : t('pfHello', 'Cześć')}</h2>${subTxt ? `<p class="profil-since">${E(subTxt)}</p>` : ''}</button></div>`;
+  const idHtml = `<div class="profil-id${animate ? ' m-rise' : ''}">${av}<button type="button" class="profil-id-txt m-press" onclick="openNameEdit()"><h2 class="profil-name" id="acctName">${named ? E(m.name) : t('pfHello', 'Cześć')}</h2><p class="profil-since" id="acctSub"${subTxt ? '' : ' hidden'}>${E(subTxt)}</p></button></div>`;
   // ---- karta logowania (gość) + statystyki ----
-  const loginCard = (!m.signedIn && SUPABASE_CONFIGURED)
-    ? `<div class="pf-card pf-card--12${rc(0)}"><h3 class="pf-empty-t">${t('pfSaveTitle', 'Zapisz swoje dane')}</h3><p class="pf-empty-d">${t('pfSaveText', 'Zaloguj się, żeby nie stracić treningów po zmianie telefonu.')}</p><button type="button" class="pf-btn m-press" onclick="openAuthSheet('login')">${t('pfLogin', 'ZALOGUJ SIĘ')}</button></div>` : '';
+  // karta jest zawsze w DOM (ID acctCloudCta = kontrakt hooka); renderAcctCloudCard chowa ją po zalogowaniu
+  const loginCard = `<div class="pf-card pf-card--12${rc(0)}" data-pf-login${(!m.signedIn && SUPABASE_CONFIGURED) ? '' : ' hidden'}><h3 class="pf-empty-t">${t('pfSaveTitle', 'Zapisz swoje dane')}</h3><p class="pf-empty-d">${t('pfSaveText', 'Zaloguj się, żeby nie stracić treningów po zmianie telefonu.')}</p><button type="button" class="pf-btn m-press" id="acctCloudCta" onclick="openAuthSheet('login')">${t('pfLogin', 'ZALOGUJ SIĘ')}</button></div>`;
   const wc = m.workoutCount, rcnt = m.recordCount;
   const wLbl = wc === 1 ? t('pfWorkoutsOne', 'TRENING') : t('pfWorkoutsMany', plTreningWord(wc).toUpperCase());
   const rLbl = rcnt === 1 ? t('pfRecordsOne', 'REKORD') : t('pfRecordsMany', plRekordWord(rcnt).toUpperCase());
@@ -8887,12 +8891,12 @@ function profileHtml(m, animate){
     <div class="pf-stat pf-stat--vol"><span class="pf-stat-v">${E(pfVolumeText(m.volumeKg))}</span><span class="pf-stat-l">${t('pfVolume', 'OBJĘTOŚĆ')}</span></div><i class="pf-vsep" aria-hidden="true"></i>
     <div class="pf-stat pf-stat--rec"><span class="pf-stat-v">${rcnt}</span><span class="pf-stat-l">${rLbl}</span></div></div>`;
   const top = `<div class="profil-stack-top">${loginCard}${stats}</div>`;
-  // ---- Rekordy: 3 najświeższe rekordy ciężaru (sam ciężar, delta w tej samej jednostce) ----
+  // ---- Rekordy: 3 najświeższe rekordy (ciężar / powtórzenia / czas, delta w tej samej jednostce) ----
   let recBody;
   if(m.records.length){
-    recBody = `<div class="pf-card"><div class="pf-rows">${m.records.map((r, i)=> `<button type="button" class="pf-row m-press" onclick="profileOpenRecord(${i})" aria-label="${E(r.name)}, ${E(fmtGymWeight(r.value))} kg, ${E(fmtDayMonShort(r.date))}">
+    recBody = `<div class="pf-card"><div class="pf-rows">${m.records.map((r, i)=> `<button type="button" class="pf-row m-press" onclick="profileOpenRecord(${i})" aria-label="${E(r.name)}, ${E(pfRecValue(r))}, ${E(fmtDayMonShort(r.date))}">
       <span class="pf-row-l"><span class="pf-row-n">${E(r.name)}</span><span class="pf-row-s">${E(fmtDayMonShort(r.date))}</span></span>
-      <span class="pf-row-r"><span>${E(fmtGymWeight(r.value))} kg</span>${r.delta > 0 ? `<span class="pf-pill">+${E(fmtGymWeight(r.delta))} kg</span>` : ''}</span></button>`).join('')}</div></div>`;
+      <span class="pf-row-r"><span>${E(pfRecValue(r))}</span>${r.delta > 0 ? `<span class="pf-pill">${E(pfRecDelta(r))}</span>` : ''}</span></button>`).join('')}</div></div>`;
   } else {
     recBody = `<div class="pf-card"><h3 class="pf-empty-t">${t('pfNoRecTitle', 'Tu pojawią się Twoje rekordy.')}</h3><p class="pf-empty-d">${t('pfNoRecText', 'Pierwszy zobaczysz po pierwszym treningu.')}</p><button type="button" class="pf-btn pf-btn--ghost m-press" onclick="navTap('gym')">${t('pfStart', 'ZACZNIJ TRENING')}</button></div>`;
   }
@@ -8902,27 +8906,48 @@ function profileHtml(m, animate){
   const badgeSec = typeof profileBadgesHtml === 'function' ? profileBadgesHtml(m, rc(3)) : '';
   // ---- Ciało ----
   const b = m.body, wt = m.weight;
+  const lastD = lastWeightDate(), lastUpdTxt = lastD ? t('pfWeightUpd', `Ostatnia aktualizacja wagi: ${fmtDate(lastD)}`, fmtDate(lastD)) : '';
   let bodyBody;
   if(wt.hasData){
     const d = wt.delta30;
     const dHtml = d == null ? '' : `<div class="pf-weight-d">${d !== 0 ? `<span class="pf-ico" style="width:12px;height:12px">${d < 0 ? PF_ICO.down : PF_ICO.up}</span>` : ''}<b>${d > 0 ? '+' : d < 0 ? '−' : ''}${E(fmtKg(Math.abs(d)))} kg</b><span>${t('pfDays30', '/ 30 dni')}</span></div>`;
     const chart = wt.points.length >= 2 ? pfChartSvg(wt.points) : '';
     const ageTxt = b.age ? `${b.age} ${LANG==='en' ? t('pfYears', 'yrs') : plLatWord(b.age)}` : '';
-    const col = (v, lbl, none)=> `<button type="button" class="pf-body-c m-press" onclick="openBodyDataSheet()"><span class="pf-body-v${none ? ' pf-body-v--none' : ''}">${v}</span><span class="pf-stat-l">${lbl}</span></button>`;
+    const col = (v, lbl, none, id)=> `<button type="button" class="pf-body-c m-press" onclick="openBodyDataSheet()"><span class="pf-body-v${none ? ' pf-body-v--none' : ''}" id="${id}">${v}</span><span class="pf-stat-l">${lbl}</span></button>`;
     const sexV = b.sex ? `<span class="pf-ico" style="width:35px;height:35px" role="img" aria-label="${b.sex === 'f' ? t('pfFemale', 'Kobieta') : t('pfMale', 'Mężczyzna')}">${b.sex === 'f' ? PF_ICO.female : PF_ICO.male}</span>` : '—';
     bodyBody = `<div class="pf-card pf-card--12"><div class="pf-weight">
-      <p class="pf-weight-lbl">${t('pfWeight', 'WAGA')}</p>
-      <div class="pf-weight-main"><div class="pf-weight-l"><div class="pf-weight-num"><span class="pf-weight-v">${E(fmtKg(wt.kg))}</span><span class="pf-weight-u">kg</span></div>${dHtml}</div>${chart}</div>
+      <p class="pf-weight-lbl">${t('pfWeight', 'WAGA')}</p><p class="set-hint" id="acctWeightUpd" hidden>${E(lastUpdTxt)}</p>
+      <div class="pf-weight-main"><div class="pf-weight-l"><div class="pf-weight-num"><span class="pf-weight-v" id="acctWeightV">${E(fmtKg(wt.kg))}</span><span class="pf-weight-u">kg</span></div>${dHtml}</div>${chart}</div>
       <div class="pf-hsep"></div>
-      <div class="pf-body">${col(b.heightCm ? `${b.heightCm} cm` : '—', t('pfHeight', 'WZROST'), !b.heightCm)}<i class="pf-vsep" aria-hidden="true"></i>${col(ageTxt ? E(ageTxt) : '—', t('pfAge', 'WIEK'), !ageTxt)}<i class="pf-vsep" aria-hidden="true"></i>${col(sexV, t('pfSex', 'PŁEĆ'), !b.sex)}</div>
+      <div class="pf-body">${col(b.heightCm ? `${b.heightCm} cm` : '—', t('pfHeight', 'WZROST'), !b.heightCm, 'acctHeightV')}<i class="pf-vsep" aria-hidden="true"></i>${col(ageTxt ? E(ageTxt) : '—', t('pfAge', 'WIEK'), !ageTxt, 'acctAgeV')}<i class="pf-vsep" aria-hidden="true"></i>${col(sexV, t('pfSex', 'PŁEĆ'), !b.sex, 'acctSexV')}</div>
       <button type="button" class="pf-btn m-press" style="margin-top:0" onclick="openWeightSheet()">${t('pfAddWeight', 'DODAJ WAGĘ')}</button></div></div>`;
   } else {
     const bodySub = (b.heightCm || b.age || b.sex) ? [b.heightCm ? `${b.heightCm} cm` : '', b.age ? `${b.age} ${LANG==='en' ? t('pfYears', 'yrs') : plLatWord(b.age)}` : '', b.sex ? (b.sex === 'f' ? t('pfFemale', 'Kobieta') : t('pfMale', 'Mężczyzna')) : ''].filter(Boolean).join(' · ') : t('pfBodyRowSub', 'Do wyliczania kalorii');
-    const row = (n, s, fn)=> `<button type="button" class="pf-row m-press" onclick="${fn}"><span class="pf-row-l"><span class="pf-row-n">${n}</span><span class="pf-row-s pf-row--help" style="color:var(--m-muted-text)">${E(s)}</span></span><span class="pf-ico" style="width:16px;height:16px;color:var(--m-ink)">${PF_ICO.caret16}</span></button>`;
-    bodyBody = `<div class="pf-card"><h3 class="pf-empty-t" style="margin-bottom:14px">${t('pfNoWeightTitle', 'Dodaj wagę, żeby śledzić zmiany')}</h3><div class="pf-rows">${row(t('pfWeightRow', 'Waga'), t('pfWeightRowSub', 'Dodaj pierwszy wpis'), 'openWeightSheet()')}${row(t('pfBodyRow', 'Wzrost, wiek, płeć'), bodySub, 'openBodyDataSheet()')}</div></div>`;
+    const row = (n, s, fn, sId, extra)=> `<button type="button" class="pf-row pf-row--help m-press" onclick="${fn}"><span class="pf-row-l"><span class="pf-row-n">${n}</span><span class="pf-row-s"${sId ? ` id="${sId}"` : ''}>${E(s)}</span>${extra || ''}</span><span class="pf-ico pf-ico--16 pf-chev">${PF_ICO.caret16}</span></button>`;
+    // hooki acct* bez widocznego miejsca w stanie pustym: ukryte, żeby każde ID istniało dokładnie raz
+    const hooks = `<span hidden><span id="acctHeightV">${b.heightCm ? `${b.heightCm} cm` : '—'}</span><span id="acctAgeV">${b.age ? `${b.age} ${LANG==='en' ? t('pfYears', 'yrs') : plLatWord(b.age)}` : '—'}</span><span id="acctSexV">${b.sex === 'f' ? t('pfFemale', 'Kobieta') : b.sex === 'm' ? t('pfMale', 'Mężczyzna') : '—'}</span><span id="acctWeightUpd">${E(lastUpdTxt)}</span></span>`;
+    bodyBody = `<div class="pf-card"><h3 class="pf-empty-t" style="margin-bottom:14px">${t('pfNoWeightTitle', 'Dodaj wagę, żeby śledzić zmiany')}</h3><div class="pf-rows">${row(t('pfWeightRow', 'Waga'), t('pfWeightRowSub', 'Dodaj pierwszy wpis'), 'openWeightSheet()', 'acctWeightV')}${row(t('pfBodyRow', 'Wzrost, wiek, płeć'), bodySub, 'openBodyDataSheet()', '', hooks)}</div></div>`;
   }
   const bodySec = sec(t('pfBody', 'CIAŁO'), '', bodyBody, 4);
-  return `${idHtml}<div class="profil-stack">${top}${recSec}${badgeSec}${bodySec}</div><p class="pf-foot">Mekkio ${E(APP_VERSION)}</p>`;
+  // ---- Cele i trener (stan nowego gościa: ukryte, ID zostają w DOM) ----
+  const chev = `<span class="pf-ico pf-ico--16 pf-chev">${PF_ICO.caret16}</span>`;
+  const fillTxt = t('pfFill', 'Uzupełnij');
+  const goalTxt = AI_GOAL_LABELS[aiPrefs.goal] ? t('aiGoal_' + aiPrefs.goal, AI_GOAL_LABELS[aiPrefs.goal]) : fillTxt;
+  const avoidTxt = aiPrefs.avoid ? (aiPrefs.avoid.length > 24 ? aiPrefs.avoid.slice(0, 24) + '…' : aiPrefs.avoid) : fillTxt;
+  const aiRow = (n, v, id)=> `<button type="button" class="pf-row pf-row--help m-press" onclick="openAiPrefsSheet()"><span class="pf-row-l"><span class="pf-row-n">${n}</span><span class="pf-row-s" id="${id}">${E(v)}</span></span>${chev}</button>`;
+  const aiSec = `<section class="pf-sec${rc(5)}"${m.isNew ? ' hidden' : ''}><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('pfGoals', 'CELE I TRENER')}</h2></div>
+    <div class="pf-card"><div class="pf-rows pf-rows--dyn">${aiRow(t('pfGoal', 'Cel treningowy'), goalTxt, 'acctAiGoalV')}${aiRow(t('pfAvoid', 'Czego unikać'), avoidTxt, 'acctAiAvoidV')}<div class="pf-row pf-row--info pf-row--help"><span class="pf-row-l"><span class="pf-row-n">${t('pfCoach', 'Trener AI')}</span><span class="pf-row-s">${t('pfCoachSub', 'Podpowiedzi po każdym treningu')}</span></span></div></div></div></section>`;
+  // ---- Połączenia: widoczne tylko w apce na iPhone'ie (jak dawne renderHealthRow / renderReminderRow) ----
+  const showHealth = IS_NATIVE && !!capPlugin('HealthPlugin'), showRem = IS_NATIVE;
+  const remTxt = reminderPillText();
+  const connSec = `<section class="pf-sec${rc(6)}"${(m.isNew || (!showHealth && !showRem)) ? ' hidden' : ''}><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('pfConn', 'POŁĄCZENIA')}</h2></div>
+    <div class="pf-card"><div class="pf-rows pf-rows--dyn">
+      <button type="button" class="pf-row pf-row--help m-press" id="pfHealthRow" onclick="openHealthSheet()"${showHealth ? '' : ' hidden'}><span class="pf-row-l"><span class="pf-row-n">${t('setHealth', 'Apple Zdrowie')}</span><span class="pf-row-s">${t('setHealthSub', 'Waga i kalorie z zegarka')}</span></span><span class="pf-row-r"><span class="pf-pill" id="acctHealthV"${healthState.enabled ? '' : ' hidden'}>${t('pfConnected', 'Połączono')}</span>${chev}</span></button>
+      <button type="button" class="pf-row pf-row--help m-press" id="pfReminderRow" onclick="openReminderSheet()"${showRem ? '' : ' hidden'}><span class="pf-row-l"><span class="pf-row-n">${t('setReminder', 'Przypomnienie o treningu')}</span><span class="pf-pill" id="acctReminderV"${remTxt ? '' : ' hidden'}>${E(remTxt)}</span></span>${chev}</button>
+    </div></div></section>`;
+  // ---- karta „Ustawienia i konto” → ekran Ustawień (okno Mekkio+ odłożone, więc bez wiersza „Odblokuj”) ----
+  const setCard = `<div class="pf-card${rc(7)}"><div class="pf-rows"><button type="button" class="pf-row pf-row--help m-press" onclick="openProfileSettingsV2()"><span class="pf-row-l"><span class="pf-row-n">${t('pfSettings', 'Ustawienia i konto')}</span><span class="pf-row-s">${t('pfSettingsSub', 'Dźwięki, dane, konto')}</span></span>${chev}</button></div></div>`;
+  return `${idHtml}<div class="profil-stack">${top}${recSec}${badgeSec}${bodySec}${aiSec}${connSec}${setCard}</div><p class="pf-foot">Mekkio <span id="acctVer">${E(APP_VERSION)}</span></p>`;
 }
 function renderProfileV2(animate){
   const host = document.getElementById('profilBody');
@@ -8940,10 +8965,78 @@ function renderProfileV2(animate){
   profileRefreshScroll();
   requestAnimationFrame(profileRefreshScroll);
 }
-window.addEventListener('resize', ()=>{ if(currentRoute === 'profile-v2') profileRefreshScroll(); });
+/* ---- Ustawienia (Figma 560:8368): podekran Profilu. Wszystkie akcje to te same funkcje co w dawnym panelu konta
+   (exportData, importFile, openFeedbackV2, openChangelogHistorySheet, signOutCloud, deleteAccountV2, setSoundOn, openAuthSheet, openReminderSheet, openHealthSheet).
+   Wiersze „Język” i „Jednostki” z Figmy pominięte (kod ich nie ma; język czeka na tłumaczenia EN). Bez „Odblokuj / MEKKIO+” (okno Mekkio+ odłożone). ---- */
+Object.assign(T_EN, {
+  aiGoal_masa: 'Mass', aiGoal_sila: 'Strength', aiGoal_wytrzymalosc: 'Endurance', aiGoal_ogolna: 'General fitness',
+  pfFill: 'Fill in', pfGoals: 'GOALS AND COACH', pfGoal: 'Training goal', pfAvoid: 'What to avoid', pfCoach: 'AI Coach', pfCoachSub: 'Tips after every workout',
+  pfConn: 'CONNECTIONS', pfConnected: 'Connected', pfSettings: 'Settings and account', pfSettingsSub: 'Sounds, data, account', pfWeightUpd: d => `Last weight update: ${d}`,
+  setTitle: 'SETTINGS', setNotif: 'NOTIFICATIONS AND SOUND', setData: 'DATA AND PRIVACY', setHelp: 'HELP', setAccount: 'ACCOUNT',
+  setReminder: 'Workout reminder', setSounds: 'Sounds', setSoundsSub: 'Rest countdown and end of workout', setHealth: 'Apple Health', setHealthSub: 'Weight and calories from your watch',
+  setExportCloud: 'Download my data', setExportCloudSub: 'Backup in a file', setExportLocal: 'Create a backup', setExportLocalSub: '.json file',
+  setImport: 'Restore a backup', setImportSub: 'Backup file', setPrivacy: 'Privacy policy',
+  setBackupCloud: 'Your workouts and plans are safe in the cloud. Here you can download your data in one file.', setBackupLocal: 'Without an account your data stays on this phone only. Make a backup or create an account.',
+  setFootCloud: 'Your data syncs with the cloud', setFootLocal: 'Your data stays on this phone only',
+  setWrite: 'Write to us', setWriteSub: 'Feedback and ideas', setWhatsNew: "What's new", setWhatsNewSub: 'Version history',
+  setLogin: 'Log in', setLoginSub: 'Save your data in the cloud', setLogout: 'Log out', setDelete: 'Delete account', setDeleteSub: 'Permanently deletes your account and cloud data',
+  setAppleRelay: 'Hidden e-mail (Apple)', setViaApple: 'Signed in with Apple', setViaGoogle: 'Signed in with Google', setViaEmail: 'Signed in with e-mail', setSignedIn: 'Signed in',
+});
+function buildProfileSettingsV2(animate){
+  const host = document.getElementById('profilSettingsBody');
+  if(!host) return;
+  const rc = i => animate ? ` m-rise-tile" style="--i:${i}` : '';
+  const E = escHtml;
+  const chev = `<span class="pf-ico pf-ico--16 pf-chev">${PF_ICO.caret16}</span>`;
+  // jeden wiersz: tag (button / a / div info), tytuł, podpis, prawa strona (domyślnie chevron), dodatkowa treść pod tytułem
+  const row = o=>{
+    const tag = o.href ? 'a' : (o.info ? 'div' : 'button');
+    const attrs = (o.href ? `href="${o.href}" target="_blank" rel="noopener"` : o.info ? '' : `type="button" onclick="${o.on}"`) + (o.id ? ` id="${o.id}"` : '') + (o.hidden ? ' hidden' : '') + (o.extra || '');
+    const cls = 'pf-row' + ((o.s != null || o.help) ? ' pf-row--help' : '') + (o.info ? ' pf-row--info' : ' m-press') + (o.danger ? ' pf-row--danger' : '');
+    return `<${tag} class="${cls}" ${attrs}><span class="pf-row-l"><span class="pf-row-n"${o.nId ? ` id="${o.nId}"` : ''}>${o.n}</span>${o.s != null ? `<span class="pf-row-s"${o.sId ? ` id="${o.sId}"` : ''}>${o.s}</span>` : ''}${o.under || ''}</span>${o.right === undefined ? chev : o.right}</${tag}>`;
+  };
+  const sec = (id, label, rows, i, hint)=> `<section class="pf-sec${rc(i)}"${id ? ` id="${id}"` : ''}><div class="pf-sec-h"><h2 class="pf-sec-lbl">${label}</h2></div><div class="pf-card"><div class="pf-rows pf-rows--dyn">${rows}</div></div>${hint || ''}</section>`;
+  const showHealth = IS_NATIVE && !!capPlugin('HealthPlugin');
+  const sec1 = sec('', t('setNotif', 'POWIADOMIENIA I DŹWIĘK'),
+    row({ id: 'acctReminderRows', on: 'openReminderSheet()', n: t('setReminder', 'Przypomnienie o treningu'), hidden: !IS_NATIVE, help: true, under: '<span class="pf-pill" id="setReminderV" hidden></span>' }) +
+    row({ id: 'setSoundRow', on: 'setSoundOn(!soundOn)', n: t('setSounds', 'Dźwięki'), s: t('setSoundsSub', 'Odliczanie przerwy i koniec treningu'),
+      extra: ` role="switch" aria-checked="${soundOn ? 'true' : 'false'}"`, right: `<span class="acct-toggle acct-toggle--s${soundOn ? ' on' : ''}" id="acctSoundToggle"><span class="acct-toggle-knob"></span></span>` }), 0);
+  const sec2 = sec('', t('setData', 'DANE I PRYWATNOŚĆ'),
+    row({ id: 'acctHealthRows', on: 'openHealthSheet()', n: t('setHealth', 'Apple Zdrowie'), s: t('setHealthSub', 'Waga i kalorie z zegarka'), hidden: !showHealth }) +
+    row({ on: 'exportData()', n: t('setExportLocal', 'Utwórz kopię zapasową'), nId: 'acctExportLabel', s: t('setExportLocalSub', 'Plik .json'), sId: 'setExportSub' }) +
+    row({ id: 'acctImportRow', on: "document.getElementById('importFile').click()", n: t('setImport', 'Wczytaj kopię'), s: t('setImportSub', 'Plik z kopią zapasową') }) +
+    row({ href: './polityka-prywatnosci.html', n: t('setPrivacy', 'Polityka prywatności') }), 1,
+    `<p class="set-hint" id="acctBackupHint"></p>`);
+  // id acctBackupSec zostaje na etykiecie sekcji (hook z dawnego panelu)
+  const sec3 = sec('', t('setHelp', 'POMOC'),
+    row({ on: 'openFeedbackV2()', n: t('setWrite', 'Napisz do nas'), s: t('setWriteSub', 'Opinia i pomysły') }) +
+    row({ on: 'openChangelogHistorySheet()', n: t('setWhatsNew', 'Co nowego'), s: t('setWhatsNewSub', 'Historia zmian'),
+      right: `<span class="pf-row-r"><span class="pf-pill pf-pill--tint" id="acctChlVer">${E(APP_VERSION)}</span>${chev}</span>` }), 2);
+  const sec4 = sec('setAccountSec', t('setAccount', 'KONTO'),
+    row({ id: 'setLoginRow', on: "openAuthSheet('login')", n: t('setLogin', 'Zaloguj się'), s: t('setLoginSub', 'Zapisz dane w chmurze'), hidden: true }) +
+    row({ id: 'acctCloudSignedIn', info: true, n: '', nId: 'acctCloudEmail', s: '', sId: 'setProvider', right: '', hidden: true }) +
+    row({ id: 'setSignOutRow', on: 'signOutCloud()', n: t('setLogout', 'Wyloguj się'), hidden: true }) +
+    row({ id: 'acctDangerZone', on: 'deleteAccountV2()', n: t('setDelete', 'Usuń konto'), s: t('setDeleteSub', 'Trwale usuwa konto i dane w chmurze'), danger: true, hidden: true }), 3);
+  host.innerHTML = `<div class="set-stack">${sec1}${sec2.replace('<h2 class="pf-sec-lbl">', '<h2 class="pf-sec-lbl" id="acctBackupSec">')}${sec3}${sec4}</div><p class="pf-foot">Mekkio <span id="setVer">${E(APP_VERSION)}</span><span id="acctFootData" hidden></span></p>`;
+}
+function renderProfileSettingsV2(animate){
+  if(animate){ document.body.scrollTop = 0; document.documentElement.scrollTop = 0; }
+  try{
+    buildProfileSettingsV2(!!animate);
+    renderAccountPanel();   // wypełnia kopię, konto, przypomnienie, Zdrowie, dźwięk
+  } catch(err){
+    console.error('settings render failed', err);
+    const host = document.getElementById('profilSettingsBody');
+    if(host) host.innerHTML = `<div class="pf-card" style="margin-top:42px"><p class="pf-empty-d" style="margin:0">${t('renderRetry', 'Spróbuj ponownie')}</p></div>`;
+  }
+  profileRefreshScroll();
+  requestAnimationFrame(profileRefreshScroll);
+}
+buildProfileSettingsV2(false);   // markup Ustawień istnieje od startu (hooki acct* zawsze w DOM); przy wejściu na ekran budowany ponownie z animacją
+window.addEventListener('resize', ()=>{ if(isProfileRoute(currentRoute)) profileRefreshScroll(); });
 // Profil jest długi i zawsze przewijany, gdy treść wyjdzie poza ekran (menu jest ukryte, więc porównujemy z dołem okna).
 function profileRefreshScroll(){
-  const panel = document.getElementById('profilPanel');
+  const panel = document.getElementById(currentRoute === 'profile-settings-v2' ? 'profilSettingsPanel' : 'profilPanel');
   let needsScroll = false;
   if(panel) needsScroll = panel.getBoundingClientRect().top + panel.scrollHeight > window.innerHeight;
   document.documentElement.classList.toggle('profil-scrollable', needsScroll);
@@ -9025,13 +9118,15 @@ function goRoute(route){
   const drill = (currentRoute === 'plans-v2' && route === 'plan-editor-v2')
              || (currentRoute === 'plan-editor-v2' && route === 'plans-v2')
              || (route === 'profile-v2' && PROFILE_SOURCES.has(currentRoute))
-             || (currentRoute === 'profile-v2' && PROFILE_SOURCES.has(route));
-  const forward = (route === 'plan-editor-v2' && currentRoute === 'plans-v2') || route === 'profile-v2';
+             || (currentRoute === 'profile-v2' && PROFILE_SOURCES.has(route))
+             || (route === 'profile-settings-v2' && currentRoute === 'profile-v2')
+             || (currentRoute === 'profile-settings-v2' && route === 'profile-v2');
+  const forward = (route === 'plan-editor-v2' && currentRoute === 'plans-v2') || (route === 'profile-v2' && currentRoute !== 'profile-settings-v2') || route === 'profile-settings-v2';
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward, !drill);
-  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2' || route==='history-v2' || route==='stats-v2' || route==='profile-v2';
-  document.getElementById('bottomNav').style.display = route==='profile-v2' ? 'none' : 'flex';
+  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plan-editor-v2' || route==='history-v2' || route==='stats-v2' || isProfileRoute(route);
+  document.getElementById('bottomNav').style.display = isProfileRoute(route) ? 'none' : 'flex';
   document.getElementById('bottomNav').classList.toggle('bottom-nav-light', isV3);
   // Only rebuild the button set when the v3-ness actually changes — every
   // goRoute() call within the same context (e.g. gym-v2 -> plans-v2, both
@@ -9062,9 +9157,9 @@ function goRoute(route){
   // just one screen deeper) but has its own red page background
   // (.pev2-bg) instead of Plans v2's flat lilac (.plansv2-bg) — see the
   // comment on .pev2-card's CSS.
-  document.documentElement.classList.toggle('profil-lock', route==='profile-v2');
-  if(route!=='profile-v2') document.documentElement.classList.remove('profil-scrollable');
-  document.body.classList.toggle('profil-bg', route==='profile-v2');
+  document.documentElement.classList.toggle('profil-lock', isProfileRoute(route));
+  if(!isProfileRoute(route)) document.documentElement.classList.remove('profil-scrollable');
+  document.body.classList.toggle('profil-bg', isProfileRoute(route));
   document.documentElement.classList.toggle('plansv2-lock', route==='plans-v2' || route==='plan-editor-v2');
   document.body.classList.toggle('plansv2-bg', route==='plans-v2');
   document.body.classList.toggle('pev2-bg', route==='plan-editor-v2');
@@ -9084,6 +9179,7 @@ function goRoute(route){
   if(route==='history-v2'){ previewMode = true; renderCalendarV2(true); }
   if(route==='stats-v2'){ previewMode = true; statsV2CaroPage = 0; renderStatsV2(true); }
   if(route==='profile-v2'){ previewMode = true; renderProfileV2(true); }
+  if(route==='profile-settings-v2'){ previewMode = true; renderProfileSettingsV2(true); }
   commitViewTransition();
   window.scrollTo(0,0);
 }
@@ -9101,7 +9197,7 @@ function goRoute(route){
     if(!isTextField(e.target)) return;
     setTimeout(()=>{
       if(isTextField(document.activeElement)) return;
-      nav.style.display = (currentRoute==='welcome' || currentRoute==='profile-v2') ? 'none' : 'flex';
+      nav.style.display = (currentRoute==='welcome' || isProfileRoute(currentRoute)) ? 'none' : 'flex';
     }, 60);
   });
 })();
