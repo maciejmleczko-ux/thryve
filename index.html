@@ -5891,7 +5891,7 @@ function renderAccountPanel(){
   const impRow = document.getElementById('acctImportRow');
   if(impRow) impRow.hidden = !!inCloud;
   set('acctBackupHint', inCloud
-    ? t('setBackupCloud', 'Treningi i plany są bezpieczne w chmurze. Tu pobierzesz swoje dane w jednym pliku.')
+    ? t('setBackupCloud', 'Treningi i plany masz w chmurze. Tu pobierzesz swoje dane w jednym pliku.')
     : t('setBackupLocal', 'Bez konta dane są tylko na tym telefonie. Zrób kopię albo załóż konto.'));
   renderAcctCloudCard();
   renderReminderRow();
@@ -6907,7 +6907,7 @@ async function signOutCloud(){
   await supabaseClient.auth.signOut();
   await clearCachedCloudResponses();
   renderAccountPanel();
-  toast('Wylogowano');
+  toast(t('setLoggedOut', 'Wylogowano'));
 }
 // Older service-worker versions cached Supabase API responses (user data)
 // in Cache Storage. Drop them on sign-out / account deletion.
@@ -8338,7 +8338,7 @@ Object.assign(T_EN, {
   pfSince: m => `Since ${m}`, pfHello: 'Hi', pfAddNamePhoto: 'Add name and photo',
   pfWorkoutsOne: 'WORKOUT', pfWorkoutsMany: 'WORKOUTS', pfVolume: 'VOLUME', pfRecordsOne: 'RECORD', pfRecordsMany: 'RECORDS',
   pfSaveTitle: 'Save your data', pfSaveText: 'Log in so you don\'t lose your workouts when you change phones.', pfLogin: 'LOG IN',
-  pfRecords: 'RECORDS', pfAll: 'ALL', pfNoRecTitle: 'Your records will show up here.', pfNoRecText: 'You\'ll see the first one after your first workout.', pfStart: 'START A WORKOUT',
+  pfRecords: 'RECORDS', pfAll: 'ALL', pfNoRecTitle: 'Your records will show up here.', pfNoRecText: 'You\'ll see the first one after you save a workout.', pfStart: 'START A WORKOUT',
   pfBody: 'BODY', pfWeight: 'WEIGHT', pfDays30: '/ 30 days', pfHeight: 'HEIGHT', pfAge: 'AGE', pfSex: 'SEX', pfAddWeight: 'ADD WEIGHT',
   pfNoWeightTitle: 'Add your weight to track changes', pfWeightRow: 'Weight', pfWeightRowSub: 'Add your first entry', pfBodyRow: 'Height, age, sex', pfBodyRowSub: 'Used to estimate calories',
   pfBadges: 'BADGES', pfClose: 'Close', pfBadgesAria: (a, b) => `Badges earned: ${a} of ${b}`, pfBadgeTodoFirst: 'Save your first workout.', pfYears: 'yrs', pfMale: 'Male', pfFemale: 'Female',
@@ -8474,7 +8474,7 @@ Object.assign(T_EN, {
   pfRecMonths: 'Months', pfRecExercises: 'Exercises',
   pfRecN: n => `${n} ${n === 1 ? 'record' : 'records'}`, pfRecW: n => `${n} ${n === 1 ? 'workout' : 'workouts'}`,
   pfRecPrev: 'Previous month', pfRecNext: 'Next month',
-  pfRecHintSwipe: 'Swipe left or right to change month.', pfRecHintTap: 'Tap a record to see the workout.',
+  pfRecHintSwipe: 'Swipe sideways to change month.', pfRecHintTap: 'Tap a record to see the workout.',
 });
 function profileRecordsModel(now){
   now = now || new Date();
@@ -8566,15 +8566,15 @@ function pfRecMonthsBodyHtml(S){
       <div class="pf-rm-dots" id="pfRecDots" aria-hidden="true">${pfRecDotsHtml(n, S.idx)}</div>
     </div>
     <div class="pf-rm-card" id="pfRecList"><div class="pf-rows">${pfRecRowsHtml(mo.records, true)}</div></div>
-    <p class="pf-rm-hint">${n > 1 ? `<span>${escHtml(t('pfRecHintSwipe', 'Przesuń w lewo lub w prawo, żeby zmienić miesiąc.'))}</span>` : ''}<span>${escHtml(t('pfRecHintTap', 'Tapnij rekord, żeby zobaczyć trening.'))}</span></p>`;
+    <p class="pf-rm-hint">${n > 1 ? `<span>${escHtml(t('pfRecHintSwipe', 'Przesuń w bok, żeby zmienić miesiąc.'))}</span>` : ''}<span>${escHtml(t('pfRecHintTap', 'Dotknij rekordu, żeby zobaczyć trening.'))}</span></p>`;
 }
 function pfRecEmptyHtml(){
-  return `<div class="pf-rm-empty"><h3 class="pf-empty-t">${escHtml(t('pfNoRecTitle', 'Tu pojawią się Twoje rekordy.'))}</h3><p class="pf-empty-d">${escHtml(t('pfNoRecText', 'Pierwszy zobaczysz po pierwszym treningu.'))}</p></div>`;
+  return `<div class="pf-rm-empty"><h3 class="pf-empty-t">${escHtml(t('pfNoRecTitle', 'Tu pojawią się Twoje rekordy.'))}</h3><p class="pf-empty-d">${escHtml(t('pfNoRecText', 'Pierwszy zobaczysz po zapisaniu treningu.'))}</p></div>`;
 }
 function pfRecExercisesBodyHtml(S){
   if(!S.m.exercises.length) return pfRecEmptyHtml();
   return `<div class="pf-rm-card"><div class="pf-rows">${pfRecRowsHtml(S.m.exercises, false)}</div></div>
-    <p class="pf-rm-hint"><span>${escHtml(t('pfRecHintTap', 'Tapnij rekord, żeby zobaczyć trening.'))}</span></p>`;
+    <p class="pf-rm-hint"><span>${escHtml(t('pfRecHintTap', 'Dotknij rekordu, żeby zobaczyć trening.'))}</span></p>`;
 }
 function pfRecSync(){
   const S = pfRec; if(!S) return;
@@ -8752,7 +8752,7 @@ function profileHtml(m, animate){
       <span class="pf-row-l"><span class="pf-row-n">${E(r.name)}</span><span class="pf-row-s">${E(fmtDayMonShort(r.date))}</span></span>
       <span class="pf-row-r"><span>${E(pfRecValue(r))}</span>${r.delta > 0 ? `<span class="pf-pill">${E(pfRecDelta(r))}</span>` : ''}</span></button>`).join('')}</div></div>`;
   } else {
-    recBody = `<div class="pf-card"><h3 class="pf-empty-t">${t('pfNoRecTitle', 'Tu pojawią się Twoje rekordy.')}</h3><p class="pf-empty-d">${t('pfNoRecText', 'Pierwszy zobaczysz po pierwszym treningu.')}</p><button type="button" class="pf-btn pf-btn--ghost m-press" onclick="navTap('gym')">${t('pfStart', 'ZACZNIJ TRENING')}</button></div>`;
+    recBody = `<div class="pf-card"><h3 class="pf-empty-t">${t('pfNoRecTitle', 'Tu pojawią się Twoje rekordy.')}</h3><p class="pf-empty-d">${t('pfNoRecText', 'Pierwszy zobaczysz po zapisaniu treningu.')}</p><button type="button" class="pf-btn pf-btn--ghost m-press" onclick="navTap('gym')">${t('pfStart', 'ZACZNIJ TRENING')}</button></div>`;
   }
   const recLink = (m.records.length && typeof openProfileRecordsSheet === 'function') ? linkBtn('openProfileRecordsSheet()', t('pfRecords', 'REKORDY')) : '';
   const recSec = sec(t('pfRecords', 'REKORDY'), recLink, recBody, 2);
@@ -8830,7 +8830,7 @@ Object.assign(T_EN, {
   setReminder: 'Workout reminder', setSounds: 'Sounds', setSoundsSub: 'Rest countdown and end of workout', setHealth: 'Apple Health', setHealthSub: 'Weight and calories from your watch',
   setExportCloud: 'Download my data', setExportCloudSub: 'Backup in a file', setExportLocal: 'Create a backup', setExportLocalSub: '.json file',
   setImport: 'Restore a backup', setImportSub: 'Backup file', setPrivacy: 'Privacy policy',
-  setBackupCloud: 'Your workouts and plans are safe in the cloud. Here you can download your data in one file.', setBackupLocal: 'Without an account your data stays on this phone only. Make a backup or create an account.',
+  setBackupCloud: 'Your workouts and plans are in the cloud. Here you can download your data in one file.', setBackupLocal: 'Without an account your data stays on this phone only. Make a backup or create an account.',
   setFootCloud: 'Your data syncs with the cloud', setFootLocal: 'Your data stays on this phone only',
   setWrite: 'Write to us', setWriteSub: 'Feedback and ideas', setWhatsNew: "What's new", setWhatsNewSub: 'Version history',
   setLogin: 'Log in', setLoginSub: 'Save your data in the cloud', setLogout: 'Log out', setDelete: 'Delete account', setDeleteSub: 'Permanently deletes your account and cloud data',
