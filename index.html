@@ -756,34 +756,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .feedback-type{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:9px 4px;font-size:var(--m-fs-xs);font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
 .feedback-type.active{background:var(--orange);border-color:var(--orange);color:#fff;}
 
-/* ---------- account panel (guest, no backend) ---------- */
-.acct-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:95;display:flex;justify-content:flex-end;}
-.acct-overlay.hidden{display:none;}
-.acct-panel{background:var(--m-panel);width:min(420px,100%);height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(14px + var(--top-inset)) 18px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;}
-/* every block keeps its natural height — otherwise flexbox shrinks the tall
-   cards to fit the viewport (rows clip under .acct-rows overflow:hidden) and
-   the panel never scrolls. flex-shrink:0 makes overflow-y:auto do its job. */
-.acct-panel > *{flex-shrink:0;}
-/* right drawer — same backdrop fade + slide-in curve as the bottom sheets,
-   just on the X axis (mSheetBackdropIn/Out reused) */
-@media (prefers-reduced-motion: no-preference){
-  .acct-overlay{animation:mSheetBackdropIn var(--m-dur-fade) ease-out;}
-  .acct-overlay.acct-closing{animation:mSheetBackdropOut var(--m-dur-fade) ease-in forwards;}
-  .acct-overlay .acct-panel{animation:acctDrawerIn var(--m-dur-in) var(--m-ease-sheet);}
-  .acct-overlay.acct-closing .acct-panel{animation:acctDrawerOut var(--m-dur-exit) var(--m-ease-exit) forwards;}
-  @keyframes acctDrawerIn{from{transform:translateX(100%);}to{transform:translateX(0);}}
-  @keyframes acctDrawerOut{from{transform:translateX(0);}to{transform:translateX(100%);}}
-}
-/* header matches the tab-screen pattern: back-arrow + icon + title, no X */
-.acct-head{display:flex;align-items:center;gap:10px;padding:6px 0 14px;}
-.acct-back{margin-left:-6px;}
-.acct-head-icon{width:32px;height:32px;flex-shrink:0;}
-.acct-head-icon .ph, .acct-head-icon.ph{display:block;width:32px;height:32px;}
-.acct-head-icon svg{display:block;width:100%;height:100%;}
-.acct-title{margin:0;font-size:var(--m-fs-xl);font-weight:400;color:var(--m-ink);letter-spacing:-.02em;}
-.acct-id{display:flex;align-items:center;gap:13px;padding:4px 2px 16px;background:none;border:0;text-align:left;cursor:pointer;font-family:inherit;width:100%;}
-.acct-av{width:52px;height:52px;flex-shrink:0;border-radius:50%;overflow:hidden;}
-.acct-av .ph{width:52px;height:52px;display:block;}
+/* ---------- account sheets: photo picker + shared hint (dawny panel boczny zastąpił ekran Profil) ---------- */
 .acct-photo{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
 /* profile sheet — photo picker */
 .acct-photo-row{display:flex;align-items:center;gap:14px;}
@@ -794,36 +767,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .acct-photo-pick:active{transform:scale(.96);}
 .acct-photo-clear{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);font-weight:600;cursor:pointer;padding:2px 0;font-family:inherit;}
 .acct-photo-clear[hidden]{display:none;}
-.acct-id-txt{display:flex;flex-direction:column;gap:2px;min-width:0;}
-.acct-id-name{font-size:var(--m-fs-base);font-weight:600;color:var(--m-ink);}
-.acct-id-sub{font-size:var(--m-fs-2xs);color:var(--m-muted);}
-.acct-cloud{position:relative;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-md);padding:15px 15px 14px;}
-.acct-soon{position:absolute;top:13px;right:13px;font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--m-orange);background:#ffe9e3;border-radius:var(--m-r-pill);padding:4px 9px;}
-.acct-cloud-t{margin:0 0 4px;font-size:var(--m-fs-sm);font-weight:600;color:var(--m-ink);}
-.acct-cloud-d{margin:0;font-size:var(--m-fs-2xs);color:var(--m-muted);line-height:1.5;max-width:34ch;}
-.acct-sec{margin:20px 0 8px;font-size:var(--m-fs-2xs);letter-spacing:.11em;text-transform:uppercase;color:var(--m-muted);}
-.acct-rows[hidden]{display:none;}   /* the [hidden] attribute lost against display:flex below: Powiadomienia / Zdrowie rows showed on web, the sound test row on iOS */
-.acct-rows{display:flex;flex-direction:column;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-md);overflow:hidden;}
-.acct-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;font-size:var(--m-fs-base);color:var(--m-ink);background:none;border:0;border-top:1px solid #e6e2ec;font-family:inherit;text-align:left;cursor:pointer;width:100%;text-decoration:none;box-sizing:border-box;}
-.acct-row:first-child{border-top:0;}
-.acct-row[hidden]{display:none;}
-.acct-row:active{background:var(--m-panel);}
-.acct-row .acct-v{color:var(--m-muted);font-size:var(--m-fs-xs);flex-shrink:0;}
-.acct-row .acct-lead{display:flex;align-items:center;gap:11px;}
-.acct-row .acct-lead .ph{width:17px;height:17px;color:var(--m-ink);}
-/* Trener AI section in the account panel — same black/gradient-border
-   identity as .dash-ai-card / .ai-popup-box (Maciej, 2026-09-16). */
-.acct-rows--ai{
-  border:1px solid transparent;
-  background:linear-gradient(#000,#000) padding-box, linear-gradient(142deg,var(--m-ai-from) 0%,var(--m-ai-to) 83%) border-box;
-  box-shadow:inset 0 0 33px rgba(161,0,255,.94),inset 0 0 11.4px rgba(222,116,255,.5);
-}
-.acct-rows--ai .acct-row{color:#fff;border-top-color:rgba(255,255,255,.15);}
-.acct-rows--ai .acct-row .acct-v{color:rgba(255,255,255,.6);}
-.acct-rows--ai .acct-row:active{background:rgba(255,255,255,.08);}
 .acct-hint{margin:7px 3px 0;font-size:var(--m-fs-2xs);color:var(--m-muted);}
-.acct-row.danger,.acct-row.danger .acct-lead .ph{color:#CD1200;}
-.acct-foot{margin:auto 0 0;padding-top:18px;font-size:var(--m-fs-2xs);color:var(--m-muted);text-align:center;line-height:1.5;}
 /* above the account panel (95) AND the GYM finish screen (9500) — weight /
    edit-kcal sheets can be opened straight from the finish screen. */
 /* Account sub-sheets (weight / body data / edit kcal / rename) ride the
@@ -862,11 +806,6 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 #editKcalSheet .plansv2-customize-actions,
 #authSheet .plansv2-customize-actions{margin-top:auto;}
 /* ---- cloud account (Supabase) — Faza 2 / E0 ---- */
-.acct-cloud-signed{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
-.acct-cloud-signed[hidden],.acct-cloud-cta[hidden]{display:none;}
-.acct-cloud-email{font-size:var(--m-fs-xs);font-weight:600;color:var(--m-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.acct-cloud-cta{display:inline-block;margin-top:10px;background:var(--m-orange);color:#fff;border:none;border-radius:var(--m-r-pill);padding:8px 16px;font-size:var(--m-fs-xs);font-weight:600;font-family:inherit;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
-.acct-cloud-cta:active{transform:scale(.96);}
 .acct-cloud-mode-link{display:block;width:100%;background:none;border:0;color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;padding:4px 0;font-family:inherit;text-align:center;}
 .acct-cloud-forgot{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);cursor:pointer;padding:6px 0 0;font-family:inherit;align-self:flex-end;}
 .acct-auth-error{margin:6px 0 0;font-size:var(--m-fs-2xs);color:#CD1200;line-height:1.4;}
@@ -2608,7 +2547,7 @@ body.pev2-bg{background:var(--m-panel);}
    list, not a global :active — :active also matches ancestors, which
    would speed up the view slide / sheet snapback mid-touch. */
 .plan-pill:active,.topbar-icon-btn:active,.gymfin-cta:active,.gymfin-share:active,.sh-seg-b:active,.sh-arrow:active,.sh-sw:active,.sh-ic:active,.sh-main:active,.sh-bgi:active,.gymfin-stat:active,.ex-tile:active,.save-btn:active,
-.hist-card.collapsed:active,.acct-photo-pick:active,.acct-cloud-cta:active,.acct-oauth-btn:active,
+.hist-card.collapsed:active,.acct-photo-pick:active,.acct-oauth-btn:active,
 .dash-chat-btn:active,.gymv2-chat-btn:active,.plansv2-chat-btn:active,.histv2-chat-btn:active,.statsv2-chat-btn:active,
 .profil-back:active,.profil-gear:active,.pf-sheet-x:active,.pf-rm-seg:active,.pf-rm-arw:active,.profil-av:active,.pf-link:active,.pf-row:active,.pf-btn:active,.pf-body-c:active,.profil-id-txt:active,
 .v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-edit-plan:active,
@@ -3670,81 +3609,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <div class="rotate-lock-overlay">
   <div class="rotate-lock-icon"></div>
   <p data-i18n="rotateLockMsg">Obróć telefon z powrotem — Mekkio działa tylko w pionie.</p>
-</div>
-
-<!-- Account panel (guest, no backend). Entry: the account badge top-right of
-     the Dashboard (was the feedback/chat button). Name-driven header — "Gość"
-     until profileName is set. Feedback lives here as a row now. -->
-<div class="acct-overlay hidden" id="accountOverlay" onclick="if(event.target===this) closeAccountPanel()">
-  <div class="acct-panel">
-    <div class="acct-head">
-      <button type="button" class="v2-hdr-back acct-back" onclick="closeAccountPanel()" title="Wstecz" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
-      <span class="ph acct-head-icon" data-ph="account"></span>
-      <h1 class="acct-title">KONTO</h1>
-    </div>
-    <button type="button" class="acct-id" onclick="openNameEdit()">
-      <span class="acct-av"><span class="ph" data-ph="account"></span></span>
-      <span class="acct-id-txt">
-        <span class="acct-id-name" id="acctName">Gość</span>
-        <span class="acct-id-sub" id="acctSub">Działasz jako gość — dane tylko na tym urządzeniu</span>
-      </span>
-    </button>
-    <div class="acct-cloud">
-      <p class="acct-cloud-t">Konto w chmurze</p>
-      <p class="acct-cloud-d">Historia dostępna na innych urządzeniach i bezpieczna, gdy zmienisz telefon.</p>
-      <div class="acct-cloud-signed" id="acctCloudSignedIn" hidden>
-        <span class="acct-cloud-email" id="acctCloudEmail"></span>
-        <button type="button" class="acct-photo-clear" onclick="signOutCloud()">Wyloguj</button>
-      </div>
-      <button type="button" class="acct-cloud-cta" id="acctCloudCta" onclick="openAuthSheet('login')">Zaloguj się</button>
-    </div>
-    <p class="acct-sec">Dane do kalorii</p>
-    <div class="acct-rows">
-      <button type="button" class="acct-row" onclick="openWeightSheet()"><span>Masa ciała</span><span class="acct-v" id="acctWeightV">Uzupełnij</span></button>
-      <button type="button" class="acct-row" onclick="openBodyDataSheet()"><span>Wzrost</span><span class="acct-v" id="acctHeightV">Uzupełnij</span></button>
-      <button type="button" class="acct-row" onclick="openBodyDataSheet()"><span>Wiek</span><span class="acct-v" id="acctAgeV">—</span></button>
-      <button type="button" class="acct-row" onclick="openBodyDataSheet()"><span>Płeć</span><span class="acct-v" id="acctSexV">—</span></button>
-    </div>
-    <p class="acct-hint" id="acctWeightUpd" hidden></p>
-    <p class="acct-sec">Trener AI</p>
-    <div class="acct-rows acct-rows--ai">
-      <button type="button" class="acct-row" onclick="openAiPrefsSheet()"><span>Cel treningowy</span><span class="acct-v" id="acctAiGoalV">Uzupełnij</span></button>
-      <button type="button" class="acct-row" onclick="openAiPrefsSheet()"><span>Czego unikać</span><span class="acct-v" id="acctAiAvoidV">Uzupełnij</span></button>
-    </div>
-    <p class="acct-hint">Trener AI patrzy na Twoje treningi i preferencje. To nie porada medyczna.</p>
-    <p class="acct-sec">Dźwięki</p>
-    <div class="acct-rows">
-      <button type="button" class="acct-row" onclick="setSoundOn(!soundOn)"><span>Dźwięki w aplikacji</span><span class="acct-toggle" id="acctSoundToggle"><span class="acct-toggle-knob"></span></span></button>
-    </div>
-    <p class="acct-hint">Tyknięcia suwaka i dźwięk zapisania serii. Nie przerywają muzyki i milkną w trybie cichym.</p>
-    <p class="acct-sec" id="acctReminderSec" hidden>Powiadomienia</p>
-    <div class="acct-rows" id="acctReminderRows" hidden>
-      <button type="button" class="acct-row" onclick="openReminderSheet()"><span>Przypomnienie o treningu</span><span class="acct-v" id="acctReminderV">Wyłączone</span></button>
-    </div>
-    <p class="acct-sec" id="acctHealthSec" hidden>Apple Zdrowie</p>
-    <div class="acct-rows" id="acctHealthRows" hidden>
-      <button type="button" class="acct-row" onclick="openHealthSheet()"><span>Waga i kalorie z zegarka</span><span class="acct-v" id="acctHealthV">Wyłączone</span></button>
-    </div>
-    <p class="acct-sec" id="acctBackupSec">Kopia zapasowa</p>
-    <div class="acct-rows">
-      <button type="button" class="acct-row" onclick="closeAccountPanel(); exportData();"><span class="acct-lead"><span class="ph" data-ph="upload-simple"></span><span id="acctExportLabel">Twórz kopię zapasową</span></span><span class="acct-v">Plik .json</span></button>
-      <button type="button" class="acct-row" id="acctImportRow" onclick="closeAccountPanel(); document.getElementById('importFile').click();"><span class="acct-lead"><span class="ph" data-ph="download-simple"></span>Import kopii zapasowej</span><span class="acct-v"></span></button>
-    </div>
-    <p class="acct-hint" id="acctBackupHint">Bez konta treningi są tylko na tym telefonie. Warto co jakiś czas zrobić kopię.</p>
-    <p class="acct-sec">Aplikacja</p>
-    <div class="acct-rows">
-      <button type="button" class="acct-row" onclick="closeAccountPanel(); openFeedbackV2();"><span class="acct-lead"><span class="ph" data-ph="chat-dots"></span>Podziel się opinią</span><span class="acct-v"></span></button>
-      <button type="button" class="acct-row" onclick="openChangelogHistorySheet()"><span class="acct-lead"><span class="ph" data-ph="clock-counter-clockwise"></span>Historia zmian</span><span class="acct-v" id="acctChlVer"></span></button>
-      <a class="acct-row" href="./polityka-prywatnosci.html" target="_blank" rel="noopener"><span>Polityka Prywatności</span><span class="acct-v"></span></a>
-    </div>
-    <div id="acctDangerZone" hidden>
-      <p class="acct-sec">Usuwanie konta</p>
-      <div class="acct-rows">
-        <button type="button" class="acct-row danger" onclick="deleteAccountV2()"><span class="acct-lead"><span class="ph" data-ph="trash"></span>Usuń konto</span><span class="acct-v"></span></button>
-      </div>
-    </div>
-    <p class="acct-foot">Mekkio <span id="acctVer"></span> · <span id="acctFootData">dane treningowe tylko na tym urządzeniu</span></p>
-  </div>
 </div>
 
 <!-- Account sub-sheets — all ride the shared .plansv2-customize-* bottom
@@ -5985,15 +5849,6 @@ function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
 }
-/* #accountOverlay is the right-side panel (not a .plansv2-customize sheet) */
-function showSheet(id){
-  document.getElementById(id).classList.remove('hidden');
-  document.documentElement.classList.add('modal-lock');
-}
-function hideSheet(id){
-  document.getElementById(id).classList.add('hidden');
-  acctLockCheck();
-}
 /* the four sub-sheets ride the shared bottom-sheet shell — reuse its
    reset + closing animation, only the lock check is account-aware. */
 const _acctSheetT = {};
@@ -6073,7 +5928,7 @@ function saveNameEdit(){
    the panel and on every account-entry button; falls back to the badge glyph. */
 const LS_AVATAR = "fitlog_avatar_v1";
 let avatarDataUrl = localStorage.getItem(LS_AVATAR) || '';
-const ACCT_ENTRY_SEL = '.acct-av, .acct-photo-preview, .dash-acct-btn, .gymv2-acct-btn, .plansv2-acct-btn, .histv2-acct-btn, .statsv2-acct-btn, .profil-av';
+const ACCT_ENTRY_SEL = '.acct-photo-preview, .dash-acct-btn, .gymv2-acct-btn, .plansv2-acct-btn, .histv2-acct-btn, .statsv2-acct-btn, .profil-av';
 function applyAvatarEverywhere(){
   document.querySelectorAll(ACCT_ENTRY_SEL).forEach(el=>{
     let img = el.querySelector('.acct-photo');
