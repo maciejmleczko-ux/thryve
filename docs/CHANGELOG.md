@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.67.0 (2026-10-14)
+- **Aktualna wersja:** 4.68.0 (2026-10-14)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,27 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.68.0 · MINOR · 2026-10-14
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Wagę wpisujesz teraz na własnej klawiaturze Mekkio, z datą pomiaru i podpowiedzią, ile zmieniło się od ostatniego razu. Pomiar możesz poprawić albo usunąć, a „Cofnij” przywróci go po usunięciu. Wszystkie pomiary znajdziesz w Profilu, w sekcji Ciało.
+
+**Popupy v2, etapy 1 i 2 (Figma POPUPS 564:11343, karta: `docs/popupy-spec.md`):**
+
+- **Szkielet okna `.m-sheet2`** (włączany klasą, istniejące okna bez zmian): białe tło, 355 px, rogi 34, uchwyt 53×3,5, ✕ 40 pt, przycisk 55 px 32 px od dołu.
+- **Klawiatura Mekkio `mkPad`** (przecinek PL / kropka EN, opcja bez separatora); klawiatura logowania serii w GYM (`lg-key`) bez zmian.
+- **Toast:** pastylka, wariant z „Cofnij” (6 s) i wariant błędu `#CD1200`; zmiana wyglądu w całej apce, API `toast(msg)` bez zmian, nowe `toast(msg,{undo,error})`.
+- **Okno wagi w 5 stanach:** dodaj, pierwszy pomiar, błąd (30–300 kg, ZAPISZ nieaktywny), edytuj z „Usuń pomiar” i „Cofnij”, podgląd pomiaru z Apple Zdrowie (tylko odczyt). Kontrakt `openWeightSheet`/`closeWeightSheet`/`saveWeightSheet` i ID `weightSheet`/`acctWeightV` bez zmian.
+- **TYMCZASOWA lista „Pomiary wagi”** (Profil → Ciało → „WSZYSTKIE”) do czasu ekranu Waga w Postępach.
+- **Sync:** `weight_log` scalany wpis po wpisie (bez zmian w kodzie sync); usunięcie nie wraca z chmury. Ryzyka: pierwsza synchronizacja urządzenia bez bazy może przywrócić usunięty wpis; usunięcie ręcznego pomiaru z dnia z odczytem Zdrowia wywoła ponowny import tego odczytu.
+- **Nowe tokeny kolorów:** `--m-orange-soft` (#ff9b82), `--m-grab` (#ccc), `--m-black` (#000). Bez nowych kluczy localStorage ani kolumn Supabase.
+
+**Commity (2):**
+
+- `3703f3a` 2026-10-14 — Popupy v2, etap 1: szkielet arkusza .m-sheet2, klawiatura Mekkio mkPad, toast pastylka z COFNIJ i wariantem błędu
+- `4508f1f` 2026-10-14 — Popupy v2, etap 2: okno wagi w szkielecie .m-sheet2 + TYMCZASOWA lista pomiarów z Profilu
 
 ### 4.67.0 · MINOR · 2026-10-14
 
