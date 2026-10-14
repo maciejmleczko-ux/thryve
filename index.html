@@ -818,7 +818,6 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .acct-oauth-divider::before,.acct-oauth-divider::after{content:'';flex:1;height:1px;background:#e6e2ec;}
 .acct-oauth-divider span{font-size:var(--m-fs-2xs);color:var(--m-muted);text-transform:uppercase;letter-spacing:.06em;}
 .acct-auth-error.info{color:var(--m-ink);}
-.acct-sheet-hint{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:#2c2727;}
 .acct-wlog{border:1px solid #c7c6cb;border-radius:var(--m-r-sm);overflow:hidden;background:var(--m-card);}
 .acct-wlog-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px;font-size:var(--m-fs-sm);color:var(--m-ink);border-top:1px solid rgba(0,0,0,.06);}
 .acct-wlog-row:first-child{border-top:0;}
@@ -8791,7 +8790,7 @@ function profileHtml(m, animate){
   const avoidTxt = aiPrefs.avoid ? (aiPrefs.avoid.length > 24 ? aiPrefs.avoid.slice(0, 24) + '…' : aiPrefs.avoid) : fillTxt;
   const aiRow = (n, v, id)=> `<button type="button" class="pf-row pf-row--help m-press" onclick="openAiPrefsSheet()"><span class="pf-row-l"><span class="pf-row-n">${n}</span><span class="pf-row-s" id="${id}">${E(v)}</span></span>${chev}</button>`;
   const aiSec = `<section class="pf-sec${rc(5)}"${m.isNew ? ' hidden' : ''}><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('pfGoals', 'CELE I TRENER')}</h2></div>
-    <div class="pf-card"><div class="pf-rows pf-rows--dyn">${aiRow(t('pfGoal', 'Cel treningowy'), goalTxt, 'acctAiGoalV')}${aiRow(t('pfAvoid', 'Czego unikać'), avoidTxt, 'acctAiAvoidV')}<div class="pf-row pf-row--info pf-row--help"><span class="pf-row-l"><span class="pf-row-n">${t('pfCoach', 'Trener AI')}</span><span class="pf-row-s">${t('pfCoachSub', 'Podpowiedzi po każdym treningu')}</span></span></div></div></div></section>`;
+    <div class="pf-card"><div class="pf-rows pf-rows--dyn">${aiRow(t('pfGoal', 'Cel treningowy'), goalTxt, 'acctAiGoalV')}${aiRow(t('pfAvoid', 'Czego unikać'), avoidTxt, 'acctAiAvoidV')}<div class="pf-row pf-row--info pf-row--help"><span class="pf-row-l"><span class="pf-row-n">${t('pfCoach', 'Trener AI')}</span><span class="pf-row-s">${t('pfCoachSub', 'Podpowiedzi po każdym treningu')}</span></span></div></div></div><p class="set-hint" id="pfCoachNote">${t('pfCoachNote', 'Trener AI patrzy na Twoje treningi i preferencje. To nie porada medyczna.')}</p></section>`;
   // ---- Połączenia: widoczne tylko w apce na iPhone'ie (jak dawne renderHealthRow / renderReminderRow) ----
   const showHealth = IS_NATIVE && !!capPlugin('HealthPlugin'), showRem = IS_NATIVE;
   const remTxt = reminderPillText();
@@ -8835,7 +8834,7 @@ Object.assign(T_EN, {
   setFootCloud: 'Your data syncs with the cloud', setFootLocal: 'Your data stays on this phone only',
   setWrite: 'Write to us', setWriteSub: 'Feedback and ideas', setWhatsNew: "What's new", setWhatsNewSub: 'Version history',
   setLogin: 'Log in', setLoginSub: 'Save your data in the cloud', setLogout: 'Log out', setDelete: 'Delete account', setDeleteSub: 'Permanently deletes your account and cloud data',
-  setAppleRelay: 'Hidden e-mail (Apple)', setViaApple: 'Signed in with Apple', setViaGoogle: 'Signed in with Google', setViaEmail: 'Signed in with e-mail', setSignedIn: 'Signed in',
+  setAppleRelay: 'Hidden e-mail (Apple)', setViaApple: 'Signed in with Apple', setViaGoogle: 'Signed in with Google', setViaEmail: 'Signed in with e-mail', setSignedIn: 'Signed in', setLoggedOut: 'Logged out', pfCoachNote: 'AI Coach looks at your workouts and preferences. This is not medical advice.',
 });
 function buildProfileSettingsV2(animate){
   const host = document.getElementById('profilSettingsBody');
@@ -8977,6 +8976,7 @@ function goRoute(route){
              || (route === 'profile-settings-v2' && currentRoute === 'profile-v2')
              || (currentRoute === 'profile-settings-v2' && route === 'profile-v2');
   const forward = (route === 'plan-editor-v2' && currentRoute === 'plans-v2') || (route === 'profile-v2' && currentRoute !== 'profile-settings-v2') || route === 'profile-settings-v2';
+  const sameRoute = route === currentRoute;   // ponowny render bieżącego ekranu (sync z chmurą, import): to nie jest wejście, więc bez animacji wejścia i bez skoku scrolla
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward, !drill);
@@ -9033,10 +9033,10 @@ function goRoute(route){
   if(route==='plan-editor-v2'){ previewMode = true; refreshPlanEditorV2Scroll(); }
   if(route==='history-v2'){ previewMode = true; renderCalendarV2(true); }
   if(route==='stats-v2'){ previewMode = true; statsV2CaroPage = 0; renderStatsV2(true); }
-  if(route==='profile-v2'){ previewMode = true; renderProfileV2(true); }
-  if(route==='profile-settings-v2'){ previewMode = true; renderProfileSettingsV2(true); }
+  if(route==='profile-v2'){ previewMode = true; renderProfileV2(!sameRoute); }
+  if(route==='profile-settings-v2'){ previewMode = true; renderProfileSettingsV2(!sameRoute); }
   commitViewTransition();
-  window.scrollTo(0,0);
+  if(!(sameRoute && isProfileRoute(route))) window.scrollTo(0,0);
 }
 
 /* ---------- hide the bottom nav while the on-screen keyboard is open —
