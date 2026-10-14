@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.66.0 (2026-10-14)
-- **Liczba wersji:** 253 · **commitów:** 622
+- **Aktualna wersja:** 4.67.0 (2026-10-14)
+- **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -109,6 +109,7 @@ Stan na 4.44.0.
 | 17–21.09 | 4.40.0 → 4.41.x | **RODO**: usuwanie konta, polityka prywatności. Nowe nazwy sekcji. Walka z paskiem iOS 27 |
 | 22–24.09 | 4.42.0 → 4.43.0 | **Periodyzacja falująca** w Kreatorze, kolejność antagonistyczna, system ruchu Mekkio + `CLAUDE.md`, sheety nad klawiaturą, **ikony ćwiczeń 3D** |
 | 25.09 | 4.43.1 → 4.44.0 | Audyt: sync edycji, XSS, service worker, limit AI. **Sync własnych ćwiczeń i notatek**, scalanie danych gościa przy logowaniu |
+| 14.10 | 4.67.0 | **Profil v2** wg Figmy: osobny ekran (push z awatara), arkusze Rekordy i Odznaki, Ustawienia, wspólny silnik odznak, koniec starego panelu konta |
 
 ---
 
@@ -117,6 +118,37 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.67.0 · MINOR · 2026-10-14
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Profil to teraz osobny ekran: najnowsze rekordy, odznaki, waga, dane ciała i ustawienia konta w jednym miejscu. Rekordy przejrzysz miesiąc po miesiącu, a wszystkie odznaki zobaczysz na jednej liście.
+
+**Profil v2 (etapy K0–K6, wg Figmy 560:10329, karta: `docs/profil-spec.md`):**
+
+- **Trasy:** `profile-v2` i `profile-settings-v2` (push/pop w `goRoute`, wejście z awatara na pięciu ekranach, powrót na ekran źródłowy przez `profileReturnRoute` w pamięci), menu dolne ukryte. Gestu od lewej krawędzi nie ma, tylko strzałka.
+- **Ekran Profil:** tożsamość, karta logowania, statystyki, 3 ostatnie rekordy, Odznaki (3 ostatnie zdobyte + 2 najbliższe), Ciało, Cele i trener, Połączenia (natywnie), stan nowego gościa. Tylko odczyt, zero nowych pól i kluczy localStorage.
+- **Arkusze:** Rekordy (Miesiące / Ćwiczenia, karuzela miesięcy ze swipe, tap otwiera trening w Historii) i Odznaki (siatka kart), oba na `.m-sheet` + `mSheetDrag`.
+- **Silnik odznak wspólny** z dashboardem (`dashBadgesCore`, `badgesModel`, `dashWithCleanData`); hash `dashboardModel` identyczny przed i po. Rekordy wyłącznie przez silnik rekordów z 4.66.0.
+- **Ustawienia:** osobny podekran (dźwięki, dane i kopia, konto, polityka prywatności, usuń konto, wyloguj bez dialogu z toastem). Bez wierszy „Język”, „Jednostki” i MEKKIO+.
+- **Stary panel konta usunięty** (`#accountOverlay`, `closeAccountPanel`); `openAccountPanel()` otwiera Profil, kontrakt `acctSheetOpen`/`openWeightSheet` i ID `acct*` bez zmian. Przywrócony komunikat „Trener AI… To nie porada medyczna” pod sekcją Cele i trener.
+- **Awatar:** jedna wysokość nagłówka `max(14px, inset−8)` na Planach, Edytorze, Historii i Postępach (jak Dashboard i GYM).
+- **Sync z chmurą** na bieżącym ekranie nie odgrywa ponownie wejścia Profilu i Ustawień ani nie skacze scrollem.
+- Odchylenia od Figmy (rekord bez „× powt.”, 10 → 11 px, kolory przez tokeny, tytuły arkuszy 20 px) opisane w karcie specyfikacji. Do sprawdzenia na iPhonie: gesty push/pop i swipe, logowanie SIWA/Google, usuwanie konta, HealthKit i powiadomienia.
+
+**Commity (10):**
+
+- `18ab32e` 2026-10-14 — Profil K6E: audyt końcowy (11 px, 44 pt, tokeny ruchu, kontrasty, ID, martwy kod)
+- `7d44de3` 2026-10-14 — Profil K6D: copy po przeglądzie, klucze EN
+- `f968252` 2026-10-14 — Profil K6B/C: brak ponownego wejścia przy syncu, komunikat Trenera AI
+- `9eeea1b` 2026-10-14 — Profil K6A: jedna wysokość awatara w nagłówkach
+- `5abd68d` 2026-10-14 — Profil K5b: usunięcie dawnego panelu konta
+- `5b4be08` 2026-10-14 — Profil K5a: Ustawienia, sekcje Profilu, przepięcia
+- `6285b08` 2026-10-14 — Profil K4: arkusz Rekordy
+- `b9a583b` 2026-10-14 — Profil K3: wspólny silnik odznak, arkusz Odznaki
+- `b26c179` 2026-10-14 — Profil K2: ekran Profil (zalogowany i nowy gość)
+- `86d1c15` 2026-10-14 — Profil K0+K1: zrzuty przed, trasa i szkielet
 
 ### 4.66.0 · MINOR · 2026-10-14
 
