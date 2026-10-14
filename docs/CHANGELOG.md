@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.68.0 (2026-10-14)
+- **Aktualna wersja:** 4.69.0 (2026-10-14)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,25 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.69.0 · MINOR · 2026-10-14
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Dotknij odznaki albo rekordu w Profilu, a zobaczysz jego szczegóły: kiedy go zdobyłeś albo ile brakuje, i skrót do wykresu lub treningu. Okna z danymi ciała i imieniem mają nowy wygląd.
+
+**Popupy v2, etap 3 (Figma POPUPS 06, 07, 08, 09, 10, 14; karta: `docs/popupy-spec.md`):**
+
+- **Dane ciała** i **Imię i zdjęcie** w szkielecie `.m-sheet2` (klawiatura `mkPad` bez separatora; walidacje i kontrakty funkcji bez zmian).
+- **Nowe okna:** szczegół odznaki (`#badgeDetailSheet`, jedna wartość postępu dla pierścienia, paska i tekstu) i szczegół rekordu (`#recordDetailSheet`: sam ciężar, przyrost, Prognoza maxa osobno, największa objętość; „Zobacz wykres” / „Zobacz trening”). Dotknięcie rekordu otwiera teraz okno, a nie od razu trening.
+- **Dialog „Usuń konto”:** wariant `gym:true` wspólnego `mConfirm`, 323 px; przepływ usuwania bez zmian.
+- Silnik rekordów: tylko odczytowe pole `volume` w `exerciseRecords`. Nowy token `--m-badge-sheen`. Bez nowych kluczy localStorage ani kolumn Supabase.
+- Znane: powrót po „Zobacz wykres/trening” schodzi do Dashboardu, nie do Profilu; nazwy odznak w oknie tylko PL.
+
+**Commity (2):**
+
+- `7ac9426` 2026-10-14 — Popupy v2 etap 3: Dane ciała i Imię i zdjęcie (oraz kod okien odznaki, rekordu, dialogu)
+- `bbf53a2` 2026-10-14 — Popupy v2 etap 3: szczegół odznaki i rekordu, dialog Usuń konto, poprawki z testów
 
 ### 4.68.0 · MINOR · 2026-10-14
 
