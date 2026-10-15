@@ -976,6 +976,21 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .ws-pad{margin-top:32px;}
 .ws-note{margin:24px 0 0;display:flex;flex-direction:column;gap:12px;text-align:center;font-size:var(--m-fs-xs);line-height:1.5;color:var(--m-muted-text);}
 .ws-note p{margin:0;}
+/* ---- Okno „Cel treningowy” (#aiPrefsSheet): segment celu (pole dotyku 44 pt), pole tekstowe 16 px ---- */
+.ai-seg{display:flex;width:100%;box-sizing:border-box;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-pill);background:var(--m-white);}
+.ai-chip{position:relative;flex:1 1 auto;min-width:0;height:44px;padding:0 6px;border:0;background:none;font:inherit;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.ai-chip:active{transform:scale(.97);}
+.ai-chip::before{content:'';position:absolute;inset:3px 1px;border-radius:var(--m-r-pill);background:var(--m-orange);opacity:0;transition:opacity var(--m-dur-quick) ease;}
+.ai-chip span{position:relative;white-space:nowrap;transition:color var(--m-dur-quick) ease;}
+.ai-chip[aria-checked="true"]{color:var(--m-white);}
+.ai-chip[aria-checked="true"]::before{opacity:1;}
+.ai-avoid-l{margin:16px 0 8px;font-size:var(--m-fs-2xs);letter-spacing:.04em;text-transform:uppercase;color:var(--m-ink);}
+.ai-textarea{display:block;width:100%;box-sizing:border-box;height:150px;resize:none;padding:12px 16px;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);background:var(--m-white);font:inherit;font-size:16px;line-height:1.4;color:var(--m-ink);outline:none;}
+.ai-textarea::placeholder{color:var(--m-muted-text);opacity:1;}
+.ai-textarea:focus{border-color:var(--m-orange);}
+.ai-note,.ai-guest{margin:12px 0 0;text-align:center;font-size:var(--m-fs-2xs);line-height:1.5;color:var(--m-muted-text);}
+.ai-guest{margin-top:6px;color:var(--m-ink);}
+@media (max-height:620px){ .ai-textarea{height:84px;} .ai-avoid-l{margin-top:10px;} .ai-note{margin-top:8px;} }
 .m-sheet2 [hidden]{display:none !important;}
 /* niski ekran (iPhone SE 568 pt): zagęszczenie, żeby klawiatura i przycisk mieściły się bez przewijania */
 @media (max-height:620px){
@@ -2755,7 +2770,7 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
-.m2-btn:active,.m2-x:active,.mk-key:active,.bd-field:active,.bd-sx:active,.nm-ico:active,#mConfirmOverlay.mc-gym .onboard-actions button:active,.wl-row:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
+.m2-btn:active,.ai-chip:active,.m2-x:active,.mk-key:active,.bd-field:active,.bd-sx:active,.nm-ico:active,#mConfirmOverlay.mc-gym .onboard-actions button:active,.wl-row:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
 /* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
 #view-gym-v2 .gymv2-tile.gymv2-search-tile, #view-gym-v2 .gymv2-tile.gymv2-add-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:13px;padding:4.5px 0 0;box-sizing:border-box;background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);}
 #view-gym-v2 .gymv2-tile.gymv2-search-tile{border:.5px solid #f1d7cb;}
@@ -3932,34 +3947,32 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<div class="onboard-overlay hidden plansv2-customize-overlay" id="aiPrefsSheet" onclick="if(event.target===this) closeAiPrefsSheet()">
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="aiPrefsSheet" onclick="if(event.target===this) closeAiPrefsSheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
-      <div class="fbv2-header">
-        <div class="fbv2-title-row">
-          <h1>PREFERENCJE TRENERA AI</h1>
-          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeAiPrefsSheet()"></span>
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="aiTitle">CEL TRENINGOWY</h1>
+          <button type="button" class="m2-x" id="aiClose" aria-label="Zamknij" onclick="closeAiPrefsSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
-        <p class="fbv2-subtitle">Wykorzystamy to w podsumowaniach i sugestiach po treningu — im więcej wiemy, tym trafniejsze porady.</p>
+        <p class="m2-sub" id="aiSub">Trener AI uwzględni to w podpowiedziach.</p>
       </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Cel treningowy</p>
-        <div class="plansv2-choice-row" id="aiGoalSeg">
-          <button type="button" class="plansv2-choice-chip" data-goal="masa" onclick="pickAiGoal('masa')">Masa</button>
-          <button type="button" class="plansv2-choice-chip" data-goal="sila" onclick="pickAiGoal('sila')">Siła</button>
-          <button type="button" class="plansv2-choice-chip" data-goal="wytrzymalosc" onclick="pickAiGoal('wytrzymalosc')">Wytrzymałość</button>
-          <button type="button" class="plansv2-choice-chip" data-goal="ogolna" onclick="pickAiGoal('ogolna')">Ogólna sprawność</button>
+      <div class="m2-body ai-body">
+        <div class="ai-seg" id="aiGoalSeg" role="radiogroup" aria-label="Cel treningowy">
+          <button type="button" class="ai-chip" role="radio" aria-checked="false" data-goal="masa" onclick="pickAiGoal('masa')"><span>Masa</span></button>
+          <button type="button" class="ai-chip" role="radio" aria-checked="false" data-goal="sila" onclick="pickAiGoal('sila')"><span>Siła</span></button>
+          <button type="button" class="ai-chip" role="radio" aria-checked="false" data-goal="wytrzymalosc" onclick="pickAiGoal('wytrzymalosc')"><span>Wytrzymałość</span></button>
+          <button type="button" class="ai-chip" role="radio" aria-checked="false" data-goal="ogolna" onclick="pickAiGoal('ogolna')"><span>Sprawność</span></button>
         </div>
+        <label class="ai-avoid-l" id="aiAvoidL" for="aiAvoidInput">CZEGO UNIKAĆ</label>
+        <textarea class="ai-textarea" id="aiAvoidInput" maxlength="300" placeholder="np. unikam ćwiczeń obciążających prawy bark"></textarea>
+        <p class="ai-note" id="aiNote">Danych ciała (waga, wzrost, wiek) nie wysyłamy do Trenera AI.</p>
+        <p class="ai-guest" id="aiGuest" hidden>Zaloguj się, żeby zapisać preferencje.</p>
       </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Czego unikać</p>
-        <textarea class="fbv2-textarea fbv2-textarea--sm" id="aiAvoidInput" maxlength="300" placeholder="np. unikaj obciążania kolana, mam kontuzję barku"></textarea>
-      </div>
-      <div class="plansv2-customize-actions">
-        <button type="button" class="plansv2-customize-cancel" onclick="closeAiPrefsSheet()">ANULUJ</button>
-        <button type="button" class="plansv2-customize-apply" onclick="saveAiPrefsSheet()">ZAPISZ</button>
-      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="aiSave" onclick="saveAiPrefsSheet()">ZAPISZ</button>
     </div>
   </div>
 </div>
@@ -4648,6 +4661,7 @@ const T_EN = {
   toastUndo: 'UNDO', mkDelete: 'Delete digit',
   bdTitle: 'BODY DATA', bdSub: 'This data is only used to estimate calories. It stays on this phone; with an account it syncs to the cloud.', bdFemale: 'FEMALE', bdMale: 'MALE', bdSkip: 'SKIP',
   bdRangeH: 'Enter a height from 120 to 230 cm.', bdRangeA: 'Enter an age from 12 to 100.', bdSave: 'SAVE', bdSaved: 'Data saved',
+  aiTitle: 'TRAINING GOAL', aiSub: 'The AI coach will use this in its suggestions.', aiAvoidL: 'WHAT TO AVOID', aiAvoidPh: 'e.g. I avoid exercises that load my right shoulder', aiNote: 'We never send body data (weight, height, age) to the AI coach.', aiGuest: 'Sign in to save your preferences.', aiGoalShort_ogolna: 'Fitness',
   nmTitle: 'NAME AND PHOTO', nmSub: 'This is how you see yourself in the app.', nmName: 'NAME', nmPlaceholder: 'e.g. Alex', nmSave: 'SAVE', nmChange: 'Change photo', nmRemove: 'Remove photo',
   bgHow: 'HOW TO EARN IT', bgEarned: d => `Earned ${d}`, bgClose: 'CLOSE', bgProgress: 'Progress',
   rdVsPrev: 'compared with the previous one', rdFirst: 'First saved result', rdSet: 'RECORD SET', rdCurrent: 'CURRENT RECORD', rdProj: 'PROJECTED MAX', rdVol: 'BIGGEST VOLUME',
@@ -6539,11 +6553,26 @@ function saveBodyDataSheet(){
 let _pickAiGoal = null;
 function pickAiGoal(g){
   _pickAiGoal = g;
-  document.querySelectorAll('#aiGoalSeg .plansv2-choice-chip').forEach(b=> b.classList.toggle('active', b.dataset.goal === g));
+  document.querySelectorAll('#aiGoalSeg .ai-chip').forEach(b=> b.setAttribute('aria-checked', b.dataset.goal === g ? 'true' : 'false'));
 }
 function openAiPrefsSheet(){
+  const $ = id => document.getElementById(id);
+  $('aiTitle').textContent = t('aiTitle', 'CEL TRENINGOWY');
+  $('aiSub').textContent = t('aiSub', 'Trener AI uwzględni to w podpowiedziach.');
+  $('aiClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('aiGoalSeg').setAttribute('aria-label', t('aiTitle', 'CEL TRENINGOWY'));
+  $('aiAvoidL').textContent = t('aiAvoidL', 'CZEGO UNIKAĆ');
+  $('aiAvoidInput').placeholder = t('aiAvoidPh', 'np. unikam ćwiczeń obciążających prawy bark');
+  $('aiNote').textContent = t('aiNote', 'Danych ciała (waga, wzrost, wiek) nie wysyłamy do Trenera AI.');
+  $('aiGuest').textContent = t('aiGuest', 'Zaloguj się, żeby zapisać preferencje.');
+  $('aiGuest').hidden = !!(cloudSession && cloudSession.user);
+  $('aiSave').textContent = t('bdSave', 'ZAPISZ');
+  document.querySelectorAll('#aiGoalSeg .ai-chip span').forEach(sp=>{
+    const g = sp.parentNode.dataset.goal;
+    sp.textContent = g === 'ogolna' ? t('aiGoalShort_ogolna', 'Sprawność') : t('aiGoal_' + g, AI_GOAL_LABELS[g]);
+  });
   pickAiGoal(aiPrefs.goal || null);
-  document.getElementById('aiAvoidInput').value = aiPrefs.avoid || '';
+  $('aiAvoidInput').value = aiPrefs.avoid || '';
   acctSheetOpen('aiPrefsSheet');   // arkusz nakłada się na ekran Profil (nie ma już panelu bocznego do chowania)
 }
 function closeAiPrefsSheet(viaDrag){
