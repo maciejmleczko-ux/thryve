@@ -757,9 +757,6 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .ai-popup-action-ex{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:#fff;}
 .ai-popup-action-do{font-size:var(--m-fs-sm);font-weight:300;line-height:1.4;color:rgba(255,255,255,.92);}
 .ai-popup-note{margin:18px 0 0;font-size:var(--m-fs-2xs);line-height:1.45;color:rgba(255,255,255,.55);}
-.feedback-type-row{display:flex;gap:8px;margin-bottom:14px;}
-.feedback-type{flex:1;background:var(--light-2);border:1px solid var(--border);border-radius:10px;padding:9px 4px;font-size:var(--m-fs-xs);font-weight:700;color:var(--text-dark);cursor:pointer;font-family:inherit;}
-.feedback-type.active{background:var(--orange);border-color:var(--orange);color:#fff;}
 
 /* ---------- account sheets: photo picker + shared hint (dawny panel boczny zastąpił ekran Profil) ---------- */
 .acct-photo{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
@@ -4487,23 +4484,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <h2 class="wn-headline" id="whatsnewHeadline"></h2>
     </div>
     <div class="wn-scroll" id="whatsnewList"></div>
-  </div>
-</div>
-
-<div class="onboard-overlay hidden" id="feedbackOverlay" onclick="if(event.target===this) closeFeedback()">
-  <div class="onboard-box">
-    <h3 data-i18n="feedbackTitle">Podziel się opinią</h3>
-    <p data-i18n="feedbackBody">Zgłoś błąd albo podrzuć pomysł — czytamy każde zgłoszenie.</p>
-    <div class="feedback-type-row" id="feedbackTypeRow">
-      <button type="button" class="feedback-type active" data-type="bug" onclick="setFeedbackType(this)" data-i18n="feedbackBug">Błąd</button>
-      <button type="button" class="feedback-type" data-type="idea" onclick="setFeedbackType(this)" data-i18n="feedbackIdea">Pomysł</button>
-      <button type="button" class="feedback-type" data-type="other" onclick="setFeedbackType(this)" data-i18n="feedbackOther">Inne</button>
-    </div>
-    <textarea id="feedbackMessage" rows="5" maxlength="2000" data-i18n-ph="feedbackPh" placeholder="Opisz co się stało albo co chciałbyś zmienić..." autocomplete="off"></textarea>
-    <div class="onboard-actions">
-      <button class="skip" onclick="closeFeedback()" data-i18n="cancel">Anuluj</button>
-      <button class="save" id="feedbackSubmitBtn" onclick="submitFeedback()" data-i18n="send">Wyślij</button>
-    </div>
   </div>
 </div>
 
@@ -8849,46 +8829,8 @@ function feedbackPayload(type, message){
   if(email) body.email = email;
   return body;
 }
-let feedbackType = 'bug';
-function setFeedbackType(btn){
-  feedbackType = btn.dataset.type;
-  document.querySelectorAll('#feedbackTypeRow .feedback-type').forEach(b=> b.classList.toggle('active', b===btn));
-}
-function openFeedback(){
-  document.getElementById('feedbackMessage').value = '';
-  feedbackType = 'bug';
-  document.querySelectorAll('#feedbackTypeRow .feedback-type').forEach(b=> b.classList.toggle('active', b.dataset.type===feedbackType));
-  document.getElementById('feedbackOverlay').classList.remove('hidden');
-}
-function closeFeedback(){
-  document.getElementById('feedbackOverlay').classList.add('hidden');
-}
-async function submitFeedback(){
-  const message = document.getElementById('feedbackMessage').value.trim();
-  if(!message){ toast(t('feedbackEmpty','Napisz coś zanim wyślesz 🙂')); return; }
-  const btn = document.getElementById('feedbackSubmitBtn');
-  btn.disabled = true;
-  btn.textContent = t('sending','Wysyłanie...');
-  try{
-    const res = await fetch(FEEDBACK_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(feedbackPayload(feedbackType, message)),
-    });
-    if(!res.ok) throw new Error('bad status');
-    closeFeedback();
-    toast(t('feedbackSent','Dzięki! Zgłoszenie wysłane.'));
-  }catch(err){
-    toast(t('feedbackFailed','Nie udało się wysłać — spróbuj ponownie.'));
-  }finally{
-    btn.disabled = false;
-    btn.textContent = t('send','Wyślij');
-  }
-}
-
 /* v2 (Figma node 175:9818) — same FEEDBACK_ENDPOINT/payload shape as the
-   production popup above, just its own state/markup so the old popup
-   (still used by the Welcome screen) stays untouched. Default type is
+   the former production popup (removed 2026-10-16), with its own state/markup. Default type is
    "idea", matching what the Figma frame shows selected. */
 let feedbackTypeV2 = 'idea';
 function setFeedbackTypeV2(btn){
@@ -20577,7 +20519,7 @@ function applyImport(mode){
    text field regardless of autocomplete="off" — it seems to key partly
    off recognizing that literal value. A random, never-seen token
    defeats the pattern match more reliably. */
-['newExTitleV2','onboardNick','feedbackMessage'].forEach(id=>{
+['newExTitleV2','onboardNick'].forEach(id=>{
   const el = document.getElementById(id);
   if(el) el.setAttribute('autocomplete', 'off-' + Math.random().toString(36).slice(2));
 });
