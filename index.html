@@ -991,6 +991,38 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .ai-note,.ai-guest{margin:12px 0 0;text-align:center;font-size:var(--m-fs-2xs);line-height:1.5;color:var(--m-muted-text);}
 .ai-guest{margin-top:6px;color:var(--m-ink);}
 @media (max-height:620px){ .ai-textarea{height:84px;} .ai-avoid-l{margin-top:10px;} .ai-note{margin-top:8px;} }
+/* ---- „Wybierz ćwiczenie” (#statsExPickSheet) i „Sortuj” (#statsExSortSheet) w Postępach ---- */
+.exp-body{margin-top:12px;}
+.exp-bar{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:8px;padding:6px 0 10px;background:var(--m-white);}
+.exp-search{position:relative;flex:1 1 auto;min-width:0;display:block;}
+.exp-search input{display:block;width:100%;box-sizing:border-box;height:48px;padding:0 48px 0 20px;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-pill);background:var(--m-white);font:inherit;font-size:16px;color:var(--m-ink);outline:none;-webkit-appearance:none;appearance:none;}
+.exp-search input::placeholder{font-size:var(--m-fs-2xs);letter-spacing:.1em;color:var(--m-muted-text);opacity:1;}
+.exp-search input::-webkit-search-cancel-button{-webkit-appearance:none;}
+.exp-search input:focus{border-color:var(--m-orange);}
+.exp-search svg{position:absolute;right:16px;top:50%;margin-top:-11px;width:22px;height:22px;display:block;color:var(--m-ink);pointer-events:none;}
+.exp-sort{flex:none;width:48px;height:48px;padding:0;border:.8px solid var(--m-orange-tint);border-radius:50%;background:var(--m-white);color:var(--m-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font:inherit;transition:background-color var(--m-dur-quick) ease;}
+.exp-sort svg{width:22px;height:22px;display:block;}
+.exp-sort:active{background:var(--m-orange-tint-2);transition-duration:var(--m-dur-press-in);}
+.exp-list,.exs-list{display:flex;flex-direction:column;width:100%;box-sizing:border-box;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);background:var(--m-white);overflow:hidden;}
+.exp-row,.exs-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;box-sizing:border-box;padding:10px 12px;border:0;background:none;font:inherit;color:var(--m-ink);text-align:left;cursor:pointer;transition:background-color var(--m-dur-quick) ease;}
+.exp-row{min-height:64px;}
+.exs-row{min-height:56px;}
+.exp-row + .exp-row,.exs-row + .exs-row{border-top:.5px solid var(--m-line);}
+.exp-row:active,.exs-row:active{background:var(--m-orange-tint-2);transition-duration:var(--m-dur-press-in);}
+.exp-txt{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0;}
+.exp-name{font-size:var(--m-fs-md);font-weight:500;line-height:1.2;color:var(--m-ink);}
+.exp-pill{padding:3px 12px;border-radius:var(--m-r-pill);background:var(--m-mint-tint);color:var(--m-mint-ink);font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.02em;}
+.exs-name{font-size:var(--m-fs-base);font-weight:400;letter-spacing:.04em;text-transform:uppercase;}
+.exp-ck{flex:none;width:24px;height:24px;border-radius:50%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:1.2px solid var(--m-line);}
+.exp-ck svg{width:12px;height:12px;display:none;}
+.exp-row[aria-checked="true"] .exp-ck,.exs-row[aria-checked="true"] .exp-ck{background:var(--m-orange);border-color:var(--m-orange);}
+.exp-row[aria-checked="true"] .exp-ck svg,.exs-row[aria-checked="true"] .exp-ck svg{display:block;}
+.exp-row .exp-ck{display:none;}
+.exp-row[aria-checked="true"] .exp-ck{display:flex;}
+.exp-empty{margin:0;padding:20px 12px;text-align:center;font-size:var(--m-fs-xs);color:var(--m-muted-text);}
+.statsv2-ex-head-r{display:flex;align-items:center;gap:6px;}
+.statsv2-ex-pick{width:44px;height:44px;margin:-6px -8px -6px 0;padding:0;border:0;background:none;color:var(--m-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.statsv2-ex-pick svg{width:22px;height:22px;display:block;}
 .m-sheet2 [hidden]{display:none !important;}
 /* niski ekran (iPhone SE 568 pt): zagęszczenie, żeby klawiatura i przycisk mieściły się bez przewijania */
 @media (max-height:620px){
@@ -3977,6 +4009,44 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="statsExPickSheet" onclick="if(event.target===this) closeStatsExPicker()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="expTitle">WYBIERZ ĆWICZENIE</h1>
+          <button type="button" class="m2-x" id="expClose" aria-label="Zamknij" onclick="closeStatsExPicker()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+      <div class="m2-body exp-body">
+        <div class="exp-bar">
+          <label class="exp-search"><input type="search" id="expSearch" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="WYSZUKAJ" oninput="statsExPickerRender()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></label>
+          <button type="button" class="exp-sort" id="expSortBtn" aria-label="Sortuj" onclick="openStatsExSort()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <div class="exp-list" id="expList" role="radiogroup"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="statsExSortSheet" onclick="if(event.target===this) closeStatsExSort()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="exsTitle">SORTUJ</h1>
+          <button type="button" class="m2-x" id="exsClose" aria-label="Zamknij" onclick="closeStatsExSort()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+      <div class="m2-body">
+        <div class="m2-field exs-list" id="exsList" role="radiogroup"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Konto w chmurze (Supabase Auth) — Faza 2 / E0. Rides the same
      plansv2-customize-* shell as the other account sub-sheets. One form,
      two modes (login/signup) toggled via setAuthMode(). -->
@@ -4662,6 +4732,7 @@ const T_EN = {
   bdTitle: 'BODY DATA', bdSub: 'This data is only used to estimate calories. It stays on this phone; with an account it syncs to the cloud.', bdFemale: 'FEMALE', bdMale: 'MALE', bdSkip: 'SKIP',
   bdRangeH: 'Enter a height from 120 to 230 cm.', bdRangeA: 'Enter an age from 12 to 100.', bdSave: 'SAVE', bdSaved: 'Data saved',
   aiTitle: 'TRAINING GOAL', aiSub: 'The AI coach will use this in its suggestions.', aiAvoidL: 'WHAT TO AVOID', aiAvoidPh: 'e.g. I avoid exercises that load my right shoulder', aiNote: 'We never send body data (weight, height, age) to the AI coach.', aiGuest: 'Sign in to save your preferences.', aiGoalShort_ogolna: 'Fitness',
+  exPickTitle: 'CHOOSE EXERCISE', exPickSearch: 'SEARCH', exPickNone: 'No exercises found.', exPickChange: 'Change exercise', exSortTitle: 'SORT', exSortRecent: 'RECENTLY TRAINED', exSortAz: 'A–Z', exSortWeight: 'HEAVIEST WEIGHT',
   nmTitle: 'NAME AND PHOTO', nmSub: 'This is how you see yourself in the app.', nmName: 'NAME', nmPlaceholder: 'e.g. Alex', nmSave: 'SAVE', nmChange: 'Change photo', nmRemove: 'Remove photo',
   bgHow: 'HOW TO EARN IT', bgEarned: d => `Earned ${d}`, bgClose: 'CLOSE', bgProgress: 'Progress',
   rdVsPrev: 'compared with the previous one', rdFirst: 'First saved result', rdSet: 'RECORD SET', rdCurrent: 'CURRENT RECORD', rdProj: 'PROJECTED MAX', rdVol: 'BIGGEST VOLUME',
@@ -6122,7 +6193,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet'];
+const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','statsExPickSheet','statsExSortSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -10737,6 +10808,8 @@ mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 mSheetDrag('bodyDataSheet', closeBodyDataSheet);     // zamknięcie przeciągnięciem czyści też stan okna (klawiatura, pola)
 mSheetDrag('badgeDetailSheet', closeBadgeDetail);
+mSheetDrag('statsExPickSheet', closeStatsExPicker);
+mSheetDrag('statsExSortSheet', closeStatsExSort);
 mSheetDrag('recordDetailSheet', closeRecordDetail);
 mSheetDrag('profileRecordsSheet', closeProfileRecordsSheet);   // zamknięcie przeciągnięciem kończy też trwający slajd miesięcy
 
@@ -18241,7 +18314,10 @@ function renderStatsV2ExerciseRow(activeName){
     <div class="statsv2-ex-section">
       <div class="statsv2-ex-head">
         <p>${t('stV2ExProgress','Progres ćwiczeń')}</p>
-        ${activeName?'':`<button type="button" class="statsv2-ex-all-btn" onclick="selectStatsExerciseV2(${jsArg(names[0])})">${t('stV2All','WSZYSTKIE')}</button>`}
+        <div class="statsv2-ex-head-r">
+          <button type="button" class="statsv2-ex-pick" aria-label="${t('exPickChange','Zmień ćwiczenie')}" onclick="openStatsExPicker()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          ${activeName?'':`<button type="button" class="statsv2-ex-all-btn" onclick="selectStatsExerciseV2(${jsArg(names[0])})">${t('stV2All','WSZYSTKIE')}</button>`}
+        </div>
       </div>
       <div class="statsv2-ex-row">${tiles}</div>
     </div>`;
@@ -18905,6 +18981,67 @@ function statsV2CenterActiveTile(){
   const tile = row && row.querySelector('.statsv2-ex-tile.active');
   if(!row || !tile) return;
   row.scrollLeft = Math.max(0, tile.offsetLeft - (row.clientWidth - tile.clientWidth) / 2);
+}
+/* ---------- „Wybierz ćwiczenie” + „Sortuj” (Postępy; Figma popupy-v2 11 i 12) ----------
+   Stan sortowania żyje tylko do końca sesji (bez localStorage). Wybór wiersza zamyka okno. */
+let statsExSort = 'recent';   // 'recent' | 'az' | 'weight'
+const STATS_EX_CK = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 6.4l2.3 2.3 4.7-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function statsExShortDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso + 'T00:00:00'); if(isNaN(d)) return '';
+  const m = MONTH_ABBR_PL[d.getMonth()].toLowerCase();
+  return LANG === 'en' ? `${m[0].toUpperCase() + m.slice(1)} ${d.getDate()}` : `${d.getDate()} ${m}`;
+}
+function statsExRowInfo(name){
+  const rec = statsV2ExerciseRecord(name), R = rec && rec.record;
+  if(!R) return { txt: '', w: -1 };
+  const v = R.kind === 'weight' ? `${fmtKgLocal(R.value)} kg` : R.kind === 'time' ? fmtDur(R.value, R.perSide) : `${R.value} ${t('stV2RepsShort','powt.')}`;
+  const dt = statsExShortDate(R.date);
+  return { txt: dt ? `${v} · ${dt}` : v, w: R.kind === 'weight' ? R.value : -1 };
+}
+function statsExPickerRender(){
+  const q = (document.getElementById('expSearch').value || '').trim().toLowerCase();
+  let rows = statsV2RecentExerciseNames().map((name, i)=> Object.assign({ name, i }, statsExRowInfo(name)));
+  if(q) rows = rows.filter(r=> r.name.toLowerCase().includes(q));
+  if(statsExSort === 'az') rows.sort((a, b)=> a.name.localeCompare(b.name, LANG === 'en' ? 'en' : 'pl'));
+  else if(statsExSort === 'weight') rows.sort((a, b)=> (b.w - a.w) || (a.i - b.i));
+  const box = document.getElementById('expList');
+  if(!rows.length){ box.innerHTML = `<p class="exp-empty">${t('exPickNone', 'Nie znaleziono ćwiczeń.')}</p>`; return; }
+  box.innerHTML = rows.map(r=>{
+    const on = r.name === selectedStatsExerciseV2;
+    return `<button type="button" class="exp-row" role="radio" aria-checked="${on}" onclick="statsExPickerPick(${jsArg(r.name)})"><span class="exp-txt"><span class="exp-name">${escHtml(r.name)}</span>${r.txt ? `<span class="exp-pill">${escHtml(r.txt)}</span>` : ''}</span><span class="exp-ck">${STATS_EX_CK}</span></button>`;
+  }).join('');
+}
+function openStatsExPicker(){
+  const $ = id => document.getElementById(id);
+  $('expTitle').textContent = t('exPickTitle', 'WYBIERZ ĆWICZENIE');
+  $('expClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('expSearch').placeholder = t('exPickSearch', 'WYSZUKAJ');
+  $('expSearch').setAttribute('aria-label', t('exPickSearch', 'WYSZUKAJ'));
+  $('expSortBtn').setAttribute('aria-label', t('exSortTitle', 'SORTUJ'));
+  $('expSearch').value = '';
+  statsExPickerRender();
+  acctSheetOpen('statsExPickSheet');
+}
+function closeStatsExPicker(viaDrag){ acctSheetClose('statsExPickSheet', viaDrag); }
+function statsExPickerPick(name){
+  closeStatsExPicker();
+  if(name !== selectedStatsExerciseV2) selectStatsExerciseV2(name);   // ten sam wiersz tylko zamyka okno (selectStatsExerciseV2 by go odznaczyło)
+}
+const STATS_EX_SORTS = [['recent', 'exSortRecent', 'OSTATNIO TRENOWANE'], ['az', 'exSortAz', 'A–Z'], ['weight', 'exSortWeight', 'NAJWIĘKSZY CIĘŻAR']];
+function openStatsExSort(){
+  const $ = id => document.getElementById(id);
+  $('exsTitle').textContent = t('exSortTitle', 'SORTUJ');
+  $('exsClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('exsList').setAttribute('aria-label', t('exSortTitle', 'SORTUJ'));
+  $('exsList').innerHTML = STATS_EX_SORTS.map(([k, tk, pl])=> `<button type="button" class="exs-row" role="radio" aria-checked="${k === statsExSort}" onclick="statsExSortPick('${k}')"><span class="exs-name">${t(tk, pl)}</span><span class="exp-ck">${STATS_EX_CK}</span></button>`).join('');
+  acctSheetOpen('statsExSortSheet');
+}
+function closeStatsExSort(viaDrag){ acctSheetClose('statsExSortSheet', viaDrag); }
+function statsExSortPick(k){
+  statsExSort = k;
+  closeStatsExSort();
+  statsExPickerRender();
 }
 function selectStatsExerciseV2(name){
   selectedStatsExerciseV2 = (selectedStatsExerciseV2===name) ? null : name;
