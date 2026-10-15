@@ -1058,6 +1058,9 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
   .m-sheet2 .m2-head{padding-top:4px;}
   .m2-body > .m2-btn--danger{height:44px;margin-top:12px;flex:none;}
   .ai-textarea.fb-ta{height:96px;}
+  .kc-field .m2-row--lg{min-height:44px;}
+  #kcalPad .mk-key{height:42px;}
+  #kcalPad{margin-top:8px;}
   .m2-note{margin-top:8px;}
   .ws-val{margin-top:10px;}
   .ws-num{font-size:52px;}
@@ -4197,33 +4200,31 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<div class="onboard-overlay hidden plansv2-customize-overlay" id="editKcalSheet" onclick="if(event.target===this) closeEditKcal()">
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="editKcalSheet" onclick="if(event.target===this) closeEditKcal()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
-      <div class="fbv2-header">
-        <div class="fbv2-title-row">
-          <h1>SPALONE KALORIE</h1>
-          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeEditKcal()"></span>
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="kcalTitle">SPALONE KALORIE</h1>
+          <button type="button" class="m2-x" id="kcalClose" aria-label="Zamknij" onclick="closeEditKcal()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
-        <p class="fbv2-subtitle" id="kcalSheetSub">To szacunek z Twojej masy ciała i czasu treningu.<br>Popraw, jeśli masz dokładniejszy odczyt z zegarka.</p>
+        <p class="m2-sub" id="kcalSheetSub">To szacunek z Twojej masy ciała i czasu treningu.<br>Popraw, jeśli masz dokładniejszy odczyt z zegarka.</p>
       </div>
-      <div class="plansv2-customize-section">
-        <p class="plansv2-customize-label">Kalorie</p>
-        <div class="acct-num-row solo">
-          <div class="exv2-field">
-            <input type="number" inputmode="numeric" step="1" min="0" max="3000" id="kcalInput" placeholder="kcal">
-          </div>
+      <div class="m2-body">
+        <div class="m2-field kc-field">
+          <div class="m2-row m2-row--lg"><span class="m2-row-l" id="kcalL">KALORIE</span><span class="m2-row-v" id="kcalV"></span></div>
         </div>
-        <button type="button" class="acct-revert" id="kcalRevertBtn" hidden onclick="revertKcal()"></button>
-        <p class="acct-hint" id="kcalWatchHint" hidden></p>
-        <p class="acct-hint" id="kcalLearnHint" hidden></p>
-        <p class="acct-hint" id="kcalDisclaimer">Kalorie to szacunek, nie pomiar. To nie porada medyczna ani dietetyczna.</p>
+        <p class="m2-err" id="kcalErr" role="alert" hidden></p>
+        <button type="button" class="m2-link m2-link--c" id="kcalRevertBtn" hidden onclick="revertKcal()"></button>
+        <p class="m2-note m2-note--c" id="kcalWatchHint" hidden></p>
+        <p class="m2-note m2-note--c" id="kcalLearnHint" hidden></p>
+        <p class="m2-note m2-note--c" id="kcalDisclaimer">Kalorie to szacunek, nie pomiar. To nie porada medyczna ani dietetyczna.</p>
+        <div class="ws-pad" id="kcalPad"></div>
       </div>
-      <div class="plansv2-customize-actions">
-        <button type="button" class="plansv2-customize-cancel" onclick="closeEditKcal()">ANULUJ</button>
-        <button type="button" class="plansv2-customize-apply" onclick="saveEditKcal()">ZAPISZ</button>
-      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="kcalSave" onclick="saveEditKcal()">ZAPISZ</button>
     </div>
   </div>
 </div>
@@ -7728,48 +7729,66 @@ function closeChangelogHistorySheet(viaDrag){ acctSheetClose('changelogHistorySh
 
 /* ---------- edit-kcal sheet (per workout) ---------- */
 let editKcalWorkoutId = null;
+let _kcal = null;   // { v: tekst cyfr, pad }
+function kcalPaint(){
+  if(!_kcal) return;
+  const $ = id => document.getElementById(id);
+  const raw = _kcal.v, n = raw === '' ? null : parseInt(raw, 10);
+  const bad = n != null && n > 3000;
+  $('kcalV').textContent = n == null ? '—' : n + ' kcal';
+  $('kcalErr').hidden = !bad;
+  if(bad) $('kcalErr').textContent = t('kcalRange', 'Wpisz wartość od 0 do 3000.');
+  $('kcalSave').disabled = n == null || bad;
+}
 function openEditKcal(wid){
   const w = workouts.find(x=> x.id === wid);
   if(!w){ return; }
   editKcalWorkoutId = wid;
+  const $ = id => document.getElementById(id);
   const est = (w.kcalEstimated != null) ? w.kcalEstimated : computeWorkoutKcal(w).kcalEstimated;
   const base = (w.kcalWatch != null) ? w.kcalWatch : est;   // what "revert" falls back to
   const cur = (w.kcalUser != null) ? w.kcalUser : base;
-  document.getElementById('kcalInput').value = (cur != null) ? cur : '';
-  const rb = document.getElementById('kcalRevertBtn');
+  $('kcalTitle').textContent = t('kcalTitle', 'SPALONE KALORIE');
+  $('kcalL').textContent = t('kcalL', 'KALORIE');
+  $('kcalClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('kcalSave').textContent = t('bdSave', 'ZAPISZ');
+  const rb = $('kcalRevertBtn');
   if(base != null && w.kcalUser != null){
     rb.hidden = false;
-    rb.textContent = w.kcalWatch != null ? 'Wróć do odczytu z zegarka (' + base + ')' : 'Wróć do szacunku (' + base + ')';
+    rb.textContent = (w.kcalWatch != null ? t('kcalBackWatch', 'Wróć do odczytu z zegarka (%n)') : t('kcalBackEst', 'Wróć do szacunku (%n)')).replace('%n', base);
   } else rb.hidden = true;
   const fromWatch = w.kcalWatch != null;
-  document.getElementById('kcalSheetSub').innerHTML = fromWatch
-    ? 'Kalorie z Twojego zegarka (Apple Zdrowie).<br>Możesz je poprawić, jeśli chcesz.'
-    : 'To szacunek z Twojej masy ciała i czasu treningu.<br>Popraw, jeśli masz dokładniejszy odczyt z zegarka.';
-  document.getElementById('kcalDisclaimer').textContent = fromWatch
-    ? 'Zegarek też liczy kalorie w przybliżeniu. To nie porada medyczna ani dietetyczna.'
-    : 'Kalorie to szacunek, nie pomiar. To nie porada medyczna ani dietetyczna.';
-  const wh = document.getElementById('kcalWatchHint');
+  $('kcalSheetSub').innerHTML = fromWatch
+    ? t('kcalSubWatch', 'Kalorie z Twojego zegarka (Apple Zdrowie).<br>Możesz je poprawić, jeśli chcesz.')
+    : t('kcalSubEst', 'To szacunek z Twojej masy ciała i czasu treningu.<br>Popraw, jeśli masz dokładniejszy odczyt z zegarka.');
+  $('kcalDisclaimer').textContent = fromWatch
+    ? t('kcalDiscWatch', 'Zegarek też liczy kalorie w przybliżeniu. To nie porada medyczna ani dietetyczna.')
+    : t('kcalDiscEst', 'Kalorie to szacunek, nie pomiar. To nie porada medyczna ani dietetyczna.');
+  const wh = $('kcalWatchHint');
   if(wh){
     wh.hidden = w.kcalWatch == null;
-    if(w.kcalWatch != null) wh.textContent = 'Odczyt z Apple Zdrowie: ' + w.kcalWatch + ' kcal' + (w.kcalWatchSrc ? ' (' + w.kcalWatchSrc + ')' : '') + '.';
+    if(w.kcalWatch != null) wh.textContent = t('kcalWatchRead', 'Odczyt z Apple Zdrowie: %n kcal%s.').replace('%n', w.kcalWatch).replace('%s', w.kcalWatchSrc ? ' (' + w.kcalWatchSrc + ')' : '');
   }
-  const hint = document.getElementById('kcalLearnHint');
+  const hint = $('kcalLearnHint');
   if(hint){
     const n = kcalEditCount();
+    const f = kcalPersonalFactor.toFixed(2).replace('.', LANG === 'en' ? '.' : ',');
     if(n >= KCAL_FACTOR_MIN_EDITS){
       hint.hidden = false;
-      hint.textContent = `Dostrajam szacunki do Twoich poprawek (${n}). Mnożnik ×${kcalPersonalFactor.toFixed(2).replace('.', ',')}.`;
+      hint.textContent = t('kcalLearnTuned', 'Dostrajam szacunki do Twoich poprawek (%n). Mnożnik ×%f.').replace('%n', n).replace('%f', f);
     } else if(n > 0 || w.kcalUser != null){
       hint.hidden = false;
-      hint.textContent = `Zbieram Twoje poprawki (${n}/${KCAL_FACTOR_MIN_EDITS}). Po ${KCAL_FACTOR_MIN_EDITS} zacznę dostrajać pozostałe szacunki.`;
+      hint.textContent = t('kcalLearnGather', 'Zbieram Twoje poprawki (%n/%m). Po %m zacznę dostrajać pozostałe szacunki.').replace('%n', n).split('%m').join(KCAL_FACTOR_MIN_EDITS);
     } else {
       hint.hidden = true;
     }
   }
+  _kcal = { v: cur != null ? String(Math.round(cur)) : '', pad: null };
+  _kcal.pad = mkPad($('kcalPad'), { maxDigits: 4, decimals: 0, min: 0, max: 3000, value: _kcal.v, onChange: st=>{ if(_kcal){ _kcal.v = st.raw; kcalPaint(); } } });
+  kcalPaint();
   acctSheetOpen('editKcalSheet');
-  setTimeout(()=>{ try{ document.getElementById('kcalInput').focus(); }catch(e){} }, 40);
 }
-function closeEditKcal(viaDrag){ acctSheetClose('editKcalSheet', viaDrag); }
+function closeEditKcal(viaDrag){ _kcal = null; acctSheetClose('editKcalSheet', viaDrag); }
 function afterKcalEdit(){
   closeEditKcal();
   if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
@@ -7785,8 +7804,8 @@ function revertKcal(){
 function saveEditKcal(){
   const w = workouts.find(x=> x.id === editKcalWorkoutId);
   if(!w) return;
-  const v = parseInt(document.getElementById('kcalInput').value, 10);
-  if(!(v >= 0 && v <= 3000)){ toast('Podaj wartość 0–3000'); return; }
+  const v = _kcal && _kcal.v !== '' ? parseInt(_kcal.v, 10) : NaN;
+  if(!(v >= 0 && v <= 3000)) return;   // ZAPISZ jest wtedy nieaktywny
   w.kcalUser = v; saveWorkouts(workouts);
   recomputeWorkoutCalories();   // new correction — refit the personal factor + re-estimate the rest
   afterKcalEdit();
@@ -16119,6 +16138,11 @@ Object.assign(T_EN, {
   npTitle: 'NEW PASSWORD', npSub: 'Set a password for your Mekkio account.', npL1: 'New password', npL2: 'Repeat password', npPh2: 'the same password', npMismatch: 'The passwords do not match.',
   npSame: 'Pick a password different from the current one.', npExpired: 'The link has expired. Ask for a new one in the sign-in window ("I forgot my password").', npDone: 'Password changed',
   fbTitle: 'SHARE FEEDBACK', fbSub: 'Report a bug or share an idea.<br>We read every submission.', fbTypeAria: 'Type of report', fbMsgAria: 'Your message', fbPh: 'Describe what happened or what you would like to change in the app',
+  kcalTitle: 'BURNED CALORIES', kcalL: 'CALORIES', kcalRange: 'Enter a value from 0 to 3000.',
+  kcalBackWatch: 'Back to the watch reading (%n)', kcalBackEst: 'Back to the estimate (%n)',
+  kcalSubWatch: 'Calories from your watch (Apple Health).<br>You can correct them if you like.', kcalSubEst: 'An estimate from your body weight and workout time.<br>Correct it if you have a more accurate reading from your watch.',
+  kcalDiscWatch: 'A watch also only estimates calories. This is not medical or dietary advice.', kcalDiscEst: 'Calories are an estimate, not a measurement. This is not medical or dietary advice.',
+  kcalWatchRead: 'Apple Health reading: %n kcal%s.', kcalLearnTuned: 'I am tuning the estimates to your corrections (%n). Multiplier ×%f.', kcalLearnGather: 'Collecting your corrections (%n/%m). After %m I will start tuning the remaining estimates.',
   m6Saved: 'Saved', m6Today: 'today',
   remTitle: 'WORKOUT REMINDER', remSub: 'A notification on the days planned in your selected plan.', remTime: 'TIME', remOn: 'On', remOff: 'Off',
   remHintNoPlan: 'Pick a plan (Plans tab) to set the reminder days.', remHintNoDays: 'Your plan has no training days yet.', remHintDays: 'Days: %d, based on the plan "%p".',
