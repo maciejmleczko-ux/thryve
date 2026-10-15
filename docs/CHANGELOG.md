@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.69.0 (2026-10-14)
+- **Aktualna wersja:** 4.70.0 (2026-10-14)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,26 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.70.0 · MINOR · 2026-10-16
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Odznaki są teraz na miesiące, nie na tygodnie: np. 100 treningów, 8 pełnych tygodni z planu z rzędu albo 1000 t podniesionej objętości. Zdobyte wcześniej mogą się przeliczyć. Po treningu zobaczysz też okno z nową odznaką.
+>
+> Okna Postępów, logowania, kalorii, przypomnienia i opinii mają nowy, spójny wygląd. W Postępach przycisk „Wszystkie” otwiera listę ćwiczeń z wyszukiwarką.
+
+**Odznaki, wyższe progi (decyzja Macieja 2026-10-16, wzorzec Apple Fitness / Strava):** Chrzest Żelaza 5 treningów, Pierwsza Krew 3 rekordy ciężaru, Gryf Mocy 100 treningów, Pełny Etat 8 pełnych tygodni z planu z rzędu, Rakieta 8 tygodni wzrostu objętości, Nokaut Tygodnia = najlepszy tydzień w historii (min. 8 tygodni danych), Waga Ciężka 1,5× waga ciała, Ściana Chwały 100 rekordów, Człowiek orkiestra 15 ćwiczeń, Wagon Towarowy 1000 t. Odznaki liczone z historii, więc przeliczają się wstecz.
+
+**Popupy v2, etapy 4–6 (karta: `docs/popupy-spec.md`):**
+
+- **Etap 4:** Cel treningowy (`#aiPrefsSheet`), nowe okna Wybierz ćwiczenie (`#statsExPickSheet`) i Sortuj (`#statsExSortSheet`); „WSZYSTKIE” w Postępach otwiera okno, ikona listy tylko w szczególe ćwiczenia; kafle zostają.
+- **Etap 5:** okno Nowa odznaka po treningu (`#newBadgeSheet`, różnica odznak przed/po zapisem, bez zapisu stanu), toast wyrównany do Figmy (12 px, 36 px wysokości), okno Język (`#langSheet`, bez wejścia: czeka na decyzję o zapamiętywaniu języka).
+- **Etap 6:** Przypomnienie, Apple Zdrowie, Zaloguj się (linki „Nie pamiętam hasła” i „Załóż konto”), Nowe hasło, Opinia (martwy `#feedbackOverlay` zostaje), Spalone kalorie (`mkPad`, 0–3000), dialog „Nie zgub swoich treningów” w wariancie GYM.
+- **EN:** nazwy i opisy odznak (`bdg_<id>_*`), toasty zdjęcia profilu, naprawiony `hydrateI18n()` (teksty z późniejszych bloków T_EN). Poza zakresem 34 klucze starszych ekranów bez EN.
+- Do sprawdzenia na iPhonie: `input[type=time]` jako nakładka w Przypomnieniu, okno odznaki po prawdziwym treningu, przepływy Apple/Google.
+
+**Commity:** wiele (etapy 4–6, progi odznak, EN); patrz `git log 789a404..HEAD`.
 
 ### 4.69.0 · MINOR · 2026-10-14
 
