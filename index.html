@@ -4699,27 +4699,30 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <!-- "Podziel się opinią" v2 (Figma node 175:9818) — replaces openFeedback()
      on the v2 preview screens only (Dashboard/GYM v2/Plans v2 list+editor);
      Welcome screen keeps the old #feedbackOverlay untouched. -->
-<div class="onboard-overlay hidden plansv2-customize-overlay" id="feedbackOverlayV2" onclick="if(event.target===this) closeFeedbackV2()">
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="feedbackOverlayV2" onclick="if(event.target===this) closeFeedbackV2()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
-      <div class="fbv2-header">
-        <div class="fbv2-title-row">
-          <h1>PODZIEL SIĘ OPINIĄ</h1>
-          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeFeedbackV2()"></span>
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="fbTitle">PODZIEL SIĘ OPINIĄ</h1>
+          <button type="button" class="m2-x" id="fbClose" aria-label="Zamknij" onclick="closeFeedbackV2()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
-        <p class="fbv2-subtitle">Zgłoś błąd albo podrzuć pomysł.<br>Czytamy każde zgłoszenie.</p>
+        <p class="m2-sub" id="fbSub">Zgłoś błąd albo podrzuć pomysł.<br>Czytamy każde zgłoszenie.</p>
       </div>
-      <div class="plansv2-choice-row" id="feedbackTypeRowV2">
-        <button type="button" class="plansv2-choice-chip" data-type="bug" onclick="setFeedbackTypeV2(this)">Błąd</button>
-        <button type="button" class="plansv2-choice-chip active" data-type="idea" onclick="setFeedbackTypeV2(this)">Pomysł</button>
-        <button type="button" class="plansv2-choice-chip" data-type="other" onclick="setFeedbackTypeV2(this)">Inne</button>
+      <div class="m2-body">
+        <div class="m2-stack">
+          <div class="ai-seg ai-seg--navy" id="feedbackTypeRowV2" role="radiogroup" aria-label="Rodzaj zgłoszenia">
+            <button type="button" class="ai-chip" role="radio" aria-checked="false" data-type="bug" onclick="setFeedbackTypeV2(this)"><span>Błąd</span></button>
+            <button type="button" class="ai-chip" role="radio" aria-checked="true" data-type="idea" onclick="setFeedbackTypeV2(this)"><span>Pomysł</span></button>
+            <button type="button" class="ai-chip" role="radio" aria-checked="false" data-type="other" onclick="setFeedbackTypeV2(this)"><span>Inne</span></button>
+          </div>
+          <textarea class="ai-textarea fb-ta" id="feedbackMessageV2" maxlength="2000" placeholder="Opisz co się stało albo co chciałbyś zmienić w aplikacji" aria-label="Treść zgłoszenia" autocomplete="off"></textarea>
+        </div>
       </div>
-      <textarea class="fbv2-textarea" id="feedbackMessageV2" maxlength="2000" placeholder="Opisz co się stało albo co chciałbyś zmienić w aplikacji" autocomplete="off"></textarea>
-      <div class="plansv2-customize-actions">
-        <button type="button" class="plansv2-customize-cancel" onclick="closeFeedbackV2()">ANULUJ</button>
-        <button type="button" class="plansv2-customize-apply" id="feedbackSubmitBtnV2" onclick="submitFeedbackV2()">WYŚLIJ</button>
-      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="feedbackSubmitBtnV2" onclick="submitFeedbackV2()">WYŚLIJ</button>
     </div>
   </div>
 </div>
@@ -8861,12 +8864,23 @@ async function submitFeedback(){
 let feedbackTypeV2 = 'idea';
 function setFeedbackTypeV2(btn){
   feedbackTypeV2 = btn.dataset.type;
-  document.querySelectorAll('#feedbackTypeRowV2 .plansv2-choice-chip').forEach(b=> b.classList.toggle('active', b===btn));
+  document.querySelectorAll('#feedbackTypeRowV2 .ai-chip').forEach(b=> b.setAttribute('aria-checked', b===btn ? 'true' : 'false'));
 }
 function openFeedbackV2(){
   document.getElementById('feedbackMessageV2').value = '';
   feedbackTypeV2 = 'idea';
-  document.querySelectorAll('#feedbackTypeRowV2 .plansv2-choice-chip').forEach(b=> b.classList.toggle('active', b.dataset.type===feedbackTypeV2));
+  const $ = id => document.getElementById(id);
+  $('fbTitle').textContent = t('fbTitle', 'PODZIEL SIĘ OPINIĄ');
+  $('fbSub').innerHTML = t('fbSub', 'Zgłoś błąd albo podrzuć pomysł.<br>Czytamy każde zgłoszenie.');
+  $('fbClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('feedbackTypeRowV2').setAttribute('aria-label', t('fbTypeAria', 'Rodzaj zgłoszenia'));
+  $('feedbackMessageV2').placeholder = t('fbPh', 'Opisz co się stało albo co chciałbyś zmienić w aplikacji');
+  $('feedbackMessageV2').setAttribute('aria-label', t('fbMsgAria', 'Treść zgłoszenia'));
+  $('feedbackSubmitBtnV2').textContent = t('feedbackSendBtn','WYŚLIJ');
+  document.querySelectorAll('#feedbackTypeRowV2 .ai-chip').forEach(b=>{
+    b.setAttribute('aria-checked', b.dataset.type===feedbackTypeV2 ? 'true' : 'false');
+    b.querySelector('span').textContent = t({bug:'feedbackBug', idea:'feedbackIdea', other:'feedbackOther'}[b.dataset.type], {bug:'Błąd', idea:'Pomysł', other:'Inne'}[b.dataset.type]);
+  });
   resetPlansCustomizeSheet('feedbackOverlayV2');
   document.getElementById('feedbackOverlayV2').classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');
@@ -16104,6 +16118,7 @@ Object.assign(T_EN, {
   authResetNoEmail: 'Enter your e-mail first', authResetFail: 'Could not send the e-mail', authResetSent: 'We sent you a password reset link',
   npTitle: 'NEW PASSWORD', npSub: 'Set a password for your Mekkio account.', npL1: 'New password', npL2: 'Repeat password', npPh2: 'the same password', npMismatch: 'The passwords do not match.',
   npSame: 'Pick a password different from the current one.', npExpired: 'The link has expired. Ask for a new one in the sign-in window ("I forgot my password").', npDone: 'Password changed',
+  fbTitle: 'SHARE FEEDBACK', fbSub: 'Report a bug or share an idea.<br>We read every submission.', fbTypeAria: 'Type of report', fbMsgAria: 'Your message', fbPh: 'Describe what happened or what you would like to change in the app',
   m6Saved: 'Saved', m6Today: 'today',
   remTitle: 'WORKOUT REMINDER', remSub: 'A notification on the days planned in your selected plan.', remTime: 'TIME', remOn: 'On', remOff: 'Off',
   remHintNoPlan: 'Pick a plan (Plans tab) to set the reminder days.', remHintNoDays: 'Your plan has no training days yet.', remHintDays: 'Days: %d, based on the plan "%p".',
