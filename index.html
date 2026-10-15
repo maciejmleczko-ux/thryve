@@ -6387,7 +6387,7 @@ function setAvatarFromFile(file){
       applyAvatarEverywhere();
       toast(t('avatarSaved','Zdjęcie ustawione'));
     };
-    img.onerror = ()=> toast(t('avatarBadFile','Nie udało się wczytać zdjęcia'));
+    img.onerror = ()=> toast(t('avatarLoadFail','Nie udało się wczytać zdjęcia'));
     img.src = rd.result;
   };
   rd.readAsDataURL(file);
@@ -16023,6 +16023,21 @@ function dashRecordEvents(){
 // c.events = rekordy ćwiczeń z silnika rekordów (dashRecordEvents → recordTimeline): Pierwsza Krew = pierwszy rekord ciężaru, Ściana Chwały =
 // liczba rekordów ćwiczeń (ciężar / powtórzenia przy masie ciała / czas), Człowiek orkiestra = rekord w 5 różnych ćwiczeniach.
 // Rekord objętości całego treningu jest osobny i nie liczy się do żadnej odznaki.
+// Odznaki + toasty zdjęcia profilu (EN); klucze bdg_<id>_name / bdg_<id>_text czyta dashBadges() przez t()
+Object.assign(T_EN, {
+  avatarBadFile: 'That is not a photo', avatarTooBig: 'Could not save the photo', avatarLoadFail: 'Could not load the photo', avatarSaved: 'Photo updated',
+  bdg_first_name: 'Iron Initiation', bdg_first_text: '5 workouts logged in Mekkio.',
+  bdg_fullweek_name: 'Full-Time Job', bdg_fullweek_text: 'Every planned workout completed for 8 weeks in a row.',
+  bdg_firstpr_name: 'First Blood', bdg_firstpr_text: '3 new weight records.',
+  bdg_pr25_name: 'Wall of Fame', bdg_pr25_text: '100 records in total.',
+  bdg_beatweek_name: 'Week Knockout', bdg_beatweek_text: 'Your best week ever by volume (with at least 8 weeks of data).',
+  bdg_ton_name: 'Freight Train', bdg_ton_text: 'Over 1,000 t of total volume in Mekkio.',
+  bdg_bodyweight_name: 'Heavyweight', bdg_bodyweight_text: 'One set with a weight 1.5 times your body weight.',
+  bdg_growth3_name: 'Rocket', bdg_growth3_text: '8 weeks in a row with more volume than the week before.',
+  bdg_allround_name: 'One-Man Band', bdg_allround_text: 'A record in 15 different exercises.',
+  bdg_gryf_name: 'Barbell Master', bdg_gryf_text: '100 workouts logged in Mekkio.',
+});
+hydrateI18n();   // ponowny przebieg: pierwszy (przy definicji) nie widział kluczy z późniejszych Object.assign(T_EN…)
 const DASH_BADGES = [
   // Progi z 2026-10-16 (Maciej: odznaki mają być odległe, ma się chcieć je zdobywać; wzorzec: Apple Fitness, Strava): miesiące i rok, nie tygodnie.
   // Odznaki są liczone z historii (bez zapisu stanu), więc zmiana progu przelicza je wstecz u każdego.
@@ -16128,7 +16143,7 @@ function dashBadges(plan, todayIso){
   };
   const all = DASH_BADGES.map(b=>{
     const r = b.check(c);
-    return { id:b.id, icon:b.icon, name:b.name, text:b.text, earned: !!r.earnedOn, earnedOn: r.earnedOn, value: r.value, goal: r.goal,
+    return { id:b.id, icon:b.icon, name:t('bdg_'+b.id+'_name', b.name), text:t('bdg_'+b.id+'_text', b.text), earned: !!r.earnedOn, earnedOn: r.earnedOn, value: r.value, goal: r.goal,
              ratio: r.goal ? Math.min(1, r.value / r.goal) : 0 };
   });
   const earned = all.filter(b=>b.earned);
