@@ -15890,68 +15890,81 @@ function dashRecordEvents(){
 // liczba rekordów ćwiczeń (ciężar / powtórzenia przy masie ciała / czas), Człowiek orkiestra = rekord w 5 różnych ćwiczeniach.
 // Rekord objętości całego treningu jest osobny i nie liczy się do żadnej odznaki.
 const DASH_BADGES = [
-  { id:'first',      icon:'barbell-flash',  name:'Chrzest Żelaza',                 text:'Pierwszy trening zapisany w Mekkio.',
-    check:c=>({ earnedOn: c.chrono.length ? c.chrono[0].date : null, value: Math.min(1, c.chrono.length), goal: 1 }) },
-  { id:'fullweek',   icon:'medal-star',     name:'Pełny Etat',                     text:'Komplet treningów z planu w jednym tygodniu.',
+  // Progi z 2026-10-16 (Maciej: odznaki mają być odległe, ma się chcieć je zdobywać; wzorzec: Apple Fitness, Strava): miesiące i rok, nie tygodnie.
+  // Odznaki są liczone z historii (bez zapisu stanu), więc zmiana progu przelicza je wstecz u każdego.
+  { id:'first',      icon:'barbell-flash',  name:'Chrzest Żelaza',                 text:'5 zapisanych treningów w Mekkio.',
+    check:c=>({ earnedOn: c.chrono.length >= 5 ? c.chrono[4].date : null, value: Math.min(5, c.chrono.length), goal: 5 }) },
+  { id:'fullweek',   icon:'medal-star',     name:'Pełny Etat',                     text:'Komplet treningów z planu przez 8 tygodni z rzędu.',
     check:c=>{
-      let on = null;
-      if(c.required > 0) for(const ws of c.weekStarts){ const s = c.weekDays.get(ws); if(s.size >= c.required){ on = [...s].sort().pop(); break; } }
-      const cur = c.weekDays.get(c.curWeekStart);
-      return { earnedOn: on, value: cur ? cur.size : 0, goal: c.required || null };
+      const GOAL = 8;
+      let run = 0, best = 0, on = null;
+      if(c.required > 0 && c.weekStarts.length){
+        for(let ws = c.weekStarts[0]; ws <= c.curWeekStart; ws = dashAddDays(ws, 7)){
+          const s = c.weekDays.get(ws);
+          if(s && s.size >= c.required) run++; else if(ws !== c.curWeekStart) run = 0;   // bieżący, jeszcze niepełny tydzień nie przerywa serii
+          best = Math.max(best, run);
+          if(run >= GOAL && !on) on = [...s].sort().pop();
+        }
+      }
+      return { earnedOn: on, value: Math.min(GOAL, run), goal: GOAL };
     } },
-  { id:'firstpr',    icon:'weight-wreath',  name:'Pierwsza Krew',                  text:'Pierwszy nowy rekord ciężaru.',
-    check:c=>{ const e = c.events.find(x=>x.kinds.includes('weight')); return { earnedOn: e ? e.date : null, value: e ? 1 : 0, goal: 1 }; } },
-  { id:'pr25',       icon:'trophy-star',    name:'Ściana Chwały',                  text:'25 rekordów łącznie.',
-    check:c=>({ earnedOn: c.events.length >= 25 ? c.events[24].date : null, value: Math.min(25, c.events.length), goal: 25 }) },
-  { id:'beatweek',   icon:'target',         name:'Nokaut Tygodnia',                text:'Objętość większa niż w zeszłym tygodniu.',
+  { id:'firstpr',    icon:'weight-wreath',  name:'Pierwsza Krew',                  text:'3 nowe rekordy ciężaru.',
+    check:c=>{ const e = c.events.filter(x=>x.kinds.includes('weight')); return { earnedOn: e.length >= 3 ? e[2].date : null, value: Math.min(3, e.length), goal: 3 }; } },
+  { id:'pr25',       icon:'trophy-star',    name:'Ściana Chwały',                  text:'100 rekordów łącznie.',
+    check:c=>({ earnedOn: c.events.length >= 100 ? c.events[99].date : null, value: Math.min(100, c.events.length), goal: 100 }) },
+  { id:'beatweek',   icon:'target',         name:'Nokaut Tygodnia',                text:'Najlepszy tydzień w historii pod względem objętości (przy co najmniej 8 tygodniach danych).',
     check:c=>{
-      let on = null;
-      for(const ws of c.weekStarts){
-        const prev = c.weekKg.get(dashAddDays(ws,-7)) || 0;
-        if(prev > 0 && (c.weekKg.get(ws)||0) > prev){ on = [...c.weekDays.get(ws)].sort().pop(); break; }
+      let on = null, best = 0, n = 0;
+      if(c.weekStarts.length){
+        for(let ws = c.weekStarts[0]; ws <= c.curWeekStart; ws = dashAddDays(ws, 7)){
+          const kg = c.weekKg.get(ws) || 0; n++;
+          if(!on && n >= 8 && kg > best && best > 0){ const d = c.weekDays.get(ws); on = d && d.size ? [...d].sort().pop() : ws; }
+          best = Math.max(best, kg);
+        }
       }
       return { earnedOn: on, value: on ? 1 : 0, goal: 1 };
     } },
-  { id:'ton',        icon:'bicep',          name:'Wagon Towarowy',                 text:'Ponad 100 t łącznej objętości w Mekkio.',
+  { id:'ton',        icon:'bicep',          name:'Wagon Towarowy',                 text:'Ponad 1000 t łącznej objętości w Mekkio.',
     check:c=>{
-      const GOAL = 100000;   // 100 t; 1000 kg bylo osiagane juz w pierwszym treningu
+      const GOAL = 1000000;   // 1000 t (ok. 200 treningów)
       let sum = 0, on = null;
       for(const w of c.chrono){ sum += workoutSumStats(w).volume; if(sum >= GOAL){ on = w.date; break; } }
       return { earnedOn: on, value: Math.min(GOAL, Math.round(c.totalKg)), goal: GOAL };
     } },
-  { id:'bodyweight', icon:'deadlift',       name:'Waga Ciężka',                    text:'Jedna seria z ciężarem większym niż Twoja waga.',
+  { id:'bodyweight', icon:'deadlift',       name:'Waga Ciężka',                    text:'Jedna seria z ciężarem 1,5 razy większym niż Twoja waga.',
     check:c=>{
       let on = null, maxSet = 0;
       for(const w of c.chrono){
         const bw = weightAtDate(w.date);
         w.exercises.forEach(ex=> exSetsView(ex).forEach(s=>{
           maxSet = Math.max(maxSet, s.weight||0);
-          if(!on && bw && (s.weight||0) > bw) on = w.date;
+          if(!on && bw && (s.weight||0) > bw * 1.5) on = w.date;
         }));
       }
-      return { earnedOn: on, value: maxSet, goal: currentWeightKg() || null };
+      const cw = currentWeightKg();
+      return { earnedOn: on, value: maxSet, goal: cw ? Math.round(cw * 1.5 * 10) / 10 : null };
     } },
-  { id:'growth3',    icon:'chart-up',       name:'Rakieta',                        text:'3 tygodnie z rzędu z większą objętością niż tydzień wcześniej.',
+  { id:'growth3',    icon:'chart-up',       name:'Rakieta',                        text:'8 tygodni z rzędu z większą objętością niż tydzień wcześniej.',
     check:c=>{
+      const GOAL = 8;
       let run = 0, on = null;
       if(c.weekStarts.length){
         for(let ws = c.weekStarts[0]; ws <= c.curWeekStart; ws = dashAddDays(ws, 7)){
           const prev = c.weekKg.get(dashAddDays(ws,-7)) || 0;
           if(prev > 0 && (c.weekKg.get(ws)||0) > prev) run++; else run = 0;
-          if(run >= 3 && !on) on = [...c.weekDays.get(ws)].sort().pop();
+          if(run >= GOAL && !on) on = [...c.weekDays.get(ws)].sort().pop();
         }
       }
-      return { earnedOn: on, value: Math.min(3, run), goal: 3 };
+      return { earnedOn: on, value: Math.min(GOAL, run), goal: GOAL };
     } },
-  { id:'allround',   icon:'clipboard-pr',   name:'Człowiek orkiestra',             text:'Rekord w 5 różnych ćwiczeniach.',
+  { id:'allround',   icon:'clipboard-pr',   name:'Człowiek orkiestra',             text:'Rekord w 15 różnych ćwiczeniach.',
     check:c=>{
       const seen = new Set(); let on = null;
-      for(const e of c.events){ seen.add(e.name); if(!on && seen.size >= 5) on = e.date; }
-      return { earnedOn: on, value: Math.min(5, seen.size), goal: 5 };
+      for(const e of c.events){ seen.add(e.name); if(!on && seen.size >= 15) on = e.date; }
+      return { earnedOn: on, value: Math.min(15, seen.size), goal: 15 };
     } },
-  // ROBOCZA reguła do akceptacji Macieja (2026-10-13): 10 zapisanych treningów łącznie
-  { id:'gryf',       icon:'barbell',        name:'Gryf Mocy',                     text:'10 zapisanych treningów w Mekkio.',
-    check:c=>({ earnedOn: c.chrono.length >= 10 ? c.chrono[9].date : null, value: Math.min(10, c.chrono.length), goal: 10 }) },
+  { id:'gryf',       icon:'barbell',        name:'Gryf Mocy',                     text:'100 zapisanych treningów w Mekkio.',
+    check:c=>({ earnedOn: c.chrono.length >= 100 ? c.chrono[99].date : null, value: Math.min(100, c.chrono.length), goal: 100 }) },
 ];
 // ---- wspólny silnik odznak (K3): jedno wejście dla Dashboardu i Profilu ----
 // Dashboard woła dashBadgesCore() w środku dashboardModel (dane już oczyszczone), Profil i jego arkusz przez badgesModel().
