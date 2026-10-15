@@ -22,11 +22,18 @@
   /* reload always starts at the hero (the browser would otherwise restore the old scroll position, mid-page);
      links with a #section still jump to that section */
   if('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  addEventListener('pageshow', function(e){
-    if(e.persisted) return;
+  // Done as soon as the DOM exists, never later: Safari fires load/pageshow only after the 3D model and images,
+  // and a late scroll would yank people back up after they had already used the menu.
+  // With manual restoration a reload already starts at the top; this only handles a #section in the address.
+  (function(){
+  var touched = false;
+  ['wheel','touchstart','keydown','mousedown'].forEach(function(t){ addEventListener(t, function(){ touched = true; }, { once: true, passive: true }); });
+  document.addEventListener('DOMContentLoaded', function(){
+    if(touched) return;
     var t = location.hash && document.getElementById(location.hash.slice(1));
-    if(t) t.scrollIntoView(); else scrollTo(0, 0);
+    if(t) t.scrollIntoView({ behavior: 'instant' }); else scrollTo({ top: 0, behavior: 'instant' });
   });
+  })();
 </script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 <style>
