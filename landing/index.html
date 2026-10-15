@@ -36,6 +36,7 @@
   --m-dur-draw:.9s;
   --m-dur-hero:1.1s;          /* landing only: phone entrance (bigger + slower than an app tile) */
   --m-dur-float:7s;           /* landing only: idle phone float loop on touch screens */
+  --m-dur-nudge:2.6s;         /* landing only: idle sideways nudge of the hero swipe arrows */
 
   --m-orange:#ff3300;         /* brand: big type, glows, decoration */
   --m-cta:#dd2b17;            /* = app --m-red-page; fills with white text (4.74:1) */
@@ -214,6 +215,22 @@ section{position:relative;}
 .hero-orbit .gl-canvas{will-change:filter;}   /* one canvas per phone: the ones going back get a CSS blur */
 .hero-orbit .gl-canvas,.hero-orbit .orbit-poster{position:absolute; inset:0; width:100%; height:100%;}
 .hero-orbit .orbit-poster{object-fit:contain; -webkit-user-drag:none;}
+/* small glass arrows beside the front phone: hint that the orbit turns (swipe / drag), and turn it on click */
+.orbit-nav{position:absolute; z-index:4; left:50%; top:calc(var(--ptop) + var(--pw) * 1.02); width:calc(var(--pw) + 2 * clamp(44px,5vw,72px)); transform:translate(-50%,-50%);
+  display:flex; justify-content:space-between; pointer-events:none; opacity:0; transition:opacity var(--m-dur-tile) ease;}
+.hero-orbit.gl-on + .orbit-nav{opacity:1;}
+.orbit-arrow{pointer-events:auto; width:40px; height:40px; border-radius:50%; border:0; padding:0; display:grid; place-items:center; cursor:pointer; color:#fff;
+  background:rgba(255,255,255,.16); box-shadow:inset 0 0 0 1px rgba(255,255,255,.32); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  transition:transform var(--m-dur-press-out) var(--m-ease), background-color var(--m-dur-quick) ease;}
+.orbit-arrow svg{width:18px; height:18px; display:block;}
+.orbit-arrow:active{transform:scale(.92); transition-duration:var(--m-dur-press-in);}
+@media (hover:hover) and (pointer:fine){ .orbit-arrow:hover{background:rgba(255,255,255,.28);} }
+@media (prefers-reduced-motion: no-preference){
+  .orbit-arrow svg{animation:m-nudge var(--m-dur-nudge) var(--m-ease) infinite;}
+  .orbit-arrow.prev svg{--nx:-3px;}
+  .orbit-arrow.next svg{--nx:3px;}
+  @keyframes m-nudge{0%,55%,100%{transform:none;} 75%{transform:translateX(var(--nx));}}
+}
 .hero-copy{
   position:relative; z-index:3; display:grid; grid-template-columns:1fr auto; align-items:end; gap:32px;
   margin-top:clamp(-141px,-9.8vw,-24px); color:#1f2329;
@@ -620,6 +637,10 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
       <div class="hero-orbit" id="heroOrbit" data-screens="img/scr-dashboard.webp img/scr-gym.webp img/scr-logset.webp">
         <img class="orbit-poster gl-poster" src="img/r-orbit.webp" alt="Trzy iPhone'y z aplikacją Mekkio: pulpit z planem na dziś i podsumowaniem tygodnia, ekran treningu z ćwiczeniami z planu oraz logowanie serii z wyborem ciężaru i powtórzeń" width="1440" height="1040" fetchpriority="high">
         <canvas class="gl-canvas" aria-hidden="true"></canvas><canvas class="gl-canvas" aria-hidden="true"></canvas><canvas class="gl-canvas" aria-hidden="true"></canvas>
+      </div>
+      <div class="orbit-nav">
+        <button type="button" class="orbit-arrow prev" data-dir="-1" aria-label="Poprzedni ekran"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button type="button" class="orbit-arrow next" data-dir="1" aria-label="Następny ekran"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       </div>
     </div>
 
@@ -1223,6 +1244,17 @@ document.documentElement.classList.add('js');
       ANG.forEach(function(a){ for(var n = -2; n <= 2; n++){ var c = -a + n * 2 * Math.PI; if(c < from - .05 && c > best) best = c; } });
       return best;
     }
+    function prevFront(from){                               // the phone that went round last comes back from the left
+      var best = 1e9;
+      ANG.forEach(function(a){ for(var n = -2; n <= 2; n++){ var c = -a + n * 2 * Math.PI; if(c > from + .05 && c < best) best = c; } });
+      return best;
+    }
+    document.querySelectorAll('.orbit-arrow').forEach(function(b){
+      b.addEventListener('click', function(){
+        var base = nearest(target);
+        target = b.dataset.dir === '1' ? nextFront(base) : prevFront(base); rate = 4; lastTurn = performance.now();
+      });
+    });
     function nearest(from){                                 // orbit angle (in any turn) that brings a phone to the front
       var best = 0, bd = 1e9;
       ANG.forEach(function(a){ var f = -a, c = f + Math.round((from - f) / (2 * Math.PI)) * 2 * Math.PI, d = Math.abs(c - from); if(d < bd){ bd = d; best = c; } });
