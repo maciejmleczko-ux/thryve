@@ -18,6 +18,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="img/r-orbit.webp">
+<script>
+  /* reload always starts at the hero (the browser would otherwise restore the old scroll position, mid-page);
+     links with a #section still jump to that section */
+  if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  addEventListener('pageshow', function(e){
+    if(e.persisted) return;
+    var t = location.hash && document.getElementById(location.hash.slice(1));
+    if(t) t.scrollIntoView(); else scrollTo(0, 0);
+  });
+</script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 <style>
 /* ---------- tokens: motion + palette mirror index.html :root (Mekkio) ---------- */
