@@ -788,16 +788,6 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .acct-num-row{display:flex;gap:12px;}
 .acct-num-row.solo{max-width:172px;}
 .acct-num-row.name{max-width:260px;}
-/* account sub-sheets ride higher and breathe more than the base sheet:
-   content hugs the top edge, actions pin to the bottom. */
-#editKcalSheet .plansv2-customize-stack,
-#authSheet .plansv2-customize-stack{min-height:52%;}
-#editKcalSheet .plansv2-customize-card,
-#authSheet .plansv2-customize-card{gap:26px;padding:16px 20px 6px;}
-#editKcalSheet .plansv2-customize-section,
-#authSheet .plansv2-customize-section{gap:12px;}
-#editKcalSheet .plansv2-customize-actions,
-#authSheet .plansv2-customize-actions{margin-top:auto;}
 /* ---- cloud account (Supabase) — Faza 2 / E0 ---- */
 .acct-cloud-mode-link{display:block;width:100%;background:none;border:0;color:var(--m-orange);font-size:var(--m-fs-xs);font-weight:600;cursor:pointer;padding:4px 0;font-family:inherit;text-align:center;}
 .acct-cloud-forgot{background:none;border:0;color:var(--m-muted);font-size:var(--m-fs-2xs);cursor:pointer;padding:6px 0 0;font-family:inherit;align-self:flex-end;}
@@ -1024,6 +1014,41 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .statsv2-ex-pick{width:44px;height:44px;margin:-6px -8px -6px 0;padding:0;border:0;background:none;color:var(--m-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .statsv2-ex-pick svg{width:22px;height:22px;display:block;}
 .m-sheet2 [hidden]{display:none !important;}
+/* ---- Okna 18–24 (Figma popupy-v2): przypomnienie, Apple Zdrowie, logowanie, nowe hasło, opinia, kalorie ---- */
+.m2-stack{display:flex;flex-direction:column;gap:12px;width:100%;}
+/* przełącznik w karcie (18, 19): cały wiersz jest przyciskiem 56 pt */
+.m2-switch{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:56px;box-sizing:border-box;padding:0 12px;border:0;background:none;font:inherit;font-size:var(--m-fs-md);color:var(--m-ink);text-align:left;cursor:pointer;border-radius:var(--m-r-sm);}
+.m-sheet2 .acct-toggle{background:var(--m-line);}
+.m-sheet2 .acct-toggle.on{background:var(--m-orange);}
+.m-sheet2 .acct-toggle-knob{background:var(--m-white);}
+.m2-row--lg{min-height:56px;}
+.m2-row input[type=time]{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;font-size:var(--m-fs-md);cursor:pointer;-webkit-appearance:none;appearance:none;}
+.m2-note{margin:12px 0 0;font-size:var(--m-fs-xs);line-height:1.5;color:var(--m-muted-text);}
+.m2-note--c{text-align:center;}
+.m2-note + .m2-note{margin-top:14px;}
+.m2-err{margin:10px 0 0;font-size:var(--m-fs-xs);line-height:1.4;color:var(--m-danger);}
+.m2-err.info{color:var(--m-ink);}
+/* pola „etykieta + wpis" (logowanie, nowe hasło) */
+.m2-inrow{display:flex;align-items:center;gap:12px;min-height:56px;box-sizing:border-box;padding:0 12px;}
+.m2-inrow + .m2-inrow{border-top:.5px solid var(--m-line);}
+.m2-inrow label{flex:none;font-size:var(--m-fs-2xs);letter-spacing:.04em;text-transform:uppercase;color:var(--m-ink);}
+.m2-inrow input{flex:1 1 auto;min-width:0;height:44px;padding:0;border:0;border-radius:0;background:none;outline:none;font:inherit;font-size:16px;font-weight:500;color:var(--m-ink);text-align:right;-webkit-appearance:none;appearance:none;}
+.m2-inrow input::placeholder{color:var(--m-muted-text);font-weight:400;opacity:1;}
+/* logowanie: Apple / Google z obrysem, „lub", linki pod przyciskiem */
+.m2-oauth{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1px solid var(--m-orange);border-radius:var(--m-r-pill);background:var(--m-white);color:var(--m-ink);font:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.m2-oauth svg{width:20px;height:20px;flex:none;display:block;}
+.m2-oauth:active{transform:scale(.97);}
+.m2-or{margin:0;text-align:center;font-size:var(--m-fs-xs);line-height:1;color:var(--m-muted-text);}
+.m2-links{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;}
+.m2-links:has(> :only-child){justify-content:center;}
+.m2-link{min-height:44px;padding:0 8px;border:0;background:none;font:inherit;font-size:var(--m-fs-xs);font-weight:500;letter-spacing:.04em;color:var(--m-ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;transition:opacity var(--m-dur-quick) ease;}
+.m2-link:active{opacity:.55;}
+.m2-link--c{display:block;margin:4px auto 0;}
+/* opinia (22): segment rodzaju zgłoszenia zaznaczony granatem (Figma; Maciej celowo odróżnia go od pomarańczu) */
+.ai-seg--navy .ai-chip::before{background:var(--m-plan-hard);}
+.ai-textarea.fb-ta{height:213px;}
+/* kalorie (23) */
+.kc-field{border-color:var(--m-orange);}
 /* niski ekran (iPhone SE 568 pt): zagęszczenie, żeby klawiatura i przycisk mieściły się bez przewijania */
 @media (max-height:620px){
   .m-sheet2 .m2-sub{margin-top:4px;}
@@ -1032,6 +1057,8 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
   .m-sheet2 .m2-actions{padding-top:12px;gap:8px;}
   .m-sheet2 .m2-head{padding-top:4px;}
   .m2-body > .m2-btn--danger{height:44px;margin-top:12px;flex:none;}
+  .ai-textarea.fb-ta{height:96px;}
+  .m2-note{margin-top:8px;}
   .ws-val{margin-top:10px;}
   .ws-num{font-size:52px;}
   .ws-unit{font-size:22px;}
@@ -2825,7 +2852,7 @@ body.pev2-bg{background:var(--m-panel);}
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
-.lng-row:active,.m2-btn:active,.ai-chip:active,.m2-x:active,.mk-key:active,.bd-field:active,.bd-sx:active,.nm-ico:active,#mConfirmOverlay.mc-gym .onboard-actions button:active,.wl-row:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
+.lng-row:active,.m2-oauth:active,.m2-btn:active,.ai-chip:active,.m2-x:active,.mk-key:active,.bd-field:active,.bd-sx:active,.nm-ico:active,#mConfirmOverlay.mc-gym .onboard-actions button:active,.wl-row:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
 /* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
 #view-gym-v2 .gymv2-tile.gymv2-search-tile, #view-gym-v2 .gymv2-tile.gymv2-add-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:13px;padding:4.5px 0 0;box-sizing:border-box;background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);}
 #view-gym-v2 .gymv2-tile.gymv2-search-tile{border:.5px solid #f1d7cb;}
@@ -4211,34 +4238,38 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
      zapisie tego arkusza — NIE na żywo przy każdej zmianie planu (patrz
      scheduleWorkoutReminders()). -->
 
-<div class="onboard-overlay hidden plansv2-customize-overlay" id="reminderSheet" onclick="if(event.target===this) closeReminderSheet()">
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="reminderSheet" onclick="if(event.target===this) closeReminderSheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
-      <div class="fbv2-header">
-        <div class="fbv2-title-row">
-          <h1>PRZYPOMNIENIE O TRENINGU</h1>
-          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeReminderSheet()"></span>
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="remTitle">PRZYPOMNIENIE O TRENINGU</h1>
+          <button type="button" class="m2-x" id="remClose" aria-label="Zamknij" onclick="closeReminderSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
-        <p class="fbv2-subtitle">Powiadomienie w dni, które masz zaplanowane w wybranym planie.</p>
+        <p class="m2-sub" id="remSub">Powiadomienie w dni, które masz zaplanowane w wybranym planie.</p>
       </div>
-      <div class="plansv2-customize-section">
-        <button type="button" class="acct-toggle-row" id="reminderToggleRow" onclick="toggleReminderEnabled()">
-          <span>Wyłączone</span>
-          <span class="acct-toggle" id="reminderToggle"><span class="acct-toggle-knob"></span></span>
-        </button>
-        <div class="acct-num-row solo" id="reminderTimeRow" style="display:none;">
-          <div class="exv2-field">
-            <label>Godzina</label>
-            <input type="time" id="reminderTimeInput" value="18:00">
+      <div class="m2-body">
+        <div class="m2-stack">
+          <div class="m2-field">
+            <button type="button" class="m2-switch" id="reminderToggleRow" role="switch" aria-checked="false" onclick="toggleReminderEnabled()">
+              <span>Wyłączone</span>
+              <span class="acct-toggle" id="reminderToggle"><span class="acct-toggle-knob"></span></span>
+            </button>
+          </div>
+          <div class="m2-field" id="reminderTimeRow" style="display:none;">
+            <label class="m2-row m2-row--lg">
+              <span class="m2-row-l" id="remTimeL">GODZINA</span>
+              <span class="m2-row-v" id="reminderTimeV">18:00</span>
+              <input type="time" id="reminderTimeInput" value="18:00" oninput="document.getElementById('reminderTimeV').textContent=this.value||'18:00'">
+            </label>
           </div>
         </div>
-        <p class="acct-hint" id="reminderHint"></p>
+        <p class="m2-note" id="reminderHint"></p>
       </div>
-      <div class="plansv2-customize-actions">
-        <button type="button" class="plansv2-customize-cancel" onclick="closeReminderSheet()">ANULUJ</button>
-        <button type="button" class="plansv2-customize-apply" onclick="saveReminderSheet()">ZAPISZ</button>
-      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="remSave" onclick="saveReminderSheet()">ZAPISZ</button>
     </div>
   </div>
 </div>
@@ -4358,31 +4389,31 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<div class="onboard-overlay hidden plansv2-customize-overlay" id="healthSheet" onclick="if(event.target===this) closeHealthSheet()">
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="healthSheet" onclick="if(event.target===this) closeHealthSheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
-      <div class="fbv2-header">
-        <div class="fbv2-title-row">
-          <h1>APPLE ZDROWIE</h1>
-          <span class="ph plansv2-customize-close" data-ph="x" onclick="closeHealthSheet()"></span>
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="hlTitle">APPLE ZDROWIE</h1>
+          <button type="button" class="m2-x" id="hlClose" aria-label="Zamknij" onclick="closeHealthSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
-        <p class="fbv2-subtitle">Mekkio weźmie ze Zdrowia Twoją wagę i spalone kalorie z zegarka.</p>
+        <p class="m2-sub" id="hlSub">Mekkio weźmie ze Zdrowia Twoją wagę i spalone kalorie.</p>
       </div>
-      <div class="plansv2-customize-section">
-        <button type="button" class="acct-toggle-row" id="healthToggleRow" onclick="toggleHealthEnabled()">
-          <span>Wyłączone</span>
-          <span class="acct-toggle" id="healthToggle"><span class="acct-toggle-knob"></span></span>
-        </button>
-        <p class="acct-hint">Czytamy wagę (np. z wagi łazienkowej) i treningi z kaloriami z zegarka: Apple Watcha, Garmina, Polara albo każdego innego, który zapisuje do Zdrowia. Waga trafia do dziennika. Kalorie z zegarka zastępują szacunek, jeśli trening pasuje czasem.</p>
-        <p class="acct-hint">To dane o zdrowiu. Waga ląduje w dzienniku wagi, a jeśli masz konto, także w chmurze. Nie wysyłamy ich do Trenera AI ani nikomu innemu. Dostęp odbierzesz w Ustawieniach: Zdrowie → Dostęp do danych i urządzenia → Mekkio.</p>
-        <p class="acct-hint">Masz Garmina albo Polara? Włącz w ich aplikacji zapis do Apple Zdrowie. Z takich zegarków dane przychodzą z opóźnieniem, więc kalorie mogą się pojawić dopiero po kilku minutach.</p>
-        <p class="acct-hint" id="healthStatus" hidden></p>
+      <div class="m2-body">
+        <div class="m2-field">
+          <button type="button" class="m2-switch" id="healthToggleRow" role="switch" aria-checked="false" onclick="toggleHealthEnabled()">
+            <span>Wyłączone</span>
+            <span class="acct-toggle" id="healthToggle"><span class="acct-toggle-knob"></span></span>
+          </button>
+        </div>
+        <p class="m2-note" id="hlNote1">To dane o zdrowiu. Waga trafia do dziennika wagi, a jeśli masz konto, także do chmury. Nie wysyłamy ich do Trenera AI ani nikomu innemu.</p>
+        <p class="m2-note" id="hlNote2">Garmin lub Polar: włącz w ich aplikacji zapis do Apple Zdrowie. Kalorie mogą się pojawić po kilku minutach.</p>
+        <p class="m2-note" id="healthStatus" hidden></p>
       </div>
-      <div class="plansv2-customize-actions">
-        <button type="button" class="plansv2-customize-cancel" onclick="closeHealthSheet()">ANULUJ</button>
-        <button type="button" class="plansv2-customize-apply" onclick="saveHealthSheet()">ZAPISZ</button>
-      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="hlSave" onclick="saveHealthSheet()">ZAPISZ</button>
     </div>
   </div>
 </div>
@@ -7780,52 +7811,54 @@ function renderReminderRow(){
 const REMINDER_DAY_LABEL = { mon:'pon', tue:'wt', wed:'śr', thu:'czw', fri:'pt', sat:'sob', sun:'nd' };
 function reminderPlanHint(){
   const p = trainingPlans.find(x=> x.id === starredPlanId);
-  if(!p) return 'Wybierz plan (zakładka Plany), żeby ustawić dni przypomnienia.';
+  if(!p) return t('remHintNoPlan', 'Wybierz plan (zakładka Plany), żeby ustawić dni przypomnienia.');
   const days = planActiveDays(p);
-  if(!days.length) return 'Twój plan nie ma jeszcze dni treningowych.';
-  return 'Dni: ' + days.map(d=> REMINDER_DAY_LABEL[d]).join(', ') + ' — na podstawie planu „' + planDisplayName(p) + '”.';
+  if(!days.length) return t('remHintNoDays', 'Twój plan nie ma jeszcze dni treningowych.');
+  const lbl = LANG === 'en' ? PF_DAY_SHORT : REMINDER_DAY_LABEL;
+  return t('remHintDays', 'Dni: %d, według planu „%p”.').replace('%d', days.map(d=> lbl[d]).join(', ')).replace('%p', planDisplayName(p));
+}
+function setReminderToggleUI(on){
+  document.getElementById('reminderToggle').classList.toggle('on', on);
+  const row = document.getElementById('reminderToggleRow');
+  row.setAttribute('aria-checked', on ? 'true' : 'false');
+  row.querySelector('span').textContent = on ? t('remOn', 'Włączone') : t('remOff', 'Wyłączone');
+  document.getElementById('reminderTimeRow').style.display = on ? '' : 'none';
 }
 function openReminderSheet(){
-  const toggle = document.getElementById('reminderToggle');
-  const label = document.getElementById('reminderToggleRow').querySelector('span');
-  const timeRow = document.getElementById('reminderTimeRow');
-  toggle.classList.toggle('on', workoutReminder.enabled);
-  label.textContent = workoutReminder.enabled ? 'Włączone' : 'Wyłączone';
-  timeRow.style.display = workoutReminder.enabled ? '' : 'none';
-  document.getElementById('reminderTimeInput').value = workoutReminder.time;
-  document.getElementById('reminderHint').textContent = reminderPlanHint();
+  const $ = id => document.getElementById(id);
+  $('remTitle').textContent = t('remTitle', 'PRZYPOMNIENIE O TRENINGU');
+  $('remSub').textContent = t('remSub', 'Powiadomienie w dni, które masz zaplanowane w wybranym planie.');
+  $('remTimeL').textContent = t('remTime', 'GODZINA');
+  $('remClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('remSave').textContent = t('bdSave', 'ZAPISZ');
+  setReminderToggleUI(workoutReminder.enabled);
+  $('reminderTimeInput').value = workoutReminder.time;
+  $('reminderTimeV').textContent = workoutReminder.time;
+  $('reminderHint').textContent = reminderPlanHint();
   acctSheetOpen('reminderSheet');
 }
 function closeReminderSheet(viaDrag){ acctSheetClose('reminderSheet', viaDrag); }
-function toggleReminderEnabled(){
-  const toggle = document.getElementById('reminderToggle');
-  const label = document.getElementById('reminderToggleRow').querySelector('span');
-  const timeRow = document.getElementById('reminderTimeRow');
-  const nowOn = !toggle.classList.contains('on');
-  toggle.classList.toggle('on', nowOn);
-  label.textContent = nowOn ? 'Włączone' : 'Wyłączone';
-  timeRow.style.display = nowOn ? '' : 'none';
-}
+function toggleReminderEnabled(){ setReminderToggleUI(!document.getElementById('reminderToggle').classList.contains('on')); }
 async function saveReminderSheet(){
   const enabled = document.getElementById('reminderToggle').classList.contains('on');
   const time = document.getElementById('reminderTimeInput').value || '18:00';
   if(enabled){
     const LN = capPlugin('LocalNotifications');
-    if(!LN){ toast('Powiadomienia niedostępne'); return; }
+    if(!LN){ toast(t('remNoNotif', 'Powiadomienia niedostępne')); return; }
     try{
       const perm = await LN.requestPermissions();
       if(!perm || perm.display !== 'granted'){
-        toast('Włącz powiadomienia dla Mekkio w Ustawieniach systemowych');
+        toast(t('remDenied', 'Włącz powiadomienia dla Mekkio w Ustawieniach systemowych'));
         return;
       }
-    }catch(e){ console.error('saveReminderSheet: requestPermissions', e); toast('Nie udało się włączyć powiadomień'); return; }
+    }catch(e){ console.error('saveReminderSheet: requestPermissions', e); toast(t('remFail', 'Nie udało się włączyć powiadomień')); return; }
   }
   workoutReminder = { enabled, time };
   saveWorkoutReminderState();
   renderReminderRow();
   closeReminderSheet();
   scheduleWorkoutReminders();
-  toast('Zapisano');
+  toast(t('m6Saved', 'Zapisano'));
 }
 // Cancels and reschedules only its own ids (90000-90999) — the timed-set notifications use 91000+.
 async function scheduleWorkoutReminders(){
@@ -7919,15 +7952,24 @@ function renderHealthRow(){
 }
 function setHealthToggleUI(on){
   document.getElementById('healthToggle').classList.toggle('on', on);
-  document.getElementById('healthToggleRow').querySelector('span').textContent = on ? 'Włączone' : 'Wyłączone';
+  const row = document.getElementById('healthToggleRow');
+  row.setAttribute('aria-checked', on ? 'true' : 'false');
+  row.querySelector('span').textContent = on ? t('remOn', 'Włączone') : t('remOff', 'Wyłączone');
 }
 function openHealthSheet(){
+  const $ = id => document.getElementById(id);
+  $('hlTitle').textContent = t('hlTitle', 'APPLE ZDROWIE');
+  $('hlSub').textContent = t('hlSub', 'Mekkio weźmie ze Zdrowia Twoją wagę i spalone kalorie.');
+  $('hlNote1').textContent = t('hlNote1', 'To dane o zdrowiu. Waga trafia do dziennika wagi, a jeśli masz konto, także do chmury. Nie wysyłamy ich do Trenera AI ani nikomu innemu.');
+  $('hlNote2').textContent = t('hlNote2', 'Garmin lub Polar: włącz w ich aplikacji zapis do Apple Zdrowie. Kalorie mogą się pojawić po kilku minutach.');
+  $('hlClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('hlSave').textContent = t('bdSave', 'ZAPISZ');
   setHealthToggleUI(!!healthState.enabled);
-  const st = document.getElementById('healthStatus');
+  const st = $('healthStatus');
   st.hidden = !healthState.lastSync;
   if(healthState.lastSync){
     const d = new Date(healthState.lastSync);
-    st.textContent = 'Ostatnie sprawdzenie: ' + (dateStr(d) === todayStr() ? 'dziś' : fmtDate(dateStr(d))) + ', ' + d.toTimeString().slice(0,5) + '.';
+    st.textContent = t('hlLast', 'Ostatnie sprawdzenie: %s.').replace('%s', (dateStr(d) === todayStr() ? t('m6Today', 'dziś') : fmtDate(dateStr(d))) + ', ' + d.toTimeString().slice(0,5));
   }
   acctSheetOpen('healthSheet');
 }
@@ -7939,9 +7981,9 @@ async function saveHealthSheet(){
     const H = capPlugin('HealthPlugin');
     try{
       const av = H && await H.isHealthAvailable();
-      if(!av || !av.available){ toast('Apple Zdrowie jest niedostępne na tym urządzeniu'); return; }
+      if(!av || !av.available){ toast(t('hlUnavail', 'Apple Zdrowie jest niedostępne na tym urządzeniu')); return; }
       await H.requestHealthPermissions({ permissions: ['READ_WEIGHT', 'READ_WORKOUTS'] });
-    }catch(e){ console.error('saveHealthSheet: permissions', e); toast('Nie udało się połączyć ze Zdrowiem'); return; }
+    }catch(e){ console.error('saveHealthSheet: permissions', e); toast(t('hlFail', 'Nie udało się połączyć ze Zdrowiem')); return; }
   }
   healthState.enabled = enabled;
   saveHealthState();
@@ -7950,11 +7992,16 @@ async function saveHealthSheet(){
   if(enabled){
     let r = null;
     try{ r = await syncHealthData(true); }catch(e){ console.error('saveHealthSheet: sync', e); }
-    toast(r && (r.weights || r.kcal) ? 'Połączono ze Zdrowiem' + healthSyncSummary(r) : 'Połączono ze Zdrowiem');
-  } else toast('Zapisano');
+    toast(t('hlConnected', 'Połączono ze Zdrowiem') + (r && (r.weights || r.kcal) ? healthSyncSummary(r) : ''));
+  } else toast(t('m6Saved', 'Zapisano'));
 }
 function healthSyncSummary(r){
   const parts = [];
+  if(LANG === 'en'){
+    if(r.weights) parts.push(r.weights + (r.weights === 1 ? ' weight entry' : ' weight entries'));
+    if(r.kcal) parts.push('calories from ' + r.kcal + (r.kcal === 1 ? ' workout' : ' workouts'));
+    return parts.length ? ': ' + parts.join(', ') : '';
+  }
   if(r.weights) parts.push(r.weights === 1 ? '1 pomiar wagi' : r.weights + ' pomiarów wagi');
   if(r.kcal) parts.push(r.kcal === 1 ? 'kalorie z 1 treningu' : 'kalorie z ' + r.kcal + ' treningów');
   return parts.length ? ': ' + parts.join(', ') : '';
@@ -16036,6 +16083,17 @@ Object.assign(T_EN, {
   bdg_growth3_name: 'Rocket', bdg_growth3_text: '8 weeks in a row with more volume than the week before.',
   bdg_allround_name: 'One-Man Band', bdg_allround_text: 'A record in 15 different exercises.',
   bdg_gryf_name: 'Barbell Master', bdg_gryf_text: '100 workouts logged in Mekkio.',
+});
+// Okna 18–24 (restyle na .m-sheet2): przypomnienie, Apple Zdrowie, logowanie, nowe hasło, opinia, kalorie, dialog konta
+Object.assign(T_EN, {
+  m6Saved: 'Saved', m6Today: 'today',
+  remTitle: 'WORKOUT REMINDER', remSub: 'A notification on the days planned in your selected plan.', remTime: 'TIME', remOn: 'On', remOff: 'Off',
+  remHintNoPlan: 'Pick a plan (Plans tab) to set the reminder days.', remHintNoDays: 'Your plan has no training days yet.', remHintDays: 'Days: %d, based on the plan "%p".',
+  remNoNotif: 'Notifications unavailable', remDenied: 'Turn on notifications for Mekkio in the system settings', remFail: 'Could not turn on notifications',
+  hlTitle: 'APPLE HEALTH', hlSub: 'Mekkio will take your weight and burned calories from Health.',
+  hlNote1: 'This is health data. Weight goes to your weight log, and with an account, to the cloud as well. We never send it to the AI coach or anyone else.',
+  hlNote2: 'Garmin or Polar: turn on saving to Apple Health in their app. Calories may show up after a few minutes.',
+  hlLast: 'Last checked: %s.', hlUnavail: 'Apple Health is not available on this device', hlFail: 'Could not connect to Health', hlConnected: 'Connected to Health',
 });
 hydrateI18n();   // ponowny przebieg: pierwszy (przy definicji) nie widział kluczy z późniejszych Object.assign(T_EN…)
 const DASH_BADGES = [
