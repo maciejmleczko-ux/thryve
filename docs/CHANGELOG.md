@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.70.0 (2026-10-14)
+- **Aktualna wersja:** 4.71.0 (2026-10-14)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,22 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.71.0 · MINOR · 2026-10-17
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Zaczynasz od nowego, pełnoekranowego przewodnika: imię, płeć, wiek, waga, wzrost i cel. Zajmuje minutę i od razu dobiera sprzęt oraz plan.
+>
+> Filtr sprzętu ma teraz osobne ikony dla hantli i sztangi, a „Kalistenika” nazywa się „Bez sprzętu”.
+>
+> W Ustawieniach możesz wybrać Polski, English albo język telefonu.
+
+- **Onboarding, etap A** (kroki imię, płeć, wiek, waga, wzrost, cel w `#onbFlow`, `onbAnswers`, podkład `#onbUnder` pod klawiaturą); stary `#onboardOverlay` usunięty. Krok wyboru planu i edytor planu: kolejne etapy.
+- **Generator planów, kroki 1–3:** `EXERCISE_META` (151 ćwiczeń), nowy klucz sprzętu `sztanga` (23 ćwiczenia z `hantle`), filtr sprzętu z 7 chipami i ikonami 3D z Figmy (`icons/equip/`), etykieta „Bez sprzętu”, `planv2EquipSet()` (sprzęt jako zbiór, stary string `'hantle'` = `['hantle','sztanga']`). `customizationV2` nie jedzie do chmury (istniejący brak, do osobnej decyzji).
+- **Język:** `mekkio_lang_v1` ('pl'|'en', brak = automatycznie), wiersz w Ustawieniach, zapis przeładowuje apkę; klucz lokalny.
+- **Szkło** 70% bieli + rozmycie w oknie wyboru ćwiczeń (reguła w `CLAUDE.md`), okna z klawiaturą: zaokrąglone rogi, przyklejony nagłówek, tło `#4A4E56` także natywne, większy odstęp tytułu od góry.
+- Odznaka „Pierwsza Krew” → „Rekordzista”. `sw.js`: cache v28 z ikonami sprzętu.
 
 ### 4.70.0 · MINOR · 2026-10-16
 
