@@ -6392,8 +6392,14 @@ const ONB_NUM = {   // zakresy linijek (jak w podglądzie)
      difficulty   'easy' | 'medium' | 'hard'            (klucze jak PLANSV2_DIFFICULTY_SLIDER)
      daysPerWeek  2 | 3 | 4                             (jak PLANSV2_FREQUENCY_SLIDER)
      equip        tablica kluczy: 'all' | 'hantle' | 'sztanga' | 'maszyny' | 'kettlebell' | 'masa ciała' | 'gumy'
-                  ('all' wyklucza resztę; pusta = brak odpowiedzi). 'sztanga' jest osobnym kluczem sprzętu (23 ćwiczenia ze sztangą, EZ, landmine, T-Bar). */
+                  ('all' wyklucza resztę; pusta = brak odpowiedzi). Przez onbEquipForPlans() daje zbiór, który wprost przyjmuje
+                  planv2MatchesEquipment() / customizationV2.equipment. 'sztanga' jest osobnym kluczem sprzętu (23 ćwiczenia ze sztangą, EZ, landmine, T-Bar). */
 const onbAnswers = {goal:null, difficulty:'medium', daysPerWeek:3, equip:[], done:false};
+/* Odpowiedź „sprzęt” z kroku „cel” jako zbiór dla generatora planów: pusta tablica = bez filtra ('all' lub brak odpowiedzi). */
+function onbEquipForPlans(){
+  const e = onbAnswers.equip || [];
+  return e.includes('all') ? [] : e.filter(k=> ONB_EQUIP.includes(k) && k !== 'all');
+}
 let onbS = null;          // stan przepływu (w pamięci): wartości kroków + dotknięcia
 let onbAnims = [];        // trwające animacje przejścia (do przerwania przy szybkim tapnięciu)
 
@@ -15294,13 +15300,38 @@ const PLANSV2_MUSCLE_BUCKETS = [
   {label:'Barki', match: g => /^Barki/.test(g)},
   {label:'Brzuch', match: g => /^Brzuch/.test(g)},
 ];
-/* Equipment key 'hantle' used to cover dumbbells AND barbells; since 'sztanga' became its own key, a plan saved with the
-   old string 'hantle' (customizationV2.equipment, the "Wolne" chip) still means both, so existing plans behave as before. */
+/* Equipment for the generator is a SET of keys (hantle, sztanga, maszyny, kettlebell, masa ciała, gumy), saved in
+   customizationV2.equipment as an array. planv2EquipSet() turns every accepted shape into a Set, or null = no filter:
+     'mix' | 'all' | undefined | [] | an array/Set containing 'all'   -> null (everything)
+     'hantle' (old string, the "Wolne" chip)                         -> {hantle, sztanga}: it used to cover both, so plans
+                                                                         saved before 'sztanga' became its own key behave the same
+     any other string ('maszyny', ...)                                -> {that key}
+     array / Set of keys                                              -> those keys (['hantle'] alone = dumbbells only) */
 const PLANSV2_LEGACY_FREE_WEIGHTS = ['hantle','sztanga'];
+function planv2EquipSet(equipment){
+  if(equipment == null || equipment === 'mix' || equipment === 'all') return null;
+  if(equipment === 'hantle') return new Set(PLANSV2_LEGACY_FREE_WEIGHTS);
+  const keys = Array.isArray(equipment) ? equipment : (equipment instanceof Set ? [...equipment] : [equipment]);
+  if(!keys.length || keys.includes('all') || keys.includes('mix')) return null;
+  return new Set(keys);
+}
 function planv2MatchesEquipment(ex, equipment){
-  if(equipment==='mix') return true;
-  if(equipment==='hantle') return PLANSV2_LEGACY_FREE_WEIGHTS.includes(ex.equipment);
-  return ex.equipment===equipment;
+  const set = planv2EquipSet(equipment);
+  return !set || set.has(ex.equipment);
+}
+/* "Dostosuj" shows three chips (Maszyny / Wolne / Miks). Saved equipment -> the chip to light up ('mix' | 'maszyny' | 'hantle'),
+   or null when the saved set is none of the three (e.g. a kettlebell-only set from onboarding); the chip's value -> what gets saved. */
+function planv2EquipChipValue(equipment){
+  const set = planv2EquipSet(equipment);
+  if(!set) return 'mix';
+  if(set.size === 1 && set.has('maszyny')) return 'maszyny';
+  if(set.size && [...set].every(k=> PLANSV2_LEGACY_FREE_WEIGHTS.includes(k))) return 'hantle';
+  return null;
+}
+function planv2EquipFromChip(value){
+  if(value === 'maszyny') return ['maszyny'];
+  if(value === 'hantle') return PLANSV2_LEGACY_FREE_WEIGHTS.slice();
+  return [];
 }
 
 /* ---------- exercise ordering ----------
@@ -15428,7 +15459,8 @@ function openPlanCustomizeV2(id){
   const saved = plan.customizationV2 || {goal:'mass', difficulty:'medium', equipment:'mix', frequency:3};
   document.getElementById('planCustomizeTitle').textContent = planDisplayName(plan);
   document.querySelectorAll('#planCustomizeOverlay .plansv2-choice-chip').forEach(chip=>{
-    chip.classList.toggle('active', chip.dataset.value===saved[chip.dataset.group]);
+    const cur = chip.dataset.group==='equipment' ? planv2EquipChipValue(saved.equipment) : saved[chip.dataset.group];
+    chip.classList.toggle('active', chip.dataset.value===cur);
   });
   const diffSlider = document.getElementById('planCustomizeDifficultySlider');
   const diffIdx = PLANSV2_DIFFICULTY_SLIDER.indexOf(saved.difficulty);
@@ -15497,7 +15529,10 @@ function applyPlanCustomizeV2(){
   const plan = trainingPlans.find(p=>p.id===id);
   if(!plan) return;
   const active = (group)=> document.querySelector(`#planCustomizeOverlay .plansv2-choice-chip[data-group="${group}"].active`)?.dataset.value;
-  const goal = active('goal') || 'mass', equipment = active('equipment') || 'mix';
+  const goal = active('goal') || 'mass';
+  // no chip lit = the saved set is none of the three chips (see planv2EquipChipValue): keep it as it is
+  const equipChip = active('equipment');
+  const equipment = equipChip ? planv2EquipFromChip(equipChip) : ((plan.customizationV2 && plan.customizationV2.equipment) || []);
   const difficulty = PLANSV2_DIFFICULTY_SLIDER[Number(document.getElementById('planCustomizeDifficultySlider').value)] || 'medium';
   const splitId = planv2SplitRoleId(plan);
   let schedule, customizationV2;
