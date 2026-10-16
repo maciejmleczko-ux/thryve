@@ -6975,9 +6975,8 @@ function opkToggleOthers(){
   }
 }
 /* ✓ na karcie / „Wybierz” w hero: zapis planu (JEDYNY fork w tym ekranie) jako aktywnego, koniec onboardingu, dashboard */
-function opkCommit(id){
-  const plan = onbPick && onbPick.rec.plans[id];
-  if(!plan) return;
+// zapis planu z generatora jako własnego i aktywnego (jedyne miejsce forka na tej ścieżce)
+function commitGeneratedPlan(plan){
   const newId = 'plan_' + Date.now();
   trainingPlans.push({id:newId, name:plan.name, builtin:false, schedule:plan.schedule, customizationV2:plan.customizationV2, meta:plan.meta});
   saveTrainingPlansList();
@@ -6986,6 +6985,11 @@ function opkCommit(id){
   scheduleCloudPush();
   updateTodayPlanBanner();
   updatePlanPillLabel();
+}
+function opkCommit(id){
+  const plan = onbPick && onbPick.rec.plans[id];
+  if(!plan) return;
+  commitGeneratedPlan(plan);
   haptic('success');
   exitPlanOnboarding();
 }
@@ -17792,7 +17796,10 @@ function dashCta(kind, arg){
     case 'noplan-history': case 'planready-plans': goRoute('plans-v2'); break;
     case 'planready-stats': goRoute('stats-v2'); break;
     case 'noplan-new': case 'noplan-new-pick':        // star the plan, then the dashboard becomes "plan ready"
-      if(arg){ toggleStarredPlan(arg); renderDashShell(false); }
+      if(arg && onbAnswers.done && onbAnswers.goal && ONB_PLAN_IDS.includes(arg)){   // karty z odpowiedzi onboardingu: zapisz plan z generatora, nie szablon
+        commitGeneratedPlan(recommendationFor(opkPrefs()).plans[arg]);
+        renderDashShell(false);
+      } else if(arg){ toggleStarredPlan(arg); renderDashShell(false); }
       break;
     case 'noplan-new-open': openPlanEditorV2(arg); break;   // same as tapping a card on Plans
     case 'noplan-new-create': openPlanEditorV2(null); break;
