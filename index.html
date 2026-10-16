@@ -3448,6 +3448,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .pl-list{display:flex;flex-direction:column;padding-bottom:8px;}
 .pl-card{--pc:var(--m-plan-mid);position:relative;isolation:isolate;width:100%;height:126px;flex-shrink:0;cursor:pointer;-webkit-user-select:none;user-select:none;outline:none;}
 .pl-card + .pl-card{margin-top:-16px;}
+.pl-card--mint .pl-name,.pl-card--mint .plansv2-stat,.pl-card--mint .plansv2-stat .ph,.pl-card--mint .plansv2-stat span.t{color:var(--m-mint-ink);}   /* biały tekst na mięcie miał słaby kontrast (decyzja Macieja 2026-10-18) */
 .pl-bg{position:absolute;left:18px;right:0;top:0;height:142px;border-radius:var(--m-r-sm);background:linear-gradient(225deg,color-mix(in srgb,var(--pc) 8%,transparent) 0%,var(--pc) 71%),linear-gradient(color-mix(in srgb,var(--pc) 70%,transparent),color-mix(in srgb,var(--pc) 70%,transparent)),url(icons/backgrounds/dashboard.webp) center/cover;
   -webkit-mask:radial-gradient(circle 29px at 0 63px,transparent 28.5px,#000 29.5px);mask:radial-gradient(circle 29px at 0 63px,transparent 28.5px,#000 29.5px);}
 .pl-info{position:absolute;left:59px;right:14px;top:16px;height:78px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;}
@@ -6906,7 +6907,7 @@ function opkHeroInnerHtml(){
 }
 function opkCardHtml(id, i, animate){
   const p = onbPick.rec.plans[id], sm = dashPlanSummary(p), name = escHtml(dashPlanShortName(sm.name));
-  return `<div class="pl-card m-press${animate ? ' m-rise-tile' : ''}" style="--i:${i};--pc:${OPK_COLORS[id]}" role="button" tabindex="0" data-act="opk-edit" data-id="${id}">
+  return `<div class="pl-card${id === 'plan_a' ? ' pl-card--mint' : ''} m-press${animate ? ' m-rise-tile' : ''}" style="--i:${i};--pc:${OPK_COLORS[id]}" role="button" tabindex="0" data-act="opk-edit" data-id="${id}">
       <div class="pl-bg"></div>
       <div class="pl-info">
         <p class="pl-name">${name}</p>
