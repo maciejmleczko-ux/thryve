@@ -3426,7 +3426,8 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .ob-gender-chip:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
 /* klawiatura systemowa (tylko krok „imię”): odstępy się zwijają, pole i DALEJ zostają nad klawiaturą */
 .ob-big-gap{flex:0 1 106px;min-height:0;height:auto;}
-#onbFlow.onb-kb{box-shadow:0 70vh 0 0 var(--m-page-top);}   /* pod klawiaturą nie prześwituje aplikacja: tło kroku dociągnięte w dół */
+#onbUnder{position:fixed;inset:0;z-index:9399;background:var(--m-page-top);}   /* podkład pod przepływem: gdy klawiatura skurczy #onbFlow, pod nim nie prześwituje aplikacja */
+#onbUnder[hidden]{display:none;}
 #onbFlow.onb-kb .ob-sub{display:none;}
 #onbFlow.onb-kb .ob-big-gap{flex-basis:24px;}
 #onbFlow.onb-kb .ob-screen{padding-top:max(20px,env(safe-area-inset-top));}
@@ -6551,6 +6552,7 @@ function onbClose(){
   onbSettle();
   const host = document.getElementById('onbFlow');
   host.hidden = true;
+  const under = document.getElementById('onbUnder'); if(under) under.hidden = true;
   host.innerHTML = '';
   host.classList.remove('onb-kb', 'onb-fade');
   host.style.height = ''; host.style.bottom = ''; host.style.transform = '';
@@ -6567,6 +6569,9 @@ function onbViewport(){
 }
 function onbStart(){
   const host = document.getElementById('onbFlow');
+  let under = document.getElementById('onbUnder');
+  if(!under){ under = document.createElement('div'); under.id = 'onbUnder'; host.parentNode.insertBefore(under, host); }
+  under.hidden = false;
   onbInitState();
   host.hidden = false;
   host.innerHTML = '';
