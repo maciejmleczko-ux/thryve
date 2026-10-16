@@ -2267,7 +2267,7 @@ body.pev2-bg{background:var(--m-panel);}
 .equip-row{display:flex;gap:8px;}
 .equip-chip{flex:0 1 52px;min-width:0;aspect-ratio:1;border-radius:50%;background:var(--m-card);border:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-fade) var(--m-ease),border-color var(--m-dur-fade) var(--m-ease);}
 .equip-chip:active{transform:scale(.93);}
-.equip-chip .ic{width:26px;height:26px;display:block;}
+.equip-chip .ic{width:15px;height:15px;display:block;}
 .equip-chip .eq-img{width:26px;height:26px;display:block;flex:none;object-fit:contain;pointer-events:none;-webkit-user-drag:none;}
 .equip-chip .ic.icon-stroke rect{fill:none;stroke:var(--m-orange);transition:stroke var(--m-dur-fade) var(--m-ease);}
 .equip-chip.active{background:var(--m-orange);border-color:var(--m-orange);}
@@ -3409,6 +3409,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .onb-equip{flex:0 0 46px;width:46px;height:46px;border-radius:50%;background:var(--onb-glass);-webkit-backdrop-filter:blur(7.23px);backdrop-filter:blur(7.23px);border:.5px solid var(--m-orange-tint);color:var(--m-ink);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-fade) var(--m-ease),border-color var(--m-dur-fade) var(--m-ease),color var(--m-dur-fade) var(--m-ease);}
 .onb-equip:active{transform:scale(.93);transition-duration:var(--m-dur-press-in);}
 .onb-equip .eq-img,.onb-equip .ic{display:block;flex:none;width:26px;height:26px;object-fit:contain;pointer-events:none;-webkit-user-drag:none;}   /* ikony wyeksportowane w skali kółka 55,75 px; kółko ma 46 px (Figma 495:18575) */
+.onb-equip svg.ic{width:15px;height:15px;}   /* siatka „Wszystko”: 14,6 px w kółku 46 px wg Figmy 594:14327 */
 .onb-equip.active{background:var(--m-orange);border-color:var(--m-orange-tint);color:#fff;}
 /* ustawienia arkusza: skala ~.947 jak w Figmie (chipy 28.4, gap 28) */
 
@@ -16086,7 +16087,7 @@ const PLAN_EQUIP_FILTERS = [
    the colour comes from the picture, not from CSS); "Wszystkie" is a 2x2 outline recoloured by the chip CSS
    (stroke orange, white when .active). 'masa ciała' = "Bez sprzętu" (biceps). */
 const EQUIP_IMG_FILE = {hantle:'hantle', sztanga:'sztanga', maszyny:'maszyny', kettlebell:'kettlebell', 'masa ciała':'cialo', gumy:'gumy'};
-const EQUIP_ALL_SVG = '<svg class="ic icon-stroke" aria-hidden="true" width="26" height="26" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.49" y="0.49" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/><rect x="0.49" y="8.32" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/><rect x="8.15" y="0.49" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/><rect x="8.15" y="8.32" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/></svg>';
+const EQUIP_ALL_SVG = '<svg class="ic icon-stroke" aria-hidden="true" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.49" y="0.49" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/><rect x="0.49" y="8.32" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/><rect x="8.15" y="0.49" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/><rect x="8.15" y="8.32" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/></svg>';
 function equipIconHtml(key){
   if(key === 'all' || !EQUIP_IMG_FILE[key]) return EQUIP_ALL_SVG;
   return '<img class="eq-img" src="icons/equip/' + EQUIP_IMG_FILE[key] + '.png" alt="" width="26" height="26" draggable="false">';
