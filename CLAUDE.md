@@ -96,6 +96,10 @@ Najprościej dodać klasę `.m-press`. Jeśli element ma własną regułę `:act
 - Funkcje open/reset/finish muszą usuwać klasę `m-sheet-entered`, inaczej kolejne otwarcie nie zagra wejścia.
 - Otwarty modal blokuje stronę (`html.modal-lock`). Własny scroll ma tylko treść sheetu.
 
+#### Popupy z klawiaturą (reguła, 2026-10-17)
+
+Każdy popup z polem tekstowym lub liczbowym (nowy szkielet `.m-sheet2`) przy otwartej klawiaturze: (1) unosi się nad klawiaturą z **zaokrąglonymi wszystkimi rogami (34 px)** i 8 px odstępu, nie jest ucięty prosto (`.plansv2-customize-overlay.m-sheet2.m-kb`); (2) **nagłówek (uchwyt, tytuł, ✕) zostaje przyklejony na górze** (`.m2-head` jest `position:sticky`), przewija się tylko treść, a przycisk główny jest przypięty na dole; (3) tło pod klawiaturą ma ten sam **ciemnoszary kolor co przyciemnienie** (`html.modal-lock` oraz `backgroundColor` w `native/capacitor.config.json`, `#4A4E56`), żeby klawiatura systemowa nie prześwitywała pomarańczem ani jasnym; (4) pola mają font min. 16 px (iOS nie powiększa strony po fokusie); (5) test: zrzut z prawdziwego iPhone'a z otwartą klawiaturą, nie tylko z Chrome. Nowego okna z polem nie wdrażaj bez tych pięciu punktów.
+
 ### 8. Poziomy swipe
 
 Nie wymyślaj nowego. Kopiuj wzór z `wireHistCalSwipeV2` / `statsV2CaroGoTo`: track na `translateX` 1:1 z palcem, `touch-action:pan-y`, blokada osi przy pierwszym ruchu, rzut z prędkością (WAAPI) + `setTimeout` jako zabezpieczenie dla PWA w tle.
