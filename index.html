@@ -4934,7 +4934,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
    LANG==='en' and one exists, otherwise the Polish text passed in
    (which may itself be a function for templated strings).
    ============================================================ */
-const LANG = (navigator.language || '').toLowerCase().startsWith('pl') ? 'pl' : 'en';
+const LANG_KEY = 'mekkio_lang_v1';   // wybór języka w apce: 'pl' | 'en'; brak klucza = automatycznie (język systemu). Lokalny, nie idzie do chmury ani do kopii.
+let LANG_OVERRIDE = null;
+try{ const v = localStorage.getItem(LANG_KEY); if(v === 'pl' || v === 'en') LANG_OVERRIDE = v; }catch(e){}
+const LANG = LANG_OVERRIDE || ((navigator.language || '').toLowerCase().startsWith('pl') ? 'pl' : 'en');
 document.title = 'Mekkio — Every rep counts. Literally.';
 document.documentElement.lang = LANG;
 const T_EN = {
@@ -9909,7 +9912,7 @@ function langPaint(){
   document.getElementById('lngAuto').setAttribute('aria-checked', _lng.auto ? 'true' : 'false');
 }
 function openLangSheet(){
-  _lng = { sel: LANG, auto: true };
+  _lng = { sel: LANG, auto: !LANG_OVERRIDE };
   document.getElementById('lngTitle').textContent = t('lngTitle', 'JĘZYK');
   document.getElementById('lngAutoL').textContent = t('lngAuto', 'Automatycznie');
   document.getElementById('lngAutoS').textContent = t('lngAutoSub', 'JAK W TELEFONIE');
@@ -9921,10 +9924,21 @@ function openLangSheet(){
 function closeLangSheet(viaDrag){ _lng = null; acctSheetClose('langSheet', viaDrag); }
 function langPick(l){ if(!_lng) return; _lng.sel = l; langPaint(); }
 function langToggleAuto(){ if(!_lng) return; _lng.auto = !_lng.auto; langPaint(); }
-function saveLangSheet(){ closeLangSheet(); }   // wybór nie jest jeszcze zapisywany: brak mechanizmu zmiany języka poza LANG z przeglądarki
+function saveLangSheet(){
+  if(!_lng) return;
+  const next = _lng.auto ? null : _lng.sel;
+  closeLangSheet();
+  if((next || null) === (LANG_OVERRIDE || null)) return;   // bez zmiany: nic nie rób
+  try{ if(next) localStorage.setItem(LANG_KEY, next); else localStorage.removeItem(LANG_KEY); }catch(e){ return; }
+  // Cała apka renderuje teksty przy starcie (LANG jest stałą), więc najbezpieczniej przeładować; dane są już w localStorage.
+  const nl = next || ((navigator.language || '').toLowerCase().startsWith('pl') ? 'pl' : 'en');
+  toast((nl === 'en' ? T_EN.lngApplying : 'Zmieniam język…'));
+  setTimeout(()=> location.reload(), 650);
+}
+function langRowLabel(){ return LANG_OVERRIDE ? (LANG_OVERRIDE === 'pl' ? 'Polski' : 'English') : t('lngAuto', 'Automatycznie'); }
 Object.assign(T_EN, {
   nbTitle: 'NEW BADGE', nbOk: 'GREAT', nbSee: 'SEE BADGES',
-  lngTitle: 'LANGUAGE', lngAuto: 'Automatic', lngAutoSub: 'SAME AS PHONE', lngSave: 'SAVE',
+  lngTitle: 'LANGUAGE', lngAuto: 'Automatic', lngAutoSub: 'SAME AS PHONE', lngSave: 'SAVE', lngApplying: 'Changing language…', setLang: 'Language',
 });
 
 /* ---- Profil: okno szczegółu rekordu (Figma 10). Tylko odczyt, dane wyłącznie z silnika rekordów (exerciseRecords / projectedMax) na
@@ -10376,7 +10390,8 @@ function buildProfileSettingsV2(animate){
   const sec1 = sec('', t('setNotif', 'POWIADOMIENIA I DŹWIĘK'),
     row({ id: 'acctReminderRows', on: 'openReminderSheet()', n: t('setReminder', 'Przypomnienie o treningu'), hidden: !IS_NATIVE, help: true, under: '<span class="pf-pill" id="setReminderV" hidden></span>' }) +
     row({ id: 'setSoundRow', on: 'setSoundOn(!soundOn)', n: t('setSounds', 'Dźwięki'), s: t('setSoundsSub', 'Odliczanie przerwy i koniec treningu'),
-      extra: ` role="switch" aria-checked="${soundOn ? 'true' : 'false'}"`, right: `<span class="acct-toggle acct-toggle--s${soundOn ? ' on' : ''}" id="acctSoundToggle"><span class="acct-toggle-knob"></span></span>` }), 0);
+      extra: ` role="switch" aria-checked="${soundOn ? 'true' : 'false'}"`, right: `<span class="acct-toggle acct-toggle--s${soundOn ? ' on' : ''}" id="acctSoundToggle"><span class="acct-toggle-knob"></span></span>` }) +
+    row({ id: 'setLangRow', on: 'openLangSheet()', n: t('setLang', 'Język'), right: `<span class="pf-row-r"><span id="setLangV">${E(langRowLabel())}</span>${chev}</span>` }), 0);
   const sec2 = sec('', t('setData', 'DANE I PRYWATNOŚĆ'),
     row({ id: 'acctHealthRows', on: 'openHealthSheet()', n: t('setHealth', 'Apple Zdrowie'), s: t('setHealthSub', 'Waga i kalorie z zegarka'), hidden: !showHealth }) +
     row({ on: 'exportData()', n: t('setExportLocal', 'Utwórz kopię zapasową'), nId: 'acctExportLabel', s: t('setExportLocalSub', 'Plik .json'), sId: 'setExportSub' }) +
