@@ -2863,7 +2863,7 @@ body.pev2-bg{background:var(--m-panel);}
 .gymv2-tile:active,.gymv2-tile-swap:active,.gymv2-done-row:active,.gymv2-save:active,
 .plansv2-btn-outline:active,.plansv2-btn-fill:active,.plansv2-card:active,.plansv2-choice-chip:active,
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
-.pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,.ob-back:active,.ob-cta:not(:disabled):active,.ob-gender-chip:active,.onb-goal-chip:active,.onb-equip:active,
+.pl-settings:active,.pl-card:active,.pl-hero:active,.pl-pick:active,.pl-cta:active,.opk-btn:active,.pl-check:active,.pev2-day-chip:active,.equip-chip:active,.pev2-save-fab:active,.ob-back:active,.ob-cta:not(:disabled):active,.ob-gender-chip:active,.onb-goal-chip:active,.onb-equip:active,
 .exv2-note-add:active,.exv2-submit:active,.swapv2-submit:not(:disabled):active,
 .lng-row:active,.m2-oauth:active,.m2-btn:active,.ai-chip:active,.m2-x:active,.mk-key:active,.bd-field:active,.bd-sx:active,.nm-ico:active,:is(#mConfirmOverlay.mc-gym,#cloudReminderOverlay) .onboard-actions button:active,.wl-row:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.swapv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
 /* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
@@ -3432,6 +3432,76 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 #onbFlow.onb-kb .ob-big-gap{flex-basis:24px;}
 #onbFlow.onb-kb .ob-screen{padding-top:max(20px,env(safe-area-inset-top));}
 #onbFlow.onb-kb .ob-cta{margin-top:12px;}
+
+/* ============ wybór planu (etap B) wg onboarding-preview.html / Figma 379:7645; ruch: tylko tokeny, transform/opacity ============ */
+.ob-screen.opk{padding:0 10px calc(25px + env(safe-area-inset-bottom));}
+.pl-settings{position:absolute;right:10px;top:max(58px, calc(env(safe-area-inset-top) + 11px));z-index:3;width:40px;height:40px;border-radius:50%;border:.5px solid var(--m-orange-tint);background:var(--m-orange);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.pl-settings::after{content:"";position:absolute;inset:-2px;}
+.pl-settings:active{transform:scale(.94);transition-duration:var(--m-dur-press-in);}
+.pl-settings .ph{width:24px;height:24px;display:block;}
+.pl-settings .ph svg{display:block;width:24px;height:24px;}
+.pl-body{flex:1;min-height:0;overflow-y:auto;-ms-overflow-style:none;scrollbar-width:none;text-align:left;padding-top:max(100px, calc(env(safe-area-inset-top) + 53px));}
+.pl-body::-webkit-scrollbar{display:none;}
+.pl-head{position:relative;height:119px;margin-bottom:58px;flex-shrink:0;}
+.pl-hello{position:absolute;left:3px;top:0;margin:0;font-size:var(--m-fs-xs);font-weight:700;color:var(--m-ink);line-height:12px;white-space:nowrap;}
+.pl-title{position:absolute;left:0;top:20px;margin:0;max-width:100%;white-space:nowrap;font-size:32px;font-weight:300;letter-spacing:-.02em;line-height:1.04;color:var(--m-ink);}
+.pl-list{display:flex;flex-direction:column;padding-bottom:8px;}
+.pl-card{--pc:var(--m-plan-mid);position:relative;isolation:isolate;width:100%;height:126px;flex-shrink:0;cursor:pointer;-webkit-user-select:none;user-select:none;outline:none;}
+.pl-card + .pl-card{margin-top:-16px;}
+.pl-bg{position:absolute;left:18px;right:0;top:0;height:142px;border-radius:var(--m-r-sm);background:linear-gradient(225deg,color-mix(in srgb,var(--pc) 8%,transparent) 0%,var(--pc) 71%),linear-gradient(color-mix(in srgb,var(--pc) 70%,transparent),color-mix(in srgb,var(--pc) 70%,transparent)),url(icons/backgrounds/dashboard.webp) center/cover;
+  -webkit-mask:radial-gradient(circle 29px at 0 63px,transparent 28.5px,#000 29.5px);mask:radial-gradient(circle 29px at 0 63px,transparent 28.5px,#000 29.5px);}
+.pl-info{position:absolute;left:59px;right:14px;top:16px;height:78px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;}
+.pl-card:last-child .pl-info{height:94px;}
+.pl-name{margin:0;font-size:var(--m-fs-lg);font-weight:300;line-height:1.1;letter-spacing:.04em;text-transform:uppercase;color:#fff;}
+.pl-check{position:absolute;left:0;top:45px;width:36px;height:36px;border-radius:50%;border:.5px solid var(--m-orange-tint);background:var(--m-orange-tint-2);color:var(--pc);z-index:2;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-quick) ease,color var(--m-dur-quick) ease;}
+.pl-check::after{content:"";position:absolute;inset:-4px;}
+.pl-check:active{transform:scale(.92);transition-duration:var(--m-dur-press-in);}
+.pl-check svg{display:block;width:16px;height:16px;}
+.pl-cta{flex-shrink:0;margin-top:12px;align-self:center;width:267px;max-width:100%;height:55px;padding:0 30px;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:#fff;font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.pl-cta:active{transform:scale(.98);transition-duration:var(--m-dur-press-in);}
+.pl-hero{position:relative;display:flex;flex-direction:column;gap:8px;padding:12px;margin-bottom:20px;flex-shrink:0;background:var(--m-orange);border:.5px solid var(--m-orange-tint);border-radius:var(--m-r-sm);-webkit-backdrop-filter:blur(3.8px);backdrop-filter:blur(3.8px);cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);outline:none;}
+.pl-hero:active{transform:scale(.99);transition-duration:var(--m-dur-press-in);}
+.pl-hero-in{display:flex;flex-direction:column;gap:20px;text-align:left;}
+.pl-hero-eyebrow{margin:0 0 8px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-orange-tint);line-height:13px;}
+.pl-hero-name{margin:0;font-size:min(30px,8.4vw);font-weight:200;letter-spacing:.04em;line-height:1.1;white-space:nowrap;text-transform:uppercase;color:#fff;}
+.pl-hero-stats{display:flex;gap:12px;}
+.pl-hero .plansv2-stat .ph{color:var(--m-orange-tint-2);}
+.pl-hero .plansv2-stat span.t{font-weight:600;color:var(--m-orange-tint-2);}
+.pl-pick{align-self:center;width:323px;max-width:100%;height:55px;margin-top:12px;border:none;border-radius:var(--m-r-pill);background:var(--m-plan-c-hard);color:#fff;font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.pl-pick:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
+.pl-sec-head{position:relative;display:flex;align-items:center;justify-content:space-between;width:100%;margin:0 0 8px;padding:0;border:none;background:none;font-family:inherit;cursor:pointer;color:var(--m-ink);flex-shrink:0;}
+.pl-sec-label{margin:0;font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);line-height:16px;}
+.pl-sec-head::after{content:"";position:absolute;inset:-14px 0;}   /* pole dotyku 44 pt przy wierszu 16 px */
+.pl-sec-head .ph{width:16px;height:16px;display:block;transition:transform var(--m-dur-fade) var(--m-ease);}
+.pl-sec-head .ph svg{display:block;width:16px;height:16px;}
+.pl-sec-head.closed .ph{transform:rotate(-90deg);}
+@media (prefers-reduced-motion: no-preference){
+  .pl-list,.pl-hero-in{transition:opacity var(--m-dur-fade) ease,transform var(--m-dur-fade) var(--m-ease);}
+}
+.pl-list.folded,.pl-list.out,.pl-hero-in.out{opacity:0;}
+.pl-list.folded{transform:translateY(-8px);}
+.pl-list.out,.pl-hero-in.out{transform:translateY(6px);}
+.pl-list[hidden]{display:none;}
+/* arkusz „Dostosuj cele”: nagłówek X · tytuł · ✓ (Figma 379:7747); szkło, rogi nad klawiaturą i przyklejony nagłówek z .m-sheet2 */
+#onbCustOverlay{--onb-glass:rgba(255,255,255,.6);font-family:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+.opk-head{padding-bottom:10px;}
+.opk-head .m2-title{font-size:var(--m-fs-xs);font-weight:600;letter-spacing:.0789em;}
+.opk-btn{position:relative;flex:none;width:44px;height:44px;padding:0;border:0;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font:inherit;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.opk-btn::before{content:"";position:absolute;inset:5px;border-radius:50%;box-sizing:border-box;-webkit-backdrop-filter:blur(6.84px);backdrop-filter:blur(6.84px);transition:background-color var(--m-dur-quick) ease;}
+.opk-btn:active{transform:scale(.94);transition-duration:var(--m-dur-press-in);}
+.opk-btn svg{position:relative;display:block;width:15px;height:15px;}
+.opk-x{margin-left:-6px;color:var(--m-ink);}
+.opk-x::before{border:.47px solid var(--m-orange);}
+.opk-ok{margin-right:-6px;color:#fff;}
+.opk-ok::before{background:var(--m-orange);border:.47px solid var(--m-border);}
+.opk-ok:disabled{cursor:default;pointer-events:none;}
+.opk-ok:disabled::before{background:var(--m-line);}
+.opk-col{gap:28px;padding-top:2px;}
+.opk-col .onb-goal-chip{height:28.4px;padding:7.6px;}
+.opk-col .onbc-label{margin-bottom:7.57px;}
+.opk-col .rl{--off:0px;}
+.opk-col .onb-equip-row{gap:4px;}
+.opk-col .onb-equip{flex:1 1 0;min-width:0;width:auto;max-width:46px;height:auto;aspect-ratio:1/1;}   /* 7 kółek mieści się też na 320 px */
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -3780,7 +3850,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="plansv2-header-title">
           <button type="button" class="v2-hdr-back" onclick="goRoute('dashboard')" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
           <span class="ph" data-ph="barbell"></span>
-          <h1>PLANS</h1>
+          <h1 data-i18n="plansTitle">PLANY</h1>
         </div>
         <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
       </div>
@@ -3812,7 +3882,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="plansv2-customize-topbar">
           <div class="plansv2-customize-topbar-title">
             <span class="ph" data-ph="barbell"></span>
-            <h1>PLANS</h1>
+            <h1 data-i18n="plansTitle">PLANY</h1>
           </div>
           <span class="ph plansv2-customize-close" data-ph="x" onclick="closePlanCustomizeV2()"></span>
         </div>
@@ -4606,6 +4676,25 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <!-- Onboarding nowego użytkownika (kroki 1-6): pełnoekranowy przepływ, wypełniany przez onbStart() -->
 <div id="onbFlow" hidden></div>
 
+<!-- Arkusz „Dostosuj cele” z wyboru planu w onboardingu (nad #onbFlow). Szkielet .m-sheet2; zmienia tylko odpowiedzi i przelicza karty, nie zapisuje planów. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="onbCustOverlay" style="z-index:9450" onclick="if(event.target===this) onbCustClose()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head opk-head">
+        <div class="m2-title-row">
+          <button type="button" class="opk-btn opk-x" aria-label="Zamknij bez zmian" data-i18n-aria="onbPickClose" onclick="onbCustClose()"><svg viewBox="0 0 18 18" width="15" height="15" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <h1 class="m2-title" data-i18n="onbPickSheetTitle">CELE TRENINGOWE</h1>
+          <button type="button" class="opk-btn opk-ok" id="opkOk" aria-label="Zastosuj" data-i18n-aria="onbPickApply" onclick="onbCustApply()"><svg viewBox="0 0 12 12" width="15" height="15" fill="none" aria-hidden="true"><path d="M10.78 3.36 4.78 9.36a.6.6 0 0 1-.8 0L1.36 6.74a.6.6 0 1 1 .8-.8l2.23 2.23 5.6-5.6a.6.6 0 0 1 .8.8Z" fill="currentColor"/></svg></button>
+        </div>
+      </div>
+      <div class="m2-body">
+        <div class="onbc-col opk-col" id="opkCol"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- "Co nowego" — Figma 500:19077. Bottom sheet: fixed photo hero (random from
      WHATSNEW_IMAGES) + scrolling list of pending versions. Opened at boot by
      openWhatsNew() when APP_VERSION differs from the last seen one. -->
@@ -5056,6 +5145,10 @@ const T_EN = {
   onbDiffHard: 'Hard',
   onbEquipLbl: 'Equipment',
   onbDaysLbl: 'Days per week',
+  plansTitle: 'PLANS',
+  onbPickHello: n => `Hi ${n}`, onbPickHelloAnon: 'Hi',
+  onbPickSettings: 'Adjust goals', onbPickSheetTitle: 'TRAINING GOALS',
+  onbPickClose: 'Close without changes', onbPickApply: 'Apply',
   skip: 'Skip',
   save: 'Save',
   whatsnewVersion: v => `Version ${v}`,
@@ -6401,10 +6494,11 @@ const ONB_NUM = {   // zakresy linijek (jak w podglądzie)
                   planv2MatchesEquipment() / customizationV2.equipment. 'sztanga' jest osobnym kluczem sprzętu (23 ćwiczenia ze sztangą, EZ, landmine, T-Bar). */
 const onbAnswers = {goal:null, difficulty:'medium', daysPerWeek:3, equip:[], done:false};
 /* Odpowiedź „sprzęt” z kroku „cel” jako zbiór dla generatora planów: pusta tablica = bez filtra ('all' lub brak odpowiedzi). */
-function onbEquipForPlans(){
-  const e = onbAnswers.equip || [];
+function onbEquipSetFor(equip){
+  const e = equip || [];
   return e.includes('all') ? [] : e.filter(k=> ONB_EQUIP.includes(k) && k !== 'all');
 }
+function onbEquipForPlans(){ return onbEquipSetFor(onbAnswers.equip); }
 let onbS = null;          // stan przepływu (w pamięci): wartości kroków + dotknięcia
 let onbAnims = [];        // trwające animacje przejścia (do przerwania przy szybkim tapnięciu)
 
@@ -6521,15 +6615,9 @@ function onbRulerHtml(which, labels, aria){
     <div class="rl-trw" aria-hidden="true"><span class="rl-tri">${ONB_RL_TRI}</span></div>
   </div>`;
 }
-function onbScreenGoal(){
-  return `<div class="ob-bgl"></div>${onbTopbarHtml()}
-    <div class="ob-body onbc-body">
-      <div class="ob-spacer" style="flex:86 1 12px"></div>
-      <h1 class="ob-h1" style="margin:0 0 12px;line-height:26px">${t('onbGoalTitle','Jaki masz cel?')}</h1>
-      <p class="ob-sub" style="max-width:220px;margin:0 auto;line-height:16px">${t('onbGoalSub','Pomoże w doborze odpowiedniego planu treningowego dla Ciebie.')}</p>
-      <div class="ob-spacer" style="flex:43 1 16px"></div>
-      <div style="margin:0 -10px;flex-shrink:0"><div class="onbc-col">
-        <div class="onbc-sec">
+/* cztery bloki ustawień celu (krok „cel” i arkusz „Dostosuj” na wyborze planu) */
+function onbControlsHtml(){
+  return `<div class="onbc-sec">
           <p class="onbc-label">${t('onbGoalLbl','Cel treningowy')}</p>
           <div class="onb-goal-row" role="group" aria-label="${t('onbGoalLbl','Cel treningowy')}">
             ${ONB_GOALS.map(k=>`<button type="button" class="onb-goal-chip" data-act="goal" data-key="${k}">${onbGoalLabel(k)}</button>`).join('')}
@@ -6548,8 +6636,16 @@ function onbScreenGoal(){
         <div class="onbc-sec">
           <p class="onbc-label">${t('onbDaysLbl','Dni w tygodniu')}</p>
           ${onbRulerHtml('days', ONB_DAYS.map(d=> d + 'x'), t('onbDaysLbl','Dni w tygodniu'))}
-        </div>
-      </div></div>
+        </div>`;
+}
+function onbScreenGoal(){
+  return `<div class="ob-bgl"></div>${onbTopbarHtml()}
+    <div class="ob-body onbc-body">
+      <div class="ob-spacer" style="flex:86 1 12px"></div>
+      <h1 class="ob-h1" style="margin:0 0 12px;line-height:26px">${t('onbGoalTitle','Jaki masz cel?')}</h1>
+      <p class="ob-sub" style="max-width:220px;margin:0 auto;line-height:16px">${t('onbGoalSub','Pomoże w doborze odpowiedniego planu treningowego dla Ciebie.')}</p>
+      <div class="ob-spacer" style="flex:43 1 16px"></div>
+      <div style="margin:0 -10px;flex-shrink:0"><div class="onbc-col">${onbControlsHtml()}</div></div>
       <div class="ob-spacer" style="flex:20 1 8px"></div>
     </div>
     ${onbCtaHtml()}`;
@@ -6604,18 +6700,18 @@ function onbInitRuler(track, key){
 }
 
 /* ---------- kontrolki kroku „cel” ---------- */
-function onbPaintGoal(){
-  const root = document.querySelector('#onbFlow .onbc-col'); if(!root) return;
-  const s = onbS;
-  root.querySelectorAll('[data-act="goal"]').forEach(b=> b.classList.toggle('active', b.dataset.key === s.goal));
-  root.querySelectorAll('[data-act="equip"]').forEach(b=>{ const on = s.equip.includes(b.dataset.key); b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
-  [['diff', s.diff], ['days', s.days]].forEach(([k, v])=>{
+function onbPaintCtl(root, st){
+  if(!root) return;
+  root.querySelectorAll('[data-act="goal"]').forEach(b=> b.classList.toggle('active', b.dataset.key === st.goal));
+  root.querySelectorAll('[data-act="equip"]').forEach(b=>{ const on = st.equip.includes(b.dataset.key); b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+  [['diff', st.diff], ['days', st.days]].forEach(([k, v])=>{
     const el = root.querySelector(`[data-ruler="${k}"]`); if(!el) return;
     el.style.setProperty('--k', v);
     el.setAttribute('aria-valuenow', v);
     el.querySelectorAll('.rl-labels span').forEach((sp, i)=> sp.classList.toggle('active', i === v));
   });
 }
+function onbPaintGoal(){ onbPaintCtl(document.querySelector('#onbFlow .onbc-col'), onbS); }
 function onbRlPick(el, e){
   const r = el.getBoundingClientRect();
   const off = parseFloat(getComputedStyle(el).getPropertyValue('--off')) || 0;
@@ -6650,28 +6746,32 @@ function onbMount(el){
 }
 // dir: 0 = pierwszy ekran, 1 = dalej (push), -1 = wstecz (pop)
 function onbShow(dir){
-  const host = document.getElementById('onbFlow');
-  onbSettle();
-  const old = host.querySelector('.ob-screen');
   const el = document.createElement('div');
   el.className = 'ob-screen';
   el.dataset.step = ONB_STEPS[onbS.step];
   el.innerHTML = ONB_RENDER[ONB_STEPS[onbS.step]]();
+  onbSwap(el, dir, onbMount);
+}
+// wprowadza gotowy ekran `el` do #onbFlow z przejściem push/pop (wspólne dla kroków 1-6 i wyboru planu)
+function onbSwap(el, dir, mount){
+  const host = document.getElementById('onbFlow');
+  onbSettle();
+  const old = host.querySelector('.ob-screen');
   if(!old || !dir || onbReduced()){
     if(old) old.remove();
-    host.appendChild(el); onbMount(el); return;
+    host.appendChild(el); mount(el); return;
   }
   const dIn = onbMs('--m-dur-in'), shift = '-28%';
   old.classList.add('onb-leaving');
   old.style.pointerEvents = 'none';
   if(dir > 0){
     el.classList.add('onb-over'); old.classList.add('onb-under');
-    host.appendChild(el); onbMount(el);
+    host.appendChild(el); mount(el);
     onbAnims.push(el.animate([{transform:'translateX(100%)'}, {transform:'translateX(0)'}], {duration:dIn, easing:MOTION.ease, fill:'backwards'}));
     onbAnims.push(old.animate([{transform:'translateX(0)', opacity:1}, {transform:`translateX(${shift})`, opacity:.6}], {duration:dIn, easing:MOTION.ease, fill:'forwards'}));
   } else {
     el.classList.add('onb-under'); old.classList.add('onb-over');
-    host.insertBefore(el, old); onbMount(el);
+    host.insertBefore(el, old); mount(el);
     onbAnims.push(el.animate([{transform:`translateX(${shift})`, opacity:.6}, {transform:'translateX(0)', opacity:1}], {duration:dIn, easing:MOTION.ease, fill:'backwards'}));
     onbAnims.push(old.animate([{transform:'translateX(0)'}, {transform:'translateX(100%)'}], {duration:dIn, easing:MOTION.ease, fill:'forwards'}));
   }
@@ -6712,8 +6812,8 @@ function onbFinish(){
   localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);
   updateWelcomeGreeting();
   try{ refreshExerciseIcons(); }catch(e){}
-  onbClose();
-  afterOnboardingStep();
+  onbS = null;
+  onbPickStart();   // etap B: ten sam #onbFlow przechodzi na wybór planu (zamknie go exitPlanOnboarding)
 }
 function onbClose(){
   onbSettle();
@@ -6782,6 +6882,238 @@ function onbStart(){
   if(window.visualViewport){ visualViewport.addEventListener('resize', onbViewport); visualViewport.addEventListener('scroll', onbViewport); }
   const nm = document.getElementById('onbFlow');   // Safari AutoFill Contact: losowy token autocomplete (jak w innych polach nazwy)
   new MutationObserver(()=>{ const inp = document.getElementById('obNameInput'); if(inp && inp.getAttribute('autocomplete') === 'off') inp.setAttribute('autocomplete', 'off-' + Math.random().toString(36).slice(2)); }).observe(nm, {childList:true, subtree:true});
+})();
+
+/* ---------- wybór planu w onboardingu (etap B): ekran „Zacznij od planu.” + arkusz „Dostosuj cele” ----------
+   Pokazywany zaraz po kroku „cel” w tym samym #onbFlow (push). Polecany plan (hero) i pozostałe (lista) to wynik
+   generatora dla odpowiedzi (recommendationFor), liczony w pamięci: NIC nie trafia do „Twoje plany”, dopóki
+   użytkownik nie potwierdzi planu ✓ albo nie zapisze go po ręcznej edycji. Arkusz „Dostosuj” zmienia tylko
+   odpowiedzi (onbAnswers) i przelicza karty: to ścieżka „tylko podgląd”, bez applyPlanCustomizeV2() i forka. */
+let onbPick = null;     // {rec, othersOpen, inEditor, timer}
+let onbDraft = null;    // szkic arkusza „Dostosuj”: {goal, diff 0..2, days 0..2, equip[]}
+const OPK_COLORS = {plan_a:'var(--m-mint)', plan_ppl:'var(--m-plan-hard)', plan_ul:'var(--m-plum)'};
+function opkPrefs(){ return {goal:onbAnswers.goal, difficulty:onbAnswers.difficulty, daysPerWeek:onbAnswers.daysPerWeek, equip:onbAnswers.equip.slice()}; }
+function opkStatsHtml(sm, withLevel){
+  const base = `<div class="plansv2-stat">${ph('barbell')}<span class="t">${escHtml(planExCountText(sm.exercisesPerDay))}</span></div>
+          <div class="plansv2-stat">${ph('clock-countdown')}<span class="t">~${sm.estMin} min</span></div>`;
+  return withLevel ? base + `<div class="plansv2-stat">${ph('chart-line')}<span class="t">${escHtml(planDifficultyLabel(onbAnswers.difficulty))}</span></div>` : base;
+}
+function opkHeroInnerHtml(){
+  const id = onbPick.rec.recId, sm = dashPlanSummary(onbPick.rec.plans[id]);
+  return `<p class="pl-hero-eyebrow">${t('dashRecommended','Polecany dla Ciebie')}</p>
+      <p class="pl-hero-name">${escHtml(dashPlanShortName(sm.name))}</p>
+      <div class="pl-hero-stats">${opkStatsHtml(sm, false)}</div>`;
+}
+function opkCardHtml(id, i, animate){
+  const p = onbPick.rec.plans[id], sm = dashPlanSummary(p), name = escHtml(dashPlanShortName(sm.name));
+  return `<div class="pl-card m-press${animate ? ' m-rise-tile' : ''}" style="--i:${i};--pc:${OPK_COLORS[id]}" role="button" tabindex="0" data-act="opk-edit" data-id="${id}">
+      <div class="pl-bg"></div>
+      <div class="pl-info">
+        <p class="pl-name">${name}</p>
+        <div class="plansv2-card-stats">${opkStatsHtml(sm, true)}</div>
+      </div>
+      <button type="button" class="pl-check" data-act="opk-pick" data-id="${id}" aria-label="${t('dashPickPlan','Wybierz plan')}: ${name}">${LG_ICONS.check}</button>
+    </div>`;
+}
+function opkOthersHtml(animate){ return onbPick.rec.order.slice(1).map((id, i)=> opkCardHtml(id, i, animate)).join(''); }
+function opkScreenHtml(){
+  const hello = profileName ? t('onbPickHello', `Cześć ${profileName}`, profileName) : t('onbPickHelloAnon', 'Cześć');
+  return `<div class="ob-bgl"></div>
+    <button type="button" class="pl-settings" data-act="opk-settings" aria-label="${t('onbPickSettings','Dostosuj cele')}" title="${t('onbPickSettings','Dostosuj cele')}">${ph('sliders')}</button>
+    <div class="pl-body">
+      <div class="pl-head m-rise" style="--i:0">
+        <p class="pl-hello">${escHtml(hello)}</p>
+        <h1 class="pl-title">${t('dashHlNew','Zacznij od planu.')}<br>${t('dashHlNew2','Reszta pójdzie sama.')}</h1>
+      </div>
+      <div class="pl-hero m-rise-tile" style="--i:1" role="button" tabindex="0" data-act="opk-edit" data-id="${onbPick.rec.recId}">
+        <div class="pl-hero-in" id="plHeroIn">${opkHeroInnerHtml()}</div>
+        <button type="button" class="pl-pick" data-act="opk-pick" data-id="${onbPick.rec.recId}">${t('dashChoose','Wybierz')}</button>
+      </div>
+      <button type="button" class="pl-sec-head" id="plOthersBtn" data-act="opk-others" aria-expanded="true">
+        <span class="pl-sec-label">${t('dashOtherPlans','Inne plany Mekkio')}</span>${ph('caret-down')}
+      </button>
+      <div class="pl-list" id="plList">${opkOthersHtml(true)}</div>
+    </div>
+    <button type="button" class="pl-cta" data-act="opk-create">${t('dashCreatePlan','Stwórz własny plan')}</button>`;
+}
+function onbPickStart(){
+  planOnboardingActive = true;
+  onbPick = {rec: recommendationFor(opkPrefs()), othersOpen: true, inEditor: false, timer: null};
+  const el = document.createElement('div');
+  el.className = 'ob-screen opk';
+  el.dataset.step = 'plan';
+  el.innerHTML = opkScreenHtml();
+  onbSwap(el, 1, ()=>{});
+}
+// po zmianie odpowiedzi: krótkie przejście samego opacity/transform (hero + lista), bez animowania wysokości i bez ponownego wejścia kart
+function opkRepaint(animate){
+  const heroIn = document.getElementById('plHeroIn'), list = document.getElementById('plList'), pick = document.querySelector('.pl-pick'), hero = document.querySelector('.pl-hero');
+  if(!onbPick || !heroIn || !list) return;
+  onbPick.rec = recommendationFor(opkPrefs());
+  const apply = ()=>{
+    heroIn.innerHTML = opkHeroInnerHtml();
+    list.innerHTML = opkOthersHtml(false);
+    if(pick) pick.dataset.id = onbPick.rec.recId;
+    if(hero) hero.dataset.id = onbPick.rec.recId;
+    heroIn.classList.remove('out'); list.classList.remove('out');
+  };
+  clearTimeout(onbPick.timer);
+  if(!animate || onbReduced()){ apply(); return; }
+  heroIn.classList.add('out'); list.classList.add('out');
+  onbPick.timer = setTimeout(apply, onbMs('--m-dur-fade') * .65);
+}
+function opkToggleOthers(){
+  const list = document.getElementById('plList'), btn = document.getElementById('plOthersBtn');
+  onbPick.othersOpen = !onbPick.othersOpen;
+  btn.setAttribute('aria-expanded', onbPick.othersOpen);
+  btn.classList.toggle('closed', !onbPick.othersOpen);
+  clearTimeout(list._t);
+  if(onbPick.othersOpen){ list.hidden = false; void list.offsetWidth; list.classList.remove('folded'); }
+  else {
+    list.classList.add('folded');
+    list._t = setTimeout(()=>{ if(!onbPick || !onbPick.othersOpen) list.hidden = true; }, onbMs('--m-dur-fade') + 20);
+  }
+}
+/* ✓ na karcie / „Wybierz” w hero: zapis planu (JEDYNY fork w tym ekranie) jako aktywnego, koniec onboardingu, dashboard */
+// zapis planu z generatora jako własnego i aktywnego (jedyne miejsce forka na tej ścieżce)
+function commitGeneratedPlan(plan){
+  const newId = 'plan_' + Date.now();
+  trainingPlans.push({id:newId, name:plan.name, builtin:false, schedule:plan.schedule, customizationV2:plan.customizationV2, meta:plan.meta});
+  saveTrainingPlansList();
+  starredPlanId = newId;
+  localStorage.setItem(LS_STARRED_PLAN, newId);
+  scheduleCloudPush();
+  updateTodayPlanBanner();
+  updatePlanPillLabel();
+}
+function opkCommit(id){
+  const plan = onbPick && onbPick.rec.plans[id];
+  if(!plan) return;
+  commitGeneratedPlan(plan);
+  haptic('success');
+  exitPlanOnboarding();
+}
+/* tap w kartę / hero albo „Stwórz własny plan”: edytor planu (flow chowa się, nie jest zamykany, żeby strzałka wstecz wróciła na wybór) */
+function opkOpenEditor(id){
+  const seed = id && onbPick.rec.plans[id] ? onbPick.rec.plans[id] : null;
+  onbPick.inEditor = true;
+  const host = document.getElementById('onbFlow'), under = document.getElementById('onbUnder');
+  host.hidden = true; if(under) under.hidden = true;
+  document.documentElement.classList.remove('modal-lock');
+  openPlanEditorV2(null, seed);
+}
+function opkReturnFromEditor(){
+  if(!onbPick) return;
+  onbPick.inEditor = false;
+  goRoute('dashboard');
+  const host = document.getElementById('onbFlow'), under = document.getElementById('onbUnder');
+  host.querySelectorAll('.m-rise, .m-rise-tile').forEach(n=> n.classList.remove('m-rise', 'm-rise-tile'));   // ponowne pokazanie nie odgrywa wejścia
+  if(under) under.hidden = false;
+  host.hidden = false;
+  document.documentElement.classList.add('modal-lock');
+}
+/* zamknięcie wyboru planu (plan zapisany): wygaszenie nakładki odsłania dashboard już narysowany pod spodem */
+function onbPickTeardown(){
+  if(!onbPick) return;
+  clearTimeout(onbPick.timer);
+  onbPick = null; onbDraft = null;
+  const host = document.getElementById('onbFlow');
+  const ov = document.getElementById('onbCustOverlay');
+  if(ov){ ov.classList.add('hidden'); ov.classList.remove('plansv2-customize-closing', 'm-sheet-entered'); ov.style.opacity = ''; }
+  if(host.hidden || onbReduced()){ onbClose(); return; }
+  const a = host.animate([{opacity:1}, {opacity:0}], {duration:onbMs('--m-dur-fade'), easing:'ease', fill:'forwards'});
+  let done = false;
+  const fin = ()=>{ if(done) return; done = true; try{ a.cancel(); }catch(e){} onbClose(); };
+  a.onfinish = fin;
+  setTimeout(fin, onbMs('--m-dur-fade') + 120);
+}
+/* ---- arkusz „Dostosuj cele” (.m-sheet2, nad #onbFlow) ---- */
+function opkDraftValid(){ return !!onbDraft && !!onbDraft.goal && onbDraft.equip.length > 0; }
+function opkDraftPaint(){
+  onbPaintCtl(document.getElementById('opkCol'), onbDraft);
+  const ok = document.getElementById('opkOk'); if(ok) ok.disabled = !opkDraftValid();
+}
+function onbCustOpen(){
+  if(!onbPick) return;
+  onbDraft = {goal:onbAnswers.goal, diff:ONB_DIFF.indexOf(onbAnswers.difficulty), days:ONB_DAYS.indexOf(onbAnswers.daysPerWeek), equip:onbAnswers.equip.slice()};
+  if(onbDraft.diff < 0) onbDraft.diff = 1;
+  if(onbDraft.days < 0) onbDraft.days = 1;
+  const col = document.getElementById('opkCol');
+  if(!col.firstElementChild) col.innerHTML = onbControlsHtml();
+  opkDraftPaint();
+  resetPlansCustomizeSheet('onbCustOverlay');
+  document.getElementById('onbCustOverlay').classList.remove('hidden');
+}
+let _onbCustT = null;
+function onbCustClose(viaDrag){
+  const overlay = document.getElementById('onbCustOverlay');
+  if(!overlay || overlay.classList.contains('hidden')) return;
+  const mover = overlay.querySelector('.plansv2-customize-stack');
+  const finish = ()=>{
+    overlay.classList.add('hidden');
+    overlay.classList.remove('plansv2-customize-closing', 'm-sheet-entered');
+    overlay.style.opacity = '';
+    if(mover){ mover.classList.remove('m-sheet-snapback'); mover.style.transform = ''; }
+    _onbCustT = null;
+  };
+  clearTimeout(_onbCustT);
+  if(viaDrag){ _onbCustT = setTimeout(finish, 20); }
+  else { overlay.classList.add('plansv2-customize-closing'); _onbCustT = setTimeout(finish, onbMs('--m-dur-exit') + 20); }
+}
+// ✓ w arkuszu: zapisuje odpowiedzi w pamięci (onbAnswers) i przelicza karty. Nic nie powstaje w „Twoje plany”.
+function onbCustApply(){
+  if(!opkDraftValid() || !onbPick) return;
+  onbAnswers.goal = onbDraft.goal;
+  onbAnswers.difficulty = ONB_DIFF[onbDraft.diff];
+  onbAnswers.daysPerWeek = ONB_DAYS[onbDraft.days];
+  onbAnswers.equip = onbDraft.equip.slice();
+  opkRepaint(true);
+  onbCustClose();
+}
+(function opkWire(){
+  const host = document.getElementById('onbFlow'), ov = document.getElementById('onbCustOverlay');
+  if(!host || !ov) return;
+  host.addEventListener('click', e=>{
+    const b = e.target.closest('[data-act^="opk-"]'); if(!b || !onbPick) return;
+    const a = b.dataset.act;
+    if(a === 'opk-pick'){ e.stopPropagation(); opkCommit(b.dataset.id); }
+    else if(a === 'opk-edit') opkOpenEditor(b.dataset.id);
+    else if(a === 'opk-create') opkOpenEditor(null);
+    else if(a === 'opk-settings') onbCustOpen();
+    else if(a === 'opk-others') opkToggleOthers();
+  });
+  host.addEventListener('keydown', e=>{
+    const c = e.target.closest && e.target.closest('[role="button"][data-act="opk-edit"]');
+    if(c && e.target === c && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); c.click(); }
+  });
+  ov.addEventListener('click', e=>{
+    const b = e.target.closest('[data-act]'); if(!b || !onbDraft) return;
+    const a = b.dataset.act;
+    if(a === 'goal'){ onbDraft.goal = b.dataset.key; opkDraftPaint(); }
+    else if(a === 'equip'){
+      const k = b.dataset.key, at = onbDraft.equip.indexOf(k);
+      if(k === 'all') onbDraft.equip = at === -1 ? ['all'] : [];
+      else { onbDraft.equip = onbDraft.equip.filter(x=> x !== 'all'); if(at === -1) onbDraft.equip.push(k); else onbDraft.equip.splice(onbDraft.equip.indexOf(k), 1); }
+      opkDraftPaint();
+    }
+  });
+  const setSl = (which, i)=>{ if(onbDraft[which] !== i){ onbDraft[which] = i; haptic('select'); } opkDraftPaint(); };
+  ov.addEventListener('keydown', e=>{
+    const rl = e.target.closest && e.target.closest('.rl');
+    if(!rl || !onbDraft) return;
+    const d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -1 : 0;
+    if(!d) return;
+    e.preventDefault();
+    setSl(rl.dataset.ruler, Math.max(0, Math.min(2, onbDraft[rl.dataset.ruler] + d)));
+  });
+  ov.addEventListener('pointerdown', e=>{
+    const rl = e.target.closest('.rl'); if(!rl || !onbDraft) return;
+    try{ rl.setPointerCapture(e.pointerId); }catch(_){}
+    rl._drag = true; setSl(rl.dataset.ruler, onbRlPick(rl, e));
+  });
+  ov.addEventListener('pointermove', e=>{ const rl = e.target.closest('.rl'); if(rl && rl._drag && onbDraft) setSl(rl.dataset.ruler, onbRlPick(rl, e)); });
+  const up = e=>{ const rl = e.target.closest && e.target.closest('.rl'); if(rl) rl._drag = false; };
+  ov.addEventListener('pointerup', up); ov.addEventListener('pointercancel', up);
 })();
 
 /* ---------- body data + weight log (local, feeds calorie estimates) ----------
@@ -10679,6 +11011,10 @@ function positionNavBlob(animate){
 }
 window.addEventListener('resize', ()=> positionNavBlob(false));
 function goRoute(route){
+  if(onbPick && onbPick.inEditor){
+    if(route === 'plans-v2' && currentRoute === 'plan-editor-v2'){ opkReturnFromEditor(); return; }   // strzałka wstecz w edytorze wraca na wybór planu z onboardingu
+    if(route !== 'plan-editor-v2' && route !== 'dashboard') onbPick.inEditor = false;               // wyszedłeś inną drogą: zwykły edytor
+  }
   if(profileDetailReturn && route !== profileDetailReturn && route !== 'profile-v2') profileDetailReturn = null;   // wyszedłeś inną drogą: strzałka znów działa jak zwykle
   // Tab switches swap instantly, like a native tab bar; the incoming
   // screen's own tile entrance is the only motion. A slide is kept
@@ -15105,6 +15441,7 @@ let planOnboardingActive = false; // true while a brand-new user is being forced
 function exitPlanOnboarding(){
   planOnboardingActive = false;
   goRoute('dashboard');
+  onbPickTeardown();   // zamyka ekran wyboru planu z onboardingu (jeśli to on prowadził)
   checkInstallPrompt(); // deferred here so it never stacks on the first-run name / plan steps
 }
 function completePlanOnboardingIfNeeded(){
@@ -15917,16 +16254,17 @@ let editingPlan = null; // working copy: {id, name, builtin, schedule:{mon:[],..
 // the shared day-select-mode / equip-filter / toggle-exercise logic that
 // follows always paints the v2 ids.
 // (Figma node 155:1086, "06. PLAN - SET UP") — reached from Plans v2.
-function openPlanEditorV2(id){
-  const existing = id ? trainingPlans.find(p=>p.id===id) : null;
+// seed (tylko onboarding): plan z generatora, jeszcze nie zapisany w trainingPlans; edytor traktuje go jak nowy plan (id null), więc zapis tworzy go dopiero teraz
+function openPlanEditorV2(id, seed){
+  const existing = seed || (id ? trainingPlans.find(p=>p.id===id) : null);
   if(isPlanHidden(existing)) return;   // hidden plus plan: not reachable by id either
   const schedule = emptySchedule();
   if(existing) PLAN_DAYS.forEach(d=>{ schedule[d] = (existing.schedule[d]||[]).map(e=>({...e})); });
   stripWarmupStretch(schedule);
   editingPlan = {
-    id: existing ? existing.id : null,
+    id: existing && !seed ? existing.id : null,
     name: existing ? planDisplayName(existing) : '',
-    builtin: existing ? !!existing.builtin : false,
+    builtin: existing && !seed ? !!existing.builtin : false,
     periodized: existing ? !!existing.periodized : false,
     schedule,
     activeDay: dayKeyFromDate(todayStr()),
@@ -16796,9 +17134,67 @@ function dashWorkoutPlanName(w){
   return best && bestScore >= 0.5 ? planDisplayName(best) : null;
 }
 
-// szew: polecany plan dla nowego użytkownika. Dziś stały Fullbody 3x, bez wnioskowania z `profile`;
-// docelowo podmieni się na generatePlanScheduleV2 po wdrożeniu onboardingu. + 2 „inne plany Mekkio”
+/* ---------- rekomendacja planu z odpowiedzi onboardingu (etap B) ----------
+   prefs = {goal, difficulty:'easy'|'medium'|'hard', daysPerWeek:2|3|4, equip:[klucze]} (kształt onbAnswers).
+   Reguła startowa (do zatwierdzenia przez Macieja), czysta funkcja:
+     4 dni -> Upper / Lower Split (Fullbody 4x nie istnieje, wg spec generatora)
+     3 dni -> Push / Pull / Legs, chyba że poziom „Łatwy” -> Fullbody
+     2 dni -> Fullbody
+     sprzęt tylko masa ciała / gumy -> zawsze Fullbody (split wymaga ćwiczeń z obciążeniem na każdy dzień)
+   Cel treningowy nie zmienia wyboru planu, tylko serie, powtórzenia i przerwy (PLANSV2_GOAL_PARAMS). */
+const ONB_PLAN_IDS = ['plan_a', 'plan_ppl', 'plan_ul'];
+function recommendPlanIdFor(prefs){
+  const eq = onbEquipSetFor(prefs.equip);
+  const bodyOnly = eq.length > 0 && eq.every(k=> k === 'masa ciała' || k === 'gumy');
+  if(bodyOnly) return 'plan_a';
+  if(prefs.daysPerWeek >= 4) return 'plan_ul';
+  if(prefs.daysPerWeek === 3) return prefs.difficulty === 'easy' ? 'plan_a' : 'plan_ppl';
+  return 'plan_a';
+}
+// Plan do podglądu / zapisu: wynik generatora dla odpowiedzi (NIE trafia do trainingPlans, dopóki użytkownik go nie wybierze)
+function planFromPrefsV2(id, prefs){
+  const goal = prefs.goal || 'mass', difficulty = prefs.difficulty || 'medium', equipment = onbEquipSetFor(prefs.equip);
+  const def = allBuiltinPlans().find(p=> p.id === id);
+  let schedule, customizationV2;
+  if(PLANSV2_SPLIT_DAY_ROLES[id]){
+    schedule = generateSplitPlanScheduleV2(id, goal, difficulty, equipment);
+    customizationV2 = {goal, difficulty, equipment, splitOf: id};
+  } else {
+    const frequency = Math.min(3, prefs.daysPerWeek || 3);   // Fullbody istnieje tylko jako 2x i 3x
+    schedule = generatePlanScheduleV2(goal, difficulty, equipment, frequency);
+    customizationV2 = {goal, difficulty, equipment, frequency};
+  }
+  return {id, name: def ? planDisplayName(def) : id, builtin:false, schedule, customizationV2, meta: planMetaForEdit(def || null)};
+}
+// plan nadaje się do pokazania, gdy każdy jego dzień ma ćwiczenia (wąski sprzęt potrafi zostawić dzień splitu pusty)
+function planViableV2(plan){
+  const days = planActiveDays(plan);
+  return days.length > 0 && planAvgExercisesPerDay(plan) >= 3;
+}
+// {recId, plans:{id->plan}, order:[recId, ...inne]}: polecany plan pierwszy, potem pozostałe nadające się do pokazania
+function recommendationFor(prefs){
+  // za wąski sprzęt (np. same gumy: w bibliotece nie ma dla nich ćwiczeń siłowych) -> dokładamy masę ciała, a gdy to za mało, zdejmujemy filtr
+  let eff = Object.assign({}, prefs, {equip: onbEquipSetFor(prefs.equip)});
+  if(!planViableV2(planFromPrefsV2('plan_a', eff))){
+    const withBody = eff.equip.includes('masa ciała') ? eff.equip : eff.equip.concat('masa ciała');
+    eff = Object.assign({}, eff, {equip: planViableV2(planFromPrefsV2('plan_a', Object.assign({}, eff, {equip: withBody}))) ? withBody : []});
+  }
+  const plans = {};
+  ONB_PLAN_IDS.forEach(id=>{ plans[id] = planFromPrefsV2(id, eff); });
+  let recId = recommendPlanIdFor(prefs);
+  if(!planViableV2(plans[recId])) recId = 'plan_a';
+  const order = [recId].concat(ONB_PLAN_IDS.filter(id=> id !== recId && planViableV2(plans[id])));
+  return {recId, plans, order};
+}
+// szew dashboardu: polecany plan dla nowego użytkownika. Z odpowiedzi onboardingu (profile albo onbAnswers) liczy generator,
+// bez nich zostaje stały Fullbody 3x + 2 „inne plany Mekkio”.
 function recommendedPlanFor(profile){
+  const prefs = profile && profile.goal ? profile : (onbAnswers.done && onbAnswers.goal ? onbAnswers : null);
+  if(prefs){
+    const rec = recommendationFor({goal: prefs.goal, difficulty: prefs.difficulty, daysPerWeek: prefs.daysPerWeek, equip: prefs.equip});
+    const sums = rec.order.map(id=> dashPlanSummary(rec.plans[id]));
+    return { plan: sums[0], others: sums.slice(1, 3), source: 'onboarding' };
+  }
   const avail = defaultTrainingPlans().filter(p=>!deletedBuiltinPlans.has(p.id));
   const main = avail.find(p=>p.id==='plan_a') || avail[0] || null;
   const rest = avail.filter(p=>p!==main);
@@ -17401,7 +17797,10 @@ function dashCta(kind, arg){
     case 'noplan-history': case 'planready-plans': goRoute('plans-v2'); break;
     case 'planready-stats': goRoute('stats-v2'); break;
     case 'noplan-new': case 'noplan-new-pick':        // star the plan, then the dashboard becomes "plan ready"
-      if(arg){ toggleStarredPlan(arg); renderDashShell(false); }
+      if(arg && onbAnswers.done && onbAnswers.goal && ONB_PLAN_IDS.includes(arg)){   // karty z odpowiedzi onboardingu: zapisz plan z generatora, nie szablon
+        commitGeneratedPlan(recommendationFor(opkPrefs()).plans[arg]);
+        renderDashShell(false);
+      } else if(arg){ toggleStarredPlan(arg); renderDashShell(false); }
       break;
     case 'noplan-new-open': openPlanEditorV2(arg); break;   // same as tapping a card on Plans
     case 'noplan-new-create': openPlanEditorV2(null); break;
