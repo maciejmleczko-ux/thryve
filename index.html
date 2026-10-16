@@ -6401,10 +6401,11 @@ const ONB_NUM = {   // zakresy linijek (jak w podglądzie)
                   planv2MatchesEquipment() / customizationV2.equipment. 'sztanga' jest osobnym kluczem sprzętu (23 ćwiczenia ze sztangą, EZ, landmine, T-Bar). */
 const onbAnswers = {goal:null, difficulty:'medium', daysPerWeek:3, equip:[], done:false};
 /* Odpowiedź „sprzęt” z kroku „cel” jako zbiór dla generatora planów: pusta tablica = bez filtra ('all' lub brak odpowiedzi). */
-function onbEquipForPlans(){
-  const e = onbAnswers.equip || [];
+function onbEquipSetFor(equip){
+  const e = equip || [];
   return e.includes('all') ? [] : e.filter(k=> ONB_EQUIP.includes(k) && k !== 'all');
 }
+function onbEquipForPlans(){ return onbEquipSetFor(onbAnswers.equip); }
 let onbS = null;          // stan przepływu (w pamięci): wartości kroków + dotknięcia
 let onbAnims = [];        // trwające animacje przejścia (do przerwania przy szybkim tapnięciu)
 
@@ -16795,9 +16796,67 @@ function dashWorkoutPlanName(w){
   return best && bestScore >= 0.5 ? planDisplayName(best) : null;
 }
 
-// szew: polecany plan dla nowego użytkownika. Dziś stały Fullbody 3x, bez wnioskowania z `profile`;
-// docelowo podmieni się na generatePlanScheduleV2 po wdrożeniu onboardingu. + 2 „inne plany Mekkio”
+/* ---------- rekomendacja planu z odpowiedzi onboardingu (etap B) ----------
+   prefs = {goal, difficulty:'easy'|'medium'|'hard', daysPerWeek:2|3|4, equip:[klucze]} (kształt onbAnswers).
+   Reguła startowa (do zatwierdzenia przez Macieja), czysta funkcja:
+     4 dni -> Upper / Lower Split (Fullbody 4x nie istnieje, wg spec generatora)
+     3 dni -> Push / Pull / Legs, chyba że poziom „Łatwy” -> Fullbody
+     2 dni -> Fullbody
+     sprzęt tylko masa ciała / gumy -> zawsze Fullbody (split wymaga ćwiczeń z obciążeniem na każdy dzień)
+   Cel treningowy nie zmienia wyboru planu, tylko serie, powtórzenia i przerwy (PLANSV2_GOAL_PARAMS). */
+const ONB_PLAN_IDS = ['plan_a', 'plan_ppl', 'plan_ul'];
+function recommendPlanIdFor(prefs){
+  const eq = onbEquipSetFor(prefs.equip);
+  const bodyOnly = eq.length > 0 && eq.every(k=> k === 'masa ciała' || k === 'gumy');
+  if(bodyOnly) return 'plan_a';
+  if(prefs.daysPerWeek >= 4) return 'plan_ul';
+  if(prefs.daysPerWeek === 3) return prefs.difficulty === 'easy' ? 'plan_a' : 'plan_ppl';
+  return 'plan_a';
+}
+// Plan do podglądu / zapisu: wynik generatora dla odpowiedzi (NIE trafia do trainingPlans, dopóki użytkownik go nie wybierze)
+function planFromPrefsV2(id, prefs){
+  const goal = prefs.goal || 'mass', difficulty = prefs.difficulty || 'medium', equipment = onbEquipSetFor(prefs.equip);
+  const def = allBuiltinPlans().find(p=> p.id === id);
+  let schedule, customizationV2;
+  if(PLANSV2_SPLIT_DAY_ROLES[id]){
+    schedule = generateSplitPlanScheduleV2(id, goal, difficulty, equipment);
+    customizationV2 = {goal, difficulty, equipment, splitOf: id};
+  } else {
+    const frequency = Math.min(3, prefs.daysPerWeek || 3);   // Fullbody istnieje tylko jako 2x i 3x
+    schedule = generatePlanScheduleV2(goal, difficulty, equipment, frequency);
+    customizationV2 = {goal, difficulty, equipment, frequency};
+  }
+  return {id, name: def ? planDisplayName(def) : id, builtin:false, schedule, customizationV2, meta: planMetaForEdit(def || null)};
+}
+// plan nadaje się do pokazania, gdy każdy jego dzień ma ćwiczenia (wąski sprzęt potrafi zostawić dzień splitu pusty)
+function planViableV2(plan){
+  const days = planActiveDays(plan);
+  return days.length > 0 && planAvgExercisesPerDay(plan) >= 3;
+}
+// {recId, plans:{id->plan}, order:[recId, ...inne]}: polecany plan pierwszy, potem pozostałe nadające się do pokazania
+function recommendationFor(prefs){
+  // za wąski sprzęt (np. same gumy: w bibliotece nie ma dla nich ćwiczeń siłowych) -> dokładamy masę ciała, a gdy to za mało, zdejmujemy filtr
+  let eff = Object.assign({}, prefs, {equip: onbEquipSetFor(prefs.equip)});
+  if(!planViableV2(planFromPrefsV2('plan_a', eff))){
+    const withBody = eff.equip.includes('masa ciała') ? eff.equip : eff.equip.concat('masa ciała');
+    eff = Object.assign({}, eff, {equip: planViableV2(planFromPrefsV2('plan_a', Object.assign({}, eff, {equip: withBody}))) ? withBody : []});
+  }
+  const plans = {};
+  ONB_PLAN_IDS.forEach(id=>{ plans[id] = planFromPrefsV2(id, eff); });
+  let recId = recommendPlanIdFor(prefs);
+  if(!planViableV2(plans[recId])) recId = 'plan_a';
+  const order = [recId].concat(ONB_PLAN_IDS.filter(id=> id !== recId && planViableV2(plans[id])));
+  return {recId, plans, order};
+}
+// szew dashboardu: polecany plan dla nowego użytkownika. Z odpowiedzi onboardingu (profile albo onbAnswers) liczy generator,
+// bez nich zostaje stały Fullbody 3x + 2 „inne plany Mekkio”.
 function recommendedPlanFor(profile){
+  const prefs = profile && profile.goal ? profile : (onbAnswers.done && onbAnswers.goal ? onbAnswers : null);
+  if(prefs){
+    const rec = recommendationFor({goal: prefs.goal, difficulty: prefs.difficulty, daysPerWeek: prefs.daysPerWeek, equip: prefs.equip});
+    const sums = rec.order.map(id=> dashPlanSummary(rec.plans[id]));
+    return { plan: sums[0], others: sums.slice(1, 3), source: 'onboarding' };
+  }
   const avail = defaultTrainingPlans().filter(p=>!deletedBuiltinPlans.has(p.id));
   const main = avail.find(p=>p.id==='plan_a') || avail[0] || null;
   const rest = avail.filter(p=>p!==main);
