@@ -2267,11 +2267,10 @@ body.pev2-bg{background:var(--m-panel);}
 .equip-chip{flex:0 1 52px;min-width:0;aspect-ratio:1;border-radius:50%;background:var(--m-card);border:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-fade) var(--m-ease),border-color var(--m-dur-fade) var(--m-ease);}
 .equip-chip:active{transform:scale(.93);}
 .equip-chip .ic{width:26px;height:26px;display:block;}
-.equip-chip .ic path,.equip-chip .ic circle,.equip-chip .ic rect{fill:var(--m-orange);transition:fill var(--m-dur-fade) var(--m-ease);}
-.equip-chip .ic.icon-stroke path{fill:none;stroke:var(--m-orange);transition:stroke var(--m-dur-fade) var(--m-ease);}
+.equip-chip .eq-img{width:26px;height:26px;display:block;flex:none;object-fit:contain;pointer-events:none;-webkit-user-drag:none;}
+.equip-chip .ic.icon-stroke rect{fill:none;stroke:var(--m-orange);transition:stroke var(--m-dur-fade) var(--m-ease);}
 .equip-chip.active{background:var(--m-orange);border-color:var(--m-orange);}
-.equip-chip.active .ic path,.equip-chip.active .ic circle,.equip-chip.active .ic rect{fill:#fff;}
-.equip-chip.active .ic.icon-stroke path{stroke:#fff !important;}
+.equip-chip.active .ic.icon-stroke rect{stroke:#fff;}
 .pev2-groups{display:flex;flex-direction:column;gap:8px;}
 .pev2-section{border:1px solid #c7c6cb;border-radius:var(--m-r-sm);padding:10px;display:flex;flex-direction:column;gap:12px;}
 /* Collapsed section = plain white pill, no border (Figma node
@@ -3408,8 +3407,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .onb-equip-row{display:flex;justify-content:space-between;align-items:center;}
 .onb-equip{flex:0 0 46px;width:46px;height:46px;border-radius:50%;background:var(--onb-glass);-webkit-backdrop-filter:blur(7.23px);backdrop-filter:blur(7.23px);border:.5px solid var(--m-orange-tint);color:var(--m-ink);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font-family:inherit;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-fade) var(--m-ease),border-color var(--m-dur-fade) var(--m-ease),color var(--m-dur-fade) var(--m-ease);}
 .onb-equip:active{transform:scale(.93);transition-duration:var(--m-dur-press-in);}
-.onb-equip .ic{display:block;flex:none;transform:scale(.8251);}   /* ikony wyeksportowane w skali kółka 55,75 px; kółko ma 46 px (Figma 495:18575) */
-.onb-equip .ic.ic-sz{transform:none;}   /* sztanga jest narysowana w skali 46 px (41x20) */
+.onb-equip .eq-img,.onb-equip .ic{display:block;flex:none;width:26px;height:26px;object-fit:contain;pointer-events:none;-webkit-user-drag:none;}   /* ikony wyeksportowane w skali kółka 55,75 px; kółko ma 46 px (Figma 495:18575) */
 .onb-equip.active{background:var(--m-orange);border-color:var(--m-orange-tint);color:#fff;}
 /* ustawienia arkusza: skala ~.947 jak w Figmie (chipy 28.4, gap 28) */
 
@@ -4755,7 +4753,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <p class="plansv2-customize-label">Sprzęt</p>
           <div class="plansv2-choice-row" id="newExEquipRowV2">
             <button type="button" class="plansv2-choice-chip active" data-bodyweight="0" onclick="setNewExEquip(0)">Z obciążeniem</button>
-            <button type="button" class="plansv2-choice-chip" data-bodyweight="1" onclick="setNewExEquip(1)">Kalistenika</button>
+            <button type="button" class="plansv2-choice-chip" data-bodyweight="1" onclick="setNewExEquip(1)" data-i18n="newExEquipBw">Bez sprzętu</button>
           </div>
         </div>
         <div class="newex-v2-bento">
@@ -5052,7 +5050,6 @@ const T_EN = {
   onbDiffMedium: 'Medium',
   onbDiffHard: 'Hard',
   onbEquipLbl: 'Equipment',
-  onbEqBarbell: 'Barbell',
   onbDaysLbl: 'Days per week',
   skip: 'Skip',
   save: 'Save',
@@ -5309,6 +5306,7 @@ const T_EN = {
   pcV2EquipLabel: 'Equipment',
   pcV2EquipMachines: 'Machines',
   pcV2EquipFree: 'Free weights',
+  newExEquipBw: 'No equipment',
   pcV2EquipMix: 'Mix',
   pcV2DaysLabel: 'Days per week',
   pcV2FreqHint: 'Each session is still a full workout — only how many times a week you repeat it changes.',
@@ -5912,7 +5910,7 @@ const GYM_PLAN = {
     {name:"Calf Raise", group:"Łydki", sets:3, repLow:15, repHigh:20, rest:"45-60s", icon:"calf_raise", equipment:"maszyny"},
     {name:"Dumbbell Hammer Curl", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_hammer_curl", equipment:"hantle"},
     {name:"Triceps Dip", group:"Triceps", sets:2, repLow:12, repHigh:15, rest:"60s", icon:"triceps_dip", equipment:"maszyny"},
-    {name:"Barbell Deadlift", group:"Plecy (dół, całość)", sets:3, repLow:6, repHigh:10, rest:"120s", icon:"barbell_deadlift", equipment:"hantle"},
+    {name:"Barbell Deadlift", group:"Plecy (dół, całość)", sets:3, repLow:6, repHigh:10, rest:"120s", icon:"barbell_deadlift", equipment:"sztanga"},
     {name:"Dumbbell Row", group:"Plecy (jednostronnie)", sets:3, repLow:10, repHigh:12, rest:"75-90s", icon:"dumbbell_row", equipment:"hantle"},
   ]
 };
@@ -5928,21 +5926,21 @@ const GYM_PLAN_C_EXTRA = [
   {name:"Dumbbell Walking Lunge", group:"Nogi (uda, pośladki)", sets:3, repLow:10, repHigh:12, rest:"75-90s", icon:"walking_lunge", equipment:"hantle"},
   {name:"Back Extension", group:"Plecy (dół, całość)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"back_extension", equipment:"maszyny"},
   {name:"Cable Curl", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", icon:"cable_curl", equipment:"maszyny"},
-  {name:"Barbell Curl", group:"Biceps", sets:3, repLow:8, repHigh:12, rest:"75s", icon:"barbell_curl", equipment:"hantle"},
+  {name:"Barbell Curl", group:"Biceps", sets:3, repLow:8, repHigh:12, rest:"75s", icon:"barbell_curl", equipment:"sztanga"},
   {name:"Dumbbell Lateral Raise", group:"Barki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_lateral_raise", equipment:"hantle"},
   {name:"Cable Crossover", group:"Klatka piersiowa (izolacja)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"cable_crossover", equipment:"maszyny"},
   {name:"Cable Curl Neutral", group:"Biceps", sets:2, repLow:12, repHigh:15, rest:"60s", icon:"cable_curl_neutral", equipment:"maszyny"},
   {name:"Cable Lateral Raise", group:"Barki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"cable_lateral_raise", equipment:"maszyny"},
   {name:"Hack Squat Machine", group:"Nogi (czworogłowe)", sets:3, repLow:8, repHigh:12, rest:"90-120s", icon:"hack_squat", equipment:"maszyny"},
   {name:"Dumbbell Bench Press", group:"Klatka piersiowa", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"dumbbell_bench_press", equipment:"hantle"},
-  {name:"Barbell Bench Press", group:"Klatka piersiowa", sets:3, repLow:6, repHigh:10, rest:"90-120s", icon:"barbell_bench_press", equipment:"hantle"},
+  {name:"Barbell Bench Press", group:"Klatka piersiowa", sets:3, repLow:6, repHigh:10, rest:"90-120s", icon:"barbell_bench_press", equipment:"sztanga"},
   {name:"Reverse Pec Deck", group:"Barki (tylne)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"reverse_pec_deck", equipment:"maszyny"},
-  {name:"Hip Thrust", group:"Pośladki", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"hip_thrust", equipment:"hantle"},
+  {name:"Hip Thrust", group:"Pośladki", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"hip_thrust", equipment:"sztanga"},
   {name:"Straight-Arm Pulldown", group:"Plecy (szerokość)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"straight_arm_pulldown", equipment:"maszyny"},
   {name:"Chest Dip", group:"Klatka piersiowa (dół)", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"chest_dip", equipment:"maszyny"},
   {name:"Cable Woodchopper", group:"Brzuch (skos)", sets:3, repLow:12, repHigh:15, rest:"45-60s", icon:"cable_woodchopper", equipment:"maszyny"},
   {name:"Face Pull", group:"Barki (tylne)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"face_pull", equipment:"maszyny"},
-  {name:"Barbell Back Squat", group:"Nogi (całość)", sets:4, repLow:6, repHigh:10, rest:"120s", icon:"barbell_back_squat", equipment:"hantle"},
+  {name:"Barbell Back Squat", group:"Nogi (całość)", sets:4, repLow:6, repHigh:10, rest:"120s", icon:"barbell_back_squat", equipment:"sztanga"},
   {name:"Dumbbell Fly", group:"Klatka piersiowa (izolacja)", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_fly", equipment:"hantle"},
   {name:"Kettlebell Swing", group:"Pośladki", sets:3, repLow:15, repHigh:20, rest:"60-75s", icon:"kettlebell_swing", equipment:"kettlebell"},
   {name:"Kettlebell Goblet Squat", group:"Nogi (uda, pośladki)", sets:3, repLow:10, repHigh:15, rest:"75-90s", icon:"kettlebell_goblet_squat", equipment:"kettlebell"},
@@ -5981,28 +5979,28 @@ const GYM_PLAN_KALISTENIKA = [
    icon-only, see CUSTOM_EXERCISE_ICON_SUGGEST. seated_leg_curl is not here on
    purpose (same move/equipment as "Leg Curl"). */
 const GYM_PLAN_EXTRA_V2 = [
-  {name:"Barbell Shrug", group:"Barki", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"barbell_shrug", equipment:"hantle"},
-  {name:"Close-Grip Bench Press", group:"Triceps", sets:3, repLow:6, repHigh:10, rest:"120s", icon:"close_grip_bench_press", equipment:"hantle"},
-  {name:"Decline Bench Press", group:"Klatka piersiowa (dół)", sets:3, repLow:8, repHigh:10, rest:"120s", icon:"decline_bench_press", equipment:"hantle"},
-  {name:"Front Squat", group:"Nogi (czworogłowe)", sets:3, repLow:5, repHigh:8, rest:"150s", icon:"front_squat", equipment:"hantle"},
-  {name:"Good Morning", group:"Uda (dwugłowe)", sets:3, repLow:8, repHigh:10, rest:"120s", icon:"good_morning", equipment:"hantle"},
-  {name:"Overhead Press", group:"Barki", sets:3, repLow:6, repHigh:10, rest:"120s", icon:"overhead_press", equipment:"hantle"},
-  {name:"Rack Pull", group:"Plecy (dół, całość)", sets:3, repLow:4, repHigh:6, rest:"180s", icon:"rack_pull", equipment:"hantle"},
-  {name:"Romanian Deadlift", group:"Uda (dwugłowe)", sets:3, repLow:8, repHigh:10, rest:"120s", icon:"romanian_deadlift", equipment:"hantle"},
-  {name:"Sumo Deadlift", group:"Nogi (uda, pośladki)", sets:3, repLow:4, repHigh:6, rest:"180s", icon:"sumo_deadlift", equipment:"hantle"},
-  {name:"Upright Row", group:"Barki", sets:3, repLow:10, repHigh:12, rest:"90s", icon:"upright_row", equipment:"hantle"},
-  {name:"Barbell Lunge", group:"Nogi (uda, pośladki)", sets:3, repLow:8, repHigh:10, rest:"120s", icon:"barbell_lunge", equipment:"hantle"}, // na stronę
+  {name:"Barbell Shrug", group:"Barki", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"barbell_shrug", equipment:"sztanga"},
+  {name:"Close-Grip Bench Press", group:"Triceps", sets:3, repLow:6, repHigh:10, rest:"120s", icon:"close_grip_bench_press", equipment:"sztanga"},
+  {name:"Decline Bench Press", group:"Klatka piersiowa (dół)", sets:3, repLow:8, repHigh:10, rest:"120s", icon:"decline_bench_press", equipment:"sztanga"},
+  {name:"Front Squat", group:"Nogi (czworogłowe)", sets:3, repLow:5, repHigh:8, rest:"150s", icon:"front_squat", equipment:"sztanga"},
+  {name:"Good Morning", group:"Uda (dwugłowe)", sets:3, repLow:8, repHigh:10, rest:"120s", icon:"good_morning", equipment:"sztanga"},
+  {name:"Overhead Press", group:"Barki", sets:3, repLow:6, repHigh:10, rest:"120s", icon:"overhead_press", equipment:"sztanga"},
+  {name:"Rack Pull", group:"Plecy (dół, całość)", sets:3, repLow:4, repHigh:6, rest:"180s", icon:"rack_pull", equipment:"sztanga"},
+  {name:"Romanian Deadlift", group:"Uda (dwugłowe)", sets:3, repLow:8, repHigh:10, rest:"120s", icon:"romanian_deadlift", equipment:"sztanga"},
+  {name:"Sumo Deadlift", group:"Nogi (uda, pośladki)", sets:3, repLow:4, repHigh:6, rest:"180s", icon:"sumo_deadlift", equipment:"sztanga"},
+  {name:"Upright Row", group:"Barki", sets:3, repLow:10, repHigh:12, rest:"90s", icon:"upright_row", equipment:"sztanga"},
+  {name:"Barbell Lunge", group:"Nogi (uda, pośladki)", sets:3, repLow:8, repHigh:10, rest:"120s", icon:"barbell_lunge", equipment:"sztanga"}, // na stronę
   {name:"Dumbbell Goblet Squat", group:"Nogi (uda, pośladki)", sets:3, repLow:10, repHigh:12, rest:"90s", icon:"dumbbell_goblet_squat", equipment:"hantle"},
-  {name:"EZ-Bar Curl", group:"Biceps", sets:3, repLow:8, repHigh:12, rest:"75s", icon:"ez_bar_curl", equipment:"hantle"},
+  {name:"EZ-Bar Curl", group:"Biceps", sets:3, repLow:8, repHigh:12, rest:"75s", icon:"ez_bar_curl", equipment:"sztanga"},
   {name:"Incline Dumbbell Press", group:"Klatka piersiowa (górna)", sets:3, repLow:8, repHigh:12, rest:"120s", icon:"incline_dumbbell_press", equipment:"hantle"},
-  {name:"Incline Bench Press", group:"Klatka piersiowa (górna)", sets:3, repLow:6, repHigh:10, rest:"120s", icon:"incline_bench_press", equipment:"hantle"},
+  {name:"Incline Bench Press", group:"Klatka piersiowa (górna)", sets:3, repLow:6, repHigh:10, rest:"120s", icon:"incline_bench_press", equipment:"sztanga"},
   {name:"Wall Sit", group:"Nogi (czworogłowe)", sets:3, mode:"time", durationSec:30, repLow:30, repHigh:30, rest:"60s", icon:"wall_sit", equipment:"masa ciała"},
-  {name:"Landmine Press", group:"Barki", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"landmine_press", equipment:"hantle"}, // na stronę
-  {name:"Landmine Squat", group:"Nogi (czworogłowe)", sets:3, repLow:10, repHigh:12, rest:"90s", icon:"landmine_squat", equipment:"hantle"},
-  {name:"Reverse Curl", group:"Biceps", sets:3, repLow:10, repHigh:15, rest:"60s", icon:"reverse_curl", equipment:"hantle"},
-  {name:"Skull Crusher", group:"Triceps", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"skull_crusher", equipment:"hantle"},
+  {name:"Landmine Press", group:"Barki", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"landmine_press", equipment:"sztanga"}, // na stronę
+  {name:"Landmine Squat", group:"Nogi (czworogłowe)", sets:3, repLow:10, repHigh:12, rest:"90s", icon:"landmine_squat", equipment:"sztanga"},
+  {name:"Reverse Curl", group:"Biceps", sets:3, repLow:10, repHigh:15, rest:"60s", icon:"reverse_curl", equipment:"sztanga"},
+  {name:"Skull Crusher", group:"Triceps", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"skull_crusher", equipment:"sztanga"},
   {name:"Spider Curl", group:"Biceps", sets:3, repLow:10, repHigh:12, rest:"60s", icon:"spider_curl", equipment:"hantle"},
-  {name:"T-Bar Row", group:"Plecy (grubość)", sets:3, repLow:8, repHigh:10, rest:"120s", icon:"t_bar_row", equipment:"hantle"},
+  {name:"T-Bar Row", group:"Plecy (grubość)", sets:3, repLow:8, repHigh:10, rest:"120s", icon:"t_bar_row", equipment:"sztanga"},
   {name:"Arnold Press", group:"Barki", sets:3, repLow:8, repHigh:12, rest:"90s", icon:"arnold_press", equipment:"hantle"},
   {name:"Concentration Curl", group:"Biceps", sets:3, repLow:10, repHigh:12, rest:"60s", icon:"concentration_curl", equipment:"hantle"}, // na stronę
   {name:"Dumbbell Front Raise", group:"Barki", sets:3, repLow:12, repHigh:15, rest:"60s", icon:"dumbbell_front_raise", equipment:"hantle"},
@@ -6374,7 +6372,6 @@ function afterOnboardingStep(){
   if(!starredPlanId) startPlanOnboarding();
   else checkInstallPrompt();
 }
-const ONB_FIG_EQUIP = {"sztanga": "<svg class=\"ic ic-sz\" aria-hidden=\"true\" width=\"41\" height=\"20\" viewBox=\"0 0 41 20\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M39.6279 7.77832H39.1704V2.97406C39.1704 1.96478 38.3491 1.14387 37.3402 1.14387C36.9874 1.14387 36.6575 1.24414 36.3779 1.41786C36.1908 0.606251 35.4619 0 34.5949 0C33.5862 0 32.7642 0.820906 32.7642 1.83019V7.77832H8.2364V1.83019C8.2364 0.820906 7.41496 0 6.40567 0C5.53865 0 4.80979 0.606251 4.62266 1.41786C4.34313 1.24414 4.0132 1.14387 3.66038 1.14387C2.65145 1.14387 1.83019 1.96478 1.83019 2.97406V7.77832H1.37264C0.615902 7.77832 0 8.39422 0 9.15096V10.9812C0 11.7379 0.615902 12.3538 1.37264 12.3538H1.83019V17.0208C1.83019 18.0301 2.65145 18.851 3.66038 18.851C4.0132 18.851 4.34313 18.7507 4.62266 18.577C4.80979 19.3886 5.53865 19.9949 6.40567 19.9949C7.41442 19.9949 8.2364 19.1739 8.2364 18.1647V12.3538H32.7642V18.096C32.7642 19.1053 33.5856 19.9262 34.5949 19.9262C35.4619 19.9262 36.1908 19.32 36.3779 18.5084C36.6575 18.6821 36.9874 18.7823 37.3402 18.7823C38.3491 18.7823 39.1704 17.9614 39.1704 16.9522V12.3538H39.6279C40.3847 12.3538 41.0006 11.7379 41.0006 10.9812V9.15096C41.0006 8.39422 40.3847 7.77832 39.6279 7.77832ZM1.83019 11.4387H1.37264C1.12046 11.4387 0.915096 11.2333 0.915096 10.9812V9.15096C0.915096 8.89877 1.12046 8.69341 1.37264 8.69341H1.83019V11.4387ZM4.57548 17.0208C4.57548 17.2733 4.47307 17.5021 4.30739 17.6678C4.1417 17.8335 3.91293 17.9359 3.66038 17.9359C3.15565 17.9359 2.74529 17.5255 2.74529 17.0208V2.97406C2.74529 2.46933 3.15565 2.05897 3.66038 2.05897C4.16512 2.05897 4.57548 2.46933 4.57548 2.97406V17.0208ZM7.3213 18.1647C7.3213 18.6694 6.9104 19.0798 6.40621 19.0798C5.90201 19.0798 5.49058 18.6694 5.49058 18.1647V1.83019C5.49058 1.32546 5.90148 0.915096 6.40621 0.915096C6.9104 0.915096 7.3213 1.32546 7.3213 1.83019V18.1647ZM32.7615 9.60851H29.5619C29.3093 9.60851 29.1043 9.81351 29.1043 10.0661C29.1043 10.3186 29.3093 10.5236 29.5619 10.5236H32.7615V11.4387H8.23408V8.69341H32.7615V9.60851ZM35.51 18.096C35.51 18.6008 35.0991 19.0111 34.5944 19.0111C34.0902 19.0111 33.6793 18.6008 33.6793 18.096V10.0895C33.6789 10.0995 33.678 10.1095 33.6766 10.1191V10.013C33.678 10.0226 33.6789 10.0326 33.6793 10.0426V1.83019C33.6793 1.32546 34.0902 0.915096 34.5944 0.915096C35.0986 0.915096 35.51 1.32546 35.51 1.83019V18.096ZM38.2553 16.9522C38.2553 17.4569 37.8449 17.8673 37.3402 17.8673C36.8355 17.8673 36.4251 17.4569 36.4251 16.9522V2.97406C36.4251 2.46933 36.8355 2.05897 37.3402 2.05897C37.8449 2.05897 38.2553 2.46933 38.2553 2.97406V16.9522ZM40.0855 10.9812C40.0855 11.2333 39.8801 11.4387 39.6279 11.4387H39.1704V8.69341H39.6279C39.8801 8.69341 40.0855 8.89877 40.0855 9.15096V10.9812Z\" fill=\"currentColor\"/>\n</svg>", "all": "<svg class=\"ic\" aria-hidden=\"true\" width=\"18\" height=\"18\" viewBox=\"0 0 18 18\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<rect x=\"0.589929\" y=\"0.589929\" width=\"7.42025\" height=\"7.42025\" rx=\"1.3986\" stroke=\"currentColor\" stroke-width=\"1.17986\"/>\n<rect x=\"0.589929\" y=\"9.98969\" width=\"7.42025\" height=\"7.42025\" rx=\"1.3986\" stroke=\"currentColor\" stroke-width=\"1.17986\"/>\n<rect x=\"9.78932\" y=\"0.589929\" width=\"7.42025\" height=\"7.42025\" rx=\"1.3986\" stroke=\"currentColor\" stroke-width=\"1.17986\"/>\n<rect x=\"9.78932\" y=\"9.98969\" width=\"7.42025\" height=\"7.42025\" rx=\"1.3986\" stroke=\"currentColor\" stroke-width=\"1.17986\"/>\n</svg>", "hantle": "<svg class=\"ic\" aria-hidden=\"true\" width=\"29\" height=\"18\" viewBox=\"0 0 29 18\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M27.1134 6.18771H26.5509V3.65637C26.5509 2.41554 25.5412 1.4063 24.3008 1.4063C23.8671 1.4063 23.4614 1.52957 23.1178 1.74315C22.8877 0.745338 21.9916 0 20.9257 0H20.925C19.6849 0 18.675 1.00924 18.675 2.25008V6.18771H10.126V2.25008C10.126 1.00924 9.1161 0 7.87527 0C6.80934 0 5.91326 0.745338 5.6832 1.74315C5.33954 1.52957 4.93391 1.4063 4.50015 1.4063C3.25975 1.4063 2.25008 2.41554 2.25008 3.65637V6.18771H1.68756C0.757203 6.18771 0 6.94491 0 7.87527V10.1253C0 11.0557 0.757203 11.8129 1.68756 11.8129H2.25008V14.3442C2.25008 15.5851 3.25975 16.5943 4.50015 16.5943C4.93391 16.5943 5.33954 16.471 5.6832 16.2575C5.91326 17.2553 6.80934 18.0006 7.87527 18.0006H7.87592C9.1161 18.0006 10.126 16.9914 10.126 15.7505V11.8129H18.675V15.7505C18.675 16.9914 19.6849 18.0006 20.9257 18.0006C21.9916 18.0006 22.8877 17.2553 23.1178 16.2575C23.4614 16.471 23.8671 16.5943 24.3008 16.5943C25.5412 16.5943 26.5509 15.5851 26.5509 14.3442V11.8129H27.1134C28.0438 11.8129 28.801 11.0557 28.801 10.1253V7.87527C28.801 6.94491 28.0438 6.18771 27.1134 6.18771ZM2.25008 10.6879H1.68756C1.37751 10.6879 1.12504 10.4354 1.12504 10.1253V7.87527C1.12504 7.56522 1.37751 7.31275 1.68756 7.31275H2.25008V10.6879ZM5.62519 14.3442C5.62519 14.6547 5.49928 14.936 5.29559 15.1397C5.0919 15.3434 4.81064 15.4693 4.50015 15.4693C3.87962 15.4693 3.37511 14.9648 3.37511 14.3442V3.65637C3.37511 3.03584 3.87962 2.53134 4.50015 2.53134C5.12068 2.53134 5.62519 3.03584 5.62519 3.65637V14.3442ZM9.00096 15.7505C9.00096 16.3711 8.49579 16.8756 7.87592 16.8756H7.87527C7.2554 16.8756 6.75023 16.3711 6.75023 15.7505V2.25008C6.75023 1.62955 7.2554 1.12504 7.87592 1.12504C8.49579 1.12504 9.00096 1.62955 9.00096 2.25008V15.7505ZM18.6717 8.43779H14.738C14.4275 8.43779 14.1755 8.68982 14.1755 9.0003C14.1755 9.31079 14.4275 9.56282 14.738 9.56282H18.6717V10.6879H10.1231V7.31275H18.6717V8.43779ZM22.0507 15.7505C22.0507 16.3711 21.5456 16.8756 20.925 16.8756C20.3052 16.8756 19.8 16.3711 19.8 15.7505V9.02909C19.7996 9.0414 19.7985 9.0537 19.7967 9.06557V8.93504C19.7985 8.94691 19.7996 8.95921 19.8 8.97152V2.25008C19.8 1.62955 20.3052 1.12504 20.925 1.12504H20.9257C21.5456 1.12504 22.0507 1.62955 22.0507 2.25008V15.7505ZM25.4259 14.3442C25.4259 14.9648 24.9213 15.4693 24.3008 15.4693C23.6803 15.4693 23.1758 14.9648 23.1758 14.3442V3.65637C23.1758 3.03584 23.6803 2.53134 24.3008 2.53134C24.9213 2.53134 25.4259 3.03584 25.4259 3.65637V14.3442ZM27.6759 10.1253C27.6759 10.4354 27.4235 10.6879 27.1134 10.6879H26.5509V7.31275H27.1134C27.4235 7.31275 27.6759 7.56522 27.6759 7.87527V10.1253Z\" fill=\"currentColor\"/>\n</svg>", "maszyny": "<svg class=\"ic\" aria-hidden=\"true\" width=\"26\" height=\"28\" viewBox=\"0 0 26 28\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M24.6533 9.69179H23.9418V3.69378C23.9418 2.53172 22.9961 1.58639 21.8337 1.58639H14.3081V0.546879C14.3081 0.244838 14.0632 0 13.7612 0H11.4393C11.1374 0 10.8925 0.244838 10.8925 0.546879V1.58639H3.36691C2.20447 1.58639 1.25875 2.53178 1.25875 3.69378V9.69179H0.546879C0.244892 9.69179 0 9.93663 0 10.2387V15.5168C0 15.8188 0.244892 16.0636 0.546879 16.0636H3.74076C4.04275 16.0636 4.28764 15.8188 4.28764 15.5168V4.61429H10.8925V5.10643H9.82752C8.93617 5.10643 8.21095 5.83159 8.21095 6.72295V13.1553C8.21095 14.0466 8.93617 14.7718 9.82752 14.7718H10.8925V15.4241H8.02523C7.72324 15.4241 7.47835 15.669 7.47835 15.971V17.9482C7.47835 18.2502 7.72324 18.4951 8.02523 18.4951H10.8925V23.2041H2.52631C1.71211 23.2041 1.04973 23.8665 1.04973 24.6807V27.4533C1.04973 27.7554 1.29463 28.0002 1.59661 28.0002H23.6041C23.906 28.0002 24.1509 27.7554 24.1509 27.4533V24.6807C24.1509 23.8665 23.4886 23.2041 22.6744 23.2041H14.3081V18.4951H17.1754C17.4774 18.4951 17.7223 18.2502 17.7223 17.9482V15.971C17.7223 15.669 17.4774 15.4241 17.1754 15.4241H14.3081V14.7718H15.3731C16.2645 14.7718 16.9897 14.0466 16.9897 13.1553V6.72295C16.9897 5.83159 16.2645 5.10643 15.3731 5.10643H14.3081V4.61429H20.913V15.5168C20.913 15.8188 21.1579 16.0636 21.4599 16.0636H24.6533C24.9553 16.0636 25.2002 15.8188 25.2002 15.5168V10.2387C25.2002 9.93663 24.9553 9.69179 24.6533 9.69179ZM11.9862 1.09376H13.2143V5.10643H11.9862V1.09376ZM3.19388 14.9699H1.09376V10.7855H3.19388V14.9699ZM3.74076 3.52059C3.43877 3.52053 3.19388 3.76537 3.19388 4.06741V9.69179H2.35251V3.69378C2.35251 3.13487 2.80757 2.68014 3.36691 2.68014H10.8925V3.52059H3.74076ZM22.6744 24.2979C22.8854 24.2979 23.0572 24.4696 23.0572 24.6807V25.0553H6.79278C6.4908 25.0553 6.2459 25.3002 6.2459 25.6022C6.2459 25.9042 6.4908 26.1491 6.79278 26.1491H23.0572V26.9064H2.14349V24.6807C2.14349 24.4696 2.31527 24.2979 2.52631 24.2979H22.6744ZM11.9862 23.2041V18.4951H13.2143V23.2041H11.9862ZM16.6285 16.5179V17.4013H8.57216V16.5179H16.6285ZM11.9862 15.4241V14.7718H13.2143V15.4241H11.9862ZM15.3731 6.20019C15.6614 6.20019 15.8959 6.43469 15.8959 6.72295V13.1553C15.8959 13.4435 15.6614 13.678 15.3731 13.678H9.82758C9.53932 13.678 9.30476 13.4435 9.30476 13.1553V6.72295C9.30476 6.43469 9.53926 6.20019 9.82758 6.20019H15.3731ZM21.4599 3.52053H14.3081V2.68014H21.8337C22.3931 2.68014 22.8481 3.13487 22.8481 3.69378V9.69179H22.0067V4.06741C22.0067 3.76537 21.7618 3.52053 21.4599 3.52053ZM24.1064 14.9699H22.0067V10.7855H24.1064V14.9699Z\" fill=\"currentColor\"/>\n</svg>", "kettlebell": "<svg class=\"ic\" aria-hidden=\"true\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g>\n<path d=\"M13.2834 21.5401C13.2525 21.3085 13.0528 21.1337 12.8198 21.1337C12.7987 21.1337 12.7777 21.1351 12.7566 21.1379C12.6323 21.1547 12.5222 21.2185 12.4463 21.3184C12.3703 21.4178 12.3379 21.541 12.3544 21.6652C12.3858 21.8968 12.585 22.0711 12.8184 22.0711C12.839 22.0711 12.8602 22.0697 12.8807 22.0669C12.8807 22.0669 12.8812 22.0669 12.8817 22.0669C13.1376 22.0327 13.3181 21.796 13.2834 21.5401Z\" fill=\"currentColor\"/>\n<path d=\"M17.8414 17.3579C17.7865 17.3363 17.7289 17.3256 17.6703 17.3256C17.4758 17.3256 17.3047 17.4423 17.2334 17.6228C16.7094 18.9582 15.7053 20.033 14.4074 20.6494C14.2944 20.7029 14.2092 20.7975 14.1669 20.9157C14.1248 21.0333 14.1313 21.1608 14.1853 21.2738C14.2626 21.4365 14.4285 21.5415 14.609 21.5415C14.6783 21.5415 14.7459 21.5265 14.8096 21.4965C15.5577 21.1411 16.2243 20.6532 16.7914 20.0471C17.3605 19.4387 17.8025 18.7384 18.1062 17.9659C18.2009 17.7249 18.0819 17.4526 17.8414 17.3579Z\" fill=\"currentColor\"/>\n<path d=\"M19.5405 11.6719C19.2614 10.6944 19.1912 9.68259 19.3327 8.659C19.4201 8.02639 19.9262 6.66531 20.1136 6.19483C20.3261 5.66333 20.4338 5.10103 20.4338 4.52344C20.4338 3.3747 19.9894 2.22807 19.2144 1.37758C18.4049 0.489272 17.3331 0 16.1962 0C16.0929 0 15.0915 0.11531 14.6537 0.192606C13.8922 0.326994 13.0291 0.479381 12.0003 0.479381C10.9716 0.479381 10.1084 0.326994 9.34693 0.192606C8.90913 0.11531 7.90771 0 7.8044 0C6.66761 0 5.59578 0.489272 4.78627 1.37763C4.01125 2.22816 3.56675 3.37479 3.56675 4.52344C3.56675 5.10103 3.67451 5.66333 3.88675 6.19427C4.07439 6.6654 4.58059 8.02658 4.66791 8.65905C4.8136 9.71316 4.7349 10.7547 4.43453 11.7592C4.41198 11.8345 4.35179 12.0087 4.35179 12.0087C3.83088 13.1265 3.56675 14.3233 3.56675 15.566C3.56675 20.2162 7.35 23.9995 12.0003 23.9995C16.6506 23.9995 20.4338 20.2162 20.4338 15.5659C20.4338 14.3233 20.1697 13.1264 19.6488 12.0088C19.6472 12.0053 19.5565 11.7277 19.5405 11.6719ZM4.50423 4.52344C4.50423 2.57962 6.01549 0.937482 7.8044 0.937482C7.88315 0.937482 7.96321 0.940622 8.04233 0.946904C8.37696 0.973341 8.75093 1.03939 9.1839 1.11584C9.94373 1.24994 10.8894 1.41691 12.0003 1.41691C13.1111 1.41691 14.0568 1.24994 14.8167 1.11584C15.2496 1.03939 15.6237 0.973387 15.9583 0.946904C16.0374 0.940622 16.1175 0.937482 16.1962 0.937482C17.985 0.937482 19.4963 2.57962 19.4963 4.52344C19.4963 4.98131 19.4111 5.42652 19.2428 5.84736C19.2136 5.92081 18.5247 7.65679 18.4039 8.53071C18.3362 9.02092 18.3116 9.50893 18.3297 9.99257C17.8243 9.41893 17.241 8.91287 16.592 8.49087C16.4268 8.38348 16.2584 8.28237 16.0871 8.18731C16.2424 7.10569 16.8756 5.46125 17.067 4.98061C17.1248 4.83548 17.1542 4.68169 17.1542 4.52344C17.1542 4.14929 16.9865 3.76174 16.7168 3.51237C16.5501 3.35801 16.3735 3.27978 16.1917 3.27978C16.1748 3.27978 16.0019 3.29572 15.9195 3.30706C15.7195 3.33467 15.477 3.37761 15.2246 3.42232C14.42 3.56445 13.3181 3.75911 12.0003 3.75911C10.6824 3.75911 9.5805 3.56449 8.7761 3.42237C8.52495 3.37789 8.28364 3.33514 8.08461 3.30758C8.00118 3.296 7.82573 3.27978 7.80885 3.27978C7.62717 3.27978 7.4505 3.35801 7.284 3.51214C7.01405 3.76183 6.84634 4.14934 6.84634 4.52344C6.84634 4.68188 6.87526 4.83455 6.93202 4.97644C7.12383 5.45844 7.75804 7.10625 7.91343 8.18731C7.91333 8.1875 7.91329 8.18769 7.91319 8.18792C7.06862 8.6568 6.30865 9.27343 5.67074 9.99731C5.67074 9.99707 5.67074 9.99674 5.67078 9.99651C5.68925 9.5115 5.66455 9.02233 5.59663 8.53071C5.47593 7.65698 4.78702 5.92081 4.75749 5.84675C4.5894 5.42652 4.50423 4.98131 4.50423 4.52344ZM15.2084 7.76455C14.1974 7.34859 13.1103 7.13241 12.0003 7.13241C11.4789 7.13241 10.9565 7.18045 10.4481 7.27523C9.87914 7.38112 9.32518 7.54528 8.79241 7.7646C8.57824 6.64525 8.04027 5.22581 7.8028 4.6291C7.79019 4.59765 7.78387 4.56211 7.78387 4.52344C7.78387 4.42266 7.82891 4.30468 7.89421 4.22795C8.08203 4.25153 8.35104 4.29915 8.61288 4.34551C9.45165 4.49363 10.6003 4.69655 12.0003 4.69655C13.4003 4.69655 14.549 4.49363 15.3879 4.34546C15.6493 4.2992 15.918 4.25162 16.1065 4.228C16.1718 4.30454 16.2168 4.42257 16.2168 4.52344C16.2168 4.56329 16.2103 4.59811 16.1962 4.6335C16.0108 5.09896 15.4318 6.60395 15.2084 7.76455ZM12.0003 23.0621C7.86693 23.0621 4.50418 19.6993 4.50418 15.5659C4.50418 14.4611 4.73879 13.3975 5.20064 12.4065L5.20739 12.3921C5.21114 12.3841 5.21484 12.376 5.21882 12.368L5.22314 12.3592C5.89929 10.9326 7.0359 9.7313 8.4236 8.97662C9.11148 8.60243 9.85036 8.34007 10.6197 8.19687C11.0718 8.11259 11.5363 8.06989 12.0003 8.06989C14.9039 8.06989 17.5726 9.77137 18.799 12.4047C19.2617 13.3976 19.4963 14.4611 19.4963 15.5659C19.4963 19.6993 16.1336 23.0621 12.0003 23.0621Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"0.294964\"/>\n</g>\n\n</svg>", "masa ciała": "<svg class=\"ic\" aria-hidden=\"true\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g>\n<path d=\"M4.96292 1.0775C5.77961 0.532446 6.73833 0.284623 7.8041 0.624226C10.9166 1.61599 10.8267 2.79126 10.4784 4.21652C10.0023 6.00354 8.95894 7.16532 6.22665 6.87325C5.95731 10.0849 7.38088 12.2904 6.9577 15.5021C10.2583 11.1116 14.7339 12.7655 16.4834 15.0222M15.0414 13.7207C16.2475 11.6197 18.2243 10.9091 19.904 11.3833C24.338 12.6351 26.2247 21.2023 16.5377 22.5058C11.5019 24.808 9.05142 22.6047 5.45716 21.9641C0.595242 21.2631 2.08762 20.4645 1.07115 18.0947C-0.621703 14.1478 1.76367 7.33767 2.03301 5.67378C2.0872 5.33882 2.22201 4.89197 2.42905 4.40054\" stroke=\"currentColor\" stroke-width=\"1.18516\" stroke-miterlimit=\"22.926\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n<path d=\"M6.22761 6.87452C5.66779 6.80144 5.25258 6.61334 4.98324 6.31058\" stroke=\"currentColor\" stroke-width=\"1.18516\" stroke-miterlimit=\"22.926\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n<path d=\"M14.6403 18.2791C14.6403 18.2791 12.2789 19.3692 9.4917 18.0845\" stroke=\"currentColor\" stroke-width=\"1.18516\" stroke-miterlimit=\"22.926\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n<path d=\"M3.46669 2.56421H3.46845\" stroke=\"currentColor\" stroke-width=\"1.18516\" stroke-miterlimit=\"2.613\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</g>\n\n</svg>", "gumy": "<svg class=\"ic\" aria-hidden=\"true\" width=\"34\" height=\"34\" viewBox=\"0 0 34 34\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M4.68829 18.8891C4.68829 10.6459 9.36742 5.12695 17.2807 5.12695C24.8499 5.12695 29.873 10.6459 29.873 18.8891C29.8737 25.151 29.873 29.5548 24.8499 29.5548C20.9964 29.5548 19.178 25.7117 23.228 18.7367C27.278 11.7617 22.8543 6.74069 17.2807 6.74069C11.707 6.74069 7.13586 11.7617 10.9893 18.7367C15.0491 25.151 13.2208 29.5548 9.36742 29.5548C4.68829 29.5548 4.68829 25.151 4.68829 18.8891Z\" stroke=\"currentColor\" stroke-width=\"1.17986\" stroke-miterlimit=\"22.926\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</svg>"};
 const ONB_BACK_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.8125 12C20.8125 12.1492 20.7532 12.2923 20.6477 12.3977C20.5423 12.5032 20.3992 12.5625 20.25 12.5625H5.10844L10.8975 18.3525C10.9528 18.404 10.9971 18.4661 11.0278 18.5351C11.0586 18.6041 11.0751 18.6786 11.0764 18.7541C11.0778 18.8296 11.0639 18.9047 11.0356 18.9747C11.0073 19.0447 10.9652 19.1084 10.9118 19.1618C10.8584 19.2152 10.7947 19.2573 10.7247 19.2856C10.6547 19.3139 10.5796 19.3278 10.5041 19.3264C10.4286 19.3251 10.3541 19.3086 10.2851 19.2778C10.2161 19.2471 10.154 19.2028 10.1025 19.1475L3.3525 12.3975C3.24716 12.292 3.18799 12.1491 3.18799 12C3.18799 11.8509 3.24716 11.708 3.3525 11.6025L10.1025 4.8525C10.2091 4.75314 10.3502 4.69905 10.4959 4.70162C10.6416 4.70419 10.7807 4.76322 10.8837 4.86628C10.9868 4.96934 11.0458 5.10838 11.0484 5.25411C11.051 5.39983 10.9969 5.54087 10.8975 5.6475L5.10844 11.4375H20.25C20.3992 11.4375 20.5423 11.4968 20.6477 11.6023C20.7532 11.7077 20.8125 11.8508 20.8125 12Z"/></svg>`;
 const ONB_RULER_TRI = '<svg viewBox="0 0 9 8" fill="currentColor"><path d="M8.87 6.15c.37.63-.08 1.43-.82 1.43H.95C.22 7.58-.24 6.78.13 6.15L3.48.47A.94.94 0 0 1 4.3 0h.4c.34 0 .65.18.82.47l3.35 5.68Z"/></svg>';
 const ONB_RL_TRI = "<svg viewBox=\"0 0 9 8\" fill=\"currentColor\"><path d=\"M8.86681 6.14811C9.23881 6.77939 8.78369 7.57585 8.05096 7.57585L0.948704 7.57585C0.215976 7.57585 -0.239145 6.77939 0.132856 6.14811L3.48106 0.466311C3.6513 0.177431 3.9616 0.000111564 4.29691 0.000111593L4.70275 0.000111629C5.03806 0.000111658 5.34837 0.17743 5.5186 0.466311L8.86681 6.14811Z\"/></svg>";
@@ -6395,7 +6392,7 @@ const ONB_NUM = {   // zakresy linijek (jak w podglądzie)
      difficulty   'easy' | 'medium' | 'hard'            (klucze jak PLANSV2_DIFFICULTY_SLIDER)
      daysPerWeek  2 | 3 | 4                             (jak PLANSV2_FREQUENCY_SLIDER)
      equip        tablica kluczy: 'all' | 'hantle' | 'sztanga' | 'maszyny' | 'kettlebell' | 'masa ciała' | 'gumy'
-                  ('all' wyklucza resztę; pusta = brak odpowiedzi). UWAGA: 'sztanga' nie jest dziś filtrem planów. */
+                  ('all' wyklucza resztę; pusta = brak odpowiedzi). 'sztanga' jest osobnym kluczem sprzętu (23 ćwiczenia ze sztangą, EZ, landmine, T-Bar). */
 const onbAnswers = {goal:null, difficulty:'medium', daysPerWeek:3, equip:[], done:false};
 let onbS = null;          // stan przepływu (w pamięci): wartości kroków + dotknięcia
 let onbAnims = [];        // trwające animacje przejścia (do przerwania przy szybkim tapnięciu)
@@ -6406,7 +6403,6 @@ function onbReduced(){ return window.matchMedia && matchMedia('(prefers-reduced-
 function onbGoalLabel(k){ return k === 'strength' ? t('onbGoalStrength','Siła') : k === 'mass' ? t('onbGoalMass','Mięśnie') : t('onbGoalEndurance','Wytrzymałość'); }
 function onbDiffLabel(k){ return k === 'easy' ? t('onbDiffEasy','Łatwy') : k === 'medium' ? t('onbDiffMedium','Średni') : t('onbDiffHard','Trudny'); }
 function onbEquipLabel(k){
-  if(k === 'sztanga') return t('onbEqBarbell','Sztanga');
   const f = PLAN_EQUIP_FILTERS.find(x=> x.key === k);
   return f ? (LANG === 'en' ? f.en : f.pl) : k;
 }
@@ -6535,7 +6531,7 @@ function onbScreenGoal(){
         <div class="onbc-sec">
           <p class="onbc-label">${t('onbEquipLbl','Sprzęt')}</p>
           <div class="onb-equip-row" role="group" aria-label="${t('onbEquipLbl','Sprzęt')}">
-            ${ONB_EQUIP.map(k=>`<button type="button" class="onb-equip" data-act="equip" data-key="${k}" title="${onbEquipLabel(k)}" aria-label="${onbEquipLabel(k)}">${ONB_FIG_EQUIP[k]}</button>`).join('')}
+            ${ONB_EQUIP.map(k=>`<button type="button" class="onb-equip" data-act="equip" data-key="${k}" title="${onbEquipLabel(k)}" aria-label="${onbEquipLabel(k)}">${equipIconHtml(k)}</button>`).join('')}
           </div>
         </div>
         <div class="onbc-sec">
@@ -11749,7 +11745,7 @@ function swapAlternatives(){
     (!taken.has(e.name) || e.name === swapPickName)
   );
   if(swapEquipFilter !== 'all'){
-    list = list.filter(e=> e.name === swapPickName || !e.equipment || e.equipment === swapEquipFilter);
+    list = list.filter(e=> e.name === swapPickName || exMatchesEquipFilter(e, swapEquipFilter));
   }
   return { origin, bucket, list };
 }
@@ -13690,7 +13686,7 @@ function setNewExType(c){
   document.querySelectorAll('#newExTypeRowV2 .plansv2-choice-chip')
     .forEach(b => b.classList.toggle('active', Number(b.dataset.compound) === Number(c)));
 }
-// "Kalistenika" here is exactly isBodyweightEx's equipment:"masa ciała" check
+// "Bez sprzętu" here is exactly isBodyweightEx's equipment:"masa ciała" check
 // (see confirmExercisePopupV2 / renderExercisePopupV2's series cards) — picking
 // it means the set-logging popup shows reps only, no kg field, same as the
 // built-in bodyweight exercises.
@@ -13812,7 +13808,7 @@ function renderExercisePickerGridV2(animate){
   const alreadyVisible = new Set([...planEx.map(e=>e.name), ...extraGymTiles.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
   let lib = orderedExerciseLibrary().filter(ex=>!alreadyVisible.has(ex.name));
   if(pickExerciseEquipFilterV2 !== 'all'){
-    lib = lib.filter(ex => !ex.equipment || ex.equipment === pickExerciseEquipFilterV2);
+    lib = lib.filter(ex => exMatchesEquipFilter(ex, pickExerciseEquipFilterV2));
   }
   const buckets = new Map();
   lib.forEach(ex=>{
@@ -15298,8 +15294,13 @@ const PLANSV2_MUSCLE_BUCKETS = [
   {label:'Barki', match: g => /^Barki/.test(g)},
   {label:'Brzuch', match: g => /^Brzuch/.test(g)},
 ];
+/* Equipment key 'hantle' used to cover dumbbells AND barbells; since 'sztanga' became its own key, a plan saved with the
+   old string 'hantle' (customizationV2.equipment, the "Wolne" chip) still means both, so existing plans behave as before. */
+const PLANSV2_LEGACY_FREE_WEIGHTS = ['hantle','sztanga'];
 function planv2MatchesEquipment(ex, equipment){
-  return equipment==='mix' || ex.equipment===equipment;
+  if(equipment==='mix') return true;
+  if(equipment==='hantle') return PLANSV2_LEGACY_FREE_WEIGHTS.includes(ex.equipment);
+  return ex.equipment===equipment;
 }
 
 /* ---------- exercise ordering ----------
@@ -16010,30 +16011,31 @@ function selectPlanEditorDay(d){
 }
 const PLAN_EQUIP_FILTERS = [
   {key:'all', pl:'Wszystkie', en:'All'},
-  {key:'hantle', pl:'Hantle', en:'Free weights'},
+  {key:'hantle', pl:'Hantle', en:'Dumbbells'},
+  {key:'sztanga', pl:'Sztanga', en:'Barbell'},
   {key:'maszyny', pl:'Maszyny', en:'Machines'},
   {key:'kettlebell', pl:'Kettlebell', en:'Kettlebell'},
+  {key:'masa ciała', pl:'Bez sprzętu', en:'No equipment'},
   {key:'gumy', pl:'Gumy', en:'Bands'},
-  {key:'masa ciała', pl:'Kalistenika', en:'Bodyweight'},
 ];
-/* Equipment-filter icons — used by the exercise picker, the plan editor's
-   equip filter and the swap sheet (all three keyed off PLAN_EQUIP_FILTERS).
-   "Wszystkie"/"Hantle" fills are ours; Maszyny/Kettlebell/Kalistenika are
-   Maciej's own SVGs, recolored via the .equip-chip CSS below. Kalistenika
-   is a stroke drawing (not filled), hence the .icon-stroke class. */
-const EQUIP_ICONS = {
-  all: `<svg class="ic" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="M102,32H54A22,22,0,0,0,32,54v48a22,22,0,0,0,22,22h48a22,22,0,0,0,22,-22V54A22,22,0,0,0,102,32ZM109,109H47V47H109ZM202,32H154A22,22,0,0,0,132,54v48a22,22,0,0,0,22,22h48a22,22,0,0,0,22,-22V54A22,22,0,0,0,202,32ZM209,109H147V47H209ZM102,132H54A22,22,0,0,0,32,154v48a22,22,0,0,0,22,22h48a22,22,0,0,0,22,-22V154A22,22,0,0,0,102,132ZM109,209H47V147H109ZM202,132H154A22,22,0,0,0,132,154v48a22,22,0,0,0,22,22h48a22,22,0,0,0,22,-22V154A22,22,0,0,0,202,132ZM209,209H147V147H209Z"/></svg>`,
-  hantle: `<svg class="ic" viewBox="0 -96 512 512" xmlns="http://www.w3.org/2000/svg"><path d="m482 110h-10v-45c0-22.058594-17.949219-40-40-40-7.710938 0-14.921875 2.191406-21.03125 5.988281-4.089844-17.738281-20.019531-30.988281-38.96875-30.988281h-.011719c-22.046875 0-40 17.941406-40 40v70h-151.976562v-70c0-22.058594-17.953125-40-40.011719-40-18.949219 0-34.878906 13.25-38.96875 30.988281-6.109375-3.796875-13.320312-5.988281-21.03125-5.988281-22.050781 0-40 17.941406-40 40v45h-10c-16.539062 0-30 13.460938-30 30v40c0 16.539062 13.460938 30 30 30h10v45c0 22.058594 17.949219 40 40 40 7.710938 0 14.921875-2.191406 21.03125-5.988281 4.089844 17.738281 20.019531 30.988281 38.96875 30.988281h.011719c22.046875 0 40-17.941406 40-40v-70h151.976562v70c0 22.058594 17.953125 40 40.011719 40 18.949219 0 34.878906-13.25 38.96875-30.988281 6.109375 3.796875 13.320312 5.988281 21.03125 5.988281 22.050781 0 40-17.941406 40-40v-45h10c16.539062 0 30-13.460938 30-30v-40c0-16.539062-13.460938-30-30-30zm-442 80h-10c-5.511719 0-10-4.488281-10-10v-40c0-5.511719 4.488281-10 10-10h10zm60 65c0 5.519531-2.238281 10.519531-5.859375 14.140625s-8.621094 5.859375-14.140625 5.859375c-11.03125 0-20-8.96875-20-20v-190c0-11.03125 8.96875-20 20-20s20 8.96875 20 20zm60.011719 25c0 11.03125-8.980469 20-20 20h-.011719c-11.019531 0-20-8.96875-20-20v-240c0-11.03125 8.980469-20 20.011719-20 11.019531 0 20 8.96875 20 20zm171.917969-130h-69.929688c-5.519531 0-10 4.480469-10 10s4.480469 10 10 10h69.929688v20h-151.96875v-60h151.96875zm60.070312 130c0 11.03125-8.980469 20-20.011719 20-11.019531 0-20-8.96875-20-20v-119.488281c-.007812.21875-.027343.4375-.058593.648437v-2.320312c.03125.210937.050781.429687.058593.648437v-119.488281c0-11.03125 8.980469-20 20-20h.011719c11.019531 0 20 8.96875 20 20zm60-25c0 11.03125-8.96875 20-20 20s-20-8.96875-20-20v-190c0-11.03125 8.96875-20 20-20s20 8.96875 20 20zm40-75c0 5.511719-4.488281 10-10 10h-10v-60h10c5.511719 0 10 4.488281 10 10zm0 0"/><path d="m222.019531 170c-5.523437 0-10.003906-4.476562-10.003906-10s4.472656-10 9.996094-10h.007812c5.523438 0 10 4.476562 10 10s-4.476562 10-10 10zm0 0"/></svg>`,
-  maszyny: `<svg class="ic" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><g><g><path d="M121.201,466.2c-0.131-0.64-0.32-1.27-0.57-1.87c-0.25-0.61-0.561-1.19-0.92-1.73c-0.37-0.55-0.79-1.06-1.25-1.52 c-0.46-0.46-0.97-0.88-1.521-1.24c-0.54-0.36-1.12-0.67-1.72-0.92c-0.61-0.25-1.24-0.44-1.87-0.57c-1.29-0.26-2.62-0.26-3.91,0 c-0.64,0.13-1.269,0.32-1.87,0.57c-0.609,0.25-1.189,0.56-1.729,0.92c-0.55,0.36-1.06,0.78-1.521,1.24 c-0.46,0.46-0.88,0.97-1.239,1.52c-0.36,0.54-0.67,1.12-0.92,1.73c-0.25,0.6-0.44,1.23-0.57,1.87s-0.2,1.3-0.2,1.95 s0.07,1.31,0.2,1.95s0.32,1.27,0.57,1.87c0.25,0.61,0.56,1.19,0.92,1.73c0.359,0.55,0.779,1.06,1.239,1.52 c1.86,1.86,4.44,2.93,7.07,2.93c0.65,0,1.31-0.07,1.96-0.2c0.63-0.12,1.26-0.32,1.87-0.57c0.6-0.25,1.18-0.56,1.72-0.92 c0.551-0.36,1.061-0.78,1.521-1.24c0.46-0.46,0.88-0.97,1.25-1.52c0.359-0.54,0.67-1.12,0.92-1.73c0.25-0.6,0.439-1.23,0.57-1.87 c0.129-0.64,0.189-1.3,0.189-1.95S121.331,466.84,121.201,466.2z"/></g></g><g><g><path d="M476.4,177.22h-13.01V67.543c0-21.249-17.293-38.535-38.548-38.535h-137.61V10c0-5.523-4.478-10-10-10h-42.457 c-5.522,0-10,4.477-10,10v19.008H87.166c-21.256,0-38.549,17.287-38.549,38.535V177.22H35.6c-5.522,0-10,4.477-10,10v96.513 c0,5.523,4.478,10,10,10h58.402c5.522,0,10-4.477,10-10V84.375h120.773v8.999h-19.473c-16.299,0-29.56,13.26-29.56,29.559v117.619 c0,16.299,13.261,29.559,29.56,29.559h19.473v11.928h-52.429c-5.522,0-10,4.477-10,10v36.154c0,5.523,4.478,10,10,10h52.429 v86.108H71.795c-14.888,0-27,12.112-27,27V502c0,5.523,4.478,10,10,10h402.419c5.522,0,10-4.477,10-10v-50.699 c0-14.888-12.112-27-27-27H287.232v-86.108h52.43c5.522,0,10-4.477,10-10v-36.154c0-5.523-4.478-10-10-10h-52.43v-11.928h19.474 c16.299,0,29.56-13.26,29.56-29.559V122.933c0-16.299-13.261-29.559-29.56-29.559h-19.474v-8.999h120.774v199.358 c0,5.523,4.478,10,10,10H476.4c5.522,0,10-4.477,10-10V187.22C486.4,181.697,481.923,177.22,476.4,177.22z M244.775,20h22.457 v73.374h-22.457V20z M84.002,273.733H45.6V197.22h38.402V273.733z M94.002,64.376L94.002,64.376c-5.522-0.001-10,4.476-10,9.999 V177.22H68.617V67.543c0-10.22,8.321-18.535,18.549-18.535h137.609v15.368H94.002z M440.214,444.301c3.859,0,7,3.14,7,7v6.85 H149.81c-5.522,0-10,4.477-10,10s4.478,10,10,10h297.404V492H64.795v-40.699c0-3.86,3.141-7,7-7H440.214z M244.775,424.301 v-86.108h22.457v86.108H244.775z M329.662,302.039v16.154H182.347v-16.154H329.662z M244.775,282.039v-11.928h22.457v11.928 H244.775z M306.706,113.374c5.272,0,9.56,4.288,9.56,9.559v117.619c0,5.271-4.288,9.559-9.56,9.559H205.303 c-5.271,0-9.56-4.288-9.56-9.559V122.933c0-5.271,4.288-9.559,9.56-9.559H306.706z M418.006,64.375H287.232V49.008h137.61 c10.228,0,18.548,8.315,18.548,18.535V177.22h-15.384V74.375C428.006,68.852,423.528,64.375,418.006,64.375z M466.4,273.733 h-38.394V197.22H466.4V273.733z"/></g></g></svg>`,
-  kettlebell: `<svg class="ic" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><g><g><path d="M283.39,459.52c-0.66-4.94-4.921-8.67-9.89-8.67c-0.45,0-0.899,0.03-1.35,0.09c-2.65,0.36-5,1.721-6.62,3.851 c-1.62,2.12-2.311,4.75-1.96,7.399c0.67,4.94,4.92,8.66,9.899,8.66c0.44,0,0.891-0.03,1.33-0.09c0,0,0.011,0,0.021,0 C280.28,470.031,284.13,464.98,283.39,459.52z"/></g></g><g><g><path d="M380.64,370.27c-1.171-0.46-2.4-0.689-3.65-0.689c-4.15,0-7.8,2.489-9.32,6.34c-11.18,28.49-32.6,51.42-60.29,64.57 c-2.41,1.14-4.229,3.159-5.13,5.68c-0.899,2.51-0.76,5.229,0.391,7.64c1.649,3.471,5.189,5.71,9.04,5.71 c1.479,0,2.92-0.319,4.279-0.96c15.96-7.58,30.181-17.99,42.28-30.92c12.14-12.979,21.57-27.92,28.05-44.399 C388.31,378.1,385.77,372.29,380.64,370.27z"/></g></g><g><g><path d="M416.862,249.005c-5.956-20.854-7.452-42.439-4.435-64.276c1.865-13.496,12.662-42.533,16.66-52.57 c4.533-11.339,6.832-23.335,6.832-35.657c0-24.507-9.482-48.969-26.016-67.113C392.635,10.438,369.768,0,345.515,0 c-2.204,0-23.568,2.46-32.907,4.109c-16.247,2.867-34.66,6.118-56.607,6.118c-21.947,0-40.361-3.251-56.607-6.118 C190.054,2.46,168.69,0,166.486,0c-24.252,0-47.118,10.438-64.388,29.39C85.564,47.535,76.081,71.997,76.081,96.502 c0,12.322,2.299,24.318,6.827,35.645c4.003,10.051,14.802,39.09,16.665,52.583c3.108,22.488,1.429,44.708-4.979,66.137 c-0.481,1.608-1.765,5.323-1.765,5.323c-11.113,23.847-16.748,49.38-16.748,75.891C76.081,431.288,156.792,512,256,512 s179.919-80.712,179.919-179.92c0-26.511-5.635-52.044-16.747-75.888C419.138,256.118,417.202,250.195,416.862,249.005z M96.081,96.502C96.081,55.033,128.322,20,166.486,20c1.68,0,3.388,0.067,5.076,0.201c7.139,0.564,15.117,1.973,24.354,3.604 c16.21,2.861,36.385,6.423,60.084,6.423c23.698,0,43.873-3.562,60.084-6.423c9.237-1.631,17.216-3.039,24.355-3.604 c1.688-0.134,3.396-0.201,5.075-0.201c38.163,0,70.404,35.033,70.404,76.502c0,9.768-1.817,19.266-5.407,28.244 c-0.624,1.567-15.32,38.602-17.897,57.246c-1.445,10.458-1.971,20.869-1.583,31.187c-10.784-12.238-23.227-23.034-37.073-32.037 c-3.523-2.291-7.116-4.448-10.77-6.476c3.313-23.075,16.821-58.157,20.903-68.411c1.235-3.096,1.861-6.377,1.861-9.753 c0-7.982-3.578-16.25-9.332-21.57c-3.556-3.293-7.324-4.962-11.202-4.962c-0.36,0-4.049,0.34-5.806,0.582 c-4.268,0.589-9.441,1.505-14.825,2.459c-17.165,3.032-40.673,7.185-68.787,7.185c-28.115,0-51.623-4.152-68.784-7.184 c-5.358-0.949-10.506-1.861-14.752-2.449c-1.78-0.247-5.523-0.593-5.883-0.593c-3.876,0-7.645,1.669-11.197,4.957 c-5.759,5.327-9.337,13.594-9.337,21.575c0,3.38,0.617,6.637,1.828,9.664c4.092,10.283,17.622,45.437,20.937,68.5 c-0.002,0.004-0.003,0.008-0.005,0.013c-18.018,10.003-34.231,23.158-47.84,38.601c0-0.005,0-0.012,0.001-0.017 c0.394-10.347-0.133-20.783-1.582-31.271c-2.575-18.64-17.272-55.679-17.902-57.259C97.898,115.768,96.081,106.27,96.081,96.502z M324.442,165.647c-21.569-8.874-44.761-13.486-68.441-13.486c-11.125,0-22.268,1.025-33.115,3.047 c-12.138,2.259-23.956,5.761-35.322,10.44c-4.569-23.88-16.046-54.162-21.112-66.892c-0.269-0.671-0.404-1.429-0.404-2.254 c0-2.15,0.961-4.667,2.354-6.304c4.007,0.503,9.746,1.519,15.332,2.508c17.894,3.16,42.398,7.489,72.267,7.489 c29.867,0,54.372-4.329,72.27-7.49c5.577-0.987,11.309-2.002,15.329-2.506c1.393,1.633,2.354,4.151,2.354,6.303 c0,0.85-0.139,1.593-0.44,2.348C341.559,108.78,329.208,140.887,324.442,165.647z M256,492c-88.18,0-159.92-71.74-159.92-159.92 c0-23.57,5.005-46.261,14.858-67.402l0.144-0.308c0.08-0.171,0.159-0.344,0.244-0.514l0.092-0.188 c14.425-30.435,38.673-56.063,68.278-72.163c14.675-7.983,30.438-13.58,46.851-16.635c9.645-1.798,19.555-2.709,29.453-2.709 c61.946,0,118.879,36.299,145.042,92.478c9.872,21.181,14.877,43.871,14.877,67.441C415.919,420.26,344.18,492,256,492z"/></g></g></svg>`,
-  gumy: `<svg class="ic icon-stroke" viewBox="18 11 84 84" xmlns="http://www.w3.org/2000/svg"><path d="M24 44.5A4.5 4.5 0 0 1 33 44.5V61.5A4.5 4.5 0 0 1 24 61.5Z" stroke-width="4.5" stroke-linejoin="round"/><path d="M87 44.5A4.5 4.5 0 0 1 96 44.5V61.5A4.5 4.5 0 0 1 87 61.5Z" stroke-width="4.5" stroke-linejoin="round"/><path d="M33 47C48 34 64 62 87 47" stroke-width="4.5" stroke-linecap="round"/><path d="M33 59C48 46 64 74 87 59" stroke-width="4.5" stroke-linecap="round"/></svg>`,
-  kalistenika: `<svg class="ic icon-stroke" viewBox="0 0 682.66669 682.66669" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(1.3333333,0,0,-1.3333333,0,682.66667)"><g><g><g transform="translate(105.8745,489.0205)"><path d="m 0,0 c 17.423,11.628 37.876,16.915 60.613,9.67 66.401,-21.158 64.484,-46.231 57.053,-76.637 -10.158,-38.124 -32.416,-62.909 -90.706,-56.678 -5.746,-68.516 24.624,-115.569 15.596,-184.085 70.414,93.665 165.896,58.381 203.218,10.238 m -30.763,27.765 c 25.731,44.822 67.903,59.983 103.738,49.866 94.594,-26.707 134.844,-209.476 -71.815,-237.284 -107.434,-49.115 -159.711,-2.11 -236.39,11.556 -103.723,14.954 -71.885,31.992 -93.57,82.549 -36.115,84.201 14.774,229.487 20.52,264.984 1.156,7.146 4.032,16.679 8.449,27.163" style="fill:none;stroke:var(--m-orange);stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:22.926;stroke-dasharray:none;stroke-opacity:1" /></g><g transform="translate(132.835,365.3755)"><path d="M 0,0 C -11.943,1.559 -20.801,5.572 -26.547,12.031" style="fill:none;stroke:var(--m-orange);stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:22.926;stroke-dasharray:none;stroke-opacity:1" /></g><g transform="translate(312.3662,122.0649)"><path d="M 0,0 C 0,0 -50.377,-23.256 -109.838,4.153" style="fill:none;stroke:var(--m-orange);stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:22.926;stroke-dasharray:none;stroke-opacity:1" /></g><g transform="translate(73.9312,457.3232)"><path d="M 0,0 H 0.007" style="fill:none;stroke:var(--m-orange);stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:2.613;stroke-dasharray:none;stroke-opacity:1" /></g></g></g></g></svg>`,
-};
-function equipIconKey(filterKey){ return filterKey === 'masa ciała' ? 'kalistenika' : filterKey; }
+/* Equipment-filter icons: the exercise picker, the plan editor's equip filter, the swap sheet and the onboarding
+   "cel" step all render them through equipIconHtml(). Six are Maciej's full-colour PNGs (icons/equip/<file>.png,
+   the colour comes from the picture, not from CSS); "Wszystkie" is a 2x2 outline recoloured by the chip CSS
+   (stroke orange, white when .active). 'masa ciała' = "Bez sprzętu" (biceps). */
+const EQUIP_IMG_FILE = {hantle:'hantle', sztanga:'sztanga', maszyny:'maszyny', kettlebell:'kettlebell', 'masa ciała':'cialo', gumy:'gumy'};
+const EQUIP_ALL_SVG = '<svg class="ic icon-stroke" aria-hidden="true" width="26" height="26" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.49" y="0.49" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/><rect x="0.49" y="8.32" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/><rect x="8.15" y="0.49" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/><rect x="8.15" y="8.32" width="6.19" height="6.19" rx="1.15" stroke="currentColor" stroke-width="0.97"/></svg>';
+function equipIconHtml(key){
+  if(key === 'all' || !EQUIP_IMG_FILE[key]) return EQUIP_ALL_SVG;
+  return '<img class="eq-img" src="icons/equip/' + EQUIP_IMG_FILE[key] + '.png" alt="" width="26" height="26" draggable="false">';
+}
+/* One place for "does this exercise pass the single-select equipment filter?": no equipment (custom exercise) passes everywhere. */
+function exMatchesEquipFilter(ex, key){
+  return key === 'all' || !ex.equipment || ex.equipment === key;
+}
 function equipRowInnerHtml(activeKey, onclickFn){
   return PLAN_EQUIP_FILTERS.map(f=>{
     const label = LANG==='en' ? f.en : f.pl;
-    return `<button type="button" class="equip-chip${f.key===activeKey?' active':''}" data-key="${f.key}" title="${label}" aria-label="${label}" onclick="${onclickFn}('${f.key}')">${EQUIP_ICONS[equipIconKey(f.key)]}</button>`;
+    return `<button type="button" class="equip-chip${f.key===activeKey?' active':''}" data-key="${f.key}" title="${label}" aria-label="${label}" onclick="${onclickFn}('${f.key}')">${equipIconHtml(f.key)}</button>`;
   }).join('');
 }
 // Toggle .active in place (a plain CSS color fade on the chip itself —
@@ -16074,7 +16076,7 @@ function renderPlanEditorGridV2(animate){
   if(!container) return;
   let lib = orderedExerciseLibrary();
   if(planEditorEquipmentFilter !== 'all'){
-    lib = lib.filter(ex => !ex.equipment || ex.equipment === planEditorEquipmentFilter);
+    lib = lib.filter(ex => exMatchesEquipFilter(ex, planEditorEquipmentFilter));
   }
   const dayExercises = editingPlan.schedule[editingPlan.activeDay];
   const buckets = new Map();
