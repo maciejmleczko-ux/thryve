@@ -96,6 +96,10 @@ Najprościej dodać klasę `.m-press`. Jeśli element ma własną regułę `:act
 - Funkcje open/reset/finish muszą usuwać klasę `m-sheet-entered`, inaczej kolejne otwarcie nie zagra wejścia.
 - Otwarty modal blokuje stronę (`html.modal-lock`). Własny scroll ma tylko treść sheetu.
 
+#### Przewijanie i gumka (bounce) na ekranach (reguła, 2026-10-18)
+
+Ekran, który się przewija, **ma gumkę iOS** (odbicie na górze i na dole): nie dodawaj `overscroll-behavior:none` na ekranach przewijanych. Ekran stały (mieści się w całości: kroki onboardingu, okna) gumki nie ma. Kolor tła na obu krawędziach musi się zgadzać z kolorem ekranu, żeby po odbiciu nie było widać szwu: gradient strony kończy się kolorem tła `body` (`--m-page-bot`) albo ekran ma na dole krótki gradient wtapiający go w to tło (wzór: `#view-dashboard::after`, Profil: gradient do 100% wysokości). Okna modalne blokują stronę pod spodem (`modal-lock`).
+
 #### Popupy z paskiem na górze i przyciskiem na dole: efekt szkła (reguła, 2026-10-17)
 
 Nagłówek (tytuł + ✕) i dolny pasek z przyciskiem głównym w oknach, w których treść przewija się pod nimi, mają tło **70% bieli + rozmycie 20 px** (`rgba(255,255,255,.7)` + `backdrop-filter:blur(20px)`, z prefiksem `-webkit-`), a treść ma zapas na dole (min. 120 px), żeby ostatni element nie chował się pod paskiem. Wzór: `#pickExerciseOverlayV2`. Nie stosuj do krótkich okien, w których nic nie przewija się pod paskiem.

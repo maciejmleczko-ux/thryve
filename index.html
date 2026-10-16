@@ -189,7 +189,7 @@ body{
    only while this route is active so that gap reads as a continuation
    of the screen instead of a cut-off strip. */
 body.gymv2-bg{background:var(--m-panel);}
-html.gymv2-bg,html.gymv2-bg body{overscroll-behavior-y:none;}
+/* GYM v2: gumka włączona 2026-10-18 (ekran przewijany); tło to stała warstwa .gy-bg, więc przy odbiciu nie ma szwu */
 /* Dashboard v2.1 — scrolls freely, same 3-part scroll-lock recipe as every v3
    screen (see PLANS v2 below). Toggled on <html> because whichever of
    html/body is the browser's "scrolling element" varies — overflow has to
@@ -207,7 +207,7 @@ html.gymv2-bg,html.gymv2-bg body{overscroll-behavior-y:none;}
    reaches the very bottom edge instead of body's colour showing in a strip.
    body.dashboard-bg is the other half — see below. */
 html.dashboard-lock, html.dashboard-lock body{overflow:hidden;height:100dvh;touch-action:none;}
-html.dashboard-lock.dashboard-scrollable, html.dashboard-lock.dashboard-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;overscroll-behavior-y:none;}
+html.dashboard-lock.dashboard-scrollable, html.dashboard-lock.dashboard-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}   /* gumka (bounce) włączona 2026-10-18: ekran, który się przewija, ma się odbijać; szew zakrywa ::after na dole #view-dashboard */
 html.dashboard-lock body{padding-bottom:0;}
 html.dashboard-lock .app{padding-bottom:0;}
 body.dashboard-bg{background:var(--m-page-bot);}
@@ -1287,6 +1287,7 @@ button.pf-bcard{font:inherit;color:inherit;cursor:pointer;width:100%;}
   background-position:0 0, -95px 0, -95px 0;
   background-size:100% 100%, 566px 1007px, 566px 1007px;
 }
+#view-dashboard::after{content:"";display:block;height:140px;margin-top:-140px;position:relative;pointer-events:none;background:linear-gradient(180deg,transparent,var(--m-page-bot));}   /* dół strony wtapia się w kolor tła body: przy odbiciu w dół nie widać szwu */
 #view-dashboard{
   min-height:100dvh;
   background-color:var(--m-bg);
