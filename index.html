@@ -10105,6 +10105,7 @@ function saveLangSheet(){
   const next = _lng.auto ? null : _lng.sel;
   closeLangSheet();
   if((next || null) === (LANG_OVERRIDE || null)) return;   // bez zmiany: nic nie rób
+  if(gymSessionStartAt){ toast(t('lngBlocked', 'Język zmienisz po zakończeniu treningu.')); return; }   // reload w trakcie treningu: nie ryzykujemy
   try{ if(next) localStorage.setItem(LANG_KEY, next); else localStorage.removeItem(LANG_KEY); }catch(e){ return; }
   // Cała apka renderuje teksty przy starcie (LANG jest stałą), więc najbezpieczniej przeładować; dane są już w localStorage.
   const nl = next || ((navigator.language || '').toLowerCase().startsWith('pl') ? 'pl' : 'en');
@@ -10114,7 +10115,7 @@ function saveLangSheet(){
 function langRowLabel(){ return LANG_OVERRIDE ? (LANG_OVERRIDE === 'pl' ? 'Polski' : 'English') : t('lngAuto', 'Automatycznie'); }
 Object.assign(T_EN, {
   nbTitle: 'NEW BADGE', nbOk: 'GREAT', nbSee: 'SEE BADGES',
-  lngTitle: 'LANGUAGE', lngAuto: 'Automatic', lngAutoSub: 'SAME AS PHONE', lngSave: 'SAVE', lngApplying: 'Changing language…', setLang: 'Language',
+  lngTitle: 'LANGUAGE', lngAuto: 'Automatic', lngAutoSub: 'SAME AS PHONE', lngSave: 'SAVE', lngApplying: 'Changing language…', lngBlocked: 'You can change the language after your workout.', setLang: 'Language',
 });
 
 /* ---- Profil: okno szczegółu rekordu (Figma 10). Tylko odczyt, dane wyłącznie z silnika rekordów (exerciseRecords / projectedMax) na
