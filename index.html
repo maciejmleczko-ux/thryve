@@ -932,6 +932,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .m2-x{position:relative;flex:none;width:44px;height:44px;margin-right:-2px;padding:0;border:0;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font:inherit;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .m2-x::before{content:'';position:absolute;inset:2px;border-radius:50%;background:var(--m-orange);border:.56px solid var(--m-orange-soft);box-sizing:border-box;}
 .m2-x svg{position:relative;width:18px;height:18px;display:block;}
+.m2-title-row .pf-cnt{margin:0 auto 0 2px;align-self:center;}   /* licznik odznak przy tytule, w jednej osi z tytułem i ✕ */
 .m2-sub{margin:9px 0 0;font-size:var(--m-fs-xs);line-height:1.5;color:var(--m-ink);}
 .m2-body{display:flex;flex-direction:column;align-items:stretch;width:100%;margin-top:26px;}
 .m2-actions{flex:none;width:100%;box-sizing:border-box;padding:16px 16px 32px;display:flex;flex-direction:column;gap:12px;position:absolute;left:0;right:0;bottom:0;z-index:3;background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-radius:0 0 34px 34px;}
@@ -4487,27 +4488,31 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
      Reads body weight into the weight log and watch workouts' calories into
      matching Mekkio workouts (see syncHealthData()). Nothing is written to
      Health and none of it is sent to the AI proxy. -->
-<div class="onboard-overlay hidden plansv2-customize-overlay" id="profileBadgesSheet" onclick="if(event.target===this) closeProfileBadgesSheet()">
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="profileBadgesSheet" onclick="if(event.target===this) closeProfileBadgesSheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
-      <div class="fbv2-title-row pf-sheet-h">
-        <h1 data-i18n="pfBadges">ODZNAKI</h1>
-        <span class="pf-cnt" id="pfBadgesCnt"></span>
-        <button type="button" class="pf-sheet-x" onclick="closeProfileBadgesSheet()" aria-label="Zamknij" data-i18n-title="pfClose"><span class="ph" data-ph="x"></span></button>
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" data-i18n="pfBadges">ODZNAKI</h1>
+          <span class="pf-cnt" id="pfBadgesCnt"></span>
+          <button type="button" class="m2-x" aria-label="Zamknij" data-i18n-title="pfClose" onclick="closeProfileBadgesSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
       </div>
       <div class="pf-bgrid" id="pfBadgesGrid"></div>
     </div>
   </div>
 </div>
 
-<div class="onboard-overlay hidden plansv2-customize-overlay" id="profileRecordsSheet" onclick="if(event.target===this) closeProfileRecordsSheet()">
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="profileRecordsSheet" onclick="if(event.target===this) closeProfileRecordsSheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
-      <div class="fbv2-title-row pf-sheet-h">
-        <h1 data-i18n="pfRecords">REKORDY</h1>
-        <button type="button" class="pf-sheet-x" onclick="closeProfileRecordsSheet()" aria-label="Zamknij" data-i18n-title="pfClose"><span class="ph" data-ph="x"></span></button>
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" data-i18n="pfRecords">REKORDY</h1>
+          <button type="button" class="m2-x" aria-label="Zamknij" data-i18n-title="pfClose" onclick="closeProfileRecordsSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
       </div>
       <div class="pf-rm-tabs" role="group">
         <button type="button" class="pf-rm-seg" id="pfRecTabMonths" aria-pressed="true" onclick="pfRecSetTab('months')" data-i18n="pfRecMonths">Miesiące</button>
