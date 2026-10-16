@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.71.0 (2026-10-14)
+- **Aktualna wersja:** 4.72.0 (2026-10-18)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,21 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.72.0 · MINOR · 2026-10-18
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Po przewodniku dostajesz gotowy plan dobrany do Twoich dni i sprzętu. Możesz go od razu dostosować albo wybrać inny.
+>
+> Przeciągnięcie ekranu w dół lub w górę pokazuje to samo tło, bez szwu.
+>
+> Zaznaczenie w oknach z wyborem przesuwa się pod napisami, zamiast zapalać się w miejscu.
+
+- **Gumka (bounce):** natywny `MekkioBridgeViewController` włącza `scrollView.bounces` (Capacitor domyślnie wyłącza), bez `alwaysBounceVertical`. Tło ekranów na stałej warstwie `.pg-bg` (Pulpit/Profil: zdjęcie + gradient, Stats/Historia/Plany: kolor panelu), token `--m-page-edge`.
+- **Pigułka:** `segGlide()` (FLIP, transform) w oknach Cel treningowy i Opinia.
+- **Onboarding, etap B:** wybór planu z generatora, zapis jako aktywny; rekomendacja 3 dni = Fullbody.
+- Build natywny 44.
 
 ### 4.71.0 · MINOR · 2026-10-17
 

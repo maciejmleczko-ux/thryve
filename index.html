@@ -126,6 +126,7 @@
   --m-mint-tint:#b9f3de;
   --m-page-top:#fbece3;    /* Dashboard page gradient: cream top... */
   --m-page-bot:#e2e2e1;    /* ...to grey bottom (also the body colour behind the dashboard) */
+  --m-page-edge:#e9e9e7;   /* kolor tła body za Dashboardem i Profilem: widać go przy odbiciu (bounce) u góry i u dołu, musi pasować do obu końców strony */
   --m-glass:rgba(255,255,255,.84); /* frosted tile fill on the Dashboard (Figma 'white 84%') */
   --m-navy-tile:#e0e6f7;   /* pale blue tile: Konsystencja, SERII mini-tile (Figma 542:10833). NOT audyt-kolorow's proposed --m-navy-wash #e7ecff (different value) */
   --m-red-wash:#fbe2dd;    /* pale red tile: OBJETOSC mini-tile */
@@ -210,7 +211,7 @@ html.dashboard-lock, html.dashboard-lock body{overflow:hidden;height:100dvh;touc
 html.dashboard-lock.dashboard-scrollable, html.dashboard-lock.dashboard-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}   /* gumka (bounce) włączona 2026-10-18: ekran, który się przewija, ma się odbijać; szew zakrywa ::after na dole #view-dashboard */
 html.dashboard-lock body{padding-bottom:0;}
 html.dashboard-lock .app{padding-bottom:0;}
-body.dashboard-bg{background:var(--m-page-bot);}
+body.dashboard-bg{background:transparent;}
 /* PLANS v2 — same "fixed screen, real scroll only when actually needed"
    recipe as Dashboard above. STANDING RULE: every new v3 screen gets
    this same 3-part treatment (see [[feedback_thryve_animation_vocabulary]]):
@@ -246,7 +247,7 @@ html.profil-lock, html.profil-lock body{overflow:hidden;height:100dvh;touch-acti
 html.profil-lock.profil-scrollable, html.profil-lock.profil-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}
 html.profil-lock body{padding-bottom:0;}
 html.profil-lock .app{padding-bottom:0;}
-body.profil-bg{background:var(--m-page-bot);}
+body.profil-bg{background:transparent;}
 /* Otwarty modal na Profilu (np. stary panel konta z zębatki): jak na dashboardzie, tło pod arkuszem nie może się przewijać */
 html.modal-lock.profil-lock.profil-scrollable, html.modal-lock.profil-lock.profil-scrollable body{overflow:hidden;touch-action:none;overscroll-behavior:none;}
 /* Same technique, reused for modals — background stays put while a popup is open. */
@@ -972,6 +973,11 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .ai-seg{display:flex;width:100%;box-sizing:border-box;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-pill);background:var(--m-white);}
 .ai-chip{position:relative;flex:1 1 auto;min-width:0;height:44px;padding:0 6px;border:0;background:none;font:inherit;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .ai-chip:active{transform:scale(.97);}
+.ai-seg{position:relative;}
+.ai-seg-thumb{position:absolute;top:3px;bottom:3px;left:0;border-radius:var(--m-r-pill);background:var(--m-orange);transform-origin:0 50%;pointer-events:none;}
+.ai-seg--navy .ai-seg-thumb{background:var(--m-plan-hard);}
+.ai-seg.has-thumb .ai-chip::before{display:none;}
+.ai-seg.has-thumb .ai-chip span{position:relative;z-index:1;}
 .ai-chip::before{content:'';position:absolute;inset:3px 1px;border-radius:var(--m-r-pill);background:var(--m-orange);opacity:0;transition:opacity var(--m-dur-quick) ease;}
 .ai-chip span{position:relative;white-space:nowrap;transition:color var(--m-dur-quick) ease;}
 .ai-chip[aria-checked="true"]{color:var(--m-white);}
@@ -1277,26 +1283,11 @@ button.pf-bcard{font:inherit;color:inherit;cursor:pointer;width:100%;}
    the same page even before it arrives. */
 #view-profile-v2, #view-profile-settings-v2{
   min-height:100dvh;
-  background-color:var(--m-bg);
-  /* Figma 560:6731: to samo zdjęcie i ten sam gradient strony co Pulpit, plus biała poświata 144° nad zdjęciem */
-  background-image:
-    linear-gradient(180deg, transparent 0, transparent 308px, var(--m-page-top) 589px, var(--m-page-bot) 100%),   /* 100% zamiast 4908 px z Figmy: dół strony kończy się kolorem tła body, więc przy przeciągnięciu w dół nie widać szwu */
-    linear-gradient(144deg, rgba(255,255,255,.78) 23%, rgba(255,255,255,0) 100%),
-    url(icons/backgrounds/dashboard.webp);
-  background-repeat:no-repeat;
-  background-position:0 0, -95px 0, -95px 0;
-  background-size:100% 100%, 566px 1007px, 566px 1007px;
+  background:transparent;   /* tło rysuje stała warstwa .pg-bg (jak .gy-bg w GYM), dzięki temu przy odbiciu nie ma szwu */
 }
-#view-dashboard::after{content:"";display:block;height:140px;margin-top:-140px;position:relative;pointer-events:none;background:linear-gradient(180deg,transparent,var(--m-page-bot));}   /* dół strony wtapia się w kolor tła body: przy odbiciu w dół nie widać szwu */
 #view-dashboard{
   min-height:100dvh;
-  background-color:var(--m-bg);
-  background-image:
-    linear-gradient(180deg, transparent 0, transparent 308px, var(--m-page-top) 589px, var(--m-page-bot) 4908px),
-    url(icons/backgrounds/dashboard.webp);
-  background-repeat:no-repeat;
-  background-position:0 0, -95px 0;
-  background-size:100% 100%, 566px 1007px;
+  background:transparent;   /* tło rysuje stała warstwa .pg-bg */
 }
 /* Top: Figma's greeting sits at y=100 on a frame that includes the status bar,
    so greeting top = --top-inset + 41px (= 100 on a 54px-inset iPhone). Bottom:
@@ -2914,6 +2905,21 @@ body.pev2-bg{background:var(--m-panel);}
   --m-sheet-r-bottom:min(calc(var(--m-screen-r) * var(--m-screen-r-k) - var(--m-sheet-gap)), calc(env(safe-area-inset-bottom) * 2));}
 html.gymv2-bg{background:#e2e2e1;}
 body.gymv2-bg{background:transparent;}
+.pg-bg{display:none;position:fixed;left:0;right:0;top:-300px;bottom:-300px;z-index:-1;pointer-events:none;
+  background-color:var(--m-page-edge);
+  background-image:
+    linear-gradient(180deg, transparent 608px, var(--m-page-top) 889px, var(--m-page-edge) calc(100% - 300px), var(--m-page-edge) 100%),
+    linear-gradient(144deg, rgba(255,255,255,.78) 23%, rgba(255,255,255,0) 100%),
+    url(icons/backgrounds/dashboard.webp);
+  background-repeat:no-repeat;
+  background-position:0 0, -95px 300px, -95px 300px;
+  background-size:100% 100%, 566px 1007px, 566px 1007px;}   /* Pulpit i Profil: zdjęcie + gradient na stałej warstwie wystającej 300 px poza ekran, więc odbicie góra/dół pokazuje to samo tło */
+body.dashboard-bg .pg-bg, body.profil-bg .pg-bg{display:block;}
+html.dashboard-lock, html.profil-lock{background:var(--m-page-edge);}
+html.statsv2-bg, html.histv2-bg{background:var(--m-panel);}
+/* Stats, Historia, Plany, edytor planu: ta sama stała warstwa, tylko płaski kolor panelu */
+body.statsv2-bg .pg-bg, body.histv2-bg .pg-bg, body.plansv2-bg .pg-bg, body.pev2-bg .pg-bg{display:block;background-color:var(--m-panel);background-image:none;}
+body.statsv2-bg, body.histv2-bg, body.plansv2-bg, body.pev2-bg{background:transparent;}
 .gy-bg{display:none;position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;}
 body.gymv2-bg .gy-bg{display:block;}
 .gy-bg-photo{position:absolute;left:-41px;top:-1px;width:458px;height:813px;background:url(icons/backgrounds/gym.jpg) center top/100% 100% no-repeat;}
@@ -3513,6 +3519,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 <script src="vendor/supabase-2.117.2.js"></script>
 </head>
 <body>
+<div class="pg-bg" aria-hidden="true"></div>
 <div class="gy-bg" aria-hidden="true"><div class="gy-bg-photo"></div><div class="gy-bg-blur"></div><div class="gy-bg-fade"></div></div>
 <script>
 /* Running inside the Capacitor iOS shell (app.mekkio)? The native bridge
@@ -7746,11 +7753,30 @@ function saveBodyDataSheet(){
   toast(t('bdSaved', 'Zapisano dane'));
 }
 
+/* Pigułka zaznaczenia przesuwa się pod napisami (FLIP: nowa szerokość od razu, stara pozycja i szerokość odtwarzane jako translate + scaleX, tylko transform).
+   Gdy arkusz jest jeszcze ukryty (szerokość 0), zostaje stare podświetlenie z ::before. */
+function segGlide(seg, animate){
+  if(!seg) return;
+  const btn = seg.querySelector('.ai-chip[aria-checked="true"]');
+  let thumb = seg.querySelector(':scope > .ai-seg-thumb');
+  if(!btn || !btn.offsetWidth){ seg.classList.remove('has-thumb'); return; }
+  if(!thumb){ thumb = document.createElement('span'); thumb.className = 'ai-seg-thumb'; thumb.setAttribute('aria-hidden','true'); seg.insertBefore(thumb, seg.firstChild); }
+  const x = btn.offsetLeft + 1, w = btn.offsetWidth - 2, prev = seg._segPrev;
+  thumb.style.width = w + 'px';
+  thumb.style.transform = `translateX(${x}px)`;
+  seg.classList.add('has-thumb');
+  if(animate && prev && (prev.x !== x || prev.w !== w) && !shReduceMotion()){
+    thumb.animate([{ transform: `translateX(${prev.x}px) scaleX(${prev.w / w})` }, { transform: `translateX(${x}px) scaleX(1)` }], { duration: motionMs('--m-dur-snap'), easing: MOTION.ease });
+  }
+  seg._segPrev = { x, w };
+}
+
 /* ---------- AI asystent preferences sheet ---------- */
 let _pickAiGoal = null;
 function pickAiGoal(g){
   _pickAiGoal = g;
   document.querySelectorAll('#aiGoalSeg .ai-chip').forEach(b=> b.setAttribute('aria-checked', b.dataset.goal === g ? 'true' : 'false'));
+  segGlide(document.getElementById('aiGoalSeg'), true);
 }
 function openAiPrefsSheet(){
   const $ = id => document.getElementById(id);
@@ -7770,7 +7796,9 @@ function openAiPrefsSheet(){
   });
   pickAiGoal(aiPrefs.goal || null);
   $('aiAvoidInput').value = aiPrefs.avoid || '';
-  acctSheetOpen('aiPrefsSheet');   // arkusz nakłada się na ekran Profil (nie ma już panelu bocznego do chowania)
+  { const sg = document.getElementById('aiGoalSeg'); if(sg) sg._segPrev = null; }
+  acctSheetOpen('aiPrefsSheet');
+  segGlide(document.getElementById('aiGoalSeg'), false);   // arkusz nakłada się na ekran Profil (nie ma już panelu bocznego do chowania)
 }
 function closeAiPrefsSheet(viaDrag){
   acctSheetClose('aiPrefsSheet', viaDrag);
@@ -9204,9 +9232,21 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.71.0";
+const APP_VERSION = "4.72.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "4.72.0": {
+    pl: [
+      {featured:true, icon:'sparks', badge:'Nowość', title:'Plan od pierwszego dnia', text:'Po przewodniku dostajesz gotowy plan dobrany do Twoich dni i sprzętu. Możesz go od razu dostosować albo wybrać inny.' },
+      {icon:'sparks', badge:'Nowość', title:'Ekrany odbijają się jak w iOS', text:'Przeciągnięcie ekranu w dół lub w górę pokazuje to samo tło, bez szwu.' },
+      {icon:'sparks', badge:'Nowość', title:'Płynna pigułka', text:'Zaznaczenie w oknach z wyborem przesuwa się pod napisami, zamiast zapalać się w miejscu.' },
+    ],
+    en: [
+      {featured:true, icon:'sparks', badge:'New', title:'A plan from day one', text:'After the guide you get a ready plan matched to your days and equipment. Adjust it right away or pick another one.' },
+      {icon:'sparks', badge:'New', title:'Screens bounce like iOS', text:'Pulling a screen down or up shows the same background, with no seam.' },
+      {icon:'sparks', badge:'New', title:'Smooth selection pill', text:'The highlight in choice windows now slides under the labels instead of lighting up in place.' },
+    ],
+  },
   "4.71.0": {
     pl: [
       {featured:true, icon:'sparks', badge:'Nowość', title:'Nowy start w aplikacji', text:'Zaczynasz od nowego, pełnoekranowego przewodnika: imię, płeć, wiek, waga, wzrost i cel. Zajmuje minutę i od razu dobiera sprzęt oraz plan.' },
@@ -9898,6 +9938,7 @@ let feedbackTypeV2 = 'idea';
 function setFeedbackTypeV2(btn){
   feedbackTypeV2 = btn.dataset.type;
   document.querySelectorAll('#feedbackTypeRowV2 .ai-chip').forEach(b=> b.setAttribute('aria-checked', b===btn ? 'true' : 'false'));
+  segGlide(document.getElementById('feedbackTypeRowV2'), true);
 }
 function openFeedbackV2(){
   document.getElementById('feedbackMessageV2').value = '';
@@ -9916,6 +9957,7 @@ function openFeedbackV2(){
   });
   resetPlansCustomizeSheet('feedbackOverlayV2');
   document.getElementById('feedbackOverlayV2').classList.remove('hidden');
+  { const sg = document.getElementById('feedbackTypeRowV2'); sg._segPrev = null; segGlide(sg, false); }
   document.documentElement.classList.add('modal-lock');
 }
 function closeFeedbackV2(viaDrag){
