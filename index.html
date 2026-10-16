@@ -17148,7 +17148,8 @@ function recommendPlanIdFor(prefs){
   const bodyOnly = eq.length > 0 && eq.every(k=> k === 'masa ciała' || k === 'gumy');
   if(bodyOnly) return 'plan_a';
   if(prefs.daysPerWeek >= 4) return 'plan_ul';
-  if(prefs.daysPerWeek === 3) return prefs.difficulty === 'easy' ? 'plan_a' : 'plan_ppl';
+  // 3 dni: Fullbody (każda partia 3×/tydz.); PPL przy 3 dniach trenuje partię raz w tygodniu, więc zostaje tylko na liście „Inne plany” (decyzja Macieja 2026-10-18)
+  if(prefs.daysPerWeek === 3) return 'plan_a';
   return 'plan_a';
 }
 // Plan do podglądu / zapisu: wynik generatora dla odpowiedzi (NIE trafia do trainingPlans, dopóki użytkownik go nie wybierze)
