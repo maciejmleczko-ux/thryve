@@ -919,10 +919,13 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
    Układ: stack > uchwyt + .plansv2-customize-card (przewijana: .m2-head + treść) + .m2-actions
    (przypięte: przycisk główny 55 px, 32 px od dołu arkusza). Tło białe, rogi 34, cień 0 13 66 .18.
    ============================================================ */
-.m-sheet2 .plansv2-customize-stack,.m-sheet2 .m-sheet{background:var(--m-white);box-shadow:0 13px 66px rgba(0,0,0,.18);padding-bottom:32px;}
-.m-sheet2 .m-sheet-grab{width:53px;height:3.5px;margin:5px auto 0;border-radius:99px;background:var(--m-grab);}
+.m-sheet2 .plansv2-customize-stack,.m-sheet2 .m-sheet{background:var(--m-white);box-shadow:0 13px 66px rgba(0,0,0,.18);padding-bottom:32px;position:relative;}
+/* Szkło (reguła CLAUDE.md): nagłówek i dolny pasek z przyciskiem to 70% bieli + rozmycie; treść przewija się pod nimi. Uchwyt jest nad kartą (absolutny), karta zaczyna się od górnej krawędzi okna. */
+.m-sheet2 .plansv2-customize-stack:has(> .m2-actions){padding-bottom:0;}
+.m-sheet2 .m-sheet-grab{position:absolute;top:5px;left:50%;z-index:4;width:53px;height:3.5px;margin:0 0 0 -26.5px;border-radius:99px;background:var(--m-grab);}
 .m-sheet2 .plansv2-customize-card{gap:0;padding:0 16px 12px;}
-.m2-head{display:flex;flex-direction:column;width:100%;padding-top:18px;position:sticky;top:0;z-index:2;background:var(--m-white);padding-bottom:6px;}   /* nagłówek zostaje na górze przy przewijaniu (klawiatura otwarta): tytuł i ✕ nie uciekają, treść nie wchodzi pod uchwyt */   /* było 10: przy tytule w dwóch liniach pierwsza linia przylegała do uchwytu */
+.m-sheet2 .plansv2-customize-card:has(+ .m2-actions){padding-bottom:124px;}
+.m2-head{display:flex;flex-direction:column;width:calc(100% + 32px);margin:0 -16px;box-sizing:border-box;padding:26px 16px 6px;position:sticky;top:0;z-index:2;background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);}   /* nagłówek zostaje na górze przy przewijaniu (klawiatura otwarta): tytuł i ✕ nie uciekają, treść nie wchodzi pod uchwyt */   /* było 10: przy tytule w dwóch liniach pierwsza linia przylegała do uchwytu */
 .m2-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;}
 .m2-title{margin:0;font-size:var(--m-fs-lg);font-weight:400;line-height:1.2;letter-spacing:.05em;text-transform:uppercase;color:var(--m-ink);}
 /* ✕: okrąg 40 pt (Figma), pole dotyku 44 pt */
@@ -931,7 +934,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .m2-x svg{position:relative;width:18px;height:18px;display:block;}
 .m2-sub{margin:9px 0 0;font-size:var(--m-fs-xs);line-height:1.5;color:var(--m-ink);}
 .m2-body{display:flex;flex-direction:column;align-items:stretch;width:100%;margin-top:26px;}
-.m2-actions{flex:none;width:100%;box-sizing:border-box;padding:16px 16px 0;display:flex;flex-direction:column;gap:12px;}
+.m2-actions{flex:none;width:100%;box-sizing:border-box;padding:16px 16px 32px;display:flex;flex-direction:column;gap:12px;position:absolute;left:0;right:0;bottom:0;z-index:3;background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-radius:0 0 34px 34px;}
 /* przycisk główny / drugorzędny: 55 pt, Medium 14, .12em */
 .m2-btn{width:100%;height:55px;border:1px solid transparent;border-radius:var(--m-r-pill);background:var(--m-orange);color:var(--m-white);font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;padding:0 30px;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-quick) ease;}
 .m2-btn:active{transform:scale(.97);}
@@ -1055,7 +1058,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
   .m-sheet2 .m2-body{margin-top:6px;}
   .m-sheet2 .plansv2-customize-card{padding-bottom:0;}
   .m-sheet2 .m2-actions{padding-top:12px;gap:8px;}
-  .m-sheet2 .m2-head{padding-top:10px;}
+  .m-sheet2 .m2-head{padding-top:18px;}
   .m2-body > .m2-btn--danger{height:44px;margin-top:12px;flex:none;}
   .ai-textarea.fb-ta{height:96px;}
   .kc-field .m2-row--lg{min-height:44px;}
@@ -2032,10 +2035,7 @@ button.dash-coach{cursor:pointer;}
    card just fills the remaining sheet height like the others. */
 #pickExerciseOverlayV2 .plansv2-customize-card{max-height:none;}
 /* Efekt szkła (reguła, Maciej 2026-10-17): nagłówek i pasek „DODAJ” to 70% biel + rozmycie, treść przewija się pod nimi */
-#pickExerciseOverlayV2 .plansv2-customize-stack{position:relative;padding-bottom:0;}
-#pickExerciseOverlayV2 .m2-head{background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);}
 #pickExerciseOverlayV2 .pickex-body{padding-bottom:120px;}
-#pickExerciseOverlayV2 .m2-actions{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:16px 16px 32px;background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-radius:0 0 34px 34px;}
 /* "Wybierz ćwiczenie" na szkielecie .m-sheet2: treść jak w edytorze planu (.pev2-section, kafle .gymv2-tile, rozmiary ikon bez nadpisań); kafle na lilaku, bo arkusz jest biały */
 .pickex-body{margin-top:14px;gap:12px;}
 .pickex-body .plansv2-section-label{margin:0 2px;}
