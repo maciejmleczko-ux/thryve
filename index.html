@@ -2031,11 +2031,11 @@ button.dash-coach{cursor:pointer;}
    the sheet (moved into .plansv2-customize-stack in the markup), so the
    card just fills the remaining sheet height like the others. */
 #pickExerciseOverlayV2 .plansv2-customize-card{max-height:none;}
-/* Efekt szkła (propozycja Macieja 2026-10-17, do akceptacji jako reguła): nagłówek i pasek „DODAJ” to 80% biel + rozmycie, treść przewija się pod nimi */
+/* Efekt szkła (reguła, Maciej 2026-10-17): nagłówek i pasek „DODAJ” to 70% biel + rozmycie, treść przewija się pod nimi */
 #pickExerciseOverlayV2 .plansv2-customize-stack{position:relative;padding-bottom:0;}
-#pickExerciseOverlayV2 .m2-head{background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);}
+#pickExerciseOverlayV2 .m2-head{background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);}
 #pickExerciseOverlayV2 .pickex-body{padding-bottom:120px;}
-#pickExerciseOverlayV2 .m2-actions{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:16px 16px 32px;background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-radius:0 0 34px 34px;}
+#pickExerciseOverlayV2 .m2-actions{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:16px 16px 32px;background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-radius:0 0 34px 34px;}
 /* "Wybierz ćwiczenie" na szkielecie .m-sheet2: treść jak w edytorze planu (.pev2-section, kafle .gymv2-tile, rozmiary ikon bez nadpisań); kafle na lilaku, bo arkusz jest biały */
 .pickex-body{margin-top:14px;gap:12px;}
 .pickex-body .plansv2-section-label{margin:0 2px;}
@@ -16615,7 +16615,7 @@ Object.assign(T_EN, {
   avatarBadFile: 'That is not a photo', avatarTooBig: 'Could not save the photo', avatarLoadFail: 'Could not load the photo', avatarSaved: 'Photo updated',
   bdg_first_name: 'Iron Initiation', bdg_first_text: '5 workouts logged in Mekkio.',
   bdg_fullweek_name: 'Full-Time Job', bdg_fullweek_text: 'Every planned workout completed for 8 weeks in a row.',
-  bdg_firstpr_name: 'First Blood', bdg_firstpr_text: '3 new weight records.',
+  bdg_firstpr_name: 'Record Setter', bdg_firstpr_text: '3 new weight records.',
   bdg_pr25_name: 'Wall of Fame', bdg_pr25_text: '100 records in total.',
   bdg_beatweek_name: 'Week Knockout', bdg_beatweek_text: 'Your best week ever by volume (with at least 8 weeks of data).',
   bdg_ton_name: 'Freight Train', bdg_ton_text: 'Over 1,000 t of total volume in Mekkio.',
@@ -16672,7 +16672,7 @@ const DASH_BADGES = [
       }
       return { earnedOn: on, value: Math.min(GOAL, run), goal: GOAL };
     } },
-  { id:'firstpr',    icon:'weight-wreath',  name:'Pierwsza Krew',                  text:'3 nowe rekordy ciężaru.',
+  { id:'firstpr',    icon:'weight-wreath',  name:'Rekordzista',                  text:'3 nowe rekordy ciężaru.',
     check:c=>{ const e = c.events.filter(x=>x.kinds.includes('weight')); return { earnedOn: e.length >= 3 ? e[2].date : null, value: Math.min(3, e.length), goal: 3 }; } },
   { id:'pr25',       icon:'trophy-star',    name:'Ściana Chwały',                  text:'100 rekordów łącznie.',
     check:c=>({ earnedOn: c.events.length >= 100 ? c.events[99].date : null, value: Math.min(100, c.events.length), goal: 100 }) },
