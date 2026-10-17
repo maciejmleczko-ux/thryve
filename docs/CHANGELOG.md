@@ -123,6 +123,19 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 **Dla użytkownika (wpis „Co nowego”):**
 
+> Wszystkie dziesięć odznak ma własną grafikę: od Chrztu Żelaza po Gryf Mocy.
+>
+> Kafel odznaki otwiera jej szczegóły, a kafel rekordu pokazuje kartę tego rekordu.
+
+- **Grafiki odznak:** `icons/badges/<id>.webp` (512 px, tło usunięte z szachownicy wygenerowanej przez narzędzie), `BADGE_OWN_ICONS` ma wszystkie 10 id, `sw.js` cache v29.
+- **Pulpit:** kafel odznaki to przycisk (`dashCta('badge')` → `openBadgeDetail`), kafel rekordu otwiera `openRecordDetail` przez `dashOpenRecord()` (fallback: Postępy).
+- **Okna odznak:** szczegół i „Nowa odznaka” bez szkła na pasku i przycisku (krótkie okna, brak odcięcia na srebrnym gradiencie).
+- Build natywny 45.
+
+### 4.73.0 · MINOR · 2026-10-18
+
+**Dla użytkownika (wpis „Co nowego”):**
+
 > Zanim Trener AI przeanalizuje trening, dowiesz się, co wysyłamy i do kogo, i sam się na to zgadzasz. Zgodę możesz cofnąć w Profilu w każdej chwili.
 
 **Szczegóły:** okno zgody `#aiConsentSheet` (Apple 5.1.2(i)); `callAI` bez zgody zwraca `no_consent`; zgoda w `fitlog_ai_consent_v1` (per konto, per urządzenie); karta Trenera AI na Dashboardzie prosi o zgodę; wiersz „Trener AI” w Profilu otwiera okno (włączony / wycofaj).
