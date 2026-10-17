@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.73.0 (2026-10-18)
+- **Aktualna wersja:** 4.74.0 (2026-10-18)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -119,26 +119,25 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
-### 4.73.0 · MINOR · 2026-10-18
+### 4.74.0 · MINOR · 2026-10-18
 
 **Dla użytkownika (wpis „Co nowego”):**
 
-> Wszystkie dziesięć odznak ma własną grafikę: od Chrztu Żelaza po Gryf Mocy.
->
 > Kafel odznaki otwiera jej szczegóły, a kafel rekordu pokazuje kartę tego rekordu.
 
-- **Grafiki odznak:** `icons/badges/<id>.webp` (512 px, tło usunięte z szachownicy wygenerowanej przez narzędzie), `BADGE_OWN_ICONS` ma wszystkie 10 id, `sw.js` cache v29.
-- **Pulpit:** kafel odznaki to przycisk (`dashCta('badge')` → `openBadgeDetail`), kafel rekordu otwiera `openRecordDetail` przez `dashOpenRecord()` (fallback: Postępy).
-- **Okna odznak:** szczegół i „Nowa odznaka” bez szkła na pasku i przycisku (krótkie okna, brak odcięcia na srebrnym gradiencie).
-- Build natywny 45.
+- **Pulpit:** kafel odznaki to przycisk (`dashCta('badge')` → `openBadgeDetail`), kafel rekordu otwiera `openRecordDetail` przez `dashOpenRecord()` (fallback: Postępy). `sw.js` cache v29 (grafiki odznak offline).
 
 ### 4.73.0 · MINOR · 2026-10-18
 
 **Dla użytkownika (wpis „Co nowego”):**
 
 > Zanim Trener AI przeanalizuje trening, dowiesz się, co wysyłamy i do kogo, i sam się na to zgadzasz. Zgodę możesz cofnąć w Profilu w każdej chwili.
+>
+> Wszystkie dziesięć odznak ma własną grafikę: od Chrztu Żelaza po Gryf Mocy.
 
 **Szczegóły:** okno zgody `#aiConsentSheet` (Apple 5.1.2(i)); `callAI` bez zgody zwraca `no_consent`; zgoda w `fitlog_ai_consent_v1` (per konto, per urządzenie); karta Trenera AI na Dashboardzie prosi o zgodę; wiersz „Trener AI” w Profilu otwiera okno (włączony / wycofaj).
+
+- **Grafiki odznak:** `icons/badges/<id>.webp` (512 px, tło usunięte z szachownicy wygenerowanej przez narzędzie), `BADGE_OWN_ICONS` ma wszystkie 10 id; okna szczegółu i „Nowa odznaka” bez szkła na pasku (brak odcięcia na srebrnym gradiencie). Build natywny 45 i 46 (46 = wspólny).
 
 **Commity (0):** zostanie dopisany po commicie.
 

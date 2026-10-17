@@ -1660,7 +1660,7 @@ button.dash-card{cursor:pointer;}
 .dash-bdg{display:flex;flex-direction:column;gap:12px;}
 .dash-bdg-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:1px;min-height:66px;}
 .dash-bdg-body img{display:block;flex:none;width:51px;height:51px;}
-.dash-bdg-name{margin:0;font-size:var(--m-fs-2xs);font-weight:500;line-height:14px;letter-spacing:.1818em;text-transform:uppercase;text-align:center;color:var(--m-ink);overflow-wrap:anywhere;}
+.dash-bdg-name{display:block;margin:0;font-size:var(--m-fs-2xs);font-weight:500;line-height:14px;letter-spacing:.1818em;text-transform:uppercase;text-align:center;color:var(--m-ink);overflow-wrap:anywhere;}
 
 /* consistency (542:10833) */
 .dash-cons{display:flex;flex-direction:column;gap:20px;background:var(--m-navy-tile);}
@@ -9316,25 +9316,25 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.73.0";
+const APP_VERSION = "4.74.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
-  "4.73.0": {
+  "4.74.0": {
     pl: [
-      {featured:true, icon:'medal-star', badge:'Nowość', title:'Nowe odznaki', text:'Wszystkie dziesięć odznak ma własną grafikę: od Chrztu Żelaza po Gryf Mocy.' },
       {icon:'sparks', badge:'Nowość', title:'Pulpit prowadzi dalej', text:'Kafel odznaki otwiera jej szczegóły, a kafel rekordu pokazuje kartę tego rekordu.' },
     ],
     en: [
-      {featured:true, icon:'medal-star', badge:'New', title:'New badges', text:'All ten badges now have their own artwork, from Iron Baptism to Power Bar.' },
       {icon:'sparks', badge:'New', title:'The dashboard takes you further', text:'The badge tile opens its details, and the record tile shows that record\'s card.' },
     ],
   },
   "4.73.0": {
     pl: [
       {featured:true, ai:true, icon:'sparks', badge:'Nowość', title:'Zgoda na Trenera AI', text:'Zanim Trener AI przeanalizuje trening, dowiesz się, co wysyłamy i do kogo, i sam się na to zgadzasz. Zgodę możesz cofnąć w Profilu w każdej chwili.' },
+      {icon:'medal-star', badge:'Nowość', title:'Nowe odznaki', text:'Wszystkie dziesięć odznak ma własną grafikę: od Chrztu Żelaza po Gryf Mocy.' },
     ],
     en: [
       {featured:true, ai:true, icon:'sparks', badge:'New', title:'AI Coach consent', text:'Before the AI Coach analyses a workout, you see what we send and to whom, and you agree to it yourself. You can withdraw consent in Profile at any time.' },
+      {icon:'medal-star', badge:'New', title:'New badges', text:'All ten badges now have their own artwork, from Iron Baptism to Power Bar.' },
     ],
   },
   "4.72.0": {
@@ -17940,10 +17940,12 @@ function dashCta(kind, arg){
     case 'rest': case 'noplan-history-free':
       goRoute('gym-v2'); break;                       // GYM handles rest day / no plan itself (free-form grid + repeat last)
     case 'done': dashOpenTodaySummary(); break;
-    case 'record': case 'kcal': goRoute('stats-v2'); break;
+    case 'record': dashOpenRecord(); break;
+    case 'kcal': goRoute('stats-v2'); break;
     case 'consistency': goRoute('history-v2'); break;
     case 'last': if(dashLastModel && dashLastModel.lastWorkout) dashOpenHistoryDay(dashLastModel.lastWorkout.date, dashLastModel.lastWorkout.id); break;
     case 'last-repeat': if(repeatMode) goRoute('gym-v2'); else repeatLastWorkoutV2(); break;   // repeatLastWorkoutV2() toggles when already in repeat mode
+    case 'badge': openBadgeDetail(arg); break;   // okno szczegółu odznaki nad Pulpitem; zamknięcie wraca na Pulpit
     case 'coach': openAiPopup(); break;
     case 'planweek': goRoute('plans-v2'); break;
     case 'weight': openWeightSheet(); break;
@@ -17958,6 +17960,22 @@ function dashCta(kind, arg){
     case 'noplan-new-open': openPlanEditorV2(arg); break;   // same as tapping a card on Plans
     case 'noplan-new-create': openPlanEditorV2(null); break;
   }
+}
+// Kafel „Rekord”: okno szczegółu rekordu (jak w Profilu) nad Pulpitem; gdy nie da się dopasować zdarzenia, Postępy
+function dashOpenRecord(){
+  const rec = dashLastModel && dashLastModel.record;
+  let r = null;
+  if(rec){
+    try{
+      dashWithCleanData(new Date(), ()=>{
+        const ex = exerciseRecords(rec.name);
+        const kind = rec.kind === 'reps' || rec.kind === 'time' ? rec.kind : 'weight';
+        const ev = ex && ex.events.filter(e=> e.kind === kind && e.value === rec.value).pop();
+        if(ev) r = { name: rec.name, kind, unit: rec.unit, value: rec.value, delta: ev.delta, date: ev.date, workoutId: ev.workoutId, perSide: ev.perSide };
+      });
+    }catch(err){ console.error('dash record failed', err); }
+  }
+  if(r) openRecordDetail(r); else goRoute('stats-v2');
 }
 // "Podsumowanie": History on today, today's (last) workout expanded
 function dashOpenTodaySummary(){ dashOpenHistoryDay(todayStr()); }
@@ -18032,10 +18050,10 @@ function dashWeekHtml(m, animate, rc){
     </button>`;
   }
   const b = m.badge && m.badge.latest;
-  const bdgHtml = b ? `<div class="dash-card dash-bdg${rc(4)}">
-      <div class="dash-hd"><p class="dash-lbl">${t('dashBadge', 'Odznaka')}</p></div>
-      <div class="dash-bdg-body"><img src="${badgeIconSrc(b.id)}" width="51" height="51" alt="" decoding="async"><p class="dash-bdg-name">${escHtml(b.name)}</p></div>
-    </div>` : '';
+  const bdgHtml = b ? `<button type="button" class="dash-card dash-bdg m-press${rc(4)}" onclick="dashCta('badge','${b.id}')" aria-label="${t('dashBadge', 'Odznaka')}: ${escHtml(b.name)}">
+      <span class="dash-hd"><span class="dash-lbl">${t('dashBadge', 'Odznaka')}</span>${dashCaret()}</span>
+      <span class="dash-bdg-body"><img src="${badgeIconSrc(b.id)}" width="51" height="51" alt="" decoding="async"><span class="dash-bdg-name">${escHtml(b.name)}</span></span>
+    </button>` : '';
   const col = recHtml || bdgHtml ? `<div class="dash-wkcol">${recHtml}${bdgHtml}</div>` : '';
   return `<div class="dash-wkrow${col ? '' : ' dash-wkrow--solo'}">${tile}${col}</div>`;
 }
