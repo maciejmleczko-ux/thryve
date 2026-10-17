@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.72.0 (2026-10-18)
+- **Aktualna wersja:** 4.73.0 (2026-10-18)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.73.0 · MINOR · 2026-10-18
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Zanim Trener AI przeanalizuje trening, dowiesz się, co wysyłamy i do kogo, i sam się na to zgadzasz. Zgodę możesz cofnąć w Profilu w każdej chwili.
+
+**Szczegóły:** okno zgody `#aiConsentSheet` (Apple 5.1.2(i)); `callAI` bez zgody zwraca `no_consent`; zgoda w `fitlog_ai_consent_v1` (per konto, per urządzenie); karta Trenera AI na Dashboardzie prosi o zgodę; wiersz „Trener AI” w Profilu otwiera okno (włączony / wycofaj).
+
+**Commity (0):** zostanie dopisany po commicie.
 
 ### 4.72.0 · MINOR · 2026-10-18
 

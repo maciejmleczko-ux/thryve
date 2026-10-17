@@ -988,6 +988,15 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 .ai-textarea:focus{border-color:var(--m-orange);}
 .ai-note,.ai-guest{margin:12px 0 0;text-align:center;font-size:var(--m-fs-2xs);line-height:1.5;color:var(--m-muted-text);}
 .ai-guest{margin-top:6px;color:var(--m-ink);}
+/* ---- Okno zgody na Trenera AI (#aiConsentSheet) ---- */
+.ac-row{display:flex;align-items:flex-start;gap:14px;}
+.ac-row + .ac-row{margin-top:20px;}
+.ac-ico{flex:none;width:44px;height:44px;border-radius:50%;background:var(--m-orange-tint);color:var(--m-orange);display:flex;align-items:center;justify-content:center;}
+.ac-tx{min-width:0;padding-top:2px;}
+.ac-l{margin:0 0 3px;font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);}
+.ac-t{margin:0;font-size:var(--m-fs-xs);line-height:1.45;color:var(--m-muted-text);}
+.ac-body .m2-note{margin-top:22px;}
+#aiConsentSheet .m2-actions{display:flex;flex-direction:column;gap:10px;}
 @media (max-height:620px){ .ai-textarea{height:84px;} .ai-avoid-l{margin-top:10px;} .ai-note{margin-top:8px;} }
 /* ---- „Wybierz ćwiczenie” (#statsExPickSheet) i „Sortuj” (#statsExSortSheet) w Postępach ---- */
 .exp-body{margin-top:12px;}
@@ -1163,6 +1172,8 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 
 /* ---- Nowa odznaka po treningu (#newBadgeSheet, Figma 15) i Język (#langSheet, Figma 17) ---- */
 #newBadgeSheet .plansv2-customize-stack{background:var(--m-badge-sheen);}
+/* krótkie okna odznak: nic nie przewija się pod paskami, więc szkło tylko robiło widoczne odcięcie na srebrnym gradiencie */
+#badgeDetailSheet .m2-head, #newBadgeSheet .m2-head, #badgeDetailSheet .m2-actions, #newBadgeSheet .m2-actions{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;}
 .nb-hero{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:8px;text-align:center;}
 .nb-hero .bg-medal{margin-bottom:16px;}
 .nb-name{margin:0;font-size:var(--m-fs-lg);font-weight:400;line-height:1.2;letter-spacing:.2em;text-transform:uppercase;color:var(--m-ink);overflow-wrap:anywhere;}
@@ -4283,7 +4294,32 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
-<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="statsExPickSheet" onclick="if(event.target===this) closeStatsExPicker()">
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="aiConsentSheet" onclick="if(event.target===this) closeAiConsent()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="acTitle">TRENER AI</h1>
+          <button type="button" class="m2-x" id="acClose" aria-label="Zamknij" onclick="closeAiConsent()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="acSub">Zanim włączysz analizy, zobacz, co wysyłamy.</p>
+      </div>
+      <div class="m2-body ac-body">
+        <div class="ac-row"><span class="ac-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><path d="M7 17 17 7M9 7h8v8"/></svg></span><div class="ac-tx"><p class="ac-l" id="acSendL">Trening i uwagi</p><p class="ac-t" id="acSendT"></p></div></div>
+        <div class="ac-row"><span class="ac-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 8h2M13 8h2M9 12h2M13 12h2M10 20v-4h4v4"/></svg></span><div class="ac-tx"><p class="ac-l" id="acToL">Anthropic</p><p class="ac-t" id="acToT"></p></div></div>
+        <div class="ac-row"><span class="ac-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><path d="M12 3.5 5 6v5.5c0 4.2 2.9 7.3 7 9 4.1-1.7 7-4.8 7-9V6l-7-2.5Z"/><path d="m9 12 2.3 2.3L15.5 10"/></svg></span><div class="ac-tx"><p class="ac-l" id="acNoL">Zostaje u nas</p><p class="ac-t" id="acNoT"></p></div></div>
+        <p class="m2-note m2-note--c" id="acNote">Zgodę możesz cofnąć w każdej chwili w Profilu. To nie porada medyczna. <a href="./polityka-prywatnosci.html" target="_blank" rel="noopener">Polityka prywatności</a></p>
+      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="acAgree" onclick="agreeAiConsent()">ZGADZAM SIĘ</button>
+      <button type="button" class="m2-btn m2-btn--danger" id="acRevoke" onclick="revokeAiConsent()" hidden>WYCOFAJ ZGODĘ</button>
+    </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="statsExPickSheet"onclick="if(event.target===this) closeStatsExPicker()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
     <div class="plansv2-customize-card">
@@ -5048,6 +5084,7 @@ const T_EN = {
   toastUndo: 'UNDO', mkDelete: 'Delete digit',
   bdTitle: 'BODY DATA', bdSub: 'This data is only used to estimate calories. It stays on this phone; with an account it syncs to the cloud.', bdFemale: 'FEMALE', bdMale: 'MALE', bdSkip: 'SKIP',
   bdRangeH: 'Enter a height from 120 to 230 cm.', bdRangeA: 'Enter an age from 12 to 100.', bdSave: 'SAVE', bdSaved: 'Data saved',
+  acTitle: 'AI COACH', acSub: 'Before you turn on analyses, see what we send.', acSubOn: 'AI Coach is on.', acSendL: 'Workout and notes', acSendT: 'Exercises, sets, weights and reps, plus your goal and "what to avoid". Notes about injuries are health information.', acToL: 'Anthropic', acToT: 'The company that provides the AI model. It uses the data only to generate the reply.', acNoL: 'Stays with us', acNoT: 'Weight, height, age, Apple Health data and your e-mail address.', acNote: 'You can withdraw consent at any time in Profile. This is not medical advice. <a href="./polityka-prywatnosci.html" target="_blank" rel="noopener">Privacy Policy</a>', acAgree: 'I AGREE', acRevoke: 'WITHDRAW CONSENT', aiConsentLogin: 'Sign in to turn on AI Coach', dashAiAsk: 'Turn on AI Coach to get a workout analysis.', pfCoachOn: 'On', pfCoachOff: 'Off, needs your consent',
   aiTitle: 'TRAINING GOAL', aiSub: 'The AI coach will use this in its suggestions.', aiAvoidL: 'WHAT TO AVOID', aiAvoidPh: 'e.g. I avoid exercises that load my right shoulder', aiNote: 'We never send body data (weight, height, age) to the AI coach.', aiGuest: 'Sign in to save your preferences.', aiGoalShort_ogolna: 'Fitness',
   exPickTitle: 'CHOOSE EXERCISE', exPickSearch: 'SEARCH', exPickNone: 'No exercises found.', exPickChange: 'Change exercise', exSortTitle: 'SORT', exSortRecent: 'RECENTLY TRAINED', exSortAz: 'A–Z', exSortWeight: 'HEAVIEST WEIGHT',
   nmTitle: 'NAME AND PHOTO', nmSub: 'This is how you see yourself in the app.', nmName: 'NAME', nmPlaceholder: 'e.g. Alex', nmSave: 'SAVE', nmChange: 'Change photo', nmRemove: 'Remove photo',
@@ -7326,7 +7363,7 @@ function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExPickSheet','statsExSortSheet'];
+const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExPickSheet','statsExSortSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -7811,6 +7848,52 @@ function saveAiPrefsSheet(){
     .then(({error})=>{ if(error) console.error('saveAiPrefsSheet: push', error); });
   renderAccountPanel();
   closeAiPrefsSheet();
+}
+
+/* ---------- zgoda na Trenera AI (Apple 5.1.2(i)) ----------
+   Bez zgody żadne dane nie lecą do ai-proxy. Zgoda jest przypięta do konta (userId) i do tego urządzenia,
+   można ją cofnąć w Profilu. Cofnięcie czyści też zapisane podsumowanie. */
+const LS_AI_CONSENT = 'fitlog_ai_consent_v1';
+function hasAiConsent(){
+  if(!cloudSession || !cloudSession.user) return false;
+  try { const c = JSON.parse(localStorage.getItem(LS_AI_CONSENT) || 'null'); return !!(c && c.userId === cloudSession.user.id); } catch(e){ return false; }
+}
+function openAiConsent(){
+  const $ = id => document.getElementById(id);
+  if(!cloudSession || !cloudSession.user){ toast(t('aiConsentLogin', 'Zaloguj się, żeby włączyć Trenera AI')); return; }
+  const on = hasAiConsent();
+  $('acTitle').textContent = t('acTitle', 'TRENER AI');
+  $('acClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('acSub').textContent = on ? t('acSubOn', 'Trener AI jest włączony.') : t('acSub', 'Zanim włączysz analizy, zobacz, co wysyłamy.');
+  $('acSendL').textContent = t('acSendL', 'Trening i uwagi');
+  $('acSendT').textContent = t('acSendT', 'Ćwiczenia, serie, ciężary i powtórzenia oraz Twój cel i „czego unikać”. Uwagi o kontuzjach to informacje o zdrowiu.');
+  $('acToL').textContent = t('acToL', 'Anthropic');
+  $('acToT').textContent = t('acToT', 'Firma, która dostarcza model AI. Używa danych tylko do wygenerowania odpowiedzi.');
+  $('acNoL').textContent = t('acNoL', 'Zostaje u nas');
+  $('acNoT').textContent = t('acNoT', 'Waga, wzrost, wiek, dane z Apple Zdrowie i adres e-mail.');
+  $('acNote').innerHTML = t('acNote', 'Zgodę cofniesz w Profilu w każdej chwili. To nie porada medyczna. <a href="./polityka-prywatnosci.html" target="_blank" rel="noopener">Polityka prywatności</a>');
+  $('acAgree').textContent = t('acAgree', 'ZGADZAM SIĘ');
+  $('acAgree').hidden = on;
+  $('acRevoke').textContent = t('acRevoke', 'WYCOFAJ ZGODĘ');
+  $('acRevoke').hidden = !on;
+  acctSheetOpen('aiConsentSheet');
+}
+function closeAiConsent(viaDrag){ acctSheetClose('aiConsentSheet', viaDrag); }
+function aiConsentRefresh(){
+  if(currentRoute === 'dashboard') renderDashboard(false);
+  if(typeof renderAccountPanel === 'function') renderAccountPanel();
+}
+function agreeAiConsent(){
+  if(!cloudSession || !cloudSession.user) return;
+  try { localStorage.setItem(LS_AI_CONSENT, JSON.stringify({ userId: cloudSession.user.id, at: Date.now() })); } catch(e){}
+  closeAiConsent();
+  aiConsentRefresh();
+}
+function revokeAiConsent(){
+  try { localStorage.removeItem(LS_AI_CONSENT); localStorage.removeItem(LS_AI_LAST_WORKOUT_SUMMARY); } catch(e){}
+  lastAiSummaryData = null; dashAiStatus = 'off';
+  closeAiConsent();
+  aiConsentRefresh();
 }
 
 /* ---------- cloud account (Supabase Auth) — Faza 2 / E0 ----------
@@ -8339,6 +8422,7 @@ const AI_PROXY_URL = SUPABASE_URL + '/functions/v1/ai-proxy';
 
 async function callAI(feature, payload){
   if(!cloudSession || !cloudSession.access_token) return { error: 'not_logged_in' };
+  if(!hasAiConsent()) return { error: 'no_consent' };
   try {
     const res = await fetch(AI_PROXY_URL, {
       method: 'POST',
@@ -9232,9 +9316,17 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.72.0";
+const APP_VERSION = "4.73.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "4.73.0": {
+    pl: [
+      {featured:true, ai:true, icon:'sparks', badge:'Nowość', title:'Zgoda na Trenera AI', text:'Zanim Trener AI przeanalizuje trening, dowiesz się, co wysyłamy i do kogo, i sam się na to zgadzasz. Zgodę możesz cofnąć w Profilu w każdej chwili.' },
+    ],
+    en: [
+      {featured:true, ai:true, icon:'sparks', badge:'New', title:'AI Coach consent', text:'Before the AI Coach analyses a workout, you see what we send and to whom, and you agree to it yourself. You can withdraw consent in Profile at any time.' },
+    ],
+  },
   "4.72.0": {
     pl: [
       {featured:true, icon:'sparks', badge:'Nowość', title:'Plan od pierwszego dnia', text:'Po przewodniku dostajesz gotowy plan dobrany do Twoich dni i sprzętu. Możesz go od razu dostosować albo wybrać inny.' },
@@ -10885,7 +10977,7 @@ function profileHtml(m, animate){
   const avoidTxt = aiPrefs.avoid ? (aiPrefs.avoid.length > 24 ? aiPrefs.avoid.slice(0, 24) + '…' : aiPrefs.avoid) : fillTxt;
   const aiRow = (n, v, id)=> `<button type="button" class="pf-row pf-row--help m-press" onclick="openAiPrefsSheet()"><span class="pf-row-l"><span class="pf-row-n">${n}</span><span class="pf-row-s" id="${id}">${E(v)}</span></span>${chev}</button>`;
   const aiSec = `<section class="pf-sec${rc(5)}"${m.isNew ? ' hidden' : ''}><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('pfGoals', 'CELE I TRENER')}</h2></div>
-    <div class="pf-card"><div class="pf-rows pf-rows--dyn">${aiRow(t('pfGoal', 'Cel treningowy'), goalTxt, 'acctAiGoalV')}${aiRow(t('pfAvoid', 'Czego unikać'), avoidTxt, 'acctAiAvoidV')}<div class="pf-row pf-row--info pf-row--help"><span class="pf-row-l"><span class="pf-row-n">${t('pfCoach', 'Trener AI')}</span><span class="pf-row-s">${t('pfCoachSub', 'Podpowiedzi po każdym treningu')}</span></span></div></div></div><p class="set-hint" id="pfCoachNote">${t('pfCoachNote', 'Trener AI patrzy na Twoje treningi i preferencje. To nie porada medyczna.')}</p></section>`;
+    <div class="pf-card"><div class="pf-rows pf-rows--dyn">${aiRow(t('pfGoal', 'Cel treningowy'), goalTxt, 'acctAiGoalV')}${aiRow(t('pfAvoid', 'Czego unikać'), avoidTxt, 'acctAiAvoidV')}<button type="button" class="pf-row pf-row--help m-press" onclick="openAiConsent()"><span class="pf-row-l"><span class="pf-row-n">${t('pfCoach', 'Trener AI')}</span><span class="pf-row-s">${hasAiConsent() ? t('pfCoachOn', 'Włączony') : t('pfCoachOff', 'Wyłączony, wymaga zgody')}</span></span>${chev}</button></div></div><p class="set-hint" id="pfCoachNote">${t('pfCoachNote', 'Trener AI patrzy na Twoje treningi i preferencje. To nie porada medyczna.')}</p></section>`;
   // ---- Połączenia: widoczne tylko w apce na iPhone'ie (jak dawne renderHealthRow / renderReminderRow) ----
   const showHealth = IS_NATIVE && !!capPlugin('HealthPlugin'), showRem = IS_NATIVE;
   const remTxt = reminderPillText();
@@ -12093,7 +12185,7 @@ mSheetDrag('whatsnewOverlay', closeWhatsNew);
 mSheetDrag('swapExerciseOverlayV2', closeSwapSheetV2);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightListSheet','weightSheet','aiPrefsSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
+['nameEditOverlay','weightListSheet','weightSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 mSheetDrag('bodyDataSheet', closeBodyDataSheet);     // zamknięcie przeciągnięciem czyści też stan okna (klawiatura, pola)
 mSheetDrag('badgeDetailSheet', closeBadgeDetail);
@@ -17413,11 +17505,11 @@ function badgesModel(now){
   now = now || new Date();
   return dashWithCleanData(now, (n, todayIso)=> dashBadgesCore(todayIso));
 }
-// Jedna grafika dla wszystkich odznak. Gdy w icons/badges/ leży własny <id>.svg, dopisz id do BADGE_OWN_ICONS: wtedy zastępuje wspólną
+// Jedna grafika dla wszystkich odznak. Gdy w icons/badges/ leży własny <id>.webp, dopisz id do BADGE_OWN_ICONS: wtedy zastępuje wspólną
 // (lista jest po to, żeby przeglądarka nie odpytywała o nieistniejące pliki i nie sypała 404 w konsoli).
-const BADGE_OWN_ICONS = new Set([]);
+const BADGE_OWN_ICONS = new Set(['first','fullweek','firstpr','pr25','beatweek','ton','bodyweight','growth3','allround','gryf']);
 const BADGE_FALLBACK_ICON = 'icons/badges/medal-barbell.svg';
-function badgeIconSrc(id){ return BADGE_OWN_ICONS.has(id) ? `icons/badges/${id}.svg` : BADGE_FALLBACK_ICON; }
+function badgeIconSrc(id){ return BADGE_OWN_ICONS.has(id) ? `icons/badges/${id}.webp` : BADGE_FALLBACK_ICON; }
 function dashBadges(plan, todayIso){
   const sets = dashboardAllSets();
   const chrono = workouts.map((w,i)=>({w,i})).sort((a,b)=> a.w.date < b.w.date ? -1 : a.w.date > b.w.date ? 1 : a.i-b.i).map(x=>x.w);
@@ -17980,6 +18072,7 @@ function dashCoachParts(m){
   let text = r.text || '', ai = false, tappable = false;
   if(r.aiEnabled && lastAiWorkoutPayload && dashAiStatus !== 'off'){
     if(dashAiStatus === 'ready' && lastAiSummaryData && lastAiSummaryData.summary){ text = lastAiSummaryData.summary; ai = true; tappable = true; }
+    else if(dashAiStatus === 'consent'){ text = t('dashAiAsk', 'Włącz Trenera AI, żeby dostać analizę treningu.'); tappable = true; }
     else if(dashAiStatus === 'loading'){ text = text || t('dashAiLoading', 'Analizuję Twój ostatni trening…'); tappable = true; }
   }
   return { text, ai, tappable };
@@ -18348,6 +18441,7 @@ let dashAiStatus = 'off';
 let dashAiInflight = '';   // fingerprint being fetched right now (no duplicate calls while a render re-enters)
 function openAiPopup(){
   if(!lastAiWorkoutPayload) return;
+  if(!hasAiConsent()){ openAiConsent(); return; }
   const p = lastAiWorkoutPayload;
   // No stat tiles/record bar here on purpose (Maciej, 2026-09-16) — that's
   // exactly what History already shows for this same workout; the popup's
@@ -18381,6 +18475,7 @@ function dashAiPrepare(payload, workoutId){
     dashAiStatus = 'off'; lastAiSummaryData = null;
     return null;
   }
+  if(!hasAiConsent()){ dashAiStatus = 'consent'; lastAiSummaryData = null; return null; }
   // userPreferences rides in the fingerprint too — editing your goal/avoid
   // note should regenerate the take on the SAME workout, not wait for the
   // next one.
