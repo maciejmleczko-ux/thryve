@@ -126,6 +126,7 @@
   --m-mint-tint:#b9f3de;
   --m-page-top:#fbece3;    /* Dashboard page gradient: cream top... */
   --m-page-bot:#e2e2e1;    /* ...to grey bottom (also the body colour behind the dashboard) */
+  --bg-photo:url(icons/backgrounds/bg_onboarding.webp); --bgc-top:#f9f9fa; --bgc-bot:#ebebec;   /* tło ekranów: zdjęcie wg płci (bg_male / bg_female), bez płci wzór z onboardingu; kolory brzegów zdjęcia wypełniają obszar nad i pod nim (applyBgPhoto) */
   --m-page-edge:#e9e9e7;   /* kolor tła body za Dashboardem i Profilem: widać go przy odbiciu (bounce) u góry i u dołu, musi pasować do obu końców strony */
   --m-glass:rgba(255,255,255,.84); /* frosted tile fill on the Dashboard (Figma 'white 84%') */
   --m-navy-tile:#e0e6f7;   /* pale blue tile: Konsystencja, SERII mini-tile (Figma 542:10833). NOT audyt-kolorow's proposed --m-navy-wash #e7ecff (different value) */
@@ -3077,20 +3078,19 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
      looked even; 2026-10-05). */
   --m-screen-r-k:1.13;
   --m-sheet-r-bottom:min(calc(var(--m-screen-r) * var(--m-screen-r-k) - var(--m-sheet-gap)), calc(env(safe-area-inset-bottom) * 2));}
-html.gymv2-bg{background:var(--m-page-edge);}
+html.gymv2-bg{background:var(--bgc-bot);}
 body.gymv2-bg{background:transparent;}
 .pg-bg{display:none;position:fixed;left:0;right:0;top:-300px;bottom:-300px;z-index:-1;pointer-events:none;
-  background-color:var(--m-page-edge);
+  background-color:var(--bgc-bot);
   background-image:
-    linear-gradient(180deg, transparent 608px, var(--m-page-top) 889px, var(--m-page-edge) calc(100% - 300px), var(--m-page-edge) 100%),
-    linear-gradient(144deg, rgba(255,255,255,.83) 23%, rgba(255,255,255,0) 100%),
-    url(icons/backgrounds/dashboard.webp);
+    var(--bg-photo),
+    linear-gradient(180deg, var(--bgc-top) 0, var(--bgc-top) 300px, var(--bgc-bot) 1307px, var(--bgc-bot) 100%);
   background-repeat:no-repeat;
-  background-position:0 0, -95px 300px, -95px 300px;
-  background-size:100% 100%, 566px 1007px, 566px 1007px;}   /* Pulpit i Profil: zdjęcie + gradient na stałej warstwie wystającej 300 px poza ekran, więc odbicie góra/dół pokazuje to samo tło */
+  background-position:-95px 300px, 0 0;
+  background-size:566px 1007px, 100% 100%;}   /* Pulpit, Plany, GYM, Historia, Postępy, Profil: gotowe zdjęcie (już z białą poświatą) na stałej warstwie wystającej 300 px poza ekran; odbicie góra/dół pokazuje kolory brzegów zdjęcia */
 body.dashboard-bg .pg-bg, body.profil-bg .pg-bg, body.plansv2-bg .pg-bg{display:block;}
-html.dashboard-lock, html.profil-lock, html.plansv2-bg{background:var(--m-page-edge);}
-html.statsv2-bg, html.histv2-bg{background:var(--m-page-edge);}
+html.dashboard-lock, html.profil-lock, html.plansv2-bg{background:var(--bgc-bot);}
+html.statsv2-bg, html.histv2-bg{background:var(--bgc-bot);}
 /* Stats, Historia, edytor planu: ta sama stała warstwa, tylko płaski kolor panelu (Plany od układu C mają tło jak Pulpit) */
 body.statsv2-bg .pg-bg, body.histv2-bg .pg-bg{display:block;}   /* Historia i Postępy: to samo tło co Pulpit (decyzja Macieja 2026-10-21), wcześniej płaski panel */
 body.statsv2-bg, body.histv2-bg, body.plansv2-bg{background:transparent;}
@@ -3614,7 +3614,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 
 
 /* tło wszystkich kroków = tło dashboardu (jedna receptura) */
-.ob-bgl{background-color:var(--m-bg);background-image:linear-gradient(180deg,transparent 0,transparent 308px,var(--m-page-top) 589px,var(--m-page-bot) 4908px),url(icons/backgrounds/dashboard-soft.webp);background-repeat:no-repeat;background-position:0 0,-95px 0;background-size:100% 100%,566px 1007px;}
+.ob-bgl{background-color:#ebebec;background-image:url(icons/backgrounds/bg_onboarding.webp),linear-gradient(180deg,#f9f9fa 0,#ebebec 1007px,#ebebec 100%);background-repeat:no-repeat;background-position:-95px 0,0 0;background-size:566px 1007px,100% 100%;}   /* wzór z onboardingu (bg_onboarding): zdjęcie z gotową poświatą */
 .ob-screen{overflow:hidden;will-change:auto;}
 .ob-screen.onb-under{z-index:0;}
 .ob-screen.onb-over{z-index:2;}
@@ -4144,7 +4144,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="pev2-body">
         <div class="pev2-anim-tile pev2-anim-tile-1">
           <label class="pev2-lab" for="planNameInputV2" data-i18n="peV2NameLabel">NAZWA PLANU</label>
-          <input type="text" class="pev2-name-input" id="planNameInputV2" oninput="editingPlan.name=this.value" placeholder="np. Full Body A" data-i18n-ph="peV2NamePh" autocomplete="off" autocapitalize="characters" enterkeyhint="done" maxlength="40">
+          <input type="text" class="pev2-name-input" id="planNameInputV2" oninput="editingPlan.name=this.value" placeholder="Fullbody" data-i18n-ph="peV2NamePh" autocomplete="off" autocapitalize="characters" enterkeyhint="done" maxlength="40">
           <p class="pev2-fork-hint hidden" id="planEditorV2ForkHint" data-i18n="planEditorForkHint">Zmiany zapiszesz jako swoją kopię tego planu — oryginał zostaje bez zmian.</p>
         </div>
 
@@ -4161,7 +4161,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
 
         <div class="pev2-anim-tile pev2-anim-tile-3">
-          <p class="pev2-lab" data-i18n="peV2EquipLabel">WYBIERZ SWÓJ SPRZĘT</p>
+          <p class="pev2-lab" data-i18n="peV2EquipLabel">WYBIERZ SPRZĘT</p>
           <div class="equip-row" id="planEquipFilterRowV2"></div>
           <div class="exs-wrap" id="planSearchWrapV2"></div>
         </div>
@@ -5602,7 +5602,7 @@ const T_EN = {
   newExerciseTitle: 'Add your own exercise',
   planCreateNew: 'Create my training plan',
   planNameLabel: 'Plan name',
-  planNamePh: 'e.g. Full Body A',
+  planNamePh: 'Fullbody',
   planEditorForkHint: "Your changes save as your own copy of this plan — the original stays as it was.",
   planDaysLabel: 'Days of the week',
   planExercisesLabel: 'Exercises',
@@ -5669,7 +5669,7 @@ const T_EN = {
   histV2EmptyDay: (d) => `No activity logged — ${d}`,
   histV2RunLabel: 'RUN',
   peV2NameLabel: 'PLAN NAME',
-  peV2NamePh: 'e.g. Full Body A',
+  peV2NamePh: 'Fullbody', plansV2Recommended: 'Recommended',
   peV2ForkHint: 'Your changes save as your own copy of this plan — the original stays as is.',
   peV2PeriodizeTitle: 'Variable intensity',
   peV2PeriodizeDesc: 'Each session uses a different level: Max, Volume, Strength or Density. Weight, reps and rest change with it.',
@@ -6166,7 +6166,15 @@ function iconPngUrl(slug){
   return `${dir}${slug}.png?v=${ICON_VER}`;
 }
 // Repaints the open screen when the icon set changes (profile saved, profile pulled from the cloud, backup imported): no reload needed.
+// Tło ekranów wg płci z Dane ciała ('f' → bg_female, 'm' → bg_male, brak → wzór z onboardingu). Kolory brzegów = pierwszy i ostatni wiersz zdjęcia.
+const BG_PHOTOS = { f:['bg_female','#f1f1f0','#dbc7ba'], m:['bg_male','#f6f5f4','#e7ded8'], n:['bg_onboarding','#f9f9fa','#ebebec'] };
+function applyBgPhoto(){
+  let k = 'n'; try{ if(bodyData.sex === 'f' || bodyData.sex === 'm') k = bodyData.sex; }catch(e){}
+  const [file, top, bot] = BG_PHOTOS[k], st = document.documentElement.style;
+  st.setProperty('--bg-photo', `url(icons/backgrounds/${file}.webp)`); st.setProperty('--bgc-top', top); st.setProperty('--bgc-bot', bot);
+}
 function refreshExerciseIcons(){
+  applyBgPhoto();
   if(iconSetIsFemale() === _iconSetShown) return;   // nothing painted yet, or already the right set
   try{
     if(currentRoute === 'gym-v2') renderGymGridV2(false);
@@ -7122,7 +7130,19 @@ function onbFinish(){
   updateWelcomeGreeting();
   try{ refreshExerciseIcons(); }catch(e){}
   onbS = null;
-  onbPickStart();   // etap B: ten sam #onbFlow przechodzi na wybór planu (zamknie go exitPlanOnboarding)
+  // Ostatni etap: prawdziwy ekran Plany (stan „brak planu”, 4.76.0) z planami Mekkio ułożonymi pod odpowiedzi; wybór planu (kółko na karcie) kończy onboarding.
+  // Wcześniejszy przejściowy ekran „Zacznij od planu” (onbPickStart) nie jest już wywoływany.
+  onbLeaveToPlans();
+}
+function onbLeaveToPlans(){
+  startPlanOnboarding();
+  const host = document.getElementById('onbFlow');
+  if(!host || host.hidden || onbReduced()){ onbClose(); return; }
+  const a = host.animate([{opacity:1}, {opacity:0}], {duration:onbMs('--m-dur-fade'), easing:'ease', fill:'forwards'});
+  let done = false;
+  const fin = ()=>{ if(done) return; done = true; try{ a.cancel(); }catch(e){} onbClose(); };
+  a.onfinish = fin;
+  setTimeout(fin, onbMs('--m-dur-fade') + 120);
 }
 function onbClose(){
   onbSettle();
@@ -7437,6 +7457,7 @@ function loadBodyData(){ try{ return JSON.parse(localStorage.getItem(LS_BODY_DAT
 function saveBodyDataLS(o){ localStorage.setItem(LS_BODY_DATA, JSON.stringify(o)); scheduleCloudPush(); }
 let weightLog = loadWeightLog();
 let bodyData = loadBodyData();
+applyBgPhoto();
 // AI asystent preferences ({goal, avoid}) — cloud-only, unlike weightLog/
 // bodyData above. The AI popup already requires cloudSession to exist at
 // all, so there's no guest scenario to support here; pulled fresh from
@@ -9576,9 +9597,21 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.77.0";
+const APP_VERSION = "4.78.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "4.78.0": {
+    pl: [
+      {featured:true, icon:'sparks', badge:'Nowość', title:'Tło dopasowane do Ciebie', text:'Pulpit i pozostałe ekrany mają teraz tło zależne od płci z Danych ciała, a onboarding własny, jaśniejszy wzór.' },
+      {icon:'barbell', badge:'Nowość', title:'Plan polecony po onboardingu', text:'Po wyborze celu zobaczysz ekran Plany z dużą kartą polecanego planu, dobranego do Twoich odpowiedzi.' },
+      {icon:'sparks', badge:'Nowość', title:'Mądrzejsza wyszukiwarka ćwiczeń', text:'Lista zawęża się od pierwszej litery, rozumie potoczne nazwy („martwy ciąg”, „wyciskanie leżąc”) i działa bez polskich znaków.' },
+    ],
+    en: [
+      {featured:true, icon:'sparks', badge:'New', title:'A background that fits you', text:'The dashboard and other screens now use a background based on the sex in Body data, and onboarding has its own, lighter pattern.' },
+      {icon:'barbell', badge:'New', title:'A recommended plan after onboarding', text:'After you pick your goal you see the Plans screen with a big card for the recommended plan, matched to your answers.' },
+      {icon:'sparks', badge:'New', title:'Smarter exercise search', text:'The list narrows from the first letter, understands everyday names and works without Polish letters.' },
+    ],
+  },
   "4.77.0": {
     pl: [
       {icon:'clock-countdown', badge:'Nowość', title:'Prostsze sterowanie licznikiem', text:'W ćwiczeniach z czasem możesz zacząć od nowa, wstrzymać i wznowić licznik, a prędkość, nachylenie i poziom zmieniasz w trakcie. „Zakończ” jest teraz pod spodem.' },
@@ -16763,6 +16796,63 @@ function plcPillHtml(own, lvl){
   return `<span class="plc-lvl">${own ? t('plansV2OwnPill', 'Własny') : escHtml(plcLevelText(lvl))}<span class="plc-dots" aria-hidden="true">${dots}</span></span>`;
 }
 // Karta planu w rzędzie (jeden komponent dla Moich i Mekkio). Zwraca HTML; kliknięcie obsługuje delegacja w renderPlansListV2().
+/* Polecany plan z odpowiedzi onboardingu (najlepszy wg planOnbScore; bez odpowiedzi stały Fullbody) i duża karta „Polecany dla Ciebie”.
+   Używa jej ekran Plany (stan bez planu, onboarding) oraz Pulpit bez planu. acts = {choose, detail}: atrybuty/onclick przycisków. */
+function onbRecommendedPlanId(){
+  const list = visiblePlans().filter(p=> p.builtin);
+  if(!list.length) return null;
+  if(!(onbAnswers.done && onbAnswers.goal)) return (list.find(p=> p.id === 'plan_a') || list[0]).id;
+  return list.map((p, i)=> ({p, i, s: planOnbScore(p)})).sort((x, y)=> y.s - x.s || x.i - y.i)[0].p.id;
+}
+// wybór polecanego planu w onboardingu: plany z generatora (plan_a/ppl/ul) zapisują się już dopasowane do odpowiedzi (sprzęt, dni, poziom), pozostałe jako gotowy plan Mekkio
+function onbChoosePlan(id){
+  if(onbAnswers.done && onbAnswers.goal && ONB_PLAN_IDS.includes(id)){
+    commitGeneratedPlan(recommendationFor(opkPrefs()).plans[id]);
+    if(planOnboardingActive) exitPlanOnboarding(); else goRoute('dashboard');
+    return;
+  }
+  toggleStarredPlan(id);
+}
+function plansV2RecCardHtml(rp, rc, attrs){
+  const rf = rp && planFacts(rp); if(!rf) return '';
+  const rdays = PLAN_DAYS.map(d=> `<span class="plansv2-day${rf.days.indexOf(d) >= 0 ? ' is-on' : ''}" aria-hidden="true">${PF_DAY_SHORT[d]}</span>`).join('');
+  const id = escHtml(rp.id);
+  return `<div class="dash-hero plansv2-hero plansv2-hero--rec${rc}" ${attrs.card(id)}>
+        <p class="dash-hero-eyebrow">${t('dashRecommended', 'Polecany dla Ciebie')}</p>
+        <h2 class="dash-hero-title">${escHtml(dashPlanShortName(planDisplayName(rp)))}</h2>
+        <div class="plansv2-days">${rdays}</div>
+        ${dashPlanStats(plcPerDay(rf), rf.minutes)}
+        <div class="plansv2-hero-btns">
+          <button type="button" class="dash-hero-btn m-press" ${attrs.choose(id)}>${t('dashChoose', 'Wybierz')}</button>
+          <button type="button" class="dash-hero-btn dash-hero-btn--ghost m-press" ${attrs.detail(id)}>${t('plansV2Details', 'Szczegóły')}</button>
+        </div>
+      </div>`;
+}
+/* Plany Mekkio pod odpowiedzi z onboardingu: punkty za cel, poziom, liczbę dni i sprzęt (plan wymagający sprzętu, którego użytkownik nie ma, traci). Tylko w trybie onboardingu bez aktywnego planu. */
+let plansV2RecId = null;
+function planOnbScore(p){
+  const f = planFacts(p); if(!f) return -99;
+  const a = onbAnswers;
+  let sc = 0;
+  const cat = planGoalCat(f.goal);
+  if(cat && cat === a.goal) sc += 3;
+  const lv = a.difficulty === 'medium' ? 'mid' : a.difficulty;
+  if(f.level === lv) sc += 2;
+  const dd = Math.abs((f.daysCount || 0) - (a.daysPerWeek || 3));
+  sc += dd === 0 ? 3 : dd === 1 ? 1 : -1;
+  const have = onbEquipSetFor(a.equip);
+  const need = f.equipment || [];
+  const missing = need.filter(k=> have.length && !have.includes(k)).length;
+  sc -= missing * 2;
+  return sc;
+}
+function plansV2OnbOrder(list){
+  plansV2RecId = null;
+  if(!planOnboardingActive || starredPlanId || !onbAnswers.done || !onbAnswers.goal) return list;
+  const ranked = list.map((p, i)=> ({p, i, s: planOnbScore(p)})).sort((x, y)=> y.s - x.s || x.i - y.i);
+  plansV2RecId = ranked.length ? ranked[0].p.id : null;
+  return ranked.map(x=> x.p);
+}
 function buildPlanCardV2(p){
   const f = planFacts(p);
   if(!f) return '';
@@ -16797,6 +16887,18 @@ function plansV2SectionHtml(seg, label, cardsHtml, rise, extraLinkHtml, noAll){
 function plansV2HeroHtml(animate){
   const rc = i => animate ? ` m-rise-tile" style="--i:${i}` : '';
   const plan = starredPlanId ? visiblePlans().find(p=>p.id === starredPlanId) : null;
+  if(!plan && plansV2RecId){   // onboarding: polecany plan w dużej karcie (Wybierz = aktywny plan i koniec onboardingu)
+    const rp = visiblePlans().find(x=> x.id === plansV2RecId);
+    const card = rp && plansV2RecCardHtml(rp, rc(0), { card: id=>`data-pa="detail" data-id="${id}"`, choose: id=>`data-pa="choose" data-id="${id}"`, detail: id=>`data-pa="detail" data-id="${id}"` });
+    if(card){
+      return `<div class="dash-pair dash-pair--flush">
+      ${card}
+      <button type="button" class="dash-tile dash-tile--bot dash-free-solo plansv2-nop-free m-press" data-pa="free">
+        <span><span class="dash-free-t">${t('dashFreeT', 'Trenuj po swojemu')}</span><span class="dash-free-d">${t('plansV2FreeD', 'Wybierz ćwiczenia, dodaj własne.')}</span></span><span class="dash-circ">${dashArrowRight()}</span>
+      </button>
+    </div>`;
+    }
+  }
   if(!plan){
     return `<div class="dash-pair dash-pair--flush${rc(0)}">
       <div class="dash-hero dash-hero--nop">
@@ -17345,6 +17447,7 @@ function plansV2Act(e){
   const id = el.dataset.id;
   switch(el.dataset.pa){
     case 'detail': openPlanDetailV2(id); break;
+    case 'choose': onbChoosePlan(id); break;   // tylko w onboardingu (polecany plan w hero)
     case 'start': case 'free': goRoute('gym-v2'); break;
     case 'edit': openPlanEditorV2(id); break;
     case 'new': openPlanEditorV2(null); break;
@@ -17371,7 +17474,7 @@ function renderPlansListV2(animate){
   const rc = i => animate ? ` m-rise-tile" style="--i:${i}` : '';
   const listed = visiblePlans();
   const own = listed.filter(p=> !p.builtin);
-  const mekkio = listed.filter(p=> p.builtin);
+  const mekkio = plansV2OnbOrder(listed.filter(p=> p.builtin));
   heroEl.innerHTML = plansV2HeroHtml(animate);
   const newCard = `<div class="plc plc--new m-press" role="button" tabindex="0" data-pa="new" aria-label="${t('plansV2AddTitle', 'Dodaj plan')}">${ph('plus-icon')}<span class="plc-newl">${t('plansV2NewPlan', 'Nowy plan')}</span></div>`;
   const importLink = `<button type="button" class="plansv2-link m-press" data-pa="import">${t('plansV2Import', 'Importuj')}</button>`;
@@ -17658,6 +17761,7 @@ function togglePlanEditorV2Section(key){
 // Dopasowanie bez rozróżniania wielkości liter i polskich znaków. Aplikacja ma nazwy ćwiczeń po angielsku (brak danych z polskimi nazwami),
 // więc szukamy po nazwie, grupie mięśniowej (po polsku i angielsku), sprzęcie i małym słowniku polskich skrótów → angielskie słowa z nazw (EX_SEARCH_ALIASES).
 function exSearchNorm(s){ return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l'); }
+const EX_SEARCH_PL = {"Chest Press":"wyciskanie na maszynie klatka piersiowa maszyna prasa","Lat Pulldown":"ściąganie drążka wyciągu do klatki szeroki grzbiet wyciąg górny","Leg Press Machine":"wypychanie nóg suwnica prasa nożna","Shoulder Press":"wyciskanie nad głowę barki maszyna wyciskanie barków","Leg Curl":"uginanie nóg dwugłowy uda tył uda maszyna","Triceps Pushdown":"prostowanie ramion wyciąg triceps francuskie na wyciągu","Ab Crunch":"brzuszki maszyna brzuch spięcia brzucha","Incline Chest":"wyciskanie skos klatka górna maszyna","Seated Row":"wiosłowanie siedząc wyciąg dolny plecy","Leg Extension":"prostowanie nóg czworogłowy przód uda maszyna","Hip Abduction":"odwodzenie nóg odwodziciele pośladki maszyna","Pec Deck":"rozpiętki maszyna butterfly klatka piersiowa","Calf Raise":"wspięcia na palce łydki","Dumbbell Hammer Curl":"uginanie młotkowe hantle biceps młotki","Triceps Dip":"dipy triceps pompki na poręczach wyciskanie francuskie","Barbell Deadlift":"martwy ciąg sztanga","Dumbbell Row":"wiosłowanie hantlem jednorącz plecy","Preacher Curl":"uginanie na modlitewniku biceps","Overhead Triceps":"prostowanie ramion za głową triceps francuskie","Hanging Leg Raise":"unoszenie nóg w zwisie brzuch drążek","Captain's Chair Raise":"unoszenie nóg na poręczach krzesło kapitańskie brzuch","Dumbbell Shoulder Press":"wyciskanie hantli nad głowę barki żołnierskie","Dumbbell Walking Lunge":"wykroki chodzone hantle nogi","Back Extension":"prostowanie tułowia ławka rzymska dolny odcinek pleców grzbiet","Cable Curl":"uginanie na wyciągu biceps","Barbell Curl":"uginanie sztangi biceps","Dumbbell Lateral Raise":"unoszenie hantli bokiem barki wznosy boczne","Cable Crossover":"krzyżowanie linek wyciągi klatka piersiowa","Cable Curl Neutral":"uginanie młotkowe na wyciągu biceps","Cable Lateral Raise":"unoszenie bokiem na wyciągu barki wznosy","Hack Squat Machine":"przysiad hakenschmidt maszyna hack nogi","Dumbbell Bench Press":"wyciskanie hantli leżąc klatka piersiowa ławka","Barbell Bench Press":"wyciskanie sztangi leżąc klatka piersiowa ławka płaska","Reverse Pec Deck":"odwrotne rozpiętki maszyna tylny akton barków","Hip Thrust":"hip thrust mostek biodrowy pośladki wypychanie bioder","Straight-Arm Pulldown":"ściąganie prostych ramion wyciąg najszerszy grzbietu","Chest Dip":"dipy klatka piersiowa pompki na poręczach","Cable Woodchopper":"rąbanie drewna wyciąg skośne brzuch","Face Pull":"face pull przyciąganie liny do twarzy tylny akton barków","Barbell Back Squat":"przysiad ze sztangą na plecach nogi","Dumbbell Fly":"rozpiętki hantlami klatka piersiowa","Kettlebell Swing":"wymachy kettlebell odważnikiem kettla","Kettlebell Goblet Squat":"przysiad goblet kettlebell odważnik","Kettlebell Deadlift":"martwy ciąg kettlebell odważnik kettla","Kettlebell Row":"wiosłowanie kettlebell odważnik plecy","Kettlebell Halo":"halo kettlebell krążenie wokół głowy barki","Turkish Get-Up":"turecka pobudka kettlebell get up","Push-up":"pompki klatka piersiowa kalistenika","Diamond Push-up":"pompki diamentowe triceps wąskie","Pull-up":"podciąganie na drążku nachwytem grzbiet","Chin-up":"podciąganie podchwytem biceps drążek","Inverted Row":"wiosłowanie australijskie podciąganie poziome plecy","Superman":"superman unoszenie pleców grzbiet leżąc","Bodyweight Squat":"przysiad z masą ciała przysiady bez obciążenia","Lunge":"wykroki nogi","Bulgarian Split Squat":"przysiad bułgarski wykrok tylną nogą nogi","Pistol Squat":"przysiad na jednej nodze pistolet","Pike Push-up":"pompki pike barki odwrócone","Handstand Push-up":"pompki w staniu na rękach barki","Plank":"deska plank brzuch core","Crunch":"brzuszki spięcia brzucha","Dead Hang":"zwis na drążku chwyt przedramiona","Glute Bridge":"mostek biodrowy pośladki unoszenie bioder","Calf Raise (Bodyweight)":"wspięcia na palce z masą ciała łydki","Barbell Shrug":"szrugsy sztanga kaptury czworoboczny","Close-Grip Bench Press":"wyciskanie wąskim chwytem triceps","Decline Bench Press":"wyciskanie na ławce skośnej w dół klatka dolna","Front Squat":"przysiad przedni sztanga nogi","Good Morning":"dzień dobry skłony ze sztangą tył uda grzbiet","Overhead Press":"wyciskanie żołnierskie sztanga nad głowę barki ohp","Rack Pull":"martwy ciąg z podstawek rack pull sztanga","Romanian Deadlift":"martwy ciąg rumuński tył uda pośladki rdl","Sumo Deadlift":"martwy ciąg sumo sztanga","Upright Row":"podciąganie sztangi wzdłuż tułowia barki wiosłowanie pionowe","Barbell Lunge":"wykroki ze sztangą nogi","Dumbbell Goblet Squat":"przysiad goblet hantel nogi","EZ-Bar Curl":"uginanie sztangą łamaną biceps","Incline Dumbbell Press":"wyciskanie hantli skos klatka górna","Incline Bench Press":"wyciskanie sztangi na ławce skośnej klatka górna","Wall Sit":"krzesełko przy ścianie przysiad izometryczny nogi","Landmine Press":"wyciskanie landmine sztanga w kącie barki","Landmine Squat":"przysiad landmine sztanga w kącie nogi","Reverse Curl":"uginanie nachwytem odwrotne przedramiona","Skull Crusher":"wyciskanie francuskie leżąc triceps łamacz czaszki","Spider Curl":"uginanie pająk biceps na ławce skośnej","T-Bar Row":"wiosłowanie sztangą t grzbiet","Arnold Press":"wyciskanie arnolda barki hantle","Concentration Curl":"uginanie skoncentrowane biceps hantel","Dumbbell Front Raise":"unoszenie hantli przodem barki","Dumbbell Kickback":"prostowanie ramienia w opadzie triceps odrzut","Dumbbell Pullover":"pullover hantel klatka piersiowa grzbiet","Dumbbell Rear Delt Fly":"odwrotne rozpiętki hantle tylny akton barków","Dumbbell Romanian Deadlift":"martwy ciąg rumuński hantle tył uda","Dumbbell Shrug":"szrugsy hantle kaptury","Farmer's Walk":"spacer farmera chwyt przedramiona chodzenie z ciężarem","Incline Dumbbell Curl":"uginanie hantli na ławce skośnej biceps","Assisted Pull-Up Machine":"podciąganie z asystą maszyna podciąganie wspomagane","Chest-Supported Dumbbell Row":"wiosłowanie hantli z podparciem klatki plecy","Chest-Supported Row Machine":"wiosłowanie maszyna z podparciem klatki plecy","Glute Kickback Machine":"odwodzenie nogi w tył maszyna pośladki","Hip Adduction":"przywodzenie nóg przywodziciele maszyna","Reverse Hyperextension":"odwrotna hiperekstensja pośladki dolny grzbiet","Seated Calf Raise":"wspięcia na palce siedząc łydki","Step-Up":"wejścia na podest step nogi pośladki","Wrist Curl":"uginanie nadgarstków przedramiona","Bayesian Cable Curl":"uginanie bayesian wyciąg biceps","Cable Crunch":"spięcia brzucha na wyciągu brzuch klęcząc","Cable Glute Kickback":"odwodzenie nogi w tył wyciąg pośladki","Pallof Press":"pallof press wyciskanie wyciąg core antyrotacja","Rope Pushdown":"prostowanie ramion linką wyciąg triceps","Single-Arm Cable Row":"wiosłowanie jednorącz wyciąg plecy","Smith Machine Bench Press":"wyciskanie na suwnicy smitha leżąc klatka","Smith Machine Incline Press":"wyciskanie na suwnicy smitha skos klatka górna","Smith Machine Shoulder Press":"wyciskanie na suwnicy smitha nad głowę barki","Smith Machine Squat":"przysiad na suwnicy smitha nogi","Ab Wheel Rollout":"kółko do brzucha rollout brzuch","Cable Pull-Through":"przeciąganie liny między nogami pośladki tył uda","Cable Rear Delt Fly":"odwrotne rozpiętki wyciąg tylny akton barków","Kettlebell Clean":"podrzut kettlebell odważnik clean","Kettlebell Press":"wyciskanie kettlebell odważnik barki","Kettlebell Snatch":"rwanie kettlebell odważnik snatch","Kettlebell Windmill":"wiatrak kettlebell odważnik tułów","Lying Leg Raise":"unoszenie nóg leżąc brzuch","Russian Twist":"skręty rosyjskie brzuch skosy","Side Plank":"deska boczna plank boczny brzuch skosy","Band External Rotation":"rotacja zewnętrzna guma mankiet rotatorów barki","Band Face Pull":"face pull guma tylny akton barków","Band Lateral Walk":"chodzenie bokiem z gumą pośladki","Band Pull-Apart":"rozciąganie gumy przed sobą tylny akton barków","Bird Dog":"ptak pies core stabilizacja","Burpees":"burpees padnij powstań kondycja cardio","Hollow Body Hold":"pozycja łódki hollow body brzuch","Mountain Climbers":"wspinaczka mountain climbers brzuch cardio","Nordic Curl":"uginanie nordyckie tył uda","Sissy Squat":"przysiad sissy czworogłowy przód uda","Arm Circles":"krążenie ramion rozgrzewka barki","Cat-Cow":"kot krowa mobilizacja kręgosłupa","Couch Stretch":"rozciąganie przodu uda kanapa zginacze bioder","Hip Circles":"krążenia bioder rozgrzewka","Inchworm":"gąsienica rozgrzewka","Leg Swings":"wymachy nóg rozgrzewka","Pigeon Stretch":"gołąb rozciąganie pośladki biodra","Scapular Push-up":"pompki łopatkowe łopatki","Thoracic Rotation":"rotacja odcinka piersiowego mobilizacja kręgosłupa","World's Greatest Stretch":"najlepsze rozciąganie świata mobilizacja rozgrzewka","Ankle Mobility":"mobilność kostki staw skokowy","Wall Slides":"ześlizgiwanie po ścianie łopatki barki mobilizacja","Foam Roll":"rolowanie wałek roller masaż powięzi","Arm Swings (Chest Opener)":"wymachy ramion otwieranie klatki rozgrzewka","Band Pull-Apart (Light)":"rozciąganie gumy lekkie rozgrzewka tylny akton barków","Elbow Circles":"krążenia łokci rozgrzewka","Wrist Circles":"krążenia nadgarstków rozgrzewka","Torso Twists":"skręty tułowia rozgrzewka","Dead Bug":"martwy robak core brzuch stabilizacja","Glute Bridge Hold":"mostek biodrowy utrzymanie pośladki izometria","Bodyweight Good Morning":"dzień dobry z masą ciała tył uda rozgrzewka","Shoulder Dislocates":"przenoszenie kija za plecy mobilizacja barków","Butterfly Stretch":"rozciąganie motyl przywodziciele","Child's Pose":"pozycja dziecka rozciąganie plecy","Cross-Body Shoulder Stretch":"rozciąganie barku w poprzek klatki barki","Doorway Chest Stretch":"rozciąganie klatki w drzwiach klatka piersiowa","Hamstring Stretch":"rozciąganie tyłu uda dwugłowy","90/90 Hip Stretch":"rozciąganie bioder 90 90 mobilizacja","Lat Stretch":"rozciąganie najszerszego grzbietu plecy","Overhead Triceps Stretch":"rozciąganie tricepsa za głową","Quad Stretch":"rozciąganie przodu uda czworogłowy","Wall Calf Stretch":"rozciąganie łydki przy ścianie","Biceps Wall Stretch":"rozciąganie bicepsa przy ścianie","Cobra Stretch":"pozycja kobry rozciąganie brzucha","Standing Side Bend":"skłony boczne na stojąco rozciąganie tułowia","Figure-Four Stretch":"rozciąganie czwórka pośladki","Seated Glute Stretch":"rozciąganie pośladków siedząc","Wrist Flexor Stretch":"rozciąganie zginaczy nadgarstka przedramiona","Wrist Extensor Stretch":"rozciąganie prostowników nadgarstka przedramiona","Neck Side Stretch":"rozciąganie szyi bok kark","Stationary Bike":"rower stacjonarny rowerek kardio","Treadmill":"bieżnia bieg marsz kardio","Elliptical":"orbitrek eliptyk kardio","Rowing Machine":"wioślarz ergometr wioślarski kardio","Stair Climber":"schody maszyna stepper kardio","Ski Erg":"ski erg narciarz maszyna kardio","Air Bike":"rower powietrzny assault bike kardio","Jump Rope":"skakanka kardio","HIIT":"interwały hiit kardio wysoka intensywność","Band Chest Press":"wyciskanie z gumą klatka piersiowa guma oporowa","Band Chest Fly":"rozpiętki z gumą klatka piersiowa guma oporowa","Band Row":"wiosłowanie z gumą plecy guma oporowa","Band Pulldown":"ściąganie z gumą szeroki grzbiet guma oporowa podciąganie z gumą","Band Shoulder Press":"wyciskanie nad głowę z gumą barki guma oporowa","Band Lateral Raise":"unoszenie bokiem z gumą barki guma oporowa wznosy","Band Biceps Curl":"uginanie z gumą biceps guma oporowa","Band Triceps Pushdown":"prostowanie ramion z gumą triceps guma oporowa","Band Overhead Triceps Extension":"prostowanie ramion za głową z gumą triceps guma oporowa francuskie","Band Squat":"przysiad z gumą nogi guma oporowa","Band Romanian Deadlift":"martwy ciąg rumuński z gumą tył uda pośladki guma oporowa","Band Glute Bridge":"mostek biodrowy z gumą pośladki guma oporowa","Band Pallof Press":"pallof press z gumą core antyrotacja guma oporowa","Band Woodchopper":"rąbanie drewna z gumą skośne brzuch guma oporowa"};   // potoczne polskie nazwy i słowa kluczowe ćwiczeń (scripts/exercise-names-pl.json), szukane razem z nazwą angielską
 const EX_SEARCH_ALIASES = [
   ['przysiad','squat'], ['martw','deadlift'], ['wyciskan','press'], ['wyciskan','bench'], ['podciag','pull-up'], ['podciag','chin-up'], ['podciag','pulldown'],
   ['wioslow','row'], ['uginan','curl'], ['prostowan','extension'], ['prostowan','pushdown'], ['wznos','raise'], ['wznos','fly'], ['unoszen','raise'], ['wypad','lunge'],
@@ -17666,13 +17770,33 @@ const EX_SEARCH_ALIASES = [
   ['klat','chest'], ['klat','bench'], ['plecy','back'], ['plec','row'], ['bark','shoulder'], ['nog','leg'], ['uda','leg'], ['dwugl','curl'], ['czworogl','extension'],
   ['hantl','dumbbell'], ['sztang','barbell'], ['maszyn','machine'], ['wyciag','cable'], ['kettl','kettlebell'], ['guma','band'], ['gumy','band'],
   ['francusk','skull'], ['mlot','hammer'], ['rumun','romanian'], ['wyskok','jump'], ['kardio','cardio'], ['bieg','run'], ['rower','bike'], ['rozgrzew','warm'], ['rozcia','stretch'],
+  ['tricep','triceps'], ['bicep','curl'], ['biezn','treadmill'], ['wykrok','lunge'], ['dips','dip'], ['dipy','dip'], ['lydk','calf'], ['posladk','glute'], ['czworogl','extension'], ['dwuglow','leg curl'],
+  ['szrug','shrug'], ['odwodz','abduction'], ['przywodz','adduction'], ['skakank','jump rope'], ['wspin','climber'], ['skret','twist'], ['rotacj','rotation'], ['ciag','deadlift'], ['lez','bench'],
+  ['laweczk','bench'], ['wioslar','rowing'], ['orbitrek','elliptical'], ['schod','stair'], ['rozpietk','fly'], ['przysiad','squat'], ['martw','deadlift'], ['podciag','pull-up'], ['brzusz','crunch'],
 ];
+const EX_SEARCH_STOP = new Set(['na','z','w','do','i','od','po','dla','ze','the','of']);
+const _exHayCache = new Map();
+function exSearchHay(ex){
+  let h = _exHayCache.get(ex.name);
+  if(!h){
+    const b = muscleGroupBucket(ex.group);
+    const txt = exSearchNorm([ex.name, ex.group, b.pl, b.en, ex.equipment || '', EX_SEARCH_PL[ex.name] || ''].join(' '));
+    h = { txt, nos: txt.replace(/[\s\-]+/g, ''), words: txt.split(/[^a-z0-9]+/).filter(Boolean) };
+    _exHayCache.set(ex.name, h);
+  }
+  return h;
+}
+// Każde wpisane słowo musi pasować (bez polskich znaków i wielkości liter). 1–2 litery: początek słowa (lista zawęża się już od pierwszej litery);
+// dłuższe: fragment nazwy (też zapisanej razem: „facepull”), polska nazwa potoczna albo alias PL → EN.
 function exMatchesSearch(ex, q){
-  const tokens = exSearchNorm(q).split(/\s+/).filter(Boolean);
+  const tokens = exSearchNorm(q).split(/\s+/).filter(t=> t && !EX_SEARCH_STOP.has(t));
   if(!tokens.length) return true;
-  const b = muscleGroupBucket(ex.group);
-  const hay = exSearchNorm([ex.name, ex.group, b.pl, b.en, ex.equipment || ''].join(' '));
-  return tokens.every(tok=> hay.includes(tok) || EX_SEARCH_ALIASES.some(([pl, en])=> (tok.startsWith(pl) || (tok.length >= 3 && pl.startsWith(tok))) && hay.includes(en)));
+  const h = exSearchHay(ex);
+  return tokens.every(tok=>{
+    if(tok.length === 1) return h.words.some(w=> w.startsWith(tok));
+    if(tok.length === 2) return h.words.some(w=> w.startsWith(tok)) || EX_SEARCH_ALIASES.some(([pl, en])=> pl.startsWith(tok) && h.txt.includes(en));
+    return h.txt.includes(tok) || h.nos.includes(tok) || EX_SEARCH_ALIASES.some(([pl, en])=> (tok.startsWith(pl) || pl.startsWith(tok)) && h.txt.includes(en));
+  });
 }
 const EXS_LUPA_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20 20"/></svg>';
 const EXS_CLEAR_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>';
@@ -19038,29 +19162,10 @@ function dashHeroHtml(m, animate){
       return `<div class="dash-pair${rc(1)}">${top}${bot}</div>`;
     }
     case 'noplan-new': {
-      const rec = h.recommended || {}, main = rec.plan;
-      const plans = [main].concat(rec.others || []).filter(Boolean);
-      const heroHtml = main ? `<div class="dash-hero${rc(1)}">
-        <p class="dash-hero-eyebrow">${t('dashRecommended', 'Polecany dla Ciebie')}</p>
-        <h2 class="dash-hero-title">${escHtml(dashPlanShortName(main.name))}</h2>
-        ${dashPlanStats(main.exercisesPerDay, main.estMin)}
-        <button type="button" class="dash-hero-btn m-press" onclick="dashCta('noplan-new','${escHtml(main.id)}')">${t('dashChoose', 'Wybierz')}</button>
-      </div>` : '';
-      const colors = ['var(--m-mint)', 'var(--m-plan-hard)', 'var(--m-plum)'];
-      const cards = plans.map((p, i)=>{
-        const plan = trainingPlans.find(x=>x.id === p.id);
-        const diff = planDifficultyLabel((plan && planLevelKey(plan)) || planDifficultyKey(p.exercisesPerDay));
-        const id = escHtml(p.id);
-        return `<div class="dash-pwrap">
-          <div class="dash-pcard m-press${i === 0 ? ' dash-pcard--ink' : ''}" role="button" tabindex="0" style="background:${colors[i % colors.length]}" onclick="dashCta('noplan-new-open','${id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-            <p class="dash-pcard-name">${escHtml(dashPlanShortName(p.name))}</p>
-            <div class="dash-pcard-meta">${dashStat(ph('barbell'), escHtml(planExCountText(p.exercisesPerDay)))}${dashStat(ph('clock-countdown'), '~' + p.estMin + ' min')}${dashStat(ph('chart-line'), escHtml(diff))}</div>
-          </div>
-          <button type="button" class="dash-pick m-press${i === 0 ? ' is-on' : ''}" style="color:${i === 0 ? 'var(--m-mint-ink)' : colors[i % colors.length]}" aria-label="${t('dashPickPlan', 'Wybierz plan')}: ${escHtml(p.name)}" onclick="event.stopPropagation();dashCta('noplan-new-pick','${id}')">${DASH_SVG_CHECK(16, 16, 12)}</button>
-        </div>`;
-      }).join('');
-      const list = plans.length ? `<div class="dash-plans${rc(2)}"><p class="dash-plans-h">${t('dashOtherPlans', 'Inne plany Mekkio')}</p>${cards}</div>` : '';
-      return heroHtml + list + `<button type="button" class="dash-create m-press${rc(3)}" onclick="dashCta('noplan-new-create')">${t('dashCreatePlan', 'Stwórz własny plan')}</button>`;
+      // nowy użytkownik bez planu: ta sama duża karta „Polecany dla Ciebie” co na ekranie Plany (4.76.0), pod nią wejście do wszystkich planów
+      const rp = visiblePlans().find(x=> x.id === onbRecommendedPlanId());
+      const card = rp ? plansV2RecCardHtml(rp, rc(1), { card: id=>`onclick="openPlanDetailV2('${id}')" role="button" tabindex="0"`, choose: id=>`onclick="event.stopPropagation();onbChoosePlan('${id}')"`, detail: id=>`onclick="event.stopPropagation();openPlanDetailV2('${id}')"` }) : '';
+      return card + `<button type="button" class="dash-create m-press${rc(2)}" onclick="goRoute('plans-v2')">${t('dashSeeAllPlans', 'Wszystkie plany')}</button>`;
     }
     default: { // noplan-history
       return `<div class="dash-pair dash-pair--flush${rc(1)}">

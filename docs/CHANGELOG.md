@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.77.0 (2026-10-21)
+- **Aktualna wersja:** 4.78.0 (2026-10-21)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,22 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.78.0 · MINOR · 2026-10-21
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Pulpit i pozostałe ekrany mają teraz tło zależne od płci z Danych ciała, a onboarding własny, jaśniejszy wzór.
+>
+> Po wyborze celu zobaczysz ekran Plany z dużą kartą polecanego planu, dobranego do Twoich odpowiedzi.
+>
+> Lista ćwiczeń zawęża się od pierwszej litery, rozumie potoczne nazwy („martwy ciąg”, „wyciskanie leżąc”) i działa bez polskich znaków.
+
+- **Tła:** `icons/backgrounds/bg_male|bg_female|bg_onboarding.webp` (z PNG od Macieja, 17–40 KB); `applyBgPhoto()` ustawia `--bg-photo` i kolory brzegów wg `bodyData.sex` (`f`/`m`, brak = wzór z onboardingu); `.pg-bg` bez nakładki 144° (poświata jest w obrazie); `.ob-bgl` = `bg_onboarding`; `sw.js` v31; `build-web.sh` pomija PNG-i źródłowe.
+- **Onboarding:** po kroku „cel” `onbFinish` → `onbLeaveToPlans()` (ekran Plany, stan bez planu); `planOnbScore`/`plansV2OnbOrder` układają plany Mekkio pod odpowiedzi; duża karta „Polecany dla Ciebie” (`plansV2RecCardHtml`) na ekranie Plany i na Pulpicie bez planu; „Wybierz” zapisuje plan z generatora już dopasowany do odpowiedzi (`onbChoosePlan`). Przejściowy ekran `onbPickStart` nie jest wywoływany.
+- **Edytor planu:** etykieta „WYBIERZ SPRZĘT”, podpowiedź nazwy „Fullbody”.
+- **Wyszukiwarka ćwiczeń:** `exMatchesSearch` (1 litera = początek słowa, od 3 liter fragment też zapisany razem), polskie nazwy potoczne `EX_SEARCH_PL` (z `scripts/exercise-names-pl.json`), nowe aliasy, brak polskich znaków i słów łączących.
+- Build natywny 51.
 
 ### 4.77.0 · MINOR · 2026-10-21
 
