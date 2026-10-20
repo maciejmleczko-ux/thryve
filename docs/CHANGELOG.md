@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.75.0 (2026-10-20)
+- **Aktualna wersja:** 4.76.0 (2026-10-21)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,27 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.76.0 · MINOR · 2026-10-21
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Karty planów mają kolory, rzędy przewijasz w bok, a każdy plan ma własny ekran ze szczegółami. Aktywny plan zmienisz jednym dotknięciem i w każdej chwili cofniesz. / Dni w edytorze zaznaczasz dotknięciem, trening skopiujesz na inne dni z menu „…”, a ćwiczenia znajdziesz wyszukiwarką.
+
+**Redesign ekranów Plany (Figma 629:21262, edytor 630:21301), decyzje P12–P23 w `docs/plan-redesign-ekrany-v2.md`, etapy w `docs/plan-wdrozenie-plany-v2.md`:**
+
+- **E1 dane:** `planFacts(plan)` (poziom, cel, sprzęt, dni, czas, źródło), plany Mekkio na stałe (`ensureBuiltinPlans`, migracja `restoreDeletedBuiltinPlansOnce`, usunięty zbiór `deletedBuiltinPlans`), usuwanie własnego planu z toastem „Cofnij” (naprawa podpisu chmury `forgetCloudPlanSig`), dialog tylko dla planu aktywnego.
+- **E2–E3 ekran Plany:** hero aktywnego planu, poziome rzędy (scroll-snap) „Moje plany”, „Plany Mekkio”, „Mekkio AI”, stan bez aktywnego planu; usunięty swipe z kart.
+- **E4 „Wszystkie plany”:** trasa `plans-all-v2`, segmenty, filtry Poziom/Cel/Dni/Sprzęt, kółko wyboru po lewej, stany puste.
+- **P23:** zmiana planu aktywnego od razu, z toastem „Cofnij” (bez arkusza potwierdzenia).
+- **E5 szczegół planu:** trasa `plan-detail-v2`, wspólny popover `mPopover`, menu „…” (Edytuj, Powiel, Udostępnij, Dostosuj, Usuń), „Cykl intensywności” T1–T4 z modelu aplikacji, nagłówek wg wzorca Profilu (E5c).
+- **E5b / P22:** kolor karty = stały kolor planu z palety (`planColorCat`, `planTone`, tokeny `--m-cat-*`, `--plc-*`), poziom tylko w pastylce; karty 264 px z wierszem dni · ćwiczenia · czas (ikona `calendar-dots`).
+- **E6:** okna Udostępnij plan, Importuj plan (stany błędu, pole 16 px, zasady okien z klawiaturą), Zaimportować plan?, Dostosuj plan na szkielecie `.m-sheet2`; przycisk „Edytuj” dla planu własnego.
+- **E7 + C3 + E7b:** edytor planu na istniejącym mechanizmie: kółka dni (tap nigdy nie kasuje listy), menu „…” (Kopiuj na inne dni, Usuń trening), arkusz „Kopiuj na”, wyszukiwarka z polskimi aliasami, wspólny akordeon `renderExAccordion` w edytorze, oknie wyboru ćwiczenia i arkuszu zamiany ćwiczenia.
+- **QA:** naprawiony `ReferenceError` w imporcie kopii zapasowej (`saveDeletedBuiltinPlans`), sync z chmurą nie powtarza animacji ekranów Plany, slide `plans-all-v2` → edytor, wciśnięcie kółek dni i ✓. Raporty: `docs/qa-statyczne-plany-v2.md`, `docs/qa-runtime-plany-v2.md`.
+- Wersja 4.75.0 (ćwiczenia czasowe, natywne kopiowanie karty) wymaga nowego builda natywnego (wtyczka Clipboard).
+
+**Commity (31):** `864fa63`…`69b1594` (lista: `git log --oneline 9d63ab8..HEAD`).
 
 ### 4.75.0 · MINOR · 2026-10-20
 
