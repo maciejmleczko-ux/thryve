@@ -3149,7 +3149,22 @@ body.gymv2-bg .gy-bg{display:block;}
 .lg-tm-row{display:flex;gap:10px;}
 .lg-tm-row[hidden]{display:none;}
 .lg-tm-row .lg-add{flex:1;min-width:0;}
+.lg-tm-btns.has-ctrl{align-items:center;gap:39px;}
+/* timer controls (Figma 620:18188): reset · play/pause · settings; "Zakończ" full width under them */
+.lg-tm-ctrl{display:flex;align-items:center;justify-content:center;gap:30px;}
+.lg-tm-ic{width:40px;height:40px;padding:0;border-radius:50%;border:.6px solid var(--m-orange);background:rgba(255,255,255,.6);color:var(--m-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;
+  transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-quick) ease,opacity var(--m-dur-quick) ease,visibility 0s linear var(--m-dur-quick);}
+.lg-tm-ic svg{width:18px;height:18px;flex:none;display:block;}
+.lg-tm-ic[aria-expanded="true"]{background:var(--m-orange);color:#fff;}
+.lg-tm-play{width:87px;height:87px;padding:0;border-radius:50%;border:1.2px solid #ff9b82;background:var(--m-orange);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.lg-tm-play svg{width:38px;height:38px;flex:none;display:block;}
+.lg-tm-ctrl.is-idle .lg-tm-ic,.lg-tm-ic.is-off{opacity:0;visibility:hidden;pointer-events:none;}   /* before Start nothing to reset; no settings for a plank */
+.lg-tm-btns #tmRow[hidden]{display:none;}
+.cg-live{width:100%;margin-top:6px;}
+.cg-live[hidden]{display:none;}
+.cg-live .lg-metric-in{pointer-events:none;}
 .lg-add.lg-tm-main{background:var(--m-orange);color:#fff;}
+.lg-tm-ic:active,.lg-tm-play:active{transform:scale(.94);transition-duration:var(--m-dur-press-in);}
 .lg-add{width:100%;height:55px;border-radius:74px;border:1px solid var(--m-orange);background:transparent;color:var(--m-ink);font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;flex:none;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .lg-sub-scroll{gap:18px;}
 .lg-note-ta{width:100%;box-sizing:border-box;min-height:150px;border:1px solid #e3e1e6;border-radius:16px;padding:14px 16px;background:#f7f6f8;font-family:inherit;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);resize:none;outline:none;}
@@ -5336,7 +5351,7 @@ const T_EN = {
   saturdayLabel: 'Saturday:',
   repsUnit: 'reps',
   timeLabel: 'Time', timeLabelSide: 'Time per side', perSideShort: '/side',
-  tmStart: 'Start', tmPause: 'Pause', tmResume: 'Resume', tmEnd: 'Finish', tmSkip: 'Skip',
+  tmStart: 'Start', tmPause: 'Pause', tmResume: 'Resume', tmEnd: 'Finish', tmSkip: 'Skip', tmResetA11y: 'Discard and start over', tmDiscarded: 'Attempt discarded',
   bkWarmup: 'Warm-up', bkStretch: 'Stretching', bkMin: 'min', bkMore: n=>`+${n} more`, bkStart: 'Start', bkRepeat: 'Do it again', bkUndo: 'Mark as not done', bkSkipStep: 'Skip step', bkStop: 'Stop', bkDoneNote: 'Done today.', bkNext: n=>`Next: ${n}`, bkNotifDone: 'Block finished', bkGetReady: 'Get ready',
   cm_distanceKm: 'Distance', cm_distanceM: 'Distance', cm_inclinePct: 'Incline', cm_level: 'Level', cm_floors: 'Floors', cm_jumps: 'Jumps',
   cgTitle: 'Goal for today', cgTime: 'Time', cgDist: 'Distance', cgNone: 'No goal', cgParams: 'Settings', cgSpeed: 'Speed',
@@ -12683,6 +12698,10 @@ function setIsLogged(sv, bw){
   return bw ? r : (String(sv.weight).trim() !== '' && r);
 }
 const LG_ICONS = {
+  reset: '<svg viewBox="0 0 18 18" fill="none"><path d="M15.75 9.00096C15.7502 10.7756 15.0515 12.4788 13.8051 13.7421C12.5588 15.0054 10.8651 15.7271 9.0907 15.751H9C7.27611 15.7553 5.61676 15.0955 4.36641 13.9088C4.31271 13.858 4.26955 13.7971 4.23938 13.7297C4.20921 13.6622 4.19262 13.5894 4.19056 13.5156C4.1885 13.4417 4.20102 13.3681 4.22739 13.2991C4.25376 13.23 4.29347 13.1669 4.34426 13.1132C4.39504 13.0595 4.45591 13.0163 4.52337 12.9862C4.59084 12.956 4.66359 12.9394 4.73746 12.9373C4.81134 12.9353 4.8849 12.9478 4.95394 12.9742C5.02298 13.0005 5.08615 13.0402 5.13984 13.091C5.94408 13.8495 6.95396 14.3542 8.04335 14.542C9.13273 14.7298 10.2533 14.5925 11.2651 14.1472C12.2769 13.7019 13.1351 12.9683 13.7324 12.0381C14.3297 11.1079 14.6396 10.0223 14.6235 8.91696C14.6075 7.81162 14.266 6.73552 13.6419 5.82309C13.0178 4.91065 12.1387 4.20235 11.1144 3.78665C10.09 3.37095 8.96594 3.26629 7.88249 3.48575C6.79903 3.7052 5.80425 4.23903 5.02242 5.02056C5.01668 5.02678 5.01057 5.03265 5.00414 5.03814L3.13523 6.75096H5.0625C5.21168 6.75096 5.35476 6.81022 5.46025 6.91571C5.56574 7.0212 5.625 7.16427 5.625 7.31346C5.625 7.46264 5.56574 7.60571 5.46025 7.7112C5.35476 7.81669 5.21168 7.87596 5.0625 7.87596H1.6875C1.53832 7.87596 1.39524 7.81669 1.28975 7.7112C1.18426 7.60571 1.125 7.46264 1.125 7.31346V3.93845C1.125 3.78927 1.18426 3.6462 1.28975 3.54071C1.39524 3.43522 1.53832 3.37595 1.6875 3.37595C1.83668 3.37595 1.97976 3.43522 2.08525 3.54071C2.19074 3.6462 2.25 3.78927 2.25 3.93845V6.03377L4.23633 4.2197C5.18131 3.27839 6.384 2.63814 7.69256 2.37979C9.00112 2.12143 10.3569 2.25656 11.5887 2.76809C12.8205 3.27963 13.8732 4.14466 14.6138 5.25396C15.3544 6.36327 15.7498 7.66714 15.75 9.00096Z" fill="currentColor"/></svg>',   // timer: discard the attempt (Figma 620:18564)
+  play: '<svg viewBox="0 0 38 38" fill="none"><path d="M34.4969 16.9953L13.11 3.91207C12.7494 3.69127 12.3364 3.57074 11.9137 3.56291C11.491 3.55508 11.0738 3.66024 10.7053 3.86754C10.3403 4.07161 10.0363 4.36923 9.82443 4.72977C9.61259 5.09031 9.50061 5.50077 9.5 5.91894V32.0825C9.50275 32.7098 9.75447 33.3103 10.1998 33.7521C10.6452 34.1938 11.2477 34.4406 11.875 34.4382C12.3128 34.438 12.7421 34.3174 13.1159 34.0894L34.4969 21.0061C34.8406 20.7967 35.1246 20.5023 35.3217 20.1514C35.5188 19.8004 35.6223 19.4047 35.6223 19.0022C35.6223 18.5997 35.5188 18.204 35.3217 17.8531C35.1246 17.5021 34.8406 17.2078 34.4969 16.9983V16.9953ZM11.875 32.0543V5.93824L33.2248 19.0007L11.875 32.0543Z" fill="currentColor"/></svg>',
+  pause: '<svg viewBox="0 0 38 38" fill="none"><path d="M29.6875 4.75H23.75C23.1201 4.75 22.516 5.00022 22.0706 5.44562C21.6252 5.89102 21.375 6.49511 21.375 7.125V30.875C21.375 31.5049 21.6252 32.109 22.0706 32.5544C22.516 32.9998 23.1201 33.25 23.75 33.25H29.6875C30.3174 33.25 30.9215 32.9998 31.3669 32.5544C31.8123 32.109 32.0625 31.5049 32.0625 30.875V7.125C32.0625 6.49511 31.8123 5.89102 31.3669 5.44562C30.9215 5.00022 30.3174 4.75 29.6875 4.75ZM29.6875 30.875H23.75V7.125H29.6875V30.875ZM14.25 4.75H8.3125C7.68261 4.75 7.07852 5.00022 6.63312 5.44562C6.18772 5.89102 5.9375 6.49511 5.9375 7.125V30.875C5.9375 31.5049 6.18772 32.109 6.63312 32.5544C7.07852 32.9998 7.68261 33.25 8.3125 33.25H14.25C14.8799 33.25 15.484 32.9998 15.9294 32.5544C16.3748 32.109 16.625 31.5049 16.625 30.875V7.125C16.625 6.49511 16.3748 5.89102 15.9294 5.44562C15.484 5.00022 14.8799 4.75 14.25 4.75ZM14.25 30.875H8.3125V7.125H14.25V30.875Z" fill="currentColor"/></svg>',
+  sliders: '<svg viewBox="0 0 18 18" fill="none"><path d="M4.50051 7.38281V2.8125C4.50051 2.66332 4.44124 2.52024 4.33575 2.41475C4.23026 2.30926 4.08719 2.25 3.93801 2.25C3.78882 2.25 3.64575 2.30926 3.54026 2.41475C3.43477 2.52024 3.37551 2.66332 3.37551 2.8125V7.38281C2.89152 7.50673 2.46255 7.78821 2.15621 8.18286C1.84987 8.57752 1.68359 9.0629 1.68359 9.5625C1.68359 10.0621 1.84987 10.5475 2.15621 10.9421C2.46255 11.3368 2.89152 11.6183 3.37551 11.7422V15.1875C3.37551 15.3367 3.43477 15.4798 3.54026 15.5852C3.64575 15.6907 3.78882 15.75 3.93801 15.75C4.08719 15.75 4.23026 15.6907 4.33575 15.5852C4.44124 15.4798 4.50051 15.3367 4.50051 15.1875V11.7422C4.98449 11.6183 5.41346 11.3368 5.7198 10.9421C6.02614 10.5475 6.19242 10.0621 6.19242 9.5625C6.19242 9.0629 6.02614 8.57752 5.7198 8.18286C5.41346 7.78821 4.98449 7.50673 4.50051 7.38281ZM3.93801 10.6875C3.7155 10.6875 3.49799 10.6215 3.31299 10.4979C3.12798 10.3743 2.98379 10.1986 2.89864 9.99302C2.81349 9.78745 2.79121 9.56125 2.83462 9.34302C2.87803 9.12479 2.98518 8.92434 3.14251 8.767C3.29984 8.60967 3.5003 8.50252 3.71853 8.45912C3.93676 8.41571 4.16296 8.43799 4.36852 8.52314C4.57409 8.60828 4.74979 8.75248 4.87341 8.93748C4.99703 9.12249 5.06301 9.34 5.06301 9.5625C5.06301 9.86087 4.94448 10.147 4.7335 10.358C4.52252 10.569 4.23637 10.6875 3.93801 10.6875ZM9.56301 4.00781V2.8125C9.56301 2.66332 9.50374 2.52024 9.39825 2.41475C9.29276 2.30926 9.14969 2.25 9.00051 2.25C8.85132 2.25 8.70825 2.30926 8.60276 2.41475C8.49727 2.52024 8.43801 2.66332 8.43801 2.8125V4.00781C7.95402 4.13173 7.52505 4.41321 7.21871 4.80786C6.91237 5.20252 6.74609 5.6879 6.74609 6.1875C6.74609 6.6871 6.91237 7.17248 7.21871 7.56714C7.52505 7.96179 7.95402 8.24327 8.43801 8.36719V15.1875C8.43801 15.3367 8.49727 15.4798 8.60276 15.5852C8.70825 15.6907 8.85132 15.75 9.00051 15.75C9.14969 15.75 9.29276 15.6907 9.39825 15.5852C9.50374 15.4798 9.56301 15.3367 9.56301 15.1875V8.36719C10.047 8.24327 10.476 7.96179 10.7823 7.56714C11.0886 7.17248 11.2549 6.6871 11.2549 6.1875C11.2549 5.6879 11.0886 5.20252 10.7823 4.80786C10.476 4.41321 10.047 4.13173 9.56301 4.00781ZM9.00051 7.3125C8.778 7.3125 8.56049 7.24652 8.37549 7.1229C8.19048 6.99929 8.04629 6.82359 7.96114 6.61802C7.87599 6.41245 7.85371 6.18625 7.89712 5.96802C7.94053 5.74979 8.04768 5.54934 8.20501 5.392C8.36234 5.23467 8.5628 5.12752 8.78103 5.08412C8.99926 5.04071 9.22546 5.06299 9.43102 5.14814C9.63659 5.23328 9.81229 5.37748 9.93591 5.56248C10.0595 5.74749 10.1255 5.965 10.1255 6.1875C10.1255 6.48587 10.007 6.77202 9.796 6.983C9.58502 7.19397 9.29887 7.3125 9.00051 7.3125ZM16.313 11.8125C16.3125 11.3137 16.1466 10.8291 15.8413 10.4347C15.5359 10.0402 15.1083 9.75822 14.6255 9.63281V2.8125C14.6255 2.66332 14.5662 2.52024 14.4608 2.41475C14.3553 2.30926 14.2122 2.25 14.063 2.25C13.9138 2.25 13.7707 2.30926 13.6653 2.41475C13.5598 2.52024 13.5005 2.66332 13.5005 2.8125V9.63281C13.0165 9.75673 12.5875 10.0382 12.2812 10.4329C11.9749 10.8275 11.8086 11.3129 11.8086 11.8125C11.8086 12.3121 11.9749 12.7975 12.2812 13.1921C12.5875 13.5868 13.0165 13.8683 13.5005 13.9922V15.1875C13.5005 15.3367 13.5598 15.4798 13.6653 15.5852C13.7707 15.6907 13.9138 15.75 14.063 15.75C14.2122 15.75 14.3553 15.6907 14.4608 15.5852C14.5662 15.4798 14.6255 15.3367 14.6255 15.1875V13.9922C15.1083 13.8668 15.5359 13.5848 15.8413 13.1903C16.1466 12.7959 16.3125 12.3113 16.313 11.8125ZM14.063 12.9375C13.8405 12.9375 13.623 12.8715 13.438 12.7479C13.253 12.6243 13.1088 12.4486 13.0236 12.243C12.9385 12.0375 12.9162 11.8113 12.9596 11.593C13.003 11.3748 13.1102 11.1743 13.2675 11.017C13.4248 10.8597 13.6253 10.7525 13.8435 10.7091C14.0618 10.6657 14.288 10.688 14.4935 10.7731C14.6991 10.8583 14.8748 11.0025 14.9984 11.1875C15.122 11.3725 15.188 11.59 15.188 11.8125C15.188 12.1109 15.0695 12.397 14.8585 12.608C14.6475 12.819 14.3614 12.9375 14.063 12.9375Z" fill="currentColor"/></svg>',   // cardio: settings while it runs (Figma 620:18570)
   x: '<svg viewBox="0 0 28 28" fill="none"><path d="M22.4 6.4 6.4 22.4M6.4 6.4l16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>', // same glyph as Trening's .gy-x
   check: '<svg viewBox="0 0 12 12" fill="none"><path d="M10.78 3.36 4.78 9.36a.6.6 0 0 1-.8 0L1.36 6.74a.6.6 0 1 1 .8-.8l2.23 2.23 5.6-5.6a.6.6 0 0 1 .8.8Z" fill="currentColor"/></svg>',
   checkBig: '<svg viewBox="0 0 24 24" fill="none"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -13357,13 +13376,15 @@ function renderExercisePopupV2(animate){
           <div class="cg-bar"><i id="cgBarFill"></i></div>
           <div class="cg-barrow"><span id="cgBarL"></span><span id="cgBarR"></span></div>
           <div class="cg-chips" id="cgChips"></div>
+          <div class="cg-live lg-sets" id="cgLive" hidden></div>
         </div>
-        <div class="lg-tm-btns">
-          <button type="button" class="lg-add lg-tm-main m-press" id="tmMain" onclick="tmMain()">${t('tmStart','Start')}</button>
-          <div class="lg-tm-row" id="tmRow" hidden>
-            <button type="button" class="lg-add m-press" onclick="tmEnd()">${t('tmEnd','Zakończ')}</button>
-            <button type="button" class="lg-add m-press" onclick="tmSkip()">${t('tmSkip','Pomiń')}</button>
+        <div class="lg-tm-btns has-ctrl">
+          <div class="lg-tm-ctrl is-idle" id="tmCtrl">
+            <button type="button" class="lg-tm-ic m-press" id="tmReset" onclick="tmSkip()" aria-label="${escHtml(t('tmResetA11y','Odrzuć pomiar i zacznij od nowa'))}">${LG_ICONS.reset}</button>
+            <button type="button" class="lg-tm-play m-press" id="tmMain" onclick="tmMain()" aria-label="${escHtml(t('tmStart','Start'))}">${LG_ICONS.play}</button>
+            <button type="button" class="lg-tm-ic m-press" id="tmParams" onclick="cgToggleLive()" aria-label="${escHtml(t('cgParams','Parametry'))}" aria-expanded="false">${LG_ICONS.sliders}</button>
           </div>
+          <button type="button" class="lg-add lg-tm-main m-press" id="tmRow" onclick="tmEnd()" hidden>${t('tmEnd','Zakończ')}</button>
         </div>
       </div>` : bw ? '' : `
       <div class="lg-block${rise(3)}">
@@ -13600,8 +13621,66 @@ function cgPaintRun(g, ph, clock, msg, lab, main, row){
     chips.innerHTML = parts.map(x=> `<span class="lg-chip">${escHtml(x)}</span>`).join('');
     chips.dataset.k = '1';
   }
-  if(main) main.textContent = tm.pausedAt !== null ? t('tmResume','Wznów') : t('tmPause','Pauza');
-  if(row) row.hidden = false;
+  tmPaintCtrl(main, row, true, g.kind === 'km' || Object.keys(g.params).length > 0);
+}
+// settings while it runs (sliders button): speed, incline, level can change mid-run. Speed changes are kept as
+// segments, so the distance hint is the sum of the stretches; with a distance goal the remaining time is recomputed.
+function cgSegsKm(g, upToMs){
+  const segs = g.segs || [{ at: 0, speed: g.speed }];
+  let km = 0;
+  segs.forEach((sg, i)=>{
+    const end = Math.min(upToMs, i + 1 < segs.length ? segs[i + 1].at : Infinity);
+    if(end > sg.at && sg.speed > 0) km += sg.speed * (end - sg.at) / 3600000;
+  });
+  return km;
+}
+function cgToggleLive(){
+  if(!tm || !tm.cg) return;
+  const prm = document.getElementById('tmParams'), live = document.getElementById('cgLive');
+  if(!prm || !live) return;
+  const open = prm.getAttribute('aria-expanded') !== 'true';
+  prm.setAttribute('aria-expanded', open ? 'true' : 'false');
+  live.hidden = !open;
+  if(open) cgLiveRender();
+  haptic('select');
+}
+function cgLiveRender(){
+  const live = document.getElementById('cgLive'), g = tm && tm.cg;
+  if(!live || !g) return;
+  const rows = [];
+  if(g.kind === 'km') rows.push('speed');
+  Object.keys(g.params).forEach(k=> rows.push(k));
+  live.innerHTML = rows.map(k=>{
+    const def = cgParamDef(k), v = k === 'speed' ? g.speed : g.params[k];
+    return `<div class="lg-metric" data-k="${k}"><span class="lg-metric-l">${escHtml(k === 'speed' ? t('cgSpeed','Prędkość') : cardioMetricLabel(k))}</span>
+      <input class="lg-metric-in" type="text" readonly tabindex="-1" value="${crFmt(def, v)}" placeholder="—" aria-label="${escHtml(k === 'speed' ? t('cgSpeed','Prędkość') : cardioMetricLabel(k))}">
+      ${def.unit ? `<span class="lg-metric-u">${def.unit}</span>` : ''}
+      <span class="lg-steps"><button type="button" class="lg-step" onclick="cgLiveStep('${k}',-1)" aria-label="−">${LG_ICONS.minus}</button><button type="button" class="lg-step" onclick="cgLiveStep('${k}',1)" aria-label="+">${LG_ICONS.plus}</button></span></div>`;
+  }).join('');
+}
+function cgLiveStep(k, dir){
+  const g = tm && tm.cg;
+  if(!g) return;
+  const def = cgParamDef(k), cur = k === 'speed' ? g.speed : g.params[k];
+  const p = Math.pow(10, def.dec), v = cgClamp(Math.round(((cur != null ? cur : 0) + dir * def.step) * p) / p, 0, def.max);
+  if(v === cur) return;
+  if(k === 'speed'){
+    const e = tmPhase().side;
+    if(!g.segs) g.segs = [{ at: 0, speed: g.speed }];
+    const last = g.segs[g.segs.length - 1];
+    if(e - last.at < 1000) last.speed = v; else g.segs.push({ at: e, speed: v });   // several taps in a row = one change
+    g.speed = v;
+    if(g.mode === 'dist' && g.kind === 'km' && v > 0){   // distance goal: time left = distance left at the new speed
+      const left = g.dist - cgSegsKm(g, e);
+      if(left > 0){ g.D = Math.round(e + left / v * 3600000); tm.D = g.D; tmNotifSchedule(); }
+    }
+  } else g.params[k] = v;
+  if(cg){ if(k === 'speed') cg.speed = v; else cg.params[k] = v; cgSave(); }   // next time starts from the settings you ended with
+  const chips = document.getElementById('cgChips');
+  if(chips) delete chips.dataset.k;   // repaint the chips with the new values
+  haptic('light');
+  cgLiveRender();
+  tmPaint();
 }
 // the set row gets the settings chosen before Start (validated like any cardio field)
 function cgRowFields(g){
@@ -13613,7 +13692,8 @@ function cgRowFields(g){
 function cgResultFor(g, sec){
   const hints = {};
   if(g.kind === 'km'){
-    if(g.speed > 0) hints.distanceKm = Math.round(g.speed * sec / 3600 * 10) / 10;
+    if(g.segs) hints.distanceKm = Math.round(cgSegsKm(g, sec * 1000) * 10) / 10;   // speed changed mid-run: sum of the stretches
+    else if(g.speed > 0) hints.distanceKm = Math.round(g.speed * sec / 3600 * 10) / 10;
     else if(g.mode === 'dist') hints.distanceKm = g.dist;
   } else if(g.kind === 'm' && g.mode === 'dist') hints.distanceM = g.dist;
   let chip = '';
@@ -13783,16 +13863,30 @@ function tmPaint(){
     if(lab && cgOn) lab.textContent = t('cgLabTime','Czas').toUpperCase();
     clock.classList.remove('is-run');
     if(msg) msg.textContent = '';
-    if(main) main.textContent = t('tmStart','Start');
-    if(row) row.hidden = true;
+    tmPaintCtrl(main, row, false, false);
     return;
   }
   const ph = tmPhase(), sec = Math.max(0, Math.ceil(ph.left / 1000));
   clock.textContent = fmtClock(sec);
   clock.classList.toggle('is-run', tm.pausedAt === null);
   if(msg) msg.textContent = ph.key === 'sw' ? t('tmSwitchSides','Zmień stronę') : (tm.sides === 2 ? t('tmSideN', `Strona ${ph.key === 's1' ? 2 : 1} z 2`, ph.key === 's1' ? 2 : 1, 2) : '');
-  if(main) main.textContent = tm.pausedAt !== null ? t('tmResume','Wznów') : t('tmPause','Pauza');
-  if(row) row.hidden = false;
+  tmPaintCtrl(main, row, true, false);
+}
+// reset · play/pause · settings, and "Zakończ" under them (Figma 620:18188 paused / 620:18588 running)
+function tmPaintCtrl(main, row, started, hasParams){
+  const ctrl = document.getElementById('tmCtrl'), prm = document.getElementById('tmParams');
+  const running = started && tm && tm.pausedAt === null;
+  if(main){
+    const want = running ? 'pause' : 'play';
+    if(main.dataset.ic !== want){ main.innerHTML = LG_ICONS[want]; main.dataset.ic = want; }
+    main.setAttribute('aria-label', !started ? t('tmStart','Start') : running ? t('tmPause','Pauza') : t('tmResume','Wznów'));
+  }
+  if(ctrl) ctrl.classList.toggle('is-idle', !started);
+  if(prm){
+    prm.classList.toggle('is-off', !hasParams);
+    if(!started || !hasParams){ prm.setAttribute('aria-expanded', 'false'); const live = document.getElementById('cgLive'); if(live) live.hidden = true; }
+  }
+  if(row) row.hidden = !started;
 }
 // "Zakończ": save what was actually done (>0 s). perSide: durationSec is one side's time —
 // during side 1 only that time, during the switch the full side, during side 2 that side's time
@@ -13804,12 +13898,21 @@ function tmEnd(){
   if(sec > 0) tmCommit(sec, false);
   else { haptic('warning'); tmStop(); tmPaint(); }
 }
-// "Pomiń": throw the attempt away, nothing is saved.
+// reset (arrow): throw the attempt away, nothing is saved — with "Cofnij", since one tap on a small icon can cost minutes of cardio
 function tmSkip(){
   if(!tm) return;
+  const snap = { D: tm.D, sides: tm.sides, t0: tm.t0, pausedAt: tm.pausedAt, key: tm.key, cg: tm.cg, at: Date.now(), ex: popupExercise };
   haptic('light');
   tmStop();
   tmPaint();
+  toast(t('tmDiscarded','Pomiar odrzucony'), { undo: ()=>{
+    if(tm || popupExercise !== snap.ex || !isTimeEx(popupExercise)) return;   // already restarted or the popup moved on
+    // running: the clock carries on as if it was never stopped; paused: it stays paused where it was
+    tm = { D: snap.D, sides: snap.sides, t0: snap.t0, pausedAt: snap.pausedAt, key: snap.key, iv: setInterval(tmTick, 250), wl: null, cg: snap.cg };
+    if(tm.pausedAt === null){ tmAwake(true); tmNotifSchedule(); }
+    haptic('light');
+    tmTick();
+  }});
 }
 function tmCommit(sec, auto){
   const ex = popupExercise;
