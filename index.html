@@ -4080,7 +4080,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
                głównych"). -->
           <button type="button" class="v2-hdr-back" id="statsV2BackBtn" onclick="statsV2Back()" title="Wstecz" aria-label="Wstecz"><span class="ph" data-ph="arrow-left"></span></button>
           <span class="ph" data-ph="chart-line-up"></span>
-          <h1>POSTĘPY</h1>
+          <h1 data-i18n="stV2Title">POSTĘPY</h1>
         </div>
         <button type="button" class="statsv2-chat-btn statsv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
       </div>
@@ -5481,6 +5481,21 @@ const T_EN = {
   stV2NoSeries: 'No sets logged for this exercise.',
   stV2NoSessions: 'No sessions.',
   stV2ExProgress: 'Exercise progress',
+  stV2Title: 'PROGRESS',
+  stV2CardioHTotal: 'h total', stV2CardioMinTotal: 'min total',
+  stV2Cardio7: 'Cardio · 7 days', stV2CardioTimeSub: 'total cardio time',
+  stV2Dist7: 'Distance · 7 days', stV2NoDist: 'no distance logged',
+  stV2Sessions7: 'Sessions · 7 days', stV2SessionsSub: 'with cardio exercises',
+  stV2Recently: 'Recently', stV2Range1y: '1y', stV2RangeAll: 'All time',
+  histTimedTotal: d => `total time ${d}`,
+  aiNextWorkout: 'For your next workout',
+  stV2Kcal7: 'Calories · 7 days',
+  stV2KcalAvg: a => `avg ${a} kcal / workout`,
+  stV2KcalNoWeight: 'Add your body weight in your account',
+  stV2BodyWeight: 'Body weight',
+  stV2WeightNoData: 'Add a measurement in your account',
+  stV2Weight90Same: 'no change / 90 days',
+  stV2Weight90: d => `${d} kg / 90 days`,
   stV2All: 'ALL',
   stV2SeriesHistory: 'Set history',
   stV2Record: 'Record',
@@ -7358,7 +7373,7 @@ function recomputeWorkoutCalories(){
   });
   if(changed) saveWorkouts(workouts);
 }
-function fmtKg(n){ return Number(n).toFixed(1).replace('.', ','); }
+function fmtKg(n){ const s = Number(n).toFixed(1); return LANG === 'en' ? s : s.replace('.', ','); }
 
 /* ---------- account panel (guest, no backend) ----------
    Entry point: the account badge top-right of the Dashboard. Header is
@@ -9317,7 +9332,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.74.1";
+const APP_VERSION = "4.74.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.74.0": {
@@ -12510,7 +12525,7 @@ function plPlural(n, one, few, many){
   if(n === 1) return one;
   return (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) ? few : many;
 }
-function fmtNum1(n){ return String(Math.round(n * 10) / 10).replace('.', ','); }
+function fmtNum1(n){ const s = String(Math.round(n * 10) / 10); return LANG === 'en' ? s : s.replace('.', ','); }
 function fmtDistance(m, inMetres){
   return inMetres ? `${String(Math.round(m)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0')} m` : `${fmtNum1(m / 1000)} km`;
 }
@@ -12526,9 +12541,9 @@ function cardioSetLine(s, name){
     if(inM && s.durationSec > 0) parts.push(fmtPace500(s.durationSec, s.distanceM));
   }
   if(s.inclinePct != null) parts.push(`${fmtNum1(s.inclinePct)}%`);
-  if(s.level != null) parts.push(`poz. ${s.level}`);
-  if(s.floors != null) parts.push(`${s.floors} ${plPlural(s.floors, 'piętro', 'piętra', 'pięter')}`);
-  if(s.jumps != null) parts.push(`${s.jumps} ${plPlural(s.jumps, 'skok', 'skoki', 'skoków')}`);
+  if(s.level != null) parts.push(LANG === 'en' ? `level ${s.level}` : `poz. ${s.level}`);
+  if(s.floors != null) parts.push(LANG === 'en' ? `${s.floors} floor${s.floors === 1 ? '' : 's'}` : `${s.floors} ${plPlural(s.floors, 'piętro', 'piętra', 'pięter')}`);
+  if(s.jumps != null) parts.push(LANG === 'en' ? `${s.jumps} jump${s.jumps === 1 ? '' : 's'}` : `${s.jumps} ${plPlural(s.jumps, 'skok', 'skoki', 'skoków')}`);
   return parts.join(' · ');
 }
 // "3 × 45 s" for equal sets, otherwise the list — the non-cardio rows of the summary's "Na czas" block
@@ -15156,6 +15171,7 @@ function dayKeyFromDate(iso){
   return map[new Date(iso+'T00:00:00').getDay()];
 }
 function plExercisesWord(n){
+  if(LANG === 'en') return n === 1 ? 'exercise' : 'exercises';
   const mod10 = n % 10, mod100 = n % 100;
   if(n === 1) return 'ćwiczenie';
   if(mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return 'ćwiczenia';
@@ -18005,8 +18021,8 @@ const DASH_ICO_CUP = `<svg aria-hidden="true" width="33" height="27" viewBox="0 
 const DASH_SVG_ARROW = (cls)=> `<svg${cls ? ` class="${cls}"` : ''} viewBox="0 0 12 12" width="12" height="12" fill="none" aria-hidden="true"><path d="M6 10V2M2.5 5.5 6 2l3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const DASH_SVG_ARROW_LONG = `<svg viewBox="0 0 30 16" width="30" height="16" fill="none" aria-hidden="true"><path d="M1 8h27M21.5 1.5 28 8l-6.5 6.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const DASH_SVG_CLOCK = `<svg viewBox="0 0 14 14" width="14" height="14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.6" stroke="currentColor" stroke-width="1.1"/><path d="M7 3.8V7l2.1 1.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const DASH_DAY_ABBR_UP = ['ND','PN','WT','ŚR','CZ','PT','SB'];
-const DASH_DAY_ABBR_LO = ['ndz','pn','wt','śr','czw','pt','sob'];
+const DASH_DAY_ABBR_UP = LANG === 'en' ? ['SUN','MON','TUE','WED','THU','FRI','SAT'] : ['ND','PN','WT','ŚR','CZ','PT','SB'];
+const DASH_DAY_ABBR_LO = LANG === 'en' ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] : ['ndz','pn','wt','śr','czw','pt','sob'];
 const dashCaret = ()=> ph('caret-down', 'dash-caret');
 const dashDow = iso => new Date(iso + 'T00:00:00').getDay();
 // "śr, 14 października" (year only when it is not the current one)
@@ -18484,7 +18500,7 @@ function openAiPopup(){
   const actionsEl = document.getElementById('aiPopupActions');
   if(data && data.actions && data.actions.length){
     actionsEl.hidden = false;
-    actionsEl.innerHTML = '<p class="ai-popup-actions-label">Na następny trening</p>' + data.actions.map(a=>
+    actionsEl.innerHTML = `<p class="ai-popup-actions-label">${t('aiNextWorkout','Na następny trening')}</p>` + data.actions.map(a=>
       `<div class="ai-popup-action"><span class="ai-popup-action-ex">${escHtml(a.exercise)}</span><span class="ai-popup-action-do">${escHtml(a.action)}</span></div>`
     ).join('');
   } else {
@@ -19329,7 +19345,7 @@ function renderHistMonthSummaryV2(animCls){
   if(monthWorkouts.length) titleParts.push(t('dashSessions', `${monthWorkouts.length} ${plTreningWord(monthWorkouts.length)}`, monthWorkouts.length));
   if(monthRuns.length) titleParts.push(`${monthRuns.length} ${plBiegWord(monthRuns.length)}`);
   const subParts = [];
-  if(totalVol>0) subParts.push(t('histV2SummaryVol', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol)));
+  if(totalVol>0) subParts.push(t('histV2SummaryVol', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol).toLocaleString('en-US')));
   if(totalKm>0) subParts.push(`${totalKm} km biegania`);
   return `
     <div class="histv2-card${animCls}" style="--i:0">
@@ -19386,7 +19402,7 @@ function histWorkoutCardInner(w){
   if(!exp){
     return head + `
     <p class="histv2-card-title">${t('histWorkoutVolTitle', `${w.exercises.length} ${plExercisesWord(w.exercises.length)}`, w.exercises.length)}</p>
-    <p class="histv2-card-sub">${workoutIsTimedOnly(w) ? `łączny czas ${fmtDur(workoutTimedTotalSec(w))}` : t('histWorkoutVolSub', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol))}</p>`;
+    <p class="histv2-card-sub">${workoutIsTimedOnly(w) ? t('histTimedTotal', `łączny czas ${fmtDur(workoutTimedTotalSec(w))}`, fmtDur(workoutTimedTotalSec(w))) : t('histWorkoutVolSub', `objętość ${Math.round(totalVol)} kg`, Math.round(totalVol).toLocaleString('en-US'))}</p>`;
   }
   const recD = gymFinRecordFrom(workoutRecord(w));
   const progress = buildProgressCard(w.exercises, name => histPriorTopSet(w, name), false);
@@ -20115,21 +20131,21 @@ function renderStatsV2Overview(){
 
       <div class="statsv2-krow statsv2-anim-card" style="--i:1">
         <div class="statsv2-kcard statsv2-kcard--half">
-          <p class="statsv2-kcard-eyebrow">Kalorie · 7 dni</p>
-          <div class="statsv2-kcard-num-row">${ph('flame')}<span class="statsv2-kcard-num">${k7.n ? k7.sum.toLocaleString('pl-PL') : '—'}<small>kcal</small></span>${k7.n?arwSvg(kcalDir):''}</div>
-          <p class="statsv2-kcard-delta">${k7.n ? `śr. ${k7.avg} kcal / trening` : 'Dodaj masę ciała w koncie'}</p>
+          <p class="statsv2-kcard-eyebrow">${t('stV2Kcal7','Kalorie · 7 dni')}</p>
+          <div class="statsv2-kcard-num-row">${ph('flame')}<span class="statsv2-kcard-num">${k7.n ? k7.sum.toLocaleString(LANG==='en'?'en-US':'pl-PL') : '—'}<small>kcal</small></span>${k7.n?arwSvg(kcalDir):''}</div>
+          <p class="statsv2-kcard-delta">${k7.n ? t('stV2KcalAvg', `śr. ${k7.avg} kcal / trening`, k7.avg) : t('stV2KcalNoWeight','Dodaj masę ciała w koncie')}</p>
         </div>
         ${(()=>{
           if(!wt) return `<div class="statsv2-kcard statsv2-kcard--half">
-            <p class="statsv2-kcard-eyebrow">Masa ciała</p>
+            <p class="statsv2-kcard-eyebrow">${t('stV2BodyWeight','Masa ciała')}</p>
             <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">—<small>kg</small></span></div>
-            <p class="statsv2-kcard-delta">Dodaj pomiar w koncie</p>
+            <p class="statsv2-kcard-delta">${t('stV2WeightNoData','Dodaj pomiar w koncie')}</p>
           </div>`;
           const dTxt = Math.abs(wt.delta) < 0.05
-            ? 'bez zmian / 90 dni'
-            : `${wt.delta > 0 ? '+' : '−'}${Math.abs(wt.delta).toFixed(1).replace('.', ',')} kg / 90 dni`;
+            ? t('stV2Weight90Same', 'bez zmian / 90 dni')
+            : t('stV2Weight90', `${wt.delta > 0 ? '+' : '−'}${Math.abs(wt.delta).toFixed(1).replace('.', ',')} kg / 90 dni`, `${wt.delta > 0 ? '+' : '−'}${Math.abs(wt.delta).toFixed(1)}`);
           return `<div class="statsv2-kcard statsv2-kcard--half">
-            <p class="statsv2-kcard-eyebrow">Masa ciała</p>
+            <p class="statsv2-kcard-eyebrow">${t('stV2BodyWeight','Masa ciała')}</p>
             <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${fmtKg(wt.cur)}<small>kg</small></span>${wtDir?arwSvg(wtDir):''}</div>
             <p class="statsv2-kcard-delta">${dTxt}</p>
           </div>`;
@@ -20242,7 +20258,7 @@ function renderStatsV2Detail(name){
       </div>`;
   }).join('');
 
-  const ranges = [[1,'1m'],[3,'3m'],[6,'6m'],[12,'1r'],[0,'Cały czas']];
+  const ranges = [[1,'1m'],[3,'3m'],[6,'6m'],[12,t('stV2Range1y','1r')],[0,t('stV2RangeAll','Cały czas')]];
 
   // Maciej: "czerwona apla z aktualny rekord - strzalka w gore pokazuje
   // progres - ta sama w dol pokazuje regres - brak ten sam ciezar". Reuses
@@ -20502,20 +20518,20 @@ function statsV2CardioHtml(){
   });
   if(!recent.length) return '';
   const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
-  const timeTxt = sec ? (h ? `${h}:${String(m).padStart(2,'0')}<small>h łącznie</small>` : `${m}<small>min łącznie</small>`) : '—';
+  const timeTxt = sec ? (h ? `${h}:${String(m).padStart(2,'0')}<small>${t('stV2CardioHTotal','h łącznie')}</small>` : `${m}<small>${t('stV2CardioMinTotal','min łącznie')}</small>`) : '—';
   const names = [...distNames].slice(0, 2).join(', ');
   return `
       <div class="statsv2-scard statsv2-anim-card" style="--i:1">
-        <p class="statsv2-scard-eyebrow">Kardio · 7 dni</p>
+        <p class="statsv2-scard-eyebrow">${t('stV2Cardio7','Kardio · 7 dni')}</p>
         <p class="statsv2-scard-num">${timeTxt}</p>
-        <p class="statsv2-scard-delta">łączny czas kardio</p>
+        <p class="statsv2-scard-delta">${t('stV2CardioTimeSub','łączny czas kardio')}</p>
       </div>
       <div class="statsv2-krow statsv2-anim-card" style="--i:1">
-        <div class="statsv2-kcard"><p class="statsv2-kcard-eyebrow">Dystans · 7 dni</p><div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${distM ? fmtNum1(distM / 1000) : '—'}<small>km</small></span></div><p class="statsv2-kcard-delta">${names ? escHtml(names) : 'bez wpisanego dystansu'}</p></div>
-        <div class="statsv2-kcard"><p class="statsv2-kcard-eyebrow">Sesje · 7 dni</p><div class="statsv2-kcard-num-row">${ph('stack')}<span class="statsv2-kcard-num">${sessions}</span></div><p class="statsv2-kcard-delta">z ćwiczeniami kardio</p></div>
+        <div class="statsv2-kcard"><p class="statsv2-kcard-eyebrow">${t('stV2Dist7','Dystans · 7 dni')}</p><div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${distM ? fmtNum1(distM / 1000) : '—'}<small>km</small></span></div><p class="statsv2-kcard-delta">${names ? escHtml(names) : t('stV2NoDist','bez wpisanego dystansu')}</p></div>
+        <div class="statsv2-kcard"><p class="statsv2-kcard-eyebrow">${t('stV2Sessions7','Sesje · 7 dni')}</p><div class="statsv2-kcard-num-row">${ph('stack')}<span class="statsv2-kcard-num">${sessions}</span></div><p class="statsv2-kcard-delta">${t('stV2SessionsSub','z ćwiczeniami kardio')}</p></div>
       </div>
       <div class="statsv2-scard statsv2-anim-card" style="--i:1">
-        <p class="statsv2-scard-eyebrow">Ostatnio</p>
+        <p class="statsv2-scard-eyebrow">${t('stV2Recently','Ostatnio')}</p>
         ${recent.map((r,i)=>`<div class="histv2-ex-item"${i===0?' style="border-top:none"':''}><span class="histv2-ex-ico">${r.icon ? `<img src="${iconPngUrl(r.icon)}" alt="">` : ''}</span><div class="histv2-ex-meta"><p class="histv2-ex-name">${escHtml(r.name)}</p><p class="histv2-ex-sets">${escHtml(r.line)}</p></div></div>`).join('')}
       </div>`;
 }
