@@ -136,6 +136,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 - **E6:** okna Udostępnij plan, Importuj plan (stany błędu, pole 16 px, zasady okien z klawiaturą), Zaimportować plan?, Dostosuj plan na szkielecie `.m-sheet2`; przycisk „Edytuj” dla planu własnego.
 - **E7 + C3 + E7b:** edytor planu na istniejącym mechanizmie: kółka dni (tap nigdy nie kasuje listy), menu „…” (Kopiuj na inne dni, Usuń trening), arkusz „Kopiuj na”, wyszukiwarka z polskimi aliasami, wspólny akordeon `renderExAccordion` w edytorze, oknie wyboru ćwiczenia i arkuszu zamiany ćwiczenia.
 - **QA:** naprawiony `ReferenceError` w imporcie kopii zapasowej (`saveDeletedBuiltinPlans`), sync z chmurą nie powtarza animacji ekranów Plany, slide `plans-all-v2` → edytor, wciśnięcie kółek dni i ✓. Raporty: `docs/qa-statyczne-plany-v2.md`, `docs/qa-runtime-plany-v2.md`.
+- **Tło i nagłówki:** Pulpit, Plany, GYM, Historia i Postępy mają to samo tło (surowe zdjęcie z Figmy z gradientem 144° .83; stare wyblakłe zdjęcie zostaje jako `dashboard-soft.webp` dla onboardingu, cache SW v30); Historia i Postępy mają nagłówek wg nowego standardu (`.profil-header`). Plan własny: zaznaczenia w pomarańczu.
 - Wersja 4.75.0 (ćwiczenia czasowe, natywne kopiowanie karty) wymaga nowego builda natywnego (wtyczka Clipboard).
 
 **Commity (31):** `864fa63`…`69b1594` (lista: `git log --oneline 9d63ab8..HEAD`).
