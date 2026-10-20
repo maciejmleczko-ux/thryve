@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.74.1 (2026-10-18)
+- **Aktualna wersja:** 4.74.2 (2026-10-20)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,10 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.74.2 · PATCH · 2026-10-20
+
+- **Wersja angielska (EN):** usunięte polskie napisy na ekranach Postępy, Historia i Pulpit. Nagłówek POSTĘPY → PROGRESS (`data-i18n="stV2Title"`); kafle Kalorie / Masa ciała / Kardio / Dystans / Sesje (tytuły i podpisy) przez `t()`; zakres wykresu ćwiczenia „1r / Cały czas” → „1y / All time”; „N ĆWICZEŃ” w karcie Historii → „N EXERCISES” (`plExercisesWord` zna EN); „łączny czas” w treningu tylko na czas; skróty dni na Pulpicie (`DASH_DAY_ABBR_*`: „MON–TUE”, „Tue, 20 October”); etykieta „Na następny trening” w oknie Trenera AI. W EN liczby z kropką dziesiętną (`fmtKg`, `fmtNum1`) i separator tysięcy w „kg volume”; opisy kardio (poziom, piętra, skoki) po angielsku. Polski bez zmian. Sprawdzone renderem w headless Chrome (`mekkio_lang_v1='en'`): Pulpit, Trening, zapis serii, Gratulacje, Historia, Postępy + szczegóły ćwiczenia.
 
 ### 4.74.1 · PATCH · 2026-10-18
 
