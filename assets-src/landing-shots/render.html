@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;background:transparent}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script></head><body>
+<script type="module">
+// static phone render for posters/carousel: ?img=<path under img/>&rx&ry&rz[&rim]
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const q=new URLSearchParams(location.search);
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true}); r.setPixelRatio(1); r.setSize(innerWidth,innerHeight); r.setClearColor(0x000000,0);
+r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.05; r.outputColorSpace=THREE.SRGBColorSpace; document.body.appendChild(r.domElement);
+const scene=new THREE.Scene(); const pm=new THREE.PMREMGenerator(r); scene.environment=pm.fromScene(new RoomEnvironment(),0.04).texture;
+const cam=new THREE.PerspectiveCamera(26,innerWidth/innerHeight,.01,10);
+const key=new THREE.DirectionalLight(0xffe2cc,2.0); key.position.set(-1,1.2,1.6); scene.add(key);
+const rim=new THREE.DirectionalLight(q.get('rim')||0xff5a1f,2.4); rim.position.set(1.4,-0.4,-0.6); scene.add(rim);
+const d=new DRACOLoader(); d.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/libs/draco/gltf/');
+const l=new GLTFLoader(); l.setDRACOLoader(d);
+const g=await l.loadAsync('3d/iphone.glb'); const m=g.scene;
+const box=new THREE.Box3().setFromObject(m); const size=box.getSize(new THREE.Vector3()); m.position.sub(box.getCenter(new THREE.Vector3()));
+const spin=new THREE.Group(); spin.add(m); m.rotation.y=Math.PI; const pivot=new THREE.Group(); pivot.add(spin); scene.add(pivot);
+const tex=await new THREE.TextureLoader().loadAsync('img/'+q.get('img')); tex.colorSpace=THREE.SRGBColorSpace; tex.flipY=false; tex.anisotropy=16;
+m.traverse(o=>{ if(o.isMesh && o.name.startsWith('display')){ o.material=new THREE.MeshStandardMaterial({color:0,emissive:0xffffff,emissiveMap:tex,roughness:.18,metalness:0,envMapIntensity:.35}); o.material.toneMapped=false; }});
+const dist=(size.y/.86/2)/Math.tan(THREE.MathUtils.degToRad(13)); cam.position.set(0,0,dist); cam.updateProjectionMatrix();
+pivot.rotation.set(+(q.get('rx')||0), +(q.get('ry')||0), +(q.get('rz')||0));
+r.render(scene,cam); document.title='ready';
+</script></body></html>

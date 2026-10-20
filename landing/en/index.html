@@ -1,0 +1,1417 @@
+<!doctype html>
+<!-- mekkio.app landing · Worker "mekkio-landing" · auto-deploy from GitHub (main, landing/*) via Cloudflare Workers Builds -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mekkio · workout log for iPhone</title>
+<meta name="description" content="Build your plan, log weight and reps at the gym, and Mekkio shows whether you're moving forward. Free, and no account needed.">
+<meta name="theme-color" content="#ff3300">
+<meta property="og:title" content="Mekkio · workout log for iPhone">
+<meta property="og:description" content="You lift. Mekkio counts.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mekkio.app/en/">
+<meta property="og:image" content="https://mekkio.app/img/apple-touch-icon.png">
+<link rel="icon" href="/img/favicon.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<link rel="canonical" href="https://mekkio.app/en/">
+<link rel="alternate" hreflang="pl" href="https://mekkio.app/">
+<link rel="alternate" hreflang="en" href="https://mekkio.app/en/">
+<link rel="alternate" hreflang="x-default" href="https://mekkio.app/">
+<link rel="preload" as="image" href="/img/en/r-orbit.webp">
+<script>
+  /* reload always starts at the hero (the browser would otherwise restore the old scroll position, mid-page);
+     links with a #section still jump to that section */
+  if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  // Done as soon as the DOM exists, never later: Safari fires load/pageshow only after the 3D model and images,
+  // and a late scroll would yank people back up after they had already used the menu.
+  // With manual restoration a reload already starts at the top; this only handles a #section in the address.
+  (function(){
+  var touched = false;
+  ['wheel','touchstart','keydown','mousedown'].forEach(function(t){ addEventListener(t, function(){ touched = true; }, { once: true, passive: true }); });
+  document.addEventListener('DOMContentLoaded', function(){
+    if(touched) return;
+    var t = location.hash && document.getElementById(location.hash.slice(1));
+    if(t) t.scrollIntoView({ behavior: 'instant' }); else scrollTo({ top: 0, behavior: 'instant' });
+  });
+  })();
+</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<style>
+/* ---------- tokens: motion + palette mirror index.html :root (Mekkio) ---------- */
+:root{
+  --m-ease:cubic-bezier(.16,1,.3,1);
+  --m-ease-exit:cubic-bezier(.4,0,1,1);
+  --m-ease-spring:cubic-bezier(.22,1.2,.36,1);
+  --m-dur-press-in:.1s;
+  --m-dur-press-out:.16s;
+  --m-dur-quick:.15s;
+  --m-dur-fade:.24s;
+  --m-dur-snap:.3s;
+  --m-dur-in:.4s;
+  --m-dur-pop:.5s;
+  --m-dur-tile:.7s;
+  --m-dur-draw:.9s;
+  --m-dur-hero:1.1s;          /* landing only: phone entrance (bigger + slower than an app tile) */
+  --m-dur-float:7s;           /* landing only: idle phone float loop on touch screens */
+  --m-dur-nudge:2.6s;         /* landing only: idle sideways nudge of the hero swipe arrows */
+
+  --m-orange:#ff3300;         /* brand: big type, glows, decoration */
+  --m-cta:#dd2b17;            /* = app --m-red-page; fills with white text (4.74:1) */
+  --m-cta-hover:#c42412;
+  --m-orange-text:#c42600;    /* small orange text on light (4.86:1) */
+  --m-ink:#1f2329;
+  --m-ink-2:#343941;
+  --m-muted:#5f5e66;          /* 5.37:1 on bg */
+  --m-ghost:#b9b6c2;          /* unfilled words of the scroll-fill headline (decorative state) */
+  --m-bg:#f3f1f6;
+  --m-bg-2:#e4e1ea;
+  --m-panel:#ebe8f1;
+  --m-card:#ffffff;
+  --m-line:#dcd8e4;
+  --m-plan-mid:#3b63cb;
+  --m-plan-accent:#6891ff;
+  --m-dark:#0e0f12;
+  --m-dark-2:#1a1c21;
+  --m-on-dark:#f5f3f8;
+  --m-on-dark-muted:#a3a2ab;
+  --m-wordmark:#ffffff;
+
+  --m-r-sm:12px;
+  --m-r-md:18px;
+  --m-r-lg:28px;
+  --m-r-xl:36px;
+  --m-font:'Geist','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --gutter:clamp(16px,4vw,40px);
+  --frame:clamp(8px,1.2vw,14px);     /* inset of the big rounded panels from the viewport edge */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --m-ink:#f2eff6; --m-ink-2:#dcd8e4; --m-muted:#a9a8b2; --m-ghost:#4a4d56;
+    --m-bg:#121317; --m-bg-2:#1b1d22; --m-panel:#1f2228; --m-card:#1a1c21; --m-line:#2c2f36;
+    --m-orange-text:#ff6a45; --m-wordmark:#23262c;
+  }
+}
+:root[data-theme="dark"]{
+  --m-ink:#f2eff6; --m-ink-2:#dcd8e4; --m-muted:#a9a8b2; --m-ghost:#4a4d56;
+  --m-bg:#121317; --m-bg-2:#1b1d22; --m-panel:#1f2228; --m-card:#1a1c21; --m-line:#2c2f36;
+  --m-orange-text:#ff6a45; --m-wordmark:#23262c;
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%; scroll-padding-top:96px;}
+@media (prefers-reduced-motion: no-preference){ html{scroll-behavior:smooth;} }
+body{
+  margin:0; background:var(--m-bg); color:var(--m-ink);
+  font-family:var(--m-font); font-size:17px; line-height:1.55; font-weight:300;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden; -webkit-tap-highlight-color:transparent;
+}
+img{max-width:100%; display:block;}
+a{color:inherit;}
+:focus-visible{outline:3px solid var(--m-orange); outline-offset:3px; border-radius:8px;}
+.wrap{max-width:1240px; margin:0 auto; padding:0 var(--gutter);}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+
+/* headings: Geist Light, tight */
+h1,h2,h3{margin:0; font-weight:300; letter-spacing:-.045em; line-height:.98; text-wrap:balance;}
+h1{font-size:clamp(2.9rem,6.4vw,5.6rem);}
+h2{font-size:clamp(2.3rem,5.4vw,4.6rem);}
+h3{font-size:1.45rem; letter-spacing:-.03em; line-height:1.15; font-weight:300;}
+p{margin:0; text-wrap:pretty;}
+.dim{color:var(--m-ghost);}
+.lede{font-size:clamp(1.05rem,1.6vw,1.2rem); color:var(--m-muted); max-width:48ch;}
+.pill-label{
+  display:inline-flex; align-items:center; gap:8px; align-self:start; justify-self:start;
+  border:1px solid var(--m-line); border-radius:999px; padding:7px 14px;
+  font-size:13px; font-weight:500; color:var(--m-muted);
+}
+.pill-label{border:0 !important; padding:0 !important; border-radius:0; font-size:13px; font-weight:400; letter-spacing:.06em; text-transform:uppercase;}
+.pill-label::before{display:none;}
+section{position:relative;}
+.sec{padding:clamp(56px,6vw,86px) 0 0;}
+
+/* ---------- buttons ---------- */
+.btn{
+  position:relative; display:inline-flex; align-items:center; justify-content:center; gap:12px;
+  min-height:54px; padding:0 8px 0 26px; border-radius:999px;
+  font:500 16px/1 var(--m-font); text-decoration:none; white-space:nowrap;
+  transition:transform var(--m-dur-press-out) var(--m-ease), background-color var(--m-dur-quick) ease, color var(--m-dur-quick) ease;
+}
+.btn:active{transform:scale(.97); transition-duration:var(--m-dur-press-in);}
+.btn .arr{
+  width:40px; height:40px; border-radius:50%; display:grid; place-items:center; flex:none; overflow:hidden;
+  transition:transform var(--m-dur-in) var(--m-ease);
+}
+.btn .arr svg{width:18px; height:18px; display:block; transition:transform var(--m-dur-in) var(--m-ease);}
+.btn-primary{background:var(--m-cta); color:#fff;}
+.btn-primary .arr{background:#fff; color:var(--m-cta);}
+.btn-light{background:#fff; color:var(--m-ink-2);}
+.btn-light .arr{background:var(--m-cta); color:#fff;}
+.btn-glass{
+  padding:0 24px; background:rgba(255,255,255,.14); color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.4);
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+}
+.btn-glass svg{width:18px; height:18px; display:block;}
+.btn-outline{padding:0 24px; background:transparent; color:var(--m-ink); box-shadow:inset 0 0 0 1px var(--m-ink);}
+@media (hover:hover) and (pointer:fine){
+  .btn-primary:hover{background:var(--m-cta-hover);}
+  .btn:hover .arr svg{transform:translateX(3px) rotate(-45deg);}
+  .btn-glass:hover{background:rgba(255,255,255,.24);}
+  .btn-outline:hover{background:var(--m-ink); color:var(--m-bg);}
+  .btn-light:hover{background:#fff3ee;}
+}
+.cta-row{display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
+
+/* ---------- nav: sits on the hero, no pill ---------- */
+.nav{
+  position:absolute; z-index:6; top:0; left:0; right:0;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:clamp(16px,2vw,26px) clamp(20px,4vw,56px); color:#fff;
+}
+.logo{display:flex; align-items:center; color:inherit; text-decoration:none; min-height:44px;}
+.logo svg{width:108px; height:27px; display:block;}
+.nav-links{display:flex; gap:clamp(18px,2.4vw,36px); font-size:15px;}
+.nav-links a{position:relative; text-decoration:none; padding:12px 0; font-weight:400; color:rgba(255,255,255,.86); transition:color var(--m-dur-quick) ease;}
+.nav-links a::after{
+  content:""; position:absolute; left:0; right:0; bottom:8px; height:1px; background:currentColor;
+  transform:scaleX(0); transform-origin:right; transition:transform var(--m-dur-in) var(--m-ease);
+}
+@media (hover:hover) and (pointer:fine){
+  .nav-links a:hover{color:#fff;}
+  .nav-links a:hover::after{transform:scaleX(1); transform-origin:left;}
+}
+.nav-cta{
+  display:inline-flex; align-items:center; gap:10px; min-height:44px; padding:0 4px 0 0;
+  color:#fff; text-decoration:none; font-size:15px;
+}
+.nav-cta .arr{width:40px; height:40px; border-radius:50%; background:#fff; color:var(--m-cta); display:grid; place-items:center;
+  transition:transform var(--m-dur-press-out) var(--m-ease);}
+.nav-cta .arr svg{width:18px; height:18px; display:block; transition:transform var(--m-dur-in) var(--m-ease);}
+.nav-cta:active .arr{transform:scale(.94);}
+@media (hover:hover) and (pointer:fine){ .nav-cta:hover .arr svg{transform:rotate(-45deg);} }
+@media (max-width:820px){ .nav-links{display:none;} }
+
+/* ---------- rendered phones: static renders of the 3D model = posters + fallback, live WebGL on top ---------- */
+.phone-img{display:block; width:100%; height:auto; user-select:none; -webkit-user-drag:none;}
+.gl-canvas{position:absolute; z-index:2; pointer-events:none; opacity:0; transition:opacity var(--m-dur-tile) ease;}
+.gl-on .gl-canvas{opacity:1;}
+.gl-on .gl-poster{opacity:0; visibility:hidden; transition:opacity var(--m-dur-fade) ease, visibility 0s linear var(--m-dur-fade);}
+
+/* ---------- HERO (per Figma 2026-09-29) ---------- */
+.hero{padding:var(--frame) var(--frame) 0;}
+.hero-panel{
+  position:relative; overflow:hidden; isolation:isolate; border-radius:var(--m-r-xl); color:#fff;
+  padding:0 clamp(20px,4vw,56px) clamp(48px,6.6vw,95px);
+  background:
+    radial-gradient(75% 36% at 45% 100%, rgba(255,226,206,.95), rgba(255,226,206,0) 72%),
+    linear-gradient(180deg,#5c0f00 0%,#a51c00 20%,#ec2c00 42%,#ff4a12 62%,#ff8a4f 82%,#ffc3a0 100%);
+}
+.hero-panel::before{ /* photo texture from the Figma: overlay, 26% */
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:.26; mix-blend-mode:overlay;
+  background:url(/img/hero-texture.webp) 50% 76.3% / 100% auto no-repeat;
+}
+.hero-panel::after{ /* fine grain against banding */
+  content:""; position:absolute; inset:0; z-index:-1; opacity:.16; mix-blend-mode:soft-light; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.hero-stage{position:relative; height:clamp(620px,62vw,900px); --pw:clamp(250px,27.4vw,400px); --ptop:76px;}
+.hero-giant{
+  position:absolute; z-index:0; left:calc(-1 * clamp(20px,4vw,56px)); right:calc(-1 * clamp(20px,4vw,56px)); top:clamp(210px,20.8vw,300px);
+  display:grid; justify-items:center; font-weight:200; letter-spacing:-.03em; line-height:.8; white-space:nowrap;
+  color:#ffa390; pointer-events:none; user-select:none;
+}
+/* Figma 21:238: ExtraLight, #FFA390; the second line is one piece, pushed right of centre */
+.hero-giant .l1{font-size:clamp(4.2rem,18.4vw,16.25rem);}
+.hero-giant .l2{font-size:clamp(3.2rem,14.2vw,12.53rem); margin-top:-.06em; position:relative; left:min(10.7vw,151px);}
+/* three phones on an invisible orbit; the box is sized from the front phone's width (--pw) so the poster
+   render and the live canvas line up at every viewport. The front phone is centred in it, --ptop from the stage top. */
+.hero-orbit{position:absolute; z-index:2; left:50%; top:calc(var(--ptop) - var(--pw) * .275); width:calc(var(--pw) * 3.6); height:calc(var(--pw) * 2.6);
+  transform:translateX(-50%); touch-action:pan-y; -webkit-user-select:none; user-select:none;}
+.hero-orbit.gl-on{cursor:grab;}
+.hero-orbit.dragging{cursor:grabbing;}
+.hero-orbit .gl-canvas{will-change:filter;}   /* one canvas per phone: the ones going back get a CSS blur */
+.hero-orbit .gl-canvas,.hero-orbit .orbit-poster{position:absolute; inset:0; width:100%; height:100%;}
+.hero-orbit .orbit-poster{object-fit:contain; -webkit-user-drag:none;}
+/* small glass arrows beside the front phone: hint that the orbit turns (swipe / drag), and turn it on click */
+.orbit-nav{position:absolute; z-index:4; left:50%; top:calc(var(--ptop) + var(--pw) * 1.02); width:calc(var(--pw) + 2 * clamp(44px,5vw,72px)); transform:translate(-50%,-50%);
+  display:flex; justify-content:space-between; pointer-events:none; opacity:0; transition:opacity var(--m-dur-tile) ease;}
+.hero-orbit.gl-on + .orbit-nav{opacity:1;}
+.orbit-arrow{pointer-events:auto; width:40px; height:40px; border-radius:50%; border:0; padding:0; display:grid; place-items:center; cursor:pointer; color:#fff;
+  background:rgba(255,255,255,.16); box-shadow:inset 0 0 0 1px rgba(255,255,255,.32); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  transition:transform var(--m-dur-press-out) var(--m-ease), background-color var(--m-dur-quick) ease;}
+.orbit-arrow svg{width:18px; height:18px; display:block;}
+.orbit-arrow:active{transform:scale(.92); transition-duration:var(--m-dur-press-in);}
+@media (hover:hover) and (pointer:fine){ .orbit-arrow:hover{background:rgba(255,255,255,.28);} }
+@media (prefers-reduced-motion: no-preference){
+  .orbit-arrow svg{animation:m-nudge var(--m-dur-nudge) var(--m-ease) infinite;}
+  .orbit-arrow.prev svg{--nx:-3px;}
+  .orbit-arrow.next svg{--nx:3px;}
+  @keyframes m-nudge{0%,55%,100%{transform:none;} 75%{transform:translateX(var(--nx));}}
+}
+.hero-copy{
+  position:relative; z-index:3; display:grid; grid-template-columns:1fr auto; align-items:end; gap:32px;
+  margin-top:clamp(-141px,-9.8vw,-24px); color:#1f2329;
+}
+.hero-copy h1{
+  font-size:clamp(2.8rem,5.7vw,5.15rem); line-height:.94; color:#1f2329;
+  background:linear-gradient(180deg,#1f2329 0%,#1f2329 48%,rgba(31,35,41,.72) 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.hero-lede{color:#0e0f12; font-size:clamp(1.1rem,1.55vw,1.375rem); line-height:1.4; font-weight:300; letter-spacing:-.015em; max-width:430px; padding-bottom:.35em;}
+/* small glass "Wkrótce w App Store" badge in the nav (Figma: 122×38) */
+.nav-right{display:flex; align-items:center; gap:clamp(18px,2.4vw,36px);}
+/* language switch: always visible (the section links hide on phones) */
+.lang-switch{display:grid; place-items:center; min-width:44px; min-height:38px; padding:0 10px; border-radius:11.5px; font-size:13px; font-weight:500; letter-spacing:.04em;
+  color:#fff; text-decoration:none; box-shadow:inset 0 0 0 1px rgba(255,255,255,.28); transition:background-color var(--m-dur-quick) ease;}
+@media (hover:hover) and (pointer:fine){ .lang-switch:hover{background:rgba(255,255,255,.16);} }
+.soon.sm{min-height:38px; padding:0 14px 0 11px; gap:7px; border-radius:11.5px; background:rgba(255,255,255,.16); box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);
+  -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px);}
+.soon.sm svg{width:16px; height:16px;}
+.soon.sm > span{font-size:12.5px;}
+.soon.sm small{font-size:8.5px;}
+.soon{
+  display:inline-flex; align-items:center; gap:10px; min-height:54px; padding:0 20px 0 16px; border-radius:16px;
+  color:#fff; background:rgba(0,0,0,.16); box-shadow:inset 0 0 0 1px rgba(255,255,255,.42); cursor:default;
+}
+.soon svg{width:22px; height:22px; display:block; flex:none;}
+.soon > span{display:grid; font-size:17px; font-weight:500; line-height:1.05; letter-spacing:-.01em;}
+.soon small{font-size:11px; font-weight:400; opacity:.85; letter-spacing:0;}
+.soon.ink{background:#1f2329; box-shadow:none;}                       /* on the light bottom of the hero: readable */
+.soon.white{background:#fff; color:var(--m-ink); box-shadow:none;}
+@media (max-width:900px){
+  .hero-stage{--pw:min(64vw,300px); --ptop:84px; height:calc(84px + var(--pw) * 2.09 + 24px);}
+  .hero-giant{top:clamp(150px,40vw,260px);}
+  .hero-copy{grid-template-columns:1fr; margin-top:0;}
+  .hero-panel::before{background-size:cover; background-position:50% 50%;}
+}
+
+/* ---------- SPLIT: two phones slide apart and reveal the line ---------- */
+.split{position:relative; height:250vh; margin-top:clamp(24px,4vw,56px);}
+.split-sticky{position:sticky; top:0; height:100vh; height:100svh; overflow:hidden; display:grid; place-items:center;}
+.split-copy{
+  position:relative; z-index:1; text-align:center; width:min(620px, calc(100% - 2 * var(--gutter)));
+  display:grid; gap:22px; justify-items:center;
+  opacity:var(--t,0); transform:translateY(calc((1 - var(--t,0)) * 34px)) scale(calc(.94 + var(--t,0) * .06));
+}
+.split-kicker{display:flex; gap:10px; align-items:center; font-size:14px; color:var(--m-muted);}
+.split-kicker b{font-weight:500; color:var(--m-ink);}
+.split-copy h2{font-size:clamp(2.2rem,4.3vw,4.1rem); line-height:1.02; letter-spacing:-.05em;}
+.split-copy h2 em{font-style:normal; color:var(--m-orange);}
+.split-copy p{color:var(--m-muted); max-width:42ch;}
+.split-phones{position:absolute; inset:0; z-index:2; pointer-events:none;}
+.split-phone{position:absolute; left:50%; top:50%; perspective:1800px; --gap0:clamp(56px,6vw,96px); --spread:clamp(220px,30vw,470px);}
+.split-phone{width:clamp(210px,20.4vw,300px);}
+.split-phone img{filter:drop-shadow(6px 10px 8px rgba(31,35,41,.28)) drop-shadow(30px 50px 50px rgba(31,35,41,.26));}
+.split-gl{inset:0; width:100%; height:100%;}
+.split.gl-on .split-phones{visibility:hidden;}
+.split-phone.l{transform:translate(-50%,-50%) translateX(calc(-1 * (var(--gap0) + var(--p,0) * var(--spread))));}
+.split-phone.r{transform:translate(-50%,-50%) translateX(calc(var(--gap0) + var(--p,0) * var(--spread))) translateY(24px); z-index:1;}
+@media (max-width:700px){
+  .split-phone{--spread:78vw; --gap0:40px;}
+  .split-phone{width:170px;}
+}
+@media (prefers-reduced-motion: reduce){
+  .split{height:auto;}
+  .split-sticky{position:relative; height:auto; padding:40px 0; display:flex; flex-direction:column; gap:40px;}
+  .split-phones{position:relative; inset:auto; display:flex; justify-content:center; gap:24px;}
+  .split-phone{position:relative; left:auto; top:auto; transform:none !important;}
+  .split-phone{width:clamp(150px,22vw,260px);}
+}
+
+/* ---------- SCREENS carousel: phones on a dark panel ---------- */
+.dark-panel{
+  margin:0 var(--frame); border-radius:var(--m-r-xl); background:var(--m-dark); color:var(--m-on-dark);
+  padding:clamp(72px,9vw,120px) 0 clamp(56px,7vw,96px); overflow:hidden; position:relative; isolation:isolate;
+}
+.dark-panel::before{
+  content:""; position:absolute; z-index:-1; left:50%; top:56%; width:min(900px,120vw); aspect-ratio:1.6; transform:translate(-50%,-50%);
+  background:radial-gradient(closest-side, rgba(255,51,0,.3), rgba(255,51,0,.08) 55%, transparent);
+}
+.dark-panel .lede{color:var(--m-on-dark-muted);}
+.dark-head{text-align:center; display:grid; justify-items:center; gap:18px;}
+.dark-head .pill-label{border-color:rgba(255,255,255,.18); color:var(--m-on-dark-muted); justify-self:center;}
+.caro{position:relative; margin-top:clamp(40px,6vw,72px); touch-action:pan-y; user-select:none;}
+.caro-track{
+  display:flex; gap:clamp(8px,1.6vw,24px); align-items:center; list-style:none; margin:0; padding:0;
+  transform:translateX(var(--x,0px)); transition:transform var(--m-dur-draw) var(--m-ease);
+}
+.caro-slide{
+  flex:none; opacity:.34; transform:scale(.84); cursor:pointer;
+  transition:transform var(--m-dur-draw) var(--m-ease), opacity var(--m-dur-draw) ease;
+}
+.caro-slide img{width:clamp(200px,20vw,270px);}
+.caro-slide.on{opacity:1; transform:none; cursor:default;}
+.caro-cap{width:min(560px,100%); margin:40px auto 0; text-align:center; display:grid; gap:8px; min-height:112px;}
+.caro-cap .k{font-size:13px; font-weight:500; color:#ff6a45; letter-spacing:.02em;}
+.caro-cap h3{font-size:clamp(1.6rem,2.6vw,2.1rem);}
+.caro-cap p{color:var(--m-on-dark-muted); font-size:16px;}
+.caro-cap > *{transition:opacity var(--m-dur-fade) ease, transform var(--m-dur-fade) var(--m-ease);}
+.caro-cap.swap > *{opacity:0; transform:translateY(6px);}
+.caro-ctrl{display:flex; justify-content:center; align-items:center; gap:10px; margin-top:22px;}
+.sq-btn{
+  width:52px; height:52px; border-radius:50%; border:0; display:grid; place-items:center; cursor:pointer;
+  transition:transform var(--m-dur-press-out) var(--m-ease), background-color var(--m-dur-quick) ease;
+}
+.sq-btn:active{transform:scale(.94);}
+.sq-btn svg{width:20px; height:20px; display:block;}
+.sq-prev{background:#fff; color:var(--m-ink-2);}
+.sq-next{background:var(--m-cta); color:#fff;}
+@media (hover:hover) and (pointer:fine){ .sq-next:hover{background:var(--m-cta-hover);} }
+.dots{display:flex; gap:10px; margin:0 14px;}
+.dots button{
+  position:relative; width:8px; height:8px; padding:0; border:0; border-radius:50%; cursor:pointer;
+  background:rgba(255,255,255,.28); transition:transform var(--m-dur-in) var(--m-ease-spring), background-color var(--m-dur-quick) ease;
+}
+.dots button::after{content:""; position:absolute; inset:-18px -5px;} /* 44px touch target */
+.dots button.on{background:#fff; transform:scale(1.4);}
+
+/* ---------- FEATURES ---------- */
+.feat-head{display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:end; margin-bottom:clamp(40px,5vw,64px);}
+.feat-head .pill-label{margin-bottom:22px;}
+@media (max-width:860px){ .feat-head{grid-template-columns:1fr;} }
+.feat{display:grid; grid-template-columns:repeat(12,1fr); gap:16px;}
+.fcell{display:flex; min-width:0;}
+.fcard{
+  flex:1; background:var(--m-card); border-radius:var(--m-r-lg); padding:26px; box-shadow:0 0 0 1px var(--m-line);
+  display:flex; flex-direction:column; gap:10px; min-width:0; overflow:hidden; position:relative;
+  transition:transform var(--m-dur-in) var(--m-ease), opacity var(--m-dur-fade) ease, box-shadow var(--m-dur-in) ease;
+}
+@media (hover:hover) and (pointer:fine){
+  .fcard:hover{transform:translateY(-6px) scale(1.03); z-index:2; box-shadow:0 0 0 1px var(--m-line), 0 30px 60px -30px rgba(31,35,41,.35);}
+  .fcard.blue:hover{box-shadow:0 30px 60px -30px rgba(38,66,164,.6);}
+  .feat:has(.fcard:hover) .fcard:not(:hover){opacity:.45;}
+}
+.fcard p{color:var(--m-muted); font-size:15.5px;}
+.fcard .shot{margin-top:auto; padding-top:18px;}
+.shot-in{position:relative; border-radius:18px; overflow:hidden; box-shadow:0 20px 40px -24px rgba(31,35,41,.4);}
+.shot-in img{width:100%; height:auto; display:block;}
+/* draw-in overlays: plain shapes in the card's own colour that move away (transform only) */
+.wipe,.strip,.ring-mask{display:none; position:absolute; pointer-events:none;}
+.wipe{left:4%; right:0; top:40%; height:47%; background:linear-gradient(90deg, rgba(254,51,0,0), #fe3300 6%); transform-origin:100% 50%;}
+.strip{left:2.5%; right:2.5%; height:14%; background:#3b63cc; transform-origin:100% 50%;}
+@property --a{syntax:'<angle>'; inherits:false; initial-value:0deg;}
+.ring-mask{
+  left:2.43%; top:24.1%; width:38.6%; aspect-ratio:1; border-radius:50%; background:#000; --a:0deg;
+  -webkit-mask:conic-gradient(from 0deg, transparent var(--a), #000 0), radial-gradient(closest-side, transparent 67%, #000 68%);
+  -webkit-mask-composite:source-in;
+  mask:conic-gradient(from 0deg, transparent var(--a), #000 0), radial-gradient(closest-side, transparent 67%, #000 68%);
+  mask-composite:intersect;
+}
+@media (prefers-reduced-motion: no-preference){
+  .js .wipe,.js .strip,.js .ring-mask{display:block;}
+  .js .fcell.in .wipe{transform:scaleX(0); transition:transform 1.4s var(--m-ease) .45s;}
+  .js .fcell.in .strip{transform:scaleX(0); transition:transform var(--m-dur-tile) var(--m-ease); transition-delay:calc(.4s + var(--k,0) * 110ms);}
+  .js .fcell.in .ring-mask{--a:360deg; transition:--a 1.3s var(--m-ease) .45s;}
+  .js .fcell .pop{opacity:0; transform:translateY(8px) scale(.94);}
+  .js .fcell.in .pop{opacity:1; transform:none;
+    transition:opacity var(--m-dur-in) ease, transform var(--m-dur-pop) var(--m-ease-spring);
+    transition-delay:calc(.35s + var(--j,0) * 45ms);}
+}
+.c5{grid-column:span 5;} .c7{grid-column:span 7;} .c4{grid-column:span 4;} .c6{grid-column:span 6;}
+.fcard.blue{background:var(--m-plan-mid); color:#fff; box-shadow:none;}
+.fcard.blue p{color:rgba(255,255,255,.9);}
+/* "+1 powtórzenie = rekord": the same weight, one more rep, and the strength record (e1RM) goes up.
+   Rep pips fill in when the card scrolls in, the 9th pops in orange, then the record counts up (JS). */
+.plus1{margin-top:auto; padding-top:18px; display:grid; gap:10px;}
+.p1-row{display:flex; justify-content:space-between; align-items:baseline; font-size:13px; color:var(--m-muted);}
+.p1-row b{font-weight:400; color:var(--m-ink); font-variant-numeric:tabular-nums;}
+.p1-row.now{color:var(--m-ink);}
+.p1-pips{display:grid; grid-template-columns:repeat(9,1fr); gap:5px; margin:-2px 0 6px;}
+.p1-pips i{height:10px; border-radius:5px; background:var(--m-bg-2);}
+.p1-pips i.on{background:#c9c6d1;}
+.p1-pips.now i.on{background:var(--m-ink);}
+.p1-pips i.new{background:var(--m-orange);}
+.p1-row .plus{margin-left:auto; margin-right:8px; font-size:11px; font-weight:500; padding:2px 8px; border-radius:999px; background:#ffe3d9; color:var(--m-orange-text);}
+.p1-pips i.empty{background:transparent; box-shadow:inset 0 0 0 1.5px var(--m-bg-2);}
+.p1-res{
+  display:grid; grid-template-columns:1fr auto; align-items:end; column-gap:12px;
+  background:var(--m-orange); color:#fff; border-radius:var(--m-r-md); padding:16px 18px;
+}
+.p1-res .k{grid-column:1 / -1; font-size:11px; font-weight:500; letter-spacing:.09em; text-transform:uppercase; color:rgba(255,255,255,.85);}
+.p1-res .v{margin-top:6px; font-size:clamp(2.2rem,3.4vw,2.8rem); font-weight:300; letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; white-space:nowrap;}
+.p1-res .v small{font-size:.42em; letter-spacing:0; margin-left:4px;}
+.p1-res .d{grid-column:1; margin-top:6px; font-size:11px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:#ffd885;}
+.p1-res .tr{grid-column:2; grid-row:2 / 4; width:40px; height:40px; display:block;}
+.p1-types{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:6px;}
+.p1-types li{font-size:12px; padding:5px 11px; border-radius:999px; background:var(--m-panel); color:var(--m-muted);}
+.p1-types li.on{background:#ffe3d9; color:var(--m-orange-text);}
+@media (prefers-reduced-motion: no-preference){
+  .js .fcell .p1-pips i{transform:scaleX(.2); opacity:0; transform-origin:0 50%;}
+  .js .fcell.in .p1-pips i{transform:none; opacity:1;
+    transition:transform var(--m-dur-in) var(--m-ease), opacity var(--m-dur-fade) ease;
+    transition-delay:calc(.35s + var(--j,0) * 45ms);}
+  .js .fcell.in .p1-pips.now i{transition-delay:calc(.6s + var(--j,0) * 45ms);}
+  .js .fcell.in .p1-pips i.new{transition:transform var(--m-dur-pop) var(--m-ease-spring), opacity var(--m-dur-fade) ease; transition-delay:1.05s;}
+  .js .fcell .p1-row .plus{opacity:0; transform:translateY(6px) scale(.9);}
+  .js .fcell.in .p1-row .plus{opacity:1; transform:none; transition:opacity var(--m-dur-fade) ease 1.15s, transform var(--m-dur-pop) var(--m-ease-spring) 1.15s;}
+}
+.wave{display:grid; grid-template-columns:auto repeat(4,1fr); gap:6px; align-items:center; font-size:12px; margin-top:auto; padding-top:18px;}
+.wave em{font-style:normal; opacity:.85; padding-right:6px;}
+.wave em.wk{text-align:center; padding:0; font-size:11px;}
+.wave i{height:30px; border-radius:10px; display:grid; place-items:center; font-style:normal; font-size:11px; font-weight:500; background:rgba(255,255,255,.14);}
+.wave i.max{background:#fff; color:#2642a4;}
+.wave i.str{background:rgba(255,255,255,.72); color:#2642a4;}
+.wave i.vol{background:rgba(255,255,255,.26);}
+.more{margin-top:16px; background:var(--m-card); border-radius:var(--m-r-lg); box-shadow:0 0 0 1px var(--m-line);
+  display:grid; grid-template-columns:repeat(3,1fr);}
+.more article{padding:26px; display:grid; grid-template-columns:44px 1fr; gap:4px 16px; align-content:start; border-top:1px solid var(--m-line);}
+.more article:nth-child(-n+3){border-top:0;}
+.more article:not(:nth-child(3n+1)){border-left:1px solid var(--m-line);}
+.more .ico{grid-row:span 2; width:44px; height:44px; border-radius:14px; background:var(--m-panel); color:var(--m-orange-text); display:grid; place-items:center;
+  transition:transform var(--m-dur-pop) var(--m-ease-spring);}
+@media (hover:hover) and (pointer:fine){ .more article:hover .ico{transform:rotate(-8deg) scale(1.08);} }
+.more .ico svg{width:22px; height:22px; display:block;}
+.more h3{font-size:1.1rem;}
+.more p{color:var(--m-muted); font-size:15px;}
+@media (max-width:980px){
+  /* records + year chart each get a full row (side by side the short records card stretched to the chart's height) */
+  .c5,.c7{grid-column:span 12;}
+  .c4,.c6{grid-column:span 6;}
+  .fcell.c4:last-child{grid-column:span 12;}
+  .more{grid-template-columns:1fr 1fr;}
+  .more article{border-left:0 !important; border-top:1px solid var(--m-line) !important;}
+  .more article:nth-child(-n+2){border-top:0 !important;}
+  .more article:nth-child(2n){border-left:1px solid var(--m-line) !important;}
+  .more article:last-child:nth-child(odd){grid-column:1 / -1;}
+}
+@media (max-width:640px){
+  .c5,.c7,.c4,.c6{grid-column:span 12;}
+  .more{grid-template-columns:1fr;}
+  .more article{border-left:0 !important; border-top:1px solid var(--m-line) !important;}
+  .more article:first-child{border-top:0 !important;}
+  .more article:nth-child(2){border-top:1px solid var(--m-line) !important;}
+  .more article:nth-child(2n){border-left:0 !important;}
+}
+
+/* ---------- AI ---------- */
+.ai{display:grid; grid-template-columns:1fr 1fr; gap:clamp(48px,8vw,140px); align-items:center; padding:clamp(24px,4vw,64px) clamp(20px,5vw,72px);}
+.ai .pill-label{border-color:rgba(255,255,255,.18); color:var(--m-on-dark-muted);}
+.ai h2{margin-top:22px;}
+.ai .lede{margin-top:20px;}
+.ai-points{list-style:none; margin:30px 0 0; padding:0; display:grid; gap:0;}
+.ai-points li{display:grid; grid-template-columns:40px 1fr; gap:14px; padding:16px 0; border-top:1px solid rgba(255,255,255,.1); font-size:16px;}
+.ai-points .n{font-size:13px; color:#b69cff; padding-top:3px; font-variant-numeric:tabular-nums;}
+.ai-disclaimer{margin-top:clamp(56px,7vw,96px); max-width:360px; text-align:center; font-size:13px; color:var(--m-on-dark-muted);}
+.ai-stage{position:relative; perspective:1800px; display:grid; justify-items:center; padding:clamp(40px,5vw,72px) 0 0;}
+.ai-stage::before{content:""; position:absolute; inset:10% 5%; z-index:-1; border-radius:50%;
+  background:radial-gradient(closest-side, rgba(182,156,255,.35), transparent); filter:blur(20px);}
+.ai-phone{position:relative; width:clamp(250px,23vw,330px);}
+.ai-phone .gl-canvas{inset:-6% -30%; width:160%; height:112%;}
+.ai-phone .ai-blur{position:absolute; inset:0; opacity:var(--pp,0);}
+/* the AI popup (live text, per Figma) grows out of the phone as the section reaches mid-screen */
+.ai-pop{
+  position:absolute; z-index:4; left:50%; top:50%; width:124%; padding:18px; border-radius:18px; color:#fff;
+  transform:translate(-50%,-50%) scale(calc(.76 + var(--pp,0) * .24));
+  border:1.15px solid transparent;
+  background:linear-gradient(#000,#000) padding-box, linear-gradient(160deg,#d87fff 0%,#6891ff 13%,#fa1228 55%,#700083 94%) border-box;
+  box-shadow:inset 0 0 38px rgba(161,0,255,.94), inset 0 0 13px rgba(222,116,255,.5), 0 30px 70px -20px rgba(0,0,0,.85);
+  display:grid; gap:23px; font-size:12px; line-height:1.3; font-weight:300;
+}
+.ai-pop-head{display:flex; align-items:center; justify-content:space-between; font-size:12.6px; font-weight:500; letter-spacing:.09em; opacity:.82;}
+.ai-pop-head span{display:flex; gap:8px; align-items:center;}
+.ai-pop-head svg{width:14px; height:14px; display:block;}
+.ai-pop b{font-weight:500; font-size:12.6px;}
+.ai-pop h4{margin:0 0 10px; font-size:12.6px; font-weight:500; letter-spacing:.04em;}
+.ai-pop dl{margin:0; display:grid; gap:0;}
+.ai-pop dt{font-weight:400; margin-top:10px;}
+.ai-pop dd{margin:2px 0 0; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.14);}
+.ai-pop dd:last-child{border-bottom:0; padding-bottom:0;}
+@media (max-width:900px){ .ai{grid-template-columns:1fr;} }
+
+/* ---------- privacy ---------- */
+.priv{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+.priv article{background:var(--m-card); border-radius:var(--m-r-lg); padding:26px; box-shadow:0 0 0 1px var(--m-line); display:grid; gap:10px; align-content:start;}
+@media (prefers-reduced-motion: no-preference){
+  .js .seq > *{opacity:0; transform:translateY(44px) scale(.95);}
+  .js .seq.in > *{opacity:1; transform:none;
+    transition:opacity var(--m-dur-tile) ease, transform var(--m-dur-tile) var(--m-ease);
+    transition-delay:calc(var(--i,0) * 200ms);}
+}
+@media (prefers-reduced-motion: reduce){
+  .js .seq > *{opacity:0;}
+  .js .seq.in > *{opacity:1; transition:opacity var(--m-dur-fade) ease; transition-delay:calc(var(--i,0) * 120ms);}
+}
+.priv .ico{width:44px; height:44px; border-radius:14px; background:var(--m-panel); color:var(--m-ink); display:grid; place-items:center; margin-bottom:8px;}
+.priv .ico svg{width:22px; height:22px; display:block;}
+.priv h3{font-size:1.15rem;}
+.priv p{color:var(--m-muted); font-size:15.5px;}
+@media (max-width:980px){ .priv{grid-template-columns:1fr 1fr;} }
+@media (max-width:560px){ .priv{grid-template-columns:1fr;} }
+.sec-link{display:inline-flex; align-items:center; gap:8px; margin-top:22px; padding:10px 0; font-weight:500; color:var(--m-orange-text); text-decoration:none;}
+.sec-link svg{width:16px; height:16px; transition:transform var(--m-dur-in) var(--m-ease);}
+@media (hover:hover) and (pointer:fine){ .sec-link:hover svg{transform:translateX(4px);} }
+.sec-head{display:grid; gap:20px; max-width:820px; margin-bottom:clamp(40px,5vw,60px);}
+
+/* ---------- price ---------- */
+.price{display:grid; grid-template-columns:auto 1fr; gap:clamp(24px,5vw,80px); align-items:center;
+  border-top:1px solid var(--m-line); border-bottom:1px solid var(--m-line); padding:clamp(40px,5vw,64px) 0;}
+.price-tag{font-size:clamp(6rem,16vw,13rem); font-weight:300; letter-spacing:-.07em; line-height:.8;}
+.price-tag span{color:var(--m-orange); font-size:.42em; letter-spacing:-.04em; margin-left:.12em;}
+.price .lede{max-width:52ch;}
+@media (max-width:760px){ .price{grid-template-columns:1fr;} }
+
+/* ---------- FAQ ---------- */
+.faq{display:grid; grid-template-columns:.8fr 1.2fr; gap:clamp(28px,5vw,80px); align-items:start;}
+.faq-list{display:grid; gap:0; border-top:1px solid var(--m-line);}
+details{border-bottom:1px solid var(--m-line);}
+summary{list-style:none; cursor:pointer; padding:24px 60px 24px 0; position:relative; font-size:19px; letter-spacing:-.02em; min-height:44px;}
+summary::-webkit-details-marker{display:none;}
+summary::after,summary::before{
+  content:""; position:absolute; right:14px; top:50%; width:16px; height:1.5px; background:var(--m-ink);
+  transition:transform var(--m-dur-in) var(--m-ease);
+}
+summary::before{transform:rotate(90deg);}
+details[open] summary::before{transform:rotate(0deg);}
+details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
+@media (prefers-reduced-motion: no-preference){
+  details[open] > div{animation:m-reveal var(--m-dur-in) var(--m-ease) backwards;}
+}
+@media (max-width:860px){ .faq{grid-template-columns:1fr;} }
+
+/* ---------- FINAL (Kinetic-style wordmark) ---------- */
+.final{padding:clamp(56px,6vw,86px) var(--frame) var(--frame);}
+.final-panel{
+  position:relative; overflow:hidden; isolation:isolate; border-radius:var(--m-r-xl); background:var(--m-bg-2);
+  padding:clamp(40px,5vw,72px) clamp(20px,4vw,56px) clamp(28px,3vw,40px);
+}
+.final-panel::before{
+  content:""; position:absolute; z-index:-1; left:-18%; top:-30%; width:min(820px,110vw); aspect-ratio:1; border-radius:50%;
+  background:radial-gradient(closest-side, rgba(255,51,0,.42), rgba(255,51,0,.12) 50%, transparent 72%); filter:blur(10px);
+}
+.final-top{display:grid; gap:0;}
+.final-top .soon{margin-top:28px; justify-self:start;}
+.final-top h2{font-size:clamp(2.2rem,4.4vw,3.8rem);}
+.final-top .lede{margin-top:18px;}
+.cta-card{background:var(--m-card); border-radius:30px; padding:30px; display:grid; gap:14px; text-align:center;
+  box-shadow:0 30px 60px -30px rgba(31,35,41,.35);}
+.cta-card h3{font-size:1.7rem;}
+.cta-card h3 span{color:var(--m-orange-text);}
+.cta-card p{color:var(--m-muted); font-size:15px;}
+.cta-card .btn{width:100%;}
+.wordmark{margin:clamp(40px,6vw,80px) 0 0; color:#fff;}
+.wordmark svg{opacity:.23;}
+.wordmark svg{width:100%; height:auto; display:block;}
+.foot{display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr; gap:24px; margin-top:clamp(32px,4vw,56px); font-size:15px;}
+.foot h4{margin:0 0 10px; font-size:18px; font-weight:300; letter-spacing:-.02em;}
+.foot a{display:block; text-decoration:none; color:var(--m-muted); padding:6px 0;}
+.foot a:hover{color:var(--m-ink);}
+.foot-soon{display:block; color:var(--m-muted); padding:6px 0;}
+.foot small{display:block; color:var(--m-muted); margin-top:18px; font-size:13px;}
+.foot .big{font-size:clamp(1.6rem,2.6vw,2.2rem); font-weight:300; letter-spacing:-.04em; line-height:1.05;}
+@media (max-width:860px){ .final-top{grid-template-columns:1fr;} .foot{grid-template-columns:1fr 1fr;} .foot > :first-child{grid-column:1/-1;} }
+
+/* ---------- motion ---------- */
+/* Scroll reveal: transition-based (interruptible), see CLAUDE.md §4/§9/§10 */
+@media (prefers-reduced-motion: no-preference){
+  .js .rv{opacity:0; transform:translateY(18px);}
+  .js .rv.in{opacity:1; transform:none;
+    transition:opacity var(--m-dur-tile) var(--m-ease), transform var(--m-dur-tile) var(--m-ease);
+    transition-delay:calc(var(--i,0) * 70ms);}
+
+  /* hero entrance (plays once on load) */
+  .js .hero-copy > *{animation:m-reveal var(--m-dur-tile) var(--m-ease) backwards; animation-delay:calc(.15s + var(--i,0) * 90ms);}
+  .js .hero-giant{animation:m-giant var(--m-dur-hero) var(--m-ease) .35s backwards;}
+  .js .hero-orbit{animation:m-phone-in var(--m-dur-hero) var(--m-ease) .3s backwards;}
+  .js .nav{animation:m-fade var(--m-dur-tile) ease .1s backwards;}
+
+  /* touch screens can't hover: the hero phone breathes instead */
+
+  @keyframes m-reveal{from{opacity:0; transform:translateY(14px);}}
+  @keyframes m-fade{from{opacity:0;}}
+  @keyframes m-giant{from{opacity:0; transform:translateY(40px);}}
+  @keyframes m-phone-in{from{opacity:0; transform:translate(-50%,90px);}}
+  @keyframes m-float{0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);}}
+}
+@media (prefers-reduced-motion: reduce){
+  .js .rv{opacity:0;}
+  .js .rv.in{opacity:1; transition:opacity var(--m-dur-fade) ease;}
+  .fill-head .w{color:var(--m-ink);}
+  .caro-track,.caro-slide{transition-duration:0s;}
+}
+/* collective :active speed-up (CLAUDE.md §5) */
+.btn:active,.sq-btn:active,.nav-cta:active .arr{transition-duration:var(--m-dur-press-in);}
+</style>
+</head>
+<body>
+
+<main id="top">
+
+<!-- ================= HERO ================= -->
+<section class="hero" aria-labelledby="hero-h">
+  <div class="hero-panel" id="hero">
+    <header class="nav" id="nav">
+      <a class="logo" href="#top" aria-label="Mekkio, home"><svg viewBox="0 0 236 58" width="108" height="27" aria-hidden="true" fill="currentColor"><path d="M214.412 58.0003C210.234 58.0003 206.557 57.1011 203.384 55.3027C200.263 53.4513 197.829 50.8594 196.084 47.527C194.391 44.1945 193.545 40.3067 193.545 35.8634C193.545 31.3673 194.391 27.4795 196.084 24.1999C197.829 20.8675 200.263 18.302 203.384 16.5036C206.557 14.6522 210.234 13.7266 214.412 13.7266C218.591 13.7266 222.241 14.6522 225.362 16.5036C228.483 18.302 230.889 20.8675 232.582 24.1999C234.328 27.4795 235.2 31.3673 235.2 35.8634C235.2 40.3067 234.328 44.1945 232.582 47.527C230.889 50.8594 228.483 53.4513 225.362 55.3027C222.241 57.1011 218.591 58.0003 214.412 58.0003ZM214.412 49.7486C217.692 49.7486 220.204 48.532 221.95 46.0988C223.748 43.6656 224.648 40.2538 224.648 35.8634C224.648 31.526 223.748 28.1407 221.95 25.7075C220.204 23.2214 217.692 21.9783 214.412 21.9783C211.133 21.9783 208.594 23.2214 206.795 25.7075C204.997 28.1407 204.098 31.526 204.098 35.8634C204.098 40.2538 204.997 43.6656 206.795 46.0988C208.594 48.532 211.133 49.7486 214.412 49.7486Z" /><path d="M178.97 57.0481C178.127 57.0481 177.444 56.365 177.444 55.5223V16.2044C177.444 15.3617 178.127 14.6786 178.97 14.6786H186.074C186.917 14.6786 187.6 15.3617 187.6 16.2044V55.5223C187.6 56.365 186.917 57.0481 186.074 57.0481H178.97ZM178.811 9.04518C177.968 9.04518 177.285 8.36204 177.285 7.51934V1.52584C177.285 0.68314 177.968 0 178.811 0H186.312C187.155 0 187.838 0.683142 187.838 1.52584V7.51934C187.838 8.36204 187.155 9.04518 186.312 9.04518H178.811Z" /><path d="M87.5634 58.0003C83.3318 58.0003 79.6555 57.1011 76.5347 55.3027C73.4138 53.4513 71.0071 50.8594 69.3144 47.527C67.6217 44.1945 66.7754 40.3067 66.7754 35.8634C66.7754 31.4202 67.6217 27.5588 69.3144 24.2793C71.0071 20.9468 73.3874 18.3549 76.4553 16.5036C79.5762 14.6522 83.1995 13.7266 87.3254 13.7266C91.3455 13.7266 94.8631 14.6258 97.8781 16.4242C100.946 18.2227 103.3 20.8146 104.94 24.1999C106.579 27.5853 107.399 31.6582 107.399 36.4189V37.194C107.399 38.0367 106.716 38.7198 105.874 38.7198H78.9436C78.0667 38.7198 77.3633 39.459 77.4773 40.3285C77.8597 43.2449 78.815 45.5122 80.3432 47.1303C82.1945 48.9816 84.6277 49.9073 87.6428 49.9073C89.9173 49.9073 91.7951 49.4048 93.2762 48.3998C94.4884 47.5637 95.4033 46.48 96.021 45.1484C96.3159 44.5125 96.9412 44.0658 97.6408 44.1086L104.955 44.5552C105.926 44.6145 106.598 45.5587 106.245 46.4656C104.966 49.7513 102.864 52.406 99.9411 54.4299C96.5557 56.8102 92.4298 58.0003 87.5634 58.0003ZM77.6238 30.1866C77.4253 31.0851 78.1433 31.8963 79.0635 31.8963H95.3034C96.1829 31.8963 96.8887 31.1523 96.7607 30.2821C96.374 27.6519 95.4505 25.651 93.9903 24.2793C92.2447 22.5866 90.0231 21.7403 87.3254 21.7403C84.6277 21.7403 82.3796 22.6131 80.5812 24.3586C79.1524 25.7874 78.1666 27.73 77.6238 30.1866Z" /><path d="M1.52584 57.0469C0.683143 57.0469 0 56.3638 0 55.5211V2.23873C0 1.39603 0.683142 0.712891 1.52584 0.712891H12.8091C13.4543 0.712891 14.0298 1.11874 14.2464 1.72653L27.9992 40.3187C28.4808 41.6702 30.3922 41.6702 30.8738 40.3187L44.6266 1.72653C44.8432 1.11874 45.4187 0.712891 46.0639 0.712891H57.3472C58.1899 0.712891 58.873 1.39603 58.873 2.23873V55.5211C58.873 56.3638 58.1899 57.0469 57.3472 57.0469H50.0842C49.2415 57.0469 48.5583 56.3638 48.5583 55.5211V26.7757C48.5583 25.0702 46.1859 24.6496 45.5996 26.2512L34.7224 55.9662C34.5022 56.5676 33.9299 56.9676 33.2895 56.9676H25.5835C24.9431 56.9676 24.3708 56.5676 24.1507 55.9662L13.2734 26.2512C12.6871 24.6496 10.3147 25.0702 10.3147 26.7757V55.5211C10.3147 56.3638 9.63154 57.0469 8.78884 57.0469H1.52584Z" /><path d="M114.631 57.167C113.789 57.167 113.105 56.4839 113.105 55.6412V2.35885C113.105 1.51615 113.789 0.833008 114.631 0.833008H121.736C122.578 0.833008 123.261 1.51615 123.261 2.35885V29.9714C123.261 31.3662 124.978 32.0298 125.917 30.9975L140.184 15.2972C140.473 14.9789 140.883 14.7975 141.313 14.7975H149.642C150.979 14.7975 151.67 16.3956 150.753 17.3692L137.438 31.5127C136.944 32.037 136.884 32.835 137.294 33.4271L152.072 54.7727C152.772 55.7846 152.048 57.167 150.817 57.167H143.124C142.612 57.167 142.134 56.9099 141.852 56.4826L130.988 40.0476C130.445 39.2273 129.28 39.1265 128.605 39.8417L123.678 45.0625C123.41 45.3457 123.261 45.7204 123.261 46.1099V55.6412C123.261 56.4839 122.578 57.167 121.736 57.167H114.631Z" /><path d="M145.039 30.9989L159.306 15.2985C159.595 14.9803 160.005 14.7988 160.435 14.7988H168.764C170.101 14.7988 170.792 16.3969 169.875 17.3706L156.56 31.514C156.066 32.0383 156.006 32.8364 156.416 33.4284L171.194 54.774C171.895 55.786 171.17 57.1684 169.939 57.1684H162.247C161.734 57.1684 161.256 56.9113 160.974 56.4839L150.11 40.049C149.568 39.2286 148.402 39.1279 147.727 39.843L143.29 44.2723C141.054 44.2723 137.881 42.7079 137.471 41.0778C136.916 38.8726 140.089 35.9482 145.039 30.9989Z" /></svg></a>
+      <div class="nav-right">
+        <nav class="nav-links" aria-label="Page sections">
+          <a href="#ekrany">How it works</a>
+          <a href="#funkcje">Features</a>
+          <a href="#trener">AI Coach</a>
+          <a href="#faq">FAQ</a>
+          <a href="/en/contact">Contact</a>
+        </nav>
+        <a class="lang-switch" href="/" hreflang="pl" lang="pl" aria-label="Polski">PL</a>
+        <span class="soon sm" role="img" aria-label="iPhone app coming soon to the App Store"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.33-3.5zM14.2 6.13c.6-.74 1.02-1.76.9-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.99-.5 2.6-1.24z"/></svg><span><small>Coming soon to</small>App Store</span></span>
+      </div>
+    </header>
+
+    <div class="hero-stage" id="stage">
+      <div class="hero-giant" aria-hidden="true"><span class="l1">every rep</span><span class="l2">counts</span></div>
+      <div class="hero-orbit" id="heroOrbit" data-screens="/img/en/scr-dashboard.webp /img/en/scr-gym.webp /img/en/scr-logset.webp">
+        <img class="orbit-poster gl-poster" src="/img/en/r-orbit.webp" alt="Three iPhones running Mekkio: the dashboard with today's plan and weekly summary, the workout screen with the exercises from your plan, and set logging with weight and reps" width="1440" height="1040" fetchpriority="high">
+        <canvas class="gl-canvas" aria-hidden="true"></canvas><canvas class="gl-canvas" aria-hidden="true"></canvas><canvas class="gl-canvas" aria-hidden="true"></canvas>
+      </div>
+      <div class="orbit-nav">
+        <button type="button" class="orbit-arrow prev" data-dir="-1" aria-label="Previous screen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button type="button" class="orbit-arrow next" data-dir="1" aria-label="Next screen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+
+    <div class="hero-copy">
+      <h1 id="hero-h">You lift.<br>Mekkio counts.</h1>
+      <p class="hero-lede" style="--i:1">Build your plan, log weight and reps at the gym, and the app shows whether you're moving forward. No spreadsheets, no notes app.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SPLIT ================= -->
+<section class="split" id="split" aria-labelledby="split-h">
+  <div class="split-sticky">
+    <div class="split-copy">
+      <p class="split-kicker"><b>01 /</b>Why it matters</p>
+      <h2 id="split-h">A notes app won't tell you if you're making progress. <em>Mekkio tells you right away.</em></h2>
+      <p>Log your sets on the left, see the result on the right. Mekkio compares every set with your previous workout and shows what changed the moment you save.</p>
+    </div>
+    <div class="split-phones">
+      <div class="split-phone l"><img class="phone-img" src="/img/en/r-split-l.webp" data-screen="/img/en/scr-logset.webp" alt="Set logging: Incline Chest, 27 kg set on the dial, reps and a list of three sets" width="643" height="1348" loading="lazy"></div>
+      <div class="split-phone r"><img class="phone-img" src="/img/en/r-split-r.webp" data-screen="/img/en/scr-gym-finish.webp" alt="After the workout: new 75 kg record on Leg Press Machine, 46 min, 7 exercises, 412 kcal, 5,693 kg volume, +8% vs the previous workout" width="643" height="1348" loading="lazy"></div>
+    </div>
+    <canvas class="gl-canvas split-gl" id="splitGL" aria-hidden="true"></canvas>
+  </div>
+</section>
+
+<!-- ================= SCREENS ================= -->
+<section class="sec" id="ekrany" aria-labelledby="ekrany-h">
+  <div class="dark-panel">
+    <div class="wrap dark-head rv">
+      <span class="pill-label">How it works</span>
+      <h2 id="ekrany-h">From plan to personal record.<br><span style="color:var(--m-on-dark-muted)">Six screens, zero spreadsheets.</span></h2>
+    </div>
+
+    <div class="caro rv" id="caro" aria-roledescription="carousel" aria-label="App screens">
+      <ul class="caro-track" id="caroTrack">
+        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-0.webp" alt="Dashboard: today's plan with a Start button, this week's summary, latest record and badge" width="640" height="1327" loading="lazy"></li>
+        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-1.webp" alt="Workout: Fullbody Workout, timer, Repeat last workout, warm-up and exercise tiles" width="640" height="1327" loading="lazy"></li>
+        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-2.webp" alt="Set logging: weight on a dial, reps with plus and minus, list of sets" width="640" height="1327" loading="lazy"></li>
+        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-3.webp" alt="After the workout: new record, time, exercises, calories, volume and a comparison with the previous workout" width="640" height="1327" loading="lazy"></li>
+        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-4.webp" alt="History: an October calendar with workouts marked and a summary of the selected day" width="640" height="1327" loading="lazy"></li>
+        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-5.webp" alt="Progress: weekly ring, calories, body weight and volume year to date" width="640" height="1327" loading="lazy"></li>
+      </ul>
+      <div class="wrap">
+        <div class="caro-cap" id="caroCap" aria-live="polite">
+          <span class="k" id="capK"></span>
+          <h3 id="capH"></h3>
+          <p id="capP"></p>
+        </div>
+        <div class="caro-ctrl">
+          <button class="sq-btn sq-prev" id="caroPrev" type="button" aria-label="Previous screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <div class="dots" id="caroDots"></div>
+          <button class="sq-btn sq-next" id="caroNext" type="button" aria-label="Next screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section class="sec" id="funkcje" aria-labelledby="funkcje-h">
+  <div class="wrap">
+    <div class="feat-head">
+      <div class="rv">
+        <span class="pill-label">Features</span>
+        <h2 id="funkcje-h">Built for what actually <span class="dim">happens at the gym.</span></h2>
+      </div>
+      <p class="lede rv" style="--i:1">A machine that's taken, a forgotten seat setting, a phone that died mid-workout. Mekkio has an answer for each of them.</p>
+    </div>
+
+    <div class="feat">
+      <div class="fcell c5 rv"><article class="fcard">
+        <h3>Records and projected max</h3>
+        <p>Your record is the heaviest weight you've lifted. But one more rep at the same weight is progress too, and it shows in your projected max.</p>
+        <div class="plus1" role="img" aria-label="Example: Chest Press 35 kg. Last time 8 reps, today 9. Projected max goes from 44.3 to 45.5 kg.">
+          <div class="p1-row"><span>Last workout</span><b>35 kg × 8</b></div>
+          <div class="p1-pips"><i class="on" style="--j:0"></i><i class="on" style="--j:1"></i><i class="on" style="--j:2"></i><i class="on" style="--j:3"></i><i class="on" style="--j:4"></i><i class="on" style="--j:5"></i><i class="on" style="--j:6"></i><i class="on" style="--j:7"></i><i class="empty" style="--j:8"></i></div>
+          <div class="p1-row now"><span>Today</span><span class="plus">+1 rep</span><b>35 kg × 9</b></div>
+          <div class="p1-pips now"><i class="on" style="--j:0"></i><i class="on" style="--j:1"></i><i class="on" style="--j:2"></i><i class="on" style="--j:3"></i><i class="on" style="--j:4"></i><i class="on" style="--j:5"></i><i class="on" style="--j:6"></i><i class="on" style="--j:7"></i><i class="new" style="--j:8"></i></div>
+          <div class="p1-res"><span class="k">Projected max · e1RM</span><span class="v"><span class="p1-num" data-from="44.3" data-to="45.5">45.5</span><small>kg</small></span><span class="d">+1.2 kg · Chest Press</span><svg class="tr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></div>
+          <ul class="p1-types" aria-label="What Mekkio counts as a record"><li class="on">Heaviest weight</li><li>Most reps</li><li>Longest time</li><li>Workout volume</li></ul>
+        </div>
+      </article></div>
+
+      <div class="fcell c7 rv" style="--i:1"><article class="fcard">
+        <h3>Your whole year on one chart</h3>
+        <p>Volume since January, month by month, plus calories, body weight and a weight line for every exercise. Swipe between the charts.</p>
+        <div class="shot"><div class="shot-in"><img src="/img/en/crop-ytd.webp" alt="Volume year to date card: a chart rising from January to September" width="741" height="544" loading="lazy"><span class="wipe"></span></div></div>
+      </article></div>
+
+      <div class="fcell c4 rv"><article class="fcard">
+        <h3>Weekly ring</h3>
+        <p>How many of this week's planned workouts are done and how many are left.</p>
+        <div class="shot"><div class="shot-in"><img src="/img/en/crop-ring.webp" alt="Weekly progress: 2 of 5 days done" width="741" height="402" loading="lazy"><span class="ring-mask"></span></div></div>
+      </article></div>
+
+      <div class="fcell c4 rv" style="--i:1"><article class="fcard">
+        <h3>History in a calendar</h3>
+        <p>Done, planned and missed workouts. Open any entry for the full summary.</p>
+        <div class="shot"><div class="shot-in"><img src="/img/en/crop-cal.webp" alt="Calendar with workouts marked" width="741" height="757" loading="lazy">
+          <span class="strip" style="top:24.57%; --k:0"></span><span class="strip" style="top:39.1%; --k:1"></span><span class="strip" style="top:53.37%; --k:2"></span><span class="strip" style="top:67.9%; --k:3"></span><span class="strip" style="top:82.43%; --k:4"></span>
+        </div></div>
+      </article></div>
+
+      <div class="fcell c4 rv" style="--i:2"><article class="fcard blue">
+        <h3>Changing intensity</h3>
+        <p>One switch in the Builder and your exercises change version every week, from max weight to high reps. The app suggests today's weight.</p>
+        <div class="wave" aria-hidden="true">
+          <span></span><em class="wk">wk 1</em><em class="wk">wk 2</em><em class="wk">wk 3</em><em class="wk">wk 4</em>
+          <em>Squat</em><i class="max pop">Max</i><i class="vol pop">Medium</i><i class="str pop">Heavy</i><i class="pop">High&nbsp;reps</i>
+          <em>Bench</em><i class="vol pop">Medium</i><i class="str pop">Heavy</i><i class="pop">High&nbsp;reps</i><i class="max pop">Max</i>
+          <em>Row</em><i class="str pop">Heavy</i><i class="pop">High&nbsp;reps</i><i class="max pop">Max</i><i class="vol pop">Medium</i>
+        </div>
+      </article></div>
+    </div>
+
+    <div class="more">
+      <article class="rv">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l4 4-4 4M21 7H9M7 21l-4-4 4-4M3 17h12"/></svg></div>
+        <h3>Swap for today</h3>
+        <p>Machine taken? Get a swap for the same muscle group. Your plan stays as it is.</p>
+      </article>
+      <article class="rv" style="--i:1">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v12H8l-4 4V4z"/><path d="M8 9h8M8 12h5"/></svg></div>
+        <h3>Exercise notes</h3>
+        <p>Seat height, grip, machine number. They're back the next time you open the exercise.</p>
+      </article>
+      <article class="rv" style="--i:2">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></div>
+        <h3>Nothing gets lost</h3>
+        <p>Close the app or run out of battery. Your logged sets wait right where you left them.</p>
+      </article>
+      <article class="rv" style="--i:0">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1.5 3 4 4.5 4 8a4 4 0 0 1-8 0c0-1.5.6-2.6 1.4-3.6C10 9 11 10 11 11c1-1.5 1-4 1-8z"/><path d="M8 17.5a4 4 0 0 0 8 0"/></svg></div>
+        <h3>Warm-up and stretching</h3>
+        <p>Picked automatically for the muscles you train today. A timer walks you through each step.</p>
+      </article>
+      <article class="rv" style="--i:1">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.2-2.5 3.6"/><path d="M12 17h.01"/></svg></div>
+        <h3>How to do it</h3>
+        <p>Every exercise comes with an illustration, setup, movement and the most common mistake. Just swipe.</p>
+      </article>
+      <article class="rv" style="--i:2">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 13.9L7 21l5-2.6 5 2.6-1.5-7.1"/></svg></div>
+        <h3>Records and badges</h3>
+        <p>Browse your records month by month in your Profile and see how close you are to the next badge.</p>
+      </article>
+      <article class="rv" style="--i:0">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M12 14V7M9 10l3-3 3 3M9 17h6"/></svg></div>
+        <h3>Workout card</h3>
+        <p>Your workout as a graphic for Stories, 4:5 or 1:1. Share it straight from the end-of-workout screen.</p>
+      </article>
+      <article class="rv" style="--i:1">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></div>
+        <h3>Share a plan by link</h3>
+        <p>Send a plan by text or WhatsApp. The other person doesn't need an account.</p>
+      </article>
+      <article class="rv" style="--i:2">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/></svg></div>
+        <h3>Any equipment</h3>
+        <p>Barbell, dumbbells, machines, kettlebells, resistance bands and calisthenics. Planks and cardio run on a timer.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= AI COACH ================= -->
+<section class="sec" id="trener" aria-labelledby="trener-h">
+  <div class="dark-panel">
+    <div class="ai">
+      <div class="rv">
+        <span class="pill-label">AI Coach</span>
+        <h2 id="trener-h">After every workout you get a concrete tip <span style="color:var(--m-on-dark-muted)">for the next one.</span></h2>
+        <p class="lede">AI Coach reviews your saved workout and compares it with the previous ones. Instead of generic advice, it tells you exactly what to do with a specific exercise.</p>
+        <ul class="ai-points">
+          <li><span class="n">01</span><span>A short workout summary, plus the exercises where you're losing strength or making real progress.</span></li>
+          <li><span class="n">02</span><span>Next time you open that exercise, the tip is waiting in the overview, together with today's target.</span></li>
+          <li><span class="n">03</span><span>Set your goal and what to avoid, like an injured shoulder. The suggestions take it into account.</span></li>
+        </ul>
+      </div>
+      <div class="ai-stage rv" style="--i:1">
+        <div class="ai-phone" id="aiPhone">
+          <img class="phone-img gl-poster" src="/img/en/r-ai.webp" data-screen="/img/en/scr-ai.webp" data-blur="/img/en/scr-ai-blur.webp" alt="" width="641" height="1335" loading="lazy">
+          <img class="phone-img ai-blur gl-poster" src="/img/en/r-ai-blur.webp" alt="" width="641" height="1335" loading="lazy">
+          <canvas class="gl-canvas" id="aiGL" aria-hidden="true"></canvas>
+          <div class="ai-pop" role="img" aria-label="Example AI Coach window with a workout summary and tips for the next workout">
+            <div class="ai-pop-head"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2v6M12 16v6M2 12h6M16 12h6M12 8c0 2.2 1.8 4 4 4-2.2 0-4 1.8-4 4 0-2.2-1.8-4-4-4 2.2 0 4-1.8 4-4z"/></svg>AI COACH</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+            <p><b>A full-body workout with 8 exercises and over 10,800 kg of total volume, with two new records, for abs and biceps.</b><br><br>Shoulders and chest clearly faded towards the end of your sets: on Shoulder Press and Chest Press you couldn't match the same reps in the last sets, so those lifts are close to your limit. Preacher Curl shows real progress over the last few sessions, not just a one-off jump. Over the past week you've also trained pushing muscles much more often than pulling ones, so it would be good to add some back work.</p>
+            <div><h4>For your next workout</h4>
+              <dl>
+                <dt>Preacher Curl</dt><dd>Add 2.5 kg next time, your reps at this weight have been going up for several sessions</dd>
+                <dt>Shoulder Press</dt><dd>Stay at this weight and work on form, the set clearly loses power towards the end</dd>
+                <dt>Leg Extension</dt><dd>Keep the current weight and control your technique, going easy on your right knee</dd>
+              </dl></div>
+          </div>
+        </div>
+        <p class="ai-disclaimer">AI Coach works when you're signed in. These are training tips, not medical advice: if you're in pain or injured, see a physiotherapist. The text on screen is an example.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRIVACY ================= -->
+<section class="sec" id="dane" aria-labelledby="dane-h">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="pill-label">Your data</span>
+      <h2 id="dane-h">Your workouts <span class="dim">belong to you.</span></h2>
+    </div>
+    <div class="priv seq">
+      <article style="--i:0">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+        <h3>No account to start</h3>
+        <p>Open it and train. Your data stays on your phone until you decide to create an account.</p>
+      </article>
+      <article style="--i:1">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+        <h3>Sign in with Apple</h3>
+        <p>One tap and Face ID. You can hide your email and still see your workouts on every device.</p>
+      </article>
+      <article style="--i:2">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg></div>
+        <h3>Download everything</h3>
+        <p>Plans, workouts, weight and notes, with one button in your Profile under Settings and account.</p>
+      </article>
+      <article style="--i:3">
+        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></svg></div>
+        <h3>Delete your account in the app</h3>
+        <p>No emails to support. Your account and cloud data disappear from every device.</p>
+      </article>
+    </div>
+    <a class="sec-link rv" href="/en/privacy">Read the privacy policy <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</section>
+
+<!-- ================= PRICE ================= -->
+<section class="sec" id="cena" aria-labelledby="cena-h">
+  <div class="wrap">
+    <div class="price rv">
+      <div class="price-tag" aria-hidden="true"><span style="margin:0 .04em 0 0">$</span>0</div>
+      <div>
+        <span class="pill-label">Price</span>
+        <h2 id="cena-h" style="margin-top:20px; font-size:clamp(2rem,4vw,3.2rem)">Right now it costs nothing.</h2>
+        <p class="lede" style="margin-top:18px">Every feature is free right now, AI Coach included. If a paid version ever arrives, you'll hear about it in the app before anything changes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="sec" id="faq" aria-labelledby="faq-h">
+  <div class="wrap faq">
+    <div class="sec-head rv" style="margin-bottom:0">
+      <span class="pill-label">FAQ</span>
+      <h2 id="faq-h">Before <span class="dim">you start</span></h2>
+      <p class="lede">Can't find your question? Check the <a href="/en/contact">help page</a> or write to <a href="mailto:support@mekkio.app">support@mekkio.app</a>.</p>
+    </div>
+    <div class="faq-list rv" style="--i:1">
+      <details>
+        <summary>What phone does Mekkio run on?</summary>
+        <div><p>Mekkio is an iPhone app. It's coming to the App Store soon.</p></div>
+      </details>
+      <details>
+        <summary>When will Mekkio be on the App Store?</summary>
+        <div><p>Soon, we're wrapping up the last details. As soon as it's available, the App Store link will appear on this page.</p></div>
+      </details>
+      <details>
+        <summary>Do I need an account?</summary>
+        <div><p>No. Everything works without one, and your data stays on this one phone. An account helps when you want your workouts on several devices, don't want to lose them when you switch phones, or want to use AI Coach.</p></div>
+      </details>
+      <details>
+        <summary>What happens to my data when I switch phones?</summary>
+        <div><p>With an account, sign in on the new phone and everything is there. Without one, create a backup in your Profile (Settings and account) and restore it on the new phone. If you trained as a guest and only now create an account, nothing is lost: your plans, workouts and notes move into the account.</p></div>
+      </details>
+      <details>
+        <summary>Does Mekkio connect to Apple Health?</summary>
+        <div><p>Yes, if you want it to. Turn it on in your Profile and Mekkio reads your weight and the workout calories your watch measured from Apple Health. You can revoke access anytime in your iPhone's Settings.</p></div>
+      </details>
+      <details>
+        <summary>Will AI Coach replace a real coach?</summary>
+        <div><p>No. It's good at keeping track of progression and catching drops in strength, but it can't see your technique. Treat its suggestions as tips. If you're in pain or injured, see a physiotherapist or a doctor.</p></div>
+      </details>
+      <details>
+        <summary>I already have a plan. Do I have to build it from scratch?</summary>
+        <div><p>You can copy it into the Builder in a few minutes: pick the days, add exercises, set your sets. If someone already has the plan in Mekkio, they can just send it to you as a link.</p></div>
+      </details>
+      <details>
+        <summary>Can I add an exercise that isn't in the library?</summary>
+        <div><p>Yes. Create your own exercise, assign a muscle group and equipment, then use it in plans like any other.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= FINAL + FOOTER ================= -->
+<footer class="final" aria-labelledby="final-h">
+  <div class="final-panel">
+    <div class="final-top">
+      <div class="rv final-copy">
+        <h2 id="final-h">Log your next workout<br>in Mekkio.</h2>
+        <p class="lede">Open it, pick a plan and head to the gym. No sign-up needed.</p>
+        <span class="soon white" role="img" aria-label="iPhone app coming soon to the App Store"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.33-3.5zM14.2 6.13c.6-.74 1.02-1.76.9-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.99-.5 2.6-1.24z"/></svg><span><small>Coming soon to</small>App Store</span></span>
+      </div>
+    </div>
+
+    <div class="wordmark rv" aria-hidden="true">
+      <svg viewBox="0 0 236 58" width="236" height="58" fill="currentColor"><path d="M214.412 58.0003C210.234 58.0003 206.557 57.1011 203.384 55.3027C200.263 53.4513 197.829 50.8594 196.084 47.527C194.391 44.1945 193.545 40.3067 193.545 35.8634C193.545 31.3673 194.391 27.4795 196.084 24.1999C197.829 20.8675 200.263 18.302 203.384 16.5036C206.557 14.6522 210.234 13.7266 214.412 13.7266C218.591 13.7266 222.241 14.6522 225.362 16.5036C228.483 18.302 230.889 20.8675 232.582 24.1999C234.328 27.4795 235.2 31.3673 235.2 35.8634C235.2 40.3067 234.328 44.1945 232.582 47.527C230.889 50.8594 228.483 53.4513 225.362 55.3027C222.241 57.1011 218.591 58.0003 214.412 58.0003ZM214.412 49.7486C217.692 49.7486 220.204 48.532 221.95 46.0988C223.748 43.6656 224.648 40.2538 224.648 35.8634C224.648 31.526 223.748 28.1407 221.95 25.7075C220.204 23.2214 217.692 21.9783 214.412 21.9783C211.133 21.9783 208.594 23.2214 206.795 25.7075C204.997 28.1407 204.098 31.526 204.098 35.8634C204.098 40.2538 204.997 43.6656 206.795 46.0988C208.594 48.532 211.133 49.7486 214.412 49.7486Z" /><path d="M178.97 57.0481C178.127 57.0481 177.444 56.365 177.444 55.5223V16.2044C177.444 15.3617 178.127 14.6786 178.97 14.6786H186.074C186.917 14.6786 187.6 15.3617 187.6 16.2044V55.5223C187.6 56.365 186.917 57.0481 186.074 57.0481H178.97ZM178.811 9.04518C177.968 9.04518 177.285 8.36204 177.285 7.51934V1.52584C177.285 0.68314 177.968 0 178.811 0H186.312C187.155 0 187.838 0.683142 187.838 1.52584V7.51934C187.838 8.36204 187.155 9.04518 186.312 9.04518H178.811Z" /><path d="M87.5634 58.0003C83.3318 58.0003 79.6555 57.1011 76.5347 55.3027C73.4138 53.4513 71.0071 50.8594 69.3144 47.527C67.6217 44.1945 66.7754 40.3067 66.7754 35.8634C66.7754 31.4202 67.6217 27.5588 69.3144 24.2793C71.0071 20.9468 73.3874 18.3549 76.4553 16.5036C79.5762 14.6522 83.1995 13.7266 87.3254 13.7266C91.3455 13.7266 94.8631 14.6258 97.8781 16.4242C100.946 18.2227 103.3 20.8146 104.94 24.1999C106.579 27.5853 107.399 31.6582 107.399 36.4189V37.194C107.399 38.0367 106.716 38.7198 105.874 38.7198H78.9436C78.0667 38.7198 77.3633 39.459 77.4773 40.3285C77.8597 43.2449 78.815 45.5122 80.3432 47.1303C82.1945 48.9816 84.6277 49.9073 87.6428 49.9073C89.9173 49.9073 91.7951 49.4048 93.2762 48.3998C94.4884 47.5637 95.4033 46.48 96.021 45.1484C96.3159 44.5125 96.9412 44.0658 97.6408 44.1086L104.955 44.5552C105.926 44.6145 106.598 45.5587 106.245 46.4656C104.966 49.7513 102.864 52.406 99.9411 54.4299C96.5557 56.8102 92.4298 58.0003 87.5634 58.0003ZM77.6238 30.1866C77.4253 31.0851 78.1433 31.8963 79.0635 31.8963H95.3034C96.1829 31.8963 96.8887 31.1523 96.7607 30.2821C96.374 27.6519 95.4505 25.651 93.9903 24.2793C92.2447 22.5866 90.0231 21.7403 87.3254 21.7403C84.6277 21.7403 82.3796 22.6131 80.5812 24.3586C79.1524 25.7874 78.1666 27.73 77.6238 30.1866Z" /><path d="M1.52584 57.0469C0.683143 57.0469 0 56.3638 0 55.5211V2.23873C0 1.39603 0.683142 0.712891 1.52584 0.712891H12.8091C13.4543 0.712891 14.0298 1.11874 14.2464 1.72653L27.9992 40.3187C28.4808 41.6702 30.3922 41.6702 30.8738 40.3187L44.6266 1.72653C44.8432 1.11874 45.4187 0.712891 46.0639 0.712891H57.3472C58.1899 0.712891 58.873 1.39603 58.873 2.23873V55.5211C58.873 56.3638 58.1899 57.0469 57.3472 57.0469H50.0842C49.2415 57.0469 48.5583 56.3638 48.5583 55.5211V26.7757C48.5583 25.0702 46.1859 24.6496 45.5996 26.2512L34.7224 55.9662C34.5022 56.5676 33.9299 56.9676 33.2895 56.9676H25.5835C24.9431 56.9676 24.3708 56.5676 24.1507 55.9662L13.2734 26.2512C12.6871 24.6496 10.3147 25.0702 10.3147 26.7757V55.5211C10.3147 56.3638 9.63154 57.0469 8.78884 57.0469H1.52584Z" /><path d="M114.631 57.167C113.789 57.167 113.105 56.4839 113.105 55.6412V2.35885C113.105 1.51615 113.789 0.833008 114.631 0.833008H121.736C122.578 0.833008 123.261 1.51615 123.261 2.35885V29.9714C123.261 31.3662 124.978 32.0298 125.917 30.9975L140.184 15.2972C140.473 14.9789 140.883 14.7975 141.313 14.7975H149.642C150.979 14.7975 151.67 16.3956 150.753 17.3692L137.438 31.5127C136.944 32.037 136.884 32.835 137.294 33.4271L152.072 54.7727C152.772 55.7846 152.048 57.167 150.817 57.167H143.124C142.612 57.167 142.134 56.9099 141.852 56.4826L130.988 40.0476C130.445 39.2273 129.28 39.1265 128.605 39.8417L123.678 45.0625C123.41 45.3457 123.261 45.7204 123.261 46.1099V55.6412C123.261 56.4839 122.578 57.167 121.736 57.167H114.631Z" /><path d="M145.039 30.9989L159.306 15.2985C159.595 14.9803 160.005 14.7988 160.435 14.7988H168.764C170.101 14.7988 170.792 16.3969 169.875 17.3706L156.56 31.514C156.066 32.0383 156.006 32.8364 156.416 33.4284L171.194 54.774C171.895 55.786 171.17 57.1684 169.939 57.1684H162.247C161.734 57.1684 161.256 56.9113 160.974 56.4839L150.11 40.049C149.568 39.2286 148.402 39.1279 147.727 39.843L143.29 44.2723C141.054 44.2723 137.881 42.7079 137.471 41.0778C136.916 38.8726 140.089 35.9482 145.039 30.9989Z" /></svg>
+    </div>
+
+    <div class="foot">
+      <div>
+        <p class="big">We're happy to reply<br>to every message.</p>
+        <small>© 2026 Mekkio</small>
+      </div>
+      <div>
+        <h4>App</h4>
+        <span class="foot-soon">App Store · coming soon</span>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <a href="/en/contact">Help and contact</a>
+        <a href="mailto:support@mekkio.app">support@mekkio.app</a>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <a href="/en/privacy">Privacy policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.documentElement.classList.add('js');
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var raf = window.requestAnimationFrame.bind(window);
+
+  /* ---- scroll reveal ---- */
+  var els = document.querySelectorAll('.rv, .seq');
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, {rootMargin:'0px 0px -8% 0px', threshold:.08});
+    els.forEach(function(e){ io.observe(e); });
+  } else { els.forEach(function(e){ e.classList.add('in'); }); }
+
+  /* ---- scroll-linked: split phones, AI popup ---- */
+  var split = document.getElementById('split'), aiPhone = document.getElementById('aiPhone');
+  function clamp01(v){ return Math.max(0, Math.min(1, v)); }
+  function ease(v){ return v*v*(3-2*v); }
+  function onScroll(){
+    var vh = window.innerHeight;
+    var r = split.getBoundingClientRect();
+    var p = clamp01(-r.top / Math.max(1, r.height - vh));
+    split.style.setProperty('--p', ease(clamp01(p / .7)).toFixed(4));
+    var narrow = window.innerWidth < 700;  // phones leave the screen first, then the line comes in
+    split.style.setProperty('--t', ease(clamp01((p - (narrow ? .4 : .34)) / (narrow ? .3 : .4))).toFixed(4));
+    var a = aiPhone.getBoundingClientRect();
+    var d = Math.abs(a.top + a.height/2 - vh/2) / (vh * .5);
+    var pp = ease(clamp01((1 - d) / .55));
+    aiPhone.style.setProperty('--pp', pp.toFixed(4));
+    aiPhone.style.setProperty('--ary', (24 - clamp01((vh - a.top) / (vh + a.height)) * 14).toFixed(2)+'deg');
+  }
+  if(!reduce){
+    var sTick = false;
+    window.addEventListener('scroll', function(){ if(!sTick){ sTick = true; raf(function(){ onScroll(); sTick = false; }); } }, {passive:true});
+    window.addEventListener('resize', onScroll);
+    onScroll();
+  } else { split.style.setProperty('--p','1'); split.style.setProperty('--t','1'); }
+
+  /* ---- bento: stagger index for the little pop-in pieces ---- */
+  document.querySelectorAll('.fcell').forEach(function(c){
+    c.querySelectorAll('.pop').forEach(function(el, j){ el.style.setProperty('--j', j); });
+  });
+
+  /* ---- screens carousel (autoplay every 3 s, pausable) ---- */
+  var CAPS = [
+    ['Dashboard','Your week on one screen','Start today\'s plan with one tap. Right next to it: your week, your latest record and badges.'],
+    ['Workout','Today\'s plan','Warm-up, the exercises from your plan and the workout timer on one screen. Exercise taken? The icon in the tile\'s corner shows a swap.'],
+    ['Set by set','You log, it counts','Set the weight on the dial, reps with plus and minus. Set saved, on to the next one.'],
+    ['After the workout','Results right away','See right away whether you hit a record, how long it took, how much you burned and how you did against your last workout.'],
+    ['History','The whole month in a calendar','Done, planned and missed workouts. Tap a day to see the details.'],
+    ['Progress','Progress you can see','Weekly ring, calories, body weight and volume year to date.']
+  ];
+  var DELAY = 3000;
+  var caro = document.getElementById('caro'), track = document.getElementById('caroTrack');
+  var slides = track.children, dotsBox = document.getElementById('caroDots'), cap = document.getElementById('caroCap');
+  var idx = 1, timer = null, userPaused = reduce, hovering = false, visible = false;
+  for(var d=0; d<slides.length; d++){
+    (function(i){
+      var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label','Screen '+(i+1)+': '+CAPS[i][0]);
+      b.addEventListener('click', function(){ go(i); restart(); }); dotsBox.appendChild(b);
+      slides[i].addEventListener('click', function(){ if(i !== idx){ go(i); restart(); } });
+    })(d);
+  }
+  function layout(){
+    var s = slides[idx];
+    track.style.setProperty('--x', (caro.clientWidth/2 - (s.offsetLeft + s.offsetWidth/2)) + 'px');
+  }
+  function setCap(first){
+    var c = CAPS[idx];
+    function put(){ document.getElementById('capK').textContent = String(idx+1).padStart(2,'0')+' · '+c[0];
+      document.getElementById('capH').textContent = c[1]; document.getElementById('capP').textContent = c[2]; }
+    if(first || reduce){ put(); return; }
+    cap.classList.add('swap'); setTimeout(function(){ put(); cap.classList.remove('swap'); }, 200);
+  }
+  function go(i, first){
+    idx = (i + slides.length) % slides.length;
+    for(var j=0;j<slides.length;j++){
+      slides[j].classList.toggle('on', j===idx); dotsBox.children[j].classList.toggle('on', j===idx);
+      slides[j].setAttribute('aria-hidden', j===idx ? 'false' : 'true');
+    }
+    layout(); setCap(first);
+  }
+  function running(){ return !userPaused && !hovering && visible && !document.hidden; }
+  function schedule(){ clearTimeout(timer); if(running()) timer = setTimeout(function(){ go(idx+1); schedule(); }, DELAY); }
+  // no pause button: once someone steers the carousel themselves, autoplay stops for good (WCAG 2.2.2)
+  function restart(){ userPaused = true; schedule(); }
+  document.getElementById('caroPrev').addEventListener('click', function(){ go(idx-1); restart(); });
+  document.getElementById('caroNext').addEventListener('click', function(){ go(idx+1); restart(); });
+  caro.addEventListener('keydown', function(e){ if(e.key==='ArrowLeft'){ go(idx-1); restart(); } if(e.key==='ArrowRight'){ go(idx+1); restart(); } });
+  caro.addEventListener('pointerenter', function(e){ if(e.pointerType === 'mouse'){ hovering = true; schedule(); } });
+  caro.addEventListener('pointerleave', function(e){ if(e.pointerType === 'mouse'){ hovering = false; schedule(); } });
+  caro.addEventListener('focusin', function(){ hovering = true; schedule(); });
+  caro.addEventListener('focusout', function(){ hovering = false; schedule(); });
+  document.addEventListener('visibilitychange', schedule);
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(en){ visible = en[0].isIntersecting; schedule(); }, {threshold:.35}).observe(caro);
+  } else { visible = true; }
+  var sx = null, sy = null;
+  caro.addEventListener('pointerdown', function(e){ sx = e.clientX; sy = e.clientY; });
+  caro.addEventListener('pointerup', function(e){
+    if(sx === null) return; var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+    if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)){ go(idx + (dx < 0 ? 1 : -1)); restart(); }
+  });
+  window.addEventListener('resize', layout);
+  go(idx, true); schedule();
+})();
+
+/* records card: the e1RM counts up once the rep pips have filled in */
+(function(){
+  var el = document.querySelector('.p1-num'); if(!el) return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+  var from = +el.dataset.from, to = +el.dataset.to, fmt = function(x){ return x.toFixed(1); };
+  el.textContent = fmt(from);
+  var io = new IntersectionObserver(function(en){
+    if(!en[0].isIntersecting) return; io.disconnect();
+    setTimeout(function(){
+      var t0 = performance.now(), D = 900;
+      (function step(now){ var k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 3);
+        el.textContent = fmt(from + (to - from) * e); if(k < 1) requestAnimationFrame(step); })(t0);
+    }, 1250);
+  }, { threshold: .5 });
+  io.observe(el);
+})();
+</script>
+<script type="module">
+/* ---- Rendered iPhones: one GLB, three live WebGL views (hero, split, AI).
+   Static renders of the same model (img/r-*.webp) are the posters and the fallback. ---- */
+(async function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var saveData = navigator.connection && navigator.connection.saveData;
+  if(reduce || saveData) return;
+  try { var probe = document.createElement('canvas'); if(!(probe.getContext('webgl2') || probe.getContext('webgl'))) return; } catch(e){ return; }
+
+  var CDN = 'https://cdn.jsdelivr.net/npm/three@0.170.0';   // pinned; same version as the import map in <head>
+  var THREE, GLTFLoader, DRACOLoader, RoomEnvironment;
+  try {
+    var mods = await Promise.all([import('three'), import('three/addons/loaders/GLTFLoader.js'),
+      import('three/addons/loaders/DRACOLoader.js'), import('three/addons/environments/RoomEnvironment.js')]);
+    THREE = mods[0]; GLTFLoader = mods[1].GLTFLoader; DRACOLoader = mods[2].DRACOLoader; RoomEnvironment = mods[3].RoomEnvironment;
+  } catch(e){ return; }
+
+  var draco = new DRACOLoader(); draco.setDecoderPath(CDN + '/examples/jsm/libs/draco/gltf/');
+  var loader = new GLTFLoader(); loader.setDRACOLoader(draco);
+  var gltf; try { gltf = await loader.loadAsync('/3d/iphone.glb'); } catch(e){ return; }
+  var template = gltf.scene, tbox = new THREE.Box3().setFromObject(template), SIZE = tbox.getSize(new THREE.Vector3());
+  template.position.sub(tbox.getCenter(new THREE.Vector3()));
+  var texCache = {}, texLoader = new THREE.TextureLoader();
+  function tex(src){ return texCache[src] || (texCache[src] = texLoader.loadAsync(src).then(function(t){ t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 8; return t; })); }
+
+  function screenMat(t, opacity){
+    var m = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffffff, emissiveMap: t, roughness: .18, metalness: 0, envMapIntensity: .35 });
+    m.toneMapped = false;
+    if(opacity != null){ m.transparent = true; m.opacity = opacity; m.depthWrite = false; m.polygonOffset = true; m.polygonOffsetFactor = -2; }
+    return m;
+  }
+  // Layered shadow behind the phone (contact + mid + ambient), phone-shaped; moves and turns with it
+  // and falls on whatever is behind (the page, or the other phone)
+  var shadowTex = {}, SH = { cw: 400, ch: 700, w: 140, h: 400 };   // texture px; the phone-shaped block is w×h
+  function phoneShadowTex(blur){
+    if(shadowTex[blur]) return shadowTex[blur];
+    // Safari has no ctx.filter, so blur via shadowBlur: draw the shape off-canvas and keep only its shadow
+    // wide margins so even the softest layer fades out before the texture edge (no visible plane borders)
+    var c = document.createElement('canvas'); c.width = SH.cw; c.height = SH.ch;
+    var g = c.getContext('2d'), OFF = 4000;
+    g.shadowColor = '#000'; g.shadowBlur = blur; g.shadowOffsetX = OFF; g.fillStyle = '#000';
+    var w = SH.w, h = SH.h, x = (SH.cw - w) / 2 - OFF, y = (SH.ch - h) / 2, r = 26;
+    g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.fill();
+    var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return (shadowTex[blur] = t);
+  }
+  function makeShadow(strength){
+    var group = new THREE.Group();
+    // [blur px, opacity, offset x, offset y (× phone size), depth behind (× thickness), scale]
+    [[12, .5, .05, -.018, 1.3, 1.0], [34, .34, .18, -.07, 3.2, 1.06], [64, .18, .3, -.12, 5.5, 1.12]].forEach(function(l){
+      var m = new THREE.Mesh(new THREE.PlaneGeometry(SIZE.x * (SH.cw / SH.w) * l[5], SIZE.y * (SH.ch / SH.h) * l[5]),
+        new THREE.MeshBasicMaterial({ map: phoneShadowTex(l[0]), transparent: true, opacity: l[1] * strength, depthWrite: false, color: 0x1a1210 }));
+      m.position.set(SIZE.x * l[2], SIZE.y * l[3], -SIZE.z * l[4]); m.renderOrder = -1; group.add(m);
+    });
+    return group;
+  }
+  // soft elliptical floor shadow (hero orbit), drawn once
+  var floorTex = null;
+  function floorShadowTex(){
+    if(floorTex) return floorTex;
+    var c = document.createElement('canvas'); c.width = 256; c.height = 256;
+    var g = c.getContext('2d'), grd = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+    grd.addColorStop(0, 'rgba(255,255,255,1)'); grd.addColorStop(.45, 'rgba(255,255,255,.55)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
+    floorTex = new THREE.CanvasTexture(c); return floorTex;
+  }
+  // One phone: pivot (for motion) > spin (model faces -Z, turn it to the camera) > model clone with its own screen material
+  async function makePhone(src, blurSrc, shadow){
+    var model = template.clone(true), display;
+    model.traverse(function(o){ if(o.isMesh && o.name.indexOf('display') === 0) display = o; });
+    display.material = screenMat(await tex(src));
+    var blur = null;
+    if(blurSrc){ blur = display.clone(); blur.material = screenMat(await tex(blurSrc), 0); display.parent.add(blur); }
+    var spin = new THREE.Group(); spin.add(model); model.rotation.y = Math.PI;
+    if(shadow) spin.add(makeShadow(shadow));
+    var pivot = new THREE.Group(); pivot.add(spin);
+    return { pivot: pivot, blur: blur };
+  }
+
+  var views = [];
+  function makeView(canvas, rimColor){
+    var r = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    r.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+    r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.05; r.outputColorSpace = THREE.SRGBColorSpace;
+    var scene = new THREE.Scene(), pm = new THREE.PMREMGenerator(r);
+    scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = .7;
+    // stronger key from the top-left + soft cool fill: more light-and-shade on the titanium body
+    var key = new THREE.DirectionalLight(0xfff0e4, 3.2); key.position.set(-1.3, 1.5, 1.4); scene.add(key);
+    var fill = new THREE.DirectionalLight(0xdfe4ff, .6); fill.position.set(1.2, .2, 1.2); scene.add(fill);
+    var rim = new THREE.DirectionalLight(rimColor || 0xff5a1f, 2.4); rim.position.set(1.4, -0.4, -0.6); scene.add(rim);
+    var cam = new THREE.PerspectiveCamera(26, 1, 0.01, 10);
+    var v = { canvas: canvas, r: r, scene: scene, cam: cam, visible: false, pxToWorld: 1, update: null };
+    v.fit = function(){
+      var w = canvas.clientWidth, h = canvas.clientHeight; if(!w || !h) return;
+      r.setSize(w, h, false); cam.aspect = w / h;
+      var dist = .5; cam.position.set(0, 0, dist); cam.updateProjectionMatrix();
+      v.pxToWorld = 2 * dist * Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) / h;   // world units per CSS px at z=0
+    };
+    v.fit(); new ResizeObserver(v.fit).observe(canvas);
+    new IntersectionObserver(function(en){ v.visible = en[0].isIntersecting; if(v.visible) kick(); }, { rootMargin: '100px' }).observe(canvas);
+    views.push(v); return v;
+  }
+  // scale a phone so it is `px` CSS pixels tall on screen
+  function sizePhone(v, ph, px){ ph.pivot.scale.setScalar(px * v.pxToWorld / SIZE.y); }
+
+  var t0 = performance.now(), running = false;
+  function kick(){ if(!running){ running = true; requestAnimationFrame(frame); } }
+  function frame(now){
+    var any = false, t = (now - t0) / 1000;
+    for(var i = 0; i < views.length; i++){ var v = views[i]; if(!v.visible) continue; any = true; if(v.update) v.update(t); v.r.render(v.scene, v.cam); }
+    if(any) requestAnimationFrame(frame); else running = false;
+  }
+  var fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var cssVar = function(el, name, def){ var s = parseFloat(el.style.getPropertyValue(name)); return isNaN(s) ? def : s; };
+
+  /* HERO — three phones on an invisible, slightly tilted orbit. Each faces outward, so only the front one shows
+     its screen. Drag (mouse or finger) turns the orbit; on release it lands on the nearest phone, with the
+     throw's momentum. Every 5.5 s the next phone comes round on its own (the first turn right after load, so people
+     see it can be turned); any drag restarts that clock. Each phone has its own canvas so the ones going back can be
+     blurred (CSS filter) and stacked by depth. */
+  (async function(){
+    var hero = document.getElementById('hero'), box = document.getElementById('heroOrbit');
+    if(!box) return;
+    var canvases = box.querySelectorAll('canvas'), srcs = box.dataset.screens.split(' ');
+    var D = Math.PI / 180;
+    var ANG = [0, 135 * D, 235 * D];                        // uneven gaps on the orbit: 135° / 100° / 125°
+    var items = await Promise.all(srcs.map(async function(src, i){
+      var v = makeView(canvases[i]); v.cam.fov = 36; v.fit();   // wider lens than the other views: stronger depth
+      var ph = await makePhone(src), orbit = new THREE.Group();
+      var floor = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: floorShadowTex(), color: 0x1f2329, transparent: true, depthWrite: false }));
+      floor.rotation.x = -Math.PI / 2; floor.renderOrder = -1;
+      orbit.add(floor); orbit.add(ph.pivot); v.scene.add(orbit);
+      v.scene.fog = new THREE.Fog(0xee4a1c, 1, 2);          // back phones also sink into the hero's orange
+      return { v: v, ph: ph, orbit: orbit, floor: floor, canvas: canvases[i], blur: -1, z: -1 };
+    }));
+
+    var phi = 0, target = 0, rate = 5;                      // orbit angle (starts on the poster pose: no ghosting on the cross-fade)
+    var tilt = { x: 0, y: 0 }, tiltT = { x: 0, y: 0 }, scrollTurn = 0, lastT = 0;
+    var AUTO_MS = 5500, lastTurn = performance.now();
+    function nextFront(from){                               // next phone comes round from the right (angle decreases)
+      var best = -1e9;
+      ANG.forEach(function(a){ for(var n = -2; n <= 2; n++){ var c = -a + n * 2 * Math.PI; if(c < from - .05 && c > best) best = c; } });
+      return best;
+    }
+    function prevFront(from){                               // the phone that went round last comes back from the left
+      var best = 1e9;
+      ANG.forEach(function(a){ for(var n = -2; n <= 2; n++){ var c = -a + n * 2 * Math.PI; if(c > from + .05 && c < best) best = c; } });
+      return best;
+    }
+    document.querySelectorAll('.orbit-arrow').forEach(function(b){
+      b.addEventListener('click', function(){
+        var base = nearest(target);
+        target = b.dataset.dir === '1' ? nextFront(base) : prevFront(base); rate = 4; lastTurn = performance.now();
+      });
+    });
+    function nearest(from){                                 // orbit angle (in any turn) that brings a phone to the front
+      var best = 0, bd = 1e9;
+      ANG.forEach(function(a){ var f = -a, c = f + Math.round((from - f) / (2 * Math.PI)) * 2 * Math.PI, d = Math.abs(c - from); if(d < bd){ bd = d; best = c; } });
+      return best;
+    }
+
+    // drag: the orbit follows the pointer 1:1, then lands on a phone with the throw's momentum
+    var drag = null, K = function(){ return 4 / Math.max(innerWidth, 600); };
+    box.addEventListener('pointerdown', function(e){
+      if(e.button > 0) return;
+      lastTurn = performance.now();
+      drag = { x: e.clientX, y: e.clientY, start: target, axis: e.pointerType === 'mouse' ? 'x' : null, vx: 0, px: e.clientX, pt: e.timeStamp, id: e.pointerId };
+      if(e.pointerType === 'mouse'){ e.preventDefault(); box.setPointerCapture(e.pointerId); box.classList.add('dragging'); }
+    });
+    box.addEventListener('pointermove', function(e){
+      if(!drag || e.pointerId !== drag.id) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if(!drag.axis && Math.abs(dx) + Math.abs(dy) > 8){
+        drag.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        if(drag.axis === 'x') box.setPointerCapture(e.pointerId);
+      }
+      if(drag.axis !== 'x') return;
+      var dt = Math.max(1, e.timeStamp - drag.pt);
+      drag.vx = drag.vx * .6 + (e.clientX - drag.px) / dt * .4; drag.px = e.clientX; drag.pt = e.timeStamp;
+      target = drag.start + dx * K(); rate = 16;
+    });
+    function release(e){
+      if(!drag || (e && e.pointerId !== drag.id)) return;
+      if(drag.axis === 'x'){
+        var fresh = e && e.timeStamp - drag.pt < 80 ? drag.vx : 0;      // a pause before letting go = no throw
+        target = nearest(target + fresh * 220 * K()); rate = 5;
+      }
+      drag = null; box.classList.remove('dragging'); lastTurn = performance.now();
+    }
+    box.addEventListener('pointerup', release); box.addEventListener('pointercancel', release);
+    box.addEventListener('lostpointercapture', function(){ release(); });
+
+    if(fine){                                               // gentle parallax tilt only, no turning
+      hero.addEventListener('pointermove', function(e){
+        if(e.pointerType !== 'mouse') return;
+        var r = box.getBoundingClientRect();
+        tiltT.x = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (innerHeight / 2))) * .05;
+        tiltT.y = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (innerWidth / 2))) * .08;
+      });
+      hero.addEventListener('pointerleave', function(){ tiltT.x = tiltT.y = 0; });
+    }
+    addEventListener('scroll', function(){ var r = hero.getBoundingClientRect(); scrollTurn = Math.max(0, Math.min(1, -r.top / r.height)) * .6; }, { passive: true });
+
+    // the first view drives the shared motion; every view then places its own phone
+    items[0].v.update = function(t){
+      var dt = Math.min(.05, lastT ? t - lastT : 0); lastT = t;
+      var now = performance.now();
+      if(!drag && !document.hidden && now - lastTurn > AUTO_MS){ target = nextFront(nearest(target)); rate = 3.2; lastTurn = now; }
+      phi += (target - phi) * (1 - Math.exp(-dt * rate));
+      tilt.x += (tiltT.x - tilt.x) * (1 - Math.exp(-dt * 4)); tilt.y += (tiltT.y - tilt.y) * (1 - Math.exp(-dt * 4));
+      place(t);
+    };
+    function place(t){
+      var pw = box.clientWidth / 3.6, H = pw * 2.05, RX = H * .98, R = H * 1.05, TILT = .19 + tilt.x;   // oval: deeper than wide
+      var a0 = phi + scrollTurn, maxBlur = pw * .02;
+      items.forEach(function(it, i){
+        var k = it.v.pxToWorld, ang = ANG[i] + a0;
+        // orbit centre sits R behind the front phone, lifted so the front phone stays centred after the tilt
+        it.orbit.position.set(0, R * Math.sin(TILT) * k, (-R + R * (1 - Math.cos(TILT))) * k);
+        it.orbit.rotation.set(TILT, tilt.y, 0);
+        // levitation: each phone floats on its own slow rhythm, with a slight sway
+        var fl = t * 1.25 + i * 2.1;
+        it.ph.pivot.position.set(Math.sin(ang) * RX * k, Math.sin(fl) * H * .022 * k, Math.cos(ang) * R * k);
+        it.ph.pivot.rotation.set(Math.sin(fl + 1.2) * .035, ang - .3, .03 + Math.sin(fl * .8 + .5) * .03);   // faces outward, 3/4 view at the front
+        sizePhone(it.v, it.ph, H);
+        // contact shadow on the floor below (Figma: soft dark ellipse, 34%); fainter and wider as the phone floats up
+        var lift = (Math.sin(fl) + 1) / 2;
+        it.floor.position.set(Math.sin(ang) * RX * k, -H * .56 * k, Math.cos(ang) * R * k);
+        it.floor.scale.set(pw * (.9 + lift * .08) * k, pw * .3 * k, 1);
+        it.floor.material.opacity = .42 - lift * .1;
+        var near = it.v.cam.position.z;                     // fog: nothing at the front, ~40% at the back
+        it.v.scene.fog.near = near + R * .2 * k; it.v.scene.fog.far = near + R * 2 * k / .4;
+        // depth 0 (front) … 1 (back): blur grows as the phone goes back; nearer phones stack on top
+        var depth = (1 - Math.cos(ang)) / 2, b = Math.round(Math.max(0, depth - .08) / .92 * maxBlur * 4) / 4;
+        if(b !== it.blur){ it.blur = b; it.canvas.style.filter = b ? 'blur(' + b + 'px)' : ''; }
+        var z = 3 - Math.round(depth * 2.99);
+        if(z !== it.z){ it.z = z; it.canvas.style.zIndex = z; }
+      });
+    }
+    items.forEach(function(it){ it.v.fit(); }); place(0);
+    items.forEach(function(it){ it.v.r.render(it.v.scene, it.v.cam); });
+    lastTurn = performance.now() - AUTO_MS + 800;           // first turn right after load: shows the orbit can be turned
+    box.classList.add('gl-on'); kick();
+  })();
+
+  /* SPLIT — two phones follow --p set by the scroll script (0 together, 1 apart) */
+  (async function(){
+    var split = document.getElementById('split'), canvas = document.getElementById('splitGL');
+    if(!split || !canvas) return;
+    var imgs = split.querySelectorAll('.split-phone img');
+    var v = makeView(canvas), L = await makePhone(imgs[0].dataset.screen, null, .9), R = await makePhone(imgs[1].dataset.screen, null, 1);
+    v.scene.add(L.pivot); v.scene.add(R.pivot);
+    // the (hidden) poster images keep moving with CSS, so the 3D phones simply sit where they are
+    // depth: the right phone sits in front, the left one behind, so their inner edges never cut through each other
+    function place(ph, img, k, c, z){ var r = img.getBoundingClientRect();
+      ph.pivot.position.set((r.left + r.width / 2 - c.x) * k, -(r.top + r.height / 2 - c.y) * k, z * r.width * k);
+      sizePhone(v, ph, r.height * .982); }
+    v.update = function(t){
+      var p = cssVar(split, '--p', 0), k = v.pxToWorld, cr = canvas.getBoundingClientRect();
+      var c = { x: cr.left + cr.width / 2, y: cr.top + cr.height / 2 };
+      place(L, imgs[0], k, c, -.35 * (1 - p)); place(R, imgs[1], k, c, .35 * (1 - p));
+      L.pivot.rotation.set(.08, .28 + p * .2, -.05 - p * .07);
+      R.pivot.rotation.set(.08, -.28 - p * .2, .05 + p * .07);
+    };
+    v.fit(); v.update(0); v.r.render(v.scene, v.cam);
+    split.classList.add('gl-on'); kick();
+  })();
+
+  /* AI — the screen blurs as the popup (HTML, over the canvas) grows; --pp / --ary come from the scroll script */
+  (async function(){
+    var box = document.getElementById('aiPhone'), canvas = document.getElementById('aiGL');
+    if(!box || !canvas) return;
+    var img = box.querySelector('img');
+    var v = makeView(canvas, 0xb69cff), ph = await makePhone(img.dataset.screen, img.dataset.blur);
+    v.scene.add(ph.pivot);
+    v.update = function(t){
+      var pp = cssVar(box, '--pp', 0), ary = cssVar(box, '--ary', 20);
+      sizePhone(v, ph, box.clientHeight * .982);
+      ph.pivot.rotation.set(.1, -THREE.MathUtils.degToRad(ary) * .9, .02);
+      ph.blur.material.opacity = pp;
+    };
+    v.fit(); v.update(0); v.r.render(v.scene, v.cam);
+    box.classList.add('gl-on'); kick();
+  })();
+})();
+</script>
+<!-- Cloudflare Web Analytics (cookieless) --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "77b9c16a394547e3a92308281b28cea9"}'></script>
+</body>
+</html>
