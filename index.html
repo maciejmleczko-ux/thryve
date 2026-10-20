@@ -903,7 +903,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
    przyciski ukrytego toastu przed fokusem i dotykiem po wygaszeniu. */
 .toast{position:fixed;left:50%;bottom:110px;width:max-content;max-width:calc(100% - 40px);box-sizing:border-box;transform:translateX(-50%) translateY(20px);background:var(--m-black);color:var(--m-card);
   display:flex;align-items:center;justify-content:center;gap:20px;padding:12px 24px;border-radius:var(--m-r-pill);font-family:var(--m-font);font-size:var(--m-fs-xs);font-weight:400;line-height:1.01;text-align:center;opacity:0;visibility:hidden;pointer-events:none;
-  transition:opacity var(--m-dur-fade) ease,transform var(--m-dur-fade) var(--m-ease),background-color var(--m-dur-quick) ease,visibility 0s linear var(--m-dur-fade);z-index:9700;}
+  transition:opacity var(--m-dur-fade) ease,transform var(--m-dur-fade) var(--m-ease),background-color var(--m-dur-quick) ease,visibility 0s linear var(--m-dur-fade);z-index:9800;}   /* nad oknem udostępniania (9700), które jest później w DOM: przy równym z-index przykrywało toast */
 .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);transition-delay:0s;}
 .toast.is-error{background:var(--m-danger);}
 .toast.has-undo{padding-right:12px;}
@@ -9317,7 +9317,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.74.1";
+const APP_VERSION = "4.75.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.74.0": {
@@ -12034,6 +12034,7 @@ function closeExercisePopupV2(viaDrag){
   // Leaving with X (not ✓) keeps what was logged as a draft, so reopening
   // this exercise picks up where it was left and its tile shows "2/4".
   if(popupExercise){
+    tmCommitPending();
     lgFlush(); // a set that was just dialled in but not yet auto-added — don't lose it
     if(sessionExercises.some(e=>e.name===popupExercise.name)){
       delete popupDrafts[popupExercise.name]; // confirmExercisePopupV2 already logged it
@@ -13811,7 +13812,15 @@ function tmSkip(){
   tmStop();
   tmPaint();
 }
-function tmCommit(sec, auto){
+// ✓ albo ✕ w oknie ćwiczenia przy działającym liczniku: zapisz to, co już zostało zrobione, zamiast po cichu wyrzucić (bieżnia 10 min znikała
+// razem z oknem, a ✓ pokazywało tylko ostrzeżenie „brak wyniku”). Bez okna wyników i bez odpoczynku.
+function tmCommitPending(){
+  if(!tm || !popupExercise || !isTimeEx(popupExercise)) return;
+  const ph = tmPhase();
+  const sec = tm.cg ? Math.floor(ph.side / 1000) : Math.floor(Math.min(ph.side, tm.D) / 1000);
+  if(sec > 0) tmCommit(sec, false, true);
+}
+function tmCommit(sec, auto, quiet){
   const ex = popupExercise;
   if(!ex || !isTimeEx(ex)){ tmStop(); return; }
   // when the set really ended: on timeline end for an automatic finish (the app may only be
@@ -13826,17 +13835,17 @@ function tmCommit(sec, auto){
   const idx = lgFirstBlank();
   if(idx === -1) sv.push(row); else sv[idx] = row;
   ex.sets = sv.length;
-  haptic(auto ? 'done' : 'medium');   // 'done' also plays the success sound — the end-of-set signal, also when the screen was off
+  haptic(quiet ? 'light' : auto ? 'done' : 'medium');   // 'done' also plays the success sound — the end-of-set signal, also when the screen was off
   markGymActivity();
   liveActivity();
-  restStart(ex, endedAt);
+  if(!quiet) restStart(ex, endedAt);
   lgPersistDraft();
   lgRenderSets();
   lgResetCurrent();
   tmPaint();
   updateGymPillsV2();
   if(goal) cgResult = cgResultFor(goal, row.durationSec);
-  if(ex.metrics && ex.metrics.length) openCardioResults(idx === -1 ? sv.length - 1 : idx);   // cardio: offer the results sheet right after the set
+  if(!quiet && ex.metrics && ex.metrics.length) openCardioResults(idx === -1 ? sv.length - 1 : idx);   // cardio: offer the results sheet right after the set
 }
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && tm){ tmTick(); if(tm && tm.pausedAt === null) tmAwake(true); } });
 window.addEventListener('pageshow', ()=>{ if(tm) tmTick(); });
@@ -13850,6 +13859,7 @@ function popupInitLg(){
 }
 function confirmExercisePopupV2(){
   if(!popupExercise) return;
+  tmCommitPending();
   lgFlush();
   const ex = popupExercise;
   ex.notes = exerciseNotes[ex.name] || '';   // also carried into workout history
@@ -21670,13 +21680,21 @@ async function shExport(kind){
   try{
     const state = Object.assign({}, sh.state, { bgImg: sh.bgImg });
     if(kind === 'copy'){
+      const CB = IS_NATIVE ? capPlugin('Clipboard') : null;
+      if(CB){   // WKWebView nie ma navigator.clipboard (kontekst niezabezpieczony): natywna wtyczka
+        const dataUrl = await blobToDataUrl(await buildWorkoutCardBlob(w, state));
+        await CB.write({ image: dataUrl });
+        toast(t('shareCopied','Skopiowano obraz')); haptic('success');
+        if(sh) setBusy(false);
+        return;
+      }
       if(!(navigator.clipboard && window.ClipboardItem)) throw new Error('no clipboard');
       // Safari needs the write inside the tap, so the blob is handed over as a promise
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': buildWorkoutCardBlob(w, state) })]);
       toast(t('shareCopied','Skopiowano obraz')); haptic('success');
     } else {
       const blob = await buildWorkoutCardBlob(w, state);
-      if(kind === 'save'){ scSaveBlob(blob, name); haptic('success'); }
+      if(kind === 'save'){ await scSaveBlob(blob, name); haptic('success'); }
       else await shareBlob(blob, name, t('shareWorkoutText','Mój trening w Mekkio 💪'));
     }
   }catch(err){
@@ -21685,7 +21703,24 @@ async function shExport(kind){
   }
   if(sh) setBusy(false);
 }
-function scSaveBlob(blob, filename){
+function blobToDataUrl(blob){
+  return new Promise((res, rej)=>{ const r = new FileReader(); r.onload = ()=> res(r.result); r.onerror = ()=> rej(r.error); r.readAsDataURL(blob); });
+}
+async function scSaveBlob(blob, filename){
+  // WKWebView ignoruje <a download>: w apce natywnej plik idzie do arkusza iOS (Zapisz obraz, Pliki...), jak kopia zapasowa
+  const FS = IS_NATIVE ? capPlugin('Filesystem') : null, SH = IS_NATIVE ? capPlugin('Share') : null;
+  if(FS && SH){
+    try{
+      const dataUrl = await blobToDataUrl(blob);
+      const w = await FS.writeFile({ path: filename, data: dataUrl.split(',')[1], directory: 'CACHE' });
+      await SH.share({ title: 'Mekkio', files: [w.uri] });
+      return;
+    }catch(e){
+      if(/cancel/i.test(String(e && e.message || e))) return;
+      console.error('scSaveBlob', e);
+      throw e;
+    }
+  }
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;

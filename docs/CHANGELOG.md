@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.74.1 (2026-10-18)
+- **Aktualna wersja:** 4.75.0 (2026-10-20)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,12 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.75.0 · MINOR · 2026-10-20
+
+- **Ćwiczenia czasowe:** ✓ albo ✕ w oknie ćwiczenia przy działającym liczniku zapisuje to, co już zostało zrobione (`tmCommitPending`, tryb `quiet` w `tmCommit`: bez odpoczynku i okna wyników kardio), zamiast po cichu wyrzucać wynik (bieżnia 10 min znikała z oknem).
+- **Karta treningu (iOS natywny):** kopiowanie obrazka przez wtyczkę `@capacitor/clipboard` (WKWebView nie ma `navigator.clipboard`), zapis obrazu przez Filesystem + Share (`scSaveBlob`, `blobToDataUrl`). Wymaga nowego builda natywnego (`native/package.json`, `Package.swift`).
+- **Toast:** `z-index` 9800 (nad oknem udostępniania 9700, które przykrywało toast).
 
 ### 4.74.1 · PATCH · 2026-10-18
 
