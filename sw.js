@@ -1,7 +1,7 @@
-const CACHE_NAME = 'mekkio-cache-v29';
+const CACHE_NAME = 'mekkio-cache-v30';
 // icons/share/* = backgrounds of the share sheet, kept offline from the first launch
 // icons/backgrounds/dashboard.webp = Dashboard header photo (~39 KB)
-const URLS_TO_CACHE = ['./', './index.html', './lottie.min.js', './success.json', './icons/backgrounds/dashboard.webp', './icons/badges/medal-barbell.svg', ...['first','fullweek','firstpr','pr25','beatweek','ton','bodyweight','growth3','allround','gryf'].map(n => './icons/badges/' + n + '.webp'), ...['hantle','sztanga','maszyny','kettlebell','cialo','gumy'].map(n => './icons/equip/' + n + '.png'), './icons/equip/wszystko.svg',
+const URLS_TO_CACHE = ['./', './index.html', './lottie.min.js', './success.json', './icons/backgrounds/dashboard.webp', './icons/backgrounds/dashboard-soft.webp', './icons/badges/medal-barbell.svg', ...['first','fullweek','firstpr','pr25','beatweek','ton','bodyweight','growth3','allround','gryf'].map(n => './icons/badges/' + n + '.webp'), ...['hantle','sztanga','maszyny','kettlebell','cialo','gumy'].map(n => './icons/equip/' + n + '.png'), './icons/equip/wszystko.svg',
   ...[1,2,3,4,5].flatMap(n => ['./icons/share/hero-' + n + '.jpg', './icons/share/gym-' + n + '.jpg'])];
 
 self.addEventListener('install', (event) => {
