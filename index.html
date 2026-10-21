@@ -129,6 +129,9 @@
   --bg-photo:url(icons/backgrounds/bg_onboarding.webp); --bgc-top:#f9f9fa; --bgc-bot:#ebebec;   /* tło ekranów: zdjęcie wg płci (bg_male / bg_female), bez płci wzór z onboardingu; kolory brzegów zdjęcia wypełniają obszar nad i pod nim (applyBgPhoto) */
   --m-page-edge:#e9e9e7;   /* kolor tła body za Dashboardem i Profilem: widać go przy odbiciu (bounce) u góry i u dołu, musi pasować do obu końców strony */
   --m-glass:rgba(255,255,255,.84); /* frosted tile fill on the Dashboard (Figma 'white 84%') */
+  --m-glass-fill:rgba(255,255,255,.42);   /* szkło iOS: wypełnienie białych kafli */
+  --m-glass-blur:blur(22px) saturate(190%);   /* szkło iOS: rozmycie + nasycenie tła pod kaflem */
+  --m-glass-edge:inset 0 .5px 0 rgba(255,255,255,.9),inset 0 -.5px 0 rgba(255,255,255,.35),0 0 0 .25px rgba(255,255,255,.7);   /* obrys 0,5 px + rozbłysk u góry */
   --m-navy-tile:#e0e6f7;   /* pale blue tile: Konsystencja, SERII mini-tile (Figma 542:10833). NOT audyt-kolorow's proposed --m-navy-wash #e7ecff (different value) */
   --m-red-wash:#fbe2dd;    /* pale red tile: OBJETOSC mini-tile */
   --m-plum:#8e0045;
@@ -3704,6 +3707,16 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .opk-col .rl{--off:0px;}
 .opk-col .onb-equip-row{gap:4px;}
 .opk-col .onb-equip{flex:1 1 0;min-width:0;width:auto;max-width:46px;height:auto;aspect-ratio:1/1;}   /* 7 kółek mieści się też na 320 px */
+/* ---- Szkło iOS na białych kaflach (4.80.0): jedna lista, trzy tokeny w :root. Tło musi mieć co rozmywać, na jednolitym jasnym tle efekt jest subtelny. ---- */
+.dash-tile,.dash-card,.dash-step,.dash-steps-h,
+.pf-card,.pf-stats,.pf-bcard,.pf-rm-card,.pf-rm-empty,
+.gymfin-record,.gymv2-done-row,.lg-ov-tiles,
+#view-gym-v2 .gymv2-tile,
+.pal-empty,.pdt-per,.pdt-days,.tn--own,.psh-card.tn--own,
+.histv2-card,.histv2-empty,.exv2-series-card,.newex-v2-bento,.wl-list,.lng-row,
+.plc--new,.pal-seg,.gymv2-block,
+.statsv2-kcard,.statsv2-bar-card,.statsv2-scard,.statsv2-ex-tile{background:var(--m-glass-fill)!important;-webkit-backdrop-filter:var(--m-glass-blur)!important;backdrop-filter:var(--m-glass-blur)!important;box-shadow:var(--m-glass-edge);}
+.tn--own{--plc-bg:var(--m-glass-fill);}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -9599,7 +9612,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.79.1";
+const APP_VERSION = "4.80.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.79.0": {
