@@ -2149,29 +2149,31 @@ button.dash-coach{cursor:pointer;}
 .pdt-act{flex:none;width:24px;height:24px;border-radius:50%;background:var(--m-orange);display:flex;align-items:center;justify-content:center;}
 .pdt-act svg{display:block;width:14px;height:14px;}
 .pdt-pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 12px;border-radius:var(--m-r-pill);font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
-.pdt-lvl{background:var(--plc-acc,var(--plc-bg));color:var(--m-white);}   /* E6: pastylka poziomu w akcencie palety karty (--plc-acc: ciemny odcień rodziny, biały tekst ≥6:1); plan własny nie ma akcentu → biała z obrysem (reguła niżej) */
-.tn--own.pdt-lvl,.tn--own .pdt-lvl{background:var(--plc-bg);color:var(--plc-fg);box-shadow:inset 0 0 0 1px var(--m-line);}
+.pdt-lvl{background:var(--plc-tint,var(--m-orange-tint-2));color:var(--plc-acc,var(--m-ink));}   /* E8: pastylka poziomu w jasnym odcieniu palety planu (--plc-tint), tekst i kropki w akcencie (--plc-acc, ≥4,5:1 na odcieniu); plan własny/AI bez palety: jasny pomarańcz + ciemny tekst */
 .pdt-dots{display:inline-flex;gap:2px;}
 .pdt-dots i{display:block;width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.35;}
 .pdt-dots i.on{opacity:1;}
-.pdt-src{background:var(--plc-tint,var(--m-plan-c-hard));color:var(--m-ink);}   /* E6: pastylka źródła w jasnym odcieniu palety karty (--plc-tint), ciemny tekst */
-.pdt-src--own{background:var(--m-white);color:var(--m-ink);box-shadow:inset 0 0 0 1px var(--m-line);}
+.pdt-src,.pdt-src--own{background:var(--m-plan-c-hard);color:var(--m-white);}   /* E8: pastylka źródła („MEKKIO”, „MOJE”) w pomarańczu; --m-plan-c-hard zamiast --m-orange, bo biały 11 px na #ff3300 ma 3,7:1, a na #cd1200 5,7:1 */
 .pdt-src--ai{background:linear-gradient(47deg,var(--m-ai-fill-from) 9%,var(--m-ai-fill-to) 100%);color:var(--m-white);}
 .pdt-title{margin:0;font-size:var(--m-fs-2xl);font-weight:300;line-height:1.15;color:var(--m-ink);overflow-wrap:anywhere;}
 .pdt-desc{margin:-4px 0 0;font-size:var(--m-fs-xs);line-height:1.4;color:var(--m-muted-text);}
 .pdt-card{box-sizing:border-box;padding:18px;border-radius:var(--m-r-md);background:var(--plc-bg);color:var(--plc-fg);box-shadow:0 0 0 .5px var(--plc-ring,transparent);display:flex;flex-direction:column;gap:12px;}
 .pdt-card-top{display:flex;gap:20px;align-items:stretch;}
+.pdt-card-top > div:first-child{flex:none;}
 .pdt-lab{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;}
 .pdt-val{margin:8px 0 0;font-size:var(--m-fs-lg);font-weight:200;line-height:36px;white-space:nowrap;}
 .pdt-vsep{flex:none;width:0;border-left:.5px solid var(--plc-line);}
 .pdt-eq{flex:1 1 auto;min-width:0;}
-.pdt-eqs{display:flex;gap:4px;margin-top:8px;}
+.pdt-eqs{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
 .pdt-eqi{flex:none;width:36px;height:36px;border-radius:50%;background:var(--plc-chip);display:flex;align-items:center;justify-content:center;color:var(--m-ink);font-size:var(--m-fs-2xs);font-weight:600;}
 .pdt-eqi .eq-img{width:24px;height:24px;display:block;object-fit:contain;}
 .pdt-hr{height:0;margin:0;border:0;border-top:.5px solid var(--plc-line);}
 .pdt-week{display:flex;gap:4px;margin-top:8px;}
-.pdt-week i{flex:1 1 0;min-width:0;max-width:44px;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:var(--m-fs-2xs);font-weight:500;text-transform:uppercase;box-shadow:inset 0 0 0 1px var(--plc-line);}
-.pdt-week i.on{background:var(--plc-on);color:var(--plc-on-fg);box-shadow:none;font-weight:600;}
+.pdt-week i{flex:1 1 0;min-width:0;max-width:44px;aspect-ratio:1;border-radius:50%;display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;font-style:normal;font-size:var(--m-fs-2xs);font-weight:500;text-transform:uppercase;background:var(--plc-tint,var(--m-orange-tint));color:var(--m-ink);}   /* E8: dzień wolny = jasny odcień palety (ciemny tekst ≥6:1), plan własny: --m-orange-tint */
+.pdt-week i.on{background:var(--plc-tick,var(--plc-acc,var(--m-plan-c-hard)));color:var(--m-white);font-weight:600;}   /* E8: dzień treningowy = ciemne kółko (akcent palety; czarna: --plc-tick, bo akcent zlewa się z kartą), biała litera ≥5,9:1; plan własny: --m-plan-c-hard (5,7:1; biały na #ff3300 ma 3,7:1) */
+.pdt-week i.on::after{content:"";width:4px;height:4px;border-radius:50%;background:currentColor;}
+.tn--ai .pdt-week i{background:none;box-shadow:inset 0 0 0 1px var(--plc-line);color:inherit;}
+.tn--ai .pdt-week i.on{background:var(--plc-on);color:var(--plc-on-fg);box-shadow:none;}
 .pdt-sec{display:flex;flex-direction:column;gap:12px;}
 .pdt-sec-l{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
 .pdt-per{box-sizing:border-box;padding:12px 16px 18px;border-radius:var(--m-r-md);background:var(--m-glass);box-shadow:0 0 0 .5px var(--m-panel);display:flex;flex-direction:column;gap:14px;}
@@ -2188,23 +2190,22 @@ button.dash-coach{cursor:pointer;}
 .pdt-day + .pdt-day{border-top:1px solid var(--m-border);}
 .pdt-day-h{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;min-height:44px;padding:16px 18px;border:0;background:none;font:inherit;text-align:left;color:var(--m-ink);cursor:pointer;transition:background-color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
 .pdt-day.is-open .pdt-day-h{background:var(--m-panel);}
-.pdt-day-tx{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.pdt-day-tx{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px;}
 .pdt-day-d{font-size:var(--m-fs-2xs);font-weight:500;}
 .pdt-day-t{font-size:var(--m-fs-base);font-weight:500;line-height:1.2;}
-.pdt-day-m{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:5px;font-size:var(--m-fs-2xs);font-weight:600;}
+.pdt-day-m{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:var(--m-fs-2xs);font-weight:600;}
 .pdt-day-m span{display:inline-flex;align-items:center;gap:6px;}
-.pdt-day-m .ph{width:16px;height:16px;flex:none;color:var(--plc-acc,var(--m-plan-c-hard));}   /* E6: ikony ćwiczeń/czasu i strzałka w akcencie palety karty (--plc-acc; --plc-ico jest jasne i na jasnym tle listy dni nie dałoby kontrastu) */
+.pdt-day-m .ph{width:16px;height:16px;flex:none;color:var(--m-orange);}   /* E8: ikony ćwiczeń i czasu w pomarańczu (grafika, ≥3:1) */
 .pdt-day-m .ph svg{width:16px;height:16px;}
-.pdt-chev{flex:none;width:16px;height:16px;color:var(--plc-acc,var(--m-plan-c-hard));transition:transform var(--m-dur-quick) var(--m-ease);}
+.pdt-chev{flex:none;width:16px;height:16px;color:var(--m-orange);transition:transform var(--m-dur-quick) var(--m-ease);}
 .pdt-chev svg{display:block;width:16px;height:16px;}
 .pdt-day.is-open .pdt-chev{transform:rotate(90deg);}
-.pdt-day-b{padding:4px 18px 8px;background:var(--m-card);}
+.pdt-day-b{padding:18px;}
 .pdt-day-b[hidden]{display:none;}
-.pdt-ex{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 0;}
-.pdt-ex + .pdt-ex{border-top:1px solid var(--m-border);}
-.pdt-ex-n{flex:1 1 auto;min-width:0;font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);overflow-wrap:anywhere;}
-.pdt-ex-g{flex:none;display:inline-flex;align-items:center;height:19px;padding:0 12px;border-radius:var(--m-r-pill);background:var(--plc-tint,var(--m-orange-tint-2));color:var(--m-ink);font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;white-space:nowrap;}   /* E6: tag partii w jasnym odcieniu palety karty; plan własny: --m-orange-tint-2 jak .pal-tag */
-.pdt-ex-s{flex:none;min-width:58px;text-align:right;font-size:var(--m-fs-xs);color:var(--m-ink);white-space:nowrap;}
+.pdt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;}
+.pdt-grid .ex-tile{background:rgba(236,234,241,.5);border:0;border-radius:var(--m-r-md);cursor:default;pointer-events:none;}   /* kafel tylko do podglądu (nieklikalny); tło jak w edytorze i oknie wyboru ćwiczenia */
+.pdt-grid .ex-tile.png-icon .gymv2-tile-icon{height:62%;}
+.pdt-none{margin:0;font-size:var(--m-fs-xs);color:var(--m-muted-text);}
 .pdt-cta{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
 .pdt-btn{width:100%;height:55px;padding:0 30px;border:1px solid transparent;border-radius:var(--m-r-pill);font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .pdt-btn--main{background:var(--m-plan-c-hard);color:var(--m-white);}
@@ -17061,15 +17062,6 @@ function pdtDayTitle(list, n){
   const parts = seen.slice(0, 3).map((l, i)=> i ? l.charAt(0).toLowerCase() + l.slice(1) : l);
   return parts.join(', ');
 }
-function pdtExSets(e){
-  const x = withLibraryTime(e);
-  const sets = parseInt(x.sets, 10);
-  if(!(sets > 0)) return '';
-  if(isTimeEx(x)) return `${sets} × ${fmtDur(timeDurFor(x), x.perSide)}`;
-  const lo = parseInt(x.repLow, 10), hi = parseInt(x.repHigh, 10);
-  if(!(lo > 0)) return '';
-  return `${sets} × ${hi > lo ? lo + '–' + hi : lo}`;
-}
 function pdtVariantHtml(){
   const tag = MAIN_LIFT_CYCLE[pdt.tab];
   const v = EXECUTION_VERSIONS[tag];
@@ -17083,10 +17075,10 @@ function pdtVariantHtml(){
 function pdtDayHtml(plan, d, idx){
   const list = planDayExercises(plan, d).filter(e=> !BOOKEND_EX_NAMES.has(e.name));
   const open = pdt.open === d;
+  // Siatka kafli 3 w rzędzie (buildExerciseTileV2 w stanie „plain”); kafel jest tylko podglądem, więc zamieniamy <button> na <div> (bez roli przycisku i fokusu).
   const rows = list.map(e=>{
-    const b = muscleGroupBucket(e.group);
-    const g = (b.key === 'Wlasne' || b.strength === false) ? '' : `<span class="pdt-ex-g">${escHtml(LANG === 'en' ? b.en : b.pl)}</span>`;
-    return `<div class="pdt-ex"><span class="pdt-ex-n">${escHtml(e.name)}</span>${g}<span class="pdt-ex-s">${escHtml(pdtExSets(e))}</span></div>`;
+    const tl = buildExerciseTileV2(e, 'plain');
+    return `<div class="${tl.className}" role="listitem">${tl.innerHTML}</div>`;
   }).join('');
   return `<div class="pdt-day${open ? ' is-open' : ''}" data-d="${d}">
     <button type="button" class="pdt-day-h" data-pa="day" data-d="${d}" id="pdtH_${d}" aria-expanded="${open}" aria-controls="pdtB_${d}">
@@ -17094,7 +17086,7 @@ function pdtDayHtml(plan, d, idx){
       <span class="pdt-day-m"><span>${ph('barbell')}${escHtml(planExCountText(list.length))}</span><span>${ph('clock-countdown')}~${pdtDayMinutes(list)} min</span></span></span>
       <span class="pdt-chev" aria-hidden="true">${PDT_CHEV_SVG}</span>
     </button>
-    <div class="pdt-day-b" id="pdtB_${d}" role="region" aria-labelledby="pdtH_${d}"${open ? '' : ' hidden'}>${rows}</div>
+    <div class="pdt-day-b" id="pdtB_${d}" role="region" aria-labelledby="pdtH_${d}"${open ? '' : ' hidden'}>${rows ? `<div class="pdt-grid" role="list">${rows}</div>` : `<p class="pdt-none">${t('pdtNoEx', 'Brak ćwiczeń tego dnia')}</p>`}</div>
   </div>`;
 }
 function renderPlanDetailV2(animate){
@@ -17116,8 +17108,7 @@ function renderPlanDetailV2(animate){
   const pills = `<div class="pdt-pills${rc(0)}">${active ? `<span class="pdt-act" role="img" aria-label="${escHtml(t('pdtActiveA11y', 'Aktywny plan'))}">${PDT_CHECK_SVG}</span>` : ''}${lvl ? `<span class="pdt-pill pdt-lvl">${escHtml(plcLevelText(lvl))}<span class="pdt-dots" aria-hidden="true">${dots}</span></span>` : ''}<span class="pdt-pill pdt-src ${srcCls}">${escHtml(plcSourceLabel(f.source))}</span></div>`;
   const name = escHtml(planDisplayName(plan));
   const head = `<div class="pdt-head">${pills}<h2 class="pdt-title${rc(0)}">${name}</h2>${f.description ? `<p class="pdt-desc${rc(0)}">${escHtml(f.description)}</p>` : ''}</div>`;
-  const eqIcons = f.equipment.slice(0, 3).map(k=> `<span class="pdt-eqi" role="img" aria-label="${escHtml(plcEquipLabel(k))}">${equipIconHtml(k)}</span>`).join('')
-    + (f.equipment.length > 3 ? `<span class="pdt-eqi" aria-label="+${f.equipment.length - 3}">+${f.equipment.length - 3}</span>` : '');
+  const eqIcons = f.equipment.map(k=> `<span class="pdt-eqi" role="img" aria-label="${escHtml(plcEquipLabel(k))}">${equipIconHtml(k)}</span>`).join('');
   const eq = f.equipment.length ? `<i class="pdt-vsep"></i><div class="pdt-eq"><p class="pdt-lab">${t('pdtEquip', 'Sprzęt')}</p><div class="pdt-eqs">${eqIcons}</div></div>` : '';
   const week = PLAN_DAYS.map(d=> `<i${f.days.indexOf(d) >= 0 ? ' class="on"' : ''}>${planDayLabel(d)}</i>`).join('');
   const card = `<div class="pdt-card${rc(1)}"><div class="pdt-card-top"><div><p class="pdt-lab">${t('pdtTime', 'Czas')}</p><p class="pdt-val">~${f.minutes} min</p></div>${eq}</div><hr class="pdt-hr"><div><p class="pdt-lab">${t('pdtDays', 'Dni')}</p><div class="pdt-week" role="img" aria-label="${escHtml(f.days.map(d=> PDT_DAY_FULL[d]).join(', '))}">${week}</div></div></div>`;
