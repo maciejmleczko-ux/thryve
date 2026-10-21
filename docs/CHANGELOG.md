@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.79.0 (2026-10-21)
+- **Aktualna wersja:** 4.79.1 (2026-10-21)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,10 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.79.1 · PATCH · 2026-10-21
+
+- **Dolne menu:** efekt szkła jak w iOS: tło 38% bieli, rozmycie 26 px, nasycenie 200%, cień z miękkim rozbłyskiem u góry. Obrys 1 px → 0,5 px (`::before` i wewnętrzne linie). Kafle pulpitu bez zmian (na jasnym tle szkła nie widać). Sprawdzone na symulatorze iPhone 17 i telefonie.
 
 ### 4.79.0 · MINOR · 2026-10-21
 
