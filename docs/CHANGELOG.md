@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.78.0 (2026-10-21)
+- **Aktualna wersja:** 4.79.0 (2026-10-21)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.79.0 · MINOR · 2026-10-21
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Ćwiczenia każdego dnia widzisz jako kafelki, sprzęt jako ikony, a dni treningowe na karcie w kolorze planu.
+
+- **Szczegół planu wg Figmy 638:9253 (E8):** pastylka poziomu w odcieniu palety planu i pomarańczowa pastylka źródła, wszystkie ikony sprzętu zamiast „3 + N”, dni jako ciemne (treningowe, z kropką) i jasne (wolne) kółka, akordeon dni z siatką kafli ćwiczeń po 3 w rzędzie zamiast listy „serie × powtórzenia”; plan własny w głównym pomarańczu.
 
 ### 4.78.0 · MINOR · 2026-10-21
 
