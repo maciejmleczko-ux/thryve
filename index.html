@@ -2830,8 +2830,10 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
    plotted (and what the PR badges/hero "100 kg" tie back to) is
    running-best WEIGHT over time, not volume — relabeled "PROGRES
    CIĘŻARU" to match what the chart actually shows. */
-.statsv2-root{background:transparent;}   /* tło daje .pg-bg (jak Pulpit) */
-.statsv2-panel{padding:max(14px, calc(var(--top-inset) - 8px)) 10px 40px;position:relative;}
+.statsv2-root{background:transparent;position:relative;isolation:isolate;min-height:100dvh;}
+/* tło Postępów wg Figmy: zdjęcie na górze (stała warstwa .pg-bg) + prostokąt gradientu od y=214 na całą wysokość strony (rgba(251,236,227,0) = --m-page-top przezroczysty) */
+.statsv2-root::before{content:"";position:absolute;left:0;right:0;top:214px;bottom:calc(-110px - env(safe-area-inset-bottom, 0px));z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(251,236,227,0) 2%,var(--m-page-top) 8%,var(--m-page-bot) 100%);}   /* tło daje .pg-bg (jak Pulpit) */
+.statsv2-panel{padding:max(14px, calc(var(--top-inset) - 8px)) 10px 0;position:relative;}   /* dół: zapas daje .app (110 px = menu + odstęp) */
 .statsv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .statsv2-cards{display:flex;flex-direction:column;gap:8px;}
 /* overview chart carousel — a transform track dragged with the finger
@@ -3100,7 +3102,8 @@ body.gymv2-bg{background:transparent;}
   background-size:566px 1007px, 100% 100%;}   /* Pulpit, Plany, GYM, Historia, Postępy, Profil: gotowe zdjęcie (już z białą poświatą) na stałej warstwie wystającej 300 px poza ekran; odbicie góra/dół pokazuje kolory brzegów zdjęcia */
 body.dashboard-bg .pg-bg, body.profil-bg .pg-bg, body.plansv2-bg .pg-bg{display:block;}
 html.dashboard-lock, html.profil-lock, html.plansv2-bg{background:var(--bgc-bot);}
-html.statsv2-bg, html.histv2-bg{background:var(--bgc-bot);}
+html.histv2-bg{background:var(--bgc-bot);}
+html.statsv2-bg{background:var(--m-page-bot);}   /* dół strony = kolor tła body za gradientem, więc gumka iOS nie pokazuje szwu */
 /* Stats, Historia, edytor planu: ta sama stała warstwa, tylko płaski kolor panelu (Plany od układu C mają tło jak Pulpit) */
 body.statsv2-bg .pg-bg, body.histv2-bg .pg-bg{display:block;}   /* Historia i Postępy: to samo tło co Pulpit (decyzja Macieja 2026-10-21), wcześniej płaski panel */
 body.statsv2-bg, body.histv2-bg, body.plansv2-bg{background:transparent;}
@@ -3756,7 +3759,10 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .stv2-seg-b:active{transform:scale(.97);}
 /* kafel trzech liczb */
 .stv2-tiles{box-sizing:border-box;min-height:80px;display:flex;align-items:center;justify-content:space-between;padding:12px 23px;border:.5px solid var(--m-panel);border-radius:var(--m-r-sm);}
-.stv2-tiles .pf-stat{gap:6px;}
+.stv2-tiles{padding:12px 0;}
+.stv2-tiles .pf-stat{gap:6px;align-items:flex-start;justify-content:flex-start;text-align:left;padding:0 14px;}
+.stv2-tiles .pf-stat-l{order:-1;}
+.stv2-tiles .stv2-tile-d{justify-content:flex-start;}
 .stv2-tiles .pf-vsep{align-self:stretch;height:auto;min-height:66px;}
 .stv2-tiles small, .stv2-bv small{margin-left:3px;font-size:var(--m-fs-xs);font-weight:400;letter-spacing:0;color:var(--m-muted-text);}
 .stv2-tile-d{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0 4px;min-height:14px;}
@@ -3810,11 +3816,15 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .stv2-stall-pill{display:inline-flex;align-items:center;height:19px;padding:0 14px;border-radius:99px;background:var(--m-amber-tint);color:var(--m-ink);font-size:var(--m-fs-2xs);}
 /* rozkład mięśni */
 .stv2-mrows{display:flex;flex-direction:column;gap:12px;}
-.stv2-mrow{display:grid;grid-template-columns:72px minmax(0,1fr) 26px 52px;align-items:center;gap:12px;min-height:29px;}
+.stv2-mrow + .stv2-mrow{padding-top:12px;border-top:.5px solid var(--m-muted);}
+.stv2-pill-up{text-transform:uppercase;}
+.stv2-mr{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.stv2-mr .stv2-mv{font-size:var(--m-fs-base);}
+.stv2-mrow{display:grid;grid-template-columns:72px minmax(0,1fr) 48px;align-items:center;gap:12px;min-height:29px;}
 .stv2-mn{font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .stv2-mtrack{display:block;height:9px;border-radius:99px;background:var(--m-orange-tint);overflow:hidden;}
 .stv2-mfill{display:block;width:calc(var(--r,0) * 100%);height:100%;border-radius:99px;background:var(--m-orange);}
-.stv2-mv{font-size:var(--m-fs-base);text-align:right;color:var(--m-ink);font-variant-numeric:tabular-nums;}
+.stv2-mv{font-size:var(--m-fs-base);text-align:right;line-height:1.2;color:var(--m-ink);font-variant-numeric:tabular-nums;}
 .stv2-banner{display:flex;align-items:center;gap:12px;margin-top:8px;padding:12px;border-radius:var(--m-r-md);background:var(--m-amber);color:var(--m-ink);}
 .stv2-banner-ic{flex:none;width:38px;height:38px;border-radius:50%;background:var(--m-amber-tint);display:flex;align-items:center;justify-content:center;}
 .stv2-banner-ic svg{display:block;width:24px;height:24px;}
@@ -3824,6 +3834,9 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .stv2-body{display:flex;gap:var(--m-gap-card);}
 .stv2-bt{flex:1 1 0;min-width:0;box-sizing:border-box;padding:12px;border:0;border-radius:var(--m-r-sm);font:inherit;color:var(--m-ink);text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
 button.stv2-bt{cursor:pointer;}
+.stv2-bt-h{display:flex;align-items:center;justify-content:space-between;width:100%;}
+.stv2-bt .stv2-spark{width:100%;height:19px;max-width:none;}
+.stv2-axis{display:flex;justify-content:space-between;width:100%;font-size:var(--m-fs-2xs);color:var(--m-muted-text);}
 .stv2-bt-d{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:14px;}
 @media (prefers-reduced-motion: no-preference){
   @keyframes stv2GrowX{from{transform:scaleX(0);}to{transform:scaleX(1);}}
@@ -21719,7 +21732,7 @@ Object.assign(T_EN, {
 const STV2_ICO = {
   cal: '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><rect x="2.25" y="3.25" width="11.5" height="10.5" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M2.25 6.75h11.5M5.5 2v2.5M10.5 2v2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
   flat: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  least: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><path d="M12 5v14M6.5 13.5 12 19l5.5-5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  least: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5v5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.4" r="1.1" fill="currentColor"/></svg>',
 };
 const STV2_MON = LANG === 'en' ? ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'] : ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
 function stv2Dm(iso, withYear){
@@ -21744,7 +21757,7 @@ function stv2Spark(vals, w, h){
   if(!vals || vals.length < 2) return '';
   const lo = Math.min(...vals), hi = Math.max(...vals), sp = hi - lo, pad = 2;
   const pts = vals.map((v, i)=>({ x: +(pad + i / (vals.length - 1) * (w - 2 * pad)).toFixed(1), y: +(sp === 0 ? h / 2 : pad + (1 - (v - lo) / sp) * (h - 2 * pad)).toFixed(1) }));
-  return `<svg class="stv2-spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" fill="none" aria-hidden="true"><path d="${statsV2SmoothPath(pts)}" stroke="var(--m-mint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  return `<svg class="stv2-spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="none" fill="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="${statsV2SmoothPath(pts)}" stroke="var(--m-mint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 // delta tekstowa: wzrost = strzałka --m-mint + tekst --m-mint-ink, spadek --m-danger; tryb 'neutral' (waga, kalorie, mięśnie) = szary
 function stv2Delta(d, fmt, mode){
@@ -21752,6 +21765,12 @@ function stv2Delta(d, fmt, mode){
   if(d === 0) return '<span class="stv2-delta stv2-delta--0"><b>0</b></span>';
   const up = d > 0, c = mode === 'neutral' ? 'neutral' : (up ? 'up' : 'down');
   return `<span class="stv2-delta stv2-delta--${c}">${up ? PF_ICO.up : PF_ICO.down}<b>${up ? '+' : '−'}${fmt(Math.abs(d))}</b></span>`;
+}
+function stv2Axis(dates){
+  if(!dates || dates.length < 2) return '';
+  const a = dates[0], m = dates[Math.floor((dates.length - 1) / 2)], z = dates[dates.length - 1];
+  const L = dates.length > 2 && m !== a && m !== z ? [a, m, z] : [a, z];
+  return `<span class="stv2-axis">${L.map(d=> `<span>${stv2Dm(d)}</span>`).join('')}</span>`;
 }
 function stv2Num(n){ return formatDashNum(n, 0); }
 function stv2Dur(min){ min = Math.round(min); return min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`; }
@@ -21827,15 +21846,22 @@ function stv2RecordRows(today){
   const names = [];
   stv2Safe(()=> recIndex().state.forEach((st, name)=>{ if(typeof name === 'string' && !isCardioName(name) && !(typeof BOOKEND_EX_NAMES !== 'undefined' && BOOKEND_EX_NAMES.has(name))) names.push(name); }));
   const recs = [];
+  const series = new Map();   // nazwa -> bieżący najlepszy wynik po każdej sesji (kg / powt. / s), do mini-wykresu
+  stv2Safe(()=> statsV2Rows().forEach(row=> row.an.per.forEach((p, name)=>{
+    const v = p.topW > 0 ? p.topW : (p.bw && p.topReps > 0) ? p.topReps : p.topTime > 0 ? p.topTime : 0;
+    if(!(v > 0)) return;
+    const arr = series.get(name) || []; if(!series.has(name)) series.set(name, arr);
+    arr.push(Math.max(v, arr.length ? arr[arr.length - 1] : 0));
+  })));
   names.forEach(name=>{
     const r = stv2Safe(()=> exerciseRecords(name), null);
     if(!r) return;
     const pick = r.weight ? { kind: 'weight', v: r.weight } : r.reps ? { kind: 'reps', v: r.reps } : r.time ? { kind: 'time', v: r.time } : null;
     if(!pick) return;
     recs.push({ name, kind: pick.kind, value: pick.v.value, perSide: pick.v.perSide, date: pick.v.date, last: r.lastDate || pick.v.date, sessions: r.sessions || 0,
-      hist: (pick.v.history || []).map(h=> h.value), isNew: fresh.has(name) });
+      hist: series.get(name) || [], isNew: fresh.has(name) });
   });
-  recs.sort((a, b)=> a.last < b.last ? 1 : a.last > b.last ? -1 : a.name < b.name ? -1 : 1);
+  recs.sort((a, b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : a.last < b.last ? 1 : a.last > b.last ? -1 : a.name < b.name ? -1 : 1);   // wg daty rekordu, malejąco
   return recs.slice(0, 3);
 }
 
@@ -21993,11 +22019,11 @@ function renderStatsV2Overview(){
   const grpName = k=> { const b = PLAN_EX_GROUPS.find(x=> x.key === k); return b ? (LANG === 'en' ? b.en : b.pl) : k; };
   const maxSets = Math.max(1, ...mus.rows.map(r=> r.sets));
   const musSec = mus.rows.length ? `
-      <section class="pf-sec ${A()}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('stV2Muscles', 'Rozkład mięśni')}</h2><span class="pf-pill">${E(stv2PeriodPill(win))}</span></div>
+      <section class="pf-sec ${A()}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('stV2Muscles', 'Rozkład mięśni')}</h2><span class="pf-pill stv2-pill-up">${E(stv2PeriodPill(win))}</span></div>
         <div class="pf-card"><div class="stv2-mrows">${mus.rows.map((r, i)=> `<div class="stv2-mrow"><span class="stv2-mn">${E(grpName(r.group))}</span>
           <span class="stv2-mtrack"><i class="stv2-mfill stv2-grow" style="--r:${(r.sets / maxSets).toFixed(3)};--i:${i}"></i></span>
-          <span class="stv2-mv">${r.sets}</span><span class="stv2-md">${stv2Delta(r.delta, stv2Num, 'neutral')}</span></div>`).join('')}</div></div>
-        ${(mus.least && mus.rows.length >= 2 && n > 2) ? `<div class="stv2-banner"><span class="stv2-banner-ic">${STV2_ICO.least}</span><div><p class="stv2-banner-t">${t('stV2Least', 'Najmniej trenowane')}</p><p class="stv2-banner-v">${t('stV2LeastVal', `${grpName(mus.least.group)}: ${mus.least.sets} ${plPlural(mus.least.sets, 'seria', 'serie', 'serii')}`, grpName(mus.least.group), mus.least.sets)}</p></div></div>` : ''}</section>` : '';
+          <span class="stv2-mr"><span class="stv2-mv">${r.sets}</span>${stv2Delta(r.delta, stv2Num, 'neutral')}</span></div>`).join('')}</div></div>
+        ${stv2ShowLeast(mus, n) ? `<div class="stv2-banner"><span class="stv2-banner-ic">${STV2_ICO.least}</span><div><p class="stv2-banner-t">${t('stV2Least', 'Najmniej trenowane')}</p><p class="stv2-banner-v">${t('stV2LeastVal', `${grpName(mus.least.group)}: ${mus.least.sets} ${plPlural(mus.least.sets, 'seria', 'serie', 'serii')}`, grpName(mus.least.group), mus.least.sets)}</p></div></div>` : ''}</section>` : '';
 
   /* ---------- 7. Ciało + Kardio + Udostępnij ---------- */
   const bodySec = stv2BodyHtml(win, ps, n, A);
@@ -22017,12 +22043,22 @@ function renderStatsV2Overview(){
   return `<div class="stv2-col">${ringCard}${head}${caro}${recSec}${stallSec}${musSec}${bodySec}${cardioSec}${shareBtn}</div>`;
 }
 
+// baner „Najmniej trenowane”: >= 3 grupy z danymi, najmniej trenowana < 50% mediany serii i bez remisu na dole
+function stv2ShowLeast(mus, n){
+  if(!mus.least || n <= 2) return false;
+  const rows = mus.rows.filter(r=> r.group !== 'Wlasne');
+  if(rows.length < 3) return false;
+  const v = rows.map(r=> r.sets).sort((a, b)=> a - b);
+  const med = v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2;
+  if(!(mus.least.sets < med * 0.5)) return false;
+  return rows.filter(r=> r.sets === mus.least.sets).length === 1;
+}
 // CIAŁO: Waga + Kalorie (delty neutralne: tu wzrost ani spadek nie jest „dobry”); równe szerokości, odstęp --m-gap-card
 function stv2BodyHtml(win, ps, n, A){
   const E = escHtml;
   const wl = (Array.isArray(weightLog) ? weightLog : []).filter(e=> e && dashValidIso(e.date) && e.date <= win.end && isFinite(+e.kg)).slice().sort((a, b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-  const kc = [];
-  statsV2Order().forEach(w=>{ if(w.date < win.start || w.date > win.end) return; const k = stv2Safe(()=> workoutKcalShown(w), null); if(typeof k === 'number' && isFinite(k) && k > 0) kc.push(k); });
+  const kc = [], kd = [];
+  statsV2Order().forEach(w=>{ if(w.date < win.start || w.date > win.end) return; const k = stv2Safe(()=> workoutKcalShown(w), null); if(typeof k === 'number' && isFinite(k) && k > 0){ kc.push(k); kd.push(w.date); } });
   if(!wl.length && !kc.length) return '';
   const inLbl = E(stv2InLabel(win.period));
   let wTile;
@@ -22032,13 +22068,13 @@ function stv2BodyHtml(win, ps, n, A){
     const before = wl.filter(e=> e.date < win.start);
     const base = before.length ? before[before.length - 1] : inWin[0];
     const dlt = (base && base !== cur) ? Math.round((cur.kg - base.kg) * 10) / 10 : null;
-    const sp = (inWin.length >= 2 ? inWin : wl.slice(-10)).map(e=> +e.kg);
-    wTile = `<span class="pf-stat-l">${t('stV2Weight', 'Waga')}</span>
+    const spE = (inWin.length >= 2 ? inWin : wl.slice(-10)), sp = spE.map(e=> +e.kg);
+    wTile = `<span class="stv2-bt-h"><span class="pf-stat-l">${t('stV2Weight', 'Waga')}</span><span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></span>
       <span class="pf-stat-v stv2-bv">${E(fmtKg(cur.kg))}<small>kg</small></span>
       <span class="stv2-bt-d">${dlt !== null ? `${stv2Delta(dlt, v=> fmtKg(v) + ' kg', 'neutral')}<span class="stv2-vs">${inLbl}</span>` : ''}</span>
-      ${stv2Spark(sp, 152, 19)}`;
+      ${stv2Spark(sp, 148, 19)}${stv2Axis(spE.map(e=> e.date))}`;
   } else {
-    wTile = `<span class="pf-stat-l">${t('stV2Weight', 'Waga')}</span><span class="pf-stat-v stv2-bv">–</span><span class="stv2-bt-d"><span class="stv2-vs">${t('stV2WeightAdd', 'Dodaj pomiar')}</span></span>`;
+    wTile = `<span class="stv2-bt-h"><span class="pf-stat-l">${t('stV2Weight', 'Waga')}</span><span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></span><span class="pf-stat-v stv2-bv">–</span><span class="stv2-bt-d"><span class="stv2-vs">${t('stV2WeightAdd', 'Dodaj pomiar')}</span></span>`;
   }
   const open = typeof statsV2OpenWeight === 'function' ? 'statsV2OpenWeight()' : 'openWeightListSheet()';
   let kTile;
@@ -22048,7 +22084,7 @@ function stv2BodyHtml(win, ps, n, A){
     kTile = `<span class="pf-stat-l">${t('stV2Kcal', 'Kalorie')}</span>
       <span class="pf-stat-v stv2-bv">~${stv2Num(avg)}<small>kcal</small></span>
       <span class="stv2-bt-d">${pk !== null ? `${stv2Delta(avg - pk, v=> stv2Num(v) + ' kcal', 'neutral')}` : ''}<span class="stv2-vs">${t('stV2KcalAvg', 'śr. na trening')}</span></span>
-      ${stv2Spark(kc.slice(-12), 152, 19)}`;
+      ${stv2Spark(kc.slice(-12), 148, 19)}${stv2Axis(kd.slice(-12))}`;
   } else {
     kTile = `<span class="pf-stat-l">${t('stV2Kcal', 'Kalorie')}</span><span class="pf-stat-v stv2-bv">–</span><span class="stv2-bt-d"></span>`;
   }
