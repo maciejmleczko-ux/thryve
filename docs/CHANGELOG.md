@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.84.3 (2026-10-22)
-- **Liczba wersji:** 258 · **commitów:** 637
+- **Aktualna wersja:** 4.84.4 (2026-10-22)
+- **Liczba wersji:** 259 · **commitów:** 638
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.84.4 · PATCH · 2026-10-22
+
+- **Animacje zgodne z zasadami (audyt):** `.ob-progress-dot` nie animuje już `width` (kropki są odtwarzane przy każdym kroku, więc przejście i tak nie działało); pięć animacji Postępów (`statsv2-ring-seg`, `ring-head`, `comet-seg`, `chart-head`, `chart-dot/pr-tag`) z fill-mode `backwards` zamiast `both`.
+- **Czasy z tokenów w JS:** `MOTION.dur` (`quick`, `fade`, `exit`, `snap`, `in`, `pop`, `tile`, `draw`, w ms, czytane z `--m-dur-*`); snapback gestu `260` → `MOTION.dur.snap` (300 ms), przesunięcie karty ze swipe `.2s ease` → `var(--m-dur-fade) var(--m-ease)`, dwa fade'y wykresu na tokeny (wartości bez zmian: .24 s, .3 s + .7 s).
+- `.gymv2-tile-swap:hover` tylko w `@media (hover:hover) and (pointer:fine)`.
+- Zostawione celowo: ok. 50 `animation-delay` w sekundach to bazy staggerów (kolejność wejścia), nie czasy trwania.
+
+**Commity (0):**
+
 
 ### 4.84.3 · PATCH · 2026-10-22
 
