@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.84.6 (2026-10-22)
-- **Liczba wersji:** 261 · **commitów:** 640
+- **Aktualna wersja:** 4.84.7 (2026-10-22)
+- **Liczba wersji:** 262 · **commitów:** 641
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,15 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.84.7 · PATCH · 2026-10-22
+
+- **Martwy CSS starego motywu usunięty (378 reguł, ok. 37 KB):** `.topbar*`, `.section-label`, `.date-pill`, `.ex-popup-box`, `.ex-bar`, `.set-row`, `.run-stat-*`, `.cal-*`, `.dp-*`, `.hist-*`, `.acct-photo-*` / `.acct-oauth-*`, `.exp-*`, `.exv2-*`, `.newex-v2-*`, `.fbv2-*`, `.statsv2-kcard*` / `scard*` / `ytd*` / `caro*`, `.gymv2-plan-*` / `done-row*`, `.plan-modal*`, `.bk-step*` i inne. Kryterium: żadna z klas selektora nie występuje w HTML ani JS (z zabezpieczeniem na klasy składane z przedrostka).
+- Weryfikacja: porównanie obliczonych stylów (kolor, tło, rozmiar, padding, margines, radius, cień, position) wszystkich elementów przed i po: 0 różnic na 9 stanach (6 ekranów, okno ćwiczenia, logowanie serii, odznaki).
+- Zostawione: reguły wieloliniowe, w `@media` i z klasami używanymi choć w jednym miejscu.
+
+**Commity (0):**
+
 
 ### 4.84.6 · PATCH · 2026-10-22
 
