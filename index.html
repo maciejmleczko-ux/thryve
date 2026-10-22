@@ -1181,7 +1181,7 @@ html.modal-lock.statsx-lock.statsx-scrollable, html.modal-lock.statsx-lock.stats
 .stc-c-hist{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:12px 0;}
 .stc-c-hist-d{flex:none;font-size:var(--m-fs-md);font-weight:500;}
 @media (prefers-reduced-motion: no-preference){
-  .stc-enter .stc-c-bar{animation:stv2BarGrow var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(320ms + var(--i,0) * 40ms);}
+  .stc-enter .stc-c-bar{animation:stv2BarGrow var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(var(--stg-d,0ms) + var(--i,0) * 40ms);}
   @keyframes stv2BarGrow{from{opacity:0;transform:scaleY(.15);}}
 }
 .statsv2-ex-head-r{display:flex;align-items:center;gap:6px;}
@@ -3965,7 +3965,7 @@ button.stv2-bt{cursor:pointer;}
 .stv2-bt-d{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:14px;}
 @media (prefers-reduced-motion: no-preference){
   @keyframes stv2GrowX{from{transform:scaleX(0);}to{transform:scaleX(1);}}
-  .stv2-grow{transform-origin:left center;animation:stv2GrowX var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(.35s + var(--i,0) * 40ms);}
+  .stv2-grow{transform-origin:left center;animation:stv2GrowX var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(var(--stg-d,0ms) + var(--i,0) * 40ms);}   /* --stg-d = moment, w którym kafel „wylądował” (ustawia stgPlay) */
 }
 /* ============================================================
    POSTĘPY v3, ETAP D: arkusze „Dostosuj ekran” (#statsCustSheet) i „Przypnij ćwiczenia” (#statsPinSheet), prefiks .std-*.
@@ -4030,6 +4030,28 @@ button.stv2-bt{cursor:pointer;}
 @media (prefers-reduced-motion: reduce){
   .std-sw i,.std-ck svg,.std-ck,.std-row--settle,.std-list--dragging .std-row:not(.std-row--drag){transition:none;}
 }
+/* ---- ETAP G: ruch wykresów Postępów (.stg-*) ----
+   Wzorzec: element z wykresem dostaje klasę stg-prime (stan ukryty, bez animacji), JS mierzy, kiedy jego karta „wylądowała”
+   (stgLand), ustawia --stg-d i zdejmuje klasę: animacje startują wtedy od zera, po karcie, nigdy razem z nią.
+   Linie małych sparków rysuje JS (stroke-dashoffset, transition, setTimeout). Zmiana okresu = tylko stg-swap (krótki fade wykresu). */
+@media (prefers-reduced-motion: no-preference){
+  @keyframes stgDotIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes stgSwapIn{from{opacity:.3;}to{opacity:1;}}
+  .stv2-chart .statsv2-comet-seg{animation:statsv2SegIn var(--m-dur-snap) ease backwards;animation-delay:calc(var(--stg-d,0ms) + var(--p,0) * var(--m-dur-tile));}
+  .stv2-chart .stg-area{animation:statsv2SegIn var(--m-dur-in) ease backwards;animation-delay:calc(var(--stg-d,0ms) + var(--m-dur-fade));}
+  .stv2-chart .statsv2-chart-head{animation:statsv2SegIn var(--m-dur-snap) ease backwards;animation-delay:calc(var(--stg-d,0ms) + var(--m-dur-tile));}
+  .stg-bar{animation:dashBarGrow var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(var(--stg-d,0ms) + var(--i,0) * 40ms);}
+  .stv2-dotw{animation:stgDotIn var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(var(--stg-d,0ms) + var(--k,0) * 25ms);}
+  .stc-w-chart .stg-area{animation:statsv2SegIn var(--m-dur-in) ease backwards;animation-delay:calc(var(--stg-d,0ms) + var(--m-dur-fade));}
+  .stc-w-chart .stg-wdot{animation:statsv2SegIn var(--m-dur-snap) ease backwards;animation-delay:calc(var(--stg-d,0ms) + var(--m-dur-draw));}
+  .stg-prime .stv2-chart .statsv2-comet-seg,.stg-prime .stv2-chart .stg-area,.stg-prime .stv2-chart .statsv2-chart-head,.stg-prime .stc-w-chart .stg-area,.stg-prime .stc-w-chart .stg-wdot{animation:none;opacity:0;}
+  .stg-prime .stg-bar{animation:none;transform:scaleY(0);}
+  .stg-prime .stv2-grow{animation:none;transform:scaleX(0);}
+  .stg-prime .stv2-dotw{animation:none;opacity:0;}
+  .stg-prime .stc-c-bar{animation:none;opacity:0;transform:scaleY(.15);}
+  .stg-swap{animation:stgSwapIn var(--m-dur-fade) ease backwards;}
+}
+.stg-cnt{display:inline-block;}   /* końcowa spacja z animateDashNumber nie dokłada odstępu */
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -22054,6 +22076,8 @@ function stv2Axis(dates){
   return `<span class="stv2-axis">${L.map(d=> `<span>${stv2Dm(d)}</span>`).join('')}</span>`;
 }
 function stv2Num(n){ return formatDashNum(n, 0); }
+// liczba z count-up przy wejściu ekranu (stgCountPrime/Play): tekst końcowy jest w markupie, więc bez JS i przy reduced-motion nic się nie zmienia
+function stgCnt(v, dec, suf, finalHtml){ return v > 0 ? `<span class="stg-cnt" data-stg-count="${v}"${dec ? ` data-dec="${dec}"` : ''}${suf ? ` data-suf="${suf}"` : ''}>${finalHtml}</span>` : finalHtml; }
 function stv2Dur(min){ min = Math.round(min); return min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`; }
 
 // jedna próbka co k punktów, żeby kometa nie miała setek segmentów przy „Wszystko”
@@ -22078,7 +22102,7 @@ function stv2LineChart(vals, dates){
   if(td.length < 3 || labs[0] === labs[2]) { labs.length = 0; labs.push(stv2Dm(td[0]), '', stv2Dm(td[td.length - 1])); if(labs[0] === labs[2]) labs[2] = ''; }
   return `<div class="stv2-chart"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" aria-hidden="true">
       <defs><linearGradient id="${fid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
-      <path class="statsv2-comet-seg" style="--p:0" d="${area}" fill="url(#${fid})" stroke="none"/>${comet.svg}</svg>
+      <path class="stg-area" d="${area}" fill="url(#${fid})" stroke="none"/>${comet.svg}</svg>
       <div class="statsv2-chart-head on-orange" style="left:${(last.x / W * 100).toFixed(1)}%;top:${(last.y / H * 100).toFixed(1)}%;"></div></div>
     <div class="stv2-clabels">${labs.map(l=>`<span>${l}</span>`).join('')}</div>`;
 }
@@ -22191,7 +22215,7 @@ function renderStatsV2Overview(){
         <div class="stv2-goal">
           <div class="stv2-goal-h"><p class="stv2-goal-lbl">${t('stV2GoalDone', 'Cel zrealizowano')}</p>
             <span class="stv2-goal-pill">${t('stV2GoalPill', `${gh.metCount} z ${gh.completedCount} ${gh.completedCount === 1 ? 'tygodnia' : 'tygodni'}`, gh.metCount, gh.completedCount)}</span></div>
-          <div class="stv2-dots" aria-hidden="true">${gh.weeks.map(w=> `<i class="stv2-dotw ${w.current ? 'stv2-dotw--cur' : (w.counted && w.ok) ? 'stv2-dotw--ok' : (w.counted && w.done > 0) ? 'stv2-dotw--part' : 'stv2-dotw--none'}"></i>`).join('')}</div>
+          <div class="stv2-dots" aria-hidden="true">${gh.weeks.map((w, k)=> `<i style="--k:${k}" class="stv2-dotw ${w.current ? 'stv2-dotw--cur' : (w.counted && w.ok) ? 'stv2-dotw--ok' : (w.counted && w.done > 0) ? 'stv2-dotw--part' : 'stv2-dotw--none'}"></i>`).join('')}</div>
         </div>` : '';
   const ringCard = `
       <div class="stv2-ring-card ${A()}">
@@ -22227,9 +22251,9 @@ function renderStatsV2Overview(){
   const dash = '–';
   const tiles = `
       <div class="stv2-tiles ${A()}">
-        <div class="pf-stat"><span class="pf-stat-v">${n ? ps.workouts : dash}</span><span class="pf-stat-l">${t('stV2TileWorkouts', 'Treningi')}</span>${n ? tileD(d && d.workouts, stv2Num) : ''}</div><i class="pf-vsep" aria-hidden="true"></i>
-        <div class="pf-stat"><span class="pf-stat-v">${n ? E(pfVolumeText(ps.volumeKg)) : dash}</span><span class="pf-stat-l">${t('stV2TileVolume', 'Objętość')}</span>${n ? tileD(d && d.volumeKg, pfVolumeText) : ''}</div><i class="pf-vsep" aria-hidden="true"></i>
-        <div class="pf-stat"><span class="pf-stat-v">${n ? ps.sets : dash}</span><span class="pf-stat-l">${t('stV2TileSets', 'Serie')}</span>${n ? tileD(d && d.sets, stv2Num) : ''}</div>
+        <div class="pf-stat"><span class="pf-stat-v">${n ? stgCnt(ps.workouts, 0, '', ps.workouts) : dash}</span><span class="pf-stat-l">${t('stV2TileWorkouts', 'Treningi')}</span>${n ? tileD(d && d.workouts, stv2Num) : ''}</div><i class="pf-vsep" aria-hidden="true"></i>
+        <div class="pf-stat"><span class="pf-stat-v">${n ? stgCnt(ps.volumeKg >= 1000 ? ps.volumeKg / 1000 : ps.volumeKg, ps.volumeKg >= 1000 ? 1 : 0, ps.volumeKg >= 1000 ? 't' : 'kg', E(pfVolumeText(ps.volumeKg))) : dash}</span><span class="pf-stat-l">${t('stV2TileVolume', 'Objętość')}</span>${n ? tileD(d && d.volumeKg, pfVolumeText) : ''}</div><i class="pf-vsep" aria-hidden="true"></i>
+        <div class="pf-stat"><span class="pf-stat-v">${n ? stgCnt(ps.sets, 0, '', ps.sets) : dash}</span><span class="pf-stat-l">${t('stV2TileSets', 'Serie')}</span>${n ? tileD(d && d.sets, stv2Num) : ''}</div>
       </div>`;
   // podpis okna: „1–13 paź vs 1–13 wrz”; bez porównania: wyjaśnienie, kiedy się pojawi (nie dla „Wszystko”)
   const winCap = (n > 0 && per !== 'all')
@@ -22252,13 +22276,13 @@ function renderStatsV2Overview(){
   let caro = '';
   if(n > 2){
     const st = stv2Safe(()=> statsV2StrengthSeries(win), { value: 0, delta: null, points: [], exerciseCount: 0 });
-    const strengthNum = st.exerciseCount > 0 ? `${stv2Num(st.value)}<small>kg</small>` : dash;
+    const strengthNum = st.exerciseCount > 0 ? `${stgCnt(st.value, 0, '', stv2Num(st.value))}<small>kg</small>` : dash;
     const strengthSub = (st.delta !== null && st.delta > 0) ? t('stV2StrengthSub', `+ ${stv2Num(st.delta)} kg vs ${stv2Dm(win.prevEnd)}`, stv2Num(st.delta), stv2Dm(win.prevEnd)) : '';
     const slide1 = stv2OCard(t('stV2Strength', 'Siła'), strengthNum, strengthSub, st.points.length ? stv2LineChart(st.points.map(p=> p.value), st.points.map(p=> p.date)) : '', 2);
     const vs = stv2VolumeSeries(win);
     const vDelta = d ? d.volumeKg : null;
     const volSub = (vDelta !== null && vDelta > 0) ? t('stV2VolSub', `+ ${pfVolumeText(vDelta)} vs ${stv2Dm(win.prevEnd)}`, pfVolumeText(vDelta), stv2Dm(win.prevEnd)) : '';
-    const slide2 = stv2OCard(t('stV2Volume', 'Objętość'), `${stv2Num(ps.volumeKg)}<small>kg</small>`, volSub, vs.vals.length ? stv2LineChart(vs.vals, vs.dates) : '', 2);
+    const slide2 = stv2OCard(t('stV2Volume', 'Objętość'), `${stgCnt(ps.volumeKg, 0, '', stv2Num(ps.volumeKg))}<small>kg</small>`, volSub, vs.vals.length ? stv2LineChart(vs.vals, vs.dates) : '', 2);
     // słupki: tydzień = dni, miesiąc = tygodnie, rok = miesiące, wszystko = miesiące (przy krótkiej historii tygodnie)
     let bucket = per === 'week' ? 'day' : per === 'month' ? 'week' : 'month';
     let ss = stv2Safe(()=> statsV2SessionsSeries(win, bucket), { points: [], avgDurationMin: 0 });
@@ -22267,7 +22291,7 @@ function renderStatsV2Overview(){
     const maxN = Math.max(1, ...pts.map(p=> p.workouts));
     const totMin = pts.reduce((s, p)=> s + p.durationMin, 0);
     const lab = p=> bucket === 'day' ? DOW_LABELS[(new Date(p.label + 'T00:00:00').getDay() + 6) % 7] : bucket === 'month' ? STV2_MON[+p.label.slice(5, 7) - 1] : (pts.length > 6 ? String(+p.label.slice(8, 10)) : stv2Dm(p.label));
-    const bars = pts.map((p, i)=> `<div class="statsv2-bar-col"><div class="bar statsv2-bar-anim" style="--i:${i};height:${Math.max(4, Math.round(p.workouts / maxN * 78))}px;background:var(--m-orange);opacity:${p.workouts ? (i === pts.length - 1 ? 1 : .6) : .25};"></div><span>${E(lab(p))}</span></div>`).join('');
+    const bars = pts.map((p, i)=> `<div class="statsv2-bar-col"><div class="bar stg-bar" style="--i:${i};height:${Math.max(4, Math.round(p.workouts / maxN * 78))}px;background:var(--m-orange);opacity:${p.workouts ? (i === pts.length - 1 ? 1 : .6) : .25};"></div><span>${E(lab(p))}</span></div>`).join('');
     const slide3 = `<div class="stv2-slide"><div class="statsv2-scard stv2-wcard statsv2-anim-card" style="--i:2">
       <p class="stv2-eyebrow">${t('stV2SessionsTime', 'Treningi i czas')}</p>
       <p class="stv2-num">${totMin > 0 ? E(stv2Dur(totMin)) : dash}</p>
@@ -22407,12 +22431,132 @@ function stv2BodyHtml(win, ps, n, A){
       <section class="pf-sec ${A()}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('stV2Body', 'Ciało')}</h2></div>
         <div class="stv2-body"><button type="button" class="stv2-bt m-press" onclick="${open}">${wTile}</button><div class="stv2-bt">${kTile}</div></div></section>`;
 }
+/* ============================================================
+   POSTĘPY v3, ETAP G: ruch wykresów (CSS: blok „ETAP G” przy .stv2-grow).
+   Zasady: ruch tylko przy wejściu ekranu (animate=true) i przy pierwszym pokazaniu slajdu karuzeli; zmiana okresu/zakresu = tylko
+   krótki fade wykresu (stgSwap). Karta wchodzi pierwsza, wykres dopiero gdy karta prawie wylądowała (stgLand). Wszystkie czasy
+   z tokenów --m-dur-* (CSS jest jedynym źródłem; w JS czytane przez stgTok). Reduced-motion: nic się nie ukrywa ani nie rusza.
+   Elementy poniżej ekranu czekają z rysowaniem, aż się pojawią (IntersectionObserver; bez niego grają od razu).
+   ============================================================ */
+const STG_REDUCE = ()=> !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const STG_LANDED = .6;       // ułamek czasu wejścia karty, po którym jest już prawie nieprzezroczysta (jak DASH_LANDED)
+const STG_SPARK_STEP = 70;   // ms między sparkami; max 6 naraz, reszta bez ruchu
+const STG_SPARK_MAX = 6;
+function stgTok(name){       // czas z tokenu CSS w ms
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v.endsWith('ms') ? parseFloat(v) : parseFloat(v) * 1000;
+}
+function stgMs(v){ const x = String(v).split(',')[0].trim(); return x.endsWith('ms') ? parseFloat(x) : parseFloat(x) * 1000; }
+// kiedy karta (i jej rodzice z wejściem) „wylądowała”: opóźnienie + czas * STG_LANDED z jej RZECZYWISTEJ animacji
+function stgLand(el){
+  let max = 0;
+  for(let n = el; n && n !== document.body; n = n.parentElement){
+    const c = n.classList;
+    if(!c || !(c.contains('m-rise') || c.contains('m-rise-tile') || c.contains('statsv2-anim-card'))) continue;
+    const cs = getComputedStyle(n);
+    if(cs.animationName === 'none') continue;
+    max = Math.max(max, stgMs(cs.animationDelay) + stgMs(cs.animationDuration) * STG_LANDED);
+  }
+  return Math.round(max);
+}
+let stgObs = [];
+function stgTeardown(){ stgObs.forEach(o=> o.disconnect()); stgObs = []; }
+function stgPrime(el){ el.classList.add('stg-prime'); stgCountPrime(el); }
+function stgPlay(el, ms){ el.style.setProperty('--stg-d', Math.max(0, Math.round(ms)) + 'ms'); el.classList.remove('stg-prime'); stgCountPlay(el, ms); }
+function stgInView(el){ const r = el.getBoundingClientRect(); return r.top < window.innerHeight * 0.88 && r.bottom > 0; }
+// prime() ukrywa, play(ms) odgrywa; ms = opóźnienie względem „teraz” (po wylądowaniu karty albo 0, gdy element wszedł w widok później)
+function stgReveal(el, prime, play){
+  prime();
+  const go = late=>{ try{ play(late ? 0 : stgLand(el), late); }catch(e){ stgRescue(el); } };
+  if(!window.IntersectionObserver || stgInView(el)){ go(false); return; }
+  const io = new IntersectionObserver(es=>{ if(es.some(e=> e.isIntersecting)){ io.disconnect(); go(true); } }, { rootMargin: '0px 0px -12% 0px' });
+  io.observe(el); stgObs.push(io);
+}
+function stgRescue(root){   // błąd w trakcie: nic nie może zostać ukryte
+  if(!root) return;
+  const all = [root].concat([].slice.call(root.querySelectorAll('.stg-prime, [data-stg-final], path[data-stg-len]')));
+  all.forEach(e=>{
+    e.classList.remove('stg-prime');
+    if(e.dataset && e.dataset.stgFinal != null){ e.innerHTML = e.dataset.stgFinal; }
+    if(e.dataset && e.dataset.stgLen){ e.style.strokeDasharray = ''; e.style.strokeDashoffset = ''; e.style.transition = ''; }
+  });
+}
+/* ---- count-up: gotowy animateDashNumber z Pulpitu; tekst końcowy przywracany setTimeoutem (rAF stoi w tle) ---- */
+function stgCountPrime(root){
+  root.querySelectorAll('[data-stg-count]').forEach(el=>{
+    if(el.dataset.stgFinal == null) el.dataset.stgFinal = el.innerHTML;
+    const dec = +(el.dataset.dec || 0), suf = el.dataset.suf || '';
+    el.textContent = formatDashNum(0, dec) + (suf ? ' ' + suf : '');
+  });
+}
+function stgCountPlay(root, wait){
+  root.querySelectorAll('[data-stg-count]').forEach(el=>{
+    const fin = el.dataset.stgFinal;
+    if(fin == null) return;
+    animateDashNumber(el, +el.dataset.stgCount, +(el.dataset.dec || 0), el.dataset.suf || '', wait);
+    setTimeout(()=>{ if(el.isConnected) el.innerHTML = fin; }, wait + stgTok('--m-dur-tile') + 200);
+  });
+}
+/* ---- linie sparków: rysowanie przez stroke-dashoffset ---- */
+function stgHidePath(path){
+  let len; try{ len = path.getTotalLength(); }catch(e){ return 0; }
+  if(!len) return 0;
+  let k = 1;   // vector-effect: non-scaling-stroke liczy kreski w pikselach ekranu, nie w jednostkach viewBox
+  if(path.getAttribute('vector-effect') === 'non-scaling-stroke' && path.ownerSVGElement){
+    const svg = path.ownerSVGElement, vb = svg.viewBox && svg.viewBox.baseVal, r = svg.getBoundingClientRect();
+    if(vb && vb.width && vb.height) k = Math.max(r.width / vb.width, r.height / vb.height) || 1;
+  }
+  const L = Math.ceil(len * k * 1.1) + 4;
+  path.dataset.stgLen = String(L);
+  path.style.transition = 'none';
+  path.style.strokeDasharray = L + ' ' + L;
+  path.style.strokeDashoffset = String(L + 4);   // +4: okrągła końcówka kreski nie zostawia kropki na początku
+  return L;
+}
+function stgDrawPath(path, delay, durVar){
+  if(!path.dataset.stgLen) return;
+  path.getBoundingClientRect();   // reflow: transition musi wystartować z ukrytego stanu
+  setTimeout(()=>{
+    if(!path.isConnected) return;
+    path.style.transition = 'stroke-dashoffset var(' + durVar + ') var(--m-ease)';
+    path.style.strokeDashoffset = '0';
+    setTimeout(()=>{ if(path.isConnected){ path.style.strokeDasharray = ''; path.style.strokeDashoffset = ''; path.style.transition = ''; delete path.dataset.stgLen; } }, stgTok(durVar) + 80);
+  }, Math.max(0, delay));
+}
+// grupa sparków w jednym kontenerze: pierwsze STG_SPARK_MAX rysują się po kolei, reszta stoi gotowa
+function stgSparks(el, sel, durVar){
+  const paths = [].slice.call(el.querySelectorAll(sel)).slice(0, STG_SPARK_MAX);
+  if(!paths.length) return;
+  stgReveal(el, ()=> paths.forEach(stgHidePath), ms=> paths.forEach((p, i)=> stgDrawPath(p, ms + i * STG_SPARK_STEP, durVar)));
+}
+// zmiana okresu / zakresu: wykres wchodzi krótkim fade-em (bez ponownego wejścia kafli)
+function stgSwap(root, sel){
+  if(!root || STG_REDUCE()) return;
+  root.querySelectorAll(sel).forEach(el=>{ el.classList.remove('stg-swap'); void el.offsetWidth; el.classList.add('stg-swap'); });
+}
+// przegląd Postępów, wejście ekranu (animate=true): liczby kafli, kropki celu, sparki, paski mięśni; karuzelę prowadzi statsV2InitCarousel
+function stgOverviewEnter(body){
+  if(STG_REDUCE()) return;
+  try{
+    const tiles = body.querySelector('.stv2-tiles');
+    if(tiles && tiles.querySelector('[data-stg-count]')) stgReveal(tiles, ()=> stgPrime(tiles), ms=> stgPlay(tiles, ms));
+    const dots = body.querySelector('.stv2-dots');   // po ruchu pierścienia (pierścień zostaje bez zmian): karta + --m-dur-pop
+    if(dots) stgReveal(dots, ()=> stgPrime(dots), (ms, late)=> stgPlay(dots, late ? ms : ms + stgTok('--m-dur-pop')));
+    const rec = body.querySelector('.stv2-rec');
+    if(rec && rec.parentElement) stgSparks(rec.parentElement, '.stv2-spark path', '--m-dur-in');
+    const bodyTiles = body.querySelector('.stv2-body');
+    if(bodyTiles) stgSparks(bodyTiles, '.stv2-spark path', '--m-dur-in');
+    const mus = body.querySelector('.stv2-mrows');
+    if(mus) stgReveal(mus, ()=> stgPrime(mus), ms=> stgPlay(mus, ms));
+  }catch(e){ stgRescue(body); }
+}
 function statsV2SetPeriod(p){
   if(STATSV2_PERIODS.indexOf(p) < 0 || p === statsV2Period) return;
   statsV2Period = p;
   const y = window.scrollY || 0;
   renderStatsV2(false);
   window.scrollTo(0, y);
+  stgSwap(document.getElementById('statsV2Body'), '.stv2-chart, .stv2-bars, .stv2-mtrack');   // etap G: tylko fade wykresu, bez ponownego wejścia kafli
 }
 
 /* ============================================================
@@ -22990,10 +23134,12 @@ function renderStatsV2Core(animate, drawLines){
   if(drawLines === undefined) drawLines = animate;
   const body = document.getElementById('statsV2Body');
   statsV2TeardownReveal();
+  stgTeardown();
   body.innerHTML = selectedStatsExerciseV2 ? renderStatsV2Detail(selectedStatsExerciseV2) : renderStatsV2Overview();
-  if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile,.statsv2-bar-anim,.statsv2-chart-dot,.statsv2-pr-tag,.statsv2-ring-seg,.statsv2-ring-head,.statsv2-comet-seg,.statsv2-chart-head,.stv2-grow').forEach(el=>{
+  if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile,.statsv2-bar-anim,.statsv2-chart-dot,.statsv2-pr-tag,.statsv2-ring-seg,.statsv2-ring-head,.statsv2-comet-seg,.statsv2-chart-head,.stv2-grow,.stg-area,.stg-bar,.stv2-dotw').forEach(el=>{
     el.style.animation = 'none';
   });
+  if(animate && !selectedStatsExerciseV2) stgOverviewEnter(body);
   if(drawLines) statsV2SetupDrawReveal(body);
   // The header back arrow does double duty (see statsV2Back): in the
   // exercise-detail view it steps back to the overview, in the overview it
@@ -23236,9 +23382,9 @@ function statsXWeightChart(m){
   const aria = t('stxWChartAria', 'Wykres wagi', '');
   return `<svg class="stc-w-chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${escHtml(aria)}">`
     + `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff3300" stop-opacity=".22"/><stop offset="1" stop-color="#ff3300" stop-opacity="0"/></linearGradient></defs>`
-    + `<path d="${area}" fill="url(#${gid})"/>`
-    + `<path d="${line}" fill="none" stroke="#ff3300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
-    + `<circle cx="${last.x}" cy="${last.y}" r="6" fill="#ff3300" stroke="#fff" stroke-width="3"/></svg>`
+    + `<path class="stg-area" d="${area}" fill="url(#${gid})"/>`
+    + `<path class="stg-wline" d="${line}" fill="none" stroke="#ff3300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+    + `<circle class="stg-wdot" cx="${last.x}" cy="${last.y}" r="6" fill="#ff3300" stroke="#fff" stroke-width="3"/></svg>`
     + `<div class="stc-w-axis" aria-hidden="true"><span>${lblAt(0)}</span><span>${lblAt(.5)}</span><span>${lblAt(1)}</span></div>`;
 }
 function statsXWeightRows(m){
@@ -23263,6 +23409,7 @@ function statsV2WeightSetRange(r){
   if(statsV2WeightRange === r) return;
   statsV2WeightRange = r;
   statsV2WeightRender(false);
+  stgSwap(document.getElementById('statsWeightBody'), '.stc-w-chart');   // zmiana zakresu: tylko fade wykresu
 }
 function statsV2WeightPaint(animate){
   const body = document.getElementById('statsWeightBody');
@@ -23297,6 +23444,13 @@ function statsV2WeightPaint(animate){
     + `<div class="stc-card stc-card--flush">${statsXWeightRows(m)}</div><p class="stc-note">${t('wlSub', 'Dotknij pomiaru, żeby go zmienić.')}</p></div>`
     + statsXWeightBodyCard(rc(4, true));
   statsXRefreshScroll();
+  if(animate && !STG_REDUCE()) stgWeightEnter(body);
+}
+// Etap G: linia wagi rysuje się po wylądowaniu karty, pole pod nią wjeżdża fade-em, kropka na końcu po dojściu linii
+function stgWeightEnter(body){
+  const card = body.querySelector('.stc-w-chartcard'), line = card && card.querySelector('.stg-wline');
+  if(!card || !line) return;
+  stgReveal(card, ()=>{ stgPrime(card); stgHidePath(line); }, ms=>{ stgPlay(card, ms); stgDrawPath(line, ms, '--m-dur-draw'); });
 }
 function statsXWeightBodyCard(rcStr){
   return `<button type="button" class="stc-card stc-card--sm stc-w-body m-press${rcStr}" onclick="openBodyDataSheet()"><div>${t('pfBodyRow', 'Wzrost, wiek, płeć')}<small>${t('pfBodyRowSub', 'Do wyliczania kalorii')}</small></div>${STATSX_ICO.chev}</button>`;
@@ -23465,9 +23619,14 @@ function statsExPickerRender(){
     const none = !model.rows.length && !model.cardio.length;
     html = `<div class="stc-card${rc(0, true)}"><p class="stc-x-empty">${none ? t('stxExNone', 'Tu pojawią się ćwiczenia po pierwszym zapisanym treningu.') : t('exPickNone', 'Nie znaleziono ćwiczeń.')}</p></div>`;
   }
+  const enter = statsXExAnimate;
   statsXExAnimate = false;
   listEl.innerHTML = html;
   statsXRefreshScroll();
+  if(enter && !STG_REDUCE()){   // etap G: pierwsze sparki (max 6) rysują się po kolei, gdy pierwsza sekcja wyląduje
+    const first = listEl.querySelector('.stc-sec');
+    if(first) stgSparks(first, '.stc-x-spark path', '--m-dur-in');
+  }
 }
 function statsXSetGroup(k){
   if(statsXGroup === k) return;
@@ -23681,16 +23840,22 @@ function statsV2CardioPaint(animate){
     `<div class="stc-seg${rc(0)}" role="radiogroup" aria-label="${escHtml(t('stxPeriodAria', 'Okres'))}">${seg}</div>`
     + `<div class="stc-card${rc(1, true)}"><div class="stc-hero-top"><p class="stc-lbl" style="color:var(--m-muted-text)">${t('stxCTotal', 'CZAS ŁĄCZNIE')}</p><span class="stc-pill">${escHtml(statsXPeriodPill(win))}</span></div><p class="stc-hero-num">${statsXHeroTime(cur.sec)}</p>${deltaHtml}</div>`
     + `<div class="stc-card stc-card--sm stc-tiles${rc(2, true)}">${tiles}</div>`
-    + `<div class="stc-sec${rc(3)}"><div class="stc-sec-h"><p class="stc-lbl">${escHtml(bk.title)}</p></div><div class="stc-card${animate ? ' stc-enter' : ''}"><div class="stc-c-bars">${bars}</div></div></div>`
+    + `<div class="stc-sec${rc(3)}"><div class="stc-sec-h"><p class="stc-lbl">${escHtml(bk.title)}</p></div><div class="stc-card${animate ? ' stc-enter stg-prime' : ''}"><div class="stc-c-bars">${bars}</div></div></div>`
     + (exRows ? `<div class="stc-sec${rc(4)}"><div class="stc-sec-h"><p class="stc-lbl">${t('stxCByEx', 'WEDŁUG ĆWICZENIA')}</p></div><div class="stc-card stc-card--flush">${exRows}</div></div>` : '')
     + `<div class="stc-sec${rc(5)}"><div class="stc-sec-h"><p class="stc-lbl">${t('stxCRecords', 'REKORDY KARDIO')}</p></div><div class="stc-card stc-card--flush">${recs}</div></div>`
     + `<div class="stc-sec${rc(6)}"><div class="stc-sec-h"><p class="stc-lbl">${t('stxCHistory', 'HISTORIA')}</p></div><div class="stc-card stc-card--flush">${hist || `<p class="stc-x-empty">${t('stxCNoneInPeriod', 'Brak sesji kardio w tym okresie.')}</p>`}</div></div>`;
   statsXRefreshScroll();
+  const bc = animate ? body.querySelector('.stc-enter') : null;   // etap G: słupki rosną po wylądowaniu swojej karty
+  if(bc){
+    if(STG_REDUCE()) bc.classList.remove('stg-prime');
+    else stgReveal(bc, ()=> stgPrime(bc), ms=> stgPlay(bc, ms));
+  }
 }
 function statsV2CardioSetPeriod(p){
   if(statsV2CardioPeriod === p) return;
   statsV2CardioPeriod = p;
   statsV2CardioRender(false);
+  stgSwap(document.getElementById('statsCardioBody'), '.stc-c-bars');   // zmiana okresu: tylko fade słupków
 }
 function statsV2CardioRender(animate){
   return recGuardedRender('statsCardio', ()=> statsV2CardioPaint(animate), statsXFail('statsCardioBody', 'statsV2CardioRender(false)'));
@@ -23771,7 +23936,7 @@ function statsV2CaroGoTo(page, opts){
   // hide the incoming slide's chart BEFORE it flies in, so it arrives
   // blank and draws itself on landing instead of flashing the finished
   // chart and re-animating
-  if(changed) statsV2SlidePrime(track.children[page]);
+  if(changed && !statsV2CaroSeen.has(page)) statsV2SlidePrime(track.children[page]);
   const killAnims = ()=>{ if(track.getAnimations) track.getAnimations().forEach(a=>a.cancel()); };
   let done = false;
   const land = ()=>{
@@ -23779,7 +23944,7 @@ function statsV2CaroGoTo(page, opts){
     track.style.transform = `translateX(${toPx}px)`;
     killAnims();
     statsV2CaroBusy = false;
-    if(changed || opts.replay) statsV2AnimateSlide(track.children[page]);
+    if(!statsV2CaroSeen.has(page)){ statsV2CaroSeen.add(page); statsV2AnimateSlide(track.children[page], 0); }
   };
   const dist = Math.abs(toPx - fromPx);
   if(STATSV2_CARO_REDUCE() || dist < 1){ land(); return; }
@@ -23837,64 +24002,16 @@ function statsV2CaroResize(){
 // (Maciej: "pokazuje się następna statystyka po czym znika i znowu się
 // animuje").
 function statsV2SlidePrime(slide){
-  if(!slide) return;
-  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  slide.querySelectorAll('.statsv2-ytd-chart path:not(.statsv2-comet-seg), .stv2-chart path:not(.statsv2-comet-seg), .statsv2-scard-chart path').forEach(path=>{
-    let len; try{ len = path.getTotalLength(); }catch(e){ return; }
-    if(!len) return;
-    path.style.transition = 'none';
-    path.style.strokeDasharray = len;
-    path.style.strokeDashoffset = len;
-  });
-  slide.querySelectorAll('.statsv2-comet-seg, .statsv2-chart-head').forEach(s=>{
-    s.style.animation = 'none';
-    s.style.opacity = '0';
-  });
-  slide.querySelectorAll('.bar.statsv2-bar-anim').forEach(b=>{
-    b.style.animation = 'none';
-    b.style.transform = 'scaleY(0)';
-  });
-  slide.querySelectorAll('.statsv2-chart-dot').forEach(d=>{
-    d.style.animation = 'none';
-    d.style.transition = 'none';
-    d.style.opacity = '0';
-  });
+  if(!slide || STG_REDUCE()) return;
+  stgPrime(slide);
 }
-// Replay the chart entrance for one slide — line redraws, bars grow one
-// after another, dots fade in behind them. Reuses the app's motion
-// vocabulary (dashBarGrow / stroke-dashoffset / opacity, cubic-bezier(.16,1,.3,1)).
-function statsV2AnimateSlide(slide){
-  if(!slide) return;
-  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  statsV2SlidePrime(slide);              // idempotent — no-op if already primed by the swipe
-  slide.querySelectorAll('.statsv2-ytd-chart path:not(.statsv2-comet-seg), .stv2-chart path:not(.statsv2-comet-seg), .statsv2-scard-chart path').forEach(path=>{
-    let len; try{ len = path.getTotalLength(); }catch(e){ return; }
-    if(!len) return;
-    path.getBoundingClientRect();
-    path.style.transition = 'stroke-dashoffset var(--m-dur-draw) var(--m-ease)';
-    path.style.strokeDashoffset = '0';
-  });
-  // comet wave line (YTD slide): replay its tail→head CSS --p stagger
-  slide.querySelectorAll('.statsv2-comet-seg, .statsv2-chart-head').forEach(s=>{
-    s.style.opacity = '';
-    s.getBoundingClientRect();
-    s.style.animation = '';
-  });
-  const bars = slide.querySelectorAll('.bar.statsv2-bar-anim');
-  bars.forEach((b,i)=>{
-    b.style.transform = '';
-    b.getBoundingClientRect();
-    b.style.animation = 'dashBarGrow var(--m-dur-in) var(--m-ease) backwards';
-    b.style.animationDelay = (i*55) + 'ms';
-  });
-  const settleMs = bars.length ? bars.length*55 + 120 : 620;
-  slide.querySelectorAll('.statsv2-chart-dot').forEach(d=>{
-    d.getBoundingClientRect();
-    d.style.transition = 'opacity .3s ease';
-    d.style.transitionDelay = settleMs + 'ms';
-    d.style.opacity = '1';
-  });
+// Etap G: slajd odgrywa wejście RAZ (pierwsze pokazanie po wejściu na ekran); ms = opóźnienie po wylądowaniu karty
+function statsV2AnimateSlide(slide, ms){
+  if(!slide || STG_REDUCE()) return;
+  slide.querySelectorAll('.statsv2-comet-seg, .stg-area, .statsv2-chart-head, .stg-bar').forEach(e=>{ e.style.animation = ''; });   // po renderze bez animacji siedzi tu animation:none
+  stgPlay(slide, ms || 0);
 }
+let statsV2CaroSeen = new Set();   // slajdy, które już zagrały wejście od ostatniego wejścia na ekran
 function statsV2InitCarousel(animate){
   // #statsCaro / #statsCaroTrack are recreated on every renderStatsV2()
   // (body.innerHTML), so this wires a fresh element each time and restores
@@ -23951,7 +24068,13 @@ function statsV2InitCarousel(animate){
     statsV2CaroGoTo(target, { vel });
   }, { passive: true });
 
-  if(animate) statsV2AnimateSlide(track.children[statsV2CaroPage]);
+  if(animate){
+    statsV2CaroSeen = new Set([statsV2CaroPage]);
+    [].slice.call(track.children).forEach((sl, i)=>{ if(i !== statsV2CaroPage) statsV2SlidePrime(sl); });   // poza ekranem: czekają na pierwsze pokazanie
+    const cur = track.children[statsV2CaroPage];
+    statsV2SlidePrime(cur);
+    try{ statsV2AnimateSlide(cur, stgLand(cur)); }catch(e){ stgRescue(cur); }   // kafel z wykresem najpierw ląduje, wykres po nim
+  }
 }
 function setStatsV2RangeV2(months){
   statsV2Range = months;
