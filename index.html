@@ -165,6 +165,11 @@
   --m-metric-time:var(--m-plum);       /* Czas treningu */
   --m-metric-kcal:var(--m-amber);      /* Kalorie (dark text) */
 
+  --m-ring-yellow:#ffcc00; /* koniec gradientu pierścienia tygodnia w Postępach (Figma 648:11284: #FF3300 → #FFCC00) */
+  --m-ring-rest:#474748;   /* kropka „zostało” i szare kropki celu tygodniowego na czarnej karcie pierścienia */
+  --m-ring-track:rgba(255,255,255,.3);   /* tor pierścienia tygodnia */
+  --m-gap-card:8px;        /* odstęp między sąsiednimi kartami */
+  --m-gap-section:20px;    /* odstęp między sekcjami ekranu (tytuł + karta), Figma Postępy */
   --m-r-sm:12px;           /* inputs, chips, small tiles */
   --m-r-md:16px;           /* cards, panels */
   --m-r-pill:999px;        /* buttons, pills, dots */
@@ -3037,7 +3042,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .pl-settings:active,.pl-card:active,.pl-hero:active,.pl-pick:active,.pl-cta:active,.opk-btn:active,.pl-check:active,.pev2-day-chip:active,.pev2-more:active,.pev2-ok:active,.pev2-save:active,.equip-chip:active,.ob-back:active,.ob-cta:not(:disabled):active,.ob-gender-chip:active,.onb-goal-chip:active,.onb-equip:active,
 .exv2-note-add:active,.exv2-submit:active,
 .pal-chip:active,.pal-pick:active,.pal-add:active,.lng-row:active,.m2-oauth:active,.m2-btn:active,.ai-chip:active,.m2-x:active,.mk-key:active,.bd-field:active,.bd-sx:active,.nm-ico:active,:is(#mConfirmOverlay.mc-gym,#cloudReminderOverlay) .onboard-actions button:active,.wl-row:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
-.pdt-day-h:active,.pdt-btn:active,.pdt-more:active,.pdt-tab:active,.m-pop-item:active{transition-duration:var(--m-dur-press-in);}
+.pdt-day-h:active,.pdt-btn:active,.pdt-more:active,.pdt-tab:active,.m-pop-item:active,.stv2-seg-b:active{transition-duration:var(--m-dur-press-in);}
 .pdt-day-h:active,.pdt-btn:active,.m-pop-item:active{transform:scale(.97);}
 .pdt-more:active{transform:scale(.92);}
 /* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
@@ -3715,8 +3720,115 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .pal-empty,.pdt-per,.pdt-days,.tn--own,.psh-card.tn--own,
 .histv2-card,.histv2-empty,.exv2-series-card,.newex-v2-bento,.wl-list,.lng-row,
 .plc--new,.pal-seg,.gymv2-block,
-.statsv2-kcard,.statsv2-bar-card,.statsv2-scard,.statsv2-ex-tile{background:var(--m-glass-fill)!important;-webkit-backdrop-filter:var(--m-glass-blur)!important;backdrop-filter:var(--m-glass-blur)!important;box-shadow:var(--m-glass-edge);}
+.statsv2-kcard,.statsv2-bar-card,.statsv2-scard,.statsv2-ex-tile,.stv2-tiles,.stv2-bt{background:var(--m-glass-fill)!important;-webkit-backdrop-filter:var(--m-glass-blur)!important;backdrop-filter:var(--m-glass-blur)!important;box-shadow:var(--m-glass-edge);}
 .tn--own{--plc-bg:var(--m-glass-fill);}
+/* ---- Postępy v3: przegląd (etap B). Białe boksy (.stv2-tiles, .stv2-bt, .pf-card, .statsv2-scard) dostają szkło iOS z reguły zbiorczej wyżej. ---- */
+.stv2-top-r{justify-self:end;display:flex;align-items:center;gap:8px;}
+.stv2-cust{position:relative;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.6);box-shadow:0 0 0 .5px var(--m-orange-tint);color:var(--m-orange);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+.stv2-cust[hidden]{display:none;}
+.stv2-cust::after{content:"";position:absolute;inset:-2px;}   /* 40 px wizualnie, 44 px do kliknięcia */
+.stv2-cust .ph, .stv2-cust .ph svg{display:block;width:18px;height:18px;}
+.stv2-col{display:flex;flex-direction:column;gap:var(--m-gap-section);}
+.stv2-stack{display:flex;flex-direction:column;gap:var(--m-gap-card);}
+.stv2-stack > .stv2-cap{margin-top:-4px;}
+.stv2-cap{margin:0 3px;font-size:var(--m-fs-2xs);font-weight:400;line-height:1.3;color:var(--m-muted-text);}
+/* karta pierścienia */
+.stv2-ring-card{background:var(--m-black);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px;}
+.stv2-ring-card .statsv2-ring-wrap svg{width:132px;height:132px;}
+.stv2-ring-card .statsv2-ring-num strong, .stv2-ring-card .statsv2-ring-legend-value{font-weight:300;}
+.stv2-ring-card .statsv2-ring-dot.done{background:var(--m-orange);}
+.stv2-ring-card .statsv2-ring-dot.left{background:var(--m-ring-rest);}
+.stv2-goal{display:flex;flex-direction:column;gap:12px;padding-top:16px;border-top:.5px solid var(--m-ring-rest);}
+.stv2-goal-h{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.stv2-goal-lbl{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-white);}
+.stv2-goal-pill{display:inline-flex;align-items:center;height:19px;padding:0 14px;border-radius:99px;background:var(--m-orange-tint-2);color:var(--m-orange-ink);font-size:var(--m-fs-2xs);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+.stv2-dots{display:flex;align-items:center;justify-content:space-between;}
+.stv2-dotw{display:block;flex:none;width:22px;height:22px;border-radius:50%;box-sizing:border-box;}
+.stv2-dotw--ok{background:var(--m-orange);}
+.stv2-dotw--part{background:var(--m-orange-ink);}
+.stv2-dotw--cur{border:1.5px solid var(--m-orange);}
+.stv2-dotw--none{background:var(--m-ring-rest);}
+/* zakładki okresu: segment (obrys w kontenerze, zaznaczony pomarańczowy) */
+.stv2-seg{align-self:stretch;display:flex;gap:4px;padding:2px;box-sizing:border-box;background:rgba(255,255,255,.6);border:.5px solid var(--m-orange-tint);border-radius:var(--m-r-pill);-webkit-backdrop-filter:blur(7.23px);backdrop-filter:blur(7.23px);}
+.stv2-seg-b{position:relative;flex:1 1 0;box-sizing:border-box;min-height:36px;padding:0 8px;border:0;border-radius:var(--m-r-pill);background:transparent;color:var(--m-ink);font:inherit;font-size:var(--m-fs-2xs);font-weight:600;cursor:pointer;transition:background var(--m-dur-quick) ease,color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.stv2-seg-b::after{content:"";position:absolute;inset:-4px -2px;}   /* 44 px do kliknięcia */
+.stv2-seg-b[aria-pressed="true"]{background:var(--m-orange);color:var(--m-white);}
+.stv2-seg-b:active{transform:scale(.97);}
+/* kafel trzech liczb */
+.stv2-tiles{box-sizing:border-box;min-height:80px;display:flex;align-items:center;justify-content:space-between;padding:12px 23px;border:.5px solid var(--m-panel);border-radius:var(--m-r-sm);}
+.stv2-tiles .pf-stat{gap:6px;}
+.stv2-tiles .pf-vsep{align-self:stretch;height:auto;min-height:66px;}
+.stv2-tiles small, .stv2-bv small{margin-left:3px;font-size:var(--m-fs-xs);font-weight:400;letter-spacing:0;color:var(--m-muted-text);}
+.stv2-tile-d{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0 4px;min-height:14px;}
+.stv2-vs{font-size:var(--m-fs-2xs);font-weight:400;color:var(--m-ink);white-space:nowrap;}
+.stv2-delta{display:inline-flex;align-items:center;gap:3px;font-size:var(--m-fs-2xs);white-space:nowrap;}
+.stv2-delta b{font-weight:400;}
+.stv2-delta svg{flex:none;width:12px;height:12px;}
+.stv2-delta--up{color:var(--m-mint-ink);}
+.stv2-delta--up svg{color:var(--m-mint);}
+.stv2-delta--down{color:var(--m-danger);}
+.stv2-delta--neutral, .stv2-delta--0{color:var(--m-muted-text);}
+/* karuzela: slajd = kolumna − 39 px, przerwa 12, wystaje 27 px następnego */
+.stv2-caro-wrap{display:flex;flex-direction:column;}
+.statsv2-caro.stv2-caro{margin:0;}
+.stv2-track{gap:12px;}
+.stv2-slide{flex:0 0 calc(100% - 39px);min-width:0;display:flex;}
+.stv2-slide > *{flex:1;min-width:0;}
+.stv2-caro-dots{display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.stv2-dotb{position:relative;flex:none;width:32px;height:44px;padding:0;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.stv2-dotb i{position:relative;display:block;width:20px;height:8px;border-radius:99px;background:var(--m-muted);opacity:.45;transition:opacity var(--m-dur-fade) ease;}
+.stv2-dotb i::after{content:"";position:absolute;left:-10px;right:-10px;top:0;bottom:0;border-radius:99px;background:var(--m-orange);opacity:0;transition:opacity var(--m-dur-fade) ease;}   /* aktywna: 40 px, bez animowania szerokości */
+.stv2-dotb i.on{opacity:1;background:transparent;}
+.stv2-dotb i.on::after{opacity:1;}
+.stv2-ocard{background:var(--m-orange);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;color:var(--m-white);}
+.stv2-eyebrow{margin:0 0 10px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-ink);}
+.stv2-ocard .stv2-eyebrow, .stv2-ocard .stv2-num, .stv2-ocard .stv2-osub{color:var(--m-white);}
+.stv2-num{margin:0;font-size:var(--m-fs-hero);font-weight:300;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--m-ink);}
+.stv2-num small{margin-left:4px;font-size:var(--m-fs-md);font-weight:300;}
+.stv2-osub{margin:6px 0 0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-ink);}
+.stv2-chart{position:relative;height:78px;margin-top:16px;}
+.stv2-chart svg{display:block;width:100%;height:78px;overflow:visible;}
+.stv2-clabels{display:flex;justify-content:space-between;margin-top:10px;}
+.stv2-clabels span{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.04em;color:var(--m-white);}
+.stv2-wcard .statsv2-bar-row{margin-top:16px;}
+.stv2-wcard .statsv2-bar-col span{font-size:var(--m-fs-2xs);}
+.stv2-wcard .statsv2-bar-col .bar{border-radius:var(--m-r-sm) var(--m-r-sm) 4px 4px;}
+/* rekordy */
+.stv2-rec .pf-row-l{flex:1;}
+.stv2-rec .pf-row-r{gap:10px;}
+.stv2-rec-s{display:flex;align-items:center;gap:4px;font-size:var(--m-fs-2xs);color:var(--m-ink);}
+.stv2-rec-s svg{flex:none;width:16px;height:16px;}
+.stv2-new{display:inline-flex;align-items:center;height:19px;padding:0 8px;border-radius:99px;background:var(--m-orange-tint-2);color:var(--m-orange-ink);font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.04em;}
+.stv2-spark{display:block;flex:none;max-width:100%;}
+/* bez postępu */
+.stv2-stall{justify-content:flex-start;gap:12px;}
+.stv2-stall .pf-row-l{flex:1;}
+.stv2-stall-ic{flex:none;width:42px;height:42px;border-radius:50%;background:var(--m-amber-tint);color:var(--m-ink);display:flex;align-items:center;justify-content:center;}
+.stv2-stall-ic svg{display:block;width:24px;height:24px;}
+.stv2-stall-line{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.stv2-stall-s{font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-ink);}
+.stv2-stall-pill{display:inline-flex;align-items:center;height:19px;padding:0 14px;border-radius:99px;background:var(--m-amber-tint);color:var(--m-ink);font-size:var(--m-fs-2xs);}
+/* rozkład mięśni */
+.stv2-mrows{display:flex;flex-direction:column;gap:12px;}
+.stv2-mrow{display:grid;grid-template-columns:72px minmax(0,1fr) 26px 52px;align-items:center;gap:12px;min-height:29px;}
+.stv2-mn{font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stv2-mtrack{display:block;height:9px;border-radius:99px;background:var(--m-orange-tint);overflow:hidden;}
+.stv2-mfill{display:block;width:calc(var(--r,0) * 100%);height:100%;border-radius:99px;background:var(--m-orange);}
+.stv2-mv{font-size:var(--m-fs-base);text-align:right;color:var(--m-ink);font-variant-numeric:tabular-nums;}
+.stv2-banner{display:flex;align-items:center;gap:12px;margin-top:8px;padding:12px;border-radius:var(--m-r-md);background:var(--m-amber);color:var(--m-ink);}
+.stv2-banner-ic{flex:none;width:38px;height:38px;border-radius:50%;background:var(--m-amber-tint);display:flex;align-items:center;justify-content:center;}
+.stv2-banner-ic svg{display:block;width:24px;height:24px;}
+.stv2-banner-t{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;}
+.stv2-banner-v{margin:2px 0 0;font-size:var(--m-fs-base);font-weight:500;}
+/* ciało */
+.stv2-body{display:flex;gap:var(--m-gap-card);}
+.stv2-bt{flex:1 1 0;min-width:0;box-sizing:border-box;padding:12px;border:0;border-radius:var(--m-r-sm);font:inherit;color:var(--m-ink);text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+button.stv2-bt{cursor:pointer;}
+.stv2-bt-d{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:14px;}
+@media (prefers-reduced-motion: no-preference){
+  @keyframes stv2GrowX{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+  .stv2-grow{transform-origin:left center;animation:stv2GrowX var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(.35s + var(--i,0) * 40ms);}
+}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -4264,7 +4376,10 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
                głównych"). -->
         <button type="button" class="profil-back m-press" id="statsV2BackBtn" onclick="statsV2Back()" title="Wstecz" aria-label="Wstecz"><span class="ph" data-ph="caret-left"></span></button>
         <h1 class="profil-title" data-i18n="stV2Title">POSTĘPY</h1>
-        <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+        <div class="stv2-top-r">
+          <button type="button" class="stv2-cust m-press" id="statsV2CustBtn" hidden onclick="statsV2OpenCustomize()" title="Dostosuj ekran" aria-label="Dostosuj ekran"><span class="ph"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><path d="M4 8h9M17 8h3M4 16h3M11 16h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="15" cy="8" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="16" r="2" stroke="currentColor" stroke-width="1.6"/></svg></span></button>
+          <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+        </div>
       </div>
 
       <div id="statsV2Body"></div>
@@ -13031,7 +13146,6 @@ const LG_ICONS = {
   reset: '<svg viewBox="0 0 18 18" fill="none"><path d="M15.75 9.00096C15.7502 10.7756 15.0515 12.4788 13.8051 13.7421C12.5588 15.0054 10.8651 15.7271 9.0907 15.751H9C7.27611 15.7553 5.61676 15.0955 4.36641 13.9088C4.31271 13.858 4.26955 13.7971 4.23938 13.7297C4.20921 13.6622 4.19262 13.5894 4.19056 13.5156C4.1885 13.4417 4.20102 13.3681 4.22739 13.2991C4.25376 13.23 4.29347 13.1669 4.34426 13.1132C4.39504 13.0595 4.45591 13.0163 4.52337 12.9862C4.59084 12.956 4.66359 12.9394 4.73746 12.9373C4.81134 12.9353 4.8849 12.9478 4.95394 12.9742C5.02298 13.0005 5.08615 13.0402 5.13984 13.091C5.94408 13.8495 6.95396 14.3542 8.04335 14.542C9.13273 14.7298 10.2533 14.5925 11.2651 14.1472C12.2769 13.7019 13.1351 12.9683 13.7324 12.0381C14.3297 11.1079 14.6396 10.0223 14.6235 8.91696C14.6075 7.81162 14.266 6.73552 13.6419 5.82309C13.0178 4.91065 12.1387 4.20235 11.1144 3.78665C10.09 3.37095 8.96594 3.26629 7.88249 3.48575C6.79903 3.7052 5.80425 4.23903 5.02242 5.02056C5.01668 5.02678 5.01057 5.03265 5.00414 5.03814L3.13523 6.75096H5.0625C5.21168 6.75096 5.35476 6.81022 5.46025 6.91571C5.56574 7.0212 5.625 7.16427 5.625 7.31346C5.625 7.46264 5.56574 7.60571 5.46025 7.7112C5.35476 7.81669 5.21168 7.87596 5.0625 7.87596H1.6875C1.53832 7.87596 1.39524 7.81669 1.28975 7.7112C1.18426 7.60571 1.125 7.46264 1.125 7.31346V3.93845C1.125 3.78927 1.18426 3.6462 1.28975 3.54071C1.39524 3.43522 1.53832 3.37595 1.6875 3.37595C1.83668 3.37595 1.97976 3.43522 2.08525 3.54071C2.19074 3.6462 2.25 3.78927 2.25 3.93845V6.03377L4.23633 4.2197C5.18131 3.27839 6.384 2.63814 7.69256 2.37979C9.00112 2.12143 10.3569 2.25656 11.5887 2.76809C12.8205 3.27963 13.8732 4.14466 14.6138 5.25396C15.3544 6.36327 15.7498 7.66714 15.75 9.00096Z" fill="currentColor"/></svg>',   // timer: discard the attempt (Figma 620:18564)
   play: '<svg viewBox="0 0 38 38" fill="none"><path d="M34.4969 16.9953L13.11 3.91207C12.7494 3.69127 12.3364 3.57074 11.9137 3.56291C11.491 3.55508 11.0738 3.66024 10.7053 3.86754C10.3403 4.07161 10.0363 4.36923 9.82443 4.72977C9.61259 5.09031 9.50061 5.50077 9.5 5.91894V32.0825C9.50275 32.7098 9.75447 33.3103 10.1998 33.7521C10.6452 34.1938 11.2477 34.4406 11.875 34.4382C12.3128 34.438 12.7421 34.3174 13.1159 34.0894L34.4969 21.0061C34.8406 20.7967 35.1246 20.5023 35.3217 20.1514C35.5188 19.8004 35.6223 19.4047 35.6223 19.0022C35.6223 18.5997 35.5188 18.204 35.3217 17.8531C35.1246 17.5021 34.8406 17.2078 34.4969 16.9983V16.9953ZM11.875 32.0543V5.93824L33.2248 19.0007L11.875 32.0543Z" fill="currentColor"/></svg>',
   pause: '<svg viewBox="0 0 38 38" fill="none"><path d="M29.6875 4.75H23.75C23.1201 4.75 22.516 5.00022 22.0706 5.44562C21.6252 5.89102 21.375 6.49511 21.375 7.125V30.875C21.375 31.5049 21.6252 32.109 22.0706 32.5544C22.516 32.9998 23.1201 33.25 23.75 33.25H29.6875C30.3174 33.25 30.9215 32.9998 31.3669 32.5544C31.8123 32.109 32.0625 31.5049 32.0625 30.875V7.125C32.0625 6.49511 31.8123 5.89102 31.3669 5.44562C30.9215 5.00022 30.3174 4.75 29.6875 4.75ZM29.6875 30.875H23.75V7.125H29.6875V30.875ZM14.25 4.75H8.3125C7.68261 4.75 7.07852 5.00022 6.63312 5.44562C6.18772 5.89102 5.9375 6.49511 5.9375 7.125V30.875C5.9375 31.5049 6.18772 32.109 6.63312 32.5544C7.07852 32.9998 7.68261 33.25 8.3125 33.25H14.25C14.8799 33.25 15.484 32.9998 15.9294 32.5544C16.3748 32.109 16.625 31.5049 16.625 30.875V7.125C16.625 6.49511 16.3748 5.89102 15.9294 5.44562C15.484 5.00022 14.8799 4.75 14.25 4.75ZM14.25 30.875H8.3125V7.125H14.25V30.875Z" fill="currentColor"/></svg>',
-  sliders: '<svg viewBox="0 0 18 18" fill="none"><path d="M4.50051 7.38281V2.8125C4.50051 2.66332 4.44124 2.52024 4.33575 2.41475C4.23026 2.30926 4.08719 2.25 3.93801 2.25C3.78882 2.25 3.64575 2.30926 3.54026 2.41475C3.43477 2.52024 3.37551 2.66332 3.37551 2.8125V7.38281C2.89152 7.50673 2.46255 7.78821 2.15621 8.18286C1.84987 8.57752 1.68359 9.0629 1.68359 9.5625C1.68359 10.0621 1.84987 10.5475 2.15621 10.9421C2.46255 11.3368 2.89152 11.6183 3.37551 11.7422V15.1875C3.37551 15.3367 3.43477 15.4798 3.54026 15.5852C3.64575 15.6907 3.78882 15.75 3.93801 15.75C4.08719 15.75 4.23026 15.6907 4.33575 15.5852C4.44124 15.4798 4.50051 15.3367 4.50051 15.1875V11.7422C4.98449 11.6183 5.41346 11.3368 5.7198 10.9421C6.02614 10.5475 6.19242 10.0621 6.19242 9.5625C6.19242 9.0629 6.02614 8.57752 5.7198 8.18286C5.41346 7.78821 4.98449 7.50673 4.50051 7.38281ZM3.93801 10.6875C3.7155 10.6875 3.49799 10.6215 3.31299 10.4979C3.12798 10.3743 2.98379 10.1986 2.89864 9.99302C2.81349 9.78745 2.79121 9.56125 2.83462 9.34302C2.87803 9.12479 2.98518 8.92434 3.14251 8.767C3.29984 8.60967 3.5003 8.50252 3.71853 8.45912C3.93676 8.41571 4.16296 8.43799 4.36852 8.52314C4.57409 8.60828 4.74979 8.75248 4.87341 8.93748C4.99703 9.12249 5.06301 9.34 5.06301 9.5625C5.06301 9.86087 4.94448 10.147 4.7335 10.358C4.52252 10.569 4.23637 10.6875 3.93801 10.6875ZM9.56301 4.00781V2.8125C9.56301 2.66332 9.50374 2.52024 9.39825 2.41475C9.29276 2.30926 9.14969 2.25 9.00051 2.25C8.85132 2.25 8.70825 2.30926 8.60276 2.41475C8.49727 2.52024 8.43801 2.66332 8.43801 2.8125V4.00781C7.95402 4.13173 7.52505 4.41321 7.21871 4.80786C6.91237 5.20252 6.74609 5.6879 6.74609 6.1875C6.74609 6.6871 6.91237 7.17248 7.21871 7.56714C7.52505 7.96179 7.95402 8.24327 8.43801 8.36719V15.1875C8.43801 15.3367 8.49727 15.4798 8.60276 15.5852C8.70825 15.6907 8.85132 15.75 9.00051 15.75C9.14969 15.75 9.29276 15.6907 9.39825 15.5852C9.50374 15.4798 9.56301 15.3367 9.56301 15.1875V8.36719C10.047 8.24327 10.476 7.96179 10.7823 7.56714C11.0886 7.17248 11.2549 6.6871 11.2549 6.1875C11.2549 5.6879 11.0886 5.20252 10.7823 4.80786C10.476 4.41321 10.047 4.13173 9.56301 4.00781ZM9.00051 7.3125C8.778 7.3125 8.56049 7.24652 8.37549 7.1229C8.19048 6.99929 8.04629 6.82359 7.96114 6.61802C7.87599 6.41245 7.85371 6.18625 7.89712 5.96802C7.94053 5.74979 8.04768 5.54934 8.20501 5.392C8.36234 5.23467 8.5628 5.12752 8.78103 5.08412C8.99926 5.04071 9.22546 5.06299 9.43102 5.14814C9.63659 5.23328 9.81229 5.37748 9.93591 5.56248C10.0595 5.74749 10.1255 5.965 10.1255 6.1875C10.1255 6.48587 10.007 6.77202 9.796 6.983C9.58502 7.19397 9.29887 7.3125 9.00051 7.3125ZM16.313 11.8125C16.3125 11.3137 16.1466 10.8291 15.8413 10.4347C15.5359 10.0402 15.1083 9.75822 14.6255 9.63281V2.8125C14.6255 2.66332 14.5662 2.52024 14.4608 2.41475C14.3553 2.30926 14.2122 2.25 14.063 2.25C13.9138 2.25 13.7707 2.30926 13.6653 2.41475C13.5598 2.52024 13.5005 2.66332 13.5005 2.8125V9.63281C13.0165 9.75673 12.5875 10.0382 12.2812 10.4329C11.9749 10.8275 11.8086 11.3129 11.8086 11.8125C11.8086 12.3121 11.9749 12.7975 12.2812 13.1921C12.5875 13.5868 13.0165 13.8683 13.5005 13.9922V15.1875C13.5005 15.3367 13.5598 15.4798 13.6653 15.5852C13.7707 15.6907 13.9138 15.75 14.063 15.75C14.2122 15.75 14.3553 15.6907 14.4608 15.5852C14.5662 15.4798 14.6255 15.3367 14.6255 15.1875V13.9922C15.1083 13.8668 15.5359 13.5848 15.8413 13.1903C16.1466 12.7959 16.3125 12.3113 16.313 11.8125ZM14.063 12.9375C13.8405 12.9375 13.623 12.8715 13.438 12.7479C13.253 12.6243 13.1088 12.4486 13.0236 12.243C12.9385 12.0375 12.9162 11.8113 12.9596 11.593C13.003 11.3748 13.1102 11.1743 13.2675 11.017C13.4248 10.8597 13.6253 10.7525 13.8435 10.7091C14.0618 10.6657 14.288 10.688 14.4935 10.7731C14.6991 10.8583 14.8748 11.0025 14.9984 11.1875C15.122 11.3725 15.188 11.59 15.188 11.8125C15.188 12.1109 15.0695 12.397 14.8585 12.608C14.6475 12.819 14.3614 12.9375 14.063 12.9375Z" fill="currentColor"/></svg>',   // cardio: settings while it runs (Figma 620:18570)
   x: '<svg viewBox="0 0 28 28" fill="none"><path d="M22.4 6.4 6.4 22.4M6.4 6.4l16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>', // same glyph as Trening's .gy-x
   check: '<svg viewBox="0 0 12 12" fill="none"><path d="M10.78 3.36 4.78 9.36a.6.6 0 0 1-.8 0L1.36 6.74a.6.6 0 1 1 .8-.8l2.23 2.23 5.6-5.6a.6.6 0 0 1 .8.8Z" fill="currentColor"/></svg>',
   checkBig: '<svg viewBox="0 0 24 24" fill="none"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -21573,195 +21687,381 @@ function statsV2CometLine(pts, ramp, sw){
   return { svg: out, segs: N };
 }
 
+/* ============================================================
+   POSTĘPY v3: przegląd (etap B, Figma 648:11284 / 654:13502 / 655:13961).
+   Okres (Tydzień / Miesiąc / Rok / Wszystko) tylko w pamięci, domyślnie miesiąc. Zmiana okresu renderuje bez animacji wejścia.
+   Przyciski prowadzące do kolejnych etapów (Dostosuj, Udostępnij, Szczegóły Kardio, strona Wagi) pojawiają się dopiero, gdy
+   istnieje funkcja docelowa: statsV2OpenCustomize / statsV2OpenShare / statsV2OpenCardio / statsV2OpenWeight.
+   ============================================================ */
+let statsV2Period = 'month';
+Object.assign(T_EN, {
+  stV2PerWeek: 'Week', stV2PerMonth: 'Month', stV2PerYear: 'Year', stV2PerAll: 'All', stV2PerAria: 'Period', stV2PillAll: 'All time',
+  stV2TileWorkouts: 'Workouts', stV2TileVolume: 'Volume', stV2TileSets: 'Sets',
+  stV2VsWeek: 'vs prev.', stV2VsMonth: m => `vs ${m}`, stV2VsYear: y => `vs ${y}`,
+  stV2CmpLater: 'Comparison with the previous period will appear after 2 weeks.',
+  stV2GoalDone: 'Goal met', stV2GoalPill: (a, b) => `${a} of ${b} ${b === 1 ? 'week' : 'weeks'}`,
+  stV2DayUpper1: 'DAY',
+  stV2Strength: 'Strength', stV2Volume: 'Volume', stV2SessionsTime: 'Workouts and time',
+  stV2StrengthSub: (n, d) => `+ ${n} kg vs ${d}`, stV2VolSub: (n, d) => `+ ${n} vs ${d}`,
+  stV2SessionsSub: (n, a) => `${n} ${n === 1 ? 'workout' : 'workouts'}${a ? ` · avg ${a} min` : ''}`,
+  stV2Records: 'Records', stV2AllEx: 'All exercises', stV2New: 'NEW',
+  stV2TrendLater: 'The trend appears from the third workout of each exercise.',
+  stV2Stalled: 'No progress', stV2StalledFor: n => `No gain for ${n} weeks`,
+  stV2Muscles: 'Muscle split', stV2Least: 'Least trained', stV2LeastVal: (g, n) => `${g}: ${n} ${n === 1 ? 'set' : 'sets'}`,
+  stV2Body: 'Body', stV2Weight: 'Weight', stV2Kcal: 'Calories', stV2KcalAvg: 'avg per workout', stV2WeightAdd: 'Add a measurement',
+  stV2InWeek: 'this week', stV2InMonth: 'this month', stV2InYear: 'this year', stV2InAll: 'overall',
+  stV2CardioT: 'Cardio', stV2CTime: 'Time', stV2CDist: 'Distance', stV2CSessions: 'Sessions', stV2Details: 'Details',
+  stV2ShareBtn: 'Share progress',
+  stV2EmptyT: 'Your progress will show up here', stV2EmptyD: 'The chart, records and muscle split appear after your first workouts.',
+  stV2CustAria: 'Customize screen',
+});
+
+const STV2_ICO = {
+  cal: '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><rect x="2.25" y="3.25" width="11.5" height="10.5" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M2.25 6.75h11.5M5.5 2v2.5M10.5 2v2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
+  flat: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  least: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><path d="M12 5v14M6.5 13.5 12 19l5.5-5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+const STV2_MON = LANG === 'en' ? ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'] : ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+function stv2Dm(iso, withYear){
+  const p = iso.split('-').map(Number);
+  return `${p[2]} ${STV2_MON[p[1] - 1]}${withYear ? ' ' + p[0] : ''}`;
+}
+// zakres dat: „1–13 paź”, „28 wrz–4 paź”; rok dopisany tylko dla innego niż bieżący
+function stv2Range(a, b){
+  const A = a.split('-').map(Number), B = b.split('-').map(Number), cy = +todayStr().slice(0, 4);
+  const y = B[0] !== cy ? ' ' + B[0] : '';
+  if(a === b) return `${A[2]} ${STV2_MON[A[1] - 1]}${y}`;
+  if(A[0] === B[0] && A[1] === B[1]) return `${A[2]}–${B[2]} ${STV2_MON[B[1] - 1]}${y}`;
+  return `${A[2]} ${STV2_MON[A[1] - 1]}–${B[2]} ${STV2_MON[B[1] - 1]}${y}`;
+}
+function stv2Weeks(n){ return LANG === 'en' ? (n === 1 ? 'week' : 'weeks') : plPlural(n, 'tydzień', 'tygodnie', 'tygodni'); }
+function stv2CssHex(name, fb){
+  try{ const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim(); if(/^#[0-9a-f]{6}$/i.test(v)) return v; }catch(e){}
+  return fb;
+}
+function stv2Safe(fn, fb){ try{ return fn(); }catch(e){ return fb; } }
+function stv2Spark(vals, w, h){
+  if(!vals || vals.length < 2) return '';
+  const lo = Math.min(...vals), hi = Math.max(...vals), sp = hi - lo, pad = 2;
+  const pts = vals.map((v, i)=>({ x: +(pad + i / (vals.length - 1) * (w - 2 * pad)).toFixed(1), y: +(sp === 0 ? h / 2 : pad + (1 - (v - lo) / sp) * (h - 2 * pad)).toFixed(1) }));
+  return `<svg class="stv2-spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" fill="none" aria-hidden="true"><path d="${statsV2SmoothPath(pts)}" stroke="var(--m-mint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+// delta tekstowa: wzrost = strzałka --m-mint + tekst --m-mint-ink, spadek --m-danger; tryb 'neutral' (waga, kalorie, mięśnie) = szary
+function stv2Delta(d, fmt, mode){
+  if(d === null || d === undefined || !isFinite(d)) return '';
+  if(d === 0) return '<span class="stv2-delta stv2-delta--0"><b>0</b></span>';
+  const up = d > 0, c = mode === 'neutral' ? 'neutral' : (up ? 'up' : 'down');
+  return `<span class="stv2-delta stv2-delta--${c}">${up ? PF_ICO.up : PF_ICO.down}<b>${up ? '+' : '−'}${fmt(Math.abs(d))}</b></span>`;
+}
+function stv2Num(n){ return formatDashNum(n, 0); }
+function stv2Dur(min){ min = Math.round(min); return min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`; }
+
+// jedna próbka co k punktów, żeby kometa nie miała setek segmentów przy „Wszystko”
+function stv2Thin(arr, max){
+  if(arr.length <= max) return arr;
+  const out = [], step = (arr.length - 1) / (max - 1);
+  for(let i = 0; i < max; i++) out.push(arr[Math.round(i * step)]);
+  return out;
+}
+function stv2LineChart(vals, dates){
+  const W = 284, H = 78, P = 6;
+  vals = vals.slice(); dates = dates.slice();
+  if(!vals.length) return '';
+  if(vals.length === 1){ vals.push(vals[0]); dates.push(dates[0]); }
+  const tv = stv2Thin(vals, 40), td = stv2Thin(dates, 40);
+  const lo = Math.min(...tv), hi = Math.max(...tv), sp = hi - lo;
+  const pts = tv.map((x, i)=>({ x: +(i / (tv.length - 1) * W).toFixed(1), y: +(sp === 0 ? H / 2 : P + (1 - (x - lo) / sp) * (H - 2 * P)).toFixed(1) }));
+  const comet = statsV2CometLine(pts, STATSV2_YTD_RAMP, 3);
+  const last = pts[pts.length - 1], fid = statsV2Uid();
+  const area = `${statsV2SmoothPath(pts)} L${W},${H} L0,${H} Z`;
+  const labs = [td[0], td[Math.floor((td.length - 1) / 2)], td[td.length - 1]].map(d=> stv2Dm(d));
+  if(td.length < 3 || labs[0] === labs[2]) { labs.length = 0; labs.push(stv2Dm(td[0]), '', stv2Dm(td[td.length - 1])); if(labs[0] === labs[2]) labs[2] = ''; }
+  return `<div class="stv2-chart"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="${fid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+      <path class="statsv2-comet-seg" style="--p:0" d="${area}" fill="url(#${fid})" stroke="none"/>${comet.svg}</svg>
+      <div class="statsv2-chart-head on-orange" style="left:${(last.x / W * 100).toFixed(1)}%;top:${(last.y / H * 100).toFixed(1)}%;"></div></div>
+    <div class="stv2-clabels">${labs.map(l=>`<span>${l}</span>`).join('')}</div>`;
+}
+function stv2OCard(title, num, sub, chart, i){
+  return `<div class="stv2-slide"><div class="stv2-ocard statsv2-anim-card" style="--i:${i}">
+      <p class="stv2-eyebrow">${title}</p>
+      <p class="stv2-num">${num}</p>
+      ${sub ? `<p class="stv2-osub">${sub}</p>` : ''}
+      ${chart}
+    </div></div>`;
+}
+
+/* ---- dane okresu: serie do wykresów ---- */
+function stv2VolumeSeries(win){
+  const vals = [], dates = [];
+  let cum = 0;
+  statsV2Order().forEach(w=>{
+    if(w.date < win.start || w.date > win.end) return;
+    let v = 0;
+    stv2Safe(()=> w.exercises.forEach(ex=>{ if(!statsV2IsStrengthEx(ex)) return; recSetsOf(ex).forEach(s=>{ const wt = recNum(s.weight), rp = recNum(s.reps); if(wt > 0 && rp > 0) v += wt * rp; }); }));
+    cum += v;
+    if(dates.length && dates[dates.length - 1] === w.date) vals[vals.length - 1] = cum; else { vals.push(cum); dates.push(w.date); }
+  });
+  return { vals, dates, total: Math.round(cum) };
+}
+function stv2PrevLabel(win){
+  if(win.period === 'week') return t('stV2VsWeek', 'vs poprz.');
+  if(win.period === 'year') return t('stV2VsYear', `vs ${win.prevStart.slice(0, 4)}`, win.prevStart.slice(0, 4));
+  const m = STV2_MON[+win.prevStart.slice(5, 7) - 1];
+  return t('stV2VsMonth', `vs ${m}`, m);
+}
+function stv2PeriodPill(win){
+  if(win.period === 'week') return t('stV2PerWeek', 'Tydzień');
+  if(win.period === 'month') return MONTH_NAMES[+win.end.slice(5, 7) - 1];
+  if(win.period === 'year') return win.end.slice(0, 4);
+  return t('stV2PillAll', 'Cały czas');
+}
+function stv2InLabel(p){
+  return p === 'week' ? t('stV2InWeek', 'w tym tygodniu') : p === 'month' ? t('stV2InMonth', 'w tym miesiącu') : p === 'year' ? t('stV2InYear', 'w tym roku') : t('stV2InAll', 'łącznie');
+}
+
+/* ---- Rekordy: 3 ćwiczenia z najświeższą aktywnością, wartość = obecny rekord (bez serii) ---- */
+function stv2RecordRows(today){
+  const fresh = new Set();
+  stv2Safe(()=> statsV2NewRecords({ start: dashAddDays(today, -6), end: today }, today).items.forEach(it=>{ if(it.isNew) fresh.add(it.name); }));
+  const names = [];
+  stv2Safe(()=> recIndex().state.forEach((st, name)=>{ if(typeof name === 'string' && !isCardioName(name) && !(typeof BOOKEND_EX_NAMES !== 'undefined' && BOOKEND_EX_NAMES.has(name))) names.push(name); }));
+  const recs = [];
+  names.forEach(name=>{
+    const r = stv2Safe(()=> exerciseRecords(name), null);
+    if(!r) return;
+    const pick = r.weight ? { kind: 'weight', v: r.weight } : r.reps ? { kind: 'reps', v: r.reps } : r.time ? { kind: 'time', v: r.time } : null;
+    if(!pick) return;
+    recs.push({ name, kind: pick.kind, value: pick.v.value, perSide: pick.v.perSide, date: pick.v.date, last: r.lastDate || pick.v.date, sessions: r.sessions || 0,
+      hist: (pick.v.history || []).map(h=> h.value), isNew: fresh.has(name) });
+  });
+  recs.sort((a, b)=> a.last < b.last ? 1 : a.last > b.last ? -1 : a.name < b.name ? -1 : 1);
+  return recs.slice(0, 3);
+}
+
+/* ---- Kardio w oknie okresu: czas, dystans, sesje ---- */
+function stv2CardioStats(win){
+  let sec = 0, distM = 0, sessions = 0, ever = false;
+  statsV2Order().forEach(w=>{
+    let had = false, wsec = 0, wdist = 0;
+    stv2Safe(()=> w.exercises.forEach(ex=>{
+      if(!ex || typeof ex.name !== 'string' || !isCardioName(ex.name)) return;
+      exSetsView(ex).forEach(x=>{ if(x.durationSec > 0){ had = true; wsec += x.durationSec; if(x.distanceM > 0) wdist += x.distanceM; } });
+    }));
+    if(had) ever = true;
+    if(had && w.date >= win.start && w.date <= win.end){ sessions++; sec += wsec; distM += wdist; }
+  });
+  return { sec, distM, sessions, ever };
+}
+
 function renderStatsV2Overview(){
-  const ringShadowId = statsV2Uid(), ringBloomId = statsV2Uid();
-  const week = statsV2WeeklyProgress();
-  const R = 58, C = 2*Math.PI*R;
-  const ringFrac = week.total ? week.done/week.total : 0;
-  // one continuous comet — over plan it just keeps flying round the same
-  // ring (up to a second full lap), no separate coil, no cut.
-  const ringSweepFrac = Math.min(2, ringFrac);
-  const ringFull = ringSweepFrac >= 1;
-  const ringExtra = Math.max(0, week.done - week.total);
-  // no arc-wide glow filter — a hard plain/glow segment boundary left a
-  // bright blob mid-ring. The comet's "świetlisty" head is carried by the
-  // dedicated head bloom circle instead. At 4/4+ the whole comet gets a
-  // drop shadow — but only from where it turns colour (t >= .10), so the
-  // grey melt-in tail doesn't cast a faint shadow on the track.
-  const ringMain = statsV2RingArc(66, 66, R, 13, 0, ringSweepFrac*360, STATSV2_RING_RAMP, 0, ringFull ? ringShadowId : null, 0.10);
-  const ringHeadDeg = ringSweepFrac * 360;
-  const ringHead = statsV2RingPt(66, 66, R, ringHeadDeg);
-  // the head dot lands right after the LAST arc segment (segments stagger
-  // in at .18s + i*10ms), not at a fixed delay that fires mid-draw on the
-  // longer fills — Maciej: "kropka powinna pojawić się na końcu"
-  const ringHeadDelay = (0.18 + Math.max(0, ringMain.segs - 1) * 0.01 + 0.16).toFixed(2);
+  const today = todayStr();
+  const order = statsV2Order();
+  const n = order.length;
+  const per = STATSV2_PERIODS.indexOf(statsV2Period) >= 0 ? statsV2Period : 'month';
+  const win = statsV2Window(per, today);
+  const ps = statsV2PeriodStats(win);
+  let blk = 0;
+  const A = ()=> `statsv2-anim-card" style="--i:${Math.min(blk++, 7)}`;   // wejście kafli tylko przy renderze „ekran otwarty” (reszta: animation:none w renderStatsV2Core)
+  const E = escHtml;
 
-  const window6 = statsV2MonthWindow(statsV2BarPage);
-  const maxKg = Math.max(1, ...window6.map(m=>m.kg));
-  const earliest = statsV2EarliestWorkoutDate();
-  const oldestInWindow = `${window6[0].year}-${String(window6[0].month).padStart(2,'0')}`;
-  const leftDisabled = earliest ? oldestInWindow <= earliest.slice(0,7) : true;
-  const rightDisabled = statsV2BarPage===0;
-  const barsHtml = window6.map((m,i)=>{
-    const h = Math.max(4, Math.round(m.kg/maxKg*112));
-    const vivid = i>=3;
-    const bg = vivid ? 'background:linear-gradient(180deg,#ffbb00,#FF6343 55%,var(--m-orange));' : 'background:var(--m-orange);opacity:.6;';
-    return `<div class="statsv2-bar-col"><div class="bar statsv2-bar-anim" style="--i:${i};height:${h}px;${bg}"></div><span>${MONTH_ABBR_PL[m.month-1]}</span></div>`;
-  }).join('');
-
-  const ytd = statsV2YtdStats();
-  const maxCum = Math.max(1, ...ytd.points.map(p=>p.cum));
-  const wW = 312, wH = 78, wPad = 4;
-  const wavePts = ytd.points.map((p,i)=>({
-    x: ytd.points.length>1 ? (i/(ytd.points.length-1))*wW : wW/2,
-    y: wPad + (1 - p.cum/maxCum) * (wH - wPad*2),
-  }));
-  const ytdComet = statsV2CometLine(wavePts, STATSV2_YTD_RAMP, 3);
-  const lastPt = wavePts[wavePts.length-1];
-  const ytdLabels = MONTH_ABBR_PL.map((abbr,idx)=> (idx%2===0 && idx+1<=ytd.points.length) ? abbr : null).filter(Boolean);
-  // Soft glow under the curve — an area fill from the line down to the
-  // chart's baseline, gradient-faded to transparent. Because the line
-  // itself sits low early in the year (little cumulative volume yet) and
-  // climbs toward "today", the filled area is naturally thin/invisible
-  // over the flat months and only reads as a glow where the curve rises —
-  // no separate shaping needed, just a plain top-to-bottom fade.
-  const ytdFillId = statsV2Uid();
-  const ytdAreaPath = wavePts.length>1
-    ? `${statsV2SmoothPath(wavePts)} L${lastPt.x},${wH} L${wavePts[0].x},${wH} Z`
-    : '';
-
-  // --- pinned kcards: trend arrows (same up/down as "Progres ćwiczeń") ---
-  const k7 = kcalStats(7);
-  const k14 = kcalStats(14);
-  const kcalPrev = k14.sum - k7.sum;                 // the 7 days before this week
-  const kcalDir = k7.n === 0 ? 'down' : (k7.sum >= kcalPrev ? 'up' : 'down');
-  const wt = weightTrend(90);
-  const wtDir = !wt ? null : (wt.delta > 0.05 ? 'up' : wt.delta < -0.05 ? 'down' : null);
-  const arwSvg = dir => `<span class="ph statsv2-kcard-arw${dir==='down'?' down':''}">${PH['arrow-up-right']}</span>`;
-
-  // --- carousel slide 3: sessions per month (last 6) ---
-  const sessionsSlide = (()=>{
-    const today = new Date(todayStr()+'T00:00:00');
-    const months = [];
-    for(let i=5;i>=0;i--){
-      const d = new Date(today.getFullYear(), today.getMonth()-i, 1);
-      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      let n = 0;
-      workouts.forEach(w=>{ if(statsV2MonthKey(w.date)===key) n++; });
-      runs.forEach(r=>{ if(statsV2MonthKey(r.date)===key) n++; });
-      months.push({ month:d.getMonth()+1, n });
-    }
-    const total = months.reduce((s,m)=>s+m.n,0);
-    const maxN = Math.max(1, ...months.map(m=>m.n));
-    const cur = months[months.length-1].n;
-    return `
-      <div class="statsv2-slide"><div class="statsv2-scard statsv2-anim-card" style="--i:2">
-        <p class="statsv2-scard-eyebrow">${t('stV2SessionsMonthly','Treningi · miesiąc po miesiącu')}</p>
-        <p class="statsv2-scard-num">${cur}<small>${t('stV2SessionsThisMonth','w tym miesiącu')}</small></p>
-        <p class="statsv2-scard-delta">${total} ${LANG==='en'?'in 6 months':'w 6 miesiącach'}</p>
-        <div class="statsv2-bar-row" style="margin-top:14px;">${months.map((m,i)=>{
-          const h = Math.max(4, Math.round(m.n/maxN*112));
-          return `<div class="statsv2-bar-col"><div class="bar statsv2-bar-anim" style="--i:${i};height:${h}px;background:linear-gradient(180deg,#ffbb00,#FF6343 55%,var(--m-orange));${m.n>0?'':'opacity:.35;'}"></div><span>${MONTH_ABBR_PL[m.month-1]}</span></div>`;
-        }).join('')}</div>
-      </div></div>`;
-  })();
-
-  return `
-    <div class="statsv2-cards">
-      <div class="statsv2-ring-card statsv2-anim-card" style="--i:0">
-        <p class="statsv2-ring-eyebrow">${t('stV2WeeklyProgress','Postęp tygodniowy')}</p>
+  /* ---------- 1. Pierścień tygodnia + cel ---------- */
+  const week = stv2Safe(()=> statsV2WeeklyProgress(), { done: 0, total: 0 });
+  const R = 57, SW = 18;
+  const ringFrac = week.total > 0 ? Math.min(1, week.done / week.total) : 0;
+  const ramp = [[0, stv2CssHex('--m-orange', '#ff3300'), 1], [.14, stv2CssHex('--m-orange', '#ff3300'), 1], [1, stv2CssHex('--m-ring-yellow', '#ffcc00'), 1]];
+  const ringArc = statsV2RingArc(66, 66, R, 14, 0, ringFrac * 360, ramp, 0, null, 0);
+  const ringHead = statsV2RingPt(66, 66, R, ringFrac * 360);
+  const dotId = statsV2Uid();
+  const headDelay = (0.18 + Math.max(0, ringArc.segs - 1) * 0.01 + 0.16).toFixed(2);
+  const dayWord = k=> k === 1 ? t('stV2DayUpper1', 'DZIEŃ') : t('stV2DaysUpper', 'DNI');
+  const over = Math.max(0, week.done - week.total);
+  const left = Math.max(0, week.total - week.done);
+  const gh = stv2Safe(()=> statsV2WeeklyGoalHistory(12, today), { weeks: [], metCount: 0, completedCount: 0 });
+  const goalRow = gh.completedCount > 0 ? `
+        <div class="stv2-goal">
+          <div class="stv2-goal-h"><p class="stv2-goal-lbl">${t('stV2GoalDone', 'Cel zrealizowano')}</p>
+            <span class="stv2-goal-pill">${t('stV2GoalPill', `${gh.metCount} z ${gh.completedCount} ${gh.completedCount === 1 ? 'tygodnia' : 'tygodni'}`, gh.metCount, gh.completedCount)}</span></div>
+          <div class="stv2-dots" aria-hidden="true">${gh.weeks.map(w=> `<i class="stv2-dotw ${w.current ? 'stv2-dotw--cur' : (w.counted && w.ok) ? 'stv2-dotw--ok' : (w.counted && w.done > 0) ? 'stv2-dotw--part' : 'stv2-dotw--none'}"></i>`).join('')}</div>
+        </div>` : '';
+  const ringCard = `
+      <div class="stv2-ring-card ${A()}">
+        <p class="statsv2-ring-eyebrow">${t('stV2WeeklyProgress', 'Postęp tygodniowy')}</p>
         <div class="statsv2-ring-row">
           <div class="statsv2-ring-wrap">
-            <svg viewBox="0 0 132 132">
-              <defs>
-                <filter id="${ringShadowId}" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.6"/></filter>
-                <filter id="${ringBloomId}" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4.5"/></filter>
-              </defs>
-              <circle cx="66" cy="66" r="${R}" fill="none" stroke="${STATSV2_RING_TRACK}" stroke-width="13"/>
-              ${ringMain.svg}
-              ${week.total > 0 ? `<circle class="statsv2-ring-head" style="animation-delay:${ringHeadDelay}s" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="10" fill="#ffb877" opacity="0.5" filter="url(#${ringBloomId})"/>
-              <circle class="statsv2-ring-head" style="animation-delay:${ringHeadDelay}s" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="6.5" fill="#ffc07a"/>` : ''}
+            <svg viewBox="0 0 132 132" width="132" height="132" aria-hidden="true">
+              <defs><filter id="${dotId}" x="-80%" y="-80%" width="260%" height="260%"><feDropShadow dx="0" dy="4" stdDeviation="2" flood-color="#000" flood-opacity=".25"/></filter></defs>
+              <circle cx="66" cy="66" r="${R}" fill="none" stroke-width="${SW}" style="stroke:var(--m-ring-track)"/>
+              ${ringArc.svg}
+              ${ringFrac > 0 ? `<circle class="statsv2-ring-head" style="animation-delay:${headDelay}s;fill:var(--m-white)" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="7" filter="url(#${dotId})"/>` : ''}
             </svg>
-            <div class="statsv2-ring-num"><strong>${week.done}/${week.total}</strong><small>${t('stV2Days','dni')}</small></div>
+            <div class="statsv2-ring-num"><strong>${week.total > 0 ? `${week.done}/${week.total}` : week.done}</strong><small>${t('stV2Days', 'dni')}</small></div>
           </div>
           <div class="statsv2-ring-legend">
-            <div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot done"></span><div><p class="statsv2-ring-legend-label">${t('stV2Done','Zrobione')}</p><p class="statsv2-ring-legend-value">${week.done} ${t('stV2DaysUpper','DNI')}</p></div></div>
-            ${ringExtra > 0
-              ? `<div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot done"></span><div><p class="statsv2-ring-legend-label">${t('stV2OverPlan','Ponad plan')}</p><p class="statsv2-ring-legend-value">+${ringExtra} ${t('stV2DaysUpper','DNI')}</p></div></div>`
-              : `<div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot left"></span><div><p class="statsv2-ring-legend-label">${t('stV2Left','Zostało')}</p><p class="statsv2-ring-legend-value">${Math.max(0,week.total-week.done)} ${t('stV2DaysUpper','DNI')}</p></div></div>`}
+            <div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot done"></span><div><p class="statsv2-ring-legend-label">${t('stV2Done', 'Zrobione')}</p><p class="statsv2-ring-legend-value">${week.done} ${dayWord(week.done)}</p></div></div>
+            ${over > 0
+              ? `<div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot done"></span><div><p class="statsv2-ring-legend-label">${t('stV2OverPlan', 'Ponad plan')}</p><p class="statsv2-ring-legend-value">+${over} ${dayWord(over)}</p></div></div>`
+              : `<div class="statsv2-ring-legend-row"><span class="statsv2-ring-dot left"></span><div><p class="statsv2-ring-legend-label">${t('stV2Left', 'Zostało')}</p><p class="statsv2-ring-legend-value">${left} ${dayWord(left)}</p></div></div>`}
           </div>
-        </div>
-      </div>
+        </div>${goalRow}
+      </div>`;
 
-      <div class="statsv2-krow statsv2-anim-card" style="--i:1">
-        <div class="statsv2-kcard statsv2-kcard--half">
-          <p class="statsv2-kcard-eyebrow">${t('stV2Kcal7','Kalorie · 7 dni')}</p>
-          <div class="statsv2-kcard-num-row">${ph('flame')}<span class="statsv2-kcard-num">${k7.n ? k7.sum.toLocaleString(LANG==='en'?'en-US':'pl-PL') : '—'}<small>kcal</small></span>${k7.n?arwSvg(kcalDir):''}</div>
-          <p class="statsv2-kcard-delta">${k7.n ? t('stV2KcalAvg', `śr. ${k7.avg} kcal / trening`, k7.avg) : t('stV2KcalNoWeight','Dodaj masę ciała w koncie')}</p>
-        </div>
-        ${(()=>{
-          if(!wt) return `<div class="statsv2-kcard statsv2-kcard--half">
-            <p class="statsv2-kcard-eyebrow">${t('stV2BodyWeight','Masa ciała')}</p>
-            <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">—<small>kg</small></span></div>
-            <p class="statsv2-kcard-delta">${t('stV2WeightNoData','Dodaj pomiar w koncie')}</p>
-          </div>`;
-          const dTxt = Math.abs(wt.delta) < 0.05
-            ? t('stV2Weight90Same', 'bez zmian / 90 dni')
-            : t('stV2Weight90', `${wt.delta > 0 ? '+' : '−'}${Math.abs(wt.delta).toFixed(1).replace('.', ',')} kg / 90 dni`, `${wt.delta > 0 ? '+' : '−'}${Math.abs(wt.delta).toFixed(1)}`);
-          return `<div class="statsv2-kcard statsv2-kcard--half">
-            <p class="statsv2-kcard-eyebrow">${t('stV2BodyWeight','Masa ciała')}</p>
-            <div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${fmtKg(wt.cur)}<small>kg</small></span>${wtDir?arwSvg(wtDir):''}</div>
-            <p class="statsv2-kcard-delta">${dTxt}</p>
-          </div>`;
-        })()}
-      </div>
-      ${statsV2CardioHtml()}
+  /* ---------- 2. Zakładki okresu + kafle z deltami ---------- */
+  const perDefs = [['week', 'stV2PerWeek', 'Tydzień'], ['month', 'stV2PerMonth', 'Miesiąc'], ['year', 'stV2PerYear', 'Rok'], ['all', 'stV2PerAll', 'Wszystko']];
+  const seg = `<div class="stv2-seg ${A()}" role="group" aria-label="${E(t('stV2PerAria', 'Okres'))}">${perDefs.map(([k, tk, pl])=> `<button type="button" class="stv2-seg-b" aria-pressed="${k === per}" onclick="statsV2SetPeriod('${k}')">${t(tk, pl)}</button>`).join('')}</div>`;
+  const d = ps.delta;
+  const tileD = (v, fmt)=> d ? `<span class="stv2-tile-d">${stv2Delta(v, fmt)}<span class="stv2-vs">${E(stv2PrevLabel(win))}</span></span>` : (n > 2 ? '<span class="stv2-tile-d" aria-hidden="true">&nbsp;</span>' : '');
+  const dash = '–';
+  const tiles = `
+      <div class="stv2-tiles ${A()}">
+        <div class="pf-stat"><span class="pf-stat-v">${n ? ps.workouts : dash}</span><span class="pf-stat-l">${t('stV2TileWorkouts', 'Treningi')}</span>${n ? tileD(d && d.workouts, stv2Num) : ''}</div><i class="pf-vsep" aria-hidden="true"></i>
+        <div class="pf-stat"><span class="pf-stat-v">${n ? E(pfVolumeText(ps.volumeKg)) : dash}</span><span class="pf-stat-l">${t('stV2TileVolume', 'Objętość')}</span>${n ? tileD(d && d.volumeKg, pfVolumeText) : ''}</div><i class="pf-vsep" aria-hidden="true"></i>
+        <div class="pf-stat"><span class="pf-stat-v">${n ? ps.sets : dash}</span><span class="pf-stat-l">${t('stV2TileSets', 'Serie')}</span>${n ? tileD(d && d.sets, stv2Num) : ''}</div>
+      </div>`;
+  // podpis okna: „1–13 paź vs 1–13 wrz”; bez porównania: wyjaśnienie, kiedy się pojawi (nie dla „Wszystko”)
+  const winCap = (n > 0 && per !== 'all')
+    ? (win.hasPrev ? `<p class="stv2-cap">${E(stv2Range(win.start, win.end))} vs ${E(stv2Range(win.prevStart, win.prevEnd))}</p>`
+        : (dashDaysBetween(order[0].date, today) + 1 < 14 ? `<p class="stv2-cap">${t('stV2CmpLater', 'Porównanie z poprzednim okresem pojawi się po 2 tygodniach.')}</p>` : ''))   // historia krótsza niż 14 dni; przy dłuższej, ale bez poprzedniego okresu (np. rok), bez podpisu
+    : '';
+  const head = `<div class="stv2-stack">${seg}${tiles}${winCap}</div>`;
 
-      <div class="statsv2-caro" id="statsCaro">
-        <div class="statsv2-caro-track" id="statsCaroTrack">
-        <div class="statsv2-slide">
-          <div class="statsv2-ytd-card statsv2-anim-card" style="--i:2">
-            <p class="statsv2-ytd-eyebrow">${t('stV2VolYtd','Objętość od początku roku')}</p>
-            <div class="statsv2-ytd-num-row">${ph('dash-barbell')}<div><span class="statsv2-ytd-num">${ytd.total.toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></span></div></div>
-            <p class="statsv2-ytd-delta">+ ${ytd.deltaKg.toLocaleString(LANG==='en'?'en-US':'pl-PL')} kg ${ytd.deltaLabel}</p>
-            <div class="statsv2-ytd-chart">
-              <svg viewBox="0 0 ${wW} ${wH+16}" preserveAspectRatio="none">
-                <defs><linearGradient id="${ytdFillId}" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#fff" stop-opacity="0.4"/>
-                  <stop offset="1" stop-color="#fff" stop-opacity="0"/>
-                </linearGradient></defs>
-                ${ytdAreaPath?`<path class="statsv2-comet-seg" style="--p:0" d="${ytdAreaPath}" fill="url(#${ytdFillId})" stroke="none"/>`:''}
-                ${ytdComet.svg}
-              </svg>
-              ${lastPt?`<div class="statsv2-chart-head on-orange" style="left:${(lastPt.x/wW*100).toFixed(1)}%;top:${(lastPt.y/(wH+16)*100).toFixed(1)}%;"></div>`:''}
-            </div>
-            <div class="statsv2-ytd-labels">${ytdLabels.map(l=>`<span>${l}</span>`).join('')}</div>
-          </div>
-        </div>
+  /* ---------- pusty stan ---------- */
+  if(n === 0){
+    const empty = `
+      <div class="pf-card ${A()}"><h3 class="pf-empty-t">${t('stV2EmptyT', 'Tu zobaczysz swój postęp')}</h3><p class="pf-empty-d">${t('stV2EmptyD', 'Wykres, rekordy i rozkład mięśni pojawią się po pierwszych treningach.')}</p><button type="button" class="pf-btn m-press" onclick="navTap('gym')">${t('pfStart', 'ZACZNIJ TRENING')}</button></div>`;
+    const bodyE = stv2BodyHtml(win, ps, n, A);
+    return `<div class="stv2-col">${ringCard}${head}${empty}${bodyE}</div>`;
+  }
 
-        <div class="statsv2-slide">
-          <div class="statsv2-bar-card statsv2-anim-card" style="--i:2">
-            <p class="statsv2-bar-eyebrow">${t('stV2VolMonthly','Objętość - miesiąc po miesiącu')}</p>
-            <p class="statsv2-scard-num">${(window6[5].kg||0).toLocaleString(LANG==='en'?'en-US':'pl-PL')}<small>kg</small></p>
-            <p class="statsv2-scard-delta">${MONTH_NAMES[window6[5].month-1]} · ${(()=>{const d=Math.round(window6[5].kg-window6[4].kg);if(d===0)return t('stV2NoChangeShort','bez zmian');const prev=MONTH_GEN_PL[window6[4].month-1];return `${d>0?'+':'−'}${Math.abs(d).toLocaleString(LANG==='en'?'en-US':'pl-PL')} kg ${t('stV2SinceMonthShort','od')} ${prev}`;})()}</p>
-            <div class="statsv2-bar-row" style="margin-top:12px;">${barsHtml}</div>
-            <div class="statsv2-bar-nav">
-              <span class="ph${leftDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(90deg)" onclick="statsV2MoveBarPage(1)">${PH['caret-down']}</span>
-              <span class="ph${rightDisabled?' disabled':''}" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="statsV2MoveBarPage(-1)">${PH['caret-down']}</span>
-            </div>
-          </div>
-        </div>
+  /* ---------- 3. Karuzela: Siła / Objętość / Treningi i czas (od 3 treningów) ---------- */
+  let caro = '';
+  if(n > 2){
+    const st = stv2Safe(()=> statsV2StrengthSeries(win), { value: 0, delta: null, points: [], exerciseCount: 0 });
+    const strengthNum = st.exerciseCount > 0 ? `${stv2Num(st.value)}<small>kg</small>` : dash;
+    const strengthSub = (st.delta !== null && st.delta > 0) ? t('stV2StrengthSub', `+ ${stv2Num(st.delta)} kg vs ${stv2Dm(win.prevEnd)}`, stv2Num(st.delta), stv2Dm(win.prevEnd)) : '';
+    const slide1 = stv2OCard(t('stV2Strength', 'Siła'), strengthNum, strengthSub, st.points.length ? stv2LineChart(st.points.map(p=> p.value), st.points.map(p=> p.date)) : '', 2);
+    const vs = stv2VolumeSeries(win);
+    const vDelta = d ? d.volumeKg : null;
+    const volSub = (vDelta !== null && vDelta > 0) ? t('stV2VolSub', `+ ${pfVolumeText(vDelta)} vs ${stv2Dm(win.prevEnd)}`, pfVolumeText(vDelta), stv2Dm(win.prevEnd)) : '';
+    const slide2 = stv2OCard(t('stV2Volume', 'Objętość'), `${stv2Num(ps.volumeKg)}<small>kg</small>`, volSub, vs.vals.length ? stv2LineChart(vs.vals, vs.dates) : '', 2);
+    // słupki: tydzień = dni, miesiąc = tygodnie, rok = miesiące, wszystko = miesiące (przy krótkiej historii tygodnie)
+    let bucket = per === 'week' ? 'day' : per === 'month' ? 'week' : 'month';
+    let ss = stv2Safe(()=> statsV2SessionsSeries(win, bucket), { points: [], avgDurationMin: 0 });
+    if(per === 'all' && ss.points.length < 4){ bucket = 'week'; ss = stv2Safe(()=> statsV2SessionsSeries(win, bucket), ss); }
+    const pts = ss.points.slice(-12);
+    const maxN = Math.max(1, ...pts.map(p=> p.workouts));
+    const totMin = pts.reduce((s, p)=> s + p.durationMin, 0);
+    const lab = p=> bucket === 'day' ? DOW_LABELS[(new Date(p.label + 'T00:00:00').getDay() + 6) % 7] : bucket === 'month' ? STV2_MON[+p.label.slice(5, 7) - 1] : (pts.length > 6 ? String(+p.label.slice(8, 10)) : stv2Dm(p.label));
+    const bars = pts.map((p, i)=> `<div class="statsv2-bar-col"><div class="bar statsv2-bar-anim" style="--i:${i};height:${Math.max(4, Math.round(p.workouts / maxN * 78))}px;background:var(--m-orange);opacity:${p.workouts ? (i === pts.length - 1 ? 1 : .6) : .25};"></div><span>${E(lab(p))}</span></div>`).join('');
+    const slide3 = `<div class="stv2-slide"><div class="statsv2-scard stv2-wcard statsv2-anim-card" style="--i:2">
+      <p class="stv2-eyebrow">${t('stV2SessionsTime', 'Treningi i czas')}</p>
+      <p class="stv2-num">${totMin > 0 ? E(stv2Dur(totMin)) : dash}</p>
+      <p class="stv2-osub">${t('stV2SessionsSub', `${ps.workouts} ${plTreningWord(ps.workouts)}${ss.avgDurationMin ? ` · śr. ${ss.avgDurationMin} min` : ''}`, ps.workouts, ss.avgDurationMin)}</p>
+      <div class="statsv2-bar-row stv2-bars">${bars}</div>
+    </div></div>`;
+    caro = `
+      <div class="stv2-caro-wrap ${A()}">
+        <div class="statsv2-caro stv2-caro" id="statsCaro"><div class="statsv2-caro-track stv2-track" id="statsCaroTrack">${slide1}${slide2}${slide3}</div></div>
+        <div class="stv2-caro-dots" id="statsCaroDots">${[0, 1, 2].map(i=> `<button type="button" class="stv2-dotb m-press" aria-label="${E(['Siła', 'Objętość', 'Treningi i czas'][i])}" onclick="statsV2CaroDot(${i})"><i${i === 0 ? ' class="on"' : ''}></i></button>`).join('')}</div>
+      </div>`;
+  }
 
-        ${sessionsSlide}
-        </div>
-      </div>
-      <div class="statsv2-caro-nav">
-        <button type="button" class="statsv2-caro-arw" onclick="statsV2CaroMove(-1)" aria-label="${t('navBack','Wstecz')}"><span class="ph" style="transform:rotate(90deg)">${PH['caret-down']}</span></button>
-        <div class="statsv2-caro-dots" id="statsCaroDots">${[0,1,2].map(i=>`<i${i===0?' class="on"':''}></i>`).join('')}</div>
-        <button type="button" class="statsv2-caro-arw" onclick="statsV2CaroMove(1)" aria-label="${t('stV2Next','Dalej')}"><span class="ph" style="transform:rotate(-90deg)">${PH['caret-down']}</span></button>
-      </div>
-    </div>
-    ${renderStatsV2ExerciseRow(null)}`;
+  /* ---------- 4. Rekordy ---------- */
+  const recs = stv2RecordRows(today);
+  const fmtRec = r=> E(pfRecValue({ kind: r.kind, value: r.value, perSide: r.perSide }));
+  const recRows = recs.map(r=> `<button type="button" class="pf-row stv2-rec m-press" onclick="selectStatsExerciseV2(${jsArg(r.name)})" aria-label="${E(r.name)}, ${fmtRec(r)}">
+        <span class="pf-row-l"><span class="pf-row-n">${E(r.name)}</span><span class="stv2-rec-s">${STV2_ICO.cal}<span>${E(fmtDayMonShort(r.date))}</span>${r.isNew ? `<span class="stv2-new">${t('stV2New', 'NOWY')}</span>` : ''}</span></span>
+        <span class="pf-row-r">${r.sessions >= 3 && r.hist.length >= 2 ? stv2Spark(r.hist.slice(-8), 94, 14) : ''}<span>${fmtRec(r)}</span><span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></span></button>`).join('');
+  const needTrend = n <= 2 && recs.some(r=> !(r.sessions >= 3));
+  const recSec = recs.length ? `
+      <section class="pf-sec ${A()}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('stV2Records', 'Rekordy')}</h2>
+        <button type="button" class="pf-link m-press" onclick="openStatsExPicker()">${t('stV2AllEx', 'Wszystkie ćwiczenia')}<span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></button></div>
+        <div class="pf-card"><div class="pf-rows">${recRows}</div></div>${needTrend ? `<p class="stv2-cap">${t('stV2TrendLater', 'Trend narysuje się od trzeciego treningu danego ćwiczenia.')}</p>` : ''}</section>` : '';
+
+  /* ---------- 5. Bez postępu ---------- */
+  const stalled = n > 2 ? stv2Safe(()=> statsV2Stalled(today), []) : [];
+  const stallVal = s=> s.unit === 'kg' ? `${fmtGymWeight(s.value)} kg` : s.unit === 'reps' ? `${s.value} ${t('repsUnit', 'powt.')}` : fmtDur(s.value);
+  const stallSec = stalled.length ? `
+      <section class="pf-sec ${A()}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('stV2Stalled', 'Bez postępu')}</h2></div>
+        <div class="pf-card pf-card--12"><div class="pf-rows">${stalled.map(s=> `<button type="button" class="pf-row stv2-stall m-press" onclick="selectStatsExerciseV2(${jsArg(s.name)})">
+          <span class="stv2-stall-ic">${STV2_ICO.flat}</span>
+          <span class="pf-row-l"><span class="pf-row-n">${E(s.name)}</span><span class="stv2-stall-line"><span class="stv2-stall-pill">${E(stallVal(s))}</span><span class="stv2-stall-s">${t('stV2StalledFor', `Bez wzrostu od ${s.weeks} ${stv2Weeks(s.weeks)}`, s.weeks)}</span></span></span>
+          <span class="pf-row-r"><span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></span></button>`).join('')}</div></div></section>` : '';
+
+  /* ---------- 6. Rozkład mięśni + baner ---------- */
+  const mus = stv2Safe(()=> statsV2MuscleDistribution(win), { rows: [], least: null });
+  const grpName = k=> { const b = PLAN_EX_GROUPS.find(x=> x.key === k); return b ? (LANG === 'en' ? b.en : b.pl) : k; };
+  const maxSets = Math.max(1, ...mus.rows.map(r=> r.sets));
+  const musSec = mus.rows.length ? `
+      <section class="pf-sec ${A()}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('stV2Muscles', 'Rozkład mięśni')}</h2><span class="pf-pill">${E(stv2PeriodPill(win))}</span></div>
+        <div class="pf-card"><div class="stv2-mrows">${mus.rows.map((r, i)=> `<div class="stv2-mrow"><span class="stv2-mn">${E(grpName(r.group))}</span>
+          <span class="stv2-mtrack"><i class="stv2-mfill stv2-grow" style="--r:${(r.sets / maxSets).toFixed(3)};--i:${i}"></i></span>
+          <span class="stv2-mv">${r.sets}</span><span class="stv2-md">${stv2Delta(r.delta, stv2Num, 'neutral')}</span></div>`).join('')}</div></div>
+        ${(mus.least && mus.rows.length >= 2 && n > 2) ? `<div class="stv2-banner"><span class="stv2-banner-ic">${STV2_ICO.least}</span><div><p class="stv2-banner-t">${t('stV2Least', 'Najmniej trenowane')}</p><p class="stv2-banner-v">${t('stV2LeastVal', `${grpName(mus.least.group)}: ${mus.least.sets} ${plPlural(mus.least.sets, 'seria', 'serie', 'serii')}`, grpName(mus.least.group), mus.least.sets)}</p></div></div>` : ''}</section>` : '';
+
+  /* ---------- 7. Ciało + Kardio + Udostępnij ---------- */
+  const bodySec = stv2BodyHtml(win, ps, n, A);
+  const cs = stv2CardioStats(win);
+  const cH = Math.floor(cs.sec / 3600), cM = Math.floor((cs.sec % 3600) / 60);
+  const cTime = cs.sec ? (cH ? `${cH}:${String(cM).padStart(2, '0')}<small>h</small>` : `${cM}<small>min</small>`) : dash;
+  const cardioLink = typeof statsV2OpenCardio === 'function' ? `<button type="button" class="pf-link m-press" onclick="statsV2OpenCardio()">${t('stV2Details', 'Szczegóły')}<span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></button>` : '';
+  const cardioSec = cs.ever ? `
+      <section class="pf-sec ${A()}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('stV2CardioT', 'Kardio')}</h2>${cardioLink}</div>
+        <div class="stv2-tiles stv2-tiles--c">
+          <div class="pf-stat"><span class="pf-stat-v">${cTime}</span><span class="pf-stat-l">${t('stV2CTime', 'Czas')}</span></div><i class="pf-vsep" aria-hidden="true"></i>
+          <div class="pf-stat"><span class="pf-stat-v">${cs.distM ? fmtNum1(cs.distM / 1000) + '<small>km</small>' : dash}</span><span class="pf-stat-l">${t('stV2CDist', 'Dystans')}</span></div><i class="pf-vsep" aria-hidden="true"></i>
+          <div class="pf-stat"><span class="pf-stat-v">${cs.sessions}</span><span class="pf-stat-l">${t('stV2CSessions', 'Sesje')}</span></div>
+        </div></section>` : '';
+  const shareBtn = typeof statsV2OpenShare === 'function' ? `<button type="button" class="m2-btn m-press ${A()}" onclick="statsV2OpenShare()">${t('stV2ShareBtn', 'Udostępnij postępy')}</button>` : '';
+
+  return `<div class="stv2-col">${ringCard}${head}${caro}${recSec}${stallSec}${musSec}${bodySec}${cardioSec}${shareBtn}</div>`;
+}
+
+// CIAŁO: Waga + Kalorie (delty neutralne: tu wzrost ani spadek nie jest „dobry”); równe szerokości, odstęp --m-gap-card
+function stv2BodyHtml(win, ps, n, A){
+  const E = escHtml;
+  const wl = (Array.isArray(weightLog) ? weightLog : []).filter(e=> e && dashValidIso(e.date) && e.date <= win.end && isFinite(+e.kg)).slice().sort((a, b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  const kc = [];
+  statsV2Order().forEach(w=>{ if(w.date < win.start || w.date > win.end) return; const k = stv2Safe(()=> workoutKcalShown(w), null); if(typeof k === 'number' && isFinite(k) && k > 0) kc.push(k); });
+  if(!wl.length && !kc.length) return '';
+  const inLbl = E(stv2InLabel(win.period));
+  let wTile;
+  if(wl.length){
+    const cur = wl[wl.length - 1];
+    const inWin = wl.filter(e=> e.date >= win.start);
+    const before = wl.filter(e=> e.date < win.start);
+    const base = before.length ? before[before.length - 1] : inWin[0];
+    const dlt = (base && base !== cur) ? Math.round((cur.kg - base.kg) * 10) / 10 : null;
+    const sp = (inWin.length >= 2 ? inWin : wl.slice(-10)).map(e=> +e.kg);
+    wTile = `<span class="pf-stat-l">${t('stV2Weight', 'Waga')}</span>
+      <span class="pf-stat-v stv2-bv">${E(fmtKg(cur.kg))}<small>kg</small></span>
+      <span class="stv2-bt-d">${dlt !== null ? `${stv2Delta(dlt, v=> fmtKg(v) + ' kg', 'neutral')}<span class="stv2-vs">${inLbl}</span>` : ''}</span>
+      ${stv2Spark(sp, 152, 19)}`;
+  } else {
+    wTile = `<span class="pf-stat-l">${t('stV2Weight', 'Waga')}</span><span class="pf-stat-v stv2-bv">–</span><span class="stv2-bt-d"><span class="stv2-vs">${t('stV2WeightAdd', 'Dodaj pomiar')}</span></span>`;
+  }
+  const open = typeof statsV2OpenWeight === 'function' ? 'statsV2OpenWeight()' : 'openWeightListSheet()';
+  let kTile;
+  if(kc.length){
+    const avg = Math.round(kc.reduce((s, x)=> s + x, 0) / kc.length);
+    const pk = ps.prev && ps.prev.workouts > 0 && ps.prev.kcal > 0 ? Math.round(ps.prev.kcal / ps.prev.workouts) : null;
+    kTile = `<span class="pf-stat-l">${t('stV2Kcal', 'Kalorie')}</span>
+      <span class="pf-stat-v stv2-bv">~${stv2Num(avg)}<small>kcal</small></span>
+      <span class="stv2-bt-d">${pk !== null ? `${stv2Delta(avg - pk, v=> stv2Num(v) + ' kcal', 'neutral')}` : ''}<span class="stv2-vs">${t('stV2KcalAvg', 'śr. na trening')}</span></span>
+      ${stv2Spark(kc.slice(-12), 152, 19)}`;
+  } else {
+    kTile = `<span class="pf-stat-l">${t('stV2Kcal', 'Kalorie')}</span><span class="pf-stat-v stv2-bv">–</span><span class="stv2-bt-d"></span>`;
+  }
+  return `
+      <section class="pf-sec ${A()}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('stV2Body', 'Ciało')}</h2></div>
+        <div class="stv2-body"><button type="button" class="stv2-bt m-press" onclick="${open}">${wTile}</button><div class="stv2-bt">${kTile}</div></div></section>`;
+}
+function statsV2SetPeriod(p){
+  if(STATSV2_PERIODS.indexOf(p) < 0 || p === statsV2Period) return;
+  statsV2Period = p;
+  const y = window.scrollY || 0;
+  renderStatsV2(false);
+  window.scrollTo(0, y);
 }
 
 function renderStatsV2Detail(name){
@@ -22061,44 +22361,6 @@ function statsV2SetupDrawReveal(body){
    drawLines — arm the line/ring scroll draw-in; defaults to `animate` but
    can be requested on its own, e.g. opening an exercise's detail (no card
    re-slide, but its progress line should still draw). */
-// Cardio card on the Stats screen: last 7 days of time, distance and sessions (cardio only; never strength volume, no calories — those live in a single workout's summary)
-function statsV2CardioHtml(){
-  const cut = new Date(); cut.setDate(cut.getDate() - 7);
-  const cs = dateStr(cut);
-  let sec = 0, distM = 0, sessions = 0;
-  const recent = [], distNames = new Set();
-  workouts.slice().sort((a,b)=> b.date.localeCompare(a.date)).forEach(w=>{
-    let had = false;
-    w.exercises.forEach(ex=>{
-      if(!isCardioName(ex.name)) return;
-      exSetsView(ex).forEach(x=>{
-        if(!(x.durationSec > 0)) return;
-        had = true;
-        if(w.date >= cs){ sec += x.durationSec; if(x.distanceM > 0){ distM += x.distanceM; distNames.add(ex.name); } }
-        if(recent.length < 3 && !recent.some(r=> r.name === ex.name)) recent.push({ name: ex.name, line: cardioSetLine(x, ex.name), icon: (BUILTIN_EXERCISES_BY_NAME.get(ex.name) || {}).icon });
-      });
-    });
-    if(had && w.date >= cs) sessions++;
-  });
-  if(!recent.length) return '';
-  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
-  const timeTxt = sec ? (h ? `${h}:${String(m).padStart(2,'0')}<small>${t('stV2CardioHTotal','h łącznie')}</small>` : `${m}<small>${t('stV2CardioMinTotal','min łącznie')}</small>`) : '—';
-  const names = [...distNames].slice(0, 2).join(', ');
-  return `
-      <div class="statsv2-scard statsv2-anim-card" style="--i:1">
-        <p class="statsv2-scard-eyebrow">${t('stV2Cardio7','Kardio · 7 dni')}</p>
-        <p class="statsv2-scard-num">${timeTxt}</p>
-        <p class="statsv2-scard-delta">${t('stV2CardioTimeSub','łączny czas kardio')}</p>
-      </div>
-      <div class="statsv2-krow statsv2-anim-card" style="--i:1">
-        <div class="statsv2-kcard"><p class="statsv2-kcard-eyebrow">${t('stV2Dist7','Dystans · 7 dni')}</p><div class="statsv2-kcard-num-row">${ph('chart-line-up')}<span class="statsv2-kcard-num">${distM ? fmtNum1(distM / 1000) : '—'}<small>km</small></span></div><p class="statsv2-kcard-delta">${names ? escHtml(names) : t('stV2NoDist','bez wpisanego dystansu')}</p></div>
-        <div class="statsv2-kcard"><p class="statsv2-kcard-eyebrow">${t('stV2Sessions7','Sesje · 7 dni')}</p><div class="statsv2-kcard-num-row">${ph('stack')}<span class="statsv2-kcard-num">${sessions}</span></div><p class="statsv2-kcard-delta">${t('stV2SessionsSub','z ćwiczeniami kardio')}</p></div>
-      </div>
-      <div class="statsv2-scard statsv2-anim-card" style="--i:1">
-        <p class="statsv2-scard-eyebrow">${t('stV2Recently','Ostatnio')}</p>
-        ${recent.map((r,i)=>`<div class="histv2-ex-item"${i===0?' style="border-top:none"':''}><span class="histv2-ex-ico">${r.icon ? `<img src="${iconPngUrl(r.icon)}" alt="">` : ''}</span><div class="histv2-ex-meta"><p class="histv2-ex-name">${escHtml(r.name)}</p><p class="histv2-ex-sets">${escHtml(r.line)}</p></div></div>`).join('')}
-      </div>`;
-}
 function renderStatsV2(animate, drawLines){
   return recGuardedRender('stats', ()=> renderStatsV2Core(animate, drawLines), ()=>{
     const body = document.getElementById('statsV2Body');
@@ -22110,7 +22372,7 @@ function renderStatsV2Core(animate, drawLines){
   const body = document.getElementById('statsV2Body');
   statsV2TeardownReveal();
   body.innerHTML = selectedStatsExerciseV2 ? renderStatsV2Detail(selectedStatsExerciseV2) : renderStatsV2Overview();
-  if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile,.statsv2-bar-anim,.statsv2-chart-dot,.statsv2-pr-tag,.statsv2-ring-seg,.statsv2-ring-head,.statsv2-comet-seg,.statsv2-chart-head').forEach(el=>{
+  if(!animate) body.querySelectorAll('.statsv2-anim-card,.statsv2-anim-tile,.statsv2-bar-anim,.statsv2-chart-dot,.statsv2-pr-tag,.statsv2-ring-seg,.statsv2-ring-head,.statsv2-comet-seg,.statsv2-chart-head,.stv2-grow').forEach(el=>{
     el.style.animation = 'none';
   });
   if(drawLines) statsV2SetupDrawReveal(body);
@@ -22122,6 +22384,8 @@ function renderStatsV2Core(animate, drawLines){
   const backLabel = selectedStatsExerciseV2 ? t('statsV2BackToOverview','Statystyki główne') : t('navBack','Wstecz');
   backBtn.title = backLabel;
   backBtn.setAttribute('aria-label', backLabel);
+  const custBtn = document.getElementById('statsV2CustBtn');   // ikona Dostosuj: tylko gdy istnieje arkusz (etap D)
+  if(custBtn){ custBtn.hidden = typeof statsV2OpenCustomize !== 'function' || !!selectedStatsExerciseV2; const cl = t('stV2CustAria', 'Dostosuj ekran'); custBtn.title = cl; custBtn.setAttribute('aria-label', cl); }
   // Maciej: "po kliknieciu w cwiczenei skacze dziwnie - niech aktywne
   // cwiczenie jest zawsze jako srodkowy kafelek". body.innerHTML above
   // destroys and recreates .statsv2-ex-row on every single render (range-
@@ -22252,6 +22516,15 @@ function statsV2CaroSyncDots(){
   if(arws[1]) arws[1].classList.toggle('disabled', statsV2CaroPage>=dots.length-1);
 }
 let statsV2CaroBusy = false;
+// przegląd v3 (Figma 01): slajd = szerokość kolumny − 39 px, przerwa 12 px, wystaje 27 px następnego; ostatni slajd dosunięty do prawej krawędzi
+const STATSV2_CARO_GAP = 12, STATSV2_CARO_PEEK = 27;
+function statsV2CaroOffset(page, n, caro){
+  const W = caro.clientWidth || 1, pitch = W - STATSV2_CARO_PEEK;
+  if(page <= 0 || n <= 1) return 0;
+  if(page >= n - 1) return -((n - 1) * pitch - (STATSV2_CARO_GAP + STATSV2_CARO_PEEK));
+  return -page * pitch;
+}
+function statsV2CaroDot(i){ if(statsV2CaroBusy) return; statsV2CaroGoTo(i); }
 const STATSV2_CARO_REDUCE = ()=> !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 function statsV2CaroTrackX(track){
   const tr = track && getComputedStyle(track).transform;
@@ -22273,8 +22546,7 @@ function statsV2CaroGoTo(page, opts){
   if(!caro || !track) return;
   const n = track.children.length;
   page = Math.max(0, Math.min(n - 1, page));
-  const w = caro.clientWidth || 1;
-  const toPx = -page * w;
+  const toPx = statsV2CaroOffset(page, n, caro);
   const fromPx = statsV2CaroTrackX(track);
   const changed = page !== statsV2CaroPage;
   statsV2CaroPage = page;
@@ -22339,7 +22611,7 @@ function statsV2CaroResize(){
   const track = document.getElementById('statsCaroTrack');
   if(!caro || !track) return;
   if(track.getAnimations) track.getAnimations().forEach(a=>a.cancel());
-  track.style.transform = `translateX(${-statsV2CaroPage * caro.clientWidth}px)`;
+  track.style.transform = `translateX(${statsV2CaroOffset(statsV2CaroPage, track.children.length, caro)}px)`;
 }
 // Two halves: PRIME sets a slide's chart to its hidden pre-entrance state,
 // PLAY kicks the entrance. On a carousel swipe the incoming slide is
@@ -22350,7 +22622,7 @@ function statsV2CaroResize(){
 function statsV2SlidePrime(slide){
   if(!slide) return;
   if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  slide.querySelectorAll('.statsv2-ytd-chart path:not(.statsv2-comet-seg), .statsv2-scard-chart path').forEach(path=>{
+  slide.querySelectorAll('.statsv2-ytd-chart path:not(.statsv2-comet-seg), .stv2-chart path:not(.statsv2-comet-seg), .statsv2-scard-chart path').forEach(path=>{
     let len; try{ len = path.getTotalLength(); }catch(e){ return; }
     if(!len) return;
     path.style.transition = 'none';
@@ -22378,7 +22650,7 @@ function statsV2AnimateSlide(slide){
   if(!slide) return;
   if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   statsV2SlidePrime(slide);              // idempotent — no-op if already primed by the swipe
-  slide.querySelectorAll('.statsv2-ytd-chart path:not(.statsv2-comet-seg), .statsv2-scard-chart path').forEach(path=>{
+  slide.querySelectorAll('.statsv2-ytd-chart path:not(.statsv2-comet-seg), .stv2-chart path:not(.statsv2-comet-seg), .statsv2-scard-chart path').forEach(path=>{
     let len; try{ len = path.getTotalLength(); }catch(e){ return; }
     if(!len) return;
     path.getBoundingClientRect();
@@ -22419,7 +22691,7 @@ function statsV2InitCarousel(animate){
   const n = track.children.length;
   statsV2CaroPage = Math.max(0, Math.min(n - 1, statsV2CaroPage));
   statsV2CaroBusy = false;
-  track.style.transform = `translateX(${-statsV2CaroPage * (caro.clientWidth || 1)}px)`;
+  track.style.transform = `translateX(${statsV2CaroOffset(statsV2CaroPage, n, caro)}px)`;
   statsV2CaroSyncDots();
   window.removeEventListener('resize', statsV2CaroResize);
   window.addEventListener('resize', statsV2CaroResize);
@@ -22444,7 +22716,7 @@ function statsV2InitCarousel(animate){
     }
     if(!dragging) return;
     prevX = lastX; prevT = lastT; lastX = p.clientX; lastT = e.timeStamp;
-    const w = caro.clientWidth || 1, min = -(n - 1) * w;
+    const min = statsV2CaroOffset(n - 1, n, caro);
     let t = base + dx;
     if(t > 0) t *= 0.3;                                  // rubber-band before the first page
     else if(t < min) t = min + (t - min) * 0.3;          // and past the last
