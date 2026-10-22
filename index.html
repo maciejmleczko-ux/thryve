@@ -21128,6 +21128,324 @@ function statsV2ExerciseSessions(name){
     .sort((a,b)=> a.date.localeCompare(b.date));
   return rows.reverse();
 }
+/* ============================================================
+   POSTĘPY v3, ETAP A: czyste obliczenia (bez UI, bez zapisu, bez nowych kluczy)
+   Dane: silnik rekordów (recIndex: chronologiczna, oczyszczona lista treningów + cache), plany (planForDate),
+   biegi (`runs`). Zasady: kardio nie wchodzi do objętości ani rekordów siłowych (decyzje S12/S13); rekord = najcięższy
+   ciężar / powtórzenia (masa ciała) / sekundy (czas), NIE prognoza maxa. Każda funkcja jest odporna na zepsute dane
+   (zły wpis jest pomijany, wyjątek nie wychodzi na zewnątrz) i czyta historię jednym przebiegiem po cache'u indeksu.
+   Daty: RRRR-MM-DD. `todayIso` opcjonalne (testy); zła wartość = prawdziwe dziś.
+   ============================================================ */
+const STATSV2_PERIODS = ['week', 'month', 'year', 'all'];
+function statsV2TodayIso(iso){ return dashValidIso(iso) ? iso : todayStr(); }
+// chronologiczna, oczyszczona lista treningów (ten sam cache co silnik rekordów); zepsuta historia = pusta lista
+function statsV2Order(){ try{ return recIndex().order || []; }catch(e){ return []; } }
+function statsV2NameFlags(){   // cache nazw ćwiczeń na czas jednego wywołania: czasowe / masa ciała (getExerciseLibrary().find jest liniowe)
+  const memo = new Map();
+  return name=>{
+    let f = memo.get(name);
+    if(!f){ let time = false, bw = false; try{ time = statsV2IsTime(name); bw = statsV2IsBodyweight(name); }catch(e){} f = { time, bw }; memo.set(name, f); }
+    return f;
+  };
+}
+// serie ćwiczenia liczone jako „seria”: z ciężarem lub powtórzeniami lub czasem (jak zapis w saveWorkout)
+function statsV2CountSets(ex){
+  let n = 0;
+  recSetsOf(ex).forEach(s=>{ if(recNum(s.weight) > 0 || recNum(s.reps) > 0 || recNum(s.durationSec) > 0) n++; });
+  return n;
+}
+function statsV2IsStrengthEx(ex){ return !!ex && typeof ex === 'object' && typeof ex.name === 'string' && !!ex.name && ex.type !== 'checklist' && !isCardioName(ex.name) && !(typeof BOOKEND_EX_NAMES !== 'undefined' && BOOKEND_EX_NAMES.has(ex.name)); }
+
+/* 1. Okno okresu. Bieżące: od początku okresu do dziś włącznie (tydzień ISO pon–nd, miesiąc i rok kalendarzowy; 'all' od
+   pierwszego treningu). Poprzednie: ten sam zakres dni w poprzednim okresie (1–13 paź vs 1–13 wrz; przycięte do długości
+   poprzedniego okresu). hasPrev=false, gdy: 'all', historia < 14 dni (decyzja S3: delty ukryte) albo poprzednie okno
+   zaczyna się przed pierwszym treningiem (nie ma z czym porównać). prevStart/prevEnd są podane także przy hasPrev=false. */
+function statsV2Window(period, todayIso){
+  const today = statsV2TodayIso(todayIso);
+  const p = STATSV2_PERIODS.indexOf(period) >= 0 ? period : 'week';
+  const order = statsV2Order();
+  const first = order.length ? order[0].date : null;
+  let start, prevStart = null, prevEnd = null, prevLimit = null;
+  if(p === 'week'){
+    start = dashWeekStartIso(today); prevStart = dashAddDays(start, -7); prevLimit = dashAddDays(start, -1);
+  } else if(p === 'month'){
+    start = today.slice(0, 8) + '01';
+    prevLimit = dashAddDays(start, -1); prevStart = prevLimit.slice(0, 8) + '01';
+  } else if(p === 'year'){
+    start = today.slice(0, 4) + '-01-01';
+    prevLimit = dashAddDays(start, -1); prevStart = prevLimit.slice(0, 4) + '-01-01';
+  } else {
+    start = first && first <= today ? first : today;
+  }
+  const days = Math.max(1, dashDaysBetween(start, today) + 1);
+  if(prevStart){ prevEnd = dashAddDays(prevStart, days - 1); if(prevEnd > prevLimit) prevEnd = prevLimit; }
+  const span = first ? dashDaysBetween(first, today) + 1 : 0;
+  const hasPrev = p !== 'all' && !!prevStart && span >= 14 && !!first && first <= prevEnd;
+  return { period: p, start, end: today, prevStart, prevEnd, days, hasPrev };
+}
+
+// sumy jednego okna dat [from..to] z oczyszczonej listy treningów; objętość = Σ ciężar×powt. (tylko serie z ciężarem, bez kardio)
+function statsV2Agg(order, from, to){
+  const a = { workouts: 0, volumeKg: 0, sets: 0, durationMin: 0, kcal: 0 };
+  if(!from || !to) return a;
+  order.forEach(w=>{
+    if(w.date < from || w.date > to) return;
+    a.workouts++;
+    try{
+      w.exercises.forEach(ex=>{
+        if(!statsV2IsStrengthEx(ex)) return;
+        a.sets += statsV2CountSets(ex);
+        recSetsOf(ex).forEach(s=>{ const wt = recNum(s.weight), rp = recNum(s.reps); if(wt > 0 && rp > 0) a.volumeKg += wt * rp; });
+      });
+    }catch(e){}
+    const d = recNum(w.durationMin); if(d > 0) a.durationMin += d;
+    try{ const k = workoutKcalShown(w); if(typeof k === 'number' && isFinite(k) && k > 0) a.kcal += k; }catch(e){}
+  });
+  a.volumeKg = Math.round(a.volumeKg); a.durationMin = Math.round(a.durationMin); a.kcal = Math.round(a.kcal);
+  return a;
+}
+/* 2. Sumy okresu + poprzedniego okna + delty (bieżące − poprzednie). Treningi = zapisane treningi siłowni (biegi mają
+   własną kartę Kardio). prev/delta = null, gdy hasPrev=false. */
+function statsV2PeriodStats(win){
+  const order = statsV2Order();
+  const w = win && typeof win === 'object' ? win : statsV2Window('week');
+  const cur = statsV2Agg(order, w.start, w.end);
+  const prev = w.hasPrev ? statsV2Agg(order, w.prevStart, w.prevEnd) : null;
+  const delta = prev ? { workouts: cur.workouts - prev.workouts, volumeKg: cur.volumeKg - prev.volumeKg, sets: cur.sets - prev.sets,
+                         durationMin: cur.durationMin - prev.durationMin, kcal: cur.kcal - prev.kcal } : null;
+  return { ...cur, prev, delta };
+}
+
+/* 3. Nowe rekordy w oknie: z recordTimeline() zdarzenia ciężaru / powtórzeń (masa ciała) / czasu, po jednym (najnowszym)
+   na ćwiczenie; pierwszy wynik ćwiczenia i remis nie są rekordem (tak liczy silnik). isNew = rekord z ostatnich 7 dni
+   (dziś i 6 dni wstecz), liczone w locie. Najnowsze na górze. */
+function statsV2NewRecords(win, todayIso){
+  const out = { count: 0, items: [] };
+  try{
+    const today = statsV2TodayIso(todayIso || (win && win.end));
+    const w = win && typeof win === 'object' ? win : statsV2Window('week', today);
+    const unitOf = { weight: 'kg', reps: 'reps', time: 's' };
+    const best = new Map();
+    recordTimeline().forEach(ev=>{
+      if(!ev || !unitOf[ev.kind] || typeof ev.name !== 'string' || !ev.name || isCardioName(ev.name)) return;
+      if(ev.date < w.start || ev.date > w.end) return;
+      const cur = best.get(ev.name);
+      if(!cur || ev.pos >= cur.pos) best.set(ev.name, ev);   // timeline jest chronologiczny: późniejszy wygrywa
+    });
+    best.forEach(ev=>{
+      const age = dashDaysBetween(ev.date, today);
+      out.items.push({ name: ev.name, unit: unitOf[ev.kind], value: ev.value, date: ev.date, workoutId: ev.workoutId, isNew: age >= 0 && age <= 6 });
+    });
+    out.items.sort((a, b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : a.name < b.name ? -1 : 1);
+    out.count = out.items.length;
+  }catch(e){ out.count = 0; out.items = []; }
+  return out;
+}
+
+// jednorazowy (na indeks) rozbiór treningów: dla każdego ćwiczenia siłowego wynik sesji z recAnalyze + tag wersji periodyzacji
+var statsV2RowsCache = null;
+function statsV2Rows(){
+  let idx = null; try{ idx = recIndex(); }catch(e){ return []; }
+  if(statsV2RowsCache && statsV2RowsCache.idx === idx) return statsV2RowsCache.rows;
+  const rows = [];
+  (idx.order || []).forEach(w=>{
+    try{
+      const an = recAnalyze(w), ver = new Map();
+      w.exercises.forEach(ex=>{ if(ex && typeof ex.name === 'string' && typeof ex.version === 'string' && ex.version && !ver.has(ex.name)) ver.set(ex.name, ex.version); });
+      rows.push({ date: w.date, an, ver });
+    }catch(e){}
+  });
+  statsV2RowsCache = { idx, rows };
+  return rows;
+}
+/* 4. „Bez postępu” (jedna funkcja także dla przyszłej reguły zastoju z roadmapy Mekkio+). Ćwiczenie jest w zastoju, gdy:
+   rekord (najcięższy ciężar; masa ciała: powtórzenia; czas: sekundy) nie urósł od >= 28 dni, w ostatnich 28 dniach były
+   >= 2 sesje po dacie rekordu, a ostatnia sesja jest nie starsza niż 14 dni (dłuższa przerwa to nie zastój). Kardio pominięte.
+   Periodyzacja: wynik porównujemy tylko z sesjami z tym samym tagiem wersji (`version` zapisane w ćwiczeniu treningu co
+   ostatnia sesja; brak tagu = sesje bez tagu). OGRANICZENIE: wewnątrz jednej wersji nie ma osobnego rozróżnienia
+   poziomów obciążenia, a trening sprzed wprowadzenia tagów (4.5x) liczy się jako „bez tagu”. Max 5, malejąco po `weeks`. */
+function statsV2Stalled(todayIso){
+  const today = statsV2TodayIso(todayIso);
+  const flags = statsV2NameFlags();
+  const byName = new Map();   // nazwa -> [{date, ver, w, r, t}]
+  try{
+    statsV2Rows().forEach(row=>{
+      if(row.date > today) return;
+      row.an.per.forEach((p, name)=>{
+        const arr = byName.get(name) || []; if(!byName.has(name)) byName.set(name, arr);
+        arr.push({ date: row.date, ver: row.ver.get(name) || null, w: p.topW, r: p.bw ? p.topReps : 0, t: p.topTime });
+      });
+    });
+  }catch(e){ return []; }
+  const out = [];
+  byName.forEach((all, name)=>{
+    try{
+      if(isCardioName(name)) return;
+      const lastVer = all[all.length - 1].ver;
+      const ses = all.filter(s=> s.ver === lastVer);
+      let unit = null, key = null;
+      if(flags(name).time && ses.some(s=> s.t > 0)){ unit = 's'; key = 't'; }
+      else if(ses.some(s=> s.w > 0)){ unit = 'kg'; key = 'w'; }
+      else if(ses.some(s=> s.r > 0)){ unit = 'reps'; key = 'r'; }
+      if(!unit) return;
+      let best = 0, bestDate = null;
+      ses.forEach(s=>{ if(s[key] > best){ best = s[key]; bestDate = s.date; } });   // data pierwszego osiągnięcia obecnego rekordu (remis nie odnawia)
+      if(!bestDate) return;
+      const since = dashDaysBetween(bestDate, today);
+      if(since < 28) return;
+      const last = ses[ses.length - 1].date;
+      if(dashDaysBetween(last, today) > 14) return;
+      const recent = ses.filter(s=> s.date > bestDate && dashDaysBetween(s.date, today) <= 28).length;
+      if(recent < 2) return;
+      out.push({ name, unit, value: best, weeks: Math.floor(since / 7) });
+    }catch(e){}
+  });
+  out.sort((a, b)=> b.weeks - a.weeks || (a.name < b.name ? -1 : 1));
+  return out.slice(0, 5);
+}
+
+/* 5. Historia celu tygodniowego: n tygodni kończąc na bieżącym (ostatni element current:true). done = dni z treningiem lub
+   biegiem (jak pierścień i dashStreak); required = dni planu z danego tygodnia (planForDate; nieznany plan tygodnia =
+   obecny plan, jak w dashStreak). ok = done >= required. `counted` (dodatkowe pole): tydzień wchodzi do liczników, gdy jest
+   pełny (nie bieżący), ma plan (required > 0) i nie jest sprzed pierwszego treningu; dla required = 0 ok = false.
+   metCount/completedCount liczone tylko z tygodni `counted`. */
+function statsV2WeeklyGoalHistory(n, todayIso){
+  const cnt = Math.max(1, Math.min(104, parseInt(n, 10) || 12));
+  const today = statsV2TodayIso(todayIso);
+  const res = { weeks: [], metCount: 0, completedCount: 0 };
+  try{
+    const days = new Map();   // poniedziałek -> Set dni z treningiem (siłownia + bieg)
+    let earliest = null;
+    statsV2Order().concat((Array.isArray(runs) ? runs : []).filter(r=> r && dashValidIso(r.date))).forEach(x=>{
+      const ws = dashWeekStartIso(x.date);
+      if(!days.has(ws)) days.set(ws, new Set());
+      days.get(ws).add(x.date);
+      if(!earliest || x.date < earliest) earliest = x.date;
+    });
+    const cur = starredPlanId ? trainingPlans.find(p=> p.id === starredPlanId) : null;
+    const curReq = cur ? planActiveDays(cur).length : 0;
+    // indeks planów tygodni z oczyszczonej listy (planHistoryIndex() czyta surowe `workouts` i wywala się na złej dacie)
+    const idx = new Map();
+    statsV2Order().forEach(w=>{ const ws = dashWeekStartIso(w.date); if(!idx.has(ws)) idx.set(ws, []); idx.get(ws).push({ date: w.date, planId: w.planId }); });
+    const curStart = dashWeekStartIso(today);
+    const firstWs = earliest ? dashWeekStartIso(earliest) : null;
+    for(let i = cnt - 1; i >= 0; i--){
+      const ws = dashAddDays(curStart, -7 * i), current = i === 0;
+      let required = curReq;
+      if(!current){ const p = planForDate(ws, idx); const k = p ? planActiveDays(p).length : 0; if(k > 0) required = k; }
+      const done = days.has(ws) ? days.get(ws).size : 0;
+      const ok = required > 0 && done >= required;
+      const counted = !current && required > 0 && !!firstWs && ws >= firstWs;
+      res.weeks.push({ ws, done, required, ok, current, counted });
+      if(counted){ res.completedCount++; if(ok) res.metCount++; }
+    }
+  }catch(e){ res.weeks = []; res.metCount = 0; res.completedCount = 0; }
+  return res;
+}
+
+/* 6. SIŁA = suma prognoz maxa (Epley, serie do STATSV2_E1RM_REP_CAP powt.) ze WSZYSTKICH ćwiczeń siłowych z ciężarem
+   (bez masy ciała, czasowych i kardio): najlepsza prognoza każdego ćwiczenia do danego dnia, zsumowana. Punkt na każdy dzień
+   treningowy w oknie. prevValue = suma na koniec poprzedniego okna (null, gdy !hasPrev). Prognoza dla ćwiczeń w obrębie
+   periodyzacji nie jest rozdzielana na wersje (to prognoza maxa, nie rekord). */
+function statsV2StrengthSeries(win){
+  const out = { value: 0, prevValue: null, delta: null, points: [], exerciseCount: 0 };
+  try{
+    const w = win && typeof win === 'object' ? win : statsV2Window('week');
+    const flags = statsV2NameFlags();
+    const best = new Map(), eligible = new Map();
+    let sum = 0, prevSum = null;
+    const rows = statsV2Rows();
+    const el = name=>{ let v = eligible.get(name); if(v === undefined){ v = !isCardioName(name) && !flags(name).bw && !flags(name).time; eligible.set(name, v); } return v; };
+    for(let i = 0; i < rows.length; i++){
+      const r = rows[i];
+      if(r.date > w.end) break;
+      if(w.hasPrev && prevSum === null && r.date > w.prevEnd) prevSum = sum;
+      r.an.per.forEach((p, name)=>{
+        if(!p.e1 || !(p.e1.value > 0) || !el(name)) return;
+        const b = best.get(name) || 0;
+        if(p.e1.value > b){ best.set(name, p.e1.value); sum += p.e1.value - b; }
+      });
+      if(r.date >= w.start){
+        const v = Math.round(sum * 10) / 10, last = out.points[out.points.length - 1];
+        if(last && last.date === r.date) last.value = v; else out.points.push({ date: r.date, value: v });
+      }
+    }
+    if(w.hasPrev && prevSum === null) prevSum = sum;   // wszystkie treningi są w poprzednim oknie lub wcześniej
+    out.value = Math.round(sum * 10) / 10;
+    out.exerciseCount = best.size;
+    if(w.hasPrev){ out.prevValue = Math.round(prevSum * 10) / 10; out.delta = Math.round((out.value - out.prevValue) * 10) / 10; }
+  }catch(e){}
+  return out;
+}
+
+/* 7. Rozkład mięśni: serie w oknie wg grupy (muscleGroupBucket po polu `group` ćwiczenia treningu, a gdy go brak — z
+   biblioteki; bez grupy = klucz 'Wlasne'). `group` w wierszu to KLUCZ z PLAN_EX_GROUPS (Nogi, Klatka, Plecy, Biceps, Triceps,
+   Barki, Brzuch, Wlasne); nazwy PL/EN bierze UI z PLAN_EX_GROUPS. Bez kardio, rozgrzewki i rozciągania. prevSets/delta = null,
+   gdy !hasPrev. `least` = grupa z najmniejszą liczbą serii wśród grup z >= 1 serią w poprzednim lub bieżącym oknie
+   (bez 'Wlasne'; remis = pierwsza wg kolejności PLAN_EX_GROUPS). */
+function statsV2MuscleDistribution(win){
+  const out = { rows: [], least: null };
+  try{
+    const w = win && typeof win === 'object' ? win : statsV2Window('week');
+    const lib = new Map(); getExerciseLibrary().forEach(e=>{ if(e && e.name && !lib.has(e.name)) lib.set(e.name, e.group); });
+    const cur = new Map(), prev = new Map();
+    statsV2Order().forEach(wo=>{
+      const inCur = wo.date >= w.start && wo.date <= w.end;
+      const inPrev = w.hasPrev && wo.date >= w.prevStart && wo.date <= w.prevEnd;
+      if(!inCur && !inPrev) return;
+      wo.exercises.forEach(ex=>{
+        if(!statsV2IsStrengthEx(ex)) return;
+        const n = statsV2CountSets(ex); if(!n) return;
+        const g = (typeof ex.group === 'string' && ex.group) ? ex.group : (lib.get(ex.name) || '');
+        const b = muscleGroupBucket(g);
+        if(b.strength === false) return;
+        const m = inCur ? cur : prev;
+        m.set(b.key, (m.get(b.key) || 0) + n);
+      });
+    });
+    const keys = new Set([...cur.keys(), ...prev.keys()]);
+    const orderOf = k=> PLAN_EX_GROUPS.findIndex(b=> b.key === k);
+    keys.forEach(k=>{
+      const sets = cur.get(k) || 0, pv = w.hasPrev ? (prev.get(k) || 0) : null;
+      out.rows.push({ group: k, sets, prevSets: pv, delta: pv === null ? null : sets - pv });
+    });
+    out.rows.sort((a, b)=> b.sets - a.sets || orderOf(a.group) - orderOf(b.group));
+    let least = null;
+    out.rows.forEach(r=>{ if(r.group !== 'Wlasne' && (!least || r.sets < least.sets || (r.sets === least.sets && orderOf(r.group) < orderOf(least.group)))) least = { group: r.group, sets: r.sets }; });
+    out.least = least;
+  }catch(e){ out.rows = []; out.least = null; }
+  return out;
+}
+
+/* 8. Treningi i czas w koszykach: bucket 'week' (domyślnie; etykieta = poniedziałek RRRR-MM-DD), 'day' (RRRR-MM-DD) albo
+   'month' (RRRR-MM). Puste koszyki w oknie zostają jako zera (ciągła oś). durationMin = suma czasu treningów z zapisanym
+   czasem; avgDurationMin = średnia po treningach z czasem w oknie (0 = brak danych). Okno 'week' to jeden koszyk. */
+function statsV2SessionsSeries(win, bucket){
+  const out = { points: [], avgDurationMin: 0 };
+  try{
+    const w = win && typeof win === 'object' ? win : statsV2Window('week');
+    const bk = bucket === 'day' || bucket === 'month' ? bucket : 'week';
+    const keyOf = d=> bk === 'day' ? d : bk === 'month' ? d.slice(0, 7) : dashWeekStartIso(d);
+    const next = k=> bk === 'day' ? dashAddDays(k, 1) : bk === 'month' ? dateStr(new Date(+k.slice(0, 4), +k.slice(5, 7), 1)).slice(0, 7) : dashAddDays(k, 7);
+    const map = new Map();
+    let dSum = 0, dN = 0;
+    statsV2Order().forEach(wo=>{
+      if(wo.date < w.start || wo.date > w.end) return;
+      const k = keyOf(wo.date), e = map.get(k) || { workouts: 0, durationMin: 0 }; map.set(k, e);
+      e.workouts++;
+      const d = recNum(wo.durationMin); if(d > 0){ e.durationMin += d; dSum += d; dN++; }
+    });
+    const last = keyOf(w.end);
+    let k = keyOf(w.start), guard = 0;
+    while(k <= last && guard++ < 800){
+      const e = map.get(k) || { workouts: 0, durationMin: 0 };
+      out.points.push({ label: k, workouts: e.workouts, durationMin: Math.round(e.durationMin) });
+      k = next(k);
+    }
+    out.avgDurationMin = dN ? Math.round(dSum / dN) : 0;
+  }catch(e){ out.points = []; out.avgDurationMin = 0; }
+  return out;
+}
 // simple, dependency-free smoothing: cubic bezier per segment with
 // horizontal-midpoint control points — no spline math needed, reads
 // as a clean wave for this many points.
