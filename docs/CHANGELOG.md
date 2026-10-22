@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.84.5 (2026-10-22)
-- **Liczba wersji:** 260 · **commitów:** 639
+- **Aktualna wersja:** 4.84.6 (2026-10-22)
+- **Liczba wersji:** 261 · **commitów:** 640
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.84.6 · PATCH · 2026-10-22
+
+- **Kolory okna Trening / GYM na tokeny (opcja A, bez zmiany wyglądu):** 44 ręczne hexy w żywych regułach zamienione na tokeny. Nowa neutralna skala `--m-grey-50 … --m-grey-700` (13 wartości, dokładnie te, które były: `#ededed`, `#cfcfcf`, `#b8b8b8`, `#a3a3a3`, `#5b5555` i inne) oraz `--m-orange-wash`, `--m-orange-wash-2`, `--m-orange-light`, `--m-orange-light-2`, `--m-lilac-wash`, `--m-blue-wash`.
+- 9 hexów to dokładne odpowiedniki istniejących tokenów (`--m-plan-easy`, `--m-orange-soft`, `--m-plan-c-easy`, `--m-ai-fill-*`, `--m-page-bot`, `--m-panel`, `--m-switch-off`); 6 to zlanie z najbliższym tokenem o różnicy ≤ 7/255 na kanał (`#d8d5e2`, `#edecf1`, `#e4e1ea`, `#e3e1e6`, `#ddd8e6`, `#ffe6dc`).
+- Zostawione celowo: `html.modal-lock` `#4a4e56` (zgodny z `capacitor.config.json`), `.wn-hero`, `.gymfin-wash`, `.ob-bgl`; martwe reguły starego motywu (`.ex-popup-box`, `.run-stat-tile`, `.exv2-note*`, `.acct-oauth-btn`) bez zmian.
+- Mockupy wyboru A/B: `mockups/audyt-finalny/10-11`.
+
+**Commity (0):**
+
 
 ### 4.84.5 · PATCH · 2026-10-22
 
