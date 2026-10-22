@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.84.0 (2026-10-22)
-- **Liczba wersji:** 255 · **commitów:** 633
+- **Aktualna wersja:** 4.84.1 (2026-10-22)
+- **Liczba wersji:** 256 · **commitów:** 635
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.84.1 · PATCH · 2026-10-22
+
+- **Nazwy ćwiczeń:** jedna reguła wagi: od 24 px extra light (200: nazwa w oknie serii `.lg-name`, tytuł szczegółu ćwiczenia `.exv2-title`), mniejsze 300 (kafle Treningu, Historia, Postępy, Profil, Pulpit, rekordy, wybór ćwiczeń). Wcześniej 400–600 zależnie od ekranu.
+- **Postępy:** kafle okresu mają kolory metryk: Objętość `--m-metric-volume`, Serie `--m-metric-sets` (klasy `pf-stat--vol`, `pf-stat--sets`); Profil bierze ten sam token zamiast `--m-danger`.
+- **Sprzątanie:** usunięty martwy kod starej karty Historii (`buildHistCardV2`, `histWorkoutCardInner`, `histRunCardInner`, CSS `histv2-wtile/wkcal/wprogress/wrecord/run-tile`); żywy szczegół to `histOpenHtmlV2`.
+- Audyt: `docs/audyt-finalny-ui-ux.md`, mockupy w `mockups/audyt-finalny/`.
+
+**Commity (1):**
+
+- `929a272` 2026-10-22 — Sprzątanie: usunięty martwy kod starej karty Historii
 
 ### 4.84.0 · MINOR · 2026-10-22
 
