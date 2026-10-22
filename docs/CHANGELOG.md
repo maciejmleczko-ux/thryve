@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.84.7 (2026-10-22)
-- **Liczba wersji:** 262 · **commitów:** 641
+- **Aktualna wersja:** 4.84.8 (2026-10-22)
+- **Liczba wersji:** 263 · **commitów:** 642
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,15 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.84.8 · PATCH · 2026-10-22
+
+- **Skala typów (opcja A, bez zmiany wyglądu):** 39 literałów `font-size` w px zamienione na tokeny. Istniejące: 16 → `--m-fs-md`, 20 → `--m-fs-lg`, 24 → `--m-fs-xl`, 28 → `--m-fs-stat`, 30 → `--m-fs-2xl`, 40 → `--m-fs-hero`, 100 → `--m-fs-display-md`. Nowe tokeny (powtarzające się rozmiary z Figmy): `--m-fs-subtitle` 18, `--m-fs-num` 26, `--m-fs-headline` 32, `--m-fs-title` 36, `--m-fs-num-lg` 52, `--m-fs-num-xl` 80.
+- **Wyjątki z Figmy** zostają jako literały z komentarzem przy skali: 42, 48, 54, 56, 72, 108 px, małoekranowe 21 / 22 px, 11,83 / 34,43 px i `clamp()` hero Pulpitu.
+- Weryfikacja: porównanie obliczonych stylów (kolor, rozmiar, waga, line-height, padding, radius i inne) wszystkich elementów przed i po: 0 różnic na 10 stanach (6 ekranów, szczegół Historii, okno ćwiczenia, logowanie serii, odznaki). Mockupy wyboru A/B: `mockups/audyt-finalny/12-14`.
+
+**Commity (0):**
+
 
 ### 4.84.7 · PATCH · 2026-10-22
 
