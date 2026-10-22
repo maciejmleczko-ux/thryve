@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.86.1 (2026-10-23)
+- **Aktualna wersja:** 4.86.2 (2026-10-23)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.86.2 · PATCH · 2026-10-23
+
+**Zakres techniczny:** okno „Udostępnij postępy” w aplikacji na iPhonie unosiło się w środku ekranu, a jego karta była ucięta przez dolny pasek z przyciskami. Przyczyna: `syncSheetsToVisualViewport()` uznawał okno za „podniesione przez klawiaturę” (`m-kb`, odstęp od dołu), gdy odczyt `visualViewport` był mniejszy niż okno o ponad 80 px, także gdy w oknie nie było żadnego pola tekstowego. Teraz klawiatura podnosi okno tylko wtedy, gdy pole tekstowe TEGO okna ma fokus; bez fokusu okno stoi przy dolnej krawędzi. Dodatkowo `acctSheetOpen()` synchronizuje okno przy otwarciu, a utrata fokusu w polu przywraca okno na dół.
+
+**Commity (1):**
+
+- `(ten commit)` 2026-10-23 — okna bez pola tekstowego nie reagują na odczyt klawiatury (Udostępnij postępy)
+
+
 
 ### 4.86.1 · PATCH · 2026-10-23
 

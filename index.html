@@ -7953,6 +7953,7 @@ function acctSheetOpen(id){
   resetPlansCustomizeSheet(id);
   document.getElementById(id).classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');
+  syncSheetsToVisualViewport();   // okno bez pola tekstowego nie dziedziczy odczytu klawiatury z poprzedniego okna
 }
 function acctSheetClose(id, viaDrag){
   const overlay = document.getElementById(id);
@@ -9912,7 +9913,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.86.1";
+const APP_VERSION = "4.86.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -12039,6 +12040,16 @@ function syncSheetsToVisualViewport(){
       ov.classList.remove('m-kb');
       return;
     }
+    /* Klawiatura podnosi okno tylko wtedy, gdy pole tekstowe TEGO okna ma fokus. Bez tego zbędny lub nieaktualny
+       odczyt visualViewport (np. po zamknięciu klawiatury w aplikacji natywnej) zostawiał okno bez pola, jak
+       „Udostępnij postępy”, unoszące się w środku ekranu z uciętą zawartością (4.82.2). */
+    const ae = document.activeElement;
+    const kbField = !!(ae && ov.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && !ae.readOnly);
+    if(!kbField){
+      ov.style.paddingTop = ov.style.paddingBottom = '';
+      ov.classList.remove('m-kb');
+      return;
+    }
     const top = vv.offsetTop;
     const bottom = ov.getBoundingClientRect().height - vv.offsetTop - vv.height;
     ov.style.paddingTop = top > 1 ? top + 'px' : '';
@@ -12046,6 +12057,7 @@ function syncSheetsToVisualViewport(){
     ov.classList.toggle('m-kb', bottom > 80);
   });
 }
+document.addEventListener('focusout', function(){ setTimeout(syncSheetsToVisualViewport, 80); });   // pole straciło fokus: okno wraca na dół ekranu
 /* Center the focused field (its Seria card, for series) inside the part of
    the sheet's scroll area that's actually visible (scroll box ∩ visual
    viewport, located via the fixed overlay's rect). The old version
