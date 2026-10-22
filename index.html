@@ -107,6 +107,7 @@
   --m-plan-accent:#6891ff; /* planned/missed/done markers on History calendar + Dashboard weekly progress */
   --m-muted-text:#6c6b78;  /* secondary text on light surfaces (5.2:1 on white); --m-muted stays icons/hints only */
   --m-line:#c7c6cb;        /* dividers, disabled */
+  --m-switch-off:#d8d5df;  /* przełącznik wyłączony (44×26 w Dostosuj ekran; to samo co .acct-toggle) */
   --m-border:#e6e2ec;      /* hairline borders */
   --m-danger:var(--m-plan-c-hard); /* error = #cd1200 + icon/message, never colour alone */
   --m-orange-ink:#801a00;  /* text on orange tints (10:1) */
@@ -3157,7 +3158,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .pl-settings:active,.pl-card:active,.pl-hero:active,.pl-pick:active,.pl-cta:active,.opk-btn:active,.pl-check:active,.pev2-day-chip:active,.pev2-more:active,.pev2-ok:active,.pev2-save:active,.equip-chip:active,.ob-back:active,.ob-cta:not(:disabled):active,.ob-gender-chip:active,.onb-goal-chip:active,.onb-equip:active,
 .exv2-note-add:active,.exv2-submit:active,
 .pal-chip:active,.pal-pick:active,.pal-add:active,.lng-row:active,.m2-oauth:active,.m2-btn:active,.ai-chip:active,.m2-x:active,.mk-key:active,.bd-field:active,.bd-sx:active,.nm-ico:active,:is(#mConfirmOverlay.mc-gym,#cloudReminderOverlay) .onboard-actions button:active,.wl-row:active,.toast-undo:active,.lg-num:active,.x-ring:active,.gy-circ.gy-x:active,.plansv2-customize-close:active,.newex-v2-close:active,.exv2-close:active,.plansv2-close:active,.histv2-card-close:active,.ai-popup-close:active{transition-duration:var(--m-dur-press-in);}
-.pdt-day-h:active,.pdt-btn:active,.pdt-more:active,.pdt-tab:active,.m-pop-item:active,.stv2-seg-b:active{transition-duration:var(--m-dur-press-in);}
+.pdt-day-h:active,.pdt-btn:active,.pdt-more:active,.pdt-tab:active,.m-pop-item:active,.stv2-seg-b:active,.std-sw:active,.std-pinrow:active,.std-pr:active .std-ck{transition-duration:var(--m-dur-press-in);}
 .pdt-day-h:active,.pdt-btn:active,.m-pop-item:active{transform:scale(.97);}
 .pdt-more:active{transform:scale(.92);}
 /* "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" tiles on Trening — Figma 461:7507 / 461:7528 (size stays the app's own) */
@@ -3836,7 +3837,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .pal-empty,.pdt-per,.pdt-days,.tn--own,.psh-card.tn--own,
 .histv2-card,.histv2-empty,.exv2-series-card,.newex-v2-bento,.wl-list,.lng-row,
 .plc--new,.pal-seg,.gymv2-block,
-.statsv2-kcard,.statsv2-bar-card,.statsv2-scard,.statsv2-ex-tile,.stv2-tiles,.stv2-bt{background:var(--m-glass-fill)!important;-webkit-backdrop-filter:var(--m-glass-blur)!important;backdrop-filter:var(--m-glass-blur)!important;box-shadow:var(--m-glass-edge);}
+.statsv2-kcard,.statsv2-bar-card,.statsv2-scard,.statsv2-ex-tile,.stv2-tiles,.stv2-bt,.std-allhid{background:var(--m-glass-fill)!important;-webkit-backdrop-filter:var(--m-glass-blur)!important;backdrop-filter:var(--m-glass-blur)!important;box-shadow:var(--m-glass-edge);}
 .tn--own{--plc-bg:var(--m-glass-fill);}
 /* ---- Postępy v3: przegląd (etap B). Białe boksy (.stv2-tiles, .stv2-bt, .pf-card, .statsv2-scard) dostają szkło iOS z reguły zbiorczej wyżej. ---- */
 .stv2-top-r{justify-self:end;display:flex;align-items:center;gap:8px;}
@@ -3950,6 +3951,69 @@ button.stv2-bt{cursor:pointer;}
 @media (prefers-reduced-motion: no-preference){
   @keyframes stv2GrowX{from{transform:scaleX(0);}to{transform:scaleX(1);}}
   .stv2-grow{transform-origin:left center;animation:stv2GrowX var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(.35s + var(--i,0) * 40ms);}
+}
+/* ============================================================
+   POSTĘPY v3, ETAP D: arkusze „Dostosuj ekran” (#statsCustSheet) i „Przypnij ćwiczenia” (#statsPinSheet), prefiks .std-*.
+   Ruch tylko transform/opacity; przejścia z tokenów --m-*; przy ograniczeniu ruchu bez przesuwania.
+   ============================================================ */
+.std-allhid{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;padding:20px 18px 8px;}
+.std-allhid-t{margin:0;font-size:var(--m-fs-base);color:var(--m-ink);}
+.std-allhid .pf-link{margin:0;padding:14px 12px;}
+/* Dostosuj: lista sekcji (uchwyt, nazwa, przełącznik 44×26) */
+.std-list{position:relative;display:flex;flex-direction:column;width:100%;}
+.std-row{position:relative;display:flex;align-items:center;gap:6px;min-height:50px;box-sizing:border-box;background:var(--m-white);}
+.std-row + .std-row{border-top:.5px solid var(--m-line);}
+.std-grip{flex:none;width:44px;height:44px;margin:0 0 0 -10px;padding:0;border:0;background:none;color:var(--m-ink);display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+.std-grip svg{width:24px;height:24px;display:block;}
+.std-name{flex:1 1 auto;min-width:0;font-size:var(--m-fs-base);font-weight:400;line-height:1.2;color:var(--m-ink);}
+.std-sw{position:relative;flex:none;width:44px;height:26px;padding:0;border:0;border-radius:13px;background:var(--m-switch-off);cursor:pointer;transition:background-color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.std-sw::after{content:"";position:absolute;inset:-9px -4px;}   /* 44×26 wizualnie, 52×44 do kliknięcia */
+.std-sw i{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:var(--m-white);box-shadow:0 1px 3px rgba(0,0,0,.22);transition:transform var(--m-dur-quick) var(--m-ease);}
+.std-sw[aria-checked="true"]{background:var(--m-orange);}
+.std-sw[aria-checked="true"] i{transform:translateX(18px);}
+.std-sw:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
+/* przyciski ▲▼: tylko dla czytników ekranu i klawiatury (widoczne po fokusie) */
+.std-mv{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+.std-mv:focus-within{position:static;width:auto;height:auto;overflow:visible;clip:auto;display:flex;gap:2px;}
+.std-mvb{width:36px;height:44px;padding:0;border:0;background:none;font:inherit;font-size:var(--m-fs-xs);color:var(--m-ink);cursor:pointer;}
+.std-mvb:disabled{opacity:.3;cursor:default;}
+/* przeciąganie: wiersz unosi się, reszta ustępuje miejsca */
+.std-row--drag{z-index:3;background:var(--m-white);border-radius:var(--m-r-sm);box-shadow:0 8px 24px rgba(0,0,0,.16);}
+.std-row--drag + .std-row,.std-row--drag{border-top-color:transparent;}
+.std-list--dragging .std-row:not(.std-row--drag){transition:transform var(--m-dur-fade) var(--m-ease);}
+.std-row--settle{transition:transform var(--m-dur-snap) var(--m-ease-sheet);}
+/* wiersz „Przypięte ćwiczenia · N z 5” */
+.std-pinrow{margin-top:18px;display:flex;align-items:center;gap:12px;width:100%;min-height:56px;box-sizing:border-box;padding:8px 12px;border:.8px solid var(--m-orange-tint);border-radius:var(--m-r-sm);background:var(--m-white);font:inherit;color:var(--m-ink);text-align:left;cursor:pointer;}
+.std-pinrow-t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.std-pinrow-n{font-size:var(--m-fs-base);font-weight:500;line-height:1.2;}
+.std-pinrow-s{font-size:var(--m-fs-2xs);line-height:1.2;color:var(--m-muted-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.std-pinrow-c{flex:none;font-size:var(--m-fs-xs);color:var(--m-muted-text);}
+.std-pinrow .pf-ico{flex:none;color:var(--m-muted-text);}
+/* Przypnij: pole wyszukiwania + lista z okrągłym znacznikiem */
+#statsPinSheet .plansv2-customize-card:has(+ .m2-actions){padding-bottom:170px;}
+.std-pin-list{margin-top:16px;}
+.std-pr{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:64px;box-sizing:border-box;padding:10px 12px;border:0;background:none;font:inherit;color:var(--m-ink);text-align:left;cursor:pointer;transition:opacity var(--m-dur-quick) ease;}
+.std-pr + .std-pr{border-top:.5px solid var(--m-line);}
+.std-pr:active .std-ck{transform:scale(.92);transition-duration:var(--m-dur-press-in);}
+.std-pr-t{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+.std-pr-n{font-size:var(--m-fs-base);font-weight:500;line-height:1.2;}
+.std-pr-p{display:flex;flex-wrap:wrap;gap:6px;}
+.std-pill{display:inline-flex;align-items:center;height:20px;padding:0 10px;border-radius:99px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.02em;white-space:nowrap;}
+.std-pill--mint{background:var(--m-mint-tint);color:var(--m-mint-ink);}
+.std-pill--or{background:var(--m-orange-tint-2);color:var(--m-orange-ink);}
+.std-ck{flex:none;width:24px;height:24px;border-radius:50%;box-sizing:border-box;border:1.2px solid var(--m-orange-tint);background:var(--m-white);display:flex;align-items:center;justify-content:center;transition:background-color var(--m-dur-quick) ease,border-color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.std-ck svg{width:12px;height:12px;display:block;opacity:0;transform:scale(.6);transition:opacity var(--m-dur-quick) ease,transform var(--m-dur-fade) var(--m-ease-spring);}
+.std-pr[aria-checked="true"] .std-ck{background:var(--m-orange);border-color:var(--m-orange);}
+.std-pr[aria-checked="true"] .std-ck svg{opacity:1;transform:none;}
+.std-pr[aria-disabled="true"]{opacity:.4;cursor:default;}
+.std-count{margin:0 0 -4px;text-align:center;font-size:var(--m-fs-2xs);line-height:1.2;color:var(--m-muted-text);}
+.std-empty{margin:0;padding:20px 12px;text-align:center;font-size:var(--m-fs-xs);color:var(--m-muted-text);}
+/* gwiazdka przypiętego ćwiczenia w liście „Wszystkie ćwiczenia” */
+.std-nrow{display:flex;align-items:center;gap:5px;min-width:0;max-width:100%;}
+.std-nrow .stc-x-name{min-width:0;}
+.std-star{flex:none;width:14px;height:14px;display:block;color:var(--m-orange);}
+@media (prefers-reduced-motion: reduce){
+  .std-sw i,.std-ck svg,.std-ck,.std-row--settle,.std-list--dragging .std-row:not(.std-row--drag){transition:none;}
 }
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -4808,6 +4872,53 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="m2-body">
         <div class="m2-field exs-list" id="exsList" role="radiogroup"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Postępy v3, etap D: „Dostosuj ekran” (Figma 657:18615) i „Przypnij ćwiczenia” (Figma 657:18880) na szkielecie .m-sheet2; teksty wypełnia JS (statsV2OpenCustomize / statsV2OpenPin).
+     Przypnij ma pole wyszukiwania: reguła „Popupy z klawiaturą” (m-kb z syncSheetsToVisualViewport, nagłówek sticky, przycisk przypięty, pole 16 px). -->
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="statsCustSheet" onclick="if(event.target===this) statsDCustClose()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="stdCustTitle">DOSTOSUJ EKRAN</h1>
+          <button type="button" class="m2-x" id="stdCustX" aria-label="Zamknij" onclick="statsDCustClose()"><svg viewBox="0 0 18 18" width="18" height="18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="stdCustSub"></p>
+      </div>
+      <div class="m2-body">
+        <div class="std-list" id="stdCustList"></div>
+        <button type="button" class="std-pinrow m-press" id="stdPinRow" onclick="statsDCustToPin()"></button>
+      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn m-press" id="stdCustSave" onclick="statsDCustSave()">ZAPISZ</button>
+    </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="statsPinSheet" onclick="if(event.target===this) statsDPinClose()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="stdPinTitle">PRZYPNIJ ĆWICZENIA</h1>
+          <button type="button" class="m2-x" id="stdPinX" aria-label="Zamknij" onclick="statsDPinClose()"><svg viewBox="0 0 18 18" width="18" height="18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="stdPinSub"></p>
+      </div>
+      <div class="m2-body">
+        <div class="std-pin-search" id="stdPinSearch"></div>
+        <div class="m2-field std-pin-list" id="stdPinList"></div>
+      </div>
+    </div>
+    <div class="m2-actions">
+      <p class="std-count" id="stdPinCount" aria-live="polite"></p>
+      <button type="button" class="m2-btn m-press" id="stdPinSave" onclick="statsDPinSave()">ZAPISZ</button>
     </div>
   </div>
 </div>
@@ -7908,7 +8019,7 @@ function fmtKg(n){ const s = Number(n).toFixed(1); return LANG === 'en' ? s : s.
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
+const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -12821,6 +12932,8 @@ mSheetDrag('planImportConfirmSheet', cancelImportPlan);
 mSheetDrag('planShareSheet', closePlanShareSheet);
 mSheetDrag('planCopySheet', closePlanCopySheet);
 mSheetDrag('statsExSortSheet', closeStatsExSort);
+mSheetDrag('statsCustSheet', statsDCustClose);
+mSheetDrag('statsPinSheet', statsDPinClose);
 mSheetDrag('recordDetailSheet', closeRecordDetail);
 mSheetDrag('profileRecordsSheet', closeProfileRecordsSheet);   // zamknięcie przeciągnięciem kończy też trwający slajd miesięcy
 
@@ -21966,7 +22079,7 @@ function stv2InLabel(p){
 }
 
 /* ---- Rekordy: 3 ćwiczenia z najświeższą aktywnością, wartość = obecny rekord (bez serii) ---- */
-function stv2RecordRows(today){
+function stv2RecordRows(today, all){
   const fresh = new Set();
   stv2Safe(()=> statsV2NewRecords({ start: dashAddDays(today, -6), end: today }, today).items.forEach(it=>{ if(it.isNew) fresh.add(it.name); }));
   const names = [];
@@ -21988,7 +22101,7 @@ function stv2RecordRows(today){
       hist: series.get(name) || [], isNew: fresh.has(name) });
   });
   recs.sort((a, b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : a.last < b.last ? 1 : a.last > b.last ? -1 : a.name < b.name ? -1 : 1);   // wg daty rekordu, malejąco
-  return recs.slice(0, 3);
+  return all ? recs : recs.slice(0, 3);
 }
 
 /* ---- Kardio w oknie okresu: czas, dystans, sesje ---- */
@@ -22087,11 +22200,13 @@ function renderStatsV2Overview(){
   if(n === 0){
     const empty = `
       <div class="pf-card ${A()}"><h3 class="pf-empty-t">${t('stV2EmptyT', 'Tu zobaczysz swój postęp')}</h3><p class="pf-empty-d">${t('stV2EmptyD', 'Wykres, rekordy i rozkład mięśni pojawią się po pierwszych treningach.')}</p><button type="button" class="pf-btn m-press" onclick="navTap('gym')">${t('pfStart', 'ZACZNIJ TRENING')}</button></div>`;
-    const bodyE = stv2BodyHtml(win, ps, n, A);
+    const layE = typeof statsV2Layout === 'function' ? statsV2Layout() : { hidden: [] };
+    const bodyE = layE.hidden.indexOf('body') < 0 ? stv2BodyHtml(win, ps, n, A) : '';
     return `<div class="stv2-col">${ringCard}${head}${empty}${bodyE}</div>`;
   }
 
   /* ---------- 3. Karuzela: Siła / Objętość / Treningi i czas (od 3 treningów) ---------- */
+  const secChart = ()=>{
   let caro = '';
   if(n > 2){
     const st = stv2Safe(()=> statsV2StrengthSeries(win), { value: 0, delta: null, points: [], exerciseCount: 0 });
@@ -22123,20 +22238,30 @@ function renderStatsV2Overview(){
         <div class="stv2-caro-dots" id="statsCaroDots">${[0, 1, 2].map(i=> `<button type="button" class="stv2-dotb m-press" aria-label="${E(['Siła', 'Objętość', 'Treningi i czas'][i])}" onclick="statsV2CaroDot(${i})"><i${i === 0 ? ' class="on"' : ''}></i></button>`).join('')}</div>
       </div>`;
   }
+  return caro;
+  };
 
-  /* ---------- 4. Rekordy ---------- */
-  const recs = stv2RecordRows(today);
+  /* ---------- 4. Rekordy (przypięte wg etapu D albo 3 automatyczne) ---------- */
+  const secRecords = ()=>{
+  let recs = stv2RecordRows(today, true);
+  const pinned = typeof statsV2PinnedList === 'function' ? statsV2PinnedList() : [];
+  const pickedRecs = pinned.map(nm=> recs.find(r=> r.name === nm)).filter(Boolean);   // przypięte w kolejności przypięcia; ćwiczenia bez historii pomijane (bez kasowania z pamięci)
+  const autoMode = !pickedRecs.length;
+  recs = autoMode ? recs.slice(0, 3) : pickedRecs;
   const fmtRec = r=> E(pfRecValue({ kind: r.kind, value: r.value, perSide: r.perSide }));
   const recRows = recs.map(r=> `<button type="button" class="pf-row stv2-rec m-press" onclick="selectStatsExerciseV2(${jsArg(r.name)})" aria-label="${E(r.name)}, ${fmtRec(r)}">
         <span class="pf-row-l"><span class="pf-row-n">${E(r.name)}</span><span class="stv2-rec-s">${STV2_ICO.cal}<span>${E(fmtDayMonShort(r.date))}</span>${r.isNew ? `<span class="stv2-new">${t('stV2New', 'NOWY')}</span>` : ''}</span></span>
         <span class="pf-row-r">${r.sessions >= 3 && r.hist.length >= 2 ? stv2Spark(r.hist.slice(-8), 94, 14) : ''}<span>${fmtRec(r)}</span><span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></span></button>`).join('');
-  const needTrend = n <= 2 && recs.some(r=> !(r.sessions >= 3));
+  const needTrend = autoMode && n <= 2 && recs.some(r=> !(r.sessions >= 3));
   const recSec = recs.length ? `
       <section class="pf-sec ${A()}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('stV2Records', 'Rekordy')}</h2>
         <button type="button" class="pf-link m-press" onclick="openStatsExPicker()">${t('stV2AllEx', 'Wszystkie ćwiczenia')}<span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></button></div>
         <div class="pf-card"><div class="pf-rows">${recRows}</div></div>${needTrend ? `<p class="stv2-cap">${t('stV2TrendLater', 'Trend narysuje się od trzeciego treningu danego ćwiczenia.')}</p>` : ''}</section>` : '';
+  return recSec;
+  };
 
   /* ---------- 5. Bez postępu ---------- */
+  const secStalled = ()=>{
   const stalled = n > 2 ? stv2Safe(()=> statsV2Stalled(today), []) : [];
   const stallVal = s=> s.unit === 'kg' ? `${fmtGymWeight(s.value)} kg` : s.unit === 'reps' ? `${s.value} ${t('repsUnit', 'powt.')}` : fmtDur(s.value);
   const stallSec = stalled.length ? `
@@ -22145,8 +22270,11 @@ function renderStatsV2Overview(){
           <span class="stv2-stall-ic">${STV2_ICO.flat}</span>
           <span class="pf-row-l"><span class="pf-row-n">${E(s.name)}</span><span class="stv2-stall-line"><span class="stv2-stall-pill">${E(stallVal(s))}</span><span class="stv2-stall-s">${t('stV2StalledFor', `Bez wzrostu od ${s.weeks} ${stv2Weeks(s.weeks)}`, s.weeks)}</span></span></span>
           <span class="pf-row-r"><span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></span></button>`).join('')}</div></div></section>` : '';
+  return stallSec;
+  };
 
   /* ---------- 6. Rozkład mięśni + baner ---------- */
+  const secMuscles = ()=>{
   const mus = stv2Safe(()=> statsV2MuscleDistribution(win), { rows: [], least: null });
   const grpName = k=> { const b = PLAN_EX_GROUPS.find(x=> x.key === k); return b ? (LANG === 'en' ? b.en : b.pl) : k; };
   const maxSets = Math.max(1, ...mus.rows.map(r=> r.sets));
@@ -22156,9 +22284,12 @@ function renderStatsV2Overview(){
           <span class="stv2-mtrack"><i class="stv2-mfill stv2-grow" style="--r:${(r.sets / maxSets).toFixed(3)};--i:${i}"></i></span>
           <span class="stv2-mr"><span class="stv2-mv">${r.sets}</span>${stv2Delta(r.delta, stv2Num, 'neutral')}</span></div>`).join('')}</div></div>
         ${stv2ShowLeast(mus, n) ? `<div class="stv2-banner"><span class="stv2-banner-ic">${STV2_ICO.least}</span><div><p class="stv2-banner-t">${t('stV2Least', 'Najmniej trenowane')}</p><p class="stv2-banner-v">${t('stV2LeastVal', `${grpName(mus.least.group)}: ${mus.least.sets} ${plPlural(mus.least.sets, 'seria', 'serie', 'serii')}`, grpName(mus.least.group), mus.least.sets)}</p></div></div>` : ''}</section>` : '';
+  return musSec;
+  };
 
   /* ---------- 7. Ciało + Kardio + Udostępnij ---------- */
-  const bodySec = stv2BodyHtml(win, ps, n, A);
+  const secBody = ()=> stv2BodyHtml(win, ps, n, A);
+  const secCardio = ()=>{
   const cs = stv2CardioStats(win);
   const cH = Math.floor(cs.sec / 3600), cM = Math.floor((cs.sec % 3600) / 60);
   const cTime = cs.sec ? (cH ? `${cH}:${String(cM).padStart(2, '0')}<small>h</small>` : `${cM}<small>min</small>`) : dash;
@@ -22170,9 +22301,19 @@ function renderStatsV2Overview(){
           <div class="pf-stat"><span class="pf-stat-v">${cs.distM ? fmtNum1(cs.distM / 1000) + '<small>km</small>' : dash}</span><span class="pf-stat-l">${t('stV2CDist', 'Dystans')}</span></div><i class="pf-vsep" aria-hidden="true"></i>
           <div class="pf-stat"><span class="pf-stat-v">${cs.sessions}</span><span class="pf-stat-l">${t('stV2CSessions', 'Sesje')}</span></div>
         </div></section>` : '';
-  const shareBtn = typeof statsV2OpenShare === 'function' ? `<button type="button" class="m2-btn m-press ${A()}" onclick="statsV2OpenShare()">${t('stV2ShareBtn', 'Udostępnij postępy')}</button>` : '';
+  return cardioSec;
+  };
+  const shareBtnF = ()=> typeof statsV2OpenShare === 'function' ? `<button type="button" class="m2-btn m-press ${A()}" onclick="statsV2OpenShare()">${t('stV2ShareBtn', 'Udostępnij postępy')}</button>` : '';
 
-  return `<div class="stv2-col">${ringCard}${head}${caro}${recSec}${stallSec}${musSec}${bodySec}${cardioSec}${shareBtn}</div>`;
+  /* sekcje w kolejności i widoczności z „Dostosuj ekran” (etap D); wejście kafli wg kolejności na ekranie (A() rośnie w trakcie budowania) */
+  const lay = typeof statsV2Layout === 'function' ? statsV2Layout() : { order: ['chart', 'records', 'stalled', 'muscles', 'body', 'cardio'], hidden: [] };
+  const builders = { chart: secChart, records: secRecords, stalled: secStalled, muscles: secMuscles, body: secBody, cardio: secCardio };
+  let secs = '';
+  lay.order.forEach(id=>{ if(lay.hidden.indexOf(id) < 0 && builders[id]) secs += builders[id](); });
+  if(lay.hidden.length >= lay.order.length && typeof statsV2OpenCustomize === 'function'){
+    secs = `<div class="pf-card std-allhid ${A()}"><p class="std-allhid-t">${t('stDAllHidden', 'Wszystkie sekcje są ukryte.')}</p><button type="button" class="pf-link m-press" onclick="statsV2OpenCustomize()">${t('stDCustLink', 'Dostosuj ekran')}<span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></button></div>`;
+  }
+  return `<div class="stv2-col">${ringCard}${head}${secs}${shareBtnF()}</div>`;
 }
 
 // baner „Najmniej trenowane”: >= 3 grupy z danymi, najmniej trenowana < 50% mediany serii i bez remisu na dole
@@ -22230,6 +22371,274 @@ function statsV2SetPeriod(p){
   const y = window.scrollY || 0;
   renderStatsV2(false);
   window.scrollTo(0, y);
+}
+
+/* ============================================================
+   POSTĘPY v3, ETAP D: „Dostosuj ekran” + „Przypnij ćwiczenia” (Figma 04 / 05).
+   Dane tylko lokalnie (bez synca do chmury):
+     mekkio_stats_layout_v1 = { order:[id...], hidden:[id...] }   id: chart | records | stalled | muscles | body | cardio
+     mekkio_stats_pins_v1   = [nazwa ćwiczenia...]                max 5, kolejność przypięcia
+   Odczyt/zapis w try/catch, wpisy zepsute lub nieznane są ignorowane (nic nie jest kasowane przy odczycie).
+   Hooki dla innych etapów: statsV2PinnedList / statsV2IsPinned / statsV2TogglePin, statsV2OpenCustomize, statsV2OpenPin.
+   ============================================================ */
+const STATSD_LAYOUT_KEY = 'mekkio_stats_layout_v1';
+const STATSD_PINS_KEY = 'mekkio_stats_pins_v1';
+const STATSD_MAX_PINS = 5;
+const STATSD_SECTIONS = ['chart', 'records', 'stalled', 'muscles', 'body', 'cardio'];   // kolejność domyślna = dzisiejsza kolejność na przeglądzie
+const STATSD_LABELS = { chart: ['stDSecChart', 'Wykres główny'], records: ['stDSecRecords', 'Rekordy'], stalled: ['stDSecStalled', 'Bez postępu'], muscles: ['stDSecMuscles', 'Rozkład mięśni'], body: ['stDSecBody', 'Ciało'], cardio: ['stDSecCardio', 'Kardio'] };
+Object.assign(T_EN, {
+  stDCustTitle: 'CUSTOMIZE SCREEN', stDCustSub: 'Choose what you see in Progress. Drag to change the order.',
+  stDSecChart: 'Main chart', stDSecRecords: 'Records', stDSecStalled: 'No progress', stDSecMuscles: 'Muscle split', stDSecBody: 'Body', stDSecCardio: 'Cardio',
+  stDGrip: n => `Drag to reorder: ${n}`, stDUp: n => `Move up: ${n}`, stDDown: n => `Move down: ${n}`,
+  stDPinRowT: 'Pinned exercises', stDPinRowNone: 'Nothing pinned', stDPinRowOf: n => `${n} of 5`,
+  stDSave: 'SAVE', stDSaved: 'Saved', stDClose: 'Close',
+  stDAllHidden: 'All sections are hidden.', stDCustLink: 'Customize screen',
+  stDPinTitle: 'PIN EXERCISES', stDPinSub: 'Pinned exercises show up in Records. Max 5.',
+  stDPinSearchAria: 'Search exercises', stDPinCount: n => `Selected ${n} of 5`,
+  stDPinRec: v => `record ${v}`,
+  stDPinMax: 'You can pin up to 5 exercises.', stDPinned: 'Pinned', stDPinEmpty: 'No exercises found.',
+});
+function statsDNormLayout(raw){
+  const r = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const order = [], hidden = [];
+  (Array.isArray(r.order) ? r.order : []).forEach(id=>{ if(typeof id === 'string' && STATSD_SECTIONS.indexOf(id) >= 0 && order.indexOf(id) < 0) order.push(id); });
+  STATSD_SECTIONS.forEach(id=>{ if(order.indexOf(id) < 0) order.push(id); });   // brakujące na końcu, w kolejności domyślnej
+  (Array.isArray(r.hidden) ? r.hidden : []).forEach(id=>{ if(typeof id === 'string' && STATSD_SECTIONS.indexOf(id) >= 0 && hidden.indexOf(id) < 0) hidden.push(id); });
+  return { order, hidden };
+}
+function statsV2Layout(){
+  try{ const raw = localStorage.getItem(STATSD_LAYOUT_KEY); return statsDNormLayout(raw ? JSON.parse(raw) : null); }
+  catch(e){ return statsDNormLayout(null); }
+}
+function statsV2SetLayout(obj){
+  const v = statsDNormLayout(obj);
+  try{ localStorage.setItem(STATSD_LAYOUT_KEY, JSON.stringify(v)); }catch(e){}
+  return v;
+}
+function statsDReadPins(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(STATSD_PINS_KEY) || 'null');
+    if(!Array.isArray(raw)) return [];
+    const out = [];
+    raw.forEach(n=>{ if(typeof n === 'string' && n && out.indexOf(n) < 0 && out.length < STATSD_MAX_PINS) out.push(n); });
+    return out;
+  }catch(e){ return []; }
+}
+function statsDWritePins(list){ try{ localStorage.setItem(STATSD_PINS_KEY, JSON.stringify(list.slice(0, STATSD_MAX_PINS))); }catch(e){} }
+function statsV2PinnedList(){ return statsDReadPins(); }   // zapisane nazwy; ćwiczenia bez historii są pomijane dopiero przy wyświetlaniu
+function statsV2IsPinned(name){ return typeof name === 'string' && statsDReadPins().indexOf(name) >= 0; }
+function statsDExists(name){ return !!stv2Safe(()=> statsV2ExerciseRecord(name), null); }
+// true = ćwiczenie jest teraz przypięte, false = odpięte albo odmowa (6. przypięcie: toast z błędem)
+function statsV2TogglePin(name){
+  if(typeof name !== 'string' || !name) return false;
+  const list = statsDReadPins();
+  const i = list.indexOf(name);
+  if(i >= 0){ list.splice(i, 1); statsDWritePins(list); statsDRefreshScreens(); return false; }
+  const live = list.filter(statsDExists);   // martwe wpisy nie zajmują miejsca w limicie
+  if(live.length >= STATSD_MAX_PINS){ toast(t('stDPinMax', 'Możesz przypiąć maksymalnie 5 ćwiczeń.'), { error: true }); return false; }
+  live.push(name); statsDWritePins(live); statsDRefreshScreens();
+  return true;
+}
+// odświeżenie ekranu pod arkuszem: przegląd bez ponownej animacji wejścia (z zachowaniem przewinięcia) albo lista ćwiczeń
+function statsDRefreshScreens(){
+  try{
+    if(currentRoute === 'stats-v2' && !selectedStatsExerciseV2){ const y = window.scrollY || 0; renderStatsV2(false); window.scrollTo(0, y); }
+    else if(currentRoute === 'stats-ex-v2' && typeof statsExPickerRender === 'function') statsExPickerRender();
+  }catch(e){}
+}
+
+/* ---------- Dostosuj ekran ---------- */
+let statsDDraft = null;   // { order:[id...], hidden:Set } do ZAPISZ; zamknięcie bez zapisu go odrzuca
+const STATSD_GRIP = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
+function statsV2OpenCustomize(){
+  const lay = statsV2Layout();
+  statsDDraft = { order: lay.order.slice(), hidden: new Set(lay.hidden) };
+  const $ = id => document.getElementById(id);
+  $('stdCustTitle').textContent = t('stDCustTitle', 'DOSTOSUJ EKRAN');
+  $('stdCustSub').textContent = t('stDCustSub', 'Wybierz, co widzisz w Postępach. Przeciągnij, żeby zmienić kolejność.');
+  $('stdCustX').setAttribute('aria-label', t('stDClose', 'Zamknij'));
+  $('stdCustSave').textContent = t('stDSave', 'ZAPISZ');
+  statsDCustPaint();
+  acctSheetOpen('statsCustSheet');
+}
+function statsDCustPinRowHtml(){
+  const pins = statsDReadPins().filter(statsDExists);
+  return `<span class="std-pinrow-t"><span class="std-pinrow-n">${t('stDPinRowT', 'Przypięte ćwiczenia')}</span><span class="std-pinrow-s">${pins.length ? escHtml(pins.join(', ')) : t('stDPinRowNone', 'Nic nie przypięto')}</span></span><span class="std-pinrow-c">${t('stDPinRowOf', `${pins.length} z ${STATSD_MAX_PINS}`, pins.length)}</span><span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span>`;
+}
+function statsDCustPaint(focusId, focusDir){
+  const d = statsDDraft, list = document.getElementById('stdCustList');
+  if(!d || !list) return;
+  list.innerHTML = d.order.map((id, i)=>{
+    const lb = STATSD_LABELS[id], nm = escHtml(t(lb[0], lb[1]));
+    const on = !d.hidden.has(id);
+    return `<div class="std-row" data-id="${id}"><button type="button" class="std-grip" aria-label="${escHtml(t('stDGrip', `Zmień kolejność: ${lb[1]}`, lb[1]))}">${STATSD_GRIP}</button>`
+      + `<span class="std-name">${nm}</span>`
+      + `<span class="std-mv"><button type="button" class="std-mvb" data-d="-1" aria-label="${escHtml(t('stDUp', `Przesuń wyżej: ${lb[1]}`, lb[1]))}"${i === 0 ? ' disabled' : ''}>▲</button><button type="button" class="std-mvb" data-d="1" aria-label="${escHtml(t('stDDown', `Przesuń niżej: ${lb[1]}`, lb[1]))}"${i === d.order.length - 1 ? ' disabled' : ''}>▼</button></span>`
+      + `<button type="button" class="std-sw m-press" role="switch" aria-checked="${on}" aria-label="${nm}" onclick="statsDCustToggle('${id}', this)"><i></i></button></div>`;
+  }).join('');
+  list.querySelectorAll('.std-row').forEach(row=>{
+    const id = row.dataset.id, grip = row.querySelector('.std-grip');
+    grip.addEventListener('pointerdown', e=> statsDGripDown(e, row));
+    grip.addEventListener('touchstart', e=> e.stopPropagation(), { passive: true });   // gest układu nie może uruchomić ściągania arkusza (mSheetDrag słucha na całym panelu)
+    grip.addEventListener('touchmove', e=> e.stopPropagation(), { passive: true });
+    grip.addEventListener('keydown', e=>{ if(e.key === 'ArrowUp' || e.key === 'ArrowDown'){ e.preventDefault(); statsDCustMove(id, e.key === 'ArrowUp' ? -1 : 1, true); } });
+    row.querySelectorAll('.std-mvb').forEach(b=> b.addEventListener('click', ()=> statsDCustMove(id, +b.dataset.d, false)));
+  });
+  const pr = document.getElementById('stdPinRow');
+  if(pr) pr.innerHTML = statsDCustPinRowHtml();
+  if(focusId){
+    const row = list.querySelector(`.std-row[data-id="${focusId}"]`);
+    const el = row && (focusDir === 'grip' ? row.querySelector('.std-grip') : (row.querySelector(`.std-mvb[data-d="${focusDir}"]:not([disabled])`) || row.querySelector('.std-mvb:not([disabled])')));
+    if(el) try{ el.focus({ preventScroll: true }); }catch(e){}
+  }
+}
+function statsDCustToggle(id, btn){
+  const d = statsDDraft; if(!d) return;
+  if(d.hidden.has(id)) d.hidden.delete(id); else d.hidden.add(id);
+  if(btn) btn.setAttribute('aria-checked', String(!d.hidden.has(id)));
+}
+function statsDCustMove(id, dir, viaGrip){
+  const d = statsDDraft; if(!d) return;
+  const i = d.order.indexOf(id), j = i + dir;
+  if(i < 0 || j < 0 || j >= d.order.length) return;
+  d.order.splice(j, 0, d.order.splice(i, 1)[0]);
+  statsDCustPaint(id, viaGrip ? 'grip' : String(dir));
+}
+// przeciąganie wiersza za uchwyt: transform 1:1 z palcem, reszta wierszy przesuwa się o krok; po puszczeniu dociągnięcie do slotu
+let statsDDragSt = null;
+function statsDGripDown(e, row){
+  if(statsDDragSt || (e.pointerType === 'mouse' && e.button > 0)) return;
+  const list = row.parentElement, rows = Array.from(list.children);
+  const idx = rows.indexOf(row);
+  if(rows.length < 2) return;
+  const step = rows[1].offsetTop - rows[0].offsetTop;
+  const grip = e.currentTarget;
+  statsDDragSt = { row, rows, idx, cur: idx, step, y0: e.clientY, list, pid: e.pointerId, grip };
+  try{ grip.setPointerCapture(e.pointerId); }catch(_){}
+  row.classList.add('std-row--drag');
+  list.classList.add('std-list--dragging');
+  const mv = ev=> statsDGripMove(ev);
+  const up = ev=>{ grip.removeEventListener('pointermove', mv); grip.removeEventListener('pointerup', up); grip.removeEventListener('pointercancel', up); statsDGripUp(ev); };
+  grip.addEventListener('pointermove', mv);
+  grip.addEventListener('pointerup', up);
+  grip.addEventListener('pointercancel', up);
+  e.preventDefault();
+}
+function statsDGripMove(e){
+  const s = statsDDragSt; if(!s || e.pointerId !== s.pid) return;
+  const n = s.rows.length;
+  const dy = Math.max(-s.idx * s.step, Math.min((n - 1 - s.idx) * s.step, e.clientY - s.y0));
+  s.row.style.transform = `translateY(${dy.toFixed(1)}px) scale(1.02)`;
+  const cur = Math.max(0, Math.min(n - 1, Math.round(s.idx + dy / s.step)));
+  if(cur === s.cur) return;
+  s.cur = cur;
+  s.rows.forEach((r, j)=>{
+    if(r === s.row) return;
+    r.style.transform = (j > s.idx && j <= cur) ? `translateY(${-s.step}px)` : (j < s.idx && j >= cur) ? `translateY(${s.step}px)` : '';
+  });
+}
+function statsDGripUp(){
+  const s = statsDDragSt; if(!s) return;
+  let done = false;
+  const commit = ()=>{
+    if(done) return; done = true;
+    statsDDragSt = null;
+    const d = statsDDraft;
+    if(d && s.cur !== s.idx) d.order.splice(s.cur, 0, d.order.splice(s.idx, 1)[0]);
+    statsDCustPaint(s.row.dataset.id, 'grip');   // przemalowanie bez przejść: wiersze wracają do pozycji 0 już w nowej kolejności
+  };
+  s.row.classList.add('std-row--settle');
+  s.row.style.transform = `translateY(${(s.cur - s.idx) * s.step}px)`;
+  s.row.addEventListener('transitionend', commit, { once: true });
+  setTimeout(commit, 420);   // zabezpieczenie: PWA w tle / brak transitionend
+}
+function statsDCustSave(){
+  if(!statsDDraft) return;
+  statsV2SetLayout({ order: statsDDraft.order, hidden: Array.from(statsDDraft.hidden) });
+  statsDCustClose();
+  statsDRefreshScreens();
+  toast(t('stDSaved', 'Zapisano'));
+}
+function statsDCustClose(viaDrag){ statsDDragSt = null; acctSheetClose('statsCustSheet', viaDrag); }
+function statsDCustToPin(){
+  if(statsDDraft) statsV2SetLayout({ order: statsDDraft.order, hidden: Array.from(statsDDraft.hidden) });   // układ nie ginie po drodze do Przypnij
+  statsDCustClose();
+  statsDRefreshScreens();
+  setTimeout(()=> statsV2OpenPin('overview'), 280);   // po zamknięciu Dostosuj (260 ms)
+}
+
+/* ---------- Przypnij ćwiczenia ---------- */
+let statsDPin = null;   // { sel:[nazwy w kolejności wyboru], rows:[...], q:'' }
+const STATSD_CK = '<svg viewBox="0 0 12 12" width="12" height="12" fill="none" aria-hidden="true"><path d="M2.5 6.4l2.3 2.3 4.7-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+// returnTo ('overview' | 'list') tylko informacyjnie: po ZAPISZ odświeżany jest ekran, na którym arkusz leży (statsDRefreshScreens)
+function statsV2OpenPin(returnTo){
+  const model = stv2Safe(()=> statsV2ExListModel(), { rows: [] });
+  const rows = model.rows.slice();
+  const pins = statsDReadPins().filter(n=> rows.some(r=> r.name === n));   // ćwiczenia bez historii pomijamy przy wyświetlaniu
+  rows.sort((a, b)=>{
+    const pa = pins.indexOf(a.name), pb = pins.indexOf(b.name);
+    if(pa >= 0 || pb >= 0) return pa < 0 ? 1 : pb < 0 ? -1 : pa - pb;
+    return a.daysAgo - b.daysAgo || (a.name < b.name ? -1 : 1);
+  });
+  statsDPin = { sel: pins.slice(), rows, q: '' };
+  const $ = id => document.getElementById(id);
+  $('stdPinTitle').textContent = t('stDPinTitle', 'PRZYPNIJ ĆWICZENIA');
+  $('stdPinSub').textContent = t('stDPinSub', 'Wybrane ćwiczenia pokażą się w Rekordach. Max 5.');
+  $('stdPinX').setAttribute('aria-label', t('stDClose', 'Zamknij'));
+  $('stdPinSave').textContent = t('stDSave', 'ZAPISZ');
+  mountExSearch('stdPinSearch', '', v=>{ if(statsDPin){ statsDPin.q = v; statsDPinPaint(); } });
+  const inp = document.querySelector('#stdPinSearch .exs-input');
+  if(inp){ inp.placeholder = t('stxSearchPh', 'SZUKAJ ĆWICZENIA'); inp.setAttribute('aria-label', t('stDPinSearchAria', 'Szukaj ćwiczenia')); }
+  statsDPinPaint();
+  acctSheetOpen('statsPinSheet');
+}
+function statsDPinPaint(){
+  const p = statsDPin, host = document.getElementById('stdPinList');
+  if(!p || !host) return;
+  const q = (p.q || '').trim();
+  const shown = [];
+  p.rows.forEach((r, i)=>{ if(!q || exMatchesSearch({ name: r.name, group: (PLAN_EX_GROUPS.find(b=> b.key === r.group) || {}).pl || '' }, q)) shown.push(i); });
+  if(!shown.length){
+    host.innerHTML = `<p class="std-empty">${p.rows.length ? t('stDPinEmpty', 'Nie znaleziono ćwiczeń.') : t('stxExNone', 'Tu pojawią się ćwiczenia po pierwszym zapisanym treningu.')}</p>`;
+  } else {
+    host.innerHTML = shown.map(i=>{
+      const r = p.rows[i];
+      return `<button type="button" class="std-pr" role="checkbox" aria-checked="false" data-i="${i}" onclick="statsDPinTap(${i})"><span class="std-pr-t"><span class="std-pr-n">${escHtml(r.name)}</span><span class="std-pr-p"><span class="std-pill std-pill--mint">${escHtml(statsXSessionsText(r.sessions))}</span><span class="std-pill std-pill--or">${escHtml(t('stDPinRec', `rekord ${statsXExVal(r)}`, statsXExVal(r)))}</span></span></span><span class="std-ck">${STATSD_CK}</span></button>`;
+    }).join('');
+  }
+  statsDPinSync();
+}
+function statsDPinSync(){
+  const p = statsDPin; if(!p) return;
+  const full = p.sel.length >= STATSD_MAX_PINS;
+  document.querySelectorAll('#stdPinList .std-pr').forEach(el=>{
+    const r = p.rows[+el.dataset.i]; if(!r) return;
+    const on = p.sel.indexOf(r.name) >= 0;
+    el.setAttribute('aria-checked', String(on));
+    if(full && !on) el.setAttribute('aria-disabled', 'true'); else el.removeAttribute('aria-disabled');
+  });
+  const c = document.getElementById('stdPinCount');
+  if(c) c.textContent = t('stDPinCount', `Wybrano ${p.sel.length} z ${STATSD_MAX_PINS}`, p.sel.length);   // zawsze zgodny z liczbą zaznaczonych
+}
+function statsDPinTap(i){
+  const p = statsDPin; if(!p) return;
+  const r = p.rows[i]; if(!r) return;
+  const k = p.sel.indexOf(r.name);
+  if(k >= 0) p.sel.splice(k, 1);
+  else if(p.sel.length < STATSD_MAX_PINS) p.sel.push(r.name);
+  else return;
+  statsDPinSync();
+}
+function statsDPinSave(){
+  if(!statsDPin) return;
+  statsDWritePins(statsDPin.sel);
+  statsDPinClose();
+  statsDRefreshScreens();
+  toast(t('stDSaved', 'Zapisano'));
+}
+function statsDPinClose(viaDrag){
+  try{ const a = document.activeElement; if(a && a.blur && a.closest && a.closest('#statsPinSheet')) a.blur(); }catch(e){}
+  acctSheetClose('statsPinSheet', viaDrag);
 }
 
 function renderStatsV2Detail(name){
@@ -22952,10 +23361,13 @@ function statsXExDelta(r){
   if(!(r.delta > 0)) return '';
   return r.unit === 'kg' ? `+${fmtKgLocal(r.delta)} kg` : r.unit === 's' ? `+${Math.round(r.delta)} s` : `+${Math.round(r.delta)}`;
 }
+const STATSD_STAR = '<svg class="std-star" viewBox="0 0 24 24" width="14" height="14" role="img" aria-label="Przypięte" fill="currentColor"><path d="M12 3.2l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6-4.4-4.3 6.1-.9L12 3.2z"/></svg>';
 function statsXExRowHtml(r){
+  const pinStar = (typeof statsV2IsPinned === 'function' && statsV2IsPinned(r.name)) ? STATSD_STAR.replace('aria-label="Przypięte"', `aria-label="${escHtml(t('stDPinned', 'Przypięte'))}"`) : '';
+  const nameHtml = pinStar ? `<span class="std-nrow"><span class="stc-x-name">${escHtml(r.name)}</span>${pinStar}</span>` : `<span class="stc-x-name">${escHtml(r.name)}</span>`;
   const stalled = r.stalledWeeks != null ? `<span class="stc-pill stc-pill--amber">${t('stxStalled', n=> `bez zmian · ${n} tyg.`, r.stalledWeeks)}</span>` : '';
   return `<button type="button" class="stc-x-row m-press" onclick="statsXPickExercise(${jsArg(r.name)})">`
-    + `<span class="stc-x-main"><span class="stc-x-name">${escHtml(r.name)}</span><span class="stc-x-meta">${escHtml(statsXDaysAgoText(r.daysAgo))}<span class="stc-pill">${escHtml(statsXSessionsText(r.sessions))}</span></span>${stalled}</span>`
+    + `<span class="stc-x-main">${nameHtml}<span class="stc-x-meta">${escHtml(statsXDaysAgoText(r.daysAgo))}<span class="stc-pill">${escHtml(statsXSessionsText(r.sessions))}</span></span>${stalled}</span>`
     + statsXSpark(r.spark)
     + `<span class="stc-x-val">${escHtml(statsXExVal(r))}<small>${escHtml(statsXExDelta(r))}</small></span></button>`;
 }
@@ -22980,14 +23392,16 @@ function statsExPickerRender(){
   const chipsEl = document.getElementById('statsExChips'), listEl = document.getElementById('statsExList');
   if(!chipsEl || !listEl) return;
   const model = statsV2ExListModel();
-  if(statsXGroup !== 'all' && !model.groups.some(g=> g.key === statsXGroup)) statsXGroup = 'all';
+  const pinnedSet = typeof statsV2PinnedList === 'function' ? new Set(statsV2PinnedList().filter(nm=> model.rows.some(r=> r.name === nm))) : new Set();   // przypięte z historią
+  if(statsXGroup === 'pinned' ? !pinnedSet.size : (statsXGroup !== 'all' && !model.groups.some(g=> g.key === statsXGroup))) statsXGroup = 'all';
   const chipList = [{ key: 'all', label: t('stxAllChip', 'Wszystkie') }];
-  if(typeof statsV2PinnedList === 'function'){ /* chip „Przypięte”: dopiero po etapie D */ }
+  if(pinnedSet.size) chipList.push({ key: 'pinned', label: t('stDPinned', 'Przypięte') });
   model.groups.forEach(g=> chipList.push(g));
   chipsEl.innerHTML = chipList.map(c=> `<button type="button" class="stc-chip" role="radio" aria-checked="${c.key === statsXGroup}" onclick="statsXSetGroup(${jsArg(c.key)})">${escHtml(c.label)}</button>`).join('');
   const q = (statsXQuery || '').trim();
   let rows = model.rows, cardio = model.cardio;
   if(statsXGroup === 'Kardio') rows = [];
+  else if(statsXGroup === 'pinned'){ rows = rows.filter(r=> pinnedSet.has(r.name)); cardio = []; }
   else if(statsXGroup !== 'all'){ rows = rows.filter(r=> r.group === statsXGroup); cardio = []; }
   if(q){
     rows = rows.filter(r=> exMatchesSearch({ name: r.name, group: (PLAN_EX_GROUPS.find(b=> b.key === r.group) || {}).pl || '' }, q));
