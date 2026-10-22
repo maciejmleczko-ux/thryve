@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.86.0 (2026-10-22)
-- **Liczba wersji:** 264 · **commitów:** 642
+- **Aktualna wersja:** 4.86.1 (2026-10-23)
+- **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,13 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.86.1 · PATCH · 2026-10-23
+
+- **Podpisy kafli ćwiczeń (Trening):** waga 300 → 500. Po teście na iPhonie 11 px wersalikami w 300 było za cienkie (zmiana z 4.84.1). Reguła wag nazw ćwiczeń: od 24 px 200, 12–14 px 300, 11 px wersaliki 500.
+
+**Commity (0):**
+
 
 ### 4.86.0 · MINOR · 2026-10-22
 
