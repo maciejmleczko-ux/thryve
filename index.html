@@ -2797,7 +2797,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
    256 viewBox instead of duplicating new ones at the Figma export's
    24 viewBox. */
 .histv2-root{background:transparent;}   /* tło daje .pg-bg (jak Pulpit) */
-.histv2-panel{padding:max(14px, calc(var(--top-inset) - 8px)) 10px 40px;position:relative;}
+.histv2-panel{padding:max(14px, calc(var(--top-inset) - 8px)) 10px 130px;position:relative;}
 /* Aligned to GYM v2/Plans v2's header exactly (40px icon, 30.654px
    title, -.02em tracking) — the Figma export's own 55.18px/30px/+1.2px
    for History read as an outlier from that specific export rather than
@@ -2807,8 +2807,8 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 /* the whole blue card drags with the finger (see wireHistCalSwipeV2);
    pan-y keeps vertical page scroll native, horizontal is ours. The card
    sliding out is clipped by .view-stack's overflow-x:hidden. */
-.histv2-cal-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:24px 16px 16px;margin-bottom:24px;box-sizing:border-box;touch-action:pan-y;}
-.histv2-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.histv2-cal-card{background:var(--m-plan-mid);border-radius:var(--m-r-md);padding:18px 16px 12px;margin-bottom:var(--m-gap-card,8px);box-sizing:border-box;touch-action:pan-y;}
+.histv2-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .histv2-cal-nav-month{display:flex;align-items:center;gap:8px;}
 .histv2-cal-nav-month .ph{width:24px;height:24px;color:#fff;cursor:pointer;flex-shrink:0;}
 .histv2-cal-nav-month .ph:active{opacity:.6;}
@@ -2819,8 +2819,8 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .histv2-cal-year-label{font-size:var(--m-fs-base);font-weight:500;color:#fff;letter-spacing:.56px;}
 .histv2-cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:8px;}
 .histv2-cal-dow{text-align:center;font-size:var(--m-fs-sm);color:var(--m-plan-easy);}
-.histv2-cal-days{display:grid;grid-template-columns:repeat(7,1fr);row-gap:6px;}
-.histv2-cal-day{aspect-ratio:1;width:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:var(--m-fs-base);color:#fff;cursor:pointer;border:none;background:none;font-family:inherit;padding:0;}
+.histv2-cal-days{display:grid;grid-template-columns:repeat(7,1fr);row-gap:4px;}
+.histv2-cal-day{aspect-ratio:1;width:100%;max-width:44px;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:var(--m-fs-base);color:#fff;cursor:pointer;border:none;background:none;font-family:inherit;padding:0;}
 .histv2-cal-day.outside{color:rgba(255,255,255,.3);cursor:default;}
 /* Three plan states (Maciej, Figma 177:10109) — a day is at most one of
    these, checked in this priority: logged beats everything (even an
@@ -2917,6 +2917,97 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
   .histv2-card.hist-reveal .histv2-wrecord{animation:loadv2Rise var(--m-dur-in) var(--m-ease) backwards;animation-delay:.1s;}
   .histv2-card.hist-reveal .histv2-ex-item{animation:histExRow var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(.1s + var(--i,0) * 40ms);}
   @keyframes histExRow{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+}
+
+/* ===== Historia: układ A (kalendarz + lista miesiąca) — eksperyment 2026-10-22 ===== */
+.histv2-cal-day.today:not(.selected)::after{content:"";position:absolute;bottom:4px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#fff;}
+.histv2-cal-day{position:relative;}
+.histv2-cal-day.today.has-log:not(.selected)::after{background:#fff;}
+.histv2-sum{background:#fff;border-radius:var(--m-r-md);padding:14px 8px 12px;margin:0 0 12px;display:grid;grid-template-columns:1fr 1fr 1fr;box-sizing:border-box;}
+.histv2-sum-cell{text-align:center;padding:0 4px;border-left:.5px solid var(--m-orange-tint);}
+.histv2-sum-cell:first-child{border-left:none;}
+.histv2-sum-cell .v{margin:0;font-size:var(--m-fs-lg);font-weight:400;letter-spacing:-.02em;color:var(--m-ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.histv2-sum-cell .k{margin:4px 0 0;font-size:var(--m-fs-2xs);color:var(--m-muted-text);text-transform:uppercase;letter-spacing:.09em;}
+.histv2-recpill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px 0 8px;border-radius:14px;background:var(--m-amber);font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);}
+.histv2-recpill[hidden]{display:none;}
+.histv2-recpill .ph{width:16px;height:16px;color:var(--m-ink);}
+.histv2-sum-rec{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:6px;padding-top:12px;border-top:.5px solid var(--m-orange-tint);font-size:var(--m-fs-xs);color:var(--m-ink);}
+.histv2-sum-rec .ph{width:16px;height:16px;color:var(--m-orange);flex-shrink:0;}
+.histv2-sum-delta{grid-column:1/-1;margin:-4px 0 0;text-align:center;font-size:var(--m-fs-2xs);color:var(--m-muted);}
+.histv2-sum-delta.up{color:#1f9d6b;}
+.histv2-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin-bottom:4px;}
+.histv2-label-row .histv2-section-label{margin:0;}
+.histv2-daychip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px 0 14px;border:none;border-radius:16px;background:var(--m-ink);color:#fff;font:inherit;font-size:var(--m-fs-xs);cursor:pointer;}
+.histv2-daychip{position:relative;}
+.histv2-daychip::after{content:"";position:absolute;inset:-6px -4px;}   /* 32 px wizualnie, 44 px do kliknięcia */
+.histv2-daychip[hidden]{display:none;}
+.histv2-daychip .ph{width:14px;height:14px;}
+.histv2-list{gap:var(--m-gap-card,8px);}
+.histv2-row{display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;min-height:72px;padding:12px 14px 12px 8px;border:none;border-radius:var(--m-r-md);background:#fff;font:inherit;text-align:left;color:var(--m-ink);cursor:pointer;}
+.histv2-row--static{cursor:default;}
+.histv2-row-date{width:46px;flex-shrink:0;text-align:center;}
+.histv2-row-date b{display:block;font-size:var(--m-fs-xl);font-weight:400;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+.histv2-row-date span{display:block;margin-top:4px;font-size:var(--m-fs-2xs);color:var(--m-muted-text);letter-spacing:.09em;}
+.histv2-row-main{flex:1;min-width:0;}
+.histv2-row-main .t{margin:0;font-size:var(--m-fs-md);font-weight:500;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.histv2-row-rec,.histv2-row-ico{width:24px;height:28px;background:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.histv2-row-rec .ph,.histv2-row-ico .ph{width:20px;height:20px;color:var(--m-orange);}
+.histv2-row-pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.hpill{display:inline-flex;align-items:center;height:20px;padding:0 10px;border-radius:var(--m-r-pill);font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.hpill--time{background:var(--m-plum-tint);color:var(--m-plum-ink);}      /* czas: śliwka (jak kafel Czas) */
+.hpill--count{background:var(--m-sky-tint);color:var(--m-sky-ink);}        /* liczba ćwiczeń: niebo (jak kafel Ćwiczenia) */
+.hpill--load{background:var(--m-red-wash);color:var(--m-metric-volume);}      /* objętość: czerwień (jak kafel Objętość i mini-kafel na Pulpicie) */
+.hpill--dist{background:var(--m-sky-tint);color:var(--m-sky-ink);}         /* dystans: niebo */
+/* blok ćwiczenia w szczególe = sesja z „Historii serii” (Postępy): nazwa, MAX + puchar, pastylki serii w 3 kolumnach, 3 odcienie wg powtórzeń */
+.histv2-exblk{padding:14px 0;}
+.histv2-exblk:first-child{padding-top:8px;}
+.histv2-exblk + .histv2-exblk{border-top:.5px solid var(--m-orange-tint);}
+.histv2-exblk-top{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.histv2-exblk-id{display:flex;align-items:center;gap:12px;min-width:0;}
+.histv2-exblk-d{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.histv2-exblk-d strong{font-size:var(--m-fs-base);font-weight:500;line-height:1.3;color:var(--m-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.histv2-exblk-d span{font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted-text);}
+.histv2-exblk-max{display:flex;align-items:center;gap:16px;flex:none;}
+.histv2-max{display:inline-flex;align-items:center;height:20px;padding:0 14px;border-radius:var(--m-r-pill);background:var(--m-orange-tint-2);color:var(--m-orange-ink);font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.04em;}
+.histv2-trophy,.histv2-trophy svg{display:block;flex:none;width:25px;height:20px;color:var(--m-orange);}
+.histv2-pills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-top:12px;}
+.histv2-pill{display:flex;align-items:center;justify-content:center;height:30px;padding:0 6px;border-radius:var(--m-r-pill);font-size:var(--m-fs-xs);font-weight:400;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.histv2-p0{background:var(--m-mint-tint);color:var(--m-mint-ink);}
+.histv2-p1{background:var(--m-mint);color:var(--m-ink);}
+.histv2-p2{background:var(--m-mint-ink);color:var(--m-white);}
+.histv2-pt{background:var(--m-plum-tint);color:var(--m-plum-ink);}   /* serie na czas: śliwka */
+
+.histv2-row-caret{width:20px;height:20px;flex-shrink:0;color:var(--m-muted);}
+.histv2-row-caret .ph{width:20px;height:20px;transform:rotate(-90deg);}
+.histv2-empty2{background:#fff;border-radius:var(--m-r-md);padding:28px 20px 22px;text-align:center;box-sizing:border-box;}
+.histv2-empty2-ico{display:block;width:44px;height:44px;margin:0 auto 12px;color:var(--m-orange);}
+.histv2-empty2 .t{margin:0;font-size:var(--m-fs-md);font-weight:500;color:var(--m-ink);}
+.histv2-empty2 .s{margin:6px auto 0;max-width:260px;font-size:var(--m-fs-sm);color:var(--m-muted-text);line-height:1.4;}
+.histv2-empty2 .m2-btn{margin-top:18px;width:100%;}
+.histv2-empty2-link{margin-top:6px;min-height:44px;padding:0 16px;border:none;background:none;font:inherit;font-size:var(--m-fs-sm);font-weight:500;color:var(--m-orange);cursor:pointer;}
+.histv2-open{touch-action:pan-y;position:fixed;inset:0;z-index:9500;overflow:hidden;background:#fbece3;visibility:hidden;transform:translateX(100%);transition:transform var(--m-dur-exit) var(--m-ease-exit),visibility 0s linear var(--m-dur-exit);}
+.histv2-open.open{visibility:visible;transform:none;transition:transform var(--m-dur-in) var(--m-ease-sheet),visibility 0s;}
+.histv2-open.closing{visibility:visible;}
+.histv2-open-scroll{z-index:1;position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:max(14px, calc(var(--top-inset) - 8px)) 10px 0;}
+.histv2-open-top{margin-bottom:8px;}
+.histv2-open-sharebtn{justify-self:end;width:40px;height:40px;padding:0;border:none;border-radius:50%;background:none;color:var(--m-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.histv2-open-sharebtn{position:relative;}
+.histv2-open-sharebtn::after{content:"";position:absolute;inset:-2px;}   /* 40 px wizualnie, 44 px do kliknięcia */
+.histv2-open-sharebtn .ph{width:20px;height:20px;}
+.histv2-open .ph{display:block;}
+.histv2-open .ph svg{display:block;width:100%;height:100%;}
+.histv2-open .profil-back .ph{width:18px;height:18px;}
+.histv2-open .profil-back{-webkit-backdrop-filter:none;backdrop-filter:none;}
+.histv2-open-inner{align-items:stretch;padding:0 0 140px;}
+.histv2-open .gymfin-heads{align-self:center;margin-bottom:28px;text-align:center;}
+.histv2-open .gymfin-record{margin-bottom:8px;}
+.histv2-open-label{margin:24px 0 8px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-ink);text-align:left;}
+.histv2-open-ex{background:rgba(255,255,255,.6);border:.91px solid #f1d7cb;-webkit-backdrop-filter:blur(10.2px);backdrop-filter:blur(10.2px);border-radius:var(--m-r-sm);padding:14px 14px 6px;text-align:left;}
+.histv2-open-share{width:100%;margin-top:20px;}
+.histv2-open-del{display:block;width:100%;min-height:48px;margin-top:4px;border:none;background:none;font:inherit;font-size:var(--m-fs-sm);color:var(--m-danger);cursor:pointer;}
+@media (prefers-reduced-motion: reduce){
+  .histv2-open{transform:none;opacity:0;transition:opacity var(--m-dur-fade) ease,visibility 0s linear var(--m-dur-fade);}
+  .histv2-open.open{opacity:1;}
 }
 .histv2-root .ph{display:block;}
 .histv2-root .ph svg{display:block;width:100%;height:100%;}
@@ -4603,10 +4694,15 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
       </div>
 
-      <p class="histv2-section-label" data-i18n="histV2YourWorkouts">Twoje treningi</p>
+      <div id="histSumV2"></div>
+      <div class="histv2-label-row"><p class="histv2-section-label" id="histListLabelV2">Treningi</p><button type="button" class="histv2-daychip m-press" id="histDayChipV2" hidden onclick="histClearDayV2()"></button><span class="histv2-recpill" id="histRecPillV2" hidden></span></div>
       <div class="histv2-list" id="histDetailV2"></div>
     </div>
   </section>
+  <div class="histv2-open" id="histOpenV2" aria-hidden="true">
+    <div class="gymfin-photo" aria-hidden="true"></div><div class="gymfin-wash" aria-hidden="true"></div>
+    <div class="histv2-open-scroll" id="histOpenScrollV2"></div>
+  </div>
 
   <!-- ===================== STATS v2 (Figma nodes 182:12264 "11. Statistic" +
        183:13393 "11. Statistic - details") — v3-styled replacement for
@@ -10026,7 +10122,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.81.2";
+const APP_VERSION = "4.82.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.81.0": {
@@ -20971,10 +21067,6 @@ function renderCalendarV2Core(animate){
   if(selectedHistDateV2 && selectedHistDateV2.slice(0,7) !== monthKey){
     selectedHistDateV2 = null;
   }
-  if(!selectedHistDateV2){
-    const todaysIso = todayStr();
-    selectedHistDateV2 = todaysIso.slice(0,7) === monthKey ? todaysIso : null;
-  }
   let html = '';
   for(let i=0;i<startOffset;i++){
     html += `<button type="button" class="histv2-cal-day outside" disabled>${prevMonthDays-startOffset+1+i}</button>`;
@@ -20988,8 +21080,9 @@ function renderCalendarV2Core(animate){
     else if(isPlanDay && iso < todayIso) cls.push('missed');
     else if(isPlanDay) cls.push('planned');
     if(iso===selectedHistDateV2) cls.push('selected');
+    if(iso===todayIso) cls.push('today');
     if(isPlanDay) cls.push('has-ring');
-    html += `<button type="button" class="${cls.join(' ')}" onclick="selectedHistDateV2='${iso}';histExpandedV2={};renderCalendarV2();">${d}</button>`;
+    html += `<button type="button" class="${cls.join(' ')}" onclick="histPickDayV2('${iso}')">${d}</button>`;
   }
   const totalCells = startOffset + daysInMonth;
   const trailing = (7 - (totalCells % 7)) % 7;
@@ -21202,17 +21295,304 @@ function renderHistDetailV2(animate){
     if(wrap) wrap.innerHTML = recErrorHtml('histv2-empty', 'histRenderError', 'Nie udało się wyświetlić historii. Spróbuj ponownie za chwilę.', 'renderHistDetailV2(false)');
   });
 }
+const HIST_DOW_FULL_V2 = ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
+function histPickDayV2(iso){
+  selectedHistDateV2 = selectedHistDateV2 === iso ? null : iso;
+  haptic('light');
+  renderCalendarV2();
+}
+function histClearDayV2(){ selectedHistDateV2 = null; renderCalendarV2(); }
+function histFmtDurV2(min){
+  if(!min) return '—';
+  const h = Math.floor(min/60), m = Math.round(min%60);
+  return h ? `${h} h ${String(m).padStart(2,'0')} min` : `${m} min`;
+}
+function histFmtTonsV2(kg){ return (kg/1000).toFixed(1).replace('.',',') + ' t'; }
+function histWorkoutStatsV2(w){
+  const vol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
+  const sets = w.exercises.reduce((s,e)=> s + e.sets.length, 0);
+  return { vol, sets };
+}
+function histWorkoutNameV2(w){
+  const p = w.planId ? trainingPlans.find(x=>x.id===w.planId) : null;
+  return p && p.name ? p.name : 'Trening';
+}
+function histMonthStatsV2(prefix){
+  const ws = workouts.filter(w=>w.date.startsWith(prefix));
+  let vol = 0, min = 0, rec = 0;
+  ws.forEach(w=>{ vol += histWorkoutStatsV2(w).vol; min += (w.durationMin||0); if(workoutRecord(w)) rec++; });
+  return { n: ws.length, vol, min, rec };
+}
+function renderHistSumV2(animate){
+  const box = document.getElementById('histSumV2');
+  const {year, month} = calStateV2;
+  const prefix = `${year}-${String(month+1).padStart(2,'0')}`;
+  const cur = histMonthStatsV2(prefix);
+  window.histMonthRecV2 = 0;
+  if(!cur.n){ box.innerHTML = ''; return; }
+  box.innerHTML = `
+    <div class="histv2-sum${animate?' m-rise':''}" style="--i:0">
+      <div class="histv2-sum-cell"><p class="v">${cur.n}</p><p class="k">${plTreningWord(cur.n)}</p></div>
+      <div class="histv2-sum-cell"><p class="v">${histFmtDurV2(cur.min)}</p><p class="k">czas</p></div>
+      <div class="histv2-sum-cell"><p class="v">${histFmtTonsV2(cur.vol)}</p><p class="k">objętość</p></div>
+    </div>`;
+  window.histMonthRecV2 = cur.rec;
+}
+function histRowHtmlV2(kind, item, i, animate){
+  const d = new Date(item.date + 'T12:00:00');
+  const dow = ['ND','PN','WT','ŚR','CZ','PT','SO'][d.getDay()];
+  const rise = animate ? ' m-rise' : '';
+  if(kind === 'run'){
+    return `<div class="histv2-row histv2-row--static${rise}" style="--i:${Math.min(i,8)}">
+      <div class="histv2-row-date"><b>${d.getDate()}</b><span>${dow}</span></div>
+      <div class="histv2-row-main"><p class="t">${runTypeLabel(item.type)}</p><div class="histv2-row-pills"><span class="hpill hpill--dist">${item.distance} km</span><span class="hpill hpill--time">${item.time} min</span></div></div>
+      <span class="histv2-row-ico">${ph('sneaker-move')}</span>
+    </div>`;
+  }
+  const st = histWorkoutStatsV2(item);
+  const rec = workoutRecord(item);
+  const pills = [
+    item.durationMin ? `<span class="hpill hpill--time">${item.durationMin} min</span>` : '',
+    `<span class="hpill hpill--count">${item.exercises.length} ${plExercisesWord(item.exercises.length)}</span>`,
+    st.vol > 0 ? `<span class="hpill hpill--load">${histFmtTonsV2(st.vol)}</span>` : '',
+  ].join('');
+  return `<button type="button" class="histv2-row m-press${rise}" style="--i:${Math.min(i,8)}" onclick="openHistWorkoutV2('${escHtml(item.id)}')">
+      <div class="histv2-row-date"><b>${d.getDate()}</b><span>${dow}</span></div>
+      <div class="histv2-row-main"><p class="t">${escHtml(histWorkoutNameV2(item))}</p><div class="histv2-row-pills">${pills}</div></div>
+      ${rec ? `<span class="histv2-row-rec" title="Rekord">${ph('trophy')}</span>` : ''}
+      <span class="histv2-row-caret"><span class="ph" data-ph="caret-down"></span></span>
+    </button>`;
+}
+function histEmptyHtmlV2(kind, extra, isBefore){
+  if(kind === 'none') return `<div class="histv2-empty2">
+      <span class="histv2-empty2-ico">${ph('barbell')}</span>
+      <p class="t">Tu pojawią się Twoje treningi</p>
+      <p class="s">Po pierwszym treningu zobaczysz tu kalendarz, listę i swoje rekordy.</p>
+      <button type="button" class="m2-btn m-press" onclick="goRoute('gym-v2')">ZACZNIJ TRENING</button>
+    </div>`;
+  if(kind === 'month') return `<div class="histv2-empty2">
+      <p class="t">Brak treningów w tym miesiącu</p>
+      ${extra ? `<p class="s">${isBefore ? 'Ostatni trening' : 'Pierwszy trening'}: ${fmtDateHuman(extra)}</p><button type="button" class="histv2-empty2-link m-press" onclick="histJumpToV2('${extra}')">Pokaż ten miesiąc</button>` : ''}
+    </div>`;
+  return `<div class="histv2-empty2"><p class="t">Brak treningu tego dnia</p><p class="s">${fmtDateHuman(extra)}</p></div>`;
+}
+function histJumpToV2(iso){
+  const [y,m] = iso.split('-').map(Number);
+  calStateV2 = { year:y, month:m-1 };
+  selectedHistDateV2 = null;
+  renderCalendarV2();
+}
 function renderHistDetailV2Core(animate){
   const wrap = document.getElementById('histDetailV2');
-  const animCls = animate ? ' histv2-anim-in' : '';
-  if(!selectedHistDateV2){ wrap.innerHTML = renderHistMonthSummaryV2(animCls); return; }
-  const dayWorkouts = workouts.filter(w=>w.date===selectedHistDateV2);
-  const dayRuns = runs.filter(r=>r.date===selectedHistDateV2);
-  if(!dayWorkouts.length && !dayRuns.length){ wrap.innerHTML = `<div class="histv2-empty">${t('histEmptyNone', `Brak zapisanej aktywności — ${fmtDate(selectedHistDateV2)}`, fmtDate(selectedHistDateV2))}</div>`; return; }
+  const {year, month} = calStateV2;
+  const prefix = `${year}-${String(month+1).padStart(2,'0')}`;
+  const label = document.getElementById('histListLabelV2');
+  const chip = document.getElementById('histDayChipV2');
   closePlansv2Swipe();
-  wrap.innerHTML = '';
-  dayWorkouts.forEach((w,i)=> wrap.appendChild(buildHistCardV2('workout', w, i, animate)));
-  dayRuns.forEach((r,i)=> wrap.appendChild(buildHistCardV2('run', r, dayWorkouts.length+i, animate)));
+  if(!workouts.length && !runs.length){
+    document.getElementById('histSumV2').innerHTML = '';
+    label.hidden = true; chip.hidden = true; document.getElementById('histRecPillV2').hidden = true;
+    wrap.innerHTML = histEmptyHtmlV2('none');
+    return;
+  }
+  label.hidden = false;
+  renderHistSumV2(animate);
+  const day = selectedHistDateV2;
+  const inScope = d => day ? d === day : d.startsWith(prefix);
+  const items = [
+    ...workouts.filter(w=>inScope(w.date)).map(w=>({kind:'workout', item:w})),
+    ...runs.filter(r=>inScope(r.date)).map(r=>({kind:'run', item:r})),
+  ].sort((a,b)=> b.item.date.localeCompare(a.item.date));
+  if(day){
+    label.textContent = 'Trening z dnia';
+    chip.hidden = false;
+    chip.innerHTML = `<span>${fmtDateHuman(day).replace(/ \d{4}$/,'')}</span><span class="ph" data-ph="x"></span>`;
+    hydrateHistIconsV2(chip);
+  } else { label.textContent = 'Treningi'; chip.hidden = true; }
+  const pill = document.getElementById('histRecPillV2');
+  const rc = day ? 0 : (window.histMonthRecV2 || 0);
+  pill.hidden = !rc;
+  if(rc) pill.innerHTML = `${ph('trophy')}<span>${rc} ${rc===1?'rekord':(rc%10>=2&&rc%10<=4&&!(rc%100>=12&&rc%100<=14)?'rekordy':'rekordów')}</span>`;
+  if(!items.length){
+    if(day){ wrap.innerHTML = histEmptyHtmlV2('day', day); return; }
+    const all = [...workouts.map(w=>w.date), ...runs.map(r=>r.date)].sort();
+    const before = all.filter(d=>d < prefix).pop();
+    wrap.innerHTML = histEmptyHtmlV2('month', before || all[0] || null, !!before);
+    return;
+  }
+  wrap.innerHTML = items.map((x,i)=> histRowHtmlV2(x.kind, x.item, i, animate)).join('');
+  hydrateHistIconsV2(wrap);
+}
+function hydrateHistIconsV2(root){ root.querySelectorAll('.ph[data-ph]').forEach(el=>{ if(!el.firstChild && PH[el.dataset.ph]) el.innerHTML = PH[el.dataset.ph]; }); }
+
+/* ---- Ekran szczegółu treningu: wjeżdża z prawej jak push (tokeny --m-*), zamyka strzałka ---- */
+let histOpenIdV2 = null;
+function histPrevWorkoutV2(w){
+  return workouts.filter(x=> x.id !== w.id && (x.date < w.date || (x.date === w.date && String(x.id) < String(w.id))))
+    .sort((p,q)=> q.date.localeCompare(p.date) || String(q.id).localeCompare(String(p.id)))[0] || null;
+}
+function histPillTxtV2(e, x){
+  if(x.durationSec > 0) return fmtDur(x.durationSec, x.perSide);
+  const w = +x.weight || 0;
+  return w > 0 ? `${x.reps} x ${fmtGymWeight(w)} kg` : `${x.reps} powt.`;
+}
+// MAX: w tym treningu padł najcięższy ciężar tego ćwiczenia (większy niż we wszystkich wcześniejszych)
+function histExMaxV2(w, e){
+  const top = Math.max(0, ...exSetsView(e).map(x=> +x.weight || 0));
+  if(top <= 0) return false;
+  const before = workouts.filter(o=> o.id !== w.id && (o.date < w.date || (o.date === w.date && String(o.id) < String(w.id))));
+  let prev = 0;
+  before.forEach(o=> o.exercises.forEach(oe=>{ if(oe.name === e.name) exSetsView(oe).forEach(x=>{ prev = Math.max(prev, +x.weight || 0); }); }));
+  return prev > 0 && top > prev;
+}
+function histExBlockV2(w, e){
+  const sets = cardioMetricsFor(e.name) ? exSetsView(e).filter(x=> x.durationSec > 0) : exSetsView(e);
+  const sh = statsFShades(sets);
+  const pills = sets.map((x,i)=> cardioMetricsFor(e.name)
+    ? `<span class="histv2-pill histv2-pt">${escHtml(cardioSetLine(x, e.name))}</span>`
+    : `<span class="histv2-pill ${x.durationSec > 0 ? 'histv2-pt' : 'histv2-p' + sh[i]}">${escHtml(histPillTxtV2(e, x))}</span>`).join('');
+  return `<div class="histv2-exblk"><div class="histv2-exblk-top">
+      <div class="histv2-exblk-id"><span class="histv2-ex-ico">${statsV2ExerciseIconHtml(e.name)}</span>
+        <div class="histv2-exblk-d"><strong>${escHtml(e.name)}</strong><span>${sets.length} ${sets.length === 1 ? 'seria' : (sets.length % 10 >= 2 && sets.length % 10 <= 4 && !(sets.length % 100 >= 12 && sets.length % 100 <= 14) ? 'serie' : 'serii')}</span></div></div>
+      ${histExMaxV2(w, e) ? `<div class="histv2-exblk-max"><span class="histv2-max">MAX</span>${ph('trophy', 'histv2-trophy')}</div>` : ''}
+    </div><div class="histv2-pills">${pills}</div></div>`;
+}
+function histOpenHtmlV2(w){
+  const d = new Date(w.date + 'T12:00:00');
+  const isBw = workoutIsBodyweightOnly(w), timed = workoutIsTimedOnly(w);
+  const sum = workoutSumStats(w);
+  const doneCount = w.exercises.filter(e=> e.sets.some(s=> s.weight > 0 || s.reps > 0 || s.durationSec > 0)).length || w.exercises.length;
+  const rec = gymFinRecordFrom(workoutRecord(w));
+  const prev = histPrevWorkoutV2(w);
+  const prevMetric = prev ? (isBw ? workoutSumStats(prev).reps : workoutSumStats(prev).volume) : 0;
+  const vsPrev = (prevMetric > 0 && !timed) ? Math.round(((isBw ? sum.reps : sum.volume) - prevMetric) / prevMetric * 100) : null;
+  const kcal = workoutKcalShown(w);
+  const volLabel = timed ? 'Łączny czas' : isBw ? 'Powtórzenia' : 'Objętość';
+  const volVal = timed ? fmtDur(workoutTimedTotalSec(w)) : isBw ? String(Math.round(sum.reps)) : `${formatDashNum(Math.round(sum.volume),0)}<small>kg</small>`;
+  const span1 = 6 / (kcal != null ? 3 : 2), span2 = 6 / (vsPrev != null ? 2 : 1);
+  const recLen = rec ? String(rec.value).length : 0;
+  const up = vsPrev != null && vsPrev >= 0;
+  return `
+    <div class="profil-header plansv2-top histv2-open-top">
+      <button type="button" class="profil-back m-press" onclick="closeHistWorkoutV2()" aria-label="Wstecz"><span class="ph" data-ph="caret-left"></span></button>
+      <h1 class="profil-title">TRENING</h1>
+      <button type="button" class="histv2-open-sharebtn m-press" onclick="shareHistCard('workout','${escHtml(w.id)}')" aria-label="Udostępnij"><span class="ph" data-ph="export"></span></button>
+    </div>
+    <div class="gymfin-inner histv2-open-inner">
+      <div class="gymfin-heads">
+        <p class="gymfin-title">${HIST_DOW_FULL_V2[d.getDay()]}, ${d.getDate()} ${MONTH_GEN_PL[d.getMonth()]}</p>
+        <p class="gymfin-sub">${escHtml(histWorkoutNameV2(w))}</p>
+      </div>
+      ${rec ? `<div class="gymfin-record">
+        <p class="gymfin-record-k">${escHtml(rec.label)}</p>
+        <div class="gymfin-record-body">
+          <p class="gymfin-record-ex">${escHtml(rec.name || '')}</p>
+          <div class="gymfin-record-main">
+            <span class="gymfin-record-ico">${ph(rec.icon || 'barbell')}</span>
+            <div class="gymfin-record-val">
+              <p class="gymfin-record-num${recLen >= 6 ? ' is-xlong' : recLen >= 4 ? ' is-long' : ''}"><span>${escHtml(rec.value)}</span><small>${escHtml(rec.unitSig || rec.unit || '')}</small></p>
+              ${rec.sub ? `<p class="gymfin-record-sub">${escHtml(rec.sub)}</p>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>` : ''}
+      <div class="gymfin-stats">
+        <div class="gymfin-stat gymfin-stat--time" style="grid-column:span ${span1}"><p class="gymfin-stat-k">Czas</p><p class="gymfin-stat-v">${w.durationMin ? w.durationMin + '<small>min</small>' : '—'}</p></div>
+        <div class="gymfin-stat gymfin-stat--sky" style="grid-column:span ${span1}"><p class="gymfin-stat-k">Ćwiczenia</p><p class="gymfin-stat-v">${doneCount}</p></div>
+        ${kcal != null ? `<button type="button" class="gymfin-stat gymfin-stat--kcal" style="grid-column:span ${span1}" onclick="openEditKcal('${escHtml(w.id)}')"><p class="gymfin-stat-k">Kalorie</p><p class="gymfin-stat-v">${kcal}<small>kcal</small></p></button>` : ''}
+        <div class="gymfin-stat gymfin-stat--volume gymfin-stat--wide" style="grid-column:span ${span2}"><p class="gymfin-stat-k">${volLabel}</p><p class="gymfin-stat-v">${volVal}</p></div>
+        ${vsPrev != null ? `<div class="gymfin-stat gymfin-stat--vs gymfin-stat--wide" style="grid-column:span 3">
+          <p class="gymfin-stat-k">Vs poprzedni</p>
+          <div><p class="gymfin-stat-v"><span class="ph" style="${up ? '' : 'transform:rotate(90deg)'}">${PH['arrow-up-right']}</span><span>${up ? '+' : '−'}${Math.abs(vsPrev)}%</span></p><p class="gymfin-stat-cap">względem ${prev ? 'ostatniego treningu' : ''}</p></div>
+        </div>` : ''}
+      </div>
+      <p class="histv2-open-label">Ćwiczenia</p>
+      <div class="histv2-open-ex">
+        ${w.exercises.map(e=> histExBlockV2(w, e)).join('')}
+      </div>
+      <button type="button" class="m2-btn m-press histv2-open-share" onclick="shareHistCard('workout','${escHtml(w.id)}')">UDOSTĘPNIJ KARTĘ</button>
+      <button type="button" class="histv2-open-del m-press" onclick="histDeleteOpenV2()">Usuń trening</button>
+    </div>`;
+}
+function openHistWorkoutV2(id){
+  const w = workouts.find(x=>x.id===id); if(!w) return;
+  histOpenIdV2 = id;
+  const el = document.getElementById('histOpenV2');
+  document.getElementById('histOpenScrollV2').innerHTML = histOpenHtmlV2(w);
+  hydrateHistIconsV2(el);
+  document.getElementById('histOpenScrollV2').scrollTop = 0;
+  el.setAttribute('aria-hidden','false');
+  el.classList.remove('closing');
+  el.getBoundingClientRect();
+  el.classList.add('open');
+  document.documentElement.classList.add('modal-lock');
+  haptic('light');
+}
+function closeHistWorkoutV2(){
+  const el = document.getElementById('histOpenV2');
+  if(!el.classList.contains('open')) return;
+  el.classList.add('closing'); el.classList.remove('open');
+  document.documentElement.classList.remove('modal-lock');
+  histOpenIdV2 = null;
+  setTimeout(()=>{ if(el.classList.contains('open')) return; el.classList.remove('closing'); el.setAttribute('aria-hidden','true'); }, 320);
+}
+/* gest cofania: przeciągnięcie od lewej krawędzi (do 24 px) niesie ekran 1:1 z palcem; rzut z prędkością albo >35% szerokości zamyka, inaczej wraca sprężyną.
+   WAAPI + setTimeout jako zabezpieczenie, gdyby PWA w tle wstrzymało animacje. */
+(function wireHistOpenSwipeV2(){
+  const el = document.getElementById('histOpenV2'); if(!el) return;
+  const reduce = ()=> !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  let x0 = 0, y0 = 0, axis = '', drag = false, busy = false, cur = 0, lastX = 0, lastT = 0, prevX = 0, prevT = 0;
+  const reset = ()=>{ el.getAnimations().forEach(a=> a.cancel()); el.style.transition = ''; el.style.transform = ''; cur = 0; };
+  el.addEventListener('touchstart', e=>{
+    if(busy || !el.classList.contains('open') || e.touches.length !== 1){ drag = false; return; }
+    const p = e.touches[0];
+    if(p.clientX > 24){ drag = false; axis = 'n'; return; }
+    x0 = p.clientX; y0 = p.clientY; axis = ''; drag = false; cur = 0; prevX = lastX = p.clientX; prevT = lastT = e.timeStamp;
+  }, { passive: true });
+  el.addEventListener('touchmove', e=>{
+    if(busy || axis === 'n' || e.touches.length !== 1) return;
+    const p = e.touches[0], dx = p.clientX - x0, dy = p.clientY - y0;
+    if(!axis){
+      if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      axis = (dx > 0 && Math.abs(dx) > Math.abs(dy)) ? 'x' : 'n';
+      if(axis === 'x'){ drag = true; el.style.transition = 'none'; }
+    }
+    if(!drag) return;
+    prevX = lastX; prevT = lastT; lastX = p.clientX; lastT = e.timeStamp;
+    cur = Math.max(0, dx);
+    el.style.transform = `translateX(${cur.toFixed(1)}px)`;
+  }, { passive: true });
+  el.addEventListener('touchend', ()=>{
+    if(!drag || busy){ drag = false; return; }
+    drag = false;
+    const w = el.clientWidth || 1, vel = (lastX - prevX) / Math.max(1, lastT - prevT);
+    const close = cur > w * .35 || (vel > .5 && cur > 24);
+    busy = true;
+    if(reduce()){
+      if(close){ reset(); el.classList.remove('open'); el.setAttribute('aria-hidden','true'); document.documentElement.classList.remove('modal-lock'); histOpenIdV2 = null; }
+      else reset();
+      busy = false; return;
+    }
+    const to = close ? w : 0;
+    const dur = close ? Math.min(260, Math.max(120, (w - cur) / Math.max(vel, .9))) : 260;
+    const a = el.animate([{ transform:`translateX(${cur}px)` }, { transform:`translateX(${to}px)` }], { duration: dur, easing: close ? MOTION.exit : MOTION.spring, fill: 'forwards' });
+    let done = false;
+    const fin = ()=>{
+      if(done) return; done = true;
+      el.style.transition = 'none';
+      reset();
+      if(close){ el.classList.remove('open', 'closing'); el.setAttribute('aria-hidden','true'); document.documentElement.classList.remove('modal-lock'); histOpenIdV2 = null; }
+      el.getBoundingClientRect(); el.style.transition = '';
+      busy = false;
+    };
+    a.onfinish = fin; setTimeout(fin, dur + 80);
+  }, { passive: true });
+})();
+function histDeleteOpenV2(){
+  const id = histOpenIdV2; if(!id) return;
+  if(!confirmActivityDeleteV2()) return;
+  closeHistWorkoutV2();
+  performHistWorkoutDeleteV2(id);
 }
 
 /* ============================================================
@@ -23304,6 +23684,7 @@ function statsV2Back(){
   else goRoute('dashboard');
 }
 function histV2Back(){
+  if(document.getElementById('histOpenV2').classList.contains('open')){ closeHistWorkoutV2(); return; }
   if(profileDetailReturn === 'history-v2'){ profileDetailReturn = null; goRoute('profile-v2'); return; }
   goRoute('dashboard');
 }

@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.81.2 (2026-10-22)
+- **Aktualna wersja:** 4.82.0 (2026-10-22)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.82.0 · MINOR · 2026-10-22
+
+**Zakres techniczny:** nowa Historia (układ A: kalendarz z listą treningów miesiąca). Pod kalendarzem karta podsumowania miesiąca (treningi, czas, objętość), pastylka liczby rekordów (`--m-amber`) i lista wierszy z pastylkami w kolorach kafli podsumowania treningu (czas `--m-plum-*`, ćwiczenia `--m-sky-*`, objętość `--m-red-wash`). Tap w dzień kalendarza filtruje listę (pastylka z ✕), dzisiejszy dzień ma kropkę zamiast automatycznego zaznaczenia. Szczegół treningu to osobny ekran wjeżdżający z prawej (`#histOpenV2`, nakładka, nie trasa w `goRoute`), w stylu ekranu gratulacji (klasy `gymfin-*`: karta rekordu, kafle Czas / Ćwiczenia / Kalorie / Objętość / Vs poprzedni) z listą ćwiczeń jak „Historia serii” w Postępach (serie w 3 kolumnach, odcienie przez `statsFShades`, MAX + puchar, gdy padł najcięższy ciężar ćwiczenia). Gest cofania od lewej krawędzi (WAAPI + `setTimeout`), bez podwójnego ruchu, cele dotyku 44 px. Stany puste: brak treningów w ogóle i pusty miesiąc ze skrótem do najbliższego. Usunięte: przesuwanie kart do usuwania i udostępniania na liście (akcje są w szczególe). Bez nowych pól w localStorage ani w bazie. Teksty tylko po polsku (EN do zrobienia); stary kod rozwijanych kart (`buildHistCardV2`, `histWorkoutCardInner`) zostaje nieużywany do wycięcia.
+
+**Commity (1):**
+
+- `(ten commit)` 2026-10-22 — Historia v2: lista miesiąca, szczegół treningu w stylu gratulacji, pastylki wg metryki
 
 ### 4.81.2 · PATCH · 2026-10-22
 
