@@ -2937,9 +2937,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
    plotted (and what the PR badges/hero "100 kg" tie back to) is
    running-best WEIGHT over time, not volume — relabeled "PROGRES
    CIĘŻARU" to match what the chart actually shows. */
-.statsv2-root{background:transparent;position:relative;isolation:isolate;min-height:100dvh;}
-/* tło Postępów wg Figmy: zdjęcie na górze (stała warstwa .pg-bg) + prostokąt gradientu od y=214 na całą wysokość strony (rgba(251,236,227,0) = --m-page-top przezroczysty) */
-.statsv2-root::before{content:"";position:absolute;left:0;right:0;top:214px;bottom:calc(-110px - env(safe-area-inset-bottom, 0px));z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(251,236,227,0) 2%,var(--m-page-top) 8%,var(--m-page-bot) 100%);}   /* tło daje .pg-bg (jak Pulpit) */
+.statsv2-root{background:transparent;}   /* tło rysuje stała warstwa .pg-bg (jak Pulpit i Historia); NIE dodawać tu position/isolation/min-height ani własnej nakładki gradientu: w PWA na iPhonie blokowało przewijanie i zasłaniało zdjęcie (4.81.1) */
 .statsv2-panel{padding:max(14px, calc(var(--top-inset) - 8px)) 10px 0;position:relative;}   /* dół: zapas daje .app (110 px = menu + odstęp) */
 .statsv2-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .statsv2-cards{display:flex;flex-direction:column;gap:8px;}
@@ -10027,7 +10025,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.81.0";
+const APP_VERSION = "4.81.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.81.0": {

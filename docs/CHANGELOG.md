@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.81.0 (2026-10-22)
+- **Aktualna wersja:** 4.81.1 (2026-10-22)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.81.1 · PATCH · 2026-10-22
+
+**Zakres techniczny:** poprawka Postępów w PWA na iPhonie: przewijanie nie działało, gdy palec zaczynał w środku ekranu (działało na dole), a tło było zasłonięte własną nakładką gradientu. Przyczyna: w 4.81.0 korzeń `.statsv2-root` dostał `position:relative`, `isolation:isolate`, `min-height:100dvh` i pseudoelement `::before` z gradientem. Przywrócony prosty korzeń `.statsv2-root{background:transparent}`; tło rysuje, jak na Pulpicie i w Historii, stała warstwa `.pg-bg`. Gradient z Figmy 01 (od y=214) świadomie nie jest odtwarzany osobną nakładką.
+
+**Commity (1):**
+
+- `(ten commit)` 2026-10-22 — Postępy: przywrócony prosty korzeń ekranu, naprawa przewijania i tła w PWA
+
+
 
 ### 4.81.0 · MINOR · 2026-10-22
 
