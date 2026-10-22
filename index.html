@@ -22227,7 +22227,7 @@ function renderStatsV2Overview(){
   // podpis okna: „1–13 paź vs 1–13 wrz”; bez porównania: wyjaśnienie, kiedy się pojawi (nie dla „Wszystko”)
   const winCap = (n > 0 && per !== 'all')
     ? (win.hasPrev ? `<p class="stv2-cap">${E(stv2Range(win.start, win.end))} vs ${E(stv2Range(win.prevStart, win.prevEnd))}</p>`
-        : (dashDaysBetween(order[0].date, today) + 1 < 14 ? `<p class="stv2-cap">${t('stV2CmpLater', 'Porównanie z poprzednim okresem pojawi się po 2 tygodniach.')}</p>` : ''))   // historia krótsza niż 14 dni; przy dłuższej, ale bez poprzedniego okresu (np. rok), bez podpisu
+        : (dashDaysBetween(order[0].date, today) + 1 < 14 ? `<p class="stv2-cap">${t('stV2CmpLater', 'Porównanie z poprzednim okresem zobaczysz po 2 tygodniach.')}</p>` : ''))   // historia krótsza niż 14 dni; przy dłuższej, ale bez poprzedniego okresu (np. rok), bez podpisu
     : '';
   const head = `<div class="stv2-stack">${seg}${tiles}${winCap}</div>`;
 
@@ -22750,7 +22750,7 @@ function statsV2OpenPin(returnTo){
   statsDPin = { sel: pins.slice(), rows, q: '' };
   const $ = id => document.getElementById(id);
   $('stdPinTitle').textContent = t('stDPinTitle', 'PRZYPNIJ ĆWICZENIA');
-  $('stdPinSub').textContent = t('stDPinSub', 'Wybrane ćwiczenia pokażą się w Rekordach. Max 5.');
+  $('stdPinSub').textContent = t('stDPinSub', 'Wybrane ćwiczenia pokażą się w Rekordach. Maksymalnie 5.');
   $('stdPinX').setAttribute('aria-label', t('stDClose', 'Zamknij'));
   $('stdPinSave').textContent = t('stDSave', 'ZAPISZ');
   mountExSearch('stdPinSearch', '', v=>{ if(statsDPin){ statsDPin.q = v; statsDPinPaint(); } });
@@ -23013,7 +23013,7 @@ function renderStatsV2Detail(name){
     const pts = statsFSeries(asc, statsFSeg, statsV2Range);
     chartCard = `
       <div class="stc-card stf-chartcard statsv2-detail-chart-card statsv2-anim-card" style="--i:1">
-        <div class="stv2-seg" role="radiogroup" aria-label="${escHtml(t('stFSegAria', 'Wskaźnik wykresu'))}">${segs.map(([k, l])=> `<button type="button" class="stv2-seg-b" role="radio" aria-checked="${statsFSeg === k}" onclick="statsFSetSeg('${k}')">${l}</button>`).join('')}</div>
+        <div class="stv2-seg" role="radiogroup" aria-label="${escHtml(t('stFSegAria', 'Metryka wykresu'))}">${segs.map(([k, l])=> `<button type="button" class="stv2-seg-b" role="radio" aria-checked="${statsFSeg === k}" onclick="statsFSetSeg('${k}')">${l}</button>`).join('')}</div>
         <div class="stc-chips stf-chips" role="radiogroup" aria-label="${escHtml(t('stFRangeAria', 'Zakres wykresu'))}">${STATSF_RANGES.map(([m, k, pl])=> `<button type="button" class="stc-chip" role="radio" aria-checked="${statsV2Range === m}" onclick="statsFSetRange(${m})">${t(k, pl)}</button>`).join('')}</div>
         ${statsFChartHtml(pts)}
       </div>`;
