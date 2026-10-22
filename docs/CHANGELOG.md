@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.84.4 (2026-10-22)
-- **Liczba wersji:** 259 · **commitów:** 638
+- **Aktualna wersja:** 4.84.5 (2026-10-22)
+- **Liczba wersji:** 260 · **commitów:** 639
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.84.5 · PATCH · 2026-10-22
+
+- **Odznaki (Profil → Odznaki):** odstęp kart 4 / 5 px → `var(--m-gap-card)` (8 px).
+- **Cele dotyku ≥ 44 px, wygląd bez zmian:** `::after` powiększa obszar kliknięcia dla `.gy-circ`, `.v2-hdr-back`, przycisków czatu i konta (`.gymv2-/.histv2-/.plansv2-/.statsv2-`), ikon dolnego menu (37,5 → ok. 45 px) oraz strzałek miesiąca i roku w kalendarzu Historii (24 / 16 px → ok. 44 / 40 px). Ikona zamiany ćwiczenia na kaflu: przycisk 26 → 32 px przy tym samym środku ikony, plus `::after` w głąb kafla (razem 44 × 44 px).
+- Weryfikacja testem trafień (`elementFromPoint`) na 6 ekranach: wszystkie małe przyciski mają ≥ 42 px, środki strzałek nadal trafiają we własny element. Wiele przycisków (`.profil-back`, `.profil-gear`, `.stv2-seg-b`, `.dash-acct-btn`) miało już obszar 44 px wcześniej.
+- Paddingi i radiusy poza skalą celowo bez zmian: wartości z Figmy (pola, chipy, tagi).
+
+**Commity (0):**
+
 
 ### 4.84.4 · PATCH · 2026-10-22
 

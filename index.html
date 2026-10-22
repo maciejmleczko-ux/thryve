@@ -1595,7 +1595,7 @@ button.pf-bcard{font:inherit;color:inherit;cursor:pointer;width:100%;}
 .pf-sheet-x:active{transform:scale(.94);transition-duration:var(--m-dur-press-in);}
 #profileBadgesSheet .plansv2-customize-stack{min-height:70%;}
 #profileBadgesSheet .plansv2-customize-card{gap:16px;padding:16px var(--m-sheet-px) 6px;}
-.pf-bgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 5px;}
+.pf-bgrid{display:grid;grid-template-columns:1fr 1fr;gap:var(--m-gap-card);}
 .pf-bcard{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;background:var(--m-glass);border:.85px solid var(--m-orange-tint);border-radius:var(--m-r-sm);text-align:center;}
 .pf-bcard-n{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1818em;text-transform:uppercase;color:var(--m-ink);}
 .pf-bcard-d{margin:0;font-size:var(--m-fs-2xs);font-weight:400;line-height:1.3;color:var(--m-muted-text);max-width:105px;}
@@ -1958,6 +1958,15 @@ button.dash-coach{cursor:pointer;}
 .v2-hdr-back{background:none;border:none;padding:0;margin:0 0 0 -6px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .v2-hdr-back:active{transform:scale(.88);}
 .v2-hdr-back .ph{width:26px;height:26px;color:var(--m-ink);}
+/* cele dotyku >= 44 px (audyt 2026-10-22): wygląd bez zmian, rośnie tylko obszar kliknięcia */
+.v2-hdr-back,.gy-circ,.gymv2-chat-btn,.histv2-chat-btn,.plansv2-chat-btn,.statsv2-chat-btn,.gymv2-acct-btn,.histv2-acct-btn,.statsv2-acct-btn,.bottom-nav.bottom-nav-light .nav-item{position:relative;}
+.v2-hdr-back::after,.gy-circ::after,.gymv2-chat-btn::after,.histv2-chat-btn::after,.plansv2-chat-btn::after,.statsv2-chat-btn::after,.gymv2-acct-btn::after,.histv2-acct-btn::after,.statsv2-acct-btn::after{content:"";position:absolute;inset:-2px;}
+.bottom-nav.bottom-nav-light .nav-item::after{content:"";position:absolute;inset:-4px;}
+.gymv2-tile-swap::after{content:"";position:absolute;inset:0 0 -12px -12px;}   /* 32 px wizualnie (ikona 19 px, środek jak dawniej), 44 px do kliknięcia, w głąb kafla */
+.gy-circ::after{inset:-3px;}
+.histv2-cal-nav-month .ph,.histv2-cal-nav-year .ph{position:relative;}
+.histv2-cal-nav-month .ph::after{content:"";position:absolute;inset:-10px;}   /* 24 px -> 44 px */
+.histv2-cal-nav-year .ph::after{content:"";position:absolute;inset:-14px -12px;}   /* 16 px -> 44 x 40 px (strzałki roku blisko siebie) */
 /* right-side control cluster (chat button + a close X) for the two headers
    that carry both — plan-editor-v2 and Stats detail. */
 .v2-hdr-actions{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
@@ -2026,7 +2035,7 @@ button.dash-coach{cursor:pointer;}
 .gymv2-tile-check{position:absolute;top:6px;right:6px;width:18px;height:18px;z-index:1;}
 .gymv2-tile-check svg{display:block;width:100%;height:100%;}
 /* "Zamień na dziś" corner control on a GYM plan tile */
-.gymv2-tile-swap{position:absolute;top:3px;right:3px;width:26px;height:26px;z-index:2;display:flex;align-items:center;justify-content:center;background:none;color:#5b5555;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),color var(--m-dur-quick) ease;}
+.gymv2-tile-swap{position:absolute;top:0;right:0;width:32px;height:32px;z-index:2;display:flex;align-items:center;justify-content:center;background:none;color:#5b5555;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),color var(--m-dur-quick) ease;}
 .gymv2-tile-swap svg{display:block;width:19px;height:19px;}
 @media (hover:hover) and (pointer:fine){.gymv2-tile-swap:hover{color:var(--m-ink);}}
 .gymv2-tile-swap:active{transform:scale(.85);}
@@ -10216,7 +10225,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.84.4";
+const APP_VERSION = "4.84.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.83.0": {
