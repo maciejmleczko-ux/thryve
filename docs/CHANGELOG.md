@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.84.2 (2026-10-22)
-- **Liczba wersji:** 257 · **commitów:** 636
+- **Aktualna wersja:** 4.84.3 (2026-10-22)
+- **Liczba wersji:** 258 · **commitów:** 637
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,15 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.84.3 · PATCH · 2026-10-22
+
+- **Jeden ciemny tekst:** stary `#2c2727` (i `rgba(44,39,39,…)`, 25 + 18 miejsc) zamieniony na `--m-ink` `#343941`: podpisy kafli ćwiczeń w GYM, tekst dialogów, podpisy w podsumowaniu. Różnica minimalna (chłodniejszy odcień).
+- **Stara paleta:** `--orange` i `--text-dark` w `:root` wskazują teraz na `--m-orange` i `--m-ink`. Dotyka tylko `.plan-pill` i `.add-pill`, które nie są widoczne w żywej apce.
+- Weryfikacja: porównanie kolorów obliczonych (2655 elementów, 6 ekranów) przed i po: różnice tylko na elementach z tych dwóch zmian. Mockupy w `mockups/audyt-finalny/05-06`.
+
+**Commity (0):**
+
 
 ### 4.84.2 · PATCH · 2026-10-22
 

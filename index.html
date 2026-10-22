@@ -74,11 +74,11 @@
   --light:#f6f4f4;
   --light-2:#f5f5f5;
   --border:#d0d0d0;
-  --orange:#f15a23;
+  --orange:var(--m-orange);
   --orange-pill:#ffc4ae;
   --tip:#f7d7cc;
   --text:#f6f4f4;
-  --text-dark:#2c2727;
+  --text-dark:var(--m-ink);
   --muted:rgba(255,255,255,.6);
   --radius-lg:24px;
   --radius-md:16px;
@@ -248,7 +248,7 @@ body.dashboard-bg{background:transparent;}
      3. body.<screen>-bg{background:<that screen's own light tone>} —
         toggled alongside <screen>-lock in goRoute() — so any bounce/
         overscroll reveals that screen's own color, not the app's dark
-        default (#2c2727) bleeding through. */
+        default (var(--m-ink)) bleeding through. */
 html.plansv2-lock, html.plansv2-lock body{overflow:hidden;height:100dvh;touch-action:none;}
 html.plansv2-lock.plansv2-scrollable, html.plansv2-lock.plansv2-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}
 body.plansv2-bg{background:var(--m-panel);}
@@ -330,7 +330,7 @@ button{font-family:inherit;}
    whenever a v3 screen is active, matching how .topbar is already hidden
    for the same routes (see goRoute()'s isV3). */
 .app-glow{position:fixed;top:-260px;left:-100px;width:640px;height:640px;border-radius:50%;
-  background:radial-gradient(circle, rgba(241,90,35,.55), rgba(44,39,39,0) 65%);pointer-events:none;z-index:-1;will-change:transform;}
+  background:radial-gradient(circle, rgba(241,90,35,.55), rgba(52,57,65,0) 65%);pointer-events:none;z-index:-1;will-change:transform;}
 /* Load screen (Figma node 107:329) — sits above everything (.topbar,
    .app-glow, the whole .app tree) while shown; showLoadScreenV2()
    toggles display + the fade-out via .hiding.
@@ -489,7 +489,7 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
 /* ---------- bottom nav ---------- */
 .bottom-nav{position:fixed;left:0;right:0;bottom:20px;
   width:calc(100% - 40px);max-width:400px;margin:0 auto;
-  background:rgba(44,39,39,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  background:rgba(52,57,65,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   border-radius:var(--m-r-pill);box-shadow:0 10px 30px rgba(0,0,0,.35);
   display:flex;align-items:center;justify-content:space-between;
   padding:15px 19px;z-index:20;}
@@ -704,7 +704,7 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
 .hist-card.collapsed{cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .hist-card.collapsed:active{transform:scale(.99);}
 .hist-right{display:flex;align-items:center;gap:14px;}
-.hist-date{font-size:var(--m-fs-2xs);color:rgba(44,39,39,.6);}
+.hist-date{font-size:var(--m-fs-2xs);color:rgba(52,57,65,.6);}
 .hist-close{cursor:pointer;display:flex;}
 .hist-close .ph{width:20px;height:20px;color:var(--text-dark);}
 .hist-share-btn{display:none;} /* temporarily disabled until the share-card template is ready, was: width:20px;height:20px;color:var(--text-dark);cursor:pointer;flex-shrink:0; */
@@ -723,13 +723,13 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
 .hist-detail-wrap .lbl-row{display:flex;align-items:center;justify-content:space-between;}
 .hist-detail-wrap .lbl-row .l{display:flex;align-items:center;gap:11px;font-size:var(--m-fs-md);font-weight:600;letter-spacing:.48px;}
 .hist-detail-wrap .lbl-row .l .ph{width:32px;height:32px;color:var(--orange);}
-.hist-detail-wrap .lbl-row>div:last-child{font-size:var(--m-fs-2xs);color:rgba(44,39,39,.6);}
+.hist-detail-wrap .lbl-row>div:last-child{font-size:var(--m-fs-2xs);color:rgba(52,57,65,.6);}
 .hist-detail-wrap .vol{margin-top:30px;font-size:var(--m-fs-lg);font-weight:700;letter-spacing:.2px;}
 .hist-ex-list{margin-top:29px;}
 .hist-ex-item{padding:10px 0;border-bottom:1px solid #e5e7eb;}
 .hist-ex-item:last-child{border-bottom:none;}
 .hist-ex-item .nm{font-size:var(--m-fs-base);}
-.hist-ex-item .st{font-size:var(--m-fs-xs);color:rgba(44,39,39,.6);margin-top:2px;letter-spacing:.36px;}
+.hist-ex-item .st{font-size:var(--m-fs-xs);color:rgba(52,57,65,.6);margin-top:2px;letter-spacing:.36px;}
 .hist-empty{padding:0 12px;color:rgba(255,255,255,.6);font-size:var(--m-fs-base);margin-top:20px;}
 #histDetail.hist-detail-wrap .hist-empty{margin-top:0;}
 
@@ -1972,7 +1972,7 @@ button.dash-coach{cursor:pointer;}
 .gymv2-repeat-ico{width:34px;height:34px;flex-shrink:0;border-radius:var(--m-r-pill);background:#eae2fb;display:flex;align-items:center;justify-content:center;color:var(--m-orange);}
 .gymv2-repeat-ico svg{width:17px;height:17px;display:block;}
 .gymv2-repeat-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-.gymv2-repeat-t{font-size:var(--m-fs-sm);font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#2c2727;}
+.gymv2-repeat-t{font-size:var(--m-fs-sm);font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--m-ink);}
 .gymv2-repeat-s{font-size:var(--m-fs-2xs);color:var(--m-muted-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums;}
 /* repeat mode active — the button becomes the "you're repeating X, tap to
    go back" control. */
@@ -2028,7 +2028,7 @@ button.dash-coach{cursor:pointer;}
 /* "Zamień na dziś" corner control on a GYM plan tile */
 .gymv2-tile-swap{position:absolute;top:3px;right:3px;width:26px;height:26px;z-index:2;display:flex;align-items:center;justify-content:center;background:none;color:#5b5555;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),color var(--m-dur-quick) ease;}
 .gymv2-tile-swap svg{display:block;width:19px;height:19px;}
-.gymv2-tile-swap:hover{color:#2c2727;}
+.gymv2-tile-swap:hover{color:var(--m-ink);}
 .gymv2-tile-swap:active{transform:scale(.85);}
 /* swapped: the whole tile gets an inset orange stroke; the corner glyph
    just turns orange, no backing. */
@@ -2066,7 +2066,7 @@ button.dash-coach{cursor:pointer;}
 .gymv2-tile-icon{width:100%;height:58%;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box;}
 .gymv2-tile-icon svg{width:100%;height:100%;display:block;}
 .gymv2-tile-icon img{width:100%;height:100%;object-fit:contain;display:block;-webkit-user-drag:none;pointer-events:none;transform:scale(1.12);}
-.gymv2-tile-label{font-size:var(--m-fs-2xs);font-weight:300;letter-spacing:.4px;text-transform:uppercase;text-align:center;color:#2c2727;line-height:1.15;padding:0 6px;}
+.gymv2-tile-label{font-size:var(--m-fs-2xs);font-weight:300;letter-spacing:.4px;text-transform:uppercase;text-align:center;color:var(--m-ink);line-height:1.15;padding:0 6px;}
 /* PNG 3D icon set (buildExerciseTileV2's .png-icon modifier) needs a
    little more height than the flat SVG glyphs it replaced — the render
    reads small if it's squeezed into the same 58%/50% zone the thin
@@ -2082,7 +2082,7 @@ button.dash-coach{cursor:pointer;}
    troche - bo te 3 wiersze sie nie miesci". Scoped to this one modal
    rather than lowering the shared 65% (which is correctly sized for
    GYM's own grid and plan editor v2's wider tiles). */
-.gymv2-tile.custom-tile .t{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;padding:0 6px;color:#2c2727;}
+.gymv2-tile.custom-tile .t{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;padding:0 6px;color:var(--m-ink);}
 /* Bakes its own dashed border/icon/label into EX_TILE_ADD_SVG
    (verbatim, same constant .ex-tile-add uses elsewhere) instead of the
    hand-approximated dashed-border+ph-icon+label this was before —
@@ -2385,7 +2385,7 @@ button.dash-coach{cursor:pointer;}
 /* Past the full-swipe threshold: bump the icon so it's obvious that
    releasing now deletes, rather than just snapping open to the reveal. */
 .plansv2-card-wrap.plansv2-will-delete .plansv2-card-delete .ph{transform:scale(1.35);}
-.plansv2-card-share{position:absolute;inset:0;border-radius:var(--m-r-md);background:var(--m-amber);display:flex;align-items:center;justify-content:flex-start;padding-left:28px;color:#2c2727;cursor:pointer;opacity:0;pointer-events:none;}
+.plansv2-card-share{position:absolute;inset:0;border-radius:var(--m-r-md);background:var(--m-amber);display:flex;align-items:center;justify-content:flex-start;padding-left:28px;color:var(--m-ink);cursor:pointer;opacity:0;pointer-events:none;}
 .plansv2-card-share .ph{width:32px;height:32px;transition:transform var(--m-dur-quick) ease;}
 .plansv2-card-wrap.plansv2-will-share .plansv2-card-share .ph{transform:scale(1.35);}
 .plansv2-card-stats{display:flex;gap:16px;flex-wrap:wrap;}
@@ -2445,7 +2445,7 @@ button.dash-coach{cursor:pointer;}
 .plansv2-customize-stack .ph svg{display:block;width:100%;height:100%;}
 .plansv2-customize-options{display:flex;flex-direction:column;gap:16px;}
 .plansv2-customize-section{display:flex;flex-direction:column;gap:8px;}
-/* 14px/0.56px kerning/#2c2727, no bold — matches .plansv2-section-label
+/* 14px/0.56px kerning/var(--m-ink), no bold — matches .plansv2-section-label
    on the real Plans v2 screen and the fresh type pass in the "06. PLAN
    - SET UP" Figma file (node 155:1086); this modal had drifted to an
    older, smaller 12px/600/1.2px token before that unification. */
@@ -2543,8 +2543,8 @@ button.dash-coach{cursor:pointer;}
    production popup, same old/v2 split as everywhere else this session. */
 .fbv2-header{display:flex;flex-direction:column;gap:4px;width:100%;}
 .fbv2-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;width:100%;}
-.fbv2-title-row h1{margin:0;font-size:var(--m-fs-lg);font-weight:400;color:#2c2727;letter-spacing:.04em;text-transform:uppercase;}
-.fbv2-subtitle{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:#2c2727;}
+.fbv2-title-row h1{margin:0;font-size:var(--m-fs-lg);font-weight:400;color:var(--m-ink);letter-spacing:.04em;text-transform:uppercase;}
+.fbv2-subtitle{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:var(--m-ink);}
 .fbv2-textarea{display:block;width:100%;box-sizing:border-box;background:var(--m-card);border:1px solid var(--m-line);border-radius:var(--m-r-sm);padding:12px 20px;font-size:var(--m-fs-base);font-weight:500;color:var(--m-ink);font-family:inherit;height:201px;resize:vertical;}
 .fbv2-textarea--sm{height:90px;}
 .fbv2-textarea::placeholder{color:var(--m-muted);opacity:1;}
@@ -2681,7 +2681,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
    down to the visible band — so the sheet always fits above the keyboard.
    With the keyboard up, the home-indicator inset is under it: drop it. */
 .m-sheet-overlay.m-kb .m-sheet{padding-bottom:14px;margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;}
-.m-sheet-grab{flex-shrink:0;width:40px;height:5px;border-radius:3px;background:rgba(44,39,39,.22);margin:8px auto 10px;cursor:grab;touch-action:none;}
+.m-sheet-grab{flex-shrink:0;width:40px;height:5px;border-radius:3px;background:rgba(52,57,65,.22);margin:8px auto 10px;cursor:grab;touch-action:none;}
 .m-sheet-grab:active{cursor:grabbing;}
 .m-sheet-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:24px;overflow:hidden;}
 /* Exercise-logging popup only (Figma node 305:582, 2026-09-15) — Maciej's
@@ -2722,14 +2722,14 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .exv2-pill--version{background:var(--m-orange);}
 .exv2-pill--version span{color:var(--m-white);}
 .exv2-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;width:100%;}
-.exv2-title{font-size:var(--m-fs-xl);font-weight:200;letter-spacing:.88px;text-transform:uppercase;color:#2c2727;line-height:1.15;}
-.exv2-close{width:24px;height:24px;flex-shrink:0;color:#2c2727;cursor:pointer;}
+.exv2-title{font-size:var(--m-fs-xl);font-weight:200;letter-spacing:.88px;text-transform:uppercase;color:var(--m-ink);line-height:1.15;}
+.exv2-close{width:24px;height:24px;flex-shrink:0;color:var(--m-ink);cursor:pointer;}
 .exv2-close svg{display:block;width:100%;height:100%;}
 .exv2-stats{display:flex;gap:16px;flex-wrap:wrap;}
 .exv2-stat{display:flex;align-items:center;gap:12px;}
 .exv2-stat .ph{width:16px;height:16px;display:block;flex-shrink:0;color:var(--m-plan-c-easy);}
 .exv2-stat .ph svg{display:block;width:100%;height:100%;}
-.exv2-stat span{font-size:var(--m-fs-base);color:#2c2727;white-space:nowrap;}
+.exv2-stat span{font-size:var(--m-fs-base);color:var(--m-ink);white-space:nowrap;}
 .exv2-tip{background:var(--m-black);border-radius:var(--m-r-sm);padding:9px 17px;text-align:left;}
 .exv2-tip .lbl{display:block;font-size:var(--m-fs-xs);font-weight:700;letter-spacing:.24px;color:var(--m-orange);margin-bottom:9px;}
 .exv2-tip .txt{font-size:var(--m-fs-xs);color:var(--m-card);line-height:1.4;}
@@ -2764,7 +2764,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
    the tiny field-labels above them. This is the redesign Maciej made
    specifically to kill the popup's scroll problem at 4-5 series. */
 .exv2-series-card{background:var(--m-white);border-radius:var(--m-r-md);padding:10px 16px;display:flex;align-items:flex-end;gap:12px;box-sizing:border-box;}
-.exv2-series-label{font-size:var(--m-fs-base);letter-spacing:.56px;text-transform:uppercase;color:#2c2727;width:76px;flex-shrink:0;}
+.exv2-series-label{font-size:var(--m-fs-base);letter-spacing:.56px;text-transform:uppercase;color:var(--m-ink);width:76px;flex-shrink:0;}
 .exv2-series-fields{display:flex;gap:12px;flex:1;min-width:0;}
 .exv2-field{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
 .exv2-field label{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--m-muted);}
@@ -2862,7 +2862,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .histv2-cal-day.planned:not(.selected){border:1.5px solid rgba(255,255,255,.75);}
 .histv2-cal-day.missed:not(.selected){border:1.5px dashed var(--m-plan-accent);color:var(--m-plan-accent);font-weight:600;}
 .histv2-cal-day.has-log:not(.selected){background:var(--m-plan-accent);font-weight:600;}
-.histv2-cal-day.selected{background:var(--m-white);color:#2c2727;font-weight:600;}
+.histv2-cal-day.selected{background:var(--m-white);color:var(--m-ink);font-weight:600;}
 /* "today" stays the existing white .selected fill — this just adds a ring
    around it (or around a tapped non-today day) when that day is also a
    plan day, so the training-day info doesn't get lost under the white fill. */
@@ -2883,7 +2883,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .histv2-card-kind .ph{width:30px;height:30px;color:var(--m-orange);flex-shrink:0;}
 .histv2-card-kind span{font-size:var(--m-fs-md);color:var(--m-ink);letter-spacing:.65px;}
 .histv2-card-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.histv2-card-date{font-size:var(--m-fs-2xs);color:#2c2727;white-space:nowrap;}
+.histv2-card-date{font-size:var(--m-fs-2xs);color:var(--m-ink);white-space:nowrap;}
 /* collapsed card keeps the plain title / sub line */
 .histv2-card-title{margin:20px 0 4px;font-size:var(--m-fs-xl);font-weight:500;color:var(--m-ink);letter-spacing:.88px;text-transform:uppercase;}
 .histv2-card-sub{margin:0;font-size:var(--m-fs-base);color:var(--m-muted);letter-spacing:.56px;text-transform:uppercase;}
@@ -3120,7 +3120,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
    .statsv2-ex-section follows .statsv2-cards, i.e. the overview case). */
 .statsv2-cards + .statsv2-ex-section{margin-top:24px;}
 .statsv2-ex-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.statsv2-ex-head p{margin:0;font-size:var(--m-fs-base);color:#2c2727;letter-spacing:.56px;text-transform:uppercase;}
+.statsv2-ex-head p{margin:0;font-size:var(--m-fs-base);color:var(--m-ink);letter-spacing:.56px;text-transform:uppercase;}
 .statsv2-ex-all-btn{background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:6px 20px;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-white);letter-spacing:.48px;font-family:inherit;cursor:pointer;}
 .statsv2-ex-row{display:flex;gap:var(--m-gap-card);overflow-x:auto;scrollbar-width:none;}
 .statsv2-ex-row::-webkit-scrollbar{display:none;}
@@ -3129,7 +3129,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .statsv2-ex-tile .icn{width:40px;height:40px;color:var(--m-orange);flex-shrink:0;}
 .statsv2-ex-tile .icn svg{display:block;width:100%;height:100%;}
 .statsv2-ex-tile .icn img{display:block;width:40px;height:40px;object-fit:contain;}
-.statsv2-ex-tile span{font-size:var(--m-fs-2xs);font-weight:600;color:#2c2727;letter-spacing:.3px;text-transform:uppercase;text-align:center;line-height:1.15;}
+.statsv2-ex-tile span{font-size:var(--m-fs-2xs);font-weight:600;color:var(--m-ink);letter-spacing:.3px;text-transform:uppercase;text-align:center;line-height:1.15;}
 
 
 /* ---- Postępy v3, etap F: szczegół ćwiczenia (Figma 06 · 655:14410). Białe boksy = .stc-card (szkło iOS); segment = .stv2-seg, chipy = .stc-chip ---- */
@@ -3364,10 +3364,10 @@ body.gymv2-bg .pg-bg{display:block;}
 /* cardio "Wyniki" sheet: rows like .lg-set, − / + like the reps stepper but smaller (see mockups/kardio.html) */
 .lg-metric{position:relative;width:100%;display:flex;align-items:center;gap:8px;box-sizing:border-box;background:#ededed;border:1.5px solid transparent;border-radius:16px;padding:8px 10px 8px 16px;}
 .lg-metric.is-active{border-color:rgba(255,51,0,.32);}
-.lg-metric-l{width:96px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(44,39,39,.71);}
+.lg-metric-l{width:96px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(52,57,65,.71);}
 .lg-metric-in{flex:1;min-width:0;background:none;border:none;outline:none;padding:0;margin:0;font:inherit;font-size:var(--m-fs-md);color:var(--m-ink);font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none;}
 .lg-metric-in::placeholder{color:#b8b8b8;}
-.lg-metric-u{font-size:var(--m-fs-2xs);color:rgba(44,39,39,.71);flex:none;}
+.lg-metric-u{font-size:var(--m-fs-2xs);color:rgba(52,57,65,.71);flex:none;}
 .lg-steps{display:flex;gap:12px;flex:none;}   /* 12px = 2 × the 6px touch extension of each button */
 .lg-steps .lg-step{width:34px;height:34px;}
 .lg-steps .lg-step svg{width:16px;height:16px;}
@@ -3378,10 +3378,10 @@ body.gymv2-bg .pg-bg{display:block;}
 #exCardioBoxV2 .lg-bar .lg-circ::after, #blockBoxV2 .lg-bar .lg-circ::after{content:"";position:absolute;inset:-4px;}   /* 40px ring, 48px touch area */
 #exCardioBoxV2 .lg-steps .lg-step{position:relative;}
 #exCardioBoxV2 .lg-steps .lg-step::after{content:"";position:absolute;inset:-7px;}   /* 34px button (1px border) + 6px each side = 46px touch area */
-.lg-cr-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);color:rgba(44,39,39,.71);line-height:1.4;}
+.lg-cr-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);color:rgba(52,57,65,.71);line-height:1.4;}
 .gymfin-timed{width:100%;background:var(--m-panel);border:1px solid var(--m-border);border-radius:var(--m-r-sm);padding:6px 14px;margin-top:8px;box-sizing:border-box;text-align:left;}
 .gymfin-timed[hidden]{display:none;}
-.gymfin-timed-k{margin:8px 0 2px;font-size:var(--m-fs-2xs);letter-spacing:.1em;text-transform:uppercase;color:rgba(44,39,39,.71);}
+.gymfin-timed-k{margin:8px 0 2px;font-size:var(--m-fs-2xs);letter-spacing:.1em;text-transform:uppercase;color:rgba(52,57,65,.71);}
 .lg-bar{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;padding:20px 20px 10px;box-sizing:border-box;}
 .lg-bar-title{position:absolute;left:50%;transform:translateX(-50%);max-width:58%;font-size:var(--m-fs-xs);font-weight:600;letter-spacing:.0833em;text-transform:uppercase;color:var(--m-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .lg-circ{width:40px;height:40px;border-radius:50%;border:.5px solid var(--m-orange);background:transparent;color:var(--m-orange);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex:none;transition:transform var(--m-dur-press-out) var(--m-ease);}
@@ -3397,20 +3397,20 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-tag{display:inline-flex;align-items:center;height:20px;padding:0 12px;border-radius:var(--m-r-pill);background:var(--m-navy-tint);color:var(--m-navy-ink);font-size:var(--m-fs-2xs);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
 .lg-tag--v{background:var(--m-orange);color:var(--m-white);}
 .lg-name-row{display:flex;align-items:center;gap:10px;min-height:32px;}
-.lg-name{flex:1;min-width:0;font-size:var(--m-fs-xl);font-weight:200;letter-spacing:.0367em;text-transform:uppercase;color:#2c2727;line-height:1.15;}
+.lg-name{flex:1;min-width:0;font-size:var(--m-fs-xl);font-weight:200;letter-spacing:.0367em;text-transform:uppercase;color:var(--m-ink);line-height:1.15;}
 .lg-ic{position:relative;width:32px;height:32px;border-radius:50%;flex:none;border:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .lg-ic svg{width:16px;height:16px;display:block;}
 /* Figma 479:12000: "jak ćwiczyć" sits in the top bar next to ✓ (38.76 circle,
    20.74 icon, 8px gap); the note button in the name row is 28 / 15. */
 .lg-bar-end{display:flex;align-items:center;gap:8px;}
 .lg-bar:has(.lg-bar-end .bulb) .lg-bar-title{max-width:calc(100% - 232px);} /* centred title must clear the wider right group */
-.lg-ic.bulb{width:38.76px;height:38.76px;background:#dcdcdc;color:#2c2727;}
+.lg-ic.bulb{width:38.76px;height:38.76px;background:#dcdcdc;color:var(--m-ink);}
 .lg-ic.bulb svg{width:20.74px;height:20.74px;}
 .lg-ic.note{width:40px;height:40px;background:var(--m-plan-hard);color:var(--m-white);}   /* the app's standard round icon button (40px, like .lg-circ), a proper touch target */
 .lg-ic.note svg{width:20px;height:20px;}
 .lg-ic.has-note::after{content:"";position:absolute;top:0;right:0;width:10px;height:10px;border-radius:50%;background:var(--m-orange);border:1.5px solid var(--m-white);box-sizing:border-box;}
 .lg-chips{display:flex;gap:6px;flex-wrap:wrap;}
-.lg-chip{display:inline-flex;align-items:center;gap:10px;height:28px;padding:0 12px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid var(--m-orange-tint);font-size:var(--m-fs-2xs);color:#2c2727;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.lg-chip{display:inline-flex;align-items:center;gap:10px;height:28px;padding:0 12px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid var(--m-orange-tint);font-size:var(--m-fs-2xs);color:var(--m-ink);white-space:nowrap;font-variant-numeric:tabular-nums;}
 .lg-chip .ph, .lg-chip .ph svg{width:16px;height:16px;display:block;flex:none;color:var(--m-orange);}
 .lg-chip.c-sets,.lg-chip.c-reps{color:var(--m-white);border-color:transparent;}   /* same colours as the start-card tiles: Serie navy, Powtórzenia sky, Przerwa orange */
 .lg-chip.c-time{background:var(--m-metric-time);color:var(--m-white);border-color:transparent;}   /* Czas treningu = plum (fixed metric colour) */
@@ -3425,7 +3425,7 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-ai-h{display:flex;align-items:center;gap:15px;font-size:var(--m-fs-xs);font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.82);}
 .lg-ai-h .ph, .lg-ai-h .ph svg{width:16px;height:16px;display:block;flex:none;}
 .lg-ai-t{margin:0;font-size:var(--m-fs-2xs);line-height:1.35;color:var(--m-card);}
-.lg-tip{display:flex;flex-direction:column;gap:8px;border-radius:var(--m-r-sm);padding:14px 16px;background:#2c2727;}
+.lg-tip{display:flex;flex-direction:column;gap:8px;border-radius:var(--m-r-sm);padding:14px 16px;background:var(--m-ink);}
 .lg-tip-l{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.09em;color:var(--m-orange);}
 .lg-tip-t{font-size:var(--m-fs-2xs);line-height:1.4;color:var(--m-card);}
 .lg-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
@@ -3434,7 +3434,7 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-wval.is-pale{color:#ffa390;}
 .lg-num{font-family:inherit;font-weight:200;letter-spacing:-.02em;color:inherit;background:none;border:none;outline:none;padding:0;margin:0;text-align:center;line-height:1;min-width:1ch;-webkit-appearance:none;appearance:none;border-radius:0;box-shadow:none;caret-color:var(--m-orange);font-size:var(--m-fs-display);}
 .lg-unit{font-size:var(--m-fs-hero);font-weight:200;line-height:1;}
-.lg-num-r{font-size:var(--m-fs-display-sm);color:#2c2727;transition:transform var(--m-dur-press-out) var(--m-ease),color var(--m-dur-quick) ease;}
+.lg-num-r{font-size:var(--m-fs-display-sm);color:var(--m-ink);transition:transform var(--m-dur-press-out) var(--m-ease),color var(--m-dur-quick) ease;}
 .lg-num-r.is-pale{color:#a3a3a3;}
 /* Weight ruler, Figma 479:12000 / 483:18019 (2026-10-05): labels on top,
    ticks under them, a small up-pointing triangle under the centre. Ticks up
@@ -3465,7 +3465,7 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-set-del{position:absolute;inset:0;background:var(--m-orange);display:flex;align-items:center;justify-content:flex-end;padding-right:20px;color:var(--m-white);}
 .lg-set-del svg{width:22px;height:22px;display:block;}
 .lg-set{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box;background:#ededed;border:1.5px solid transparent;border-radius:16px;padding:10px 16px;text-align:left;font-family:inherit;cursor:pointer;touch-action:pan-y;transition:border-color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
-.lg-set-l{width:76px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(44,39,39,.71);}
+.lg-set-l{width:76px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(52,57,65,.71);}
 .lg-set-v{flex:1;min-width:0;font-size:var(--m-fs-md);color:var(--m-ink);font-variant-numeric:tabular-nums;}
 .lg-set-c{width:24px;height:24px;border-radius:50%;flex:none;background:var(--m-orange);color:var(--m-white);display:flex;align-items:center;justify-content:center;box-sizing:border-box;}
 .lg-set-c svg{width:12px;height:12px;display:block;}
@@ -3514,8 +3514,8 @@ body.gymv2-bg .pg-bg{display:block;}
 .cg-val{display:flex;align-items:baseline;justify-content:center;gap:8px;color:var(--m-ink);}
 .cg-val b{font-size:var(--m-fs-hero);font-weight:200;line-height:1;font-variant-numeric:tabular-nums;}
 .cg-val span{font-size:var(--m-fs-md);color:var(--m-muted);}
-.cg-est{margin:0;text-align:center;font-size:var(--m-fs-xs);color:rgba(44,39,39,.71);line-height:1.4;min-height:1.4em;}
-.cg-sec{margin:6px 0 0;font-size:var(--m-fs-2xs);letter-spacing:.1em;text-transform:uppercase;color:rgba(44,39,39,.71);}
+.cg-est{margin:0;text-align:center;font-size:var(--m-fs-xs);color:rgba(52,57,65,.71);line-height:1.4;min-height:1.4em;}
+.cg-sec{margin:6px 0 0;font-size:var(--m-fs-2xs);letter-spacing:.1em;text-transform:uppercase;color:rgba(52,57,65,.71);}
 .cg-bar{width:100%;height:6px;border-radius:3px;background:#e4e1ea;overflow:hidden;}
 .cg-bar i{display:block;height:100%;width:100%;background:var(--m-orange);transform-origin:left;transform:scaleX(0);}
 .cg-barrow{width:100%;display:flex;justify-content:space-between;font-size:var(--m-fs-2xs);color:var(--m-muted);}
@@ -3654,11 +3654,11 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-pg-ov .lg-ov-note .lg-tip-t{color:#5a1a0c;font-weight:400;}
 .lg-ov-row{display:grid;grid-template-columns:174fr 141fr;gap:8px;}
 .lg-mini{min-width:0;min-height:135px;background:#ededed;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;gap:10px;}
-.lg-mini-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(44,39,39,.8);}
-.lg-mini-v{font-size:40px;font-weight:200;letter-spacing:-.02em;line-height:40px;color:#2c2727;white-space:nowrap;}
-.lg-mini-from{font-size:var(--m-fs-xs);font-weight:400;color:rgba(44,39,39,.6);line-height:1.15;margin-top:-4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.lg-mini-v small{font-size:var(--m-fs-md);font-weight:400;letter-spacing:0;margin-left:4px;color:rgba(44,39,39,.8);}
-.lg-mini-s{display:flex;align-items:center;gap:8px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#2c2727;}
+.lg-mini-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(52,57,65,.8);}
+.lg-mini-v{font-size:40px;font-weight:200;letter-spacing:-.02em;line-height:40px;color:var(--m-ink);white-space:nowrap;}
+.lg-mini-from{font-size:var(--m-fs-xs);font-weight:400;color:rgba(52,57,65,.6);line-height:1.15;margin-top:-4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lg-mini-v small{font-size:var(--m-fs-md);font-weight:400;letter-spacing:0;margin-left:4px;color:rgba(52,57,65,.8);}
+.lg-mini-s{display:flex;align-items:center;gap:8px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-ink);}
 .lg-mini-s.is-trend{gap:4px;}
 .lg-mini-s b{font-weight:500;color:var(--m-orange);}
 .lg-mini-s .ph, .lg-mini-s .ph svg{width:12px;height:12px;display:block;color:var(--m-orange);}
@@ -3675,7 +3675,7 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-pg-how{gap:16px;}
 .lg-how-ill{display:flex;align-items:center;justify-content:center;}
 .lg-how-ill img{display:block;width:305px;max-width:100%;height:auto;aspect-ratio:1;object-fit:contain;}
-.lg-how-ill svg{height:200px;width:auto;max-width:70%;color:#2c2727;}
+.lg-how-ill svg{height:200px;width:auto;max-width:70%;color:var(--m-ink);}
 .lg-how-txt{display:flex;flex-direction:column;gap:8px;padding:0 12px;}
 .lg-how-txt .lg-how{gap:8px;}
 .lg-how-txt .lg-how-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;}
@@ -10213,7 +10213,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.84.2";
+const APP_VERSION = "4.84.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.83.0": {
