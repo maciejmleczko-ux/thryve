@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.83.0 (2026-10-22)
-- **Liczba wersji:** 254 · **commitów:** 633
+- **Aktualna wersja:** 4.84.0 (2026-10-22)
+- **Liczba wersji:** 255 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.84.0 · MINOR · 2026-10-22
+
+- **Jednostki:** wybór systemu metrycznego (kg, cm, km) lub imperialnego (lb, ft/in, mi). Nowe okno w Ustawieniach („Jednostki”, jak okno Języka, zmiana przeładowuje apkę) i nowy krok „Jakich jednostek używasz?” w onboardingu (po wieku). Domyślnie wg regionu telefonu (imperialne dla en-US, en-LR, my-MM). Nowy klucz localStorage `mekkio_units_v1` (lokalny, nie idzie do chmury).
+- **Dane bez zmian:** wszystko nadal zapisane w kg / cm / m; przeliczanie tylko przy wyświetlaniu (`kgToDisp`, `dispToKg`, `fmtW`, `wUnit`) i przy zapisie wpisanej liczby. Waga ciała zapisywana z dokładnością 0,01 kg (wcześniej 0,1), żeby wpis w lb wracał do tej samej liczby.
+- **Wpisywanie:** okno serii (linijka w lb, kroki 2,5 / 5 lb), okno wagi, „Dane ciała” (wzrost cyframi: 59 = 5′9″), onboarding (waga w lb, wzrost w calach), kardio (mi, mph, cele nadal zapisane w km).
+- **Wyświetlanie:** Pulpit, Historia, Postępy, Profil, rekordy, odznaki, wskazówki treningowe, gratulacje, karta do udostępnienia.
+- Build natywny 57.
 
 ### 4.83.0 · MINOR · 2026-10-22
 

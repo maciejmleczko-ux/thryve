@@ -816,7 +816,7 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
    straight from the finish screen too. Only the few genuinely new bits
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
-#nameEditOverlay,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#recordDetailSheet,#newBadgeSheet,#langSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
+#nameEditOverlay,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#recordDetailSheet,#newBadgeSheet,#langSheet,#unitsSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
 /* mConfirm() is opened from inside the account panel (z 95) and its sheets
    (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
 #mConfirmOverlay{z-index:9650;}
@@ -1348,6 +1348,8 @@ html.modal-lock.statsx-lock.statsx-scrollable, html.modal-lock.statsx-lock.stats
 .nb-count{margin:8px 0 0;font-size:var(--m-fs-2xs);letter-spacing:.04em;color:var(--m-muted-text);}
 .lng-list{display:flex;flex-direction:column;gap:8px;margin-top:6px;transition:opacity var(--m-dur-quick) ease;}
 .lng-list.is-off{opacity:.4;pointer-events:none;}
+.lng-row-t{display:flex;flex-direction:column;gap:2px;text-align:left;}
+.lng-row-t small{font-size:var(--m-fs-2xs);letter-spacing:.04em;text-transform:none;opacity:.6;}
 .lng-row{display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;min-height:55px;padding:0 16px;border:.8px solid var(--m-line);border-radius:var(--m-r-sm);background:var(--m-white);color:var(--m-ink);font:inherit;font-size:var(--m-fs-base);letter-spacing:.02em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),border-color var(--m-dur-quick) ease;}
 .lng-row.is-on{border-color:var(--m-orange);}
 .lng-dot{position:relative;flex:none;width:24px;height:24px;border-radius:50%;box-sizing:border-box;border:1px solid var(--m-line);background:var(--m-white);transition:background-color var(--m-dur-quick) ease,border-color var(--m-dur-quick) ease;}
@@ -3811,6 +3813,9 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .ob-gender-chip svg{width:50px;height:50px;color:var(--m-plan-c-easy,#FF6343);}
 .ob-gender-chip span{font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.04em;color:var(--m-ink);}
 .ob-gender-chip.active{border-color:rgba(255,51,0,.45);}
+.ob-units-row{gap:var(--m-gap-card);}
+.ob-units-chip{flex:1 1 0;aspect-ratio:auto;min-height:107px;}
+.ob-units-chip small{font-size:var(--m-fs-2xs);color:var(--m-ink);opacity:.6;}
 
 .ob-num-wrap{text-align:center;}
 .ob-num-label{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.04em;color:var(--m-ink);margin:0 0 10px;}
@@ -5390,6 +5395,31 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<!-- Jednostki: okno wyboru Metryczne / Imperialne (wzór: okno Język). Dane zawsze w kg / cm / km, zmiana tylko przelicza wyświetlanie. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="unitsSheet" onclick="if(event.target===this) closeUnitsSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="uniTitle">JEDNOSTKI</h1>
+          <button type="button" class="m2-x" id="uniClose" aria-label="Zamknij" onclick="closeUnitsSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="uniSub">Tak pokażemy ciężary, wagę, wzrost i dystans. Zapisane dane się nie zmieniają.</p>
+      </div>
+      <div class="m2-body">
+        <div class="lng-list" id="uniList" role="radiogroup" aria-labelledby="uniTitle">
+          <button type="button" class="lng-row" role="radio" aria-checked="false" data-un="metric" onclick="unitsPick('metric')"><span class="lng-row-t"><span id="uniMetricL">Metryczne</span><small>kg · cm · km</small></span><span class="lng-dot"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 6.4l2.4 2.4 4.6-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="lng-row" role="radio" aria-checked="false" data-un="imperial" onclick="unitsPick('imperial')"><span class="lng-row-t"><span id="uniImpL">Imperialne</span><small>lb · ft · mi</small></span><span class="lng-dot"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 6.4l2.4 2.4 4.6-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="uniSave" onclick="saveUnitsSheet()">ZAPISZ</button>
+    </div>
+  </div>
+</div>
+
 <!-- Szczegół rekordu (Figma 10): wejście z wiersza rekordu w arkuszu Rekordy i w sekcji Rekordy Profilu; tylko odczyt -->
 <div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="recordDetailSheet" onclick="if(event.target===this) closeRecordDetail()">
   <div class="plansv2-customize-stack">
@@ -5924,6 +5954,8 @@ function unitsDec(n){ return (LANG === 'en') ? String(n) : String(n).replace('.'
 /* Ciężar w kg -> tekst bez jednostki: kg do 2 miejsc, lb do 1 (zapis w kg ma 2 miejsca, więc 1 miejsce lb zawsze wraca do tej samej liczby). */
 function fmtW(kg){ const d = kgToDisp(Number(kg) || 0); return unitsDec(isImp() ? Math.round(d * 10) / 10 : Math.round(d * 100) / 100); }
 function fmtW1(kg){ return unitsDec(Math.round(kgToDisp(Number(kg) || 0) * 10) / 10); }
+// różnica mas w kg: metrycznie do 0,1 kg; imperialnie zostaje dokładniejsza, żeby po przeliczeniu na lb 1 miejsce było prawdziwe
+function kgDelta(a, b){ const x = a - b; return isImp() ? Math.round(x * 1000) / 1000 : Math.round(x * 10) / 10; }
 function fmtW0(kg){ return String(Math.round(kgToDisp(Number(kg) || 0))); }
 /* Wzrost: cm -> { ft, in } (zaokrąglone do pełnego cala) */
 function cmToFtIn(cm){ const tot = Math.round((Number(cm) || 0) / CM_PER_IN); return { ft: Math.floor(tot / 12), inch: tot % 12 }; }
@@ -5997,7 +6029,7 @@ const T_EN = {
   histWorkoutLabel: 'WORKOUT',
   histRunLabel: 'RUNNING',
   histWorkoutVol: (n, v) => `${n} exercise${n===1?'':'s'} · ${v} ${wUnit()} volume`,
-  histKilometers: 'Kilometers',
+  histKilometers: 'Kilometers', histMiles: 'Miles', paceMinMi: 'Pace (min/mi)',
   histMinutes: 'Minutes',
   weightProgress: 'Weight progress',
   exercisesCheckHint: 'Exercises (check / uncheck)',
@@ -6177,11 +6209,11 @@ const T_EN = {
   bkWarmup: 'Warm-up', bkStretch: 'Stretching', bkMin: 'min', bkMore: n=>`+${n} more`, bkStart: 'Start', bkRepeat: 'Do it again', bkUndo: 'Mark as not done', bkSkipStep: 'Skip step', bkStop: 'Stop', bkDoneNote: 'Done today.', bkNext: n=>`Next: ${n}`, bkNotifDone: 'Block finished', bkGetReady: 'Get ready',
   cm_distanceKm: 'Distance', cm_distanceM: 'Distance', cm_inclinePct: 'Incline', cm_level: 'Level', cm_floors: 'Floors', cm_jumps: 'Jumps',
   cgTitle: 'Goal for today', cgTime: 'Time', cgDist: 'Distance', cgNone: 'No goal', cgParams: 'Settings', cgSpeed: 'Speed',
-  cgEstSpeed: (sp, min) => `At ${sp} km/h that is about ${min} min. I'll let you know when the time is up.`,
+  cgEstSpeed: (sp, min) => `At ${sp} ${speedUnit()} that is about ${min} min. I'll let you know when the time is up.`,
   cgEstNoSpeed: 'Add a speed and I will estimate the time. Without it the clock counts up.',
   cgEstM: 'The clock counts up. Enter the distance at the end.',
   cgEstNone: 'The clock counts up. You finish when you want.',
-  cgEstKm: (sp, km) => `At ${sp} km/h that is about ${km} km.`,
+  cgEstKm: (sp, km) => `At ${sp} ${speedUnit()} that is about ${km} ${distUnit()}.`,
   cgLabLeft: 'Left', cgLabOver: 'Over goal', cgLabTime: 'Time', cgGoal: (g) => `Goal: ${g}`, cgTotal: (t) => `Total ${t}`, cgReached: 'Goal reached',
   tmNotifGoal: 'Goal reached', crNeed: 'to fill in', crGoalChip: (g) => `Goal ${g}`, cgDistHint: 'Add the distance from the machine to calculate speed and calories.',
   tmSwitchSides: 'Switch sides', tmSideN: (n,m)=>`Side ${n} of ${m}`,
@@ -7368,16 +7400,26 @@ const ONB_BACK_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http:/
 const ONB_RULER_TRI = '<svg viewBox="0 0 9 8" fill="currentColor"><path d="M8.87 6.15c.37.63-.08 1.43-.82 1.43H.95C.22 7.58-.24 6.78.13 6.15L3.48.47A.94.94 0 0 1 4.3 0h.4c.34 0 .65.18.82.47l3.35 5.68Z"/></svg>';
 const ONB_RL_TRI = "<svg viewBox=\"0 0 9 8\" fill=\"currentColor\"><path d=\"M8.86681 6.14811C9.23881 6.77939 8.78369 7.57585 8.05096 7.57585L0.948704 7.57585C0.215976 7.57585 -0.239145 6.77939 0.132856 6.14811L3.48106 0.466311C3.6513 0.177431 3.9616 0.000111564 4.29691 0.000111593L4.70275 0.000111629C5.03806 0.000111658 5.34837 0.17743 5.5186 0.466311L8.86681 6.14811Z\"/></svg>";
 
-const ONB_STEPS = ['imie','plec','wiek','waga','wzrost','cel'];
+const ONB_STEPS = ['imie','plec','wiek','jedn','waga','wzrost','cel'];
 const ONB_DIFF = ['easy','medium','hard'];
 const ONB_DAYS = [2,3,4];
 const ONB_GOALS = ['strength','mass','endurance'];
 const ONB_EQUIP = ['all','hantle','sztanga','maszyny','kettlebell','masa ciała','gumy'];   // kolejność z Figmy (495:18575)
-const ONB_NUM = {   // zakresy linijek (jak w podglądzie)
+const ONB_NUM_METRIC = {   // zakresy linijek (jak w podglądzie)
   age:    {min:14,  max:80,  unit:''},
   weight: {min:35,  max:180, unit:'kg'},
   height: {min:140, max:210, unit:'cm'},
 };
+const ONB_NUM_IMPERIAL = {   // waga w lb, wzrost w calach (pokazywany jako 5′9″)
+  age:    {min:14,  max:80,  unit:''},
+  weight: {min:80,  max:400, unit:'lb'},
+  height: {min:55,  max:83,  unit:''},
+};
+function onbNumDef(k){ return (isImp() ? ONB_NUM_IMPERIAL : ONB_NUM_METRIC)[k]; }
+// liczba na linijce: wzrost imperialny to cale -> 5′9″
+function onbNumText(key, v){ return key === 'height' && isImp() ? `${Math.floor(v / 12)}′${v % 12}″` : String(v); }
+function onbNumHtml(key, v){ const r = onbNumDef(key); return onbNumText(key, v) + (r.unit ? `<small>${r.unit}</small>` : ''); }
+function onbTickMajor(key, v){ return key === 'height' && isImp() ? v % 6 === 0 : v % 5 === 0; }
 /* Odpowiedzi z kroku „cel”, dla etapu B (wybór planu / recommendedPlanFor). Wypełniane przy zakończeniu
    przepływu (onbFinish), tylko w pamięci, nigdzie nie zapisywane:
      goal         'strength' | 'mass' | 'endurance' | null (null = onboarding nie przeszedł kroku „cel”)
@@ -7413,11 +7455,11 @@ function onbInitState(){
   const bd = bodyData || {}, w = currentWeightKg();
   onbS = {
     step:0, name:profileName || '', gender:(bd.sex === 'f' || bd.sex === 'm') ? bd.sex : null,
-    age: bd.age || 45, weight: w ? Math.round(w) : 100, height: bd.heightCm || 176,
+    age: bd.age || 45, weight: w ? Math.round(kgToDisp(w)) : (isImp() ? 220 : 100), height: bd.heightCm ? (isImp() ? Math.round(bd.heightCm / CM_PER_IN) : bd.heightCm) : (isImp() ? 69 : 176),
     ageT: !!bd.age, weightT: !!w, heightT: !!bd.heightCm,   // DALEJ szary, dopóki użytkownik sam nie ustawi wartości (domyślna liczba nie jest odpowiedzią)
     goal:null, diff:1, days:1, equip:[],                     // diff 0..2 = easy/medium/hard, days 0..2 = 2x/3x/4x
   };
-  ['age','weight','height'].forEach(k=>{ const r = ONB_NUM[k]; onbS[k] = Math.max(r.min, Math.min(r.max, onbS[k])); });
+  ['age','weight','height'].forEach(k=>{ const r = onbNumDef(k); onbS[k] = Math.max(r.min, Math.min(r.max, onbS[k])); });
 }
 function onbValid(){
   const s = onbS;
@@ -7425,6 +7467,7 @@ function onbValid(){
     case 'imie':   return cleanName(s.name).trim().length > 0;
     case 'plec':   return true;              // opcjonalna: bez wyboru zostają męskie ikony
     case 'wiek':   return s.ageT;
+    case 'jedn':   return true;              // domyślnie wg regionu telefonu, można zmienić
     case 'waga':   return s.weightT;
     case 'wzrost': return s.heightT;
     case 'cel':    return !!s.goal && s.equip.length > 0;
@@ -7460,6 +7503,28 @@ function onbScreenName(){
     <div class="ob-spacer" style="flex-grow:277"></div>
     ${onbCtaHtml()}`);
 }
+// zmiana jednostek w trakcie onboardingu: przelicza już wybrane (lub domyślne) wartości linijek, nic jeszcze nie zapisuje
+function onbSetUnits(u){
+  if(u !== 'metric' && u !== 'imperial' || u === UNITS || !onbS) return;
+  const kg = dispToKg(onbS.weight), cm = isImp() ? onbS.height * CM_PER_IN : onbS.height;
+  UNITS = u;
+  onbS.weight = Math.round(kgToDisp(kg));
+  onbS.height = isImp() ? Math.round(cm / CM_PER_IN) : Math.round(cm);
+  ['weight','height'].forEach(k=>{ const r = onbNumDef(k); onbS[k] = Math.max(r.min, Math.min(r.max, onbS[k])); });
+  haptic('select');
+}
+function onbScreenUnits(){
+  const opts = [{key:'metric', label:t('onbUnitsMetric','METRYCZNE'), sub:'kg · cm · km'}, {key:'imperial', label:t('onbUnitsImperial','IMPERIALNE'), sub:'lb · ft · mi'}];
+  return onbShellHtml(`
+    <h1 class="ob-h1">${t('onbUnitsTitle','Jakich jednostek używasz?')}</h1>
+    <p class="ob-sub">${t('onbUnitsSub','Tak pokażemy ciężary, wagę i dystans. Zmienisz to później w Ustawieniach.')}</p>
+    <div class="ob-spacer" style="flex-grow:86"></div>
+    <div class="ob-gender-row ob-units-row" role="radiogroup" aria-label="${t('onbUnitsTitle','Jakich jednostek używasz?')}">
+      ${opts.map(o=>`<button type="button" class="ob-gender-chip ob-units-chip${UNITS === o.key ? ' active' : ''}" role="radio" data-act="units" data-key="${o.key}" aria-checked="${UNITS === o.key}"><span>${o.label}</span><small>${o.sub}</small></button>`).join('')}
+    </div>
+    <div class="ob-spacer" style="flex-grow:300"></div>
+    ${onbCtaHtml()}`);
+}
 function onbScreenGender(){
   const opts = [{key:'f', label:t('onbFemale','KOBIETA'), icon:onbFemaleSvg()}, {key:'m', label:t('onbMale','MĘŻCZYZNA'), icon:onbMaleSvg()}];
   return onbShellHtml(`
@@ -7474,15 +7539,15 @@ function onbScreenGender(){
     ${onbCtaHtml()}`);
 }
 function onbScreenNum(key){
-  const r = ONB_NUM[key];
+  const r = onbNumDef(key);
   const sub = key === 'age' ? t('onbAgeSub','Wiek pomaga w ustaleniu tempa regeneracji i optymalnej intensywności serii.')
             : key === 'weight' ? t('onbWeightSub','To Twój punkt wyjścia do mierzenia postępów i wyliczania siły względnej.')
             : t('onbHeightSub','Pomoże w analizie proporcji sylwetki i prawidłowego wskaźnika masy ciała.');
   const label = key === 'age' ? t('onbAge','WIEK') : key === 'weight' ? t('onbWeight','WAGA') : t('onbHeight','WZROST');
   let ticks = '';
   for(let v = r.min; v <= r.max; v++){
-    const major = v % 5 === 0;
-    ticks += `<div class="ruler-h-tick${major ? ' major' : ''}" data-v="${v}">${major ? `<label>${v}</label>` : ''}<i></i></div>`;
+    const major = onbTickMajor(key, v);
+    ticks += `<div class="ruler-h-tick${major ? ' major' : ''}" data-v="${v}">${major ? `<label>${onbNumText(key, v)}</label>` : ''}<i></i></div>`;
   }
   return onbShellHtml(`
     <h1 class="ob-h1">${ONB_TITLE_ABOUT()}</h1>
@@ -7490,7 +7555,7 @@ function onbScreenNum(key){
     <div class="ob-label-gap"></div>
     <div class="ob-num-wrap">
       <p class="ob-num-label">${label}</p>
-      <div class="ob-num" id="obNum" aria-live="off">${onbS[key]}${r.unit ? `<small>${r.unit}</small>` : ''}</div>
+      <div class="ob-num" id="obNum" aria-live="off">${onbNumHtml(key, onbS[key])}</div>
     </div>
     <div class="ob-ruler-gap"></div>
     <div class="ruler-h" role="slider" aria-label="${label}" aria-valuemin="${r.min}" aria-valuemax="${r.max}" aria-valuenow="${onbS[key]}">
@@ -7544,7 +7609,7 @@ function onbScreenGoal(){
     </div>
     ${onbCtaHtml()}`;
 }
-const ONB_RENDER = {imie:onbScreenName, plec:onbScreenGender, wiek:()=>onbScreenNum('age'), waga:()=>onbScreenNum('weight'), wzrost:()=>onbScreenNum('height'), cel:onbScreenGoal};
+const ONB_RENDER = {imie:onbScreenName, plec:onbScreenGender, wiek:()=>onbScreenNum('age'), jedn:onbScreenUnits, waga:()=>onbScreenNum('weight'), wzrost:()=>onbScreenNum('height'), cel:onbScreenGoal};
 
 /* ---------- linijki wiek/waga/wzrost (scroll-snap, jak w podglądzie) ---------- */
 function onbRulerPaint(track, cur){
@@ -7555,7 +7620,7 @@ function onbRulerPaint(track, cur){
 }
 // onChange(wartość, byUser): byUser=false przy programowym ustawieniu środka, więc domyślna liczba nie liczy się jako odpowiedź
 function onbInitRuler(track, key){
-  const r = ONB_NUM[key], min = r.min, value = onbS[key];
+  const r = onbNumDef(key), min = r.min, value = onbS[key];
   const center = track.clientWidth / 2;
   track.style.scrollPaddingLeft = center + 'px';
   track.style.scrollPaddingRight = center + 'px';
@@ -7586,7 +7651,7 @@ function onbInitRuler(track, key){
       if(ready){ onbS[key + 'T'] = true; if(best !== lastV) haptic('select'); }
       lastV = best;
       const el = document.getElementById('obNum');
-      if(el) el.innerHTML = best + (r.unit ? `<small>${r.unit}</small>` : '');
+      if(el) el.innerHTML = onbNumHtml(key, best);
       const host = track.parentElement; if(host) host.setAttribute('aria-valuenow', best);
       onbRefreshCta();
     });
@@ -7693,10 +7758,11 @@ function onbFinish(){
   if(!nm) return;
   profileName = nm;
   localStorage.setItem(LS_PROFILE_NAME, profileName);
-  bodyData = Object.assign({}, bodyData, {heightCm:s.height, age:s.age});
+  bodyData = Object.assign({}, bodyData, {heightCm:isImp() ? Math.round(s.height * CM_PER_IN) : s.height, age:s.age});
+  try{ localStorage.setItem(UNITS_KEY, UNITS); UNITS_OVERRIDE = UNITS; }catch(e){}   // wybór jednostek z kroku „jedn”
   if(s.gender) bodyData.sex = s.gender;
   saveBodyDataLS(bodyData);                       // też scheduleCloudPush
-  logWeight(s.weight, todayStr());                // jak okno wagi: weightLog + przeliczenie kcal
+  logWeight(Math.round(dispToKg(s.weight) * 100) / 100, todayStr());                // jak okno wagi: weightLog + przeliczenie kcal
   onbAnswers.goal = s.goal;
   onbAnswers.difficulty = ONB_DIFF[s.diff];
   onbAnswers.daysPerWeek = ONB_DAYS[s.days];
@@ -7760,6 +7826,7 @@ function onbStart(){
     const a = b.dataset.act;
     if(a === 'next') onbNext();
     else if(a === 'back') onbBack();
+    else if(a === 'units'){ onbSetUnits(b.dataset.key); host.querySelectorAll('[data-act="units"]').forEach(x=>{ const on = x.dataset.key === UNITS; x.classList.toggle('active', on); x.setAttribute('aria-checked', on); }); }
     else if(a === 'gender'){ onbS.gender = onbS.gender === b.dataset.key ? null : b.dataset.key; host.querySelectorAll('[data-act="gender"]').forEach(x=>{ const on = x.dataset.key === onbS.gender; x.classList.toggle('active', on); x.setAttribute('aria-pressed', on); }); }
     else if(a === 'goal'){ onbS.goal = b.dataset.key; onbPaintGoal(); onbRefreshCta(); }
     else if(a === 'equip') onbToggleEquip(b.dataset.key);
@@ -8049,7 +8116,7 @@ function weightAtDate(d){
   return (pick || weightLog[0]).kg;   // before the earliest entry, fall back to it
 }
 function logWeight(kg, date){
-  kg = Math.round(kg*10)/10;
+  kg = Math.round(kg*100)/100;   // 2 miejsca: wpis w lb (np. 135 lb = 61,23 kg) wraca do tej samej liczby
   const i = weightLog.findIndex(e=> e.date === date);
   if(i >= 0){ weightLog[i].kg = kg; delete weightLog[i].src; }   // hand edit — Health won't touch this day again
   else weightLog.push({kg, date});
@@ -8218,7 +8285,7 @@ function fmtKg(n){ const s = Number(kgToDisp(Number(n))).toFixed(1); return LANG
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
+const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -8415,7 +8482,7 @@ function wsPaint(st){
   } else if(prev){
     html = `<p>${escHtml(t('wsPrev', `Poprzednio ${wsFmt(prev.kg)}`, wsFmt(prev.kg)))}</p>`;
     if(canSave){
-      const d = Math.round((dispToKg(st.value) - prev.kg) * 10) / 10;
+      const d = kgDelta(dispToKg(st.value), prev.kg);
       html += d === 0
         ? `<p class="ws-delta">${escHtml(t('wsSame', 'bez zmian'))}</p>`
         : `<p class="ws-delta">${d < 0 ? WS_ICO_DOWN : WS_ICO_UP}<span>${d < 0 ? '−' : '+'}${wsFmt(Math.abs(d))} ${wUnit()}</span></p>`;
@@ -8543,7 +8610,7 @@ function renderWeightList(){
   const rows = weightLog.filter(e=> e && wsDateOk(e.date) && Number.isFinite(+e.kg)).slice().sort((a,b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
   if(!rows.length){ body.innerHTML = `<p class="wl-empty">${escHtml(t('wlEmpty', 'Brak pomiarów. Pierwszy dodasz przyciskiem poniżej.'))}</p>`; return; }
   body.innerHTML = '<div class="wl-list">' + rows.map((e, i)=>{
-    const prev = rows[i + 1], d = prev ? Math.round((e.kg - prev.kg) * 10) / 10 : null;
+    const prev = rows[i + 1], d = prev ? kgDelta(e.kg, prev.kg) : null;
     const dTxt = d ? `<span>${d < 0 ? '−' : '+'}${wsFmt(Math.abs(d))}</span>` : '';
     const dIco = d ? (d < 0 ? WS_ICO_DOWN : WS_ICO_UP) : '';
     const src = e.src === 'health' ? t('wsHealthName', 'Apple Zdrowie') : t('wlManual', 'Ręcznie');
@@ -10189,7 +10256,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.83.0";
+const APP_VERSION = "4.84.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.83.0": {
@@ -11378,7 +11445,7 @@ function pfBadgePicks(b){
 // postęp „x / y jednostka”; null, gdy odznaka nie ma liczbowego celu (cel 1: zrobione albo nie)
 function pfBadgeProgress(b){
   if(!b.goal || b.goal <= 1) return null;
-  if(b.id === 'ton') return `${formatDashNum(b.value / 1000, 1)} / ${formatDashNum(b.goal / 1000, 1)} t`;
+  if(b.id === 'ton') return isImp() ? `${formatDashNum(kgToDisp(b.value), 0)} / ${formatDashNum(kgToDisp(b.goal), 0)} lb` : `${formatDashNum(b.value / 1000, 1)} / ${formatDashNum(b.goal / 1000, 1)} t`;
   if(b.id === 'bodyweight') return `${fmtKg(b.value)} / ${fmtKg(b.goal)} ${wUnit()}`;
   return `${b.value} / ${b.goal}`;
 }
@@ -11428,7 +11495,7 @@ function closeProfileBadgesSheet(viaDrag){ acctSheetClose('profileBadgesSheet', 
    szara wersja liczona w kodzie (filtr). ---- */
 function bgProgText(b){
   if(!b.goal || b.goal <= 1) return null;
-  if(b.id === 'ton') return `${formatDashNum(b.value / 1000, 1)} t / ${formatDashNum(b.goal / 1000, 1)} t`;
+  if(b.id === 'ton') return isImp() ? `${formatDashNum(kgToDisp(b.value), 0)} lb / ${formatDashNum(kgToDisp(b.goal), 0)} lb` : `${formatDashNum(b.value / 1000, 1)} t / ${formatDashNum(b.goal / 1000, 1)} t`;
   if(b.id === 'bodyweight') return `${fmtKg(b.value)} ${wUnit()} / ${fmtKg(b.goal)} ${wUnit()}`;
   return `${b.value} / ${b.goal}`;
 }
@@ -11530,6 +11597,41 @@ function saveLangSheet(){
   toast((nl === 'en' ? T_EN.lngApplying : 'Zmieniam język…'));
   setTimeout(()=> location.reload(), 650);
 }
+
+/* ---- Jednostki (Ustawienia → Jednostki): Metryczne (kg, cm, km) / Imperialne (lb, ft, mi). Jak język: wybór lokalny, zmiana przeładowuje apkę. ---- */
+let _uni = null;   // 'metric' | 'imperial'
+function unitsPaint(){
+  document.querySelectorAll('#unitsSheet .lng-row').forEach(r=>{ const on = r.dataset.un === _uni; r.classList.toggle('is-on', on); r.setAttribute('aria-checked', on ? 'true' : 'false'); });
+}
+function openUnitsSheet(){
+  _uni = UNITS;
+  document.getElementById('uniTitle').textContent = t('uniTitle', 'JEDNOSTKI');
+  document.getElementById('uniSub').textContent = t('uniSub', 'Tak pokażemy ciężary, wagę, wzrost i dystans. Zapisane dane się nie zmieniają.');
+  document.getElementById('uniMetricL').textContent = t('uniMetric', 'Metryczne');
+  document.getElementById('uniImpL').textContent = t('uniImperial', 'Imperialne');
+  document.getElementById('uniSave').textContent = t('lngSave', 'ZAPISZ');
+  document.getElementById('uniClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  unitsPaint();
+  acctSheetOpen('unitsSheet');
+}
+function closeUnitsSheet(viaDrag){ _uni = null; acctSheetClose('unitsSheet', viaDrag); }
+function unitsPick(u){ if(!_uni) return; _uni = u; unitsPaint(); }
+function saveUnitsSheet(){
+  if(!_uni) return;
+  const next = _uni;
+  closeUnitsSheet();
+  if(next === UNITS) return;
+  if(gymSessionStartAt){ toast(t('uniBlocked', 'Jednostki zmienisz po zakończeniu treningu.')); return; }   // przeładowanie w trakcie treningu: nie ryzykujemy
+  try{ localStorage.setItem(UNITS_KEY, next); }catch(e){ return; }
+  toast(t('uniApplying', 'Zmieniam jednostki…'));
+  setTimeout(()=> location.reload(), 650);
+}
+function unitsRowLabel(){ return isImp() ? t('uniImperial', 'Imperialne') : t('uniMetric', 'Metryczne'); }
+Object.assign(T_EN, {
+  uniTitle: 'UNITS', uniSub: 'This is how we show weights, body weight, height and distance. Saved data does not change.', uniMetric: 'Metric', uniImperial: 'Imperial',
+  uniBlocked: 'You can change units after your workout.', uniApplying: 'Changing units…', setUnits: 'Units',
+  onbUnitsTitle: 'Which units do you use?', onbUnitsSub: 'This is how we show weights, body weight and distance. You can change it later in Settings.', onbUnitsMetric: 'METRIC', onbUnitsImperial: 'IMPERIAL',
+});
 function langRowLabel(){ return LANG_OVERRIDE ? (LANG_OVERRIDE === 'pl' ? 'Polski' : 'English') : t('lngAuto', 'Automatycznie'); }
 Object.assign(T_EN, {
   nbTitle: 'NEW BADGE', nbOk: 'GREAT', nbSee: 'SEE BADGES',
@@ -11986,7 +12088,8 @@ function buildProfileSettingsV2(animate){
     row({ id: 'acctReminderRows', on: 'openReminderSheet()', n: t('setReminder', 'Przypomnienie o treningu'), hidden: !IS_NATIVE, help: true, under: '<span class="pf-pill" id="setReminderV" hidden></span>' }) +
     row({ id: 'setSoundRow', on: 'setSoundOn(!soundOn)', n: t('setSounds', 'Dźwięki'), s: t('setSoundsSub', 'Odliczanie przerwy i koniec treningu'),
       extra: ` role="switch" aria-checked="${soundOn ? 'true' : 'false'}"`, right: `<span class="acct-toggle acct-toggle--s${soundOn ? ' on' : ''}" id="acctSoundToggle"><span class="acct-toggle-knob"></span></span>` }) +
-    row({ id: 'setLangRow', on: 'openLangSheet()', n: t('setLang', 'Język'), right: `<span class="pf-row-r"><span id="setLangV">${E(langRowLabel())}</span>${chev}</span>` }), 0);
+    row({ id: 'setLangRow', on: 'openLangSheet()', n: t('setLang', 'Język'), right: `<span class="pf-row-r"><span id="setLangV">${E(langRowLabel())}</span>${chev}</span>` }) +
+    row({ id: 'setUnitsRow', on: 'openUnitsSheet()', n: t('setUnits', 'Jednostki'), right: `<span class="pf-row-r"><span id="setUnitsV">${E(unitsRowLabel())}</span>${chev}</span>` }), 0);
   const sec2 = sec('', t('setData', 'DANE I PRYWATNOŚĆ'),
     row({ id: 'acctHealthRows', on: 'openHealthSheet()', n: t('setHealth', 'Apple Zdrowie'), s: t('setHealthSub', 'Waga i kalorie z zegarka'), hidden: !showHealth }) +
     row({ on: 'exportData()', n: t('setExportLocal', 'Utwórz kopię zapasową'), nId: 'acctExportLabel', s: t('setExportLocalSub', 'Plik .json'), sId: 'setExportSub' }) +
@@ -13167,6 +13270,7 @@ mSheetDrag('bodyDataSheet', closeBodyDataSheet);     // zamknięcie przeciągni�
 mSheetDrag('badgeDetailSheet', closeBadgeDetail);
 mSheetDrag('newBadgeSheet', closeNewBadge);
 mSheetDrag('langSheet', closeLangSheet);
+mSheetDrag('unitsSheet', closeUnitsSheet);
 mSheetDrag('palFilterSheet', closePalFilter);
 mSheetDrag('planImportSheet', closeImportPlanCodeModal);
 mSheetDrag('planImportConfirmSheet', cancelImportPlan);
@@ -13449,6 +13553,13 @@ const CARDIO_METRIC_DEFS = {
   floors:     { field:'floors',     label:'Piętra',     unit:'',   step:1,   dec:0, max:1000,  toStored:v=> Math.round(v),        fromStored:v=> v },
   jumps:      { field:'jumps',      label:'Skoki',      unit:'',   step:10,  dec:0, max:50000, toStored:v=> Math.round(v),        fromStored:v=> v },
 };
+// dystans w km albo milach (jednostka użytkownika), w danych zawsze w metrach; gettery, bo jednostki mogą się zmienić w onboardingu
+Object.defineProperties(CARDIO_METRIC_DEFS.distanceKm, {
+  unit:       { get: ()=> distUnit(), enumerable: true },
+  max:        { get: ()=> isImp() ? 125 : 200, enumerable: true },
+  toStored:   { get: ()=> isImp() ? (v=> Math.round(v * 1609.344)) : (v=> Math.round(v * 1000)), enumerable: true },
+  fromStored: { get: ()=> isImp() ? (m=> m / 1609.344) : (m=> m / 1000), enumerable: true },
+});
 const CARDIO_SET_FIELDS = ['distanceM','inclinePct','level','floors','jumps'];
 const CARDIO_FIELD_MAX = { distanceM:200000, inclinePct:40, level:100, floors:1000, jumps:50000 };
 // the metric fields of one set, validated (finite, 0..max); any kcal / kcalEst in the input is dropped
@@ -13472,7 +13583,7 @@ function plPlural(n, one, few, many){
 }
 function fmtNum1(n){ const s = String(Math.round(n * 10) / 10); return LANG === 'en' ? s : s.replace('.', ','); }
 function fmtDistance(m, inMetres){
-  return inMetres ? `${String(Math.round(m)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0')} m` : `${fmtNum1(m / 1000)} km`;
+  return inMetres ? `${String(Math.round(m)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0')} m` : `${fmtNum1(kmToDisp(m / 1000))} ${distUnit()}`;
 }
 function fmtPace500(durationSec, distanceM){
   const p = Math.round(durationSec / (distanceM / 500));
@@ -13584,7 +13695,7 @@ function crPaintDerived(){
   if(!el || !cr || !popupExercise) return;
   const sec = popupExercise.setValues[cr.idx].durationSec, chips = [];
   const km = cr.vals.distanceKm, m = cr.vals.distanceM;
-  if(km > 0 && sec > 0) chips.push(`Prędkość ${fmtNum1(km / (sec / 3600))} km/h`);
+  if(km > 0 && sec > 0) chips.push(`Prędkość ${fmtNum1(km / (sec / 3600))} ${speedUnit()}`);
   if(m > 0 && sec > 0) chips.push(`Tempo ${fmtPace500(sec, m)}`);
   el.innerHTML = chips.map(c=> `<span class="lg-chip">${escHtml(c)}</span>`).join('');
   // what the calorie estimate will rest on (or what's missing); the estimate itself is never stored on the set
@@ -14386,9 +14497,9 @@ const LS_CARDIO_GOAL = 'mekkio_cardio_goal_v1';
 let cardioGoals = (()=>{ try{ const v = JSON.parse(localStorage.getItem(LS_CARDIO_GOAL)); return (v && typeof v === 'object') ? v : {}; }catch(e){ return {}; } })();
 function saveCardioGoals(){ try{ localStorage.setItem(LS_CARDIO_GOAL, JSON.stringify(cardioGoals)); }catch(e){} }
 const CG_TIME = { min:5, max:120, step:1 };                     // minutes
-const CG_DIST = { km:{ max:30, step:0.5 }, m:{ max:10000, step:250 } };
+const CG_DIST = { km:{ get max(){ return isImp() ? 20 : 30; }, step:0.5 }, m:{ max:10000, step:250 } };   // km albo mile (jednostka użytkownika)
 const CG_PRE_PARAMS = ['inclinePct', 'level'];                  // metrics worth entering before Start; the distance is read off the machine at the end
-const CG_SPEED_DEF = { label:'Prędkość', unit:'km/h', step:0.5, dec:1, max:40 };
+const CG_SPEED_DEF = { label:'Prędkość', get unit(){ return speedUnit(); }, step:0.5, dec:1, get max(){ return isImp() ? 25 : 40; } };
 let cg = null;        // { mode:'time'|'dist'|'none', timeMin, dist, speed, params:{inclinePct, level}, ruler }
 let cgResult = null;  // what the results sheet needs after a goal set: { chip, hints }
 function isCardioGoalEx(ex){ return !!ex && isTimeEx(ex) && ex.group === 'Kardio' && !!ex.metrics && ex.metrics.length > 0 && ex.name !== 'Jump Rope'; }
@@ -14404,11 +14515,11 @@ function cgFmtDist(v, kind){ return kind === 'm' ? Math.round(v).toLocaleString(
 function cgLoad(ex){
   const saved = cardioGoals[ex.name] || {}, kind = cgDistKind(ex);
   const hist = lastSessionsFor(ex.name);
-  let speed = saved.speed != null ? saved.speed : null;
+  let speed = saved.speed != null ? Math.round(kmToDisp(saved.speed) * 10) / 10 : null;   // zapisane cele są w km i km/h
   if(speed == null && kind === 'km'){   // last time's average speed
     for(const h of hist){
       const set = exSetsView(h).find(x=> x.distanceM > 0 && x.durationSec > 0);
-      if(set){ speed = Math.round(set.distanceM / 1000 / (set.durationSec / 3600) * 2) / 2; break; }
+      if(set){ speed = Math.round(kmToDisp(set.distanceM / 1000) / (set.durationSec / 3600) * 2) / 2; break; }
     }
   }
   const params = {};
@@ -14419,13 +14530,13 @@ function cgLoad(ex){
   cg = {
     mode, kind,
     timeMin: cgClamp(Math.round(saved.timeMin || timeDurFor(ex) / 60), CG_TIME.min, CG_TIME.max),
-    dist: saved.dist || (kind === 'm' ? 2000 : 5),
+    dist: kind === 'km' && saved.dist ? Math.round(kmToDisp(saved.dist) * 10) / 10 : (saved.dist || (kind === 'm' ? 2000 : (isImp() ? 3 : 5))),
     speed, params, ruler: null
   };
 }
 function cgSave(){
   if(!cg || !popupExercise) return;
-  cardioGoals[popupExercise.name] = { mode: cg.mode, timeMin: cg.timeMin, dist: cg.dist, speed: cg.speed, params: cg.params };
+  cardioGoals[popupExercise.name] = { mode: cg.mode, timeMin: cg.timeMin, dist: cg.kind === 'km' ? Math.round(dispToKm(cg.dist) * 100) / 100 : cg.dist, speed: cg.speed != null ? Math.round(dispToKm(cg.speed) * 100) / 100 : cg.speed, params: cg.params };
   saveCardioGoals();
 }
 // goal in ms for the countdown; 0 = nothing to count down to (stopwatch)
@@ -14442,7 +14553,7 @@ function cgIdleClock(){
 }
 function cgGoalLabel(g){
   if(g.mode === 'time') return `${g.timeMin} min`;
-  if(g.mode === 'dist') return `${cgFmtDist(g.dist, g.kind)} ${g.kind === 'm' ? 'm' : 'km'}`;
+  if(g.mode === 'dist') return `${cgFmtDist(g.dist, g.kind)} ${g.kind === 'm' ? 'm' : distUnit()}`;
   return '';
 }
 function cgBegin(){   // snapshot taken at Start (the card is hidden while it runs)
@@ -14499,16 +14610,16 @@ function cgPaint(){
   const val = document.getElementById('cgVal'), est = document.getElementById('cgEst');
   if(val){
     val.innerHTML = cg.mode === 'time' ? `<b>${cg.timeMin}</b><span>min</span>`
-      : cg.mode === 'dist' ? `<b>${cgFmtDist(cg.dist, cg.kind)}</b><span>${cg.kind === 'm' ? 'm' : 'km'}</span>`
+      : cg.mode === 'dist' ? `<b>${cgFmtDist(cg.dist, cg.kind)}</b><span>${cg.kind === 'm' ? 'm' : distUnit()}</span>`
       : `<b>—</b>`;
   }
   if(est){
     let txt = '';
     if(cg.mode === 'dist'){
-      if(cg.kind === 'km') txt = cg.speed > 0 ? t('cgEstSpeed', `Przy ${fmtKgLocal(cg.speed)} km/h to około ${Math.round(cg.dist / cg.speed * 60)} min. Dam znać, gdy ten czas minie.`, fmtKgLocal(cg.speed), Math.round(cg.dist / cg.speed * 60)) : t('cgEstNoSpeed','Podaj prędkość, a oszacuję czas. Bez niej zegar liczy w górę.');
+      if(cg.kind === 'km') txt = cg.speed > 0 ? t('cgEstSpeed', `Przy ${fmtKgLocal(cg.speed)} ${speedUnit()} to około ${Math.round(cg.dist / cg.speed * 60)} min. Dam znać, gdy ten czas minie.`, fmtKgLocal(cg.speed), Math.round(cg.dist / cg.speed * 60)) : t('cgEstNoSpeed','Podaj prędkość, a oszacuję czas. Bez niej zegar liczy w górę.');
       else txt = t('cgEstM','Zegar liczy czas w górę. Dystans wpiszesz na końcu.');
     } else if(cg.mode === 'time'){
-      if(cg.kind === 'km' && cg.speed > 0) txt = t('cgEstKm', `Przy ${fmtKgLocal(cg.speed)} km/h to około ${fmtKgLocal(Math.round(cg.speed * cg.timeMin / 60 * 10) / 10)} km.`, fmtKgLocal(cg.speed), fmtKgLocal(Math.round(cg.speed * cg.timeMin / 60 * 10) / 10));
+      if(cg.kind === 'km' && cg.speed > 0) txt = t('cgEstKm', `Przy ${fmtKgLocal(cg.speed)} ${speedUnit()} to około ${fmtKgLocal(Math.round(cg.speed * cg.timeMin / 60 * 10) / 10)} ${distUnit()}.`, fmtKgLocal(cg.speed), fmtKgLocal(Math.round(cg.speed * cg.timeMin / 60 * 10) / 10));
     } else txt = t('cgEstNone','Zegar liczy w górę. Kończysz, kiedy chcesz.');
     est.textContent = txt;
   }
@@ -14560,7 +14671,7 @@ function cgPaintRun(g, ph, clock, msg, lab, main, row){
   if(R) R.textContent = hasBar ? cgFmtMMSS(g.D / 1000) : '';
   if(chips && !chips.dataset.k){
     const parts = [];
-    if(g.speed > 0) parts.push(`${t('cgSpeed','Prędkość')} ${fmtKgLocal(g.speed)} km/h`);
+    if(g.speed > 0) parts.push(`${t('cgSpeed','Prędkość')} ${fmtKgLocal(g.speed)} ${speedUnit()}`);
     Object.keys(g.params).forEach(k=>{ if(g.params[k] != null){ const d = CARDIO_METRIC_DEFS[k]; parts.push(`${cardioMetricLabel(k)} ${crFmt(d, g.params[k])}${d.unit ? (d.unit === '%' ? '%' : ' ' + d.unit) : ''}`); } });
     chips.innerHTML = parts.map(x=> `<span class="lg-chip">${escHtml(x)}</span>`).join('');
     chips.dataset.k = '1';
@@ -19536,7 +19647,7 @@ function dashWeightBlock(todayIso){
   const ref = ref0 && ref0 !== last ? ref0 : null;
   return {
     hasData:true, kg:last.kg, date:last.date, daysSince: dashDaysBetween(last.date, todayIso),
-    delta30: ref ? Math.round((last.kg - ref.kg)*10)/10 : null,
+    delta30: ref ? kgDelta(last.kg, ref.kg) : null,
     points: (base ? [base] : []).concat(inWin).map(e=>({ date:e.date, kg:e.kg })),
   };
 }
@@ -21204,7 +21315,7 @@ function renderHistMonthSummaryV2(animCls){
   if(monthRuns.length) titleParts.push(`${monthRuns.length} ${plBiegWord(monthRuns.length)}`);
   const subParts = [];
   if(totalVol>0) subParts.push(t('histV2SummaryVol', `objętość ${Math.round(kgToDisp(totalVol))} ${wUnit()}`, Math.round(kgToDisp(totalVol)).toLocaleString('en-US')));
-  if(totalKm>0) subParts.push(`${totalKm} km biegania`);
+  if(totalKm>0) subParts.push(`${isImp() ? fmtNum1(kmToDisp(totalKm)) : totalKm} ${distUnit()} biegania`);
   return `
     <div class="histv2-card${animCls}" style="--i:0">
       <div class="histv2-card-head">
@@ -21312,7 +21423,7 @@ function histWorkoutCardInner(w){
     </div>`;
 }
 function histRunCardInner(r){
-  const min = Math.floor(r.pace), sec = Math.round((r.pace-min)*60);
+  const pcU = isImp() ? r.pace * KM_PER_MI : r.pace, min = Math.floor(pcU), sec = Math.round((pcU-min)*60);
   const exp = !!histExpandedV2[r.id];
   return `
     <div class="histv2-card-head">
@@ -21324,9 +21435,9 @@ function histRunCardInner(r){
     </div>
     <p class="histv2-card-title">${runTypeLabel(r.type)}</p>
     ${exp?`<div class="histv2-run-tiles">
-      <div class="histv2-run-tile"><div class="v">${r.distance}</div><div class="l">${t('histKilometers','Kilometry')}</div></div>
+      <div class="histv2-run-tile"><div class="v">${isImp() ? fmtNum1(kmToDisp(r.distance)) : r.distance}</div><div class="l">${isImp() ? t('histMiles','Mile') : t('histKilometers','Kilometry')}</div></div>
       <div class="histv2-run-tile"><div class="v">${r.time}</div><div class="l">${t('histMinutes','Minuty')}</div></div>
-      <div class="histv2-run-tile"><div class="v">${min}:${sec.toString().padStart(2,'0')}</div><div class="l">${t('paceMinKm','Tempo (min/km)')}</div></div>
+      <div class="histv2-run-tile"><div class="v">${min}:${sec.toString().padStart(2,'0')}</div><div class="l">${isImp() ? t('paceMinMi','Tempo (min/mi)') : t('paceMinKm','Tempo (min/km)')}</div></div>
     </div>
     ${r.notes?`<p class="histv2-run-notes">${escHtml(r.notes)}</p>`:''}`:''}`;
 }
@@ -21409,7 +21520,7 @@ function histFmtDurV2(min){
   const h = Math.floor(min/60), m = Math.round(min%60);
   return h ? `${h} h ${String(m).padStart(2,'0')} min` : `${m} min`;
 }
-function histFmtTonsV2(kg){ return (kg/1000).toFixed(1).replace('.',',') + ' t'; }
+function histFmtTonsV2(kg){ return isImp() ? `${formatDashNum(kgToDisp(kg), 0)} lb` : (kg/1000).toFixed(1).replace('.',',') + ' t'; }
 function histWorkoutStatsV2(w){
   const vol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
   const sets = w.exercises.reduce((s,e)=> s + e.sets.length, 0);
@@ -21447,7 +21558,7 @@ function histRowHtmlV2(kind, item, i, animate){
   if(kind === 'run'){
     return `<div class="histv2-row histv2-row--static${rise}" style="--i:${Math.min(i,8)}">
       <div class="histv2-row-date"><b>${d.getDate()}</b><span>${dow}</span></div>
-      <div class="histv2-row-main"><p class="t">${runTypeLabel(item.type)}</p><div class="histv2-row-pills"><span class="hpill hpill--dist">${item.distance} km</span><span class="hpill hpill--time">${item.time} min</span></div></div>
+      <div class="histv2-row-main"><p class="t">${runTypeLabel(item.type)}</p><div class="histv2-row-pills"><span class="hpill hpill--dist">${isImp() ? fmtNum1(kmToDisp(item.distance)) : item.distance} ${distUnit()}</span><span class="hpill hpill--time">${item.time} min</span></div></div>
       <span class="histv2-row-ico">${ph('sneaker-move')}</span>
     </div>`;
   }
@@ -22832,7 +22943,7 @@ function renderStatsV2Overview(){
       <section class="pf-sec ${A()}"><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('stV2CardioT', 'Kardio')}</h2>${cardioLink}</div>
         <div class="stv2-tiles stv2-tiles--c">
           <div class="pf-stat"><span class="pf-stat-v">${cTime}</span><span class="pf-stat-l">${t('stV2CTime', 'Czas')}</span></div><i class="pf-vsep" aria-hidden="true"></i>
-          <div class="pf-stat"><span class="pf-stat-v">${cs.distM ? fmtNum1(cs.distM / 1000) + '<small>km</small>' : dash}</span><span class="pf-stat-l">${t('stV2CDist', 'Dystans')}</span></div><i class="pf-vsep" aria-hidden="true"></i>
+          <div class="pf-stat"><span class="pf-stat-v">${cs.distM ? fmtNum1(kmToDisp(cs.distM / 1000)) + '<small>' + distUnit() + '</small>' : dash}</span><span class="pf-stat-l">${t('stV2CDist', 'Dystans')}</span></div><i class="pf-vsep" aria-hidden="true"></i>
           <div class="pf-stat"><span class="pf-stat-v">${cs.sessions}</span><span class="pf-stat-l">${t('stV2CSessions', 'Sesje')}</span></div>
         </div></section>` : '';
   return cardioSec;
@@ -22874,7 +22985,7 @@ function stv2BodyHtml(win, ps, n, A){
     const inWin = wl.filter(e=> e.date >= win.start);
     const before = wl.filter(e=> e.date < win.start);
     const base = before.length ? before[before.length - 1] : inWin[0];
-    const dlt = (base && base !== cur) ? Math.round((cur.kg - base.kg) * 10) / 10 : null;
+    const dlt = (base && base !== cur) ? kgDelta(cur.kg, base.kg) : null;
     const spE = (inWin.length >= 2 ? inWin : wl.slice(-10)), sp = spE.map(e=> +e.kg);
     wTile = `<span class="stv2-bt-h"><span class="pf-stat-l">${t('stV2Weight', 'Waga')}</span><span class="pf-ico" style="width:12px;height:12px">${PF_ICO.caret12}</span></span>
       <span class="pf-stat-v stv2-bv">${E(fmtKg(cur.kg))}<small>${wUnit()}</small></span>
@@ -23481,7 +23592,7 @@ function renderStatsV2Detail(name){
   const arrow = growth > 0 && !rec.firstResult ? `<span class="ph stf-rec-ar">${PH['arrow-up-right'].replace('<svg', '<svg width="40" height="40"')}</span>` : '';
   const volTxt = rec.objetosc ? (bw ? statsFValTxt(statsV2IsTime(name) ? 'time' : 'reps', rec.objetosc.vol) : `${formatDashNum(Math.round(kgToDisp(rec.objetosc.vol)), 0)} ${wUnit()}`) : '';
   const rows = [
-    hasProj ? `<div class="stf-rec-r"><span>${t('stV2ProjectedMax', 'Prognoza maxa')}</span><b>≈ ${fmtW(Math.round(rec.prognoza.value))} ${wUnit()}</b></div>` : '',
+    hasProj ? `<div class="stf-rec-r"><span>${t('stV2ProjectedMax', 'Prognoza maxa')}</span><b>≈ ${fmtW0(rec.prognoza.value)} ${wUnit()}</b></div>` : '',
     rec.objetosc ? `<div class="stf-rec-r"><span>${t('stV2RecVolume', 'Największa objętość sesji')}</span><b>${volTxt}</b></div>` : '',
   ].join('');
   const recCard = `
@@ -23907,7 +24018,7 @@ function statsV2WeightModel(range, todayIso){
     });
     m.avg = Math.round(sum / w.length * 10) / 10;
   }
-  if(w.length >= 2) m.delta = Math.round((w[w.length - 1].kg - w[0].kg) * 10) / 10;
+  if(w.length >= 2) m.delta = kgDelta(w[w.length - 1].kg, w[0].kg);
   return m;
 }
 function statsXRangeLabel(r){
@@ -23959,7 +24070,7 @@ function statsXWeightRows(m){
   const all = m.all.slice().reverse();   // najnowsze na górze
   const shown = statsV2WeightAll ? all : all.slice(0, STATSX_W_PREVIEW);
   const rows = shown.map((e, i)=>{
-    const prev = all[i + 1], d = prev ? Math.round((e.kg - prev.kg) * 10) / 10 : null;
+    const prev = all[i + 1], d = prev ? kgDelta(e.kg, prev.kg) : null;
     const dTxt = d ? `${d < 0 ? statsXMinus() : '+'}${wsFmt(Math.abs(d))} ${wUnit()}` : '';
     const src = e.src === 'health' ? t('wsHealthName', 'Apple Zdrowie') : t('wlManual', 'Ręcznie');
     return `<button type="button" class="stc-w-row m-press" onclick="openWeightEdit('${e.date}')" aria-label="${escHtml(wsFmt(e.kg) + ' kg, ' + statsXDateFull(e.date) + ', ' + src)}">`
@@ -24288,7 +24399,7 @@ function statsXCardioAgg(sessions, from, to){
 }
 function statsXPace(sec){
   if(!isFinite(sec) || sec <= 0) return '—';
-  const s = Math.round(sec);
+  const s = Math.round(isImp() ? sec * KM_PER_MI : sec);   // tempo w danych: s/km
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 function statsXClock(sec){
@@ -24366,13 +24477,13 @@ function statsV2CardioPaint(animate){
     const dm = Math.round((cur.sec - prev.sec) / 60);
     deltaHtml = `<p class="stc-delta">${dm ? statsXArrow(dm) + (dm < 0 ? statsXMinus() : '+') + escHtml(statsXMinText(Math.abs(dm) * 60)) : t('stxWSame', 'bez zmian')} <span>${escHtml(statsXCardioVs(win))}</span></p>`;
   }
-  const dKm = prev ? Math.round((cur.distM - prev.distM) / 100) / 10 : 0;
+  const dKm = prev ? Math.round(kmToDisp((cur.distM - prev.distM) / 1000) * 10) / 10 : 0;
   const dN = prev ? cur.n - prev.n : 0;
   const dPace = prev && cur.pace && prev.pace ? Math.round(cur.pace - prev.pace) : 0;
   const tile = (label, val, unit, sub)=> `<div class="stc-tile"><span class="stc-tile-l">${label}</span><span class="stc-tile-v">${val}${unit ? `<small>${unit}</small>` : ''}</span><span class="stc-tile-s">${sub || ''}</span></div>`;
-  const tiles = tile(t('stxCDist', 'DYSTANS'), cur.distM > 0 ? escHtml(fmtNum1(cur.distM / 1000)) : '—', cur.distM > 0 ? 'km' : '', statsXTileDelta(`${dKm < 0 ? statsXMinus() : '+'}${fmtNum1(Math.abs(dKm))} km`, dKm))
+  const tiles = tile(t('stxCDist', 'DYSTANS'), cur.distM > 0 ? escHtml(fmtNum1(kmToDisp(cur.distM / 1000))) : '—', cur.distM > 0 ? distUnit() : '', statsXTileDelta(`${dKm < 0 ? statsXMinus() : '+'}${fmtNum1(Math.abs(dKm))} ${distUnit()}`, dKm))
     + tile(t('stxCSessions', 'SESJE'), String(cur.n), '', statsXTileDelta(`${dN < 0 ? statsXMinus() : '+'}${Math.abs(dN)}`, dN))
-    + tile(t('stxCPace', 'ŚR. TEMPO'), escHtml(statsXPace(cur.pace)), cur.pace ? '/km' : '', statsXTileDelta(`${dPace < 0 ? statsXMinus() : '+'}${statsXPace(Math.abs(dPace))}`, dPace));
+    + tile(t('stxCPace', 'ŚR. TEMPO'), escHtml(statsXPace(cur.pace)), cur.pace ? '/' + distUnit() : '', statsXTileDelta(`${dPace < 0 ? statsXMinus() : '+'}${statsXPace(Math.abs(dPace))}`, dPace));
   // słupki
   const bk = statsXCardioBuckets(win, all);
   const maxSec = bk.bars.reduce((m, b)=> Math.max(m, b.sec), 0);
@@ -24400,7 +24511,7 @@ function statsV2CardioPaint(animate){
   let recs = '';
   if(longest) recs += `<div class="stc-c-rec"><div class="stc-c-rec-l">${t('stxRecLongest', 'Najdłuższa sesja')}${recMeta(longest)}</div><span class="stc-c-rec-v">${escHtml(statsXClock(longest.sec))}</span></div>`;
   if(farthest) recs += `<div class="stc-c-rec"><div class="stc-c-rec-l">${t('stxRecFarthest', 'Najdłuższy dystans')}${recMeta(farthest)}</div><span class="stc-c-rec-v">${escHtml(fmtDistance(farthest.distM, false))}</span></div>`;
-  if(bestPace) recs += `<div class="stc-c-rec"><div class="stc-c-rec-l">${t('stxRecPace', 'Najlepsze tempo')}<span class="stc-note">${t('stxRecPaceNote', 'Wyliczone z dystansu i czasu')}</span></div><span class="stc-c-rec-v">${escHtml(statsXPace(bestPace.pc))} min/km</span></div>`;
+  if(bestPace) recs += `<div class="stc-c-rec"><div class="stc-c-rec-l">${t('stxRecPace', 'Najlepsze tempo')}<span class="stc-note">${t('stxRecPaceNote', 'Wyliczone z dystansu i czasu')}</span></div><span class="stc-c-rec-v">${escHtml(statsXPace(bestPace.pc))} min/${distUnit()}</span></div>`;
   // historia (okno, najnowsze pierwsze, do 30)
   const hist = all.filter(s=> s.date >= win.start && s.date <= win.end).slice(0, 30).map(s=>
     `<div class="stc-c-hist"><div class="stc-c-rec-l">${escHtml(s.name)}<span class="stc-c-rec-m"><i>${STATSX_ICO.clock}${escHtml(statsXClock(s.sec))}</i>${s.distM > 0 ? `<i>${STATSX_ICO.ruler}${escHtml(fmtDistance(s.distM, false))}</i>` : ''}${s.incline != null && s.incline > 0 ? `<i>${STATSX_ICO.slope}${escHtml(fmtNum1(s.incline))} %</i>` : ''}</span></div><span class="stc-c-hist-d">${escHtml(statsXShortDay(s.date))}</span></div>`).join('');
