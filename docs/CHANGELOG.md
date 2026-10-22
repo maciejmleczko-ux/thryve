@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.84.1 (2026-10-22)
-- **Liczba wersji:** 256 · **commitów:** 635
+- **Aktualna wersja:** 4.84.2 (2026-10-22)
+- **Liczba wersji:** 257 · **commitów:** 636
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.84.2 · PATCH · 2026-10-22
+
+- **Kolory na tokeny:** 270 surowych kolorów hex w CSS zamienione na istniejące tokeny (`#fff` → `--m-white` ×165, `#000` → `--m-black` ×27, `#f1d7cb` → `--m-orange-tint` ×16, `#343941` → `--m-ink`, `#2642a4` → `--m-plan-hard`, `#cd1200` → `--m-danger` i inne). Bez zmiany wyglądu: porównanie wszystkich kolorów obliczonych (2655 elementów, 6 ekranów + szczegół Historii) przed i po daje 0 różnic.
+- Zostają jeszcze kolory bez tokenu (`#2c2727`, stara paleta `--orange #f15a23`): wymagają decyzji wizualnej, osobno.
+
+**Commity (0):**
+
 
 ### 4.84.1 · PATCH · 2026-10-22
 
