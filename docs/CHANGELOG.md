@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.80.1 (2026-10-21)
+- **Aktualna wersja:** 4.81.0 (2026-10-22)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,31 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.81.0 · MINOR · 2026-10-22
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Postępy w nowym wydaniu: Siła, objętość i rekordy w karuzeli, rozkład mięśni, ćwiczenia bez postępu oraz osobne strony Wagi, Kardio i listy ćwiczeń. Ukryj sekcje, zmień kolejność, przypnij do pięciu ćwiczeń. Karta z postępami do udostępnienia.
+
+**Zakres techniczny:** przebudowa ekranu Postępy (`stats-v2`) wg Figmy 657:19118 w etapach A–H: czyste obliczenia (`statsV2Window`, `statsV2PeriodStats`, `statsV2NewRecords`, `statsV2Stalled`, `statsV2WeeklyGoalHistory`, `statsV2StrengthSeries`, `statsV2MuscleDistribution`, `statsV2SessionsSeries`), przegląd, strony Waga/Wszystkie ćwiczenia/Kardio (route `stats-weight-v2`, `stats-ex-v2`, `stats-cardio-v2`), arkusze Dostosuj ekran i Przypnij ćwiczenia (nowe klucze localStorage `mekkio_stats_layout_v1`, `mekkio_stats_pins_v1`, bez synca), karta Udostępnij postępy, szczegół ćwiczenia, ruch wykresów (`.stg-*`), poprawki po audytach QA. Nowe tokeny: `--m-gap-card`, `--m-ring-rest`, `--m-switch-off`, `--m-ctl-edge`, `--m-glass-ctl-blur`, `--m-fs-stat`, `--m-fs-display-md`. Audyty: `docs/audyt-postepy-figma.md`, `docs/qa-postepy-v3-*.md`. Plan: `docs/plan-postepy-v3.md`.
+
+**Commity (12, bez scaleń):**
+
+- `4087490` 2026-10-22 — Postepy v3: korekta tekstow PL po przegladzie (Maksymalnie 5, Metryka wykresu, Porownanie zobaczysz)
+- `625f614` 2026-10-22 — Postepy v3, etap H: poprawki po audytach QA (wiernosc, DS, regresja)
+- `83b9843` 2026-10-22 — Postepy etap F: szczegol cwiczenia wg Figmy 06 (rekord, wykres z segmentem i chipami zakresu, historia serii, gwiazdka przypiecia)
+- `3a7a977` 2026-10-22 — Postepy etap G: ruch wykresow (kometa po wylodowaniu karty, sparki, slupki, paski, count-up, fade przy zmianie okresu)
+- `a6c496a` 2026-10-22 — Postepy etap D: arkusze Dostosuj ekran i Przypnij cwiczenia, uklad sekcji i przypiete rekordy (localStorage)
+- `34e9d65` 2026-10-22 — Postepy etap E: arkusz Udostepnij postepy z karta PNG (tydzien/miesiac/rok), lokalnie, bez wagi
+- `61b9a45` 2026-10-22 — Postepy v3: rozdzielenie klas CSS etapu C (stc-) od etapu B (stv2-), naprawa kolizji delt i kafli
+- `2c6a228` 2026-10-22 — Postepy etap C: strony Waga, Wszystkie cwiczenia, Kardio (push/pop, szklo iOS, puste stany)
+- `e692f67` 2026-10-22 — Postepy v3: pierscien tygodnia z oryginalnym rysowaniem (kometa, poswiata), bez nowego gradientu z Figmy
+- `38ea7ce` 2026-10-22 — Postepy v3 etap B: poprawki po przegladzie (etykiety kafli na gorze, tlo wg Figmy, sortowanie rekordow, rozklad miesni, baner, podpisy osi w Ciele, dol strony)
+- `4d6aa27` 2026-10-22 — Postepy v3 etap B: przeglad wg Figmy (pierscien + cel tygodniowy, okres, kafle z deltami, karuzela Sila/Objetosc/Treningi i czas, rekordy, bez postepu, rozklad miesni, cialo, kardio), stany pusty i 1-2 treningi
+- `71bb842` 2026-10-22 — Postepy v3, etap A: czyste obliczenia statsV2 (okna, delty, rekordy, bez postepu, cel tygodniowy, sila, rozklad miesni, serie sesji)
+
+
 
 ### 4.80.1 · PATCH · 2026-10-21
 
