@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.82.2 (2026-10-22)
+- **Aktualna wersja:** 4.83.0 (2026-10-22)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.83.0 · MINOR · 2026-10-22
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Nowe ćwiczenie, import kopii, instalacja i inne okna mają ten sam wygląd i przyciski co reszta aplikacji, a Trener AI kolory i literę karty Mekkio AI.
+
+- **Dialogi:** klasa `.m-dialog` (323 px, padding 30, przyciski 55 px, główny pomarańcz, drugorzędny z obrysem, odstęp 12 px) dla instalacji, „Powtórzyć ostatni trening?”, importu kopii, „Plan dodany, ale tutaj”, „Twoja wiadomość do wysłania”, „Nie ma co zapisać”; przycisk „Usuń” w potwierdzeniach bez czerwieni (Figma 14).
+- **Nowe ćwiczenie:** okno na `.m-sheet2` (pola 56 px / 16 px, segmenty `ai-seg` z `segGlide`, karta liczb, DODAJ na dolnym pasku); logika `saveNewExerciseV2` bez zmian.
+- **Trener AI:** gradient, ramka i poświata jak `.plc--ai`, typografia z karty Mekkio AI (etykieta 11/600, tytuł fs-lg/200, opisy fs-xs/400).
+- Build natywny 56.
 
 ### 4.82.2 · PATCH · 2026-10-22
 
