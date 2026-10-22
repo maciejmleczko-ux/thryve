@@ -165,9 +165,7 @@
   --m-metric-time:var(--m-plum);       /* Czas treningu */
   --m-metric-kcal:var(--m-amber);      /* Kalorie (dark text) */
 
-  --m-ring-yellow:#ffcc00; /* koniec gradientu pierścienia tygodnia w Postępach (Figma 648:11284: #FF3300 → #FFCC00) */
-  --m-ring-rest:#474748;   /* kropka „zostało” i szare kropki celu tygodniowego na czarnej karcie pierścienia */
-  --m-ring-track:rgba(255,255,255,.3);   /* tor pierścienia tygodnia */
+  --m-ring-rest:#474748;   /* szare kropki celu tygodniowego i linia na czarnej karcie pierścienia */
   --m-gap-card:8px;        /* odstęp między sąsiednimi kartami */
   --m-gap-section:20px;    /* odstęp między sekcjami ekranu (tytuł + karta), Figma Postępy */
   --m-r-sm:12px;           /* inputs, chips, small tiles */
@@ -3737,10 +3735,6 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .stv2-cap{margin:0 3px;font-size:var(--m-fs-2xs);font-weight:400;line-height:1.3;color:var(--m-muted-text);}
 /* karta pierścienia */
 .stv2-ring-card{background:var(--m-black);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px;}
-.stv2-ring-card .statsv2-ring-wrap svg{width:132px;height:132px;}
-.stv2-ring-card .statsv2-ring-num strong, .stv2-ring-card .statsv2-ring-legend-value{font-weight:300;}
-.stv2-ring-card .statsv2-ring-dot.done{background:var(--m-orange);}
-.stv2-ring-card .statsv2-ring-dot.left{background:var(--m-ring-rest);}
 .stv2-goal{display:flex;flex-direction:column;gap:12px;padding-top:16px;border-top:.5px solid var(--m-ring-rest);}
 .stv2-goal-h{display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .stv2-goal-lbl{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-white);}
@@ -21748,10 +21742,6 @@ function stv2Range(a, b){
   return `${A[2]} ${STV2_MON[A[1] - 1]}–${B[2]} ${STV2_MON[B[1] - 1]}${y}`;
 }
 function stv2Weeks(n){ return LANG === 'en' ? (n === 1 ? 'week' : 'weeks') : plPlural(n, 'tydzień', 'tygodnie', 'tygodni'); }
-function stv2CssHex(name, fb){
-  try{ const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim(); if(/^#[0-9a-f]{6}$/i.test(v)) return v; }catch(e){}
-  return fb;
-}
 function stv2Safe(fn, fb){ try{ return fn(); }catch(e){ return fb; } }
 function stv2Spark(vals, w, h){
   if(!vals || vals.length < 2) return '';
@@ -21893,13 +21883,15 @@ function renderStatsV2Overview(){
 
   /* ---------- 1. Pierścień tygodnia + cel ---------- */
   const week = stv2Safe(()=> statsV2WeeklyProgress(), { done: 0, total: 0 });
-  const R = 57, SW = 18;
-  const ringFrac = week.total > 0 ? Math.min(1, week.done / week.total) : 0;
-  const ramp = [[0, stv2CssHex('--m-orange', '#ff3300'), 1], [.14, stv2CssHex('--m-orange', '#ff3300'), 1], [1, stv2CssHex('--m-ring-yellow', '#ffcc00'), 1]];
-  const ringArc = statsV2RingArc(66, 66, R, 14, 0, ringFrac * 360, ramp, 0, null, 0);
-  const ringHead = statsV2RingPt(66, 66, R, ringFrac * 360);
-  const dotId = statsV2Uid();
-  const headDelay = (0.18 + Math.max(0, ringArc.segs - 1) * 0.01 + 0.16).toFixed(2);
+  // rysowanie pierścienia 1:1 z wersji sprzed etapu B (15a0ab9): kometa STATSV2_RING_RAMP, poświata na końcu, tor 13 px, R 58
+  const ringShadowId = statsV2Uid(), ringBloomId = statsV2Uid();
+  const R = 58;
+  const ringFrac = week.total ? week.done / week.total : 0;
+  const ringSweepFrac = Math.min(2, ringFrac);
+  const ringFull = ringSweepFrac >= 1;
+  const ringMain = statsV2RingArc(66, 66, R, 13, 0, ringSweepFrac * 360, STATSV2_RING_RAMP, 0, ringFull ? ringShadowId : null, 0.10);
+  const ringHead = statsV2RingPt(66, 66, R, ringSweepFrac * 360);
+  const ringHeadDelay = (0.18 + Math.max(0, ringMain.segs - 1) * 0.01 + 0.16).toFixed(2);
   const dayWord = k=> k === 1 ? t('stV2DayUpper1', 'DZIEŃ') : t('stV2DaysUpper', 'DNI');
   const over = Math.max(0, week.done - week.total);
   const left = Math.max(0, week.total - week.done);
@@ -21916,10 +21908,14 @@ function renderStatsV2Overview(){
         <div class="statsv2-ring-row">
           <div class="statsv2-ring-wrap">
             <svg viewBox="0 0 132 132" width="132" height="132" aria-hidden="true">
-              <defs><filter id="${dotId}" x="-80%" y="-80%" width="260%" height="260%"><feDropShadow dx="0" dy="4" stdDeviation="2" flood-color="#000" flood-opacity=".25"/></filter></defs>
-              <circle cx="66" cy="66" r="${R}" fill="none" stroke-width="${SW}" style="stroke:var(--m-ring-track)"/>
-              ${ringArc.svg}
-              ${ringFrac > 0 ? `<circle class="statsv2-ring-head" style="animation-delay:${headDelay}s;fill:var(--m-white)" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="7" filter="url(#${dotId})"/>` : ''}
+              <defs>
+                <filter id="${ringShadowId}" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.6"/></filter>
+                <filter id="${ringBloomId}" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4.5"/></filter>
+              </defs>
+              <circle cx="66" cy="66" r="${R}" fill="none" stroke="${STATSV2_RING_TRACK}" stroke-width="13"/>
+              ${ringMain.svg}
+              ${week.total > 0 ? `<circle class="statsv2-ring-head" style="animation-delay:${ringHeadDelay}s" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="10" fill="#ffb877" opacity="0.5" filter="url(#${ringBloomId})"/>
+              <circle class="statsv2-ring-head" style="animation-delay:${ringHeadDelay}s" cx="${ringHead.x.toFixed(2)}" cy="${ringHead.y.toFixed(2)}" r="6.5" fill="#ffc07a"/>` : ''}
             </svg>
             <div class="statsv2-ring-num"><strong>${week.total > 0 ? `${week.done}/${week.total}` : week.done}</strong><small>${t('stV2Days', 'dni')}</small></div>
           </div>
