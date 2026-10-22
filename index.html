@@ -6328,6 +6328,22 @@ stV2SessionsSub: 'with cardio exercises',
   histWorkoutVolSub: v => `${v} kg volume`,
   histV2Summary: 'SUMMARY',
   histV2SummaryVol: v => `${v} kg volume`,
+  histWorkoutDefault: 'Workout',
+  histSumVolume: 'volume',
+  histSumTime: 'time',
+  histEmptyNoneT: 'Your workouts will show up here',
+  histEmptyNoneS: 'After your first workout you will see the calendar, the list and your records here.',
+  histEmptyStart: 'START WORKOUT',
+  histEmptyMonthT: 'No workouts this month',
+  histLastWorkout: 'Last workout',
+  histFirstWorkout: 'First workout',
+  histShowMonth: 'Show that month',
+  histEmptyDayT: 'No workout on this day',
+  histLabelDay: 'Workout on',
+  histLabelList: 'Workouts',
+  histOpenTitle: 'WORKOUT',
+  histShareCard: 'SHARE CARD',
+  histDeleteWorkout: 'Delete workout',
 };
 function t(key, plText, ...args){
   const val = (LANG === 'en' && T_EN[key] !== undefined) ? T_EN[key] : plText;
@@ -10122,7 +10138,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.82.0";
+const APP_VERSION = "4.82.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.81.0": {
@@ -21295,7 +21311,17 @@ function renderHistDetailV2(animate){
     if(wrap) wrap.innerHTML = recErrorHtml('histv2-empty', 'histRenderError', 'Nie udało się wyświetlić historii. Spróbuj ponownie za chwilę.', 'renderHistDetailV2(false)');
   });
 }
-const HIST_DOW_FULL_V2 = ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
+const HIST_DOW_FULL_V2 = LANG==='en' ? ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] : ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
+const HIST_DOW_SHORT_V2 = LANG==='en' ? ['SU','MO','TU','WE','TH','FR','SA'] : ['ND','PN','WT','ŚR','CZ','PT','SO'];
+// „21 października” (PL) / „October 21” (EN); EN z dniem tygodnia: „Wednesday, October 21”
+function histDayMonthV2(d){ return LANG==='en' ? `${MONTH_GEN_PL[d.getMonth()]} ${d.getDate()}` : `${d.getDate()} ${MONTH_GEN_PL[d.getMonth()]}`; }
+function histCountWordV2(n){ return LANG==='en' ? (n === 1 ? 'workout' : 'workouts') : plTreningWord(n); }
+function histRecWordV2(n){ return LANG==='en' ? (n === 1 ? 'record' : 'records') : plRekordWord(n); }
+function histSetsWordV2(n){
+  if(LANG==='en') return n === 1 ? 'set' : 'sets';
+  const m10 = n % 10, m100 = n % 100;
+  return n === 1 ? 'seria' : (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14) ? 'serie' : 'serii');
+}
 function histPickDayV2(iso){
   selectedHistDateV2 = selectedHistDateV2 === iso ? null : iso;
   haptic('light');
@@ -21315,7 +21341,7 @@ function histWorkoutStatsV2(w){
 }
 function histWorkoutNameV2(w){
   const p = w.planId ? trainingPlans.find(x=>x.id===w.planId) : null;
-  return p && p.name ? p.name : 'Trening';
+  return p && p.name ? p.name : t('histWorkoutDefault', 'Trening');
 }
 function histMonthStatsV2(prefix){
   const ws = workouts.filter(w=>w.date.startsWith(prefix));
@@ -21332,15 +21358,15 @@ function renderHistSumV2(animate){
   if(!cur.n){ box.innerHTML = ''; return; }
   box.innerHTML = `
     <div class="histv2-sum${animate?' m-rise':''}" style="--i:0">
-      <div class="histv2-sum-cell"><p class="v">${cur.n}</p><p class="k">${plTreningWord(cur.n)}</p></div>
-      <div class="histv2-sum-cell"><p class="v">${histFmtDurV2(cur.min)}</p><p class="k">czas</p></div>
-      <div class="histv2-sum-cell"><p class="v">${histFmtTonsV2(cur.vol)}</p><p class="k">objętość</p></div>
+      <div class="histv2-sum-cell"><p class="v">${cur.n}</p><p class="k">${histCountWordV2(cur.n)}</p></div>
+      <div class="histv2-sum-cell"><p class="v">${histFmtDurV2(cur.min)}</p><p class="k">${t('histSumTime', 'czas')}</p></div>
+      <div class="histv2-sum-cell"><p class="v">${histFmtTonsV2(cur.vol)}</p><p class="k">${t('histSumVolume', 'objętość')}</p></div>
     </div>`;
   window.histMonthRecV2 = cur.rec;
 }
 function histRowHtmlV2(kind, item, i, animate){
   const d = new Date(item.date + 'T12:00:00');
-  const dow = ['ND','PN','WT','ŚR','CZ','PT','SO'][d.getDay()];
+  const dow = HIST_DOW_SHORT_V2[d.getDay()];
   const rise = animate ? ' m-rise' : '';
   if(kind === 'run'){
     return `<div class="histv2-row histv2-row--static${rise}" style="--i:${Math.min(i,8)}">
@@ -21366,15 +21392,15 @@ function histRowHtmlV2(kind, item, i, animate){
 function histEmptyHtmlV2(kind, extra, isBefore){
   if(kind === 'none') return `<div class="histv2-empty2">
       <span class="histv2-empty2-ico">${ph('barbell')}</span>
-      <p class="t">Tu pojawią się Twoje treningi</p>
-      <p class="s">Po pierwszym treningu zobaczysz tu kalendarz, listę i swoje rekordy.</p>
-      <button type="button" class="m2-btn m-press" onclick="goRoute('gym-v2')">ZACZNIJ TRENING</button>
+      <p class="t">${t('histEmptyNoneT', 'Tu pojawią się Twoje treningi')}</p>
+      <p class="s">${t('histEmptyNoneS', 'Po pierwszym treningu zobaczysz tu kalendarz, listę i swoje rekordy.')}</p>
+      <button type="button" class="m2-btn m-press" onclick="goRoute('gym-v2')">${t('histEmptyStart', 'ZACZNIJ TRENING')}</button>
     </div>`;
   if(kind === 'month') return `<div class="histv2-empty2">
-      <p class="t">Brak treningów w tym miesiącu</p>
-      ${extra ? `<p class="s">${isBefore ? 'Ostatni trening' : 'Pierwszy trening'}: ${fmtDateHuman(extra)}</p><button type="button" class="histv2-empty2-link m-press" onclick="histJumpToV2('${extra}')">Pokaż ten miesiąc</button>` : ''}
+      <p class="t">${t('histEmptyMonthT', 'Brak treningów w tym miesiącu')}</p>
+      ${extra ? `<p class="s">${isBefore ? t('histLastWorkout', 'Ostatni trening') : t('histFirstWorkout', 'Pierwszy trening')}: ${fmtDateHuman(extra)}</p><button type="button" class="histv2-empty2-link m-press" onclick="histJumpToV2('${extra}')">${t('histShowMonth', 'Pokaż ten miesiąc')}</button>` : ''}
     </div>`;
-  return `<div class="histv2-empty2"><p class="t">Brak treningu tego dnia</p><p class="s">${fmtDateHuman(extra)}</p></div>`;
+  return `<div class="histv2-empty2"><p class="t">${t('histEmptyDayT', 'Brak treningu tego dnia')}</p><p class="s">${fmtDateHuman(extra)}</p></div>`;
 }
 function histJumpToV2(iso){
   const [y,m] = iso.split('-').map(Number);
@@ -21404,15 +21430,15 @@ function renderHistDetailV2Core(animate){
     ...runs.filter(r=>inScope(r.date)).map(r=>({kind:'run', item:r})),
   ].sort((a,b)=> b.item.date.localeCompare(a.item.date));
   if(day){
-    label.textContent = 'Trening z dnia';
+    label.textContent = t('histLabelDay', 'Trening z dnia');
     chip.hidden = false;
-    chip.innerHTML = `<span>${fmtDateHuman(day).replace(/ \d{4}$/,'')}</span><span class="ph" data-ph="x"></span>`;
+    chip.innerHTML = `<span>${histDayMonthV2(new Date(day + 'T12:00:00'))}</span><span class="ph" data-ph="x"></span>`;
     hydrateHistIconsV2(chip);
-  } else { label.textContent = 'Treningi'; chip.hidden = true; }
+  } else { label.textContent = t('histLabelList', 'Treningi'); chip.hidden = true; }
   const pill = document.getElementById('histRecPillV2');
   const rc = day ? 0 : (window.histMonthRecV2 || 0);
   pill.hidden = !rc;
-  if(rc) pill.innerHTML = `${ph('trophy')}<span>${rc} ${rc===1?'rekord':(rc%10>=2&&rc%10<=4&&!(rc%100>=12&&rc%100<=14)?'rekordy':'rekordów')}</span>`;
+  if(rc) pill.innerHTML = `${ph('trophy')}<span>${rc} ${histRecWordV2(rc)}</span>`;
   if(!items.length){
     if(day){ wrap.innerHTML = histEmptyHtmlV2('day', day); return; }
     const all = [...workouts.map(w=>w.date), ...runs.map(r=>r.date)].sort();
@@ -21434,7 +21460,7 @@ function histPrevWorkoutV2(w){
 function histPillTxtV2(e, x){
   if(x.durationSec > 0) return fmtDur(x.durationSec, x.perSide);
   const w = +x.weight || 0;
-  return w > 0 ? `${x.reps} x ${fmtGymWeight(w)} kg` : `${x.reps} powt.`;
+  return w > 0 ? `${x.reps} x ${fmtGymWeight(w)} kg` : `${x.reps} ${t('stV2RepsShort', 'powt.')}`;
 }
 // MAX: w tym treningu padł najcięższy ciężar tego ćwiczenia (większy niż we wszystkich wcześniejszych)
 function histExMaxV2(w, e){
@@ -21453,7 +21479,7 @@ function histExBlockV2(w, e){
     : `<span class="histv2-pill ${x.durationSec > 0 ? 'histv2-pt' : 'histv2-p' + sh[i]}">${escHtml(histPillTxtV2(e, x))}</span>`).join('');
   return `<div class="histv2-exblk"><div class="histv2-exblk-top">
       <div class="histv2-exblk-id"><span class="histv2-ex-ico">${statsV2ExerciseIconHtml(e.name)}</span>
-        <div class="histv2-exblk-d"><strong>${escHtml(e.name)}</strong><span>${sets.length} ${sets.length === 1 ? 'seria' : (sets.length % 10 >= 2 && sets.length % 10 <= 4 && !(sets.length % 100 >= 12 && sets.length % 100 <= 14) ? 'serie' : 'serii')}</span></div></div>
+        <div class="histv2-exblk-d"><strong>${escHtml(e.name)}</strong><span>${sets.length} ${histSetsWordV2(sets.length)}</span></div></div>
       ${histExMaxV2(w, e) ? `<div class="histv2-exblk-max"><span class="histv2-max">MAX</span>${ph('trophy', 'histv2-trophy')}</div>` : ''}
     </div><div class="histv2-pills">${pills}</div></div>`;
 }
@@ -21467,20 +21493,20 @@ function histOpenHtmlV2(w){
   const prevMetric = prev ? (isBw ? workoutSumStats(prev).reps : workoutSumStats(prev).volume) : 0;
   const vsPrev = (prevMetric > 0 && !timed) ? Math.round(((isBw ? sum.reps : sum.volume) - prevMetric) / prevMetric * 100) : null;
   const kcal = workoutKcalShown(w);
-  const volLabel = timed ? 'Łączny czas' : isBw ? 'Powtórzenia' : 'Objętość';
+  const volLabel = timed ? t('gymFinTotalTime', 'Łączny czas') : isBw ? t('gymFinReps', 'Powtórzenia') : t('gymFinVolume', 'Objętość');
   const volVal = timed ? fmtDur(workoutTimedTotalSec(w)) : isBw ? String(Math.round(sum.reps)) : `${formatDashNum(Math.round(sum.volume),0)}<small>kg</small>`;
   const span1 = 6 / (kcal != null ? 3 : 2), span2 = 6 / (vsPrev != null ? 2 : 1);
   const recLen = rec ? String(rec.value).length : 0;
   const up = vsPrev != null && vsPrev >= 0;
   return `
     <div class="profil-header plansv2-top histv2-open-top">
-      <button type="button" class="profil-back m-press" onclick="closeHistWorkoutV2()" aria-label="Wstecz"><span class="ph" data-ph="caret-left"></span></button>
-      <h1 class="profil-title">TRENING</h1>
-      <button type="button" class="histv2-open-sharebtn m-press" onclick="shareHistCard('workout','${escHtml(w.id)}')" aria-label="Udostępnij"><span class="ph" data-ph="export"></span></button>
+      <button type="button" class="profil-back m-press" onclick="closeHistWorkoutV2()" aria-label="${t('navBack', 'Wstecz')}"><span class="ph" data-ph="caret-left"></span></button>
+      <h1 class="profil-title">${t('histOpenTitle', 'TRENING')}</h1>
+      <button type="button" class="histv2-open-sharebtn m-press" onclick="shareHistCard('workout','${escHtml(w.id)}')" aria-label="${t('gymFinShareA11y', 'Udostępnij')}"><span class="ph" data-ph="export"></span></button>
     </div>
     <div class="gymfin-inner histv2-open-inner">
       <div class="gymfin-heads">
-        <p class="gymfin-title">${HIST_DOW_FULL_V2[d.getDay()]}, ${d.getDate()} ${MONTH_GEN_PL[d.getMonth()]}</p>
+        <p class="gymfin-title">${HIST_DOW_FULL_V2[d.getDay()]}, ${histDayMonthV2(d)}</p>
         <p class="gymfin-sub">${escHtml(histWorkoutNameV2(w))}</p>
       </div>
       ${rec ? `<div class="gymfin-record">
@@ -21497,21 +21523,21 @@ function histOpenHtmlV2(w){
         </div>
       </div>` : ''}
       <div class="gymfin-stats">
-        <div class="gymfin-stat gymfin-stat--time" style="grid-column:span ${span1}"><p class="gymfin-stat-k">Czas</p><p class="gymfin-stat-v">${w.durationMin ? w.durationMin + '<small>min</small>' : '—'}</p></div>
-        <div class="gymfin-stat gymfin-stat--sky" style="grid-column:span ${span1}"><p class="gymfin-stat-k">Ćwiczenia</p><p class="gymfin-stat-v">${doneCount}</p></div>
-        ${kcal != null ? `<button type="button" class="gymfin-stat gymfin-stat--kcal" style="grid-column:span ${span1}" onclick="openEditKcal('${escHtml(w.id)}')"><p class="gymfin-stat-k">Kalorie</p><p class="gymfin-stat-v">${kcal}<small>kcal</small></p></button>` : ''}
+        <div class="gymfin-stat gymfin-stat--time" style="grid-column:span ${span1}"><p class="gymfin-stat-k">${t('gymFinTime', 'Czas')}</p><p class="gymfin-stat-v">${w.durationMin ? w.durationMin + '<small>min</small>' : '—'}</p></div>
+        <div class="gymfin-stat gymfin-stat--sky" style="grid-column:span ${span1}"><p class="gymfin-stat-k">${t('gymFinExercises', 'Ćwiczenia')}</p><p class="gymfin-stat-v">${doneCount}</p></div>
+        ${kcal != null ? `<button type="button" class="gymfin-stat gymfin-stat--kcal" style="grid-column:span ${span1}" onclick="openEditKcal('${escHtml(w.id)}')"><p class="gymfin-stat-k">${t('gymFinKcal', 'Kalorie')}</p><p class="gymfin-stat-v">${kcal}<small>kcal</small></p></button>` : ''}
         <div class="gymfin-stat gymfin-stat--volume gymfin-stat--wide" style="grid-column:span ${span2}"><p class="gymfin-stat-k">${volLabel}</p><p class="gymfin-stat-v">${volVal}</p></div>
         ${vsPrev != null ? `<div class="gymfin-stat gymfin-stat--vs gymfin-stat--wide" style="grid-column:span 3">
-          <p class="gymfin-stat-k">Vs poprzedni</p>
-          <div><p class="gymfin-stat-v"><span class="ph" style="${up ? '' : 'transform:rotate(90deg)'}">${PH['arrow-up-right']}</span><span>${up ? '+' : '−'}${Math.abs(vsPrev)}%</span></p><p class="gymfin-stat-cap">względem ${prev ? 'ostatniego treningu' : ''}</p></div>
+          <p class="gymfin-stat-k">${t('gymFinVs', 'Vs poprzedni')}</p>
+          <div><p class="gymfin-stat-v"><span class="ph" style="${up ? '' : 'transform:rotate(90deg)'}">${PH['arrow-up-right']}</span><span>${up ? '+' : '−'}${Math.abs(vsPrev)}%</span></p><p class="gymfin-stat-cap">${t('gymFinVsCap', 'względem ostatniego treningu')}</p></div>
         </div>` : ''}
       </div>
-      <p class="histv2-open-label">Ćwiczenia</p>
+      <p class="histv2-open-label">${t('gymFinExercises', 'Ćwiczenia')}</p>
       <div class="histv2-open-ex">
         ${w.exercises.map(e=> histExBlockV2(w, e)).join('')}
       </div>
-      <button type="button" class="m2-btn m-press histv2-open-share" onclick="shareHistCard('workout','${escHtml(w.id)}')">UDOSTĘPNIJ KARTĘ</button>
-      <button type="button" class="histv2-open-del m-press" onclick="histDeleteOpenV2()">Usuń trening</button>
+      <button type="button" class="m2-btn m-press histv2-open-share" onclick="shareHistCard('workout','${escHtml(w.id)}')">${t('histShareCard', 'UDOSTĘPNIJ KARTĘ')}</button>
+      <button type="button" class="histv2-open-del m-press" onclick="histDeleteOpenV2()">${t('histDeleteWorkout', 'Usuń trening')}</button>
     </div>`;
 }
 function openHistWorkoutV2(id){
