@@ -259,6 +259,11 @@ body.plansv2-bg{background:var(--m-panel);}
    overscroll bounce on both screens. */
 body.statsv2-bg{background:var(--m-panel);}
 body.histv2-bg{background:var(--m-panel);}
+/* Historia: ta sama receta co Plany i Pulpit (lock + scrollable). Bez niej przewijał się cały dokument i przy odbiciu iOS „chwiało się” także tło;
+   z nią tło (.pg-bg) stoi, a odbija się tylko treść. */
+html.histv2-lock, html.histv2-lock body{overflow:hidden;height:100dvh;touch-action:none;}
+html.histv2-lock.histv2-scrollable, html.histv2-lock.histv2-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}
+html.modal-lock.histv2-lock.histv2-scrollable, html.modal-lock.histv2-lock.histv2-scrollable body{overflow:hidden;touch-action:none;overscroll-behavior:none;}
 /* PROFIL v2 — ta sama receta co Plany (lock + scrollable + bg), ale ekran jest
    zawsze przewijany (długi), a menu dolne jest ukryte, więc nie ma nawet
    zapasu na nie: .app i body bez dolnego paddingu, tło zbiega do --m-page-bot. */
@@ -10138,7 +10143,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.82.1";
+const APP_VERSION = "4.82.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.81.0": {
@@ -12108,6 +12113,8 @@ function goRoute(route){
   // identically on History v2, fixed both together.
   document.body.classList.toggle('statsv2-bg', route==='stats-v2' || isStatsXRoute(route));
   document.documentElement.classList.toggle('statsv2-bg', route==='stats-v2' || isStatsXRoute(route));
+  document.documentElement.classList.toggle('histv2-lock', route==='history-v2');
+  if(route!=='history-v2') document.documentElement.classList.remove('histv2-scrollable');
   document.documentElement.classList.toggle('statsx-lock', isStatsXRoute(route));   // strony w głąb Postępów: jak Plany (lock + scrollable)
   if(!isStatsXRoute(route)) document.documentElement.classList.remove('statsx-scrollable');
   document.body.classList.toggle('histv2-bg', route==='history-v2');
@@ -12119,7 +12126,7 @@ function goRoute(route){
   if(route==='plans-all-v2'){ previewMode = true; renderAllPlansV2(!sameRoute); }
   if(route==='plan-detail-v2'){ previewMode = true; renderPlanDetailV2(!sameRoute); }
   if(route==='plan-editor-v2'){ previewMode = true; refreshPlanEditorV2Scroll(); }
-  if(route==='history-v2'){ previewMode = true; renderCalendarV2(true); }
+  if(route==='history-v2'){ previewMode = true; renderCalendarV2(true); histRefreshScrollV2(); }
   if(route==='stats-v2'){ previewMode = true; statsV2CaroPage = 0; renderStatsV2(true); }
   if(route==='stats-weight-v2'){ previewMode = true; statsV2WeightRender(!sameRoute); }
   if(route==='stats-ex-v2'){ previewMode = true; statsV2ExListRender(!sameRoute); }
@@ -21306,10 +21313,19 @@ function buildHistCardV2(kind, item, orderIdx, animate){
   return wrap;
 }
 function renderHistDetailV2(animate){
-  return recGuardedRender('history', ()=> renderHistDetailV2Core(animate), ()=>{
+  const r = recGuardedRender('history', ()=> renderHistDetailV2Core(animate), ()=>{
     const wrap = document.getElementById('histDetailV2');
     if(wrap) wrap.innerHTML = recErrorHtml('histv2-empty', 'histRenderError', 'Nie udało się wyświetlić historii. Spróbuj ponownie za chwilę.', 'renderHistDetailV2(false)');
   });
+  histRefreshScrollV2();
+  return r;
+}
+// przewijanie tylko wtedy, gdy treść naprawdę się nie mieści (jak refreshPlanEditorV2Scroll): scrollHeight nie zależy od bieżącego przewinięcia
+function histRefreshScrollV2(){
+  if(!document.documentElement.classList.contains('histv2-lock')) return;
+  const needsScroll = document.body.scrollHeight > window.innerHeight + 2;
+  document.documentElement.classList.toggle('histv2-scrollable', needsScroll);
+  if(!needsScroll) document.documentElement.scrollTop = 0;
 }
 const HIST_DOW_FULL_V2 = LANG==='en' ? ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] : ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
 const HIST_DOW_SHORT_V2 = LANG==='en' ? ['SU','MO','TU','WE','TH','FR','SA'] : ['ND','PN','WT','ŚR','CZ','PT','SO'];

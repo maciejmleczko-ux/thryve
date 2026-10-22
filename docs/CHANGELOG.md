@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.82.1 (2026-10-22)
+- **Aktualna wersja:** 4.82.2 (2026-10-22)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.82.2 · PATCH · 2026-10-22
+
+**Zakres techniczny:** tło Historii przestaje „chwiać się” przy przewijaniu i odbiciu iOS. Przyczyna: Historia była jedynym głównym ekranem bez trybu `lock + scrollable`, więc przewijał się cały dokument, a z nim ruszała się też stała warstwa tła `.pg-bg`. Dodane `html.histv2-lock` / `histv2-scrollable` (jak `plansv2-*` i `dashboard-*`), włączane w `goRoute()`, a `histRefreshScrollV2()` po każdym renderze przyznaje przewijanie tylko wtedy, gdy treść się nie mieści (`scrollHeight`). Otwarte okno szczegółu nadal blokuje stronę pod spodem (`modal-lock`).
+
+**Commity (1):**
+
+- `(ten commit)` 2026-10-22 — Historia: tryb lock + scrollable (tło stoi, odbija się treść)
 
 ### 4.82.1 · PATCH · 2026-10-22
 
