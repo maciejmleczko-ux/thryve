@@ -4443,6 +4443,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <!-- Backup import file input — shared by the History v2 import button
        (was inside the old #view-history, moved out when that was deleted). -->
   <input type="file" id="importFile" accept="application/json" style="display:none;" onchange="importData(event)">
+  <input type="file" id="impAppFile" accept=".csv,.tsv,.txt,text/csv,text/plain,text/tab-separated-values" style="display:none;" onchange="impAppFileChosen(event)">
 
   <!-- ===================== BOTTOM NAV ===================== -->
   <!-- Rebuilt from NAV_ITEMS_V3 by renderBottomNavForContext() on the first
@@ -5020,6 +5021,23 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="m2-actions">
       <button type="button" class="m2-btn" id="uniSave" onclick="saveUnitsSheet()">ZAPISZ</button>
     </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="importAppSheet" onclick="if(event.target===this) closeImportAppSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="impTitle">IMPORT TRENINGÓW</h1>
+          <button type="button" class="m2-x" id="impClose" aria-label="Zamknij" onclick="closeImportAppSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="impSub"></p>
+      </div>
+      <div class="m2-body" id="impBody"></div>
+    </div>
+    <div class="m2-actions" id="impActions"></div>
   </div>
 </div>
 
@@ -5747,6 +5765,17 @@ const T_EN = {
   exerciseExists: 'This exercise already exists — pick it from the grid',
   exerciseAdded: 'Added new exercise to the list and session',
   backupDownloaded: 'Backup downloaded',
+  setImportApp: 'Import from another app', setImportAppSub: 'Strong, Hevy (CSV file)',
+  impTitle: 'IMPORT WORKOUTS', impPick: 'CHOOSE FILE', impSub: 'Bring your history over from Strong or Hevy. The file is read on this phone and is not sent anywhere.',
+  impHowStrong: 'Profile → ⚙ → Export Workouts → CSV', impHowHevy: 'Settings → Export Data (the file arrives by email)',
+  impHowSave: 'Save the file in the Files app and choose it here. You can import more than once: the same workout is never added twice.',
+  impSubPreview: 'Check what we will bring in. Nothing is saved yet.', impSubDone: 'Done. History, records and charts can see it now.',
+  impUnitQ: 'What were the weights in your file? Strong does not record the unit.', impUnitKg: 'Kilograms (kg)', impUnitLb: 'Pounds (lb)',
+  impSkipCardio: n => `Skipped ${n} sets with a distance (running, cycling). Cardio import comes separately.`, impSkipWarm: n => `Skipped ${n} warm-up sets.`, impSkipDate: n => `Skipped ${n} rows with an unreadable date.`,
+  impRowSrc: 'SOURCE', impRowW: 'WORKOUTS', impRowRange: 'PERIOD', impRowSets: 'SETS', impRowEx: 'EXERCISES', impExMatched: (a, b) => b ? `${a} known, ${b} new` : `${a}, all known`,
+  impNewEx: 'Exercises we do not know are added to your exercises under their original name. New: ', impGo: 'IMPORT',
+  impRowAdded: 'WORKOUTS ADDED', impRowDup: 'ALREADY THERE', impRowNewEx: 'NEW EXERCISES', impUndo: 'UNDO IMPORT', impSeeStats: 'SEE IN PROGRESS', impUndone: 'Import undone',
+  impTooBig: 'The file is too big (15 MB limit).', impBadFormat: 'We did not recognise this file. We support CSV exports from Strong and Hevy.', impEmpty: 'There are no workouts in this file that we can read.',
   dataImported: 'Data imported',
   fileReadFailed: "Couldn't read the file",
   importConfirm: 'OK = merge with existing data, Cancel = replace existing data',
@@ -9859,7 +9888,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.84.8";
+const APP_VERSION = "4.85.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.83.0": {
@@ -11697,6 +11726,7 @@ function buildProfileSettingsV2(animate){
     row({ id: 'acctHealthRows', on: 'openHealthSheet()', n: t('setHealth', 'Apple Zdrowie'), s: t('setHealthSub', 'Waga i kalorie z zegarka'), hidden: !showHealth }) +
     row({ on: 'exportData()', n: t('setExportLocal', 'Utwórz kopię zapasową'), nId: 'acctExportLabel', s: t('setExportLocalSub', 'Plik .json'), sId: 'setExportSub' }) +
     row({ id: 'acctImportRow', on: "document.getElementById('importFile').click()", n: t('setImport', 'Wczytaj kopię'), s: t('setImportSub', 'Plik z kopią zapasową') }) +
+    row({ id: 'setImportAppRow', on: 'openImportAppSheet()', n: t('setImportApp', 'Importuj z innej aplikacji'), s: t('setImportAppSub', 'Strong, Hevy (plik CSV)') }) +
     row({ href: './polityka-prywatnosci.html', n: t('setPrivacy', 'Polityka prywatności') }), 1,
     `<p class="set-hint" id="acctBackupHint"></p>`);
   // id acctBackupSec zostaje na etykiecie sekcji (hook z dawnego panelu)
@@ -12874,6 +12904,7 @@ mSheetDrag('badgeDetailSheet', closeBadgeDetail);
 mSheetDrag('newBadgeSheet', closeNewBadge);
 mSheetDrag('langSheet', closeLangSheet);
 mSheetDrag('unitsSheet', closeUnitsSheet);
+mSheetDrag('importAppSheet', closeImportAppSheet);
 mSheetDrag('palFilterSheet', closePalFilter);
 mSheetDrag('planImportSheet', closeImportPlanCodeModal);
 mSheetDrag('planImportConfirmSheet', cancelImportPlan);
@@ -21003,7 +21034,9 @@ function histWorkoutStatsV2(w){
 }
 function histWorkoutNameV2(w){
   const p = w.planId ? trainingPlans.find(x=>x.id===w.planId) : null;
-  return p && p.name ? p.name : t('histWorkoutDefault', 'Trening');
+  if(p && p.name) return p.name;
+  if(w.imported && w.day && w.day !== 'własny') return w.day;   // import: nazwa treningu z pliku (np. „Push”)
+  return t('histWorkoutDefault', 'Trening');
 }
 function histMonthStatsV2(prefix){
   const ws = workouts.filter(w=>w.date.startsWith(prefix));
@@ -25206,6 +25239,294 @@ async function shareRunById(id){
 function shareHistCard(kind, id){
   if(kind==='workout') openShareSheet(id);
   else shareRunById(id);
+}
+
+/* ============================================================
+   IMPORT HISTORII Z INNYCH APLIKACJI (Strong, Hevy; CSV/TSV)
+   Rdzeń bez DOM: parsowanie, wykrywanie formatu, grupowanie w treningi, dopasowanie ćwiczeń.
+   Plik czytany lokalnie w telefonie, nigdy nie wysyłany na serwer. Dane lądują w kg (jak wszędzie).
+   ============================================================ */
+const IMP_MONTHS = {jan:1,january:1,sty:1,styczen:1,feb:2,february:2,lut:2,luty:2,mar:3,march:3,marzec:3,apr:4,april:4,kwi:4,kwiecien:4,may:5,maj:5,jun:6,june:6,cze:6,czerwiec:6,jul:7,july:7,lip:7,lipiec:7,aug:8,august:8,sie:8,sierpien:8,sep:9,sept:9,september:9,wrz:9,wrzesien:9,oct:10,october:10,paz:10,pazdziernik:10,nov:11,november:11,lis:11,listopad:11,dec:12,december:12,gru:12,grudzien:12};
+function impNorm(s){ return String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l').replace(/Ł/g, 'L').toLowerCase().replace(/\s+/g, ' ').trim(); }
+/* CSV/TSV: BOM, separator z pierwszej linii (przecinek, średnik, tabulator), cudzysłowy z "" w środku, CRLF */
+function impParseCsv(text){
+  text = String(text || '').replace(/^﻿/, '');
+  const first = text.split(/\r?\n/, 1)[0] || '';
+  const cnt = c => first.split(c).length - 1;
+  const sep = (cnt('\t') >= cnt(';') && cnt('\t') >= cnt(',') && cnt('\t') > 0) ? '\t' : (cnt(';') > cnt(',') ? ';' : ',');
+  const rows = []; let row = [], cur = '', q = false;
+  for(let i = 0; i < text.length; i++){
+    const ch = text[i];
+    if(q){
+      if(ch === '"'){ if(text[i + 1] === '"'){ cur += '"'; i++; } else q = false; }
+      else cur += ch;
+    } else if(ch === '"') q = true;
+    else if(ch === sep){ row.push(cur); cur = ''; }
+    else if(ch === '\n' || ch === '\r'){
+      if(ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(cur); cur = '';
+      if(row.some(c => c !== '')) rows.push(row);
+      row = [];
+    } else cur += ch;
+  }
+  row.push(cur); if(row.some(c => c !== '')) rows.push(row);
+  return rows;
+}
+/* Wykrycie po nagłówku. Zwraca {src, cols:{pole:indeks}, weightUnit:'kg'|'lb'|null, distUnit:'m'|'km'|'mi'|null} albo null */
+function impDetect(header){
+  const h = header.map(impNorm);
+  const idx = (...names) => { for(const n of names){ const i = h.indexOf(n); if(i >= 0) return i; } return -1; };
+  const c = {};
+  if(idx('exercise name') >= 0 && idx('set order') >= 0){
+    Object.assign(c, { date: idx('date'), wname: idx('workout name'), dur: idx('duration'), ex: idx('exercise name'), set: idx('set order'),
+      weight: idx('weight', 'weight (kg)', 'weight (lb)', 'weight (lbs)'), reps: idx('reps'), dist: idx('distance', 'distance (m)', 'distance (km)', 'distance (mi)'), secs: idx('seconds'), rpe: idx('rpe') });
+    const wh = h[c.weight] || '';
+    return { src: 'strong', cols: c, weightUnit: /\(kg\)/.test(wh) ? 'kg' : /\(lbs?\)/.test(wh) ? 'lb' : null, distUnit: /\(km\)/.test(h[c.dist]||'') ? 'km' : /\(mi\)/.test(h[c.dist]||'') ? 'mi' : 'm' };
+  }
+  if(idx('exercise_title') >= 0 && idx('start_time') >= 0){
+    const wKg = idx('weight_kg'), wLb = idx('weight_lbs', 'weight_lb');
+    Object.assign(c, { date: idx('start_time'), end: idx('end_time'), wname: idx('title'), ex: idx('exercise_title'), set: idx('set_index'), stype: idx('set_type'),
+      weight: wKg >= 0 ? wKg : wLb, reps: idx('reps'), dist: idx('distance_km', 'distance_miles', 'distance_mi'), secs: idx('duration_seconds'), rpe: idx('rpe') });
+    return { src: 'hevy', cols: c, weightUnit: wKg >= 0 ? 'kg' : (wLb >= 0 ? 'lb' : null), distUnit: wKg >= 0 || idx('distance_km') >= 0 ? 'km' : 'mi' };
+  }
+  return null;
+}
+/* Data i godzina z eksportu -> {day:'RRRR-MM-DD', min: minuty od północy|null}. Brak poprawnej daty = null (wiersz pomijamy). */
+function impParseDate(s){
+  s = String(s || '').trim(); if(!s) return null;
+  let m, y, mo, d, hh = null, mm = null;
+  if((m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{1,2}):(\d{2}))?/))){ y = +m[1]; mo = +m[2]; d = +m[3]; if(m[4] != null){ hh = +m[4]; mm = +m[5]; } }
+  else if((m = s.match(/^(\d{1,2})\s+([A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+)\.?,?\s+(\d{4})(?:[, ]+(\d{1,2}):(\d{2}))?/))){ d = +m[1]; mo = IMP_MONTHS[impNorm(m[2])]; y = +m[3]; if(m[4] != null){ hh = +m[4]; mm = +m[5]; } }
+  else if((m = s.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})(?:[, ]+(\d{1,2}):(\d{2}))?/))){
+    const a = +m[1], b = +m[2]; y = +m[3];
+    if(s.indexOf('.') >= 0 || a > 12){ d = a; mo = b; } else { mo = a; d = b; }   // ze slashem domyślnie USA (m/d/r), chyba że pierwszy człon >12
+    if(m[4] != null){ hh = +m[4]; mm = +m[5]; }
+  } else return null;
+  if(!mo || mo < 1 || mo > 12 || d < 1 || d > 31 || y < 1990 || y > 2100) return null;
+  const p = n => String(n).padStart(2, '0');
+  return { day: `${y}-${p(mo)}-${p(d)}`, min: hh == null ? null : hh * 60 + mm };
+}
+/* "1h 15m", "45m", "1h", "2:03:10", "75" (min) -> minuty */
+function impParseDurationMin(s){
+  s = String(s || '').trim(); if(!s) return null;
+  let m;
+  if((m = s.match(/^(?:(\d+)\s*h)?\s*(?:(\d+)\s*m(?:in)?)?\s*(?:(\d+)\s*s)?$/i)) && (m[1] || m[2] || m[3])) return Math.max(1, Math.round((+m[1] || 0) * 60 + (+m[2] || 0) + (+m[3] || 0) / 60));
+  if((m = s.match(/^(\d+):(\d{2}):(\d{2})$/))) return Math.max(1, Math.round(+m[1] * 60 + +m[2] + +m[3] / 60));
+  if(/^\d+$/.test(s)) return Math.max(1, +s);
+  return null;
+}
+function impNum(s){ s = String(s == null ? '' : s).trim().replace(',', '.'); const n = parseFloat(s); return isFinite(n) ? n : 0; }
+/* Wiersze -> treningi. Zwraca {src, weightUnit, sessions:[{key, day, name, durationMin, exercises:[{src, sets:[{w,reps,sec}]}]}], skipped:{badDate, cardio, warmup, empty}} */
+function impBuildSessions(rows, det){
+  const c = det.cols, get = (r, i) => i >= 0 ? (r[i] == null ? '' : String(r[i]).trim()) : '';
+  const skipped = { badDate: 0, cardio: 0, warmup: 0, empty: 0 };
+  const sessions = new Map();
+  for(let i = 1; i < rows.length; i++){
+    const r = rows[i];
+    const dt = impParseDate(get(r, c.date));
+    if(!dt){ skipped.badDate++; continue; }
+    const exName = get(r, c.ex); if(!exName){ skipped.empty++; continue; }
+    if(det.src === 'hevy' && /warm/i.test(get(r, c.stype))){ skipped.warmup++; continue; }
+    if(det.src === 'strong' && /^\s*(rest timer|note)\s*$/i.test(get(r, c.set))) { skipped.empty++; continue; }
+    const w = impNum(get(r, c.weight)), reps = Math.round(impNum(get(r, c.reps))), sec = Math.round(impNum(get(r, c.secs))), dist = impNum(get(r, c.dist));
+    if(dist > 0 && w === 0 && reps === 0){ skipped.cardio++; continue; }   // bieg/rower po dystansie: osobny etap (kardio)
+    if(w <= 0 && reps <= 0 && sec <= 0){ skipped.empty++; continue; }
+    const key = get(r, c.date) + '|' + get(r, c.wname);
+    let s = sessions.get(key);
+    if(!s){
+      let dur = null;
+      if(det.src === 'strong') dur = impParseDurationMin(get(r, c.dur));
+      else { const e = impParseDate(get(r, c.end)); if(e && e.min != null && dt.min != null){ let x = e.min - dt.min; if(e.day !== dt.day && x < 0) x += 1440; dur = x > 0 ? Math.min(x, 600) : null; } }
+      s = { key, day: dt.day, name: get(r, c.wname), durationMin: dur, exercises: [], _ex: new Map() };
+      sessions.set(key, s);
+    }
+    let ex = s._ex.get(exName);
+    if(!ex){ ex = { src: exName, sets: [] }; s._ex.set(exName, ex); s.exercises.push(ex); }
+    ex.sets.push({ w, reps, sec });
+  }
+  const list = [...sessions.values()].filter(s => s.exercises.length).map(s => { delete s._ex; return s; });
+  return { src: det.src, weightUnit: det.weightUnit, sessions: list, skipped };
+}
+
+/* ---- dopasowanie nazw ćwiczeń: ~120 aliasów Strong/Hevy -> ćwiczenia z biblioteki Mekkio ---- */
+const IMP_ALIASES = (`bench press (barbell)|Barbell Bench Press;bench press (dumbbell)|Dumbbell Bench Press;bench press|Barbell Bench Press;incline bench press (barbell)|Incline Bench Press;incline bench press (dumbbell)|Incline Dumbbell Press;incline press (dumbbell)|Incline Dumbbell Press;decline bench press (barbell)|Decline Bench Press;close grip bench press (barbell)|Close-Grip Bench Press;chest press (machine)|Chest Press;incline chest press (machine)|Incline Chest;chest fly (machine)|Pec Deck;butterfly (pec deck)|Pec Deck;pec deck|Pec Deck;chest fly (dumbbell)|Dumbbell Fly;chest fly (cable)|Cable Crossover;cable crossover|Cable Crossover;chest dip|Chest Dip;chest dip (assisted)|Chest Dip;triceps dip|Triceps Dip;triceps dip (assisted)|Triceps Dip;push up|Push-up;push-up|Push-up;diamond push up|Diamond Push-up;pike push up|Pike Push-up;handstand push up|Handstand Push-up;`
+ + `squat (barbell)|Barbell Back Squat;back squat (barbell)|Barbell Back Squat;front squat (barbell)|Front Squat;squat (smith machine)|Smith Machine Squat;hack squat (machine)|Hack Squat Machine;goblet squat (dumbbell)|Dumbbell Goblet Squat;goblet squat (kettlebell)|Kettlebell Goblet Squat;bulgarian split squat|Bulgarian Split Squat;bulgarian split squat (dumbbell)|Bulgarian Split Squat;pistol squat|Pistol Squat;squat (bodyweight)|Bodyweight Squat;bodyweight squat|Bodyweight Squat;lunge (dumbbell)|Dumbbell Walking Lunge;walking lunge (dumbbell)|Dumbbell Walking Lunge;lunge (barbell)|Barbell Lunge;lunge|Lunge;lunge (bodyweight)|Lunge;step up|Step-Up;step up (dumbbell)|Step-Up;leg press|Leg Press Machine;leg press (machine)|Leg Press Machine;leg extension (machine)|Leg Extension;leg extension|Leg Extension;seated leg curl (machine)|Leg Curl;lying leg curl (machine)|Leg Curl;leg curl (machine)|Leg Curl;leg curl|Leg Curl;standing calf raise (machine)|Calf Raise;calf raise (machine)|Calf Raise;calf press on leg press|Calf Raise;seated calf raise (machine)|Seated Calf Raise;seated calf raise|Seated Calf Raise;hip abduction (machine)|Hip Abduction;hip adduction (machine)|Hip Adduction;hip thrust (barbell)|Hip Thrust;hip thrust|Hip Thrust;glute bridge|Glute Bridge;glute kickback (machine)|Glute Kickback Machine;wall sit|Wall Sit;nordic curl|Nordic Curl;`
+ + `deadlift (barbell)|Barbell Deadlift;deadlift|Barbell Deadlift;romanian deadlift (barbell)|Romanian Deadlift;romanian deadlift (dumbbell)|Dumbbell Romanian Deadlift;sumo deadlift (barbell)|Sumo Deadlift;rack pull (barbell)|Rack Pull;good morning (barbell)|Good Morning;back extension|Back Extension;back extension (hyperextension)|Back Extension;back extension (machine)|Back Extension;reverse hyperextension|Reverse Hyperextension;kettlebell swing|Kettlebell Swing;turkish get up|Turkish Get-Up;`
+ + `lat pulldown (cable)|Lat Pulldown;lat pulldown (machine)|Lat Pulldown;lat pulldown|Lat Pulldown;pull up|Pull-up;pull-up|Pull-up;pull up (assisted)|Assisted Pull-Up Machine;chin up|Chin-up;chin-up|Chin-up;inverted row|Inverted Row;seated row (cable)|Seated Row;seated row (machine)|Seated Row;seated cable row|Seated Row;iso-lateral row (machine)|Seated Row;bent over row (dumbbell)|Dumbbell Row;one arm row (dumbbell)|Dumbbell Row;single arm row (dumbbell)|Dumbbell Row;dumbbell row|Dumbbell Row;t bar row|T-Bar Row;t-bar row|T-Bar Row;chest supported row (dumbbell)|Chest-Supported Dumbbell Row;chest supported row (machine)|Chest-Supported Row Machine;straight arm lat pulldown (cable)|Straight-Arm Pulldown;pullover (dumbbell)|Dumbbell Pullover;single arm cable row|Single-Arm Cable Row;face pull (cable)|Face Pull;face pull|Face Pull;`
+ + `overhead press (barbell)|Overhead Press;standing overhead press (barbell)|Overhead Press;shoulder press (dumbbell)|Dumbbell Shoulder Press;seated shoulder press (dumbbell)|Dumbbell Shoulder Press;overhead press (dumbbell)|Dumbbell Shoulder Press;shoulder press (machine)|Shoulder Press;shoulder press (smith machine)|Smith Machine Shoulder Press;arnold press (dumbbell)|Arnold Press;landmine press|Landmine Press;lateral raise (dumbbell)|Dumbbell Lateral Raise;lateral raise (cable)|Cable Lateral Raise;lateral raise (machine)|Dumbbell Lateral Raise;front raise (dumbbell)|Dumbbell Front Raise;rear delt reverse fly (dumbbell)|Dumbbell Rear Delt Fly;reverse fly (dumbbell)|Dumbbell Rear Delt Fly;rear delt reverse fly (machine)|Reverse Pec Deck;reverse fly (machine)|Reverse Pec Deck;shrug (barbell)|Barbell Shrug;shrug (dumbbell)|Dumbbell Shrug;upright row (barbell)|Upright Row;`
+ + `bicep curl (dumbbell)|Dumbbell Hammer Curl;bicep curl (barbell)|Barbell Curl;barbell curl|Barbell Curl;ez bar biceps curl|EZ-Bar Curl;ez bar curl|EZ-Bar Curl;bicep curl (cable)|Cable Curl;bicep curl (machine)|Preacher Curl;hammer curl (dumbbell)|Dumbbell Hammer Curl;hammer curl (cable)|Cable Curl Neutral;preacher curl (barbell)|Preacher Curl;preacher curl (dumbbell)|Preacher Curl;preacher curl (machine)|Preacher Curl;concentration curl|Concentration Curl;incline curl (dumbbell)|Incline Dumbbell Curl;spider curl (dumbbell)|Spider Curl;reverse curl (barbell)|Reverse Curl;wrist curl (barbell)|Wrist Curl;triceps pushdown (cable - straight bar)|Triceps Pushdown;triceps pushdown|Triceps Pushdown;triceps rope pushdown|Rope Pushdown;triceps pushdown (cable - rope)|Rope Pushdown;skullcrusher (barbell)|Skull Crusher;skullcrusher (dumbbell)|Skull Crusher;skull crusher (barbell)|Skull Crusher;triceps extension (dumbbell)|Overhead Triceps;overhead triceps extension (cable)|Overhead Triceps;triceps extension (cable)|Overhead Triceps;triceps kickback (dumbbell)|Dumbbell Kickback;`
+ + `plank|Plank;side plank|Side Plank;crunch|Crunch;crunch (machine)|Ab Crunch;cable crunch|Cable Crunch;hanging leg raise|Hanging Leg Raise;leg raise (hanging)|Hanging Leg Raise;lying leg raise|Lying Leg Raise;ab wheel|Ab Wheel Rollout;ab wheel rollout|Ab Wheel Rollout;russian twist|Russian Twist;pallof press|Pallof Press;cable woodchopper|Cable Woodchopper;burpee|Burpees;burpees|Burpees;mountain climbers|Mountain Climbers;superman|Superman;bird dog|Bird Dog;dead hang|Dead Hang;hollow body hold|Hollow Body Hold;farmer's walk|Farmer's Walk;farmers walk|Farmer's Walk`)
+  .split(';').reduce((m, p) => { const i = p.indexOf('|'); m.set(p.slice(0, i), p.slice(i + 1)); return m; }, new Map());
+/* nazwa z pliku -> nazwa ćwiczenia z biblioteki (albo null). libIdx: Map znormalizowana nazwa -> nazwa (wbudowane + własne). */
+function impMatchExercise(src, libIdx){
+  const k = impNorm(src).replace(/\s*\(\s*/g, ' (').replace(/\s*\)/g, ')');
+  if(IMP_ALIASES.has(k)) return IMP_ALIASES.get(k);
+  if(libIdx.has(k)) return libIdx.get(k);
+  const bare = k.replace(/\s*\([^)]*\)\s*$/, '');
+  return (bare !== k && IMP_ALIASES.has(bare)) ? IMP_ALIASES.get(bare) : null;
+}
+/* Grupa dla ćwiczenia, którego nie znamy (trafia do własnych ćwiczeń użytkownika) */
+function impGuessGroup(name){
+  const n = impNorm(name);
+  const rules = [['Brzuch', /\b(abs?|crunch|plank|twist|core|sit.?up|leg raise)\b/], ['Biceps', /\bcurl\b/], ['Triceps', /(tricep|pushdown|skull|\bdips?\b|kickback)/],
+    ['Barki', /(shoulder|lateral raise|front raise|delt|\bpress\b.*(overhead|military)|overhead press|arnold|shrug)/], ['Plecy', /(\brow\b|pull.?up|pulldown|chin.?up|\blat\b|deadlift|back ext)/],
+    ['Klatka', /(chest|bench|\bfly\b|push.?up|pec\b|crossover)/], ['Nogi', /(squat|lunge|\bleg\b|calf|glute|hip |thrust|step.?up|hamstring|quad)/]];
+  for(const [g, re] of rules) if(re.test(n)) return g;
+  return 'Wlasne';
+}
+/* Deterministyczne id (ten sam plik wczytany drugi raz nie dubluje treningów). FNV-1a po treści treningu. */
+function impSessionId(src, s){
+  let h = 2166136261; const str = src + '|' + s.key + '|' + s.exercises.map(e => e.src + ':' + e.sets.map(x => x.w + 'x' + x.reps + 'x' + x.sec).join(',')).join(';');
+  for(let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return 'imp_' + src + '_' + h.toString(36);
+}
+/* Podsumowanie do podglądu (przed zapisem). map: nazwa z pliku -> nazwa Mekkio | null (nowe własne). */
+function impPlan(parsed, libNames, weightUnit){
+  const libIdx = new Map(libNames.map(n => [impNorm(n), n]));
+  const factor = weightUnit === 'lb' ? 0.45359237 : 1;
+  const map = new Map(), unmatched = new Map();
+  parsed.sessions.forEach(s => s.exercises.forEach(e => {
+    if(!map.has(e.src)){ const m = impMatchExercise(e.src, libIdx); map.set(e.src, m); if(!m) unmatched.set(e.src, 0); }
+    if(unmatched.has(e.src)) unmatched.set(e.src, unmatched.get(e.src) + e.sets.length);
+  }));
+  const days = parsed.sessions.map(s => s.day).sort();
+  return { factor, map, unmatched, count: parsed.sessions.length, first: days[0] || null, last: days[days.length - 1] || null,
+    setCount: parsed.sessions.reduce((n, s) => n + s.exercises.reduce((m, e) => m + e.sets.length, 0), 0) };
+}
+/* Pełne obiekty treningów w modelu Mekkio (ciężary w kg, zaokrąglone do 0,01 jak w reszcie apki) */
+function impToWorkouts(parsed, plan, groupOf){
+  const r2 = x => Math.round(x * 100) / 100;
+  return parsed.sessions.map(s => {
+    const exercises = s.exercises.map(e => ({
+      name: plan.map.get(e.src) || e.src,
+      group: groupOf(plan.map.get(e.src) || e.src),
+      sets: e.sets.map(x => x.sec > 0 && !(x.w > 0) && !(x.reps > 0) ? { weight: 0, reps: 0, durationSec: x.sec } : { weight: r2(x.w * plan.factor), reps: x.reps }),
+      rpe: null, notes: '', version: null,
+    })).filter(e => e.sets.length);
+    return { id: impSessionId(parsed.src, s), date: s.day, startDate: s.day, planId: null, day: s.name || 'własny', exercises, durationMin: s.durationMin, imported: parsed.src };
+  }).filter(w => w.exercises.length);
+}
+
+/* ---- okno „Importuj z innej aplikacji” (Ustawienia → Dane i prywatność) ----
+   Kroki: wybór pliku -> podgląd (ile treningów, które ćwiczenia, jednostka) -> gotowe z opcją cofnięcia.
+   Cofnięcie usuwa dokładnie te treningi (id imp_*) i nowe własne ćwiczenia, których nikt inny nie użył. */
+const LS_IMPORT_LAST = 'mekkio_import_last_v1';
+let _impApp = null;
+function impMonYear(day){ try{ return new Date(day + 'T12:00:00').toLocaleDateString(LANG === 'en' ? 'en-US' : 'pl-PL', { month: 'short', year: 'numeric' }); }catch(e){ return day; } }
+function openImportAppSheet(){
+  _impApp = { step: 'pick' };
+  document.getElementById('impTitle').textContent = t('impTitle', 'IMPORT TRENINGÓW');
+  document.getElementById('impClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  impRender();
+  acctSheetOpen('importAppSheet');
+}
+function closeImportAppSheet(viaDrag){ _impApp = null; acctSheetClose('importAppSheet', viaDrag); }
+function impRow(l, v){ return `<div class="m2-row"><span class="m2-row-l">${escHtml(l)}</span><span class="m2-row-v">${escHtml(v)}</span></div>`; }
+function impRender(){
+  const st = _impApp; if(!st) return;
+  const body = document.getElementById('impBody'), act = document.getElementById('impActions'), sub = document.getElementById('impSub');
+  if(st.step === 'pick' || st.step === 'error'){
+    sub.textContent = t('impSub', 'Przenieś historię ze Strong albo Hevy. Plik jest czytany na tym telefonie i nie jest nigdzie wysyłany.');
+    body.innerHTML = (st.step === 'error' ? `<p class="m2-err" role="alert">${escHtml(st.msg)}</p>` : '')
+      + `<p class="m2-note"><b>Strong:</b> ${escHtml(t('impHowStrong', 'Profil → ⚙ → Export Workouts → CSV'))}</p>`
+      + `<p class="m2-note"><b>Hevy:</b> ${escHtml(t('impHowHevy', 'Ustawienia → Export Data (plik przyjdzie mailem)'))}</p>`
+      + `<p class="m2-note">${escHtml(t('impHowSave', 'Zapisz plik w aplikacji Pliki i wybierz go tutaj. Importować można wiele razy: ten sam trening nie dodaje się drugi raz.'))}</p>`;
+    act.innerHTML = `<button type="button" class="m2-btn" onclick="document.getElementById('impAppFile').click()">${escHtml(t('impPick', 'WYBIERZ PLIK'))}</button>`;
+  } else if(st.step === 'preview'){
+    const p = st.plan, sk = st.parsed.skipped;
+    sub.textContent = t('impSubPreview', 'Sprawdź, co wczytamy. Nic jeszcze nie zapisaliśmy.');
+    const matched = [...p.map.values()].filter(Boolean).length, fresh = p.unmatched.size;
+    const unitRow = st.det.weightUnit ? '' : `<p class="m2-note">${escHtml(t('impUnitQ', 'W czym były ciężary w Twoim pliku? Strong nie zapisuje jednostki.'))}</p>
+      <div class="lng-list" id="impUnitList" role="radiogroup">${['kg', 'lb'].map(u => `<button type="button" class="lng-row${st.unit === u ? ' is-on' : ''}" role="radio" aria-checked="${st.unit === u}" onclick="impSetUnit('${u}')"><span class="lng-row-t"><span>${escHtml(u === 'kg' ? t('impUnitKg', 'Kilogramy (kg)') : t('impUnitLb', 'Funty (lb)'))}</span></span><span class="lng-dot"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 6.4l2.4 2.4 4.6-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>`).join('')}</div>`;
+    const notes = [];
+    if(sk.cardio) notes.push(t('impSkipCardio', n => `Pominięte serie z dystansem (bieg, rower): ${n}. Kardio dojdzie osobno.`, sk.cardio));
+    if(sk.warmup) notes.push(t('impSkipWarm', n => `Pominięte serie rozgrzewkowe: ${n}.`, sk.warmup));
+    if(sk.badDate) notes.push(t('impSkipDate', n => `Pominięte wiersze z nieczytelną datą: ${n}.`, sk.badDate));
+    body.innerHTML = `<div class="m2-field">${impRow(t('impRowSrc', 'ŹRÓDŁO'), st.det.src === 'strong' ? 'Strong' : 'Hevy')}
+      ${impRow(t('impRowW', 'TRENINGI'), String(p.count))}${impRow(t('impRowRange', 'OKRES'), p.first === p.last ? impMonYear(p.first) : impMonYear(p.first) + ' – ' + impMonYear(p.last))}
+      ${impRow(t('impRowSets', 'SERIE'), String(p.setCount))}${impRow(t('impRowEx', 'ĆWICZENIA'), t('impExMatched', (a, b) => b ? `znane ${a}, nowe ${b}` : `${a}, wszystkie znane`, matched, fresh))}</div>`
+      + (fresh ? `<p class="m2-note">${escHtml(t('impNewEx', 'Ćwiczenia, których nie znamy, dodamy do Twoich ćwiczeń pod ich oryginalną nazwą. Nowe: ') + [...p.unmatched.keys()].slice(0, 6).join(', ') + (fresh > 6 ? '…' : ''))}</p>` : '')
+      + unitRow + notes.map(n => `<p class="m2-note">${escHtml(n)}</p>`).join('');
+    act.innerHTML = `<button type="button" class="m2-btn" onclick="impAppConfirm()">${escHtml(t('impGo', 'IMPORTUJ'))}</button>`;
+  } else if(st.step === 'done'){
+    sub.textContent = t('impSubDone', 'Gotowe. Historia, rekordy i wykresy już ją widzą.');
+    body.innerHTML = `<div class="m2-field">${impRow(t('impRowAdded', 'DODANO TRENINGI'), String(st.added))}${st.dup ? impRow(t('impRowDup', 'JUŻ BYŁY'), String(st.dup)) : ''}${st.newEx ? impRow(t('impRowNewEx', 'NOWE ĆWICZENIA'), String(st.newEx)) : ''}</div>`;
+    act.innerHTML = `<button type="button" class="m2-btn" onclick="impSeeStats()">${escHtml(t('impSeeStats', 'POKAŻ W POSTĘPACH'))}</button>${st.added ? `<button type="button" class="m2-btn m2-btn--ghost" onclick="impAppUndo()">${escHtml(t('impUndo', 'COFNIJ IMPORT'))}</button>` : ''}`;
+  }
+}
+function impAppFileChosen(evt){
+  const file = evt.target.files && evt.target.files[0]; evt.target.value = '';
+  if(!file || !_impApp) return;
+  const fail = msg => { if(_impApp){ _impApp = { step: 'error', msg }; impRender(); } };
+  if(file.size > 15 * 1024 * 1024){ fail(t('impTooBig', 'Plik jest za duży (limit 15 MB).')); return; }
+  const reader = new FileReader();
+  reader.onerror = () => fail(t('fileReadFailed', 'Nie udało się wczytać pliku'));
+  reader.onload = e => {
+    try{
+      const rows = impParseCsv(e.target.result);
+      const det = rows.length > 1 ? impDetect(rows[0]) : null;
+      if(!det){ fail(t('impBadFormat', 'Nie rozpoznaliśmy tego pliku. Obsługujemy eksport CSV ze Strong i Hevy.')); return; }
+      const parsed = impBuildSessions(rows, det);
+      if(!parsed.sessions.length){ fail(t('impEmpty', 'W pliku nie ma treningów, które da się wczytać.')); return; }
+      const unit = det.weightUnit || (isImp() ? 'lb' : 'kg');
+      _impApp = { step: 'preview', det, parsed, unit, plan: impPlan(parsed, getExerciseLibrary().map(x => x.name), unit) };
+      impRender();
+    }catch(err){ console.error('import', err); fail(t('fileReadFailed', 'Nie udało się wczytać pliku')); }
+  };
+  reader.readAsText(file);
+}
+function impSetUnit(u){
+  const st = _impApp; if(!st || st.step !== 'preview') return;
+  st.unit = u; st.plan.factor = u === 'lb' ? KG_PER_LB : 1;
+  document.querySelectorAll('#impUnitList .lng-row').forEach((r, i) => { const on = (i === 0 ? 'kg' : 'lb') === u; r.classList.toggle('is-on', on); r.setAttribute('aria-checked', on ? 'true' : 'false'); });
+}
+function impAppConfirm(){
+  const st = _impApp; if(!st || st.step !== 'preview') return;
+  const lib = getExerciseLibrary(), byLower = new Map(lib.map(x => [x.name.toLowerCase(), x]));
+  const newEx = [];
+  st.plan.unmatched.forEach((n, src) => {
+    const name = cleanName(src).trim() || src, ex = byLower.get(name.toLowerCase());
+    if(ex){ st.plan.map.set(src, ex.name); return; }
+    const g = PLAN_EX_GROUPS.find(x => x.key === impGuessGroup(name)) || PLAN_EX_GROUPS[PLAN_EX_GROUPS.length - 1];
+    const e = { name, group: g.pl, sets: 3, repLow: 8, repHigh: 12, rest: t('asNeeded', 'wg uznania'), icon: null, compound: false, equipment: null };
+    newEx.push(e); byLower.set(name.toLowerCase(), e); st.plan.map.set(src, name);
+  });
+  const groupOf = name => { const x = byLower.get(String(name).toLowerCase()); return (x && x.group) || ''; };
+  const all = impToWorkouts(st.parsed, st.plan, groupOf);
+  const have = new Set(workouts.map(w => w.id)), fresh = all.filter(w => !have.has(w.id));
+  let usedNew = [];
+  if(fresh.length){
+    fresh.forEach(w => workouts.push(w));
+    saveWorkouts(workouts);
+    usedNew = newEx.filter(e => fresh.some(w => w.exercises.some(x => x.name === e.name)));
+    if(usedNew.length){ usedNew.forEach(e => customExercises.push(e)); saveCustomExercises(customExercises); refreshExerciseIcons(); }
+    try{ localStorage.setItem(LS_IMPORT_LAST, JSON.stringify({ ids: fresh.map(w => w.id), ex: usedNew.map(e => e.name) })); }catch(e){}
+    recomputeWorkoutCalories();
+    goRoute(currentRoute);
+    trackEvent('/event/import-workouts', 'Import treningów z innej aplikacji');
+  }
+  st.step = 'done'; st.added = fresh.length; st.dup = all.length - fresh.length; st.newEx = usedNew.length;
+  impRender();
+}
+function impSeeStats(){
+  statsV2Period = 'all';   // import zwykle sięga wstecz, a domyślny okres to bieżący miesiąc: bez tego Postępy wyglądałyby na puste
+  closeImportAppSheet();
+  setTimeout(()=> navTap('stats'), 280);
+}
+function impAppUndo(){
+  let last = null; try{ last = JSON.parse(localStorage.getItem(LS_IMPORT_LAST)); }catch(e){}
+  if(!last || !Array.isArray(last.ids)) return;
+  const ids = new Set(last.ids);
+  workouts = workouts.filter(w => !ids.has(w.id));
+  saveWorkouts(workouts);
+  const used = new Set(); workouts.forEach(w => w.exercises.forEach(e => used.add(e.name)));
+  const drop = new Set((last.ex || []).filter(n => !used.has(n)));
+  if(drop.size){ customExercises = customExercises.filter(e => !drop.has(e.name)); saveCustomExercises(customExercises); refreshExerciseIcons(); }
+  try{ localStorage.removeItem(LS_IMPORT_LAST); }catch(e){}
+  recomputeWorkoutCalories();
+  goRoute(currentRoute);
+  closeImportAppSheet();
+  toast(t('impUndone', 'Import cofnięty'));
 }
 
 /* ============================================================

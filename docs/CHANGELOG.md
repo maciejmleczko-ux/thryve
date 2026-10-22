@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.84.8 (2026-10-22)
-- **Liczba wersji:** 263 · **commitów:** 642
+- **Aktualna wersja:** 4.85.0 (2026-10-22)
+- **Liczba wersji:** 264 · **commitów:** 642
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.85.0 · MINOR · 2026-10-22
+
+- **Import treningów ze Strong i Hevy (CSV/TSV):** nowy wiersz „Importuj z innej aplikacji” w Ustawieniach (Dane i prywatność) i okno `#importAppSheet` (`.m-sheet2`): wybór pliku, podgląd (źródło, liczba treningów, okres, serie, ćwiczenia znane i nowe, pominięte wiersze), gotowe z opcją „Cofnij import” i przyciskiem „Pokaż w Postępach” (ustawia okres „Wszystko”).
+- **Rdzeń bez DOM** (`impParseCsv`, `impDetect`, `impParseDate`, `impBuildSessions`, `impPlan`, `impToWorkouts`): format po nagłówku (Strong: `Exercise Name` + `Set Order`; Hevy: `exercise_title` + `start_time`), separator `,` `;` tab, BOM, cudzysłowy, daty ISO / „15 Mar 2024” (też polskie miesiące) / `dd.mm.rrrr` / `m/d/rrrr`. 174 aliasy nazw → biblioteka Mekkio, nieznane ćwiczenia trafiają do własnych (grupa zgadywana po słowach).
+- **Jednostki:** Hevy niesie jednostkę w nagłówku (`weight_kg` / `weight_lbs`), Strong nie, więc podgląd pyta (domyślnie wg ustawienia apki). Zapis zawsze w kg (zaokrąglenie 0,01), więc 135 lb wraca jako 135,0.
+- **Bezpieczeństwo danych:** id treningu liczone z treści (`imp_<źródło>_<hash>`), ten sam plik drugi raz nic nie dubluje; cofnięcie usuwa dokładnie te treningi i nowe własne ćwiczenia, których nic innego nie używa (`mekkio_import_last_v1`). Plik czytany lokalnie, nie wysyłany. Pomijane: serie rozgrzewkowe Hevy, wiersze bez daty, serie z dystansem (kardio osobno).
+- Nazwa treningu z pliku („Push”) jest tytułem w Historii (`histWorkoutNameV2`), komunikat błędu w `.m2-err`.
+- Bez wpisu „Co nowego”. Nagłówki Strong/Hevy zweryfikowane tylko z opisów publicznych, nie z prawdziwych plików. Build natywny 59.
+
+**Commity (0):**
 
 ### 4.84.8 · PATCH · 2026-10-22
 
