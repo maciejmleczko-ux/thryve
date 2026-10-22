@@ -127,6 +127,7 @@
   --m-page-top:#fbece3;    /* Dashboard page gradient: cream top... */
   --m-page-bot:#e2e2e1;    /* ...to grey bottom (also the body colour behind the dashboard) */
   --bg-photo:url(icons/backgrounds/bg_onboarding.webp); --bgc-top:#f9f9fa; --bgc-bot:#ebebec;   /* tło ekranów: zdjęcie wg płci (bg_male / bg_female), bez płci wzór z onboardingu; kolory brzegów zdjęcia wypełniają obszar nad i pod nim (applyBgPhoto) */
+  --m-gap-card:8px;   /* odstęp między sąsiednimi kartami i kaflami w całej apce (decyzja 2026-10-22; wewnątrz elementów, w pastylkach i gęstych listach zostaje 4 px) */
   --m-page-edge:#e9e9e7;   /* kolor tła body za Dashboardem i Profilem: widać go przy odbiciu (bounce) u góry i u dołu, musi pasować do obu końców strony */
   --m-glass:rgba(255,255,255,.84); /* frosted tile fill on the Dashboard (Figma 'white 84%') */
   --m-glass-fill:rgba(255,255,255,.42);   /* szkło iOS: wypełnienie białych kafli */
@@ -411,7 +412,7 @@ html.gymfin-open .bottom-nav{z-index:9600;}   /* the real nav stays on top of th
 .gymfin-record-sub{margin:0;line-height:1.15;font-size:var(--m-fs-xs);font-weight:400;color:rgba(52,57,65,.6);}
 
 /* summary tiles: 6-col grid, JS sets the column spans so a missing tile never leaves a hole */
-.gymfin-stats{width:100%;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px 4px;}
+.gymfin-stats{width:100%;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--m-gap-card);}
 .gymfin-stat{grid-column:span 2;min-width:0;box-sizing:border-box;border:0;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;text-align:left;font-family:inherit;color:#fff;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymfin-stat--wide{grid-column:span 3;min-height:78px;gap:8px;}   /* Figma: 78px with space-between; min-height + 8px gap so the 11px caption (Figma 8px) never squeezes the label */
 .gymfin-stat[hidden]{display:none;}
@@ -1395,7 +1396,7 @@ button.pf-bcard{font:inherit;color:inherit;cursor:pointer;width:100%;}
 .profil-name{margin:0;font-size:36px;font-weight:200;line-height:1.1;color:var(--m-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .profil-since{margin:0;font-size:var(--m-fs-xs);font-weight:400;line-height:1.2;color:var(--m-muted-text);}
 .profil-stack{display:flex;flex-direction:column;gap:20px;margin-top:42px;}
-.profil-stack-top{display:flex;flex-direction:column;gap:4px;}
+.profil-stack-top{display:flex;flex-direction:column;gap:var(--m-gap-card);}
 .pf-sec{display:flex;flex-direction:column;gap:8px;}
 .pf-sec-h{display:flex;align-items:center;justify-content:space-between;min-height:12px;margin:0;}
 .pf-sec-lbl{display:flex;align-items:center;gap:12px;margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
@@ -1543,7 +1544,7 @@ a.pf-row{text-decoration:none;}
 
 /* Content column: hero first, then one <section> per card group (filled by
    Phase 3, empty ones collapse). Figma gap 4; states 06/07 use 20. */
-.dash-col{display:flex;flex-direction:column;gap:4px;}
+.dash-col{display:flex;flex-direction:column;gap:var(--m-gap-card);}   /* odstęp między kartami Pulpitu: 8 px (było 4, decyzja Macieja 2026-10-22) */
 .dash-col[data-state="planready"],.dash-col[data-state="noplan-new"]{gap:20px;}
 #dashHero{display:flex;flex-direction:column;gap:inherit;}   /* hero + its attached lists keep the column's own gap */
 .dash-col > :empty{display:none;}
@@ -1663,7 +1664,7 @@ button.dash-card{cursor:pointer;}
 @supports (text-box:trim-both cap alphabetic){ .dash-num{line-height:1.1;text-box:trim-both cap alphabetic;} }
 
 /* week + record + badge row (533:8472) */
-.dash-wkrow{display:flex;align-items:stretch;gap:4px;}
+.dash-wkrow{display:flex;align-items:stretch;gap:var(--m-gap-card);}
 .dash-wk{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:20px;padding:12px;border-radius:var(--m-r-sm);background:var(--m-plan-hard);color:var(--m-white);}
 .dash-wk-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:17px;}
 .dash-wk .dash-lbl{color:var(--m-on-dark-1);white-space:nowrap;}
@@ -1683,7 +1684,7 @@ button.dash-card{cursor:pointer;}
 .dash-wk-chip--min{background:var(--m-plan-mid);color:var(--m-white);box-shadow:none;}
 .dash-wk-chip svg{display:block;flex:none;width:13.5px;height:13.5px;}
 @media (max-width:359px){ .dash-wk-ico{display:none;} .dash-wk-chip{padding:5px 8px;} .dash-range{padding:0 6px;letter-spacing:.04em;} }
-.dash-wkcol{flex:0 0 133px;display:flex;flex-direction:column;gap:4px;}
+.dash-wkcol{flex:0 0 133px;display:flex;flex-direction:column;gap:var(--m-gap-card);}
 .dash-wkcol > *{flex:1 1 auto;}
 .dash-wkrow--solo .dash-wkcol{display:none;}
 .dash-rec{display:flex;flex-direction:column;gap:12px;}
@@ -1720,7 +1721,7 @@ button.dash-card{cursor:pointer;}
 .dash-last-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:8px;}
 .dash-last-chip{display:inline-flex;align-items:center;min-height:24.83px;padding:5px 15px;border-radius:var(--m-r-pill);box-shadow:inset 0 0 0 .85px var(--m-orange-tint);font-size:var(--m-fs-2xs);font-weight:500;line-height:1.2;white-space:nowrap;}
 .dash-last-date{margin-left:auto;font-size:var(--m-fs-2xs);font-weight:400;line-height:14px;text-align:right;color:var(--m-muted-text);}
-.dash-last-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-top:20px;}
+.dash-last-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--m-gap-card);margin-top:20px;}
 .dash-mini{display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-height:72px;padding:12px;border-radius:var(--m-r-sm);}
 .dash-mini .dash-lbl{color:inherit;}
 .dash-mini-v{display:flex;align-items:baseline;gap:3px;white-space:nowrap;}
@@ -1764,7 +1765,7 @@ button.dash-coach{cursor:pointer;}
 .dash-pw-chip svg{display:block;flex:none;width:16px;height:16px;}
 
 /* weight + calories (533:8721) */
-.dash-body{display:flex;gap:4px;align-items:stretch;}
+.dash-body{display:flex;gap:var(--m-gap-card);align-items:stretch;}
 .dash-bt{display:flex;flex-direction:column;gap:10px;min-width:0;}
 .dash-bt-top{display:flex;flex-direction:column;gap:4px;}
 .dash-bt--w{flex:137 1 137px;}
@@ -1885,7 +1886,7 @@ button.dash-coach{cursor:pointer;}
 .gymv2-edit-plan{background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:6px 20px;width:140px;color:#fff;font-size:var(--m-fs-xs);font-weight:500;letter-spacing:.04em;text-align:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymv2-edit-plan:active{transform:scale(.95);}
 
-.gymv2-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+.gymv2-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--m-gap-card);}
 .gymv2-tile{position:relative;border-radius:var(--m-r-md);overflow:hidden;background:#fff;aspect-ratio:115.667/122;padding:0;border:none;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymv2-tile:active{transform:scale(.95);}
 /* "Assigned to the active plan day" state — plan editor v2 only, see
@@ -2033,7 +2034,7 @@ button.dash-coach{cursor:pointer;}
 .plansv2-day.is-today{font-weight:700;box-shadow:0 0 0 2px var(--m-orange),0 0 0 3.5px var(--m-white);}
 .plansv2-today{margin:14px 0 0;font-size:var(--m-fs-xs);font-weight:500;line-height:16px;color:var(--m-white);}
 .plansv2-hero .dash-hero-meta{margin-top:10px;}
-.plansv2-hero-btns{display:flex;gap:4px;margin-top:20px;}
+.plansv2-hero-btns{display:flex;gap:var(--m-gap-card);margin-top:20px;}
 .plansv2-hero-btns .dash-hero-btn{flex:1 1 0;width:auto;margin-top:0;padding:0 12px;}
 .plansv2-hero-btns .dash-hero-btn--ghost{background:transparent;box-shadow:inset 0 0 0 1px var(--m-plan-c-hard);}
 .plansv2-nop-desc{margin:8px 0 0;font-size:var(--m-fs-xs);line-height:1.4;color:var(--m-white);}
@@ -2206,7 +2207,7 @@ button.dash-coach{cursor:pointer;}
 .pdt-day.is-open .pdt-chev{transform:rotate(90deg);}
 .pdt-day-b{padding:18px;}
 .pdt-day-b[hidden]{display:none;}
-.pdt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;}
+.pdt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--m-gap-card);}
 .pdt-grid .ex-tile{background:rgba(236,234,241,.5);border:0;border-radius:var(--m-r-md);cursor:default;pointer-events:none;}   /* kafel tylko do podglądu (nieklikalny); tło jak w edytorze i oknie wyboru ćwiczenia */
 .pdt-grid .ex-tile.png-icon .gymv2-tile-icon{height:62%;}
 .pdt-none{margin:0;font-size:var(--m-fs-xs);color:var(--m-muted-text);}
@@ -2489,7 +2490,7 @@ button.exs-ico{cursor:pointer;}
 .pev2-section-header .ph{width:24px;height:24px;color:var(--m-ink);transition:transform var(--m-dur-fade) ease;flex-shrink:0;}
 .pev2-section-header .ph.collapsed{transform:rotate(-90deg);}
 .pev2-groups--ed .pev2-section,.pev2-groups--ed .pev2-section.collapsed{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.9);border-radius:var(--m-r-md);}
-.pev2-groups--ed .gymv2-grid{row-gap:4px;}
+.pev2-groups--ed .gymv2-grid{row-gap:var(--m-gap-card);}
 .pev2-groups.is-locked > .pev2-section{opacity:.45;}   /* brak edytowanego dnia (odznaczony ostatni pusty): lista zablokowana (inert) */
 .pev2-groups.is-locked > .pev2-pickday{padding:4px 12px 12px;color:#6C6B78;}
 /* dolny pasek: szkło jak nagłówek, przycisk 55 pt (ta sama akcja co ✓ w nagłówku) */
@@ -2923,7 +2924,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .statsv2-ex-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .statsv2-ex-head p{margin:0;font-size:var(--m-fs-base);color:#2c2727;letter-spacing:.56px;text-transform:uppercase;}
 .statsv2-ex-all-btn{background:var(--m-orange);border:none;border-radius:var(--m-r-pill);padding:6px 20px;font-size:var(--m-fs-xs);font-weight:500;color:#fff;letter-spacing:.48px;font-family:inherit;cursor:pointer;}
-.statsv2-ex-row{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;}
+.statsv2-ex-row{display:flex;gap:var(--m-gap-card);overflow-x:auto;scrollbar-width:none;}
 .statsv2-ex-row::-webkit-scrollbar{display:none;}
 .statsv2-ex-tile{flex-shrink:0;width:76px;height:84px;border-radius:var(--m-r-sm);background:#fff;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;box-sizing:border-box;cursor:pointer;opacity:.5;transition:opacity var(--m-dur-quick) ease;}
 .statsv2-ex-tile.active{opacity:1;border-color:var(--m-orange);}
@@ -3274,7 +3275,7 @@ body.gymv2-bg .pg-bg{display:block;}
 .gymv2-block-t span{font-size:var(--m-fs-xs);color:var(--m-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .gymv2-block-chip{flex:none;font-size:var(--m-fs-xs);font-weight:600;padding:4px 10px;border-radius:var(--m-r-pill);background:#e4ebff;color:#2642a4;}
 .gymv2-block-chip svg{width:16px;height:16px;display:block;}
-.bk-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:4px 0 12px;}
+.bk-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--m-gap-card);margin:4px 0 12px;}
 .bk-tiles .ex-tile{pointer-events:none;}
 .bk-step{display:flex;align-items:center;gap:12px;background:var(--m-card);border:1px solid #e6e2ec;border-radius:var(--m-r-sm);padding:8px 12px;}
 .bk-step img{width:44px;height:44px;border-radius:10px;background:#fff;object-fit:contain;flex:none;}
