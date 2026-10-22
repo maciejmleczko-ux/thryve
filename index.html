@@ -1068,6 +1068,121 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
 .exp-row .exp-ck{display:none;}
 .exp-row[aria-checked="true"] .exp-ck{display:flex;}
 .exp-empty{margin:0;padding:20px 12px;text-align:center;font-size:var(--m-fs-xs);color:var(--m-muted-text);}
+/* ============================================================
+   POSTĘPY v3, ETAP C: strony w głąb Waga (.stv2-w-*), Wszystkie ćwiczenia (.stv2-x-*), Kardio (.stv2-c-*).
+   Wspólne klocki: .stv2-card (szkło iOS, tokeny --m-glass-*), .stv2-seg (segment okresu: obrys + pomarańczowy),
+   .stv2-chip (chipy zakresu/filtrów: bez kontenera, zaznaczony --m-ink), .stv2-pill, .stv2-tiles.
+   Ruch tylko transform/opacity, keyframes w prefers-reduced-motion: no-preference.
+   ============================================================ */
+:root{--m-fs-display-md:100px;}   /* hero wagi i czasu kardio (Figma 200/100); obok --m-fs-display 108 */
+html.statsx-lock, html.statsx-lock body{overflow:hidden;height:100dvh;touch-action:none;}
+html.statsx-lock.statsx-scrollable, html.statsx-lock.statsx-scrollable body{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;}   /* gumka iOS zostaje: bez overscroll-behavior:none */
+html.modal-lock.statsx-lock.statsx-scrollable, html.modal-lock.statsx-lock.statsx-scrollable body{overflow:hidden;touch-action:none;overscroll-behavior:none;}
+.stv2-body{display:flex;flex-direction:column;gap:var(--m-gap-card,8px);margin-top:20px;}
+.stv2-sec{display:flex;flex-direction:column;gap:var(--m-gap-card,8px);margin-top:16px;}
+.stv2-sec-h{display:flex;align-items:center;justify-content:space-between;min-height:12px;margin:0;}
+.stv2-lbl{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-ink);}
+.stv2-link{position:relative;display:flex;align-items:center;gap:6px;margin:-16px 0;padding:16px 0 16px 12px;border:0;background:none;font:inherit;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-orange);cursor:pointer;}
+.stv2-link svg{display:block;width:12px;height:12px;}
+.stv2-card{box-sizing:border-box;width:100%;border-radius:var(--m-r-md);padding:18px;color:var(--m-ink);background:var(--m-glass-fill)!important;-webkit-backdrop-filter:var(--m-glass-blur)!important;backdrop-filter:var(--m-glass-blur)!important;box-shadow:var(--m-glass-edge);}
+.stv2-card--sm{border-radius:var(--m-r-sm);}
+.stv2-card--flush{padding:6px 18px;}
+.stv2-err{padding:24px 18px;text-align:center;font-size:var(--m-fs-sm);color:var(--m-ink);}
+.stv2-err .rec-retry{display:block;margin:12px auto 0;}
+.stv2-note{margin:0;font-size:var(--m-fs-2xs);font-weight:400;line-height:1.35;color:var(--m-muted-text);}
+.stv2-pill{display:inline-flex;align-items:center;height:20px;padding:0 10px;border-radius:var(--m-r-pill);background:var(--m-mint-tint);color:var(--m-mint-ink);font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;white-space:nowrap;}
+.stv2-pill--navy{background:var(--m-navy-tint);color:var(--m-plan-hard);}
+.stv2-pill--amber{background:var(--m-amber-tint);color:var(--m-ink);}
+.stv2-pill--orange{background:var(--m-orange-tint-2);color:var(--m-orange-ink);font-weight:500;text-transform:uppercase;}
+.stv2-btn{display:flex;align-items:center;justify-content:center;width:100%;height:55px;border:0;border-radius:74px;background:var(--m-orange);color:var(--m-white);font:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
+.stv2-hero-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:20px;}
+.stv2-hero-num{margin:6px 0 0;font-size:var(--m-fs-display-md);font-weight:200;line-height:1;letter-spacing:-.04em;color:var(--m-ink);white-space:nowrap;}
+.stv2-hero-num small{margin:0 0 0 6px;font-size:calc(var(--m-fs-display-md) * .426);font-weight:300;letter-spacing:-.0583em;color:var(--m-muted-text);}
+.stv2-hero-num small:not(:last-child){margin-right:12px;}
+.stv2-delta{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;margin:10px 0 0;font-size:var(--m-fs-base);font-weight:400;color:var(--m-ink);}
+.stv2-delta span{color:var(--m-muted-text);}
+.stv2-delta svg,.stv2-tile-s svg{flex:none;display:block;width:14px;height:14px;color:var(--m-muted-text);}
+.stv2-seg{display:flex;padding:2px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid var(--m-orange-tint);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);}
+.stv2-seg-b{position:relative;flex:1 1 0;min-width:0;height:36px;padding:0 4px;border:0;border-radius:var(--m-r-pill);background:transparent;font:inherit;font-size:var(--m-fs-2xs);font-weight:600;color:var(--m-ink);cursor:pointer;transition:background-color var(--m-dur-quick) ease,color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.stv2-seg-b::after{content:"";position:absolute;inset:-4px 0;}   /* 40 px wizualnie, 44 px do kliknięcia */
+.stv2-seg-b[aria-checked="true"]{background:var(--m-orange);color:var(--m-white);}
+.stv2-seg-b:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
+.stv2-chips{display:flex;align-items:center;gap:2px;}
+.stv2-chips--scroll{gap:6px;overflow-x:auto;margin:0 -10px;padding:0 10px;touch-action:pan-x pan-y;scrollbar-width:none;}
+.stv2-chips--scroll::-webkit-scrollbar{display:none;}
+.stv2-chip{position:relative;flex:none;height:32px;padding:0 14px;border:0;border-radius:var(--m-r-pill);background:transparent;font:inherit;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);cursor:pointer;transition:background-color var(--m-dur-quick) ease,color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.stv2-chip::after{content:"";position:absolute;inset:-6px -2px;}   /* 32 px wizualnie, 44 px do kliknięcia */
+.stv2-chip[aria-checked="true"]{background:var(--m-ink);color:var(--m-white);}
+.stv2-chip:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
+.stv2-chips--scroll .stv2-chip{border:.5px solid var(--m-orange-tint);}
+.stv2-chips--scroll .stv2-chip[aria-checked="true"]{border-color:var(--m-ink);}
+.stv2-tiles{display:flex;align-items:stretch;padding:14px 6px;}
+.stv2-tile{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 4px;text-align:center;}
+.stv2-tile + .stv2-tile{border-left:.5px solid var(--m-orange-tint);}
+.stv2-tile-l{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-muted-text);white-space:nowrap;}
+.stv2-tile-v{font-size:28px;font-weight:200;line-height:1.1;letter-spacing:-.0357em;color:var(--m-ink);white-space:nowrap;}   /* jak .pf-stat-v w Profilu (Figma: 28 / 32) */
+.stv2-tile-v small{margin-left:3px;font-size:var(--m-fs-2xs);font-weight:300;letter-spacing:0;color:var(--m-muted-text);}
+.stv2-tile-s{display:flex;align-items:center;justify-content:center;gap:2px;min-height:14px;font-size:var(--m-fs-2xs);font-weight:400;color:var(--m-muted-text);white-space:nowrap;}
+.stv2-tile-s svg{width:10px;height:10px;}
+@media (max-width:339px){ .stv2-tile-v{font-size:24px;} .stv2-hero-num{font-size:84px;} .stv2-hero-num small{font-size:36px;} }
+.stv2-empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px 18px;text-align:center;}
+.stv2-empty-t{margin:0;font-size:var(--m-fs-md);font-weight:400;line-height:1.3;color:var(--m-ink);}
+.stv2-empty-d{margin:0;font-size:var(--m-fs-xs);line-height:1.4;color:var(--m-muted-text);}
+/* Waga */
+.stv2-w-chartcard{padding:12px 12px 14px;}
+.stv2-w-chart{display:block;width:100%;height:auto;margin-top:12px;overflow:visible;}
+.stv2-w-axis{display:flex;justify-content:space-between;margin:6px 6px 0;font-size:var(--m-fs-xs);font-weight:400;letter-spacing:.04em;color:var(--m-muted-text);}
+.stv2-w-nodata{margin:22px 0 14px;text-align:center;font-size:var(--m-fs-xs);color:var(--m-muted-text);}
+.stv2-w-row{display:flex;align-items:center;gap:10px;width:100%;min-height:64px;padding:10px 0;border:0;background:none;font:inherit;color:var(--m-ink);text-align:left;cursor:pointer;}
+.stv2-w-row + .stv2-w-row{border-top:.5px solid var(--m-line);}
+.stv2-w-date{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:var(--m-fs-base);font-weight:500;}
+.stv2-w-date small,.stv2-w-val small{font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted-text);}
+.stv2-w-val{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:var(--m-fs-base);font-weight:500;}
+.stv2-w-more{display:block;width:100%;min-height:44px;border:0;border-top:.5px solid var(--m-line);background:none;font:inherit;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-orange);cursor:pointer;}
+.stv2-w-body{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:65px;padding:10px 18px;border:0;text-align:left;font:inherit;color:var(--m-ink);cursor:pointer;}
+.stv2-w-body div{display:flex;flex-direction:column;gap:2px;font-size:var(--m-fs-base);font-weight:500;}
+.stv2-w-body small{font-size:var(--m-fs-2xs);font-weight:400;color:var(--m-muted-text);}
+.stv2-w-body svg{flex:none;width:16px;height:16px;display:block;color:var(--m-muted-text);}
+/* Lista ćwiczeń */
+.stv2-x-search{margin-top:4px;}
+.stv2-x-chips{margin-top:12px;}
+.stv2-x-row{display:grid;grid-template-columns:minmax(0,1fr) 84px 72px;align-items:center;gap:10px;width:100%;min-height:68px;padding:12px 0;border:0;background:none;font:inherit;color:var(--m-ink);text-align:left;cursor:pointer;}
+.stv2-x-row + .stv2-x-row{border-top:.5px solid var(--m-line);}
+.stv2-x-main{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px;}
+.stv2-x-name{max-width:100%;font-size:var(--m-fs-base);font-weight:500;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.stv2-x-meta{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted-text);}
+.stv2-x-spark{display:block;width:84px;height:16px;overflow:visible;}
+.stv2-x-val{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:44px;font-size:var(--m-fs-base);font-weight:500;white-space:nowrap;}
+.stv2-x-val small{font-size:var(--m-fs-2xs);font-weight:400;color:var(--m-muted-text);}
+.stv2-x-empty{margin:0;padding:28px 12px;text-align:center;font-size:var(--m-fs-xs);color:var(--m-muted-text);}
+@media (max-width:339px){ .stv2-x-row{grid-template-columns:minmax(0,1fr) 72px;} .stv2-x-spark{display:none;} }
+/* Kardio */
+.stv2-c-bars{display:flex;align-items:flex-end;gap:8px;margin-top:8px;}
+.stv2-c-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;}
+.stv2-c-area{width:100%;height:128px;display:flex;align-items:flex-end;justify-content:center;}
+.stv2-c-bar{width:100%;max-width:42px;border-radius:var(--m-r-sm);background:var(--m-plan-c-easy);opacity:.6;transform-origin:50% 100%;}
+.stv2-c-bar.is-cur{background:var(--m-orange);opacity:1;}
+.stv2-c-lbl{font-size:var(--m-fs-xs);font-weight:400;color:var(--m-muted-text);}
+.stv2-c-ex{padding:14px 0;}
+.stv2-c-ex + .stv2-c-ex{border-top:.5px solid var(--m-line);}
+.stv2-c-name{margin:0 0 10px;font-size:var(--m-fs-base);font-weight:500;}
+.stv2-c-pills{display:flex;gap:6px;}
+.stv2-c-pills .stv2-pill{flex:1 1 0;justify-content:center;height:30px;min-width:0;padding:0 6px;font-size:var(--m-fs-xs);font-weight:500;}
+.stv2-c-pills .stv2-pill--solid{background:var(--m-plan-hard);color:var(--m-white);}
+.stv2-c-pills .stv2-pill--sky{background:var(--m-sky-tint);color:var(--m-sky-ink);}
+.stv2-c-rec{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;padding:12px 0;}
+.stv2-c-rec + .stv2-c-rec,.stv2-c-hist + .stv2-c-hist{border-top:.5px solid var(--m-line);}
+.stv2-c-rec-l{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px;font-size:var(--m-fs-base);font-weight:500;}
+.stv2-c-rec-m{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted-text);}
+.stv2-c-rec-m i{display:inline-flex;align-items:center;gap:4px;font-style:normal;}
+.stv2-c-rec-m svg{width:14px;height:14px;display:block;flex:none;color:var(--m-orange);}
+.stv2-c-rec-v{flex:none;font-size:var(--m-fs-base);font-weight:400;color:var(--m-ink);white-space:nowrap;}
+.stv2-c-hist{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:12px 0;}
+.stv2-c-hist-d{flex:none;font-size:var(--m-fs-md);font-weight:500;}
+@media (prefers-reduced-motion: no-preference){
+  .stv2-enter .stv2-c-bar{animation:stv2BarGrow var(--m-dur-in) var(--m-ease) backwards;animation-delay:calc(320ms + var(--i,0) * 40ms);}
+  @keyframes stv2BarGrow{from{opacity:0;transform:scaleY(.15);}}
+}
 .statsv2-ex-head-r{display:flex;align-items:center;gap:6px;}
 .statsv2-ex-pick{width:44px;height:44px;margin:-6px -8px -6px 0;padding:0;border:0;background:none;color:var(--m-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .statsv2-ex-pick svg{width:22px;height:22px;display:block;}
@@ -4393,6 +4508,41 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
   </section>
 
+  <!-- ===================== POSTĘPY v3, etap C: strony w głąb (push/pop z przeglądu Postępów): Waga, Wszystkie ćwiczenia, Kardio.
+       Malowanie: statsV2WeightRender / statsV2ExListRender / statsV2CardioRender, wejścia statsV2OpenWeight / statsV2OpenExList / statsV2OpenCardio. ===================== -->
+  <section class="view statsv2-root" id="view-stats-weight-v2">
+    <div class="statsv2-panel">
+      <div class="profil-header plansv2-top">
+        <button type="button" class="profil-back m-press" onclick="statsXBack()" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="caret-left"></span></button>
+        <h1 class="profil-title">WAGA</h1>
+        <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+      </div>
+      <div id="statsWeightBody" class="stv2-body"></div>
+    </div>
+  </section>
+
+  <section class="view statsv2-root" id="view-stats-ex-v2">
+    <div class="statsv2-panel">
+      <div class="profil-header plansv2-top">
+        <button type="button" class="profil-back m-press" onclick="statsXBack()" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="caret-left"></span></button>
+        <h1 class="profil-title">ĆWICZENIA</h1>
+        <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+      </div>
+      <div id="statsExBody" class="stv2-body"></div>
+    </div>
+  </section>
+
+  <section class="view statsv2-root" id="view-stats-cardio-v2">
+    <div class="statsv2-panel">
+      <div class="profil-header plansv2-top">
+        <button type="button" class="profil-back m-press" onclick="statsXBack()" title="Wstecz" data-i18n-title="navBack" aria-label="Wstecz"><span class="ph" data-ph="caret-left"></span></button>
+        <h1 class="profil-title">KARDIO</h1>
+        <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+      </div>
+      <div id="statsCardioBody" class="stv2-body"></div>
+    </div>
+  </section>
+
   <!-- ===================== PROFIL v2 (Figma 560:6731) — K1: tylko szkielet (nagłówek + tło).
        Wejście: openProfileV2() z awatara; trasa 'profile-v2' (push/pop, menu dolne ukryte), patrz goRoute().
        Treść dochodzi w K2+. ===================== -->
@@ -4641,27 +4791,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
     <div class="m2-actions">
       <button type="button" class="m2-btn" id="palFApply" onclick="applyPalFilter()">ZASTOSUJ</button>
-    </div>
-  </div>
-</div>
-
-<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="statsExPickSheet"onclick="if(event.target===this) closeStatsExPicker()">
-  <div class="plansv2-customize-stack">
-    <div class="m-sheet-grab" aria-hidden="true"></div>
-    <div class="plansv2-customize-card">
-      <div class="m2-head">
-        <div class="m2-title-row">
-          <h1 class="m2-title" id="expTitle">WYBIERZ ĆWICZENIE</h1>
-          <button type="button" class="m2-x" id="expClose" aria-label="Zamknij" onclick="closeStatsExPicker()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-        </div>
-      </div>
-      <div class="m2-body exp-body">
-        <div class="exp-bar">
-          <label class="exp-search"><input type="search" id="expSearch" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="SZUKAJ" oninput="statsExPickerRender()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></label>
-          <button type="button" class="exp-sort" id="expSortBtn" aria-label="Sortuj" onclick="openStatsExSort()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-        </div>
-        <div class="exp-list" id="expList" role="radiogroup"></div>
-      </div>
     </div>
   </div>
 </div>
@@ -6318,6 +6447,7 @@ function refreshExerciseIcons(){
     else if(currentRoute === 'plan-editor-v2') renderPlanEditorGridV2(false);
     else if(currentRoute === 'history-v2') renderCalendarV2(false);
     else if(currentRoute === 'stats-v2') renderStatsV2(false);
+    else if(currentRoute === 'stats-ex-v2') statsV2ExListRender(false);
   }catch(e){ console.error('refreshExerciseIcons', e); }
 }
 // Generic dumbbell render for custom exercises (icon:null, see saveNewExerciseV2()) — no slug to look up.
@@ -7778,7 +7908,7 @@ function fmtKg(n){ const s = Number(n).toFixed(1); return LANG === 'en' ? s : s.
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExPickSheet','statsExSortSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
+const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -8052,6 +8182,7 @@ function wsRefreshAll(){
   if(document.getElementById('histDetailV2') && selectedHistDateV2) renderHistDetailV2(false);
   if(typeof cr !== 'undefined' && cr && popupExercise) crPaintDerived();   // the cardio results sheet may be waiting for a weight
   renderWeightList();
+  if(currentRoute === 'stats-weight-v2') statsV2WeightRender(false);   // strona Waga w Postępach
 }
 function saveWeightSheet(){
   if(!_ws) return;
@@ -10792,10 +10923,10 @@ const PREVIEW_ROUTES = { gym: 'gym-v2', plans: 'plans-v2', history: 'history-v2'
 // żeby wyjście z Profilu nie wyglądało jak zmiana zakładki (bez poślizgu kulki i obrotu ikony).
 let profileReturnRoute = 'dashboard';
 let profileDetailReturn = null;   // 'stats-v2' | 'history-v2': wejście z okna szczegółu rekordu w Profilu; strzałka wstecz wraca do Profilu (tylko w pamięci)   // tylko w pamięci, NIE klucz localStorage
-const V3_ROUTE_ALIAS = { 'gym-v2': 'gym', 'plans-v2': 'plans', 'plans-all-v2': 'plans', 'plan-detail-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats',
+const V3_ROUTE_ALIAS = { 'gym-v2': 'gym', 'plans-v2': 'plans', 'plans-all-v2': 'plans', 'plan-detail-v2': 'plans', 'plan-editor-v2': 'plans', 'history-v2': 'history', 'stats-v2': 'stats', 'stats-weight-v2': 'stats', 'stats-ex-v2': 'stats', 'stats-cardio-v2': 'stats',
   get 'profile-v2'(){ return V3_ROUTE_ALIAS[profileReturnRoute] || profileReturnRoute; },
   get 'profile-settings-v2'(){ return V3_ROUTE_ALIAS[profileReturnRoute] || profileReturnRoute; } }; // which nav icon a v3 route should light up
-const PROFILE_SOURCES = new Set(['dashboard','gym-v2','plans-v2','plan-editor-v2','history-v2','stats-v2']);   // ekrany, z których awatar wchodzi w Profil
+const PROFILE_SOURCES = new Set(['dashboard','gym-v2','plans-v2','plan-editor-v2','history-v2','stats-v2','stats-weight-v2','stats-ex-v2','stats-cardio-v2']);   // ekrany, z których awatar wchodzi w Profil
 const isProfileRoute = r => r === 'profile-v2' || r === 'profile-settings-v2';   // Profil i jego podekran Ustawienia: menu ukryte, wspólne tło i blokada przewijania
 function openProfileV2(){
   if(!isProfileRoute(currentRoute)) profileReturnRoute = PROFILE_SOURCES.has(currentRoute) ? currentRoute : 'dashboard';
@@ -11641,13 +11772,14 @@ function goRoute(route){
              || (route === 'profile-v2' && PROFILE_SOURCES.has(currentRoute))
              || (currentRoute === 'profile-v2' && PROFILE_SOURCES.has(route))
              || (route === 'profile-settings-v2' && currentRoute === 'profile-v2')
-             || (currentRoute === 'profile-settings-v2' && route === 'profile-v2');
-  const forward = (route === 'plan-editor-v2' && (currentRoute === 'plans-v2' || currentRoute === 'plans-all-v2' || currentRoute === 'plan-detail-v2')) || (route === 'plans-all-v2' && currentRoute === 'plans-v2') || (route === 'plan-detail-v2' && currentRoute !== 'plan-editor-v2') || (route === 'profile-v2' && currentRoute !== 'profile-settings-v2') || route === 'profile-settings-v2';
+             || (currentRoute === 'profile-settings-v2' && route === 'profile-v2')
+             || !!statsXNav;   // Postępy: przegląd/szczegół <-> Waga, Wszystkie ćwiczenia, Kardio (kierunek ustawia statsXGo)
+  const forward = (route === 'plan-editor-v2' && (currentRoute === 'plans-v2' || currentRoute === 'plans-all-v2' || currentRoute === 'plan-detail-v2')) || (route === 'plans-all-v2' && currentRoute === 'plans-v2') || (route === 'plan-detail-v2' && currentRoute !== 'plan-editor-v2') || (route === 'profile-v2' && currentRoute !== 'profile-settings-v2') || route === 'profile-settings-v2' || statsXNav === 'push';
   const sameRoute = route === currentRoute;   // ponowny render bieżącego ekranu (sync z chmurą, import): to nie jest wejście, więc bez animacji wejścia i bez skoku scrolla
   currentRoute = route;
   trackEvent('/' + route, route);
   beginViewTransition(route, forward, !drill);
-  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plans-all-v2' || route==='plan-detail-v2' || route==='plan-editor-v2' || route==='history-v2' || route==='stats-v2' || isProfileRoute(route);
+  const isV3 = route==='dashboard' || route==='gym-v2' || route==='plans-v2' || route==='plans-all-v2' || route==='plan-detail-v2' || route==='plan-editor-v2' || route==='history-v2' || route==='stats-v2' || isStatsXRoute(route) || isProfileRoute(route);
   document.getElementById('bottomNav').style.display = (isProfileRoute(route) || route === 'plan-editor-v2') ? 'none' : 'flex';   // edytor planu ma własny dolny pasek ZAPISZ PLAN (Figma 630:21301 nie pokazuje menu)
   document.getElementById('bottomNav').classList.toggle('bottom-nav-light', isV3);
   // Only rebuild the button set when the v3-ness actually changes — every
@@ -11686,8 +11818,10 @@ function goRoute(route){
   document.documentElement.classList.toggle('gymv2-bg', route==='gym-v2');
   // Maciej: "tlo w statystykach niech bedzie - F5F1FB" — same gap existed
   // identically on History v2, fixed both together.
-  document.body.classList.toggle('statsv2-bg', route==='stats-v2');
-  document.documentElement.classList.toggle('statsv2-bg', route==='stats-v2');
+  document.body.classList.toggle('statsv2-bg', route==='stats-v2' || isStatsXRoute(route));
+  document.documentElement.classList.toggle('statsv2-bg', route==='stats-v2' || isStatsXRoute(route));
+  document.documentElement.classList.toggle('statsx-lock', isStatsXRoute(route));   // strony w głąb Postępów: jak Plany (lock + scrollable)
+  if(!isStatsXRoute(route)) document.documentElement.classList.remove('statsx-scrollable');
   document.body.classList.toggle('histv2-bg', route==='history-v2');
   document.documentElement.classList.toggle('histv2-bg', route==='history-v2');
   document.querySelector('.topbar').classList.toggle('hidden', isV3);
@@ -11699,6 +11833,9 @@ function goRoute(route){
   if(route==='plan-editor-v2'){ previewMode = true; refreshPlanEditorV2Scroll(); }
   if(route==='history-v2'){ previewMode = true; renderCalendarV2(true); }
   if(route==='stats-v2'){ previewMode = true; statsV2CaroPage = 0; renderStatsV2(true); }
+  if(route==='stats-weight-v2'){ previewMode = true; statsV2WeightRender(!sameRoute); }
+  if(route==='stats-ex-v2'){ previewMode = true; statsV2ExListRender(!sameRoute); }
+  if(route==='stats-cardio-v2'){ previewMode = true; statsV2CardioRender(!sameRoute); }
   if(route==='profile-v2'){ previewMode = true; renderProfileV2(!sameRoute); }
   if(route==='profile-settings-v2'){ previewMode = true; renderProfileSettingsV2(!sameRoute); }
   commitViewTransition();
@@ -12683,7 +12820,6 @@ mSheetDrag('planImportSheet', closeImportPlanCodeModal);
 mSheetDrag('planImportConfirmSheet', cancelImportPlan);
 mSheetDrag('planShareSheet', closePlanShareSheet);
 mSheetDrag('planCopySheet', closePlanCopySheet);
-mSheetDrag('statsExPickSheet', closeStatsExPicker);
 mSheetDrag('statsExSortSheet', closeStatsExSort);
 mSheetDrag('recordDetailSheet', closeRecordDetail);
 mSheetDrag('profileRecordsSheet', closeProfileRecordsSheet);   // zamknięcie przeciągnięciem kończy też trwający slajd miesięcy
@@ -22440,48 +22576,6 @@ function statsV2CenterActiveTile(){
    Stan sortowania żyje tylko do końca sesji (bez localStorage). Wybór wiersza zamyka okno. */
 let statsExSort = 'recent';   // 'recent' | 'az' | 'weight'
 const STATS_EX_CK = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 6.4l2.3 2.3 4.7-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-function statsExShortDate(iso){
-  if(!iso) return '';
-  const d = new Date(iso + 'T00:00:00'); if(isNaN(d)) return '';
-  const m = MONTH_ABBR_PL[d.getMonth()].toLowerCase();
-  return LANG === 'en' ? `${m[0].toUpperCase() + m.slice(1)} ${d.getDate()}` : `${d.getDate()} ${m}`;
-}
-function statsExRowInfo(name){
-  const rec = statsV2ExerciseRecord(name), R = rec && rec.record;
-  if(!R) return { txt: '', w: -1 };
-  const v = R.kind === 'weight' ? `${fmtKgLocal(R.value)} kg` : R.kind === 'time' ? fmtDur(R.value, R.perSide) : `${R.value} ${t('stV2RepsShort','powt.')}`;
-  const dt = statsExShortDate(R.date);
-  return { txt: dt ? `${v} · ${dt}` : v, w: R.kind === 'weight' ? R.value : -1 };
-}
-function statsExPickerRender(){
-  const q = (document.getElementById('expSearch').value || '').trim().toLowerCase();
-  let rows = statsV2RecentExerciseNames().map((name, i)=> Object.assign({ name, i }, statsExRowInfo(name)));
-  if(q) rows = rows.filter(r=> r.name.toLowerCase().includes(q));
-  if(statsExSort === 'az') rows.sort((a, b)=> a.name.localeCompare(b.name, LANG === 'en' ? 'en' : 'pl'));
-  else if(statsExSort === 'weight') rows.sort((a, b)=> (b.w - a.w) || (a.i - b.i));
-  const box = document.getElementById('expList');
-  if(!rows.length){ box.innerHTML = `<p class="exp-empty">${t('exPickNone', 'Nie znaleziono ćwiczeń.')}</p>`; return; }
-  box.innerHTML = rows.map(r=>{
-    const on = r.name === selectedStatsExerciseV2;
-    return `<button type="button" class="exp-row" role="radio" aria-checked="${on}" onclick="statsExPickerPick(${jsArg(r.name)})"><span class="exp-txt"><span class="exp-name">${escHtml(r.name)}</span>${r.txt ? `<span class="exp-pill">${escHtml(r.txt)}</span>` : ''}</span><span class="exp-ck">${STATS_EX_CK}</span></button>`;
-  }).join('');
-}
-function openStatsExPicker(){
-  const $ = id => document.getElementById(id);
-  $('expTitle').textContent = t('exPickTitle', 'WYBIERZ ĆWICZENIE');
-  $('expClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
-  $('expSearch').placeholder = t('exPickSearch', 'SZUKAJ');
-  $('expSearch').setAttribute('aria-label', t('exPickSearch', 'SZUKAJ'));
-  $('expSortBtn').setAttribute('aria-label', t('exSortTitle', 'SORTUJ'));
-  $('expSearch').value = '';
-  statsExPickerRender();
-  acctSheetOpen('statsExPickSheet');
-}
-function closeStatsExPicker(viaDrag){ acctSheetClose('statsExPickSheet', viaDrag); }
-function statsExPickerPick(name){
-  closeStatsExPicker();
-  if(name !== selectedStatsExerciseV2) selectStatsExerciseV2(name);   // ten sam wiersz tylko zamyka okno (selectStatsExerciseV2 by go odznaczyło)
-}
 const STATS_EX_SORTS = [['recent', 'exSortRecent', 'OSTATNIO TRENOWANE'], ['az', 'exSortAz', 'A–Z'], ['weight', 'exSortWeight', 'NAJWIĘKSZY CIĘŻAR']];
 function openStatsExSort(){
   const $ = id => document.getElementById(id);
@@ -22495,9 +22589,10 @@ function closeStatsExSort(viaDrag){ acctSheetClose('statsExSortSheet', viaDrag);
 function statsExSortPick(k){
   statsExSort = k;
   closeStatsExSort();
-  statsExPickerRender();
+  statsExPickerRender();   // przemalowanie listy na stronie Wszystkie ćwiczenia (statsV2ExListRender)
 }
 function selectStatsExerciseV2(name){
+  statsXDetailFromList = false;   // wybór z kafelków przeglądu, nie z listy
   selectedStatsExerciseV2 = (selectedStatsExerciseV2===name) ? null : name;
   // Maciej: "seated row - ma 4 treningi i nie widze linii" — "1m" is a
   // real rolling 30-day window (see statsV2ExerciseDailySeries), so an
@@ -22514,6 +22609,7 @@ function selectStatsExerciseV2(name){
   renderStatsV2(false, !!selectedStatsExerciseV2);
 }
 function closeStatsDetailV2(){
+  statsXDetailFromList = false;
   selectedStatsExerciseV2 = null;
   renderStatsV2(false);
 }
@@ -22522,6 +22618,7 @@ function closeStatsDetailV2(){
    this section, so it leaves to the Dashboard like the other v2 tabs. */
 function statsV2Back(){
   if(profileDetailReturn && profileDetailReturn === 'stats-v2'){ profileDetailReturn = null; selectedStatsExerciseV2 = null; goRoute('profile-v2'); return; }
+  if(selectedStatsExerciseV2 && statsXDetailFromList){ statsXDetailFromList = false; selectedStatsExerciseV2 = null; statsXGo('stats-ex-v2', 'pop'); return; }   // szczegół otwarty z listy: wstecz = lista
   if(selectedStatsExerciseV2) closeStatsDetailV2();
   else goRoute('dashboard');
 }
@@ -22529,6 +22626,638 @@ function histV2Back(){
   if(profileDetailReturn === 'history-v2'){ profileDetailReturn = null; goRoute('profile-v2'); return; }
   goRoute('dashboard');
 }
+/* ============================================================
+   POSTĘPY v3, ETAP C: strony w głąb (push/pop z przeglądu Postępów): Waga, Wszystkie ćwiczenia, Kardio.
+   Trasy: 'stats-weight-v2', 'stats-ex-v2', 'stats-cardio-v2' (menu: aktywna ikona wykresu, V3_ROUTE_ALIAS).
+   Punkty wejścia: statsV2OpenWeight(), statsV2OpenExList() (= openStatsExPicker()), statsV2OpenCardio().
+   Dane tylko do odczytu (weightLog, oczyszczona lista treningów), bez nowych kluczy localStorage ani pól synca.
+   Slide tylko dla wejścia w głąb: statsXGo(route, 'push'|'pop') ustawia kierunek, który czyta goRoute();
+   zwykły tap zakładki menu zostaje natychmiastowy.
+   ============================================================ */
+const STATSX_ROUTES = ['stats-weight-v2', 'stats-ex-v2', 'stats-cardio-v2'];
+function isStatsXRoute(r){ return STATSX_ROUTES.indexOf(r) >= 0; }
+let statsXNav = null;             // 'push' | 'pop' | null: czytane (i zerowane) przez goRoute()
+let statsXDetailFromList = false; // szczegół ćwiczenia otwarty z listy: strzałka wstecz wraca na listę
+let statsXCardioFrom = 'ov';      // 'ov' | 'ex': skąd weszliśmy w Kardio
+function statsXGo(route, dir){
+  statsXNav = dir;
+  try{ goRoute(route); }finally{ statsXNav = null; }
+}
+function statsXBack(){
+  if(currentRoute === 'stats-cardio-v2' && statsXCardioFrom === 'ex'){ statsXGo('stats-ex-v2', 'pop'); return; }
+  statsXGo('stats-v2', 'pop');
+}
+// przewijanie tylko gdy treść nie mieści się nad pływającym menu (wzór pdtRefreshScroll); gumka iOS zostaje
+function statsXRefreshScroll(){
+  const root = document.documentElement;
+  if(!isStatsXRoute(currentRoute)){ root.classList.remove('statsx-scrollable'); return; }
+  const panel = document.querySelector('#view-' + currentRoute + ' .statsv2-panel'), nav = document.getElementById('bottomNav');
+  let need = false;
+  if(panel && nav){
+    const off = document.body.scrollTop + root.scrollTop;
+    need = panel.getBoundingClientRect().top + off + panel.scrollHeight > nav.getBoundingClientRect().top;
+  }
+  root.classList.toggle('statsx-scrollable', need);
+  if(!need){ root.scrollTop = 0; document.body.scrollTop = 0; }
+}
+window.addEventListener('resize', ()=>{ if(isStatsXRoute(currentRoute)) statsXRefreshScroll(); });
+
+/* ---- wspólne drobiazgi ---- */
+const STATSX_WD_PL = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
+const STATSX_WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const STATSX_MON_NOM_PL = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec', 'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'];
+const STATSX_MON_NOM_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const STATSX_ICO = {
+  up: '<svg viewBox="0 0 14 14" width="14" height="14" fill="none" aria-hidden="true"><path d="M7 12V2m0 0L3 6m4-4l4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  down: '<svg viewBox="0 0 14 14" width="14" height="14" fill="none" aria-hidden="true"><path d="M7 2v10m0 0L3 8m4 4l4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  chev: '<svg viewBox="0 0 12 12" width="12" height="12" fill="none" aria-hidden="true"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  clock: '<svg viewBox="0 0 14 14" width="14" height="14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.2l2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  ruler: '<svg viewBox="0 0 14 14" width="14" height="14" fill="none" aria-hidden="true"><rect x="1.2" y="4.6" width="11.6" height="4.8" rx="1" transform="rotate(-35 7 7)" stroke="currentColor" stroke-width="1.2"/><path d="M5 8.2l1 .7M7 6.9l.7.5M9 5.6l1 .7" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>',
+  slope: '<svg viewBox="0 0 14 14" width="14" height="14" fill="none" aria-hidden="true"><path d="M2 11.5v-1.5M5 11.5V8.5M8 11.5V6M11 11.5V3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  cal: '<svg viewBox="0 0 14 14" width="14" height="14" fill="none" aria-hidden="true"><rect x="1.8" y="2.6" width="10.4" height="9.6" rx="1.6" stroke="currentColor" stroke-width="1.2"/><path d="M1.8 5.6h10.4M4.6 1.4v2.4M9.4 1.4v2.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
+};
+function statsXMinus(){ return '−'; }
+function statsXArrow(d){ return d > 0 ? STATSX_ICO.up : d < 0 ? STATSX_ICO.down : ''; }
+function statsXIsoDay(iso){ const p = String(iso).split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000; }
+function statsXWeekday(iso){ const d = new Date(iso + 'T00:00:00'); return (LANG === 'en' ? STATSX_WD_EN : STATSX_WD_PL)[d.getDay()] || ''; }
+function statsXMonNom(iso){ return (LANG === 'en' ? STATSX_MON_NOM_EN : STATSX_MON_NOM_PL)[parseInt(iso.slice(5, 7), 10) - 1] || ''; }
+function statsXMonthsAgo(iso, n){ const p = iso.split('-').map(Number); return dateStr(new Date(p[0], p[1] - 1 - n, p[2])); }
+// „13 paź 2026”: zawsze z rokiem (lista pomiarów obejmuje lata)
+function statsXDateFull(iso){
+  const p = iso.split('-');
+  return `${parseInt(p[2], 10)} ${PF_MON_SHORT[parseInt(p[1], 10) - 1] || ''} ${p[0]}`;
+}
+function statsXRise(animate){
+  return (i, tile)=> animate ? ` m-rise${tile ? '-tile' : ''}" style="--i:${i}` : '';
+}
+function statsXHeaderTitle(route, key, pl){
+  const el = document.querySelector('#view-' + route + ' .profil-title');
+  if(el) el.textContent = t(key, pl);
+}
+function statsXFail(hostId, retryJs){
+  return ()=>{ const b = document.getElementById(hostId); if(b) b.innerHTML = recErrorHtml('stv2-card stv2-err', 'statsRenderError', 'Nie udało się wyświetlić postępów. Spróbuj ponownie za chwilę.', retryJs); };
+}
+
+/* ============================================================
+   1. WAGA (Figma 07). Bez celu wagowego; zmiany wagi są neutralne (szare strzałki, bez zieleni i czerwieni).
+   Dodawanie, edycja, usuwanie z „Cofnij” i dane ciała reużywają okien z Profilu (wsOpen / openWeightEdit / openBodyDataSheet).
+   ============================================================ */
+let statsV2WeightRange = 6;      // 3 | 6 | 12 | 0 (= wszystko), stan do końca sesji
+let statsV2WeightAll = false;    // lista pomiarów: tylko ostatnie 8 albo wszystkie
+const STATSX_WEIGHT_RANGES = [[3, 'stxR3m', '3m'], [6, 'stxR6m', '6m'], [12, 'stxR1y', '1r'], [0, 'stxRAll', 'Wszystko']];
+const STATSX_W_PREVIEW = 8;
+function statsV2OpenWeight(){
+  if(currentRoute === 'stats-weight-v2') return;
+  statsV2WeightRange = 6; statsV2WeightAll = false;
+  statsXGo('stats-weight-v2', 'push');
+}
+// poprawne wpisy (data RRRR-MM-DD, masa > 0), rosnąco; zepsute wpisy są pomijane
+function statsV2WeightEntries(){
+  const out = [];
+  try{
+    (Array.isArray(weightLog) ? weightLog : []).forEach(e=>{
+      if(!e || typeof e !== 'object' || !dashValidIso(e.date)) return;
+      const kg = Number(e.kg);
+      if(!isFinite(kg) || kg <= 0) return;
+      out.push({ date: e.date, kg, src: e.src === 'health' ? 'health' : 'manual' });
+    });
+  }catch(err){ return []; }
+  out.sort((a, b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  return out;
+}
+function statsV2WeightModel(range, todayIso){
+  const today = statsV2TodayIso(todayIso);
+  const r = [3, 6, 12, 0].indexOf(range) >= 0 ? range : 6;
+  const all = statsV2WeightEntries().filter(e=> e.date <= today);
+  const m = { range: r, all, last: all.length ? all[all.length - 1] : null, win: [], delta: null, min: null, max: null, avg: null };
+  if(!all.length) return m;
+  const start = r > 0 ? statsXMonthsAgo(today, r) : all[0].date;
+  m.win = all.filter(e=> e.date >= start);
+  const w = m.win;
+  if(w.length){
+    let sum = 0;
+    w.forEach(e=>{
+      sum += e.kg;
+      if(!m.min || e.kg <= m.min.kg) m.min = e;     // przy remisie późniejszy pomiar
+      if(!m.max || e.kg >= m.max.kg) m.max = e;
+    });
+    m.avg = Math.round(sum / w.length * 10) / 10;
+  }
+  if(w.length >= 2) m.delta = Math.round((w[w.length - 1].kg - w[0].kg) * 10) / 10;
+  return m;
+}
+function statsXRangeLabel(r){
+  return r === 3 ? t('stxIn3m', 'w 3 miesiące') : r === 12 ? t('stxIn1y', 'w ostatnim roku') : r === 0 ? t('stxSinceFirst', 'od pierwszego pomiaru') : t('stxIn6m', 'w 6 miesięcy');
+}
+function statsXRangeAvgLabel(r){
+  return r === 3 ? t('stxAvg3m', '3 mies.') : r === 12 ? t('stxAvg1y', '1 rok') : r === 0 ? t('stxAvgAll', 'cały czas') : t('stxAvg6m', '6 mies.');
+}
+function statsXShortDay(iso){ const p = iso.split('-'); return `${parseInt(p[2], 10)} ${PF_MON_SHORT[parseInt(p[1], 10) - 1] || ''}`; }
+function statsXWeightDateLong(iso){
+  const p = iso.split('-'), mon = (LANG === 'en' ? STATSX_MON_NOM_EN.map(s=> s) : PF_MON_GEN)[parseInt(p[1], 10) - 1] || '';
+  const y = p[0] !== todayStr().slice(0, 4) ? ' ' + p[0] : '';
+  return LANG === 'en' ? `${mon} ${parseInt(p[2], 10)}${y}` : `${parseInt(p[2], 10)} ${mon}${y}`;
+}
+function statsXWeightChart(m){
+  const w = m.win;
+  if(w.length < 2){
+    return `<p class="stv2-w-nodata">${w.length ? t('stxWOnePoint', 'Jeden pomiar w tym okresie. Wykres pojawi się po kolejnym.') : t('stxWNoPoints', 'Brak pomiarów w tym okresie.')}</p>`;
+  }
+  const W = 319, H = 118, padX = 8, padT = 12, padB = 12;
+  let lo = Infinity, hi = -Infinity;
+  w.forEach(e=>{ if(e.kg < lo) lo = e.kg; if(e.kg > hi) hi = e.kg; });
+  const span = hi - lo;
+  if(span < 0.5){ lo -= 0.5; hi += 0.5; } else { lo -= span * 0.08; hi += span * 0.08; }
+  const t0 = statsXIsoDay(w[0].date), t1 = statsXIsoDay(w[w.length - 1].date), dt = Math.max(1, t1 - t0);
+  const pts = w.map(e=>({
+    x: Math.round((padX + (statsXIsoDay(e.date) - t0) / dt * (W - 2 * padX)) * 10) / 10,
+    y: Math.round((padT + (hi - e.kg) / (hi - lo) * (H - padT - padB)) * 10) / 10,
+  }));
+  const line = statsV2SmoothPath(pts), last = pts[pts.length - 1], first = pts[0];
+  const gid = statsV2Uid();
+  const area = `${line} L${last.x},${H} L${first.x},${H} Z`;
+  const mons = PF_MON_SHORT, cap = s=> s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  const lblAt = f=>{
+    const d = new Date(Math.round((t0 + dt * f) * 86400000));
+    const mm = d.getUTCMonth(), yy = String(d.getUTCFullYear()).slice(2);
+    return cap(mons[mm] || '') + (dt > 330 ? ` ${yy}` : '');
+  };
+  const aria = t('stxWChartAria', 'Wykres wagi', '');
+  return `<svg class="stv2-w-chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${escHtml(aria)}">`
+    + `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff3300" stop-opacity=".22"/><stop offset="1" stop-color="#ff3300" stop-opacity="0"/></linearGradient></defs>`
+    + `<path d="${area}" fill="url(#${gid})"/>`
+    + `<path d="${line}" fill="none" stroke="#ff3300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+    + `<circle cx="${last.x}" cy="${last.y}" r="6" fill="#ff3300" stroke="#fff" stroke-width="3"/></svg>`
+    + `<div class="stv2-w-axis" aria-hidden="true"><span>${lblAt(0)}</span><span>${lblAt(.5)}</span><span>${lblAt(1)}</span></div>`;
+}
+function statsXWeightRows(m){
+  const all = m.all.slice().reverse();   // najnowsze na górze
+  const shown = statsV2WeightAll ? all : all.slice(0, STATSX_W_PREVIEW);
+  const rows = shown.map((e, i)=>{
+    const prev = all[i + 1], d = prev ? Math.round((e.kg - prev.kg) * 10) / 10 : null;
+    const dTxt = d ? `${d < 0 ? statsXMinus() : '+'}${wsFmt(Math.abs(d))} kg` : '';
+    const src = e.src === 'health' ? t('wsHealthName', 'Apple Zdrowie') : t('wlManual', 'Ręcznie');
+    return `<button type="button" class="stv2-w-row m-press" onclick="openWeightEdit('${e.date}')" aria-label="${escHtml(wsFmt(e.kg) + ' kg, ' + statsXDateFull(e.date) + ', ' + src)}">`
+      + `<span class="stv2-w-date">${escHtml(statsXDateFull(e.date))}<small>${escHtml(statsXWeekday(e.date))}</small></span>`
+      + `<span class="stv2-pill${e.src === 'health' ? ' stv2-pill--navy' : ''}">${escHtml(src)}</span>`
+      + `<span class="stv2-w-val">${escHtml(wsFmt(e.kg))} kg<small>${escHtml(dTxt)}</small></span></button>`;
+  }).join('');
+  const more = all.length > STATSX_W_PREVIEW
+    ? `<button type="button" class="stv2-w-more m-press" onclick="statsV2WeightToggleAll()">${statsV2WeightAll ? t('stxWLess', 'POKAŻ MNIEJ') : t('stxWMore', 'POKAŻ WSZYSTKIE ({n})', all.length).replace('{n}', all.length)}</button>`
+    : '';
+  return rows + more;
+}
+function statsV2WeightToggleAll(){ statsV2WeightAll = !statsV2WeightAll; statsV2WeightRender(false); }
+function statsV2WeightSetRange(r){
+  if(statsV2WeightRange === r) return;
+  statsV2WeightRange = r;
+  statsV2WeightRender(false);
+}
+function statsV2WeightPaint(animate){
+  const body = document.getElementById('statsWeightBody');
+  if(!body) return;
+  statsXHeaderTitle('stats-weight-v2', 'stxWeightTitle', 'WAGA');
+  const rc = statsXRise(animate);
+  const m = statsV2WeightModel(statsV2WeightRange);
+  if(!m.last){
+    body.innerHTML = `<div class="stv2-card stv2-empty${rc(0, true)}"><p class="stv2-empty-t">${t('stxWEmptyT', 'Dodaj swoją wagę, a narysujemy trend.')}</p>`
+      + `<p class="stv2-empty-d">${t('stxWEmptyD', 'Wystarczy jeden pomiar. Najlepiej ważyć się o tej samej porze, rano na czczo.')}</p>`
+      + `<button type="button" class="stv2-btn m-press" onclick="openWeightSheet()">${t('stxWAdd', 'DODAJ WAGĘ')}</button></div>`
+      + statsXWeightBodyCard(rc(1, true));
+    statsXRefreshScroll();
+    return;
+  }
+  const L = m.last;
+  const deltaHtml = m.delta === null ? '' : m.delta === 0
+    ? `<p class="stv2-delta">${t('stxWSame', 'bez zmian')} <span>${statsXRangeLabel(m.range)}</span></p>`
+    : `<p class="stv2-delta">${statsXArrow(m.delta)}${m.delta < 0 ? statsXMinus() : '+'}${wsFmt(Math.abs(m.delta))} kg <span>${statsXRangeLabel(m.range)}</span></p>`;
+  const chips = STATSX_WEIGHT_RANGES.map(([v, k, pl])=> `<button type="button" class="stv2-chip" role="radio" aria-checked="${v === m.range}" onclick="statsV2WeightSetRange(${v})">${t(k, pl)}</button>`).join('');
+  const tile = (label, val, sub)=> `<div class="stv2-tile"><span class="stv2-tile-l">${label}</span><span class="stv2-tile-v">${val === null ? '—' : escHtml(wsFmt(val))}${val === null ? '' : '<small>kg</small>'}</span><span class="stv2-tile-s">${escHtml(sub || '')}</span></div>`;
+  body.innerHTML =
+    `<div class="stv2-card${rc(0, true)}"><div class="stv2-hero-top"><p class="stv2-lbl" style="color:var(--m-muted-text)">${t('stxWLast', 'OSTATNI POMIAR')}</p><span class="stv2-pill">${escHtml(statsXWeightDateLong(L.date))}</span></div>`
+    + `<p class="stv2-hero-num">${escHtml(wsFmt(L.kg))}<small>kg</small></p>${deltaHtml}</div>`
+    + `<div class="stv2-card stv2-w-chartcard${rc(1, true)}"><div class="stv2-chips" role="radiogroup" aria-label="${escHtml(t('stxRangeAria', 'Zakres wykresu'))}">${chips}</div>${statsXWeightChart(m)}</div>`
+    + `<div class="stv2-card stv2-card--sm stv2-tiles${rc(2, true)}">`
+    + tile(t('stxWMin', 'NAJNIŻSZA'), m.min ? m.min.kg : null, m.min ? statsXShortDay(m.min.date) : '')
+    + tile(t('stxWAvg', 'ŚREDNIA'), m.avg, m.avg === null ? '' : statsXRangeAvgLabel(m.range))
+    + tile(t('stxWMax', 'NAJWYŻSZA'), m.max ? m.max.kg : null, m.max ? statsXShortDay(m.max.date) : '')
+    + `</div>`
+    + `<div class="stv2-sec${rc(3)}"><div class="stv2-sec-h"><p class="stv2-lbl">${t('stxWList', 'POMIARY')}</p><button type="button" class="stv2-link m-press" onclick="openWeightSheet()">${t('stxWAdd', 'DODAJ WAGĘ')}${STATSX_ICO.chev}</button></div>`
+    + `<div class="stv2-card stv2-card--flush">${statsXWeightRows(m)}</div><p class="stv2-note">${t('wlSub', 'Dotknij pomiaru, żeby go zmienić.')}</p></div>`
+    + statsXWeightBodyCard(rc(4, true));
+  statsXRefreshScroll();
+}
+function statsXWeightBodyCard(rcStr){
+  return `<button type="button" class="stv2-card stv2-card--sm stv2-w-body m-press${rcStr}" onclick="openBodyDataSheet()"><div>${t('pfBodyRow', 'Wzrost, wiek, płeć')}<small>${t('pfBodyRowSub', 'Do wyliczania kalorii')}</small></div>${STATSX_ICO.chev}</button>`;
+}
+function statsV2WeightRender(animate){
+  return recGuardedRender('statsWeight', ()=> statsV2WeightPaint(animate), statsXFail('statsWeightBody', 'statsV2WeightRender(false)'));
+}
+
+/* ============================================================
+   2. WSZYSTKIE ĆWICZENIA (Figma 08): pełnoekranowa lista zamiast okna wyboru. Wiersz = nazwa, „N dni temu”,
+   „N sesji”, mini-wykres wyników sesji, rekord (bez serii), przyrost rekordu z 28 dni, plakietka „bez zmian” (statsV2Stalled).
+   Sekcje: OSTATNIO TRENOWANE (<= 28 dni) / DAWNO NIETRENOWANE / KARDIO. Chip „Przypięte” dopiero po etapie D
+   (renderowany tylko, gdy istnieje statsV2PinnedList).
+   ============================================================ */
+let statsXQuery = '';
+let statsXGroup = 'all';   // 'all' | klucz grupy z PLAN_EX_GROUPS | 'Kardio'
+const STATSX_EX_RECENT_DAYS = 28;
+function statsV2OpenExList(){
+  if(currentRoute === 'stats-ex-v2') return;
+  statsXQuery = ''; statsXGroup = 'all';
+  statsXGo('stats-ex-v2', 'push');
+}
+function openStatsExPicker(){ statsV2OpenExList(); }   // stare wywołania (przegląd, szczegół ćwiczenia) otwierają nową stronę
+function statsXDaysAgoText(n){
+  if(n <= 0) return t('stxToday', 'dziś');
+  if(n === 1) return t('stxYesterday', 'wczoraj');
+  return t('stxDaysAgo', `${n} dni temu`, n);
+}
+function statsXSessionsText(n){
+  return LANG === 'en' ? `${n} session${n === 1 ? '' : 's'}` : `${n} ${plPlural(n, 'sesja', 'sesje', 'sesji')}`;
+}
+// model listy: { rows: strength[], cardio: [], groups: [{key,label}] }; czysta funkcja (do testów), każdy wpis w try/catch
+function statsV2ExListModel(todayIso){
+  const today = statsV2TodayIso(todayIso);
+  const out = { rows: [], cardio: [], groups: [] };
+  const flags = statsV2NameFlags();
+  const per = new Map();
+  try{
+    statsV2Rows().forEach(row=>{
+      if(row.date > today) return;
+      row.an.per.forEach((p, name)=>{
+        if(typeof name !== 'string' || !name || isCardioName(name) || (typeof BOOKEND_EX_NAMES !== 'undefined' && BOOKEND_EX_NAMES.has(name))) return;
+        let e = per.get(name); if(!e){ e = []; per.set(name, e); }
+        e.push({ date: row.date, w: p.topW || 0, r: p.bw ? (p.topReps || 0) : 0, t: p.topTime || 0 });
+      });
+    });
+  }catch(err){}
+  let stalled = new Map();
+  try{ statsV2Stalled(today).forEach(s=> stalled.set(s.name, s.weeks)); }catch(err){}
+  const lib = new Map();
+  try{ getExerciseLibrary().forEach(e=>{ if(e && e.name && !lib.has(e.name)) lib.set(e.name, e.group); }); }catch(err){}
+  const cutoff = dashAddDays(today, -28);
+  per.forEach((ses, name)=>{
+    try{
+      let key = null, unit = null;
+      if(flags(name).time && ses.some(s=> s.t > 0)){ key = 't'; unit = 's'; }
+      else if(ses.some(s=> s.w > 0)){ key = 'w'; unit = 'kg'; }
+      else if(ses.some(s=> s.r > 0)){ key = 'r'; unit = 'reps'; }
+      if(!key) return;
+      let rec = 0, before = 0;
+      ses.forEach(s=>{ if(s[key] > rec) rec = s[key]; if(s.date <= cutoff && s[key] > before) before = s[key]; });
+      const lastDate = ses[ses.length - 1].date;
+      out.rows.push({
+        name, unit, record: rec, delta: before > 0 && rec > before ? Math.round((rec - before) * 100) / 100 : 0,
+        sessions: ses.length, lastDate, daysAgo: Math.max(0, dashDaysBetween(lastDate, today)),
+        spark: ses.slice(-8).map(s=> s[key]), stalledWeeks: stalled.has(name) ? stalled.get(name) : null,
+        group: muscleGroupBucket(lib.get(name) || '').key,
+      });
+    }catch(err){}
+  });
+  const seen = new Set(out.rows.map(r=> r.group));
+  PLAN_EX_GROUPS.forEach(b=>{ if(seen.has(b.key) && b.strength !== false) out.groups.push({ key: b.key, label: LANG === 'en' ? b.en : b.pl }); });
+  seen.forEach(k=>{ if(!out.groups.some(g=> g.key === k) && k !== 'Kardio'){ const b = PLAN_EX_GROUPS.find(x=> x.key === k); out.groups.push({ key: k, label: b ? (LANG === 'en' ? b.en : b.pl) : k }); } });
+  // kardio: jeden wiersz na ćwiczenie
+  try{
+    const byName = new Map();
+    statsV2CardioSessions().filter(s=> s.date <= today).forEach(s=>{   // najnowsze pierwsze
+      let e = byName.get(s.name); if(!e){ e = { name: s.name, sessions: 0, last: s, spark: [] }; byName.set(s.name, e); }
+      e.sessions++; e.spark.unshift(s.sec);
+    });
+    byName.forEach(e=>{
+      out.cardio.push({ name: e.name, sessions: e.sessions, lastDate: e.last.date, daysAgo: Math.max(0, dashDaysBetween(e.last.date, today)),
+        sec: e.last.sec, distM: e.last.distM, spark: e.spark.slice(-8) });
+    });
+  }catch(err){}
+  if(out.cardio.length) out.groups.push({ key: 'Kardio', label: LANG === 'en' ? 'Cardio' : 'Kardio' });
+  return out;
+}
+function statsXSpark(vals){
+  const W = 84, H = 16;
+  const v = (Array.isArray(vals) ? vals : []).filter(x=> isFinite(x));
+  if(v.length < 2) return `<svg class="stv2-x-spark" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><path d="M2,${H / 2} L${W - 2},${H / 2}" stroke="#1f996e" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`;
+  let lo = Math.min(...v), hi = Math.max(...v);
+  const flat = hi - lo < 1e-9;
+  const pts = v.map((x, i)=>({ x: Math.round((2 + i / (v.length - 1) * (W - 4)) * 10) / 10, y: flat ? H / 2 : Math.round((H - 2 - (x - lo) / (hi - lo) * (H - 4)) * 10) / 10 }));
+  return `<svg class="stv2-x-spark" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><path d="${statsV2SmoothPath(pts)}" stroke="#1f996e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
+}
+function statsXExVal(r){
+  if(r.unit === 'kg') return `${fmtKgLocal(r.record)} kg`;
+  if(r.unit === 's') return fmtDur(r.record);
+  return `${Math.round(r.record)} ${t('stV2RepsShort', 'powt.')}`;
+}
+function statsXExDelta(r){
+  if(!(r.delta > 0)) return '';
+  return r.unit === 'kg' ? `+${fmtKgLocal(r.delta)} kg` : r.unit === 's' ? `+${Math.round(r.delta)} s` : `+${Math.round(r.delta)}`;
+}
+function statsXExRowHtml(r){
+  const stalled = r.stalledWeeks != null ? `<span class="stv2-pill stv2-pill--amber">${t('stxStalled', n=> `bez zmian · ${n} tyg.`, r.stalledWeeks)}</span>` : '';
+  return `<button type="button" class="stv2-x-row m-press" onclick="statsXPickExercise(${jsArg(r.name)})">`
+    + `<span class="stv2-x-main"><span class="stv2-x-name">${escHtml(r.name)}</span><span class="stv2-x-meta">${escHtml(statsXDaysAgoText(r.daysAgo))}<span class="stv2-pill">${escHtml(statsXSessionsText(r.sessions))}</span></span>${stalled}</span>`
+    + statsXSpark(r.spark)
+    + `<span class="stv2-x-val">${escHtml(statsXExVal(r))}<small>${escHtml(statsXExDelta(r))}</small></span></button>`;
+}
+function statsXCardioRowHtml(c){
+  const val = c.sec > 0 ? statsXMinText(c.sec) : '';
+  const sub = c.distM > 0 ? fmtDistance(c.distM, false) : '';
+  return `<button type="button" class="stv2-x-row m-press" onclick="statsV2OpenCardio()">`
+    + `<span class="stv2-x-main"><span class="stv2-x-name">${escHtml(c.name)}</span><span class="stv2-x-meta">${escHtml(statsXDaysAgoText(c.daysAgo))}<span class="stv2-pill">${escHtml(statsXSessionsText(c.sessions))}</span></span></span>`
+    + statsXSpark(c.spark)
+    + `<span class="stv2-x-val">${escHtml(val)}<small>${escHtml(sub)}</small></span></button>`;
+}
+let statsXExAnimate = false;   // wejście kart tylko przy pierwszym malowaniu po otwarciu strony
+function statsXExSortRows(rows){
+  const arr = rows.slice();
+  if(statsExSort === 'az') arr.sort((a, b)=> a.name.localeCompare(b.name, LANG === 'en' ? 'en' : 'pl'));
+  else if(statsExSort === 'weight') arr.sort((a, b)=> ((b.unit === 'kg' ? b.record : -1) - (a.unit === 'kg' ? a.record : -1)) || (a.daysAgo - b.daysAgo));
+  else arr.sort((a, b)=> a.daysAgo - b.daysAgo || (a.name < b.name ? -1 : 1));
+  return arr;
+}
+// przemalowanie chipów i listy (pole wyszukiwania zostaje nietknięte, żeby nie tracić fokusu); nazwa zachowana dla starych wywołań
+function statsExPickerRender(){
+  const chipsEl = document.getElementById('statsExChips'), listEl = document.getElementById('statsExList');
+  if(!chipsEl || !listEl) return;
+  const model = statsV2ExListModel();
+  if(statsXGroup !== 'all' && !model.groups.some(g=> g.key === statsXGroup)) statsXGroup = 'all';
+  const chipList = [{ key: 'all', label: t('stxAllChip', 'Wszystkie') }];
+  if(typeof statsV2PinnedList === 'function'){ /* chip „Przypięte”: dopiero po etapie D */ }
+  model.groups.forEach(g=> chipList.push(g));
+  chipsEl.innerHTML = chipList.map(c=> `<button type="button" class="stv2-chip" role="radio" aria-checked="${c.key === statsXGroup}" onclick="statsXSetGroup(${jsArg(c.key)})">${escHtml(c.label)}</button>`).join('');
+  const q = (statsXQuery || '').trim();
+  let rows = model.rows, cardio = model.cardio;
+  if(statsXGroup === 'Kardio') rows = [];
+  else if(statsXGroup !== 'all'){ rows = rows.filter(r=> r.group === statsXGroup); cardio = []; }
+  if(q){
+    rows = rows.filter(r=> exMatchesSearch({ name: r.name, group: (PLAN_EX_GROUPS.find(b=> b.key === r.group) || {}).pl || '' }, q));
+    cardio = cardio.filter(c=> exMatchesSearch({ name: c.name, group: 'Kardio' }, q));
+  }
+  const recent = statsXExSortRows(rows.filter(r=> r.daysAgo <= STATSX_EX_RECENT_DAYS));
+  const old = statsXExSortRows(rows.filter(r=> r.daysAgo > STATSX_EX_RECENT_DAYS));
+  const rc = statsXRise(statsXExAnimate);
+  let html = '', n = 0, first = true;
+  const sec = (label, inner)=>{
+    const sort = first ? `<button type="button" class="stv2-link m-press" onclick="openStatsExSort()" aria-label="${escHtml(t('exSortTitle', 'SORTUJ'))}">${t('stxSort', 'SORTUJ')}${STATSX_ICO.chev}</button>` : '';
+    first = false;
+    html += `<div class="stv2-sec${rc(n++)}"><div class="stv2-sec-h"><p class="stv2-lbl">${label}</p>${sort}</div><div class="stv2-card stv2-card--flush">${inner}</div></div>`;
+  };
+  if(recent.length) sec(t('stxSecRecent', 'OSTATNIO TRENOWANE'), recent.map(statsXExRowHtml).join(''));
+  if(old.length) sec(t('stxSecOld', 'DAWNO NIETRENOWANE'), old.map(statsXExRowHtml).join(''));
+  if(cardio.length) sec(t('stxSecCardio', 'KARDIO'), cardio.map(statsXCardioRowHtml).join(''));
+  if(!html){
+    const none = !model.rows.length && !model.cardio.length;
+    html = `<div class="stv2-card${rc(0, true)}"><p class="stv2-x-empty">${none ? t('stxExNone', 'Tu pojawią się ćwiczenia po pierwszym zapisanym treningu.') : t('exPickNone', 'Nie znaleziono ćwiczeń.')}</p></div>`;
+  }
+  statsXExAnimate = false;
+  listEl.innerHTML = html;
+  statsXRefreshScroll();
+}
+function statsXSetGroup(k){
+  if(statsXGroup === k) return;
+  statsXGroup = k;
+  statsExPickerRender();
+}
+function statsV2ExListPaint(animate){
+  const body = document.getElementById('statsExBody');
+  if(!body) return;
+  statsXHeaderTitle('stats-ex-v2', 'stxExTitle', 'ĆWICZENIA');
+  body.innerHTML = `<div class="stv2-x-search" id="statsExSearch"></div><div class="stv2-chips stv2-chips--scroll stv2-x-chips" id="statsExChips" role="radiogroup" aria-label="${escHtml(t('stxGroupAria', 'Grupa mięśniowa'))}"></div><div id="statsExList"></div>`;
+  mountExSearch('statsExSearch', statsXQuery, v=>{ statsXQuery = v; statsExPickerRender(); });
+  const inp = document.querySelector('#statsExSearch .exs-input');
+  if(inp){ inp.placeholder = t('stxSearchPh', 'SZUKAJ ĆWICZENIA'); inp.setAttribute('aria-label', t('stxSearchPh', 'SZUKAJ ĆWICZENIA')); }
+  statsXExAnimate = !!animate;
+  statsExPickerRender();
+}
+function statsV2ExListRender(animate){
+  return recGuardedRender('statsExList', ()=> statsV2ExListPaint(animate), statsXFail('statsExBody', 'statsV2ExListRender(false)'));
+}
+function statsXPickExercise(name){
+  if(typeof name !== 'string' || !name) return;
+  if(isCardioName(name)){ statsV2OpenCardio(); return; }
+  selectedStatsExerciseV2 = name;
+  statsV2Range = statsV2ExerciseDailySeries(name).points.length ? 1 : 6;   // jak selectStatsExerciseV2: 1m tylko gdy są punkty z ostatnich 30 dni
+  statsXDetailFromList = true;
+  statsXGo('stats-v2', 'push');
+}
+
+/* ============================================================
+   3. KARDIO (Figma 09). Źródło: serie czasowe ćwiczeń kardio w treningach (czas, dystans, nachylenie).
+   Kardio nie wchodzi do rekordów siłowych, objętości ani kalorii (S12/S13). Zmiany neutralne (szare strzałki).
+   ============================================================ */
+let statsV2CardioPeriod = 'month';   // 'week' | 'month' | 'year' | 'all'
+const STATSX_CARDIO_PERIODS = [['week', 'stxPWeek', 'Tydzień'], ['month', 'stxPMonth', 'Miesiąc'], ['year', 'stxPYear', 'Rok'], ['all', 'stxPAll', 'Wszystko']];
+function statsV2OpenCardio(){
+  if(currentRoute === 'stats-cardio-v2') return;
+  statsXCardioFrom = currentRoute === 'stats-ex-v2' ? 'ex' : 'ov';
+  statsV2CardioPeriod = 'month';
+  statsXGo('stats-cardio-v2', 'push');
+}
+// jedna sesja = jedno ćwiczenie kardio w jednym treningu (suma serii czasowych), najnowsze pierwsze; zepsute wpisy pomijane
+function statsV2CardioSessions(){
+  const out = [];
+  try{
+    (Array.isArray(workouts) ? workouts : []).forEach(w=>{
+      if(!w || typeof w !== 'object' || !dashValidIso(w.date) || !Array.isArray(w.exercises)) return;
+      w.exercises.forEach(ex=>{
+        try{
+          if(!ex || typeof ex.name !== 'string' || !isCardioName(ex.name)) return;
+          let sec = 0, dist = 0, incSum = 0, incSec = 0, n = 0;
+          recSetsOf(ex).forEach(s=>{
+            const d = recNum(s.durationSec);
+            if(!(d > 0)) return;
+            n++; sec += d;
+            const m = recNum(s.distanceM); if(m > 0) dist += m;
+            const inc = Number(s.inclinePct); if(s.inclinePct != null && s.inclinePct !== '' && isFinite(inc) && inc >= 0){ incSum += inc * d; incSec += d; }
+          });
+          if(n) out.push({ date: w.date, name: ex.name, sec, distM: dist, incline: incSec ? Math.round(incSum / incSec * 10) / 10 : null });
+        }catch(err){}
+      });
+    });
+  }catch(err){ return []; }
+  out.sort((a, b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+  return out;
+}
+// okno okresu dla kardio (jak statsV2Window, ale oparte o pierwszą sesję kardio; porównanie tylko, gdy kardio istniało przed poprzednim oknem)
+function statsV2CardioWindow(period, sessions, todayIso){
+  const today = statsV2TodayIso(todayIso);
+  const p = STATSV2_PERIODS.indexOf(period) >= 0 ? period : 'month';
+  const first = sessions.length ? sessions[sessions.length - 1].date : null;
+  let start, prevStart = null, prevEnd = null, prevLimit = null;
+  if(p === 'week'){ start = dashWeekStartIso(today); prevStart = dashAddDays(start, -7); prevLimit = dashAddDays(start, -1); }
+  else if(p === 'month'){ start = today.slice(0, 8) + '01'; prevLimit = dashAddDays(start, -1); prevStart = prevLimit.slice(0, 8) + '01'; }
+  else if(p === 'year'){ start = today.slice(0, 4) + '-01-01'; prevLimit = dashAddDays(start, -1); prevStart = prevLimit.slice(0, 4) + '-01-01'; }
+  else start = first && first <= today ? first : today;
+  const days = Math.max(1, dashDaysBetween(start, today) + 1);
+  if(prevStart){ prevEnd = dashAddDays(prevStart, days - 1); if(prevEnd > prevLimit) prevEnd = prevLimit; }
+  return { period: p, start, end: today, prevStart, prevEnd, days, hasPrev: p !== 'all' && !!prevStart && !!first && first <= prevEnd };
+}
+function statsXCardioAgg(sessions, from, to){
+  const a = { sec: 0, distM: 0, n: 0, paceSec: 0, paceDist: 0 };
+  if(!from || !to) return a;
+  sessions.forEach(s=>{
+    if(s.date < from || s.date > to) return;
+    a.n++; a.sec += s.sec; a.distM += s.distM;
+    if(s.distM >= 100){ a.paceSec += s.sec; a.paceDist += s.distM; }
+  });
+  a.pace = a.paceDist > 0 ? a.paceSec / (a.paceDist / 1000) : null;   // s / km
+  return a;
+}
+function statsXPace(sec){
+  if(!isFinite(sec) || sec <= 0) return '—';
+  const s = Math.round(sec);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+function statsXClock(sec){
+  const s = Math.max(0, Math.round(sec)), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
+  return h ? `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}` : `${m}:${String(r).padStart(2, '0')}`;
+}
+// łączny czas w minutach: „34 min”, „1 h 40 min”
+function statsXMinText(sec){
+  const m = Math.round(sec / 60), h = Math.floor(m / 60), r = m % 60;
+  return h ? (r ? `${h} h ${r} min` : `${h} h`) : `${m} min`;
+}
+function statsXHeroTime(sec){
+  const m = Math.round(sec / 60), h = Math.floor(m / 60), r = m % 60;
+  return h ? `${h}<small>h</small>${r}<small>min</small>` : `${m}<small>min</small>`;
+}
+function statsXCardioBuckets(win, sessions){
+  const bars = [];
+  const sum = (from, to)=> sessions.reduce((a, s)=> a + (s.date >= from && s.date <= to ? s.sec : 0), 0);
+  const cur = win.end;
+  if(win.period === 'week'){
+    const names = LANG === 'en' ? ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] : ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+    for(let i = 0; i < 7; i++){ const d = dashAddDays(win.start, i); bars.push({ label: names[i], sec: d > cur ? 0 : sum(d, d), cur: d === cur }); }
+    return { title: t('stxBarsDays', 'CZAS W DNIACH'), bars };
+  }
+  if(win.period === 'month'){
+    const lastWs = dashWeekStartIso(cur);
+    let ws = dashWeekStartIso(win.start), i = 1, guard = 0;
+    while(ws <= lastWs && guard++ < 8){
+      const from = ws < win.start ? win.start : ws, to = dashAddDays(ws, 6) > cur ? cur : dashAddDays(ws, 6);
+      bars.push({ label: `W${i++}`, sec: sum(from, to), cur: ws === lastWs });
+      ws = dashAddDays(ws, 7);
+    }
+    return { title: t('stxBarsWeeks', 'CZAS W TYGODNIACH'), bars };
+  }
+  // rok / wszystko: miesiące (maks. 12 ostatnich)
+  let y = +win.start.slice(0, 4), m = +win.start.slice(5, 7) - 1;
+  const ey = +cur.slice(0, 4), em = +cur.slice(5, 7) - 1;
+  let guard = 0;
+  while((y < ey || (y === ey && m <= em)) && guard++ < 600){
+    const from = dateStr(new Date(y, m, 1)), to = dateStr(new Date(y, m + 1, 0));
+    bars.push({ label: PF_MON_SHORT[m] || '', sec: sum(from, to > cur ? cur : to), cur: y === ey && m === em });
+    m++; if(m > 11){ m = 0; y++; }
+  }
+  return { title: t('stxBarsMonths', 'CZAS W MIESIĄCACH'), bars: bars.slice(-12) };
+}
+function statsXPeriodPill(win){
+  if(win.period === 'week') return t('stxThisWeek', 'TEN TYDZIEŃ');
+  if(win.period === 'month') return statsXMonNom(win.end).toUpperCase();
+  if(win.period === 'year') return win.end.slice(0, 4);
+  return t('stxAllTime', 'CAŁY CZAS');
+}
+function statsXCardioVs(win){
+  if(win.period === 'week') return t('stxVsWeek', 'vs poprzedni tydzień');
+  if(win.period === 'year') return t('stxVsYear', `vs ${win.prevStart.slice(0, 4)}`, win.prevStart.slice(0, 4));
+  return t('stxVsMonth', `vs ${statsXMonNom(win.prevStart)} (${parseInt(win.prevStart.slice(8), 10)}–${parseInt(win.prevEnd.slice(8), 10)})`, statsXMonNom(win.prevStart), parseInt(win.prevStart.slice(8), 10), parseInt(win.prevEnd.slice(8), 10));
+}
+function statsXTileDelta(txt, d){ return d ? `${statsXArrow(d)}${escHtml(txt)}` : ''; }
+function statsV2CardioPaint(animate){
+  const body = document.getElementById('statsCardioBody');
+  if(!body) return;
+  statsXHeaderTitle('stats-cardio-v2', 'stxCardioTitle', 'KARDIO');
+  const rc = statsXRise(animate);
+  const all = statsV2CardioSessions();
+  if(!all.length){
+    body.innerHTML = `<div class="stv2-card stv2-empty${rc(0, true)}"><p class="stv2-empty-t">${t('stxCEmptyT', 'Tu zobaczysz swoje kardio.')}</p><p class="stv2-empty-d">${t('stxCEmptyD', 'Dodaj bieżnię, rower albo inne kardio w treningu, a pojawi się tu czas, dystans i tempo.')}</p></div>`;
+    statsXRefreshScroll();
+    return;
+  }
+  const win = statsV2CardioWindow(statsV2CardioPeriod, all);
+  const cur = statsXCardioAgg(all, win.start, win.end);
+  const prev = win.hasPrev ? statsXCardioAgg(all, win.prevStart, win.prevEnd) : null;
+  const seg = STATSX_CARDIO_PERIODS.map(([k, tk, pl])=> `<button type="button" class="stv2-seg-b" role="radio" aria-checked="${k === win.period}" onclick="statsV2CardioSetPeriod('${k}')">${t(tk, pl)}</button>`).join('');
+  let deltaHtml = '';
+  if(prev){
+    const dm = Math.round((cur.sec - prev.sec) / 60);
+    deltaHtml = `<p class="stv2-delta">${dm ? statsXArrow(dm) + (dm < 0 ? statsXMinus() : '+') + escHtml(statsXMinText(Math.abs(dm) * 60)) : t('stxWSame', 'bez zmian')} <span>${escHtml(statsXCardioVs(win))}</span></p>`;
+  }
+  const dKm = prev ? Math.round((cur.distM - prev.distM) / 100) / 10 : 0;
+  const dN = prev ? cur.n - prev.n : 0;
+  const dPace = prev && cur.pace && prev.pace ? Math.round(cur.pace - prev.pace) : 0;
+  const tile = (label, val, unit, sub)=> `<div class="stv2-tile"><span class="stv2-tile-l">${label}</span><span class="stv2-tile-v">${val}${unit ? `<small>${unit}</small>` : ''}</span><span class="stv2-tile-s">${sub || ''}</span></div>`;
+  const tiles = tile(t('stxCDist', 'DYSTANS'), cur.distM > 0 ? escHtml(fmtNum1(cur.distM / 1000)) : '—', cur.distM > 0 ? 'km' : '', statsXTileDelta(`${dKm < 0 ? statsXMinus() : '+'}${fmtNum1(Math.abs(dKm))} km`, dKm))
+    + tile(t('stxCSessions', 'SESJE'), String(cur.n), '', statsXTileDelta(`${dN < 0 ? statsXMinus() : '+'}${Math.abs(dN)}`, dN))
+    + tile(t('stxCPace', 'ŚR. TEMPO'), escHtml(statsXPace(cur.pace)), cur.pace ? '/km' : '', statsXTileDelta(`${dPace < 0 ? statsXMinus() : '+'}${statsXPace(Math.abs(dPace))}`, dPace));
+  // słupki
+  const bk = statsXCardioBuckets(win, all);
+  const maxSec = bk.bars.reduce((m, b)=> Math.max(m, b.sec), 0);
+  const bars = bk.bars.map((b, i)=>{
+    const h = maxSec > 0 && b.sec > 0 ? Math.max(6, Math.round(b.sec / maxSec * 128)) : 4;
+    return `<div class="stv2-c-col"><div class="stv2-c-area"><div class="stv2-c-bar${b.cur ? ' is-cur' : ''}" style="height:${h}px;--i:${i}" role="img" aria-label="${escHtml(b.label + ': ' + statsXMinText(b.sec))}"></div></div><span class="stv2-c-lbl">${escHtml(b.label)}</span></div>`;
+  }).join('');
+  // wg ćwiczenia (w oknie)
+  const byEx = new Map();
+  all.forEach(s=>{
+    if(s.date < win.start || s.date > win.end) return;
+    const e = byEx.get(s.name) || { name: s.name, n: 0, sec: 0, distM: 0 }; byEx.set(s.name, e);
+    e.n++; e.sec += s.sec; e.distM += s.distM;
+  });
+  const exRows = [...byEx.values()].sort((a, b)=> b.sec - a.sec).map(e=>
+    `<div class="stv2-c-ex"><p class="stv2-c-name">${escHtml(e.name)}</p><div class="stv2-c-pills"><span class="stv2-pill stv2-pill--solid">${escHtml(statsXSessionsText(e.n))}</span><span class="stv2-pill">${escHtml(statsXMinText(e.sec))}</span>${e.distM > 0 ? `<span class="stv2-pill stv2-pill--sky">${escHtml(fmtDistance(e.distM, false))}</span>` : ''}</div></div>`).join('');
+  // rekordy kardio (cały czas)
+  let longest = null, farthest = null, bestPace = null;
+  all.forEach(s=>{
+    if(!longest || s.sec > longest.sec) longest = s;
+    if(s.distM > 0 && (!farthest || s.distM > farthest.distM)) farthest = s;
+    if(s.distM >= 500 && s.sec >= 120){ const pc = s.sec / (s.distM / 1000); if(!bestPace || pc < bestPace.pc) bestPace = { pc, s }; }
+  });
+  const recMeta = s=> `<span class="stv2-c-rec-m"><span class="stv2-pill stv2-pill--orange">${escHtml(s.name)}</span><i>${STATSX_ICO.cal}${escHtml(statsXShortDay(s.date))}</i></span>`;
+  let recs = '';
+  if(longest) recs += `<div class="stv2-c-rec"><div class="stv2-c-rec-l">${t('stxRecLongest', 'Najdłuższa sesja')}${recMeta(longest)}</div><span class="stv2-c-rec-v">${escHtml(statsXClock(longest.sec))}</span></div>`;
+  if(farthest) recs += `<div class="stv2-c-rec"><div class="stv2-c-rec-l">${t('stxRecFarthest', 'Najdłuższy dystans')}${recMeta(farthest)}</div><span class="stv2-c-rec-v">${escHtml(fmtDistance(farthest.distM, false))}</span></div>`;
+  if(bestPace) recs += `<div class="stv2-c-rec"><div class="stv2-c-rec-l">${t('stxRecPace', 'Najlepsze tempo')}<span class="stv2-note">${t('stxRecPaceNote', 'Wyliczone z dystansu i czasu')}</span></div><span class="stv2-c-rec-v">${escHtml(statsXPace(bestPace.pc))} min/km</span></div>`;
+  // historia (okno, najnowsze pierwsze, do 30)
+  const hist = all.filter(s=> s.date >= win.start && s.date <= win.end).slice(0, 30).map(s=>
+    `<div class="stv2-c-hist"><div class="stv2-c-rec-l">${escHtml(s.name)}<span class="stv2-c-rec-m"><i>${STATSX_ICO.clock}${escHtml(statsXClock(s.sec))}</i>${s.distM > 0 ? `<i>${STATSX_ICO.ruler}${escHtml(fmtDistance(s.distM, false))}</i>` : ''}${s.incline != null && s.incline > 0 ? `<i>${STATSX_ICO.slope}${escHtml(fmtNum1(s.incline))} %</i>` : ''}</span></div><span class="stv2-c-hist-d">${escHtml(statsXShortDay(s.date))}</span></div>`).join('');
+  body.innerHTML =
+    `<div class="stv2-seg${rc(0)}" role="radiogroup" aria-label="${escHtml(t('stxPeriodAria', 'Okres'))}">${seg}</div>`
+    + `<div class="stv2-card${rc(1, true)}"><div class="stv2-hero-top"><p class="stv2-lbl" style="color:var(--m-muted-text)">${t('stxCTotal', 'CZAS ŁĄCZNIE')}</p><span class="stv2-pill">${escHtml(statsXPeriodPill(win))}</span></div><p class="stv2-hero-num">${statsXHeroTime(cur.sec)}</p>${deltaHtml}</div>`
+    + `<div class="stv2-card stv2-card--sm stv2-tiles${rc(2, true)}">${tiles}</div>`
+    + `<div class="stv2-sec${rc(3)}"><div class="stv2-sec-h"><p class="stv2-lbl">${escHtml(bk.title)}</p></div><div class="stv2-card${animate ? ' stv2-enter' : ''}"><div class="stv2-c-bars">${bars}</div></div></div>`
+    + (exRows ? `<div class="stv2-sec${rc(4)}"><div class="stv2-sec-h"><p class="stv2-lbl">${t('stxCByEx', 'WEDŁUG ĆWICZENIA')}</p></div><div class="stv2-card stv2-card--flush">${exRows}</div></div>` : '')
+    + `<div class="stv2-sec${rc(5)}"><div class="stv2-sec-h"><p class="stv2-lbl">${t('stxCRecords', 'REKORDY KARDIO')}</p></div><div class="stv2-card stv2-card--flush">${recs}</div></div>`
+    + `<div class="stv2-sec${rc(6)}"><div class="stv2-sec-h"><p class="stv2-lbl">${t('stxCHistory', 'HISTORIA')}</p></div><div class="stv2-card stv2-card--flush">${hist || `<p class="stv2-x-empty">${t('stxCNoneInPeriod', 'Brak sesji kardio w tym okresie.')}</p>`}</div></div>`;
+  statsXRefreshScroll();
+}
+function statsV2CardioSetPeriod(p){
+  if(statsV2CardioPeriod === p) return;
+  statsV2CardioPeriod = p;
+  statsV2CardioRender(false);
+}
+function statsV2CardioRender(animate){
+  return recGuardedRender('statsCardio', ()=> statsV2CardioPaint(animate), statsXFail('statsCardioBody', 'statsV2CardioRender(false)'));
+}
+Object.assign(T_EN, {
+  stxWeightTitle: 'WEIGHT', stxExTitle: 'EXERCISES', stxCardioTitle: 'CARDIO',
+  stxR3m: '3m', stxR6m: '6m', stxR1y: '1y', stxRAll: 'All', stxRangeAria: 'Chart range',
+  stxIn3m: 'in 3 months', stxIn6m: 'in 6 months', stxIn1y: 'in the last year', stxSinceFirst: 'since the first entry',
+  stxAvg3m: '3 mo.', stxAvg6m: '6 mo.', stxAvg1y: '1 year', stxAvgAll: 'all time',
+  stxWOnePoint: 'One entry in this period. The chart will appear after the next one.', stxWNoPoints: 'No entries in this period.', stxWChartAria: 'Weight chart',
+  stxWMore: 'SHOW ALL ({n})', stxWLess: 'SHOW LESS', stxWSame: 'no change',
+  stxWEmptyT: 'Add your weight and we\'ll draw the trend.', stxWEmptyD: 'One entry is enough. It\'s best to weigh yourself at the same time, in the morning on an empty stomach.',
+  stxWAdd: 'ADD WEIGHT', stxWLast: 'LATEST ENTRY', stxWMin: 'LOWEST', stxWAvg: 'AVERAGE', stxWMax: 'HIGHEST', stxWList: 'ENTRIES',
+  stxToday: 'today', stxYesterday: 'yesterday', stxDaysAgo: n=> `${n} days ago`,
+  stxStalled: n=> `no change · ${n} wk`, stxAllChip: 'All', stxSort: 'SORT', stxSecRecent: 'RECENTLY TRAINED', stxSecOld: 'NOT TRAINED FOR A WHILE', stxSecCardio: 'CARDIO',
+  stxExNone: 'Exercises will show up here after your first saved workout.', stxSearchPh: 'SEARCH EXERCISES', stxGroupAria: 'Muscle group',
+  stxPWeek: 'Week', stxPMonth: 'Month', stxPYear: 'Year', stxPAll: 'All', stxPeriodAria: 'Period',
+  stxThisWeek: 'THIS WEEK', stxAllTime: 'ALL TIME', stxVsWeek: 'vs previous week', stxVsYear: y=> `vs ${y}`, stxVsMonth: (m, a, b)=> `vs ${m} (${a}–${b})`,
+  stxBarsDays: 'TIME PER DAY', stxBarsWeeks: 'TIME PER WEEK', stxBarsMonths: 'TIME PER MONTH',
+  stxCTotal: 'TOTAL TIME', stxCDist: 'DISTANCE', stxCSessions: 'SESSIONS', stxCPace: 'AVG PACE', stxCByEx: 'BY EXERCISE', stxCRecords: 'CARDIO RECORDS', stxCHistory: 'HISTORY',
+  stxRecLongest: 'Longest session', stxRecFarthest: 'Longest distance', stxRecPace: 'Best pace', stxRecPaceNote: 'Calculated from distance and time',
+  stxCEmptyT: 'Your cardio will show up here.', stxCEmptyD: 'Add the treadmill, a bike or other cardio in a workout and you\'ll see time, distance and pace here.', stxCNoneInPeriod: 'No cardio sessions in this period.',
+});
 function statsV2MoveBarPage(delta){
   statsV2BarPage = Math.max(0, statsV2BarPage + delta);
   renderStatsV2(false);
