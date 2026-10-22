@@ -744,6 +744,17 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
 .wn-item:last-child{margin-bottom:0;}
 .wn-item-title{margin:0 0 6px;font-size:var(--m-fs-base);font-weight:400;letter-spacing:.04em;text-transform:uppercase;line-height:1.3;}
 .wn-item-text{margin:0;font-size:var(--m-fs-xs);line-height:1.5;}
+/* Karta wydania: 355 px, zdjęcie 252 px na górze (Figma: 388 px z przesunięciem −17/−131), pod nim etykieta 12/700, tytuł 32/300, tekst 11 */
+#releaseSheet.rl-sheet{background:var(--m-white);}
+.rl-sheet{position:relative;overflow:hidden;border-radius:33px;padding:0;background:var(--m-white);max-height:none;}
+.rl-hero{height:252px;background:#fd4202 url(icons/whatsnew/v4-hero.webp) -17px -131px/388px auto no-repeat;}
+.rl-x{position:absolute;top:14px;right:14px;width:44px;height:44px;padding:0;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.rl-x svg{width:18px;height:18px;display:block;}
+.rl-x:active{transform:scale(.92);transition-duration:var(--m-dur-press-in);}
+.rl-body{padding:27px 30px calc(30px + max(0px, env(safe-area-inset-bottom) - 10px));display:flex;flex-direction:column;gap:12px;}
+.rl-label{margin:0;font-size:var(--m-fs-xs);font-weight:700;line-height:1.02;text-transform:uppercase;color:var(--m-ink);}
+.rl-title{margin:0;font-size:32px;font-weight:300;line-height:1.04;letter-spacing:-.02em;color:#000;white-space:pre-line;}
+.rl-text{margin:0;font-size:var(--m-fs-2xs);line-height:1.45;color:var(--m-ink);white-space:pre-line;}
 
 /* ---------- "Historia zmian" sheet — full numbered CHANGELOG, reached
    from the account panel (see renderChangelogHistorySheet()). Same sheet
@@ -5170,6 +5181,19 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <h2 class="wn-headline" id="whatsnewHeadline"></h2>
     </div>
     <div class="wn-scroll" id="whatsnewList"></div>
+  </div>
+</div>
+
+<!-- Karta wydania (Figma 667:19119): jednorazowy ekran „Mekkio X jest gotowe” zamiast listy Co nowego, gdy najnowsza oczekująca wersja ma w CHANGELOG pole `release` -->
+<div class="onboard-overlay hidden m-sheet-overlay" id="releaseOverlay" onclick="if(event.target===this) closeRelease()">
+  <div class="m-sheet rl-sheet" id="releaseSheet">
+    <div class="rl-hero" aria-hidden="true"></div>
+    <button type="button" class="rl-x" aria-label="Zamknij" onclick="closeRelease()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    <div class="rl-body">
+      <p class="rl-label" data-i18n="whatsnewTitle">CO NOWEGO</p>
+      <h2 class="rl-title" id="rlTitle"></h2>
+      <p class="rl-text" id="rlText"></p>
+    </div>
   </div>
 </div>
 
@@ -9888,9 +9912,21 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.85.0";
+const APP_VERSION = "4.86.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "4.86.0": {
+    release: {
+      pl: { title: 'Mekkio 4\njest gotowe', text: 'Skończyliśmy prace nad wersją 4.\nTo wersja finalna. Zapraszam do testów.\n\nJeśli coś nie działa, czegoś brakuje albo po prostu Ci się podoba, daj znać.\n\nKażda uwaga się liczy.' },
+      en: { title: 'Mekkio 4\nis ready', text: 'We have finished work on version 4.\nThis is the final version. Come and test it.\n\nIf something does not work, something is missing, or you simply like it, let us know.\n\nEvery note counts.' },
+    },
+    pl: [
+      {featured:true, icon:'sparks', badge:'Nowość', title:'Mekkio 4 jest gotowe', text:'Skończyliśmy prace nad wersją 4. Zapraszam do testów.' },
+    ],
+    en: [
+      {featured:true, icon:'sparks', badge:'New', title:'Mekkio 4 is ready', text:'We have finished work on version 4. Come and test it.' },
+    ],
+  },
   "4.83.0": {
     pl: [
       {icon:'sparks', badge:'Nowość', title:'Spójne okna', text:'Nowe ćwiczenie, import kopii, instalacja i inne okna mają ten sam wygląd i przyciski co reszta aplikacji, a Trener AI kolory i literę karty Mekkio AI.' },
@@ -10628,6 +10664,19 @@ function renderWhatsNew(){
     return `<p class="wn-ver">${t('whatsnewVer','wersja mekkio v.' + v, v)}</p>${items}`;
   }).join('');
   list.scrollTop = 0;
+}
+function openRelease(){
+  const v = pendingChangelogVersions().find(x=> CHANGELOG[x].release);
+  const r = CHANGELOG[v].release, L = r[LANG] || r.pl;
+  document.getElementById('rlTitle').textContent = L.title;
+  document.getElementById('rlText').textContent = L.text;
+  mSheetOpenReset('releaseOverlay');
+  document.getElementById('releaseOverlay').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+}
+function closeRelease(viaDrag){
+  localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);
+  mSheetClose('releaseOverlay', viaDrag === true);
 }
 function openWhatsNew(){
   renderWhatsNew();
@@ -12895,6 +12944,7 @@ function mSheetDrag(overlayId, closeFn){
 }
 // The set-logging sheet is fixed (no drag-to-dismiss, no backdrop close): only X leaves, so a slipping thumb can't drop it.
 mSheetDrag('whatsnewOverlay', closeWhatsNew);
+mSheetDrag('releaseOverlay', closeRelease);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','swapExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
 ['nameEditOverlay','weightListSheet','weightSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
@@ -25712,7 +25762,9 @@ const onboardSeen = !!localStorage.getItem(LS_ONBOARD_SEEN);
 if(!onboardSeen){
   onbStart();   // nowy użytkownik: onboarding pełnoekranowy (imię, płeć, wiek, waga, wzrost, cel), potem wybór planu
 } else if(localStorage.getItem(LS_LAST_SEEN_VERSION) !== APP_VERSION){
-  if(pendingChangelogItems().length){
+  if(pendingChangelogVersions().some(x=> CHANGELOG[x].release)){
+    openRelease();   // karta wydania zamiast listy Co nowego
+  } else if(pendingChangelogItems().length){
     openWhatsNew();
   } else {
     localStorage.setItem(LS_LAST_SEEN_VERSION, APP_VERSION);

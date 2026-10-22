@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.85.0 (2026-10-22)
+- **Aktualna wersja:** 4.86.0 (2026-10-22)
 - **Liczba wersji:** 264 · **commitów:** 642
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,13 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.86.0 · MINOR · 2026-10-22
+
+**Dla użytkownika (wpis „Co nowego”):** zamiast listy zmian jednorazowa karta wydania „Mekkio 4 jest gotowe” (Figma 667:19119): zdjęcie z maskotką, „CO NOWEGO”, tytuł i krótki tekst od autora.
+
+- **Karta wydania:** `#releaseOverlay` / `openRelease()`; pokazuje się przy starcie, gdy któraś oczekująca wersja w `CHANGELOG` ma pole `release` ({pl, en}: title, text); zamknięcie (✕, tło, przeciągnięcie) zapisuje wersję jako widzianą. Zdjęcie `icons/whatsnew/v4-hero.webp`, `sw.js` v32. Kolejne wydania pokazują zwykłą listę Co nowego (bez pola `release`).
+- Build natywny 60.
 
 ### 4.85.0 · MINOR · 2026-10-22
 

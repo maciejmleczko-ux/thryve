@@ -1,7 +1,7 @@
-const CACHE_NAME = 'mekkio-cache-v31';
+const CACHE_NAME = 'mekkio-cache-v32';
 // icons/share/* = backgrounds of the share sheet, kept offline from the first launch
 // icons/backgrounds/bg_*.webp = tła ekranów wg płci i wzór onboardingu (~35-45 KB każde)
-const URLS_TO_CACHE = ['./', './index.html', './lottie.min.js', './success.json', './icons/backgrounds/bg_female.webp', './icons/backgrounds/bg_male.webp', './icons/backgrounds/bg_onboarding.webp', './icons/badges/medal-barbell.svg', ...['first','fullweek','firstpr','pr25','beatweek','ton','bodyweight','growth3','allround','gryf'].map(n => './icons/badges/' + n + '.webp'), ...['hantle','sztanga','maszyny','kettlebell','cialo','gumy'].map(n => './icons/equip/' + n + '.png'), './icons/equip/wszystko.svg',
+const URLS_TO_CACHE = ['./', './index.html', './lottie.min.js', './success.json', './icons/backgrounds/bg_female.webp', './icons/backgrounds/bg_male.webp', './icons/backgrounds/bg_onboarding.webp', './icons/whatsnew/v4-hero.webp', './icons/badges/medal-barbell.svg', ...['first','fullweek','firstpr','pr25','beatweek','ton','bodyweight','growth3','allround','gryf'].map(n => './icons/badges/' + n + '.webp'), ...['hantle','sztanga','maszyny','kettlebell','cialo','gumy'].map(n => './icons/equip/' + n + '.png'), './icons/equip/wszystko.svg',
   ...[1,2,3,4,5].flatMap(n => ['./icons/share/hero-' + n + '.jpg', './icons/share/gym-' + n + '.jpg'])];
 
 self.addEventListener('install', (event) => {
