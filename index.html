@@ -3867,6 +3867,21 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .stv2-seg-b::after{content:"";position:absolute;inset:-4px -2px;}   /* 44 px do kliknięcia */
 .stv2-seg-b[aria-pressed="true"]{background:var(--m-orange);color:var(--m-white);}
 .stv2-seg-b:active{transform:scale(.97);}
+/* ---- Etap E: arkusz „Udostępnij postępy” (#statsShareSheet, szkielet .m-sheet2; Figma 655:16430) ---- */
+.ste-seg{margin-top:-12px;background:none;border-color:var(--m-line);-webkit-backdrop-filter:none;backdrop-filter:none;}
+.ste-prev{position:relative;margin-top:20px;width:100%;aspect-ratio:323/250;border-radius:12px;overflow:hidden;}
+.ste-card{display:block;width:100%;height:100%;}
+.ste-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 24px;box-sizing:border-box;text-align:center;border-radius:12px;background:var(--m-orange-tint-2);color:var(--m-ink);}
+.ste-empty[hidden]{display:none;}
+.ste-empty-t{margin:0;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.02em;}
+.ste-empty-d{margin:0;font-size:var(--m-fs-xs);line-height:1.5;color:var(--m-muted-text);}
+#statsShareSheet .plansv2-customize-card.plansv2-customize-card{padding-bottom:124px;}
+.m2-actions.ste-actions{flex-direction:row;align-items:center;}
+.ste-actions .m2-btn:not(.ste-save){flex:1 1 auto;width:auto;min-width:0;padding:0 16px;}
+.ste-save{flex:none;width:55px;padding:0;display:flex;align-items:center;justify-content:center;}
+.ste-save svg{display:block;width:24px;height:24px;}
+.ste-save:disabled{background:none;border-color:var(--m-line);}
+.ste-save:disabled svg{opacity:.5;}
 /* kafel trzech liczb */
 .stv2-tiles{box-sizing:border-box;min-height:80px;display:flex;align-items:center;justify-content:space-between;padding:12px 23px;border:.5px solid var(--m-panel);border-radius:var(--m-r-sm);}
 .stv2-tiles{padding:12px 0;}
@@ -5442,6 +5457,33 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <div class="m2-actions">
       <button type="button" class="m2-btn m-press" onclick="planShareSheetShare()" data-i18n="pshShare">Udostępnij</button>
       <button type="button" class="m2-btn m2-btn--ghost m-press" onclick="planShareSheetCopy()" data-i18n="pshCopy">Skopiuj kod planu</button>
+    </div>
+  </div>
+</div>
+
+<!-- „Udostępnij postępy” (etap E; Figma 655:16430): segment okresu, podgląd karty PNG (rysowanej lokalnie na canvasie), ZAPISZ + UDOSTĘPNIJ; treść maluje statsV2OpenShare() -->
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="statsShareSheet" onclick="if(event.target===this) closeStatsShareSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="steTitle">Udostępnij postępy</h1>
+          <button type="button" class="m2-x" id="steClose" aria-label="Zamknij" onclick="closeStatsShareSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="steSub"></p>
+      </div>
+      <div class="m2-body">
+        <div class="stv2-seg ste-seg" id="steSeg" role="group"></div>
+        <div class="ste-prev">
+          <canvas class="ste-card" id="steCanvas" width="1080" height="836" role="img"></canvas>
+          <div class="ste-empty" id="steEmpty" hidden><p class="ste-empty-t" id="steEmptyT"></p><p class="ste-empty-d" id="steEmptyD"></p></div>
+        </div>
+      </div>
+    </div>
+    <div class="m2-actions ste-actions">
+      <button type="button" class="m2-btn m2-btn--ghost ste-save m-press" id="steSave" onclick="steExport('save')"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5V15m-4.5-4.5L12 15l4.5-4.5M4.5 15v3.5A1.5 1.5 0 0 0 6 20h12a1.5 1.5 0 0 0 1.5-1.5V15"/></svg></button>
+      <button type="button" class="m2-btn m-press" id="steShare" onclick="steExport('share')">UDOSTĘPNIJ</button>
     </div>
   </div>
 </div>
@@ -8019,7 +8061,7 @@ function fmtKg(n){ const s = Number(n).toFixed(1); return LANG === 'en' ? s : s.
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
+const ACCT_SHEETS = ['nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -22306,7 +22348,7 @@ function renderStatsV2Overview(){
   const shareBtnF = ()=> typeof statsV2OpenShare === 'function' ? `<button type="button" class="m2-btn m-press ${A()}" onclick="statsV2OpenShare()">${t('stV2ShareBtn', 'Udostępnij postępy')}</button>` : '';
 
   /* sekcje w kolejności i widoczności z „Dostosuj ekran” (etap D); wejście kafli wg kolejności na ekranie (A() rośnie w trakcie budowania) */
-  const lay = typeof statsV2Layout === 'function' ? statsV2Layout() : { order: ['chart', 'records', 'stalled', 'muscles', 'body', 'cardio'], hidden: [] };
+  const lay = typeof statsV2Layout === 'function' ? statsV2Layout() : { order: ['chart', 'records', 'stalled', 'muscles', 'cardio', 'body'], hidden: [] };
   const builders = { chart: secChart, records: secRecords, stalled: secStalled, muscles: secMuscles, body: secBody, cardio: secCardio };
   let secs = '';
   lay.order.forEach(id=>{ if(lay.hidden.indexOf(id) < 0 && builders[id]) secs += builders[id](); });
@@ -22384,7 +22426,7 @@ function statsV2SetPeriod(p){
 const STATSD_LAYOUT_KEY = 'mekkio_stats_layout_v1';
 const STATSD_PINS_KEY = 'mekkio_stats_pins_v1';
 const STATSD_MAX_PINS = 5;
-const STATSD_SECTIONS = ['chart', 'records', 'stalled', 'muscles', 'body', 'cardio'];   // kolejność domyślna = dzisiejsza kolejność na przeglądzie
+const STATSD_SECTIONS = ['chart', 'records', 'stalled', 'muscles', 'cardio', 'body'];   // kolejność domyślna wg listy w Figmie 04: ..., Rozkład mięśni, Kardio, Ciało
 const STATSD_LABELS = { chart: ['stDSecChart', 'Wykres główny'], records: ['stDSecRecords', 'Rekordy'], stalled: ['stDSecStalled', 'Bez postępu'], muscles: ['stDSecMuscles', 'Rozkład mięśni'], body: ['stDSecBody', 'Ciało'], cardio: ['stDSecCardio', 'Kardio'] };
 Object.assign(T_EN, {
   stDCustTitle: 'CUSTOMIZE SCREEN', stDCustSub: 'Choose what you see in Progress. Drag to change the order.',
@@ -24744,6 +24786,141 @@ async function scSaveBlob(blob, filename){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=> URL.revokeObjectURL(url), 4000);
   toast(t('imageSaved','Zapisano grafikę na urządzeniu'));
+}
+/* ============ Etap E: „Udostępnij postępy” — karta z liczbami okresu (PNG), rysowana lokalnie na canvasie ============
+   Bez serwera i bez AI: bitmapa trafia tylko do arkusza systemowego / zapisu użytkownika (shareBlob, scSaveBlob z 4.75.0).
+   Stan (wybrany okres) żyje tylko w pamięci. Karta 323×250 wg Figmy 655:17233, wyjście 1080 px szerokości, tło przezroczyste. */
+Object.assign(T_EN, {
+  stETitle: 'Share progress', stESub: 'A card with the numbers from the period you pick. No weight.',
+  stEPerAria: 'Period', stEWeek: 'Week', stEMonth: 'Month', stEYear: 'Year',
+  stEThisWeek: 'This week', stEWorkouts: n => n === 1 ? 'Workout' : 'Workouts', stEVolume: 'Volume', stERecords: 'Records', stECalories: 'Calories',
+  stESave: 'Save image', stEShare: 'Share', stEEmptyT: 'No workouts in this period', stEEmptyD: 'Pick a longer period or log your first workout.',
+  stEFile: 'progress', stEText: 'My progress in Mekkio 💪',
+});
+const STE_PERIODS = ['week', 'month', 'year'];
+let ste = null;   // { period, busy, seq, data } dopóki arkusz jest otwarty
+const STE_W = 323, STE_H = 250;
+function steTok(name, fb){ try{ const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim(); return v || fb; }catch(e){ return fb; } }
+// dane karty z okna okresu (etap A); każda awaria danych = pusta karta, nigdy wyjątek w UI
+function steData(period){
+  const out = { period, n: 0, volumeKg: 0, kcal: 0, records: 0, label: '' };
+  try{
+    const win = statsV2Window(period), ps = statsV2PeriodStats(win);
+    out.n = Math.max(0, Math.round(Number(ps.workouts) || 0));
+    out.volumeKg = Math.max(0, Number(ps.volumeKg) || 0);
+    out.kcal = Math.max(0, Number(ps.kcal) || 0);
+    try{ out.records = Math.max(0, statsV2NewRecords(win).count | 0); }catch(e){}
+    if(period === 'week') out.label = t('stEThisWeek', 'Ten tydzień');
+    else if(period === 'month'){ const m = parseInt(String(win.start).slice(5, 7), 10); out.label = MONTH_NAMES[m - 1] || ''; }
+    else out.label = String(win.start).slice(0, 4);
+  }catch(e){ out.n = 0; }
+  return out;
+}
+function steWorkoutsWord(n){ return LANG === 'en' ? t('stEWorkouts', n === 1 ? 'Workout' : 'Workouts', n) : plTreningWord(n); }
+function steVolume(kg){ return !(kg > 0) ? null : kg >= 1000 ? [formatDashNum(kg / 1000, 1), 't'] : [formatDashNum(kg, 0), 'kg']; }
+// rysuje kartę na canvasie o szerokości 1080 (współrzędne z Figmy 323×250 × k); tło przezroczyste, kolory z tokenów :root
+function steDraw(canvas, d){
+  const W = 1080, k = W / STE_W, H = Math.round(STE_H * k);
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  const orange = steTok('--m-orange', '#ff3300'), white = steTok('--m-white', '#fff'), red = steTok('--m-metric-volume', '#cd1200'),
+        sky = steTok('--m-sky', '#5da9e9'), amber = steTok('--m-amber', '#ffbb00'), ink = steTok('--m-ink', '#343941');
+  const rgba = (hex, a)=>{ let h = hex.replace('#', ''); if(h.length === 3) h = h.replace(/(.)/g, '$1$1'); const n = parseInt(h, 16); return `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, ${a})`; };
+  ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  // tekst w jednostkach Figmy; zwraca szerokość (bez odstępu po ostatniej literze)
+  const text = (str, x, y, wt, px, color, ls, align)=>{
+    ctx.font = scFont(wt, px * k); ctx.fillStyle = color; scLetterSpacing(ctx, (ls || 0) * px * k);
+    const w = ctx.measureText(str).width - (ls || 0) * px * k;
+    const X = align === 'center' ? x - w / (2 * k) : align === 'right' ? x - w / k : x;
+    ctx.fillText(str, X * k, y * k); scLetterSpacing(ctx, 0);
+    return w / k;
+  };
+  // etykieta okresu
+  text((d.label || '').toUpperCase(), 11.12, 17, 500, 11, orange, .1);
+  // pomarańczowy blok z liczbą treningów
+  ctx.fillStyle = orange; roundRect(ctx, 5.44 * k, 26.68 * k, 312.11 * k, 120.79 * k, 10.52 * k); ctx.fill();
+  const cx = 5.44 + 312.11 / 2;
+  text(String(d.n), cx, 105, 200, 87.67, white, -.01, 'center');
+  text(steWorkoutsWord(d.n).toUpperCase(), cx, 126.5, 400, 12.27, white, .0884, 'center');
+  // trzy kafle
+  const tiles = [
+    { x: 5.44, w: 100.49, bg: red, fg: white, lab: t('stEVolume', 'Objętość'), vu: steVolume(d.volumeKg) },
+    { x: 113.66, w: 86.97, bg: sky, fg: ink, lab: t('stERecords', 'Rekordy'), vu: [String(d.records), ''] },
+    { x: 208.36, w: 109.19, bg: amber, fg: ink, lab: t('stECalories', 'Kalorie'), vu: d.kcal > 0 ? ['~' + formatDashNum(d.kcal, 0), 'kcal'] : null }
+  ];
+  tiles.forEach(ti=>{
+    ctx.fillStyle = ti.bg; roundRect(ctx, ti.x * k, 155.2 * k, ti.w * k, 65.71 * k, 10.52 * k); ctx.fill();
+    text(ti.lab.toUpperCase(), ti.x + 10.52, 172.5, 500, 8.77, rgba(ti.fg, .82), .1);
+    const vu = ti.vu || ['–', ''], avail = ti.w - 21.04;
+    // za długa liczba (np. kcal z całego roku) zmniejsza się, żeby zmieściła się w kaflu
+    const meas = (f)=>{
+      ctx.font = scFont(200, 22.79 * f * k); scLetterSpacing(ctx, 0 * 22.79 * f * k);
+      let w = ctx.measureText(vu[0]).width / k; scLetterSpacing(ctx, 0);
+      if(vu[1]){ ctx.font = scFont(400, 10.52 * f * k); w += 3.5 + ctx.measureText(vu[1]).width / k; }
+      return w;
+    };
+    const w0 = meas(1), sc = w0 > avail ? Math.max(.55, avail / w0) : 1;
+    const wv = text(vu[0], ti.x + 10.52, 208.5, 200, 22.79 * sc, ti.fg, 0);
+    if(vu[1]) text(vu[1], ti.x + 10.52 + wv + 3.5, 208.5, 400, 10.52 * sc, rgba(ti.fg, .8));
+  });
+  // stopka: znak Mekkio + hasło marki (po angielsku, decyzja 2026-10-22; bez wagi i zdjęć)
+  scDrawWordmark(ctx, 10 * k, 233 * k, 36.02 * k, orange);
+  text('EVERY REP COUNTS. LITERALLY.', 315, 241, 500, 9, orange, .1, 'right');
+}
+async function steBlob(d){
+  await scEnsureFonts();
+  const c = document.createElement('canvas');
+  steDraw(c, d);
+  return new Promise(res=> c.toBlob(res, 'image/png'));
+}
+function steRender(){
+  if(!ste) return;
+  const seg = document.getElementById('steSeg');
+  seg.setAttribute('aria-label', t('stEPerAria', 'Okres'));
+  const defs = [['week', 'stEWeek', 'Tydzień'], ['month', 'stEMonth', 'Miesiąc'], ['year', 'stEYear', 'Rok']];
+  seg.innerHTML = defs.map(([key, tk, pl])=> `<button type="button" class="stv2-seg-b" aria-pressed="${key === ste.period}" onclick="steSetPeriod('${key}')">${escHtml(t(tk, pl))}</button>`).join('');
+  const d = steData(ste.period), empty = d.n < 1, cv = document.getElementById('steCanvas');
+  ste.data = d;
+  document.getElementById('steEmpty').hidden = !empty;
+  cv.style.visibility = empty ? 'hidden' : '';
+  document.getElementById('steShare').disabled = empty; document.getElementById('steSave').disabled = empty;
+  cv.setAttribute('aria-label', empty ? '' : `${d.label}: ${d.n} ${steWorkoutsWord(d.n)}, ${t('stEVolume', 'Objętość')} ${(steVolume(d.volumeKg) || ['–']).join(' ')}, ${t('stERecords', 'Rekordy')} ${d.records}`);
+  const seq = ++ste.seq;
+  if(!empty) scEnsureFonts().then(()=>{ if(ste && seq === ste.seq) steDraw(cv, d); });
+}
+function steSetPeriod(p){
+  if(!ste || STE_PERIODS.indexOf(p) < 0 || p === ste.period || ste.busy) return;
+  ste.period = p; haptic('select'); steRender();
+}
+// punkt wejścia z przeglądu (przycisk „UDOSTĘPNIJ POSTĘPY”); okres startowy = ten z przeglądu, „Wszystko” → rok
+function statsV2OpenShare(){
+  const p = STE_PERIODS.indexOf(statsV2Period) >= 0 ? statsV2Period : (statsV2Period === 'all' ? 'year' : 'month');
+  ste = { period: p, busy: false, seq: 0, data: null };
+  document.getElementById('steTitle').textContent = t('stETitle', 'Udostępnij postępy');
+  document.getElementById('steSub').textContent = t('stESub', 'Karta z liczbami z wybranego okresu. Bez wagi.');
+  document.getElementById('steClose').setAttribute('aria-label', t('close', 'Zamknij'));
+  document.getElementById('steSave').setAttribute('aria-label', t('stESave', 'Zapisz obraz'));
+  document.getElementById('steShare').textContent = t('stEShare', 'Udostępnij');
+  document.getElementById('steEmptyT').textContent = t('stEEmptyT', 'Brak treningów w tym okresie');
+  document.getElementById('steEmptyD').textContent = t('stEEmptyD', 'Wybierz dłuższy okres albo zapisz pierwszy trening.');
+  steRender();
+  acctSheetOpen('statsShareSheet');
+}
+function closeStatsShareSheet(viaDrag){ ste = null; acctSheetClose('statsShareSheet', viaDrag); }
+mSheetDrag('statsShareSheet', closeStatsShareSheet);
+async function steExport(kind){
+  if(!ste || ste.busy || !ste.data || ste.data.n < 1) return;
+  const d = ste.data, name = `mekkio-${t('stEFile', 'postepy')}-${d.period}-${todayStr()}.png`;
+  const btns = [document.getElementById('steShare'), document.getElementById('steSave')];
+  ste.busy = true; btns.forEach(b=> b.disabled = true);
+  try{
+    const blob = await steBlob(d);
+    if(!blob) throw new Error('empty blob');
+    if(kind === 'save'){ await scSaveBlob(blob, name); haptic('success'); }
+    else await shareBlob(blob, name, t('stEText', 'Moje postępy w Mekkio 💪'));
+  }catch(err){ console.error('stats share', err); toast(t('imageGenFailed', 'Nie udało się wygenerować grafiki')); haptic('warning'); }
+  if(ste){ ste.busy = false; btns.forEach(b=> b.disabled = !(ste.data && ste.data.n > 0)); }
 }
 async function shareRunById(id){
   const r = runs.find(x=>x.id===id);
