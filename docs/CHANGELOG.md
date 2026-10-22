@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.81.1 (2026-10-22)
+- **Aktualna wersja:** 4.81.2 (2026-10-22)
 - **Liczba wersji:** 254 · **commitów:** 633
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.81.2 · PATCH · 2026-10-22
+
+**Zakres techniczny:** słupki wykresów w Postępach (Treningi i czas w karuzeli, Kardio) mają zaokrąglone tylko górne rogi na 4 px we wszystkich zakresach (tydzień, miesiąc, rok, wszystko). Nowy token `--m-r-bar:4px` zamiast `--m-r-md`/`--m-r-sm` (12–16 px, które przy wąskich słupkach w zakresie Rok i Wszystko zaokrąglały górę do półkola, a niskie słupki do pigułek). Zerowe wartości to płaska, 4-pikselowa kreska.
+
+**Commity (1):**
+
+- `(ten commit)` 2026-10-22 — Postępy: słupki wykresów 4 px (token --m-r-bar)
+
+
 
 ### 4.81.1 · PATCH · 2026-10-22
 
