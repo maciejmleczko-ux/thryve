@@ -3053,37 +3053,64 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .statsv2-ex-tile .icn img{display:block;width:40px;height:40px;object-fit:contain;}
 .statsv2-ex-tile span{font-size:var(--m-fs-2xs);font-weight:600;color:#2c2727;letter-spacing:.3px;text-transform:uppercase;text-align:center;line-height:1.15;}
 
-.statsv2-record-card{background:var(--m-orange);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;}
-.statsv2-record-eyebrow{margin:0;}
-.statsv2-record-num-row{display:flex;align-items:center;gap:20px;margin-top:8px;}
-.statsv2-record-trophy{width:36px;height:32px;color:#fff;flex-shrink:0;}
-.statsv2-record-num{flex:1;font-size:var(--m-fs-hero);color:#fff;font-weight:400;letter-spacing:-.88px;font-variant-numeric:tabular-nums;}
-.statsv2-record-num small{font-size:var(--m-fs-md);color:rgba(255,255,255,.8);margin-left:4px;}
-.statsv2-record-arrow{width:40px;height:40px;color:#fff;flex-shrink:0;}
-.statsv2-record-arrow.down{transform:scaleY(-1);}
-.statsv2-record-delta{margin:8px 0 16px;font-size:var(--m-fs-2xs);color:#ffd885;letter-spacing:1.1px;text-transform:uppercase;}
-.statsv2-record-sep{height:1px;background:rgba(255,255,255,.25);margin-bottom:16px;}
-.statsv2-record-stats{display:flex;gap:28px;}
-.statsv2-record-stat span{display:block;font-size:var(--m-fs-2xs);color:#fff;letter-spacing:.4px;margin-bottom:4px;}
-.statsv2-record-stat strong{font-size:var(--m-fs-md);color:#fff;font-weight:600;}
-.statsv2-record-row{display:flex;align-items:center;gap:10px;padding:7px 0;}
-.statsv2-record-ric{width:18px;height:18px;color:#fff;flex-shrink:0;}
-.statsv2-record-rk{flex:1;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.85);letter-spacing:.4px;text-transform:uppercase;}
-.statsv2-record-rv{font-size:var(--m-fs-sm);color:#fff;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0;}
-.statsv2-record-rv small{font-weight:400;color:rgba(255,255,255,.75);}
-.statsv2-record-foot{margin:10px 0 0;font-size:var(--m-fs-2xs);color:rgba(255,255,255,.8);line-height:1.5;}
-.statsv2-record-foot strong{color:#fff;font-weight:600;}
 
-.statsv2-detail-chart-card{background:var(--m-card);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;}
-.statsv2-detail-chart-eyebrow{margin:0 0 10px;}
-.statsv2-range-row{display:flex;gap:7px;margin-bottom:32px;}
-.statsv2-range-chip{flex-shrink:0;width:52px;border:1px solid var(--m-orange);background:var(--m-card);border-radius:var(--m-r-sm);padding:11px 4px;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);font-family:inherit;cursor:pointer;text-align:center;}
-.statsv2-range-chip.wide{flex:1;width:auto;}
-.statsv2-range-chip.active{background:var(--m-orange);color:#fff;}
-.statsv2-detail-wave{position:relative;height:120px;margin-top:8px;}
-.statsv2-detail-wave svg{width:100%;height:100%;overflow:visible;}
-.statsv2-detail-wave-labels{display:flex;justify-content:space-between;margin-top:4px;}
-.statsv2-detail-wave-labels span{font-size:var(--m-fs-xs);color:var(--m-ink);letter-spacing:.48px;}
+/* ---- Postępy v3, etap F: szczegół ćwiczenia (Figma 06 · 655:14410). Białe boksy = .stc-card (szkło iOS); segment/chipy = .stc-seg / .stc-chip ---- */
+#view-stats-v2 .profil-title.stf-title{max-width:calc(100vw - 120px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.stf-pin .ph,.stf-pin svg{display:block;width:22px;height:22px;}
+.stf-pin.is-on svg path{fill:currentColor;}
+.stf-body{margin-top:0;}
+.stf-body > .stf-sec:first-child{margin-top:0;}
+.stf-sec{margin-top:16px;}
+/* karta rekordu: biały tekst na --m-orange (3,67:1: znany wyjątek pomarańczowego kafla, patrz docs/audyt-postepy-figma.md 2.4) */
+.stf-rec{box-sizing:border-box;width:100%;padding:16px;border-radius:var(--m-r-md);background:var(--m-orange);color:var(--m-white);}
+.stf-rec-k{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-white);}
+.stf-rec-row{display:flex;align-items:center;gap:20px;min-height:40px;margin-top:10px;}
+.stf-rec-tr,.stf-rec-tr svg{display:block;flex:none;width:36px;height:32px;}
+.stf-rec-num{flex:1;min-width:0;font-size:var(--m-fs-hero);font-weight:200;line-height:1.1;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.stf-rec-num small{margin-left:6px;font-size:var(--m-fs-md);font-weight:300;letter-spacing:0;}
+.stf-rec-ar,.stf-rec-ar svg{display:block;flex:none;width:40px;height:40px;}
+.stf-rec-d{margin:8px 0 0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;}
+.stf-rec-sep{height:0;margin:18px 0 16px;border-top:.92px solid rgba(255,255,255,.7);}
+.stf-rec-r{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
+.stf-rec-r + .stf-rec-r{margin-top:6px;}
+.stf-rec-r span{font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;text-transform:uppercase;}
+.stf-rec-r b{font-size:var(--m-fs-md);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+/* karta wykresu */
+.stf-chartcard{padding:18px;}
+.stf-chips{justify-content:space-between;margin-top:16px;}
+.stf-chips .stc-chip{min-width:52px;padding:0 16px;}
+.stf-chart{position:relative;height:120px;margin-top:20px;}
+.stf-chart svg{display:block;width:100%;height:120px;overflow:visible;}
+.statsv2-chart-head.stf-head{width:16px;height:16px;background:var(--m-orange);box-shadow:0 0 0 3px var(--m-orange-tint);}
+.stf-axis{display:flex;justify-content:space-between;margin-top:12px;font-size:var(--m-fs-xs);font-weight:400;letter-spacing:.04em;color:var(--m-ink);}
+.stf-nodata{display:flex;align-items:center;justify-content:center;height:120px;margin-top:20px;font-size:var(--m-fs-xs);text-align:center;color:var(--m-muted-text);}
+.stf-trend{padding:18px;}
+/* historia serii */
+.stf-hist{display:flex;flex-direction:column;}
+.stf-sess{padding:14px 0;}
+.stf-sess:first-child{padding-top:0;}
+.stf-sess:last-child{padding-bottom:0;}
+.stf-sess + .stf-sess{border-top:.5px solid var(--m-orange-tint);}
+.stf-sess-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.stf-sess-d{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.stf-sess-d strong{font-size:var(--m-fs-base);font-weight:500;line-height:1.3;color:var(--m-ink);white-space:nowrap;}
+.stf-sess-d span{font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-muted-text);}
+.stf-sess-max{display:flex;align-items:center;gap:16px;}
+.stf-max{display:inline-flex;align-items:center;height:20px;padding:0 14px;border-radius:var(--m-r-pill);background:var(--m-orange-tint-2);color:var(--m-orange-ink);font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.04em;}   /* Figma: pełny pomarańcz; tint + --m-orange-ink daje 10:1 */
+.stf-trophy,.stf-trophy svg{display:block;flex:none;width:25px;height:20px;color:var(--m-orange);}
+.stf-pills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-top:12px;}
+.stf-pill{display:flex;align-items:center;justify-content:center;height:30px;padding:0 6px;border-radius:var(--m-r-pill);font-size:var(--m-fs-xs);font-weight:400;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stf-p0{background:var(--m-mint-tint);color:var(--m-mint-ink);}
+.stf-p1{background:var(--m-mint);color:var(--m-ink);}
+.stf-p2{background:var(--m-mint-ink);color:var(--m-white);}   /* Figma #1F996E + biel = 3,5:1; --m-mint-ink + biel = 6,3:1 */
+.stf-more{position:relative;align-self:center;height:36px;margin-top:14px;padding:0 18px;border:.5px solid var(--m-orange-tint);border-radius:var(--m-r-pill);background:transparent;font:inherit;font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);cursor:pointer;}
+.stf-more::after{content:"";position:absolute;inset:-4px -6px;}   /* 36 px wizualnie, 44 px do kliknięcia */
+.stf-change{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:65px;border:0;font:inherit;text-align:left;color:var(--m-ink);cursor:pointer;margin-top:8px;}
+.stf-change-t{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.stf-change-t strong{font-size:var(--m-fs-base);font-weight:500;line-height:1.2;}
+.stf-change-t span{font-size:var(--m-fs-2xs);font-weight:400;color:var(--m-muted-text);}
+.stf-change-c{flex:none;color:var(--m-muted-text);}
+.stf-change-c svg{display:block;width:12px;height:12px;}
 .statsv2-pr-tag{position:absolute;transform:translate(-50%,-100%);background:#FFBB00;color:#2c1500;font-size:var(--m-fs-2xs);font-weight:500;padding:4px 6px;border-radius:6px;white-space:nowrap;pointer-events:none;}
 /* Maciej: "punkty z PR na wykresach to powinna byc kropka nie owal" —
    the dots used to be SVG <circle> elements inside an svg stretched
@@ -3095,18 +3122,6 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
    perfect circle regardless of how the svg underneath is stretched. */
 .statsv2-chart-dot{position:absolute;border-radius:50%;transform:translate(-50%,-50%);box-sizing:content-box;pointer-events:none;}
 
-.statsv2-log-card{background:var(--m-card);border-radius:var(--m-r-md);padding:16px;box-sizing:border-box;}
-.statsv2-log-eyebrow{margin:0 0 24px;}
-.statsv2-log-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid #eee;}
-.statsv2-log-row:first-child{border-top:none;padding-top:0;}
-.statsv2-log-date{flex-shrink:0;}
-.statsv2-log-date strong{display:block;font-size:var(--m-fs-base);color:var(--m-ink);font-weight:500;white-space:nowrap;}
-.statsv2-log-date span{font-size:var(--m-fs-2xs);color:var(--m-ink);}
-.statsv2-log-main{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-.statsv2-log-sets-v{font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);letter-spacing:.36px;text-align:right;}
-.statsv2-log-tags{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px;}
-.statsv2-log-tag{font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--m-ink);color:#fff;border-radius:var(--m-r-pill);padding:2px 7px;line-height:1.5;}
-.statsv2-log-trophy{width:26px;height:26px;color:var(--m-orange);flex-shrink:0;}
 
 /* .statsv2-empty — see the shared empty-state rule near .gymv2-no-plan */
 
@@ -4598,10 +4613,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
                można usunąć X a strzałka będzie kierować do statystyk
                głównych"). -->
         <button type="button" class="profil-back m-press" id="statsV2BackBtn" onclick="statsV2Back()" title="Wstecz" aria-label="Wstecz"><span class="ph" data-ph="caret-left"></span></button>
-        <h1 class="profil-title" data-i18n="stV2Title">POSTĘPY</h1>
+        <h1 class="profil-title" id="statsV2Title" data-i18n="stV2Title">POSTĘPY</h1>
         <div class="stv2-top-r">
           <button type="button" class="stv2-cust m-press" id="statsV2CustBtn" hidden onclick="statsV2OpenCustomize()" title="Dostosuj ekran" aria-label="Dostosuj ekran"><span class="ph"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><path d="M4 8h9M17 8h3M4 16h3M11 16h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="15" cy="8" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="16" r="2" stroke="currentColor" stroke-width="1.6"/></svg></span></button>
-          <button type="button" class="plansv2-chat-btn plansv2-acct-btn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
+          <button type="button" class="stv2-cust stf-pin m-press" id="statsV2PinBtn" hidden aria-pressed="false" onclick="statsFTogglePin()"></button>
+          <button type="button" class="plansv2-chat-btn plansv2-acct-btn" id="statsV2AcctBtn" onclick="openProfileV2()" title="Konto" aria-label="Konto"><span class="ph" data-ph="account"></span></button>
         </div>
       </div>
 
@@ -22827,144 +22843,235 @@ function statsDPinClose(viaDrag){
   acctSheetClose('statsPinSheet', viaDrag);
 }
 
+/* ============================================================
+   POSTĘPY v3, ETAP F: szczegół ćwiczenia (Figma 06 · 655:14410). Prefiks CSS: .stf-*; białe boksy = .stc-card (szkło iOS).
+   Układ: REKORD (pomarańczowa karta) → karta wykresu (segment Ciężar/Prognoza/Objętość + chipy zakresu 3m/6m/1r/Wszystko)
+   → HISTORIA SERII (ostatnie 6 sesji, „Pokaż wszystkie”) → „Zmień ćwiczenie”. Nagłówek (nazwa + gwiazdka przypięcia) maluje
+   statsFSyncHeader(). Rekord = najcięższy ciężar / najwięcej powtórzeń (masa ciała) / najdłuższy czas (czasowe); PROGNOZA MAXA
+   to osobny wiersz, zawsze jako prognoza (tylko ćwiczenia siłowe z ciężarem). Stan (segment, rozwinięcie listy) tylko w pamięci.
+   Wykres: pole + linia komety (statsV2CometLine, klasy .statsv2-comet-seg / .statsv2-chart-head), karta ma klasę
+   .statsv2-detail-chart-card, więc statsV2SetupDrawReveal / statsV2AnimateDrawPaths obejmują ją bez zmian.
+   ============================================================ */
+let statsFSeg = 'main';     // 'main' (ciężar / powtórzenia / czas) | 'proj' (prognoza) | 'vol' (objętość sesji)
+let statsFFor = null;       // ćwiczenie, dla którego ustawiono segment i listę (inne ćwiczenie = reset)
+let statsFAll = false;      // lista sesji rozwinięta przyciskiem „Pokaż wszystkie”
+const STATSF_RANGES = [[3, 'stFR3', '3m'], [6, 'stFR6', '6m'], [12, 'stFR12', '1r'], [0, 'stFRAll', 'Wszystko']];
+const STATSF_SESSIONS_SHOWN = 6;
+const STATSF_RAMP = [[0, '#ffa88f', 1], [.55, '#ff5a2a', 1], [1, '#ff3300', 1]];   // ogon jaśniejszy, głowa --m-orange (SVG nie czyta var())
+Object.assign(T_EN, {
+  stFRecord: 'RECORD', stFHeavy: 'HEAVIEST WEIGHT', stFMostReps: 'MOST REPETITIONS', stFLongest: 'LONGEST TIME',
+  stFSince: 'since last month', stFProj: 'Projected max', stFVol: 'Biggest session volume',
+  stFSegMain: 'Weight', stFSegReps: 'Reps', stFSegTime: 'Time', stFSegProj: 'Projection', stFSegVol: 'Volume',
+  stFR3: '3m', stFR6: '6m', stFR12: '1y', stFRAll: 'All',
+  stFHistory: 'SET HISTORY', stFShowAll: n => `Show all (${n})`, stFShowLess: 'Show fewer',
+  stFChange: 'Change exercise', stFChangeSub: 'Pick from exercises with history',
+  stFPinOn: 'Pin exercise', stFPinOff: 'Unpin exercise',
+  stFTrendLater: 'The trend appears from the third workout.', stFNoData: 'Not enough data in this period.',
+  stFEmptyT: 'No sets for this exercise yet', stFEmptyD: 'Log it in a workout and your records and trend show up here.',
+  stFSegAria: 'Chart metric', stFRangeAria: 'Chart range', stFChartAria: (a, b) => `Trend chart from ${a} to ${b}`,
+});
+// rodzaj metryki rekordu (ten sam co linia wykresu): 'weight' | 'reps' (masa ciała) | 'time'
+function statsFMetric(rec){ return rec.record ? rec.record.kind : (rec.seria ? 'reps' : 'weight'); }
+function statsFVal(kind, v){
+  if(kind === 'weight') return { n: fmtGymWeight(v), u: 'kg' };
+  if(kind === 'time'){
+    v = Math.round(v);
+    return v < 60 ? { n: String(v), u: 's' } : { n: `${Math.floor(v / 60)}:${String(v % 60).padStart(2, '0')}`, u: 'min' };
+  }
+  return { n: String(Math.round(v)), u: t('stV2RepsShort', 'powt.') };
+}
+function statsFValTxt(kind, v){ const o = statsFVal(kind, v); return `${o.n} ${o.u}`; }
+// sesje ćwiczenia od najstarszej: najlepsza wartość metryki, najlepsza prognoza (Epley, serie do 12 powt.), objętość sesji
+function statsFSessionsAsc(name, metric, bwVol){
+  const out = [];
+  statsV2ExerciseSessions(name).slice().reverse().forEach(r=>{
+    if(!dashValidIso(r.date)) return;
+    let best = 0, e1 = 0, vol = 0;
+    r.sets.forEach(s=>{
+      const w = +s.weight || 0, rp = +s.reps || 0;
+      const m = metric === 'weight' ? w : rp;
+      if(m > best) best = m;
+      if(metric === 'weight' && statsV2E1rmEligible({ weight: w, reps: rp })) e1 = Math.max(e1, statsV2Epley(w, rp));
+      vol += bwVol ? rp : w * rp;
+    });
+    out.push({ date: r.date, best, e1, vol });
+  });
+  return out;
+}
+// punkty wykresu {date, v} dla segmentu i zakresu (miesiące wstecz; 0 = wszystko). „main” = najlepszy wynik do tej sesji
+// (trajektoria rekordu, z wartością sprzed okna jako punkt startowy); „proj” / „vol” = wartość z danej sesji.
+function statsFSeries(asc, seg, range){
+  let start = null;
+  if(range){ const d = new Date(todayStr() + 'T00:00:00'); d.setMonth(d.getMonth() - range); start = dateStr(d); }
+  const pts = [];
+  if(seg === 'main'){
+    let run = 0, carry = null;
+    asc.forEach(s=>{
+      if(s.best > run) run = s.best;
+      if(start && s.date < start){ carry = run; return; }
+      pts.push({ date: s.date, v: run });
+    });
+    if(start && carry !== null && (!pts.length || pts[0].date > start)) pts.unshift({ date: start, v: carry });
+  } else {
+    const key = seg === 'proj' ? 'e1' : 'vol';
+    asc.forEach(s=>{ if((!start || s.date >= start) && s[key] > 0) pts.push({ date: s.date, v: s[key] }); });
+  }
+  return pts;
+}
+function statsFAxisLabels(d0, d1){
+  const ms = iso=> Date.parse(iso + 'T00:00:00Z'), mid = new Date((ms(d0) + ms(d1)) / 2).toISOString().slice(0, 10);
+  const multi = d0.slice(0, 4) !== d1.slice(0, 4);
+  const mon = iso=>{ const m = STV2_MON[+iso.slice(5, 7) - 1] || ''; const s = m.charAt(0).toUpperCase() + m.slice(1); return multi ? `${s} ’${iso.slice(2, 4)}` : s; };
+  let labs = [mon(d0), mon(mid), mon(d1)];
+  if(labs[0] === labs[2]) labs = [stv2Dm(d0), '', stv2Dm(d1)];   // okno w jednym miesiącu: dzień i miesiąc
+  else if(labs[1] === labs[0] || labs[1] === labs[2]) labs[1] = '';
+  return labs;
+}
+// wykres: pole z gradientem + linia komety + kropka końcowa; x proporcjonalnie do daty; mniej niż 2 różne daty = brak wykresu
+function statsFChartHtml(pts){
+  const ms = iso=> Date.parse(iso + 'T00:00:00Z');
+  if(pts.length < 2 || pts[0].date === pts[pts.length - 1].date) return `<div class="stf-nodata">${t('stFNoData', 'Za mało danych w tym okresie.')}</div>`;
+  if(pts.length > 48){ const step = (pts.length - 1) / 47; pts = Array.from({ length: 48 }, (_, i)=> pts[Math.round(i * step)]); }
+  const W = 319, H = 120, PT = 10, PB = 8;
+  const t0 = ms(pts[0].date), t1 = ms(pts[pts.length - 1].date);
+  const vals = pts.map(p=> p.v), lo = Math.min(...vals), hi = Math.max(...vals), sp = hi - lo;
+  const xy = pts.map(p=>({ x: +((ms(p.date) - t0) / (t1 - t0) * W).toFixed(1), y: +(sp === 0 ? H / 2 : PT + (1 - (p.v - lo) / sp) * (H - PT - PB)).toFixed(1) }));
+  const comet = statsV2CometLine(xy, STATSF_RAMP, 3), last = xy[xy.length - 1], fid = statsV2Uid();
+  const area = `${statsV2SmoothPath(xy)} L${W},${H} L0,${H} Z`;
+  const labs = statsFAxisLabels(pts[0].date, pts[pts.length - 1].date);
+  const aria = t('stFChartAria', `Wykres trendu od ${labs[0]} do ${labs[2]}`, labs[0], labs[2]);
+  return `<div class="stf-chart" role="img" aria-label="${escHtml(aria)}"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="${fid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff3300" stop-opacity=".3"/><stop offset="1" stop-color="#ff3300" stop-opacity="0"/></linearGradient></defs>
+      <path class="statsv2-comet-seg" style="--p:0" d="${area}" fill="url(#${fid})" stroke="none"/>${comet.svg}</svg>
+      <div class="statsv2-chart-head stf-head" style="left:${(last.x / W * 100).toFixed(1)}%;top:${(last.y / H * 100).toFixed(1)}%;"></div></div>
+    <div class="stf-axis" aria-hidden="true">${labs.map(l=> `<span>${l}</span>`).join('')}</div>`;
+}
+// odcień pastylki serii wg liczby powtórzeń względem najmniejszej w sesji (Figma: 10 / 11 / 12 powt. = jasny / średni / ciemny; równe = wszystkie jasne);
+// gdy powtórzenia są równe, a ciężary różne, rozstrzyga ciężar
+function statsFShades(sets){
+  const pick = f=> sets.map(s=> +s[f] || 0);
+  let v = pick('reps'), lo = Math.min(...v), hi = Math.max(...v);
+  if(hi === lo){ v = pick('weight'); lo = Math.min(...v); hi = Math.max(...v); }
+  return v.map(x=>{ if(hi === lo) return 0; const k = (x - lo) / (hi - lo); return k < .34 ? 0 : k < .67 ? 1 : 2; });
+}
+function statsFPillTxt(name, s){
+  if(statsV2IsTime(name)) return statsFValTxt('time', s.reps);
+  const w = +s.weight || 0;
+  return w > 0 ? `${s.reps} x ${fmtGymWeight(w)} kg` : `${s.reps} ${statsV2Unit(name)}`;
+}
+const STATSF_STAR = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3.2l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6-4.4-4.3 6.1-.9L12 3.2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+// nagłówek strony: w szczególe nazwa ćwiczenia + gwiazdka przypięcia (zamiast awatara), w przeglądzie napis „POSTĘPY” i awatar
+function statsFSyncHeader(detail){
+  const $ = id=> document.getElementById(id);
+  const title = $('statsV2Title'), pin = $('statsV2PinBtn'), acct = $('statsV2AcctBtn');
+  const name = detail ? selectedStatsExerciseV2 : null;
+  if(title){ title.textContent = name || t('stV2Title', 'POSTĘPY'); title.classList.toggle('stf-title', !!name); if(name) title.title = name; else title.removeAttribute('title'); }
+  if(acct) acct.style.display = name ? 'none' : '';
+  if(pin){
+    pin.hidden = !name;
+    if(name){
+      const on = statsV2IsPinned(name), lbl = on ? t('stFPinOff', 'Odepnij ćwiczenie') : t('stFPinOn', 'Przypnij ćwiczenie');
+      pin.classList.toggle('is-on', on); pin.setAttribute('aria-pressed', on ? 'true' : 'false');
+      pin.title = lbl; pin.setAttribute('aria-label', lbl);
+      if(!pin.firstElementChild) pin.innerHTML = STATSF_STAR;
+    }
+  }
+}
+function statsFTogglePin(){
+  const n = selectedStatsExerciseV2;
+  if(!n) return;
+  try{ statsV2TogglePin(n); }catch(e){ console.error('statsFTogglePin', e); }   // przy 6. przypięciu toast z błędem (etap D)
+  statsFSyncHeader(true);
+}
+// zmiana segmentu / zakresu / rozwinięcia listy: render bez animacji wejścia, z zachowaniem przewinięcia
+function statsFRerender(){
+  const root = document.documentElement, y1 = root.scrollTop, y2 = document.body.scrollTop;
+  renderStatsV2(false);
+  root.scrollTop = y1; document.body.scrollTop = y2;
+}
+function statsFSetSeg(k){ if(statsFSeg === k) return; statsFSeg = k; statsFRerender(); }
+function statsFSetRange(m){ if(statsV2Range === m) return; statsV2Range = m; statsFRerender(); }
+function statsFToggleAll(){ statsFAll = !statsFAll; statsFRerender(); }
+function setStatsV2RangeV2(months){ statsFSetRange(months); }   // stara nazwa (wywołania spoza szczegółu)
+
+function statsFChangeRow(i){
+  return `<button type="button" class="stc-card stf-change m-press statsv2-anim-card" style="--i:${i}" onclick="statsV2OpenExList()">
+      <span class="stf-change-t"><strong>${t('stFChange', 'Zmień ćwiczenie')}</strong><span>${t('stFChangeSub', 'Wybierz z listy ćwiczeń z historią')}</span></span>
+      <span class="stf-change-c" aria-hidden="true">${STATSX_ICO.chev}</span></button>`;
+}
 function renderStatsV2Detail(name){
   const rec = statsV2ExerciseRecord(name);
-  if(!rec) return renderStatsV2ExerciseRow(name) + `<div class="statsv2-empty">${t('stV2NoSeries','Brak zapisanych serii dla tego ćwiczenia.')}</div>`;
+  if(!rec){
+    return `<div class="stc-body stf-body"><div class="stc-card stc-empty statsv2-anim-card" style="--i:0"><p class="stc-empty-t">${t('stFEmptyT', 'Brak serii dla tego ćwiczenia')}</p><p class="stc-empty-d">${t('stFEmptyD', 'Zapisz je w treningu, a rekordy i trend pojawią się tutaj.')}</p></div>${statsFChangeRow(1)}</div>`;
+  }
+  if(![3, 6, 12, 0].includes(statsV2Range)) statsV2Range = 6;   // wejścia z Profilu / listy ustawiają 1 (stare 30 dni); szczegół startuje od 6m
+  if(statsFFor !== name){ statsFFor = name; statsFSeg = 'main'; statsFAll = false; }
 
-  const series = statsV2Range === 1 ? statsV2ExerciseDailySeries(name) : statsV2ExerciseMonthlySeries(name, statsV2Range);
-  const pts = series.points;
-  const maxW = Math.max(1, ...pts.map(p=>p.weight));
-  // Bug (Maciej: "AB CRUNCH - mam 5 sesji a progres ciezaru sie nie
-  // rysuje"): a point at (or near) the highest value in the series —
-  // very often the case, since that's exactly when a PR tag shows up —
-  // rendered with its own .statsv2-pr-tag directly on top of it.
-  // First attempt reserved top headroom in the point layout (dPadTop),
-  // but that alone didn't fix it: the tag's own `top` was computed as
-  // `p.y/(dH+16)*100` — mathematically that puts the tag's bottom edge
-  // (it's anchored via translate(-50%,-100%)) at the SAME y as the
-  // point's own center, just expressed as a % of a taller box, not
-  // actually offset above it. Confirmed via getBoundingClientRect: tag
-  // bottom and dot center landed within 0.2px of each other regardless
-  // of dPadTop's value — the dot's top half stayed hidden under the tag.
-  // Real fix: subtract the dot's own radius plus a real gap from p.y
-  // when placing the tag, in the same coordinate space as the point.
-  const dW = 312, dH = 100, dPadTop = 14, dPadBottom = 8;
-  const chartPts = pts.map((p,i)=>({
-    ...p,
-    x: pts.length>1 ? (i/(pts.length-1))*dW : dW/2,
-    y: dPadTop + (1 - p.weight/maxW) * (dH - dPadTop - dPadBottom),
-  }));
-  const detailComet = statsV2CometLine(chartPts, STATSV2_DETAIL_RAMP, 3);
-  const lastKey = chartPts.length ? chartPts[chartPts.length-1].key : null;
-  const prPts = chartPts.filter(p=>series.prMonths.has(p.key)).map(p=>({...p, r: p.key===lastKey?6.5:4}));
-  const dLabels = chartPts.filter((_,i)=> pts.length<=6 || i%Math.ceil(pts.length/6)===0 || i===pts.length-1);
+  const kind = statsFMetric(rec), R = rec.record, bw = rec.isBodyweight;
+  const fmtW = w=> fmtGymWeight(w);
+  const hasProj = kind === 'weight' && !bw && !!rec.prognoza;
 
-  const sessions = statsV2ExerciseSessions(name);
-  const sessionRows = sessions.map(r=>{
-    const dateObj = new Date(r.date+'T00:00:00');
-    const dateShort = `${dateObj.getDate()} ${MONTH_GEN_PL[dateObj.getMonth()].slice(0,3)} ${dateObj.getFullYear()}`;
-    const weekday = GYMV2_DAY_NAMES_PL[dateObj.getDay()];
-    const setsStr = rec.isBodyweight
-      ? r.sets.map(s=>`${s.reps} ${statsV2Unit(name)}`).join(' · ')
-      : r.sets.map(s=>`${s.weight}kg×${s.reps}`).join(' · ');
-    // SIŁA (szacowany max) nie jest rekordem, więc nie ma plakietki; patrz „Prognoza maxa”
-    const tags = [
-      r.prCiezar   ? `<span class="statsv2-log-tag">${t('stV2TagCiezar','ciężar')}</span>` : '',
-      r.prSeria    ? `<span class="statsv2-log-tag">${t('stV2TagSeria','seria')}</span>` : '',
-      r.prObjetosc ? `<span class="statsv2-log-tag">${t('stV2TagObjetosc','objętość')}</span>` : '',
-    ].join('');
-    const flagged = r.prCiezar || r.prSeria || r.prObjetosc;
-    return `
-      <div class="statsv2-log-row${flagged?' is-pr':''}">
-        <div class="statsv2-log-date"><strong>${dateShort}</strong><span>${weekday}</span></div>
-        <div class="statsv2-log-main">
-          <span class="statsv2-log-sets-v">${setsStr}</span>
-          ${tags ? `<span class="statsv2-log-tags">${tags}</span>` : ''}
-        </div>
-        ${flagged?`<span class="ph statsv2-log-trophy">${PH.trophy}</span>`:''}
-      </div>`;
-  }).join('');
-
-  const ranges = [[1,'1m'],[3,'3m'],[6,'6m'],[12,t('stV2Range1y','1r')],[0,t('stV2RangeAll','Cały czas')]];
-
-  // Maciej: "czerwona apla z aktualny rekord - strzalka w gore pokazuje
-  // progres - ta sama w dol pokazuje regres - brak ten sam ciezar". Reuses
-  // the one arrow-up-right SVG for both directions (a vertical flip turns
-  // "up-right" into "down-right") rather than adding a near-duplicate icon.
-  // masa ciała: the trend arrow/delta track best reps, not e1RM/kg.
-  const R = rec.record, isKgRecord = !!R && R.kind === 'weight';
-  const deltaVal = isKgRecord ? rec.deltaKg : rec.deltaReps;
-  const deltaArrow = (rec.firstResult || !deltaVal)
-    ? ''
-    : deltaVal > 0
-      ? `<span class="ph statsv2-record-arrow">${PH['arrow-up-right']}</span>`
-      : `<span class="ph statsv2-record-arrow down">${PH['arrow-up-right']}</span>`;
-  // „Pierwszy zapisany wynik” tylko przy dokładnie jednej sesji; wiele sesji bez danych sprzed tego miesiąca = bez wiersza delty; wzrost 0 = „bez zmian”
-  const deltaText = rec.firstResult
-    ? (rec.sessions === 1 ? t('stV2FirstResult','Pierwszy zapisany wynik') : '')
-    : !deltaVal
-      ? `${t('dashDeltaSame','bez zmian')} ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`
-      : isKgRecord
-        ? `+${deltaVal} kg ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`
-        : `+${deltaVal} ${R && R.kind === 'time' ? 'sek.' : statsV2Unit(name)} ${t('stV2DeltaSinceLastMonth','od zeszłego miesiąca')}`;
-
-  const fmtW = w => (typeof fmtGymWeight === 'function') ? fmtGymWeight(w) : String(w);
-  // Headline = the RECORD (engine): heaviest weight (shown without reps), masa ciała: most reps, timed: longest time.
-  // PROGNOZA MAXA (Epley) is its own row below, always labelled as a forecast, never as a record.
-  const headNum = !R ? `${rec.seria ? rec.seria.reps : 0}<small>${statsV2Unit(name)}</small>`
-    : R.kind === 'weight' ? `${fmtW(R.value)}<small>kg</small>`
-    : R.kind === 'time' ? `${Math.round(R.value)}<small>s</small>`
-    : `${R.value}<small>${statsV2Unit(name)}</small>`;
-  const recRows = [
-    rec.prognoza ? `<div class="statsv2-record-row">${ph('chart-line-up','statsv2-record-ric')}<span class="statsv2-record-rk">${t('stV2ProjectedMax','Prognoza maxa')}</span><span class="statsv2-record-rv">≈ ${Math.round(rec.prognoza.value)} kg <small>${t('stV2ProjFrom','z')} ${fmtW(rec.prognoza.weight)} × ${rec.prognoza.reps}</small></span></div>` : '',
-    rec.objetosc ? `<div class="statsv2-record-row">${ph('medal','statsv2-record-ric')}<span class="statsv2-record-rk">${t('stV2RecVolume','Największa objętość sesji')}</span><span class="statsv2-record-rv">${rec.isBodyweight ? `${Math.round(rec.objetosc.vol)} ${statsV2Unit(name)}` : `${formatDashNum(Math.round(rec.objetosc.vol),0)} kg`}</span></div>` : '',
+  /* --- karta rekordu --- */
+  const label = kind === 'time' ? t('stFLongest', 'NAJDŁUŻSZY CZAS') : kind === 'reps' ? t('stFMostReps', 'NAJWIĘCEJ POWTÓRZEŃ') : t('stFHeavy', 'NAJCIĘŻSZY CIĘŻAR');
+  const head = R ? statsFVal(kind, R.value) : statsFVal('reps', rec.seria ? rec.seria.reps : 0);
+  const growth = kind === 'weight' ? rec.deltaKg : rec.deltaReps;   // o ile rekord urósł od końca zeszłego miesiąca
+  let deltaTxt = '';
+  if(!rec.firstResult){   // brak wyniku sprzed tego miesiąca = brak punktu odniesienia = brak delty
+    const since = t('stFSince', 'od zeszłego miesiąca');
+    deltaTxt = growth > 0 ? `+${statsFValTxt(kind, growth)} ${since}` : `${t('dashDeltaSame', 'bez zmian')} ${since}`;
+  }
+  const arrow = growth > 0 && !rec.firstResult ? `<span class="ph stf-rec-ar">${PH['arrow-up-right']}</span>` : '';
+  const volTxt = rec.objetosc ? (bw ? statsFValTxt(statsV2IsTime(name) ? 'time' : 'reps', rec.objetosc.vol) : `${formatDashNum(Math.round(rec.objetosc.vol), 0)} kg`) : '';
+  const rows = [
+    hasProj ? `<div class="stf-rec-r"><span>${t('stV2ProjectedMax', 'Prognoza maxa')}</span><b>≈ ${fmtW(Math.round(rec.prognoza.value))} kg</b></div>` : '',
+    rec.objetosc ? `<div class="stf-rec-r"><span>${t('stV2RecVolume', 'Największa objętość sesji')}</span><b>${volTxt}</b></div>` : '',
   ].join('');
-  const seriaFoot = rec.seria
-    ? `${t('stV2RecLongestSet','Najdłuższa seria')}: <strong>${rec.seria.reps} ${statsV2Unit(name)}</strong>${rec.seria.weight>0?` × ${fmtW(rec.seria.weight)} kg`:''} · ${t('stV2TotalSets','Serie ogółem')} ${rec.totalSets}`
-    : `${t('stV2TotalSets','Serie ogółem')} ${rec.totalSets}`;
+  const recCard = `
+      <section class="stc-sec stf-sec"><p class="stc-lbl">${t('stFRecord', 'REKORD')}</p>
+      <div class="stf-rec statsv2-anim-card" style="--i:0">
+        <p class="stf-rec-k">${label}</p>
+        <div class="stf-rec-row">${ph('trophy', 'stf-rec-tr')}<span class="stf-rec-num">${head.n}<small>${head.u}</small></span>${arrow}</div>
+        ${deltaTxt ? `<p class="stf-rec-d">${deltaTxt}</p>` : ''}
+        ${rows ? `<div class="stf-rec-sep"></div>${rows}` : ''}
+      </div></section>`;
 
-  return `
-    ${renderStatsV2ExerciseRow(name)}
-    <div class="statsv2-cards" style="margin-top:24px;">
-      <div class="statsv2-record-card statsv2-anim-card" style="--i:0">
-        <p class="statsv2-record-eyebrow">${t('stV2CurrentRecord', `Aktualny rekord - ${escHtml(name)}`, escHtml(name))}</p>
-        <div class="statsv2-record-num-row">
-          ${ph('trophy','statsv2-record-trophy')}
-          <span class="statsv2-record-num">${headNum}</span>
-          ${deltaArrow}
-        </div>
-        ${deltaText ? `<p class="statsv2-record-delta">${deltaText}</p>` : ''}
-        <div class="statsv2-record-sep"></div>
-        ${recRows}
-        <p class="statsv2-record-foot">${seriaFoot}</p>
-      </div>
+  /* --- karta wykresu (od trzeciego treningu) --- */
+  const sessions = statsV2ExerciseSessions(name).filter(r=> dashValidIso(r.date));
+  let chartCard;
+  if(sessions.length < 3){
+    chartCard = `<div class="stc-card stf-trend statsv2-anim-card" style="--i:1"><p class="stc-note">${t('stFTrendLater', 'Trend narysuje się od trzeciego treningu.')}</p></div>`;
+  } else {
+    if(statsFSeg === 'proj' && !hasProj) statsFSeg = 'main';
+    const mainLbl = kind === 'time' ? t('stFSegTime', 'Czas') : kind === 'reps' ? t('stFSegReps', 'Powtórzenia') : t('stFSegMain', 'Ciężar');
+    const segs = [['main', mainLbl]].concat(hasProj ? [['proj', t('stFSegProj', 'Prognoza')]] : [], [['vol', t('stFSegVol', 'Objętość')]]);
+    const asc = statsFSessionsAsc(name, kind === 'weight' ? 'weight' : 'reps', bw);
+    const pts = statsFSeries(asc, statsFSeg, statsV2Range);
+    chartCard = `
+      <div class="stc-card stf-chartcard statsv2-detail-chart-card statsv2-anim-card" style="--i:1">
+        <div class="stc-seg" role="radiogroup" aria-label="${escHtml(t('stFSegAria', 'Wskaźnik wykresu'))}">${segs.map(([k, l])=> `<button type="button" class="stc-seg-b" role="radio" aria-checked="${statsFSeg === k}" onclick="statsFSetSeg('${k}')">${l}</button>`).join('')}</div>
+        <div class="stc-chips stf-chips" role="radiogroup" aria-label="${escHtml(t('stFRangeAria', 'Zakres wykresu'))}">${STATSF_RANGES.map(([m, k, pl])=> `<button type="button" class="stc-chip" role="radio" aria-checked="${statsV2Range === m}" onclick="statsFSetRange(${m})">${t(k, pl)}</button>`).join('')}</div>
+        ${statsFChartHtml(pts)}
+      </div>`;
+  }
 
-      <div class="statsv2-detail-chart-card statsv2-anim-card" style="--i:1">
-        <p class="statsv2-detail-chart-eyebrow">${statsV2IsTime(name) ? t('stV2TimeProgress','Progres czasu') : rec.isBodyweight ? t('stV2RepsProgress','Progres powtórzeń') : t('stV2WeightProgress','Progres ciężaru')}</p>
-        <div class="statsv2-range-row">
-          ${ranges.map(([m,label],i)=>`<button type="button" class="statsv2-range-chip${i===ranges.length-1?' wide':''}${statsV2Range===m?' active':''}" onclick="setStatsV2RangeV2(${m})">${label}</button>`).join('')}
-        </div>
-        <div class="statsv2-detail-wave">
-          ${prPts.map(p=>`<div class="statsv2-pr-tag" style="left:${(p.x/dW*100).toFixed(1)}%;top:${(Math.max(0,p.y-p.r-6)/(dH+16)*100).toFixed(1)}%;">${t('stV2PrTag', v=>`Rekord ${v}`, fmtGymWeight(p.weight) + ' ' + (rec.isBodyweight ? statsV2Unit(name) : 'kg'))}</div>`).join('')}
-          <svg viewBox="0 0 ${dW} ${dH+16}" preserveAspectRatio="none">${detailComet.svg}</svg>
-          ${chartPts.map((p,i)=>{
-            const L = (p.x/dW*100).toFixed(1), T = (p.y/(dH+16)*100).toFixed(1);
-            // latest point = the glowing comet head
-            if(i===chartPts.length-1) return `<div class="statsv2-chart-head" style="left:${L}%;top:${T}%;"></div>`;
-            // a dot on every plotted point, with a 2 pt card-coloured ring
-            // that lifts it off the gradient line (past PRs keep the dark fill)
-            if(series.prMonths.has(p.key)) return `<div class="statsv2-chart-dot" style="width:10px;height:10px;background:#221b17;border:2px solid #ff8a3d;left:${L}%;top:${T}%;"></div>`;
-            return `<div class="statsv2-chart-dot" style="width:10px;height:10px;background:#FFBB00;border:2px solid var(--m-card);left:${L}%;top:${T}%;"></div>`;
-          }).join('')}
-        </div>
-        <div class="statsv2-detail-wave-labels">${dLabels.map(p=> p.month ? `<span>${MONTH_ABBR_PL[p.month-1]}</span>` : `<span>${new Date(p.date+'T00:00:00').getDate()}.${String(new Date(p.date+'T00:00:00').getMonth()+1).padStart(2,'0')}</span>`).join('')}</div>
-      </div>
+  /* --- historia serii --- */
+  const shown = statsFAll ? sessions : sessions.slice(0, STATSF_SESSIONS_SHOWN);
+  const recFlag = r=> kind === 'weight' ? r.prCiezar : r.prSeria;   // sesja, w której padł rekord tej metryki
+  const sessHtml = shown.map(r=>{
+    const wd = GYMV2_DAY_NAMES_PL[new Date(r.date + 'T00:00:00').getDay()] || '';
+    const sh = statsFShades(r.sets);
+    const pills = r.sets.map((s, i)=> `<span class="stf-pill stf-p${sh[i]}">${statsFPillTxt(name, s)}</span>`).join('');
+    return `<div class="stf-sess"><div class="stf-sess-top"><div class="stf-sess-d"><strong>${stv2Dm(r.date, true)}</strong><span>${wd}</span></div>
+        ${recFlag(r) ? `<div class="stf-sess-max"><span class="stf-max">MAX</span>${ph('trophy', 'stf-trophy')}</div>` : ''}</div>
+        <div class="stf-pills">${pills}</div></div>`;
+  }).join('');
+  const more = sessions.length > STATSF_SESSIONS_SHOWN
+    ? `<button type="button" class="stf-more m-press" onclick="statsFToggleAll()">${statsFAll ? t('stFShowLess', 'Pokaż mniej') : t('stFShowAll', `Pokaż wszystkie (${sessions.length})`, sessions.length)}</button>` : '';
+  const histCard = `
+      <section class="stc-sec stf-sec"><p class="stc-lbl">${t('stFHistory', 'HISTORIA SERII')}</p>
+      <div class="stc-card stf-hist statsv2-anim-card" style="--i:2"><div class="stf-sess-list">${sessHtml || `<p class="stc-note">${t('stV2NoSessions', 'Brak sesji.')}</p>`}</div>${more}</div></section>`;
 
-      <div class="statsv2-log-card statsv2-anim-card" style="--i:2">
-        <p class="statsv2-log-eyebrow">${t('stV2SeriesHistory','Historia serii')}</p>
-        ${sessionRows || `<div class="statsv2-empty">${t('stV2NoSessions','Brak sesji.')}</div>`}
-      </div>
-    </div>`;
+  return `<div class="stc-body stf-body">${recCard}${chartCard}${histCard}${statsFChangeRow(3)}</div>`;
 }
 
 // Maciej: "wykresy moglyby sie rysowac" — draws each wave-chart line in
@@ -23149,6 +23256,7 @@ function renderStatsV2Core(animate, drawLines){
   const backLabel = selectedStatsExerciseV2 ? t('statsV2BackToOverview','Statystyki główne') : t('navBack','Wstecz');
   backBtn.title = backLabel;
   backBtn.setAttribute('aria-label', backLabel);
+  statsFSyncHeader(!!selectedStatsExerciseV2);   // etap F: nazwa ćwiczenia + gwiazdka w szczególe, „POSTĘPY” + awatar w przeglądzie
   const custBtn = document.getElementById('statsV2CustBtn');   // ikona Dostosuj: tylko gdy istnieje arkusz (etap D)
   if(custBtn){ custBtn.hidden = typeof statsV2OpenCustomize !== 'function' || !!selectedStatsExerciseV2; const cl = t('stV2CustAria', 'Dostosuj ekran'); custBtn.title = cl; custBtn.setAttribute('aria-label', cl); }
   // Maciej: "po kliknieciu w cwiczenei skacze dziwnie - niech aktywne
@@ -24075,10 +24183,6 @@ function statsV2InitCarousel(animate){
     statsV2SlidePrime(cur);
     try{ statsV2AnimateSlide(cur, stgLand(cur)); }catch(e){ stgRescue(cur); }   // kafel z wykresem najpierw ląduje, wykres po nim
   }
-}
-function setStatsV2RangeV2(months){
-  statsV2Range = months;
-  renderStatsV2(false);
 }
 
 /* ============================================================
