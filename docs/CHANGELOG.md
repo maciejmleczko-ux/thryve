@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.86.2 (2026-10-23)
+- **Aktualna wersja:** 4.86.3 (2026-10-23)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.86.3 · PATCH · 2026-10-23
+
+- **Naprawa Historii (szczegół treningu):** serie (pastylki z ciężarem × powtórzenia) były niewidoczne: wersja 4.84.7 usunęła jako „martwe” klasy `.histv2-p0`, `.histv2-p1`, `.histv2-p2`, które JS składa w locie (`'histv2-p' + indeks` w `histExBlockV2`). Przywrócone, z komentarzem w CSS. Sprawdzone: 19 pastylek i 6 pucharów rysuje się poprawnie, 0 błędów w konsoli.
+- Dlaczego test z 4.84.7 tego nie wykrył: porównanie stylów nie obejmowało szczegółu treningu, a skaner „martwych klas” chronił tylko przedrostki kończące się myślnikiem. Przeskanowane ponownie wszystkie 378 usuniętych reguł pod kątem klas składanych z dowolnego przedrostka: to były jedyne trzy.
+
+**Commity (0):**
+
 
 ### 4.86.2 · PATCH · 2026-10-23
 
