@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.86.3 (2026-10-23)
+- **Aktualna wersja:** 4.86.4 (2026-10-23)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.86.4 · PATCH · 2026-10-23
+
+**Zakres techniczny:** wykres w szczególe ćwiczenia (Postępy) ma oś wartości z lewej strony: najwyższa, środkowa (gdy różni się po sformatowaniu) i najniższa wartość zakresu, w skali linii. Format wg segmentu: ciężar i prognoza w kg, objętość w kg lub powtórzeniach, powtórzenia, czas jako m:ss. Kropka na każdej sesji (`.stf-dot`, istniejący mechanizm `statsv2-chart-dot`: pojawiają się od lewej za rysującą się linią); przy gęstej serii (> 24 punkty) mniejsze, bez obwódki. Nowe klasy `.stf-plot`, `.stf-plotmain`, `.stf-yax`, `.stf-dot`; `statsFChartHtml(pts, yfmt)`.
+
+**Commity (1):**
+
+- `(ten commit)` 2026-10-23 — oś wartości z lewej strony i kropki na sesjach wykresu ćwiczenia
+
+
 
 ### 4.86.3 · PATCH · 2026-10-23
 
