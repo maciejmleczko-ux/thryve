@@ -412,6 +412,7 @@ html.gymfin-open .bottom-nav{z-index:9600;}   /* the real nav stays on top of th
 .gymfin-record-sub{margin:0;line-height:1.15;font-size:var(--m-fs-xs);font-weight:400;color:rgba(52,57,65,.6);}
 
 /* summary tiles: 6-col grid, JS sets the column spans so a missing tile never leaves a hole */
+.gymfin-bwnote{margin:0;text-align:center;font-size:var(--m-fs-2xs);line-height:1.4;color:var(--m-ink);opacity:.6;}
 .gymfin-stats{width:100%;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--m-gap-card);}
 .gymfin-stat{grid-column:span 2;min-width:0;box-sizing:border-box;border:0;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;text-align:left;font-family:inherit;color:var(--m-white);transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymfin-stat--wide{grid-column:span 3;min-height:78px;gap:8px;}   /* Figma: 78px with space-between; min-height + 8px gap so the 11px caption (Figma 8px) never squeezes the label */
@@ -4160,6 +4161,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
       </div>
 
+      <p class="gymfin-bwnote" id="gymFinBwNote" hidden></p>
+
       <div class="gymfin-timed" id="gymFinTimed" hidden><p class="gymfin-timed-k" data-i18n="gymFinTimedBlock">Na czas</p><div id="gymFinTimedList"></div></div>
    </div>
   </div>
@@ -6035,6 +6038,7 @@ const T_EN = {
   tuesdayLabel: 'Tuesday:',
   saturdayLabel: 'Saturday:',
   repsUnit: 'reps',
+  bwNote: txt => `Calculated with body weight ${txt}`,
   loadLabelExtra: 'Extra weight', loadLabelAssist: 'Assistance', loadHint: 'Using a band or machine? Slide left.', loadA11y: 'Extra weight or assistance',
   timeLabel: 'Time', timeLabelSide: 'Time per side', perSideShort: '/side',
   tmStart: 'Start', tmPause: 'Pause', tmResume: 'Resume', tmEnd: 'Finish', tmSkip: 'Skip', tmResetA11y: 'Discard and start over', tmDiscarded: 'Attempt discarded',
@@ -7934,7 +7938,7 @@ function onbCustApply(){
    weight effective on the day of each workout. No backend, no login. */
 const LS_WEIGHT_LOG = "fitlog_weight_log_v1";   // [{kg:Number, date:"YYYY-MM-DD"}] ascending
 const LS_BODY_DATA  = "fitlog_body_data_v1";    // {heightCm, age, sex:"f"|"m"}
-const KCAL_MODEL_VERSION = 2;
+const KCAL_MODEL_VERSION = 3;   // 3: masa własna liczona współczynnikiem ćwiczenia + extraKg (BW_FACTOR)
 function loadWeightLog(){ try{ const a = JSON.parse(localStorage.getItem(LS_WEIGHT_LOG)); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
 function saveWeightLog(a){ localStorage.setItem(LS_WEIGHT_LOG, JSON.stringify(a)); scheduleCloudPush(); }
 function loadBodyData(){ try{ return JSON.parse(localStorage.getItem(LS_BODY_DATA)) || {}; }catch(e){ return {}; } }
@@ -7975,10 +7979,59 @@ function workoutTonnage(w, bodyweightKg){
   let t = 0;
   w.exercises.forEach(e=> e.sets.forEach(s=>{
     if(!(s.reps > 0)) return;
-    if(s.weight > 0) t += s.weight * s.reps;
-    else if(bodyweightKg) t += s.reps * bodyweightKg * 0.5;   // pull-ups / dips / push-ups ~ half bodyweight
+    if(s.weight > 0){ t += s.weight * s.reps; return; }
+    const f = bwFactorFor(e.name);
+    if(f != null) t += s.reps * Math.max(0, (bodyweightKg ? bodyweightKg * f : 0) + (+s.extraKg || 0));   // masa własna: masa × współczynnik ćwiczenia + dodatek / wspomaganie
+    else if(bodyweightKg) t += s.reps * bodyweightKg * 0.5;   // ćwiczenie spoza biblioteki z serią bez ciężaru: jak dawniej, pół masy ciała
   }));
   return t;
+}
+/* ---------- masa własna: ile masy ciała podnosi ćwiczenie ----------
+   Współczynnik = jaka część masy ciała pracuje przy ćwiczeniu (wartości przybliżone z popularnej biomechaniki: pompka ok. 64%,
+   podciągnięcie ok. 100%). Brak ćwiczenia w tabeli = BW_FACTOR_DEFAULT (jak dawna stała 0,5). Ćwiczenia czasowe, rozgrzewka i rozciąganie
+   nie mają współczynnika (null), bo nie liczą się w objętości. Efektywny ciężar serii = masa × współczynnik + extraKg (extraKg < 0 = wspomaganie). */
+const BW_FACTOR_DEFAULT = 0.5;
+const BW_FACTOR = {
+  'Pull-up':1, 'Chin-up':1, 'Handstand Push-up':0.9, 'Pike Push-up':0.7, 'Push-up':0.64, 'Diamond Push-up':0.64, 'Inverted Row':0.5,
+  'Pistol Squat':1, 'Bulgarian Split Squat':0.8, 'Lunge':0.8, 'Bodyweight Squat':0.7, 'Sissy Squat':0.7, 'Glute Bridge':0.5,
+  'Calf Raise (Bodyweight)':1, 'Nordic Curl':0.6, 'Burpees':0.8, 'Superman':0.35, 'Bird Dog':0.3,
+  'Hanging Leg Raise':0.4, "Captain's Chair Raise":0.4, 'Lying Leg Raise':0.35, 'Crunch':0.3, 'Russian Twist':0.3, 'Ab Wheel Rollout':0.5,
+};
+function bwFactorFor(name){
+  const lib = BUILTIN_EXERCISES_BY_NAME.get(name) || customExercises.find(e=> e.name === name);
+  if(!lib || lib.equipment !== 'masa ciała' || lib.mode === 'time' || LEGACY_TIME_EX.has(name)) return null;
+  if(lib.group === 'Rozgrzewka' || lib.group === 'Rozciąganie') return null;
+  const f = BW_FACTOR[name];
+  return f === undefined ? BW_FACTOR_DEFAULT : f;
+}
+// efektywny ciężar na powtórzenie (kg): zapisany ciężar, a przy masie własnej masa ciała × współczynnik + extraKg. bodyKg domyślnie = aktualna waga
+function setEffKg(name, s, bodyKg){
+  const w = +s.weight || 0;
+  if(w > 0) return w;
+  const f = bwFactorFor(name);
+  if(f == null) return 0;
+  const bw = bodyKg === undefined ? currentWeightKg() : bodyKg;
+  return Math.max(0, (bw ? bw * f : 0) + (+s.extraKg || 0));
+}
+function setVolumeKg(name, s, bodyKg){ return setEffKg(name, s, bodyKg) * (+s.reps || 0); }
+function workoutVolumeKg(w, bodyKg){
+  let v = 0;
+  (w.exercises || []).forEach(e=> exSetsView(e).forEach(x=>{ v += setVolumeKg(e.name, x, bodyKg); }));
+  return v;
+}
+// czy objętość treningu jest liczona z masą ciała (jest ćwiczenie z masą własną i znamy wagę): do linijki pod kaflami
+function workoutBwNote(w){
+  const kg = currentWeightKg();
+  if(!kg) return null;
+  const uses = (w.exercises || []).some(e=> bwFactorFor(e.name) != null && exSetsView(e).some(x=> !(+x.weight > 0) && x.reps > 0));
+  if(!uses) return null;
+  const txt = `${fmtW1(kg)} ${wUnit()}`;
+  return t('bwNote', `Liczone z masą ciała ${txt}`, txt);
+}
+// „Vs poprzedni": trening wyłącznie z masą własną porównuje objętość (z masą ciała i dodatkiem), a gdy brak wagi (objętość 0) same powtórzenia
+function vsPrevMetric(isBw, cur, prev){
+  const useVol = !isBw || (cur.volume > 0 && prev.volume > 0);
+  return useVol ? { c: cur.volume, p: prev.volume } : { c: cur.reps, p: prev.reps };
 }
 
 /* ---------- personal calorie factor ----------
@@ -10181,7 +10234,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.94.0";
+const APP_VERSION = "4.95.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -15765,6 +15818,9 @@ function showGymFinishV2(summary, onDone){
     recEl.hidden = true;
   }
 
+  const bwNoteEl = document.getElementById('gymFinBwNote');
+  if(bwNoteEl){ bwNoteEl.textContent = summary.bwNote || ''; bwNoteEl.hidden = !summary.bwNote; }
+
   // "Vs poprzedni": volume (reps for masa ciała) against the previous workout
   const vsEl = document.getElementById('gymFinVs');
   if(summary.vsPrev != null){
@@ -16226,7 +16282,7 @@ function gymFinRecordFrom(rec){
 // total volume (kg) and reps of one saved workout; strength sets only, same sums saveWorkoutV2() builds for the current session
 function workoutSumStats(w){
   let volume = 0, reps = 0;
-  w.exercises.forEach(ex=> exSetsView(ex).forEach(x=>{ volume += (x.weight || 0) * (x.reps || 0); reps += x.reps || 0; }));
+  w.exercises.forEach(ex=> exSetsView(ex).forEach(x=>{ volume += setVolumeKg(ex.name, x); reps += x.reps || 0; }));
   return { volume, reps };
 }
 function saveWorkoutV2(){
@@ -16242,7 +16298,7 @@ function saveWorkoutV2(){
   const isBw = workoutIsBodyweightOnly(w);
   let volume = 0, repsTotal = 0;
   w.exercises.forEach(ex=> exSetsView(ex).forEach(st=>{
-    volume += st.weight * st.reps;
+    volume += setVolumeKg(ex.name, st);
     repsTotal += st.reps || 0;
   }));
   const exCount = w.exercises.filter(ex=> ex.sets.some(s=> s.weight > 0 || s.reps > 0 || s.durationSec > 0)).length;
@@ -16257,9 +16313,10 @@ function saveWorkoutV2(){
   saveWorkouts(workouts);
 
   // --- "Vs poprzedni": volume (reps for a masa ciała workout) against the previous workout, in % ---
-  const prevMetric = prevStats ? (isBw ? prevStats.reps : prevStats.volume) : 0;
+  const vm = prevStats ? vsPrevMetric(isBw, { volume, reps: repsTotal }, prevStats) : null;
+  const prevMetric = vm ? vm.p : 0;
   const daysSincePrev = prevWorkout ? Math.round((new Date(w.date + 'T00:00:00') - new Date(prevWorkout.date + 'T00:00:00')) / 86400000) : null;
-  const vsPrev = (prevMetric > 0 && !workoutIsTimedOnly(w)) ? Math.round(((isBw ? repsTotal : volume) - prevMetric) / prevMetric * 100) : null;
+  const vsPrev = (prevMetric > 0 && !workoutIsTimedOnly(w)) ? Math.round((vm.c - prevMetric) / prevMetric * 100) : null;
 
   const record = gymFinRecordFrom(workoutRecord(w));
   const newBadges = badgesNewSince(badgesBefore);
@@ -16268,6 +16325,7 @@ function saveWorkoutV2(){
     durationMin: w.durationMin,
     volume: Math.round(isBw ? repsTotal : volume),
     isBodyweight: isBw,
+    bwNote: workoutBwNote(w),
     exercises: exCount,
     timedRows: timedSummaryRows(w),
     timedOnly: workoutIsTimedOnly(w),
@@ -19156,7 +19214,7 @@ function dashboardAllSets(){
         // masa ciała sets have weight:0 (no kg ever logged) — used to be
         // dropped here entirely by the weight>0 check, so a calisthenics
         // exercise never reached any stat, even the reps-based ones.
-        if(s.reps>0) out.push({date:w.date, name:ex.name, weight:s.weight||0, reps:s.reps});
+        if(s.reps>0) out.push({date:w.date, name:ex.name, weight:s.weight||0, reps:s.reps, extraKg:+s.extraKg||0, vol:setVolumeKg(ex.name, s)});   // vol = objętość z masą ciała (weight zostaje czyste: e1RM i rekordy ciężaru)
       });
     });
   });
@@ -19242,7 +19300,7 @@ function dashWeekDayMap(){
 // liczby co kafle „Ten tydzień” w renderDashboard() (sets z dashboardAllSets(), minuty = durationMin + czas biegu)
 function dashWindowStats(from, to, sets){
   let kg = 0, reps = 0, sessions = 0, min = 0;
-  sets.forEach(s=>{ if(s.date>=from && s.date<=to){ kg += s.weight*s.reps; reps += s.reps; } });
+  sets.forEach(s=>{ if(s.date>=from && s.date<=to){ kg += s.vol; reps += s.reps; } });
   workouts.forEach(w=>{ if(w.date>=from && w.date<=to){ sessions++; min += w.durationMin||0; } });
   runs.forEach(r=>{ if(r.date>=from && r.date<=to){ sessions++; min += r.time||0; } });
   return { kg: Math.round(kg), reps, sessions, min: Math.round(min) };
@@ -19551,13 +19609,13 @@ function dashBadges(plan, todayIso){
   const sets = dashboardAllSets();
   const chrono = workouts.map((w,i)=>({w,i})).sort((a,b)=> a.w.date < b.w.date ? -1 : a.w.date > b.w.date ? 1 : a.i-b.i).map(x=>x.w);
   const weekDays = dashWeekDayMap(), weekKg = new Map();
-  sets.forEach(s=>{ const ws = dashWeekStartIso(s.date); weekKg.set(ws, (weekKg.get(ws)||0) + s.weight*s.reps); });
+  sets.forEach(s=>{ const ws = dashWeekStartIso(s.date); weekKg.set(ws, (weekKg.get(ws)||0) + s.vol); });
   const c = {
     chrono, events: dashRecordEvents(), weekDays, weekKg,
     weekStarts: [...weekDays.keys()].sort(),
     curWeekStart: dashWeekStartIso(todayIso),
     required: plan ? planActiveDays(plan).length : 0,
-    totalKg: sets.reduce((sum,s)=>sum+s.weight*s.reps, 0),
+    totalKg: sets.reduce((sum,s)=>sum+s.vol, 0),
   };
   const all = DASH_BADGES.map(b=>{
     const r = b.check(c);
@@ -20360,7 +20418,7 @@ function renderDashboardInner(animate){
     // następny cel (podwójna progresja) i lista highlights. Model dostaje gotowe wnioski i wybiera z nich
     // jedną historię (patrz ai-proxy: last_workout_summary).
     const setsOf = ex => exSetsView(ex).filter(s=>s.reps>0);
-    const volOf = w => w.exercises.reduce((sum,ex)=> sum + setsOf(ex).reduce((s2,s)=> s2 + (s.weight||0)*s.reps, 0), 0);
+    const volOf = w => w.exercises.reduce((sum,ex)=> sum + setsOf(ex).reduce((s2,s)=> s2 + setVolumeKg(ex.name, s), 0), 0);
     const e1rmOfSets = sets => sets.reduce((m,s)=> statsV2E1rmEligible(s) ? Math.max(m, statsV2Epley(s.weight, s.reps)) : m, 0);
     const pct = (a,b) => b > 0 ? Math.round((a/b - 1) * 100) : null;
     const round1 = x => Math.round(x*10)/10;
@@ -20912,7 +20970,7 @@ function updateGymV2RepeatBtn(){
   const last = lastSavedWorkout();
   if(!last){ btn.hidden = true; return; }
   const n = last.exercises.length;
-  const vol = Math.round(last.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight * st.reps, 0), 0));
+  const vol = Math.round(workoutVolumeKg(last));
   tEl.textContent = t('repeatLastWorkout','Powtórz ostatni trening');
   sEl.textContent = `${fmtDateHuman(last.date)} · ${planExCountText(n)}` + (vol > 0 ? ` · ${formatDashNum(kgToDisp(vol), 0)} ${wUnit()}` : '');
   btn.hidden = false;
@@ -21656,7 +21714,7 @@ function renderHistMonthSummaryV2(animCls){
   if(!monthWorkouts.length && !monthRuns.length){
     return `<div class="histv2-empty">${t('histEmptyMonth', `Brak zapisanej aktywności — ${MONTH_NAMES[month]} ${year}`, `${MONTH_NAMES[month]} ${year}`)}</div>`;
   }
-  const totalVol = monthWorkouts.reduce((s,w)=> s + w.exercises.reduce((s2,e)=> s2 + e.sets.reduce((s3,st)=> s3 + st.weight*st.reps, 0), 0), 0);
+  const totalVol = monthWorkouts.reduce((s,w)=> s + workoutVolumeKg(w), 0);
   const totalKm = monthRuns.reduce((s,r)=> s + (r.distance||0), 0);
   const titleParts = [];
   if(monthWorkouts.length) titleParts.push(t('dashSessions', `${monthWorkouts.length} ${plTreningWord(monthWorkouts.length)}`, monthWorkouts.length));
@@ -21742,7 +21800,7 @@ function histFmtDurV2(min){
 }
 function histFmtTonsV2(kg){ return isImp() ? `${formatDashNum(kgToDisp(kg), 0)} lb` : (kg/1000).toFixed(1).replace('.',',') + ' t'; }
 function histWorkoutStatsV2(w){
-  const vol = w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0);
+  const vol = workoutVolumeKg(w);
   const sets = w.exercises.reduce((s,e)=> s + e.sets.length, 0);
   return { vol, sets };
 }
@@ -21901,8 +21959,9 @@ function histOpenHtmlV2(w){
   const doneCount = w.exercises.filter(e=> e.sets.some(s=> s.weight > 0 || s.reps > 0 || s.durationSec > 0)).length || w.exercises.length;
   const rec = gymFinRecordFrom(workoutRecord(w));
   const prev = histPrevWorkoutV2(w);
-  const prevMetric = prev ? (isBw ? workoutSumStats(prev).reps : workoutSumStats(prev).volume) : 0;
-  const vsPrev = (prevMetric > 0 && !timed) ? Math.round(((isBw ? sum.reps : sum.volume) - prevMetric) / prevMetric * 100) : null;
+  const vm = prev ? vsPrevMetric(isBw, sum, workoutSumStats(prev)) : null;
+  const prevMetric = vm ? vm.p : 0;
+  const vsPrev = (prevMetric > 0 && !timed) ? Math.round((vm.c - prevMetric) / prevMetric * 100) : null;
   const kcal = workoutKcalShown(w);
   const volLabel = timed ? t('gymFinTotalTime', 'Łączny czas') : isBw ? t('gymFinReps', 'Powtórzenia') : t('gymFinVolume', 'Objętość');
   const volVal = timed ? fmtDur(workoutTimedTotalSec(w)) : isBw ? String(Math.round(sum.reps)) : `${formatDashNum(Math.round(kgToDisp(sum.volume)),0)}<small>${wUnit()}</small>`;
@@ -21943,6 +22002,7 @@ function histOpenHtmlV2(w){
           <div><p class="gymfin-stat-v"><span class="ph" style="${up ? '' : 'transform:rotate(90deg)'}">${PH['arrow-up-right']}</span><span>${up ? '+' : '−'}${Math.abs(vsPrev)}%</span></p><p class="gymfin-stat-cap">${t('gymFinVsCap', 'względem ostatniego treningu')}</p></div>
         </div>` : ''}
       </div>
+      ${workoutBwNote(w) ? `<p class="gymfin-bwnote">${escHtml(workoutBwNote(w))}</p>` : ''}
       <p class="histv2-open-label">${t('gymFinExercises', 'Ćwiczenia')}</p>
       <div class="histv2-open-ex">
         ${w.exercises.map(e=> histExBlockV2(w, e)).join('')}
@@ -22086,7 +22146,7 @@ function statsV2MonthlyVolumeMap(){
   const map = new Map();
   dashboardAllSets().forEach(s=>{
     const key = statsV2MonthKey(s.date);
-    map.set(key, (map.get(key)||0) + s.weight*s.reps);
+    map.set(key, (map.get(key)||0) + s.vol);
   });
   return map;
 }
@@ -25139,7 +25199,7 @@ function scTextColor(name, a){
 }
 /* Everything a card shows, read from one saved workout. `record` is the same one the Gratulacje screen shows. */
 function scCardData(w){
-  const totalVol = Math.round(w.exercises.reduce((s,e)=> s + e.sets.reduce((s2,st)=> s2 + st.weight*st.reps, 0), 0));
+  const totalVol = Math.round(workoutVolumeKg(w));
   const totalReps = w.exercises.reduce((s,e)=> s + exSetsView(e).reduce((s2,st)=> s2 + st.reps, 0), 0);
   const setCount = w.exercises.reduce((s,e)=> s + exSetsView(e).length, 0);
   const exCount = w.exercises.filter(ex=> ex.sets.some(s=> s.weight > 0 || s.reps > 0 || s.durationSec > 0)).length || w.exercises.length;
