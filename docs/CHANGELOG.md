@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.90.0 (2026-10-25)
+- **Aktualna wersja:** 4.91.0 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.91.0 · MINOR · 2026-10-25
+
+Baner „Podsumowanie miesiąca” w Historii. Pod paskiem miesiąca (treningi / czas / objętość, `renderHistSumV2`) pojawia się karta w stylu `.dash-coach` (`msBannerHtml()`), gdy w kalendarzu nie ma wybranego dnia, miesiąc jest zakończony i ma min. 4 treningi. Tap otwiera `#monthSumSheet` (`msBannerTap()`): z cache od razu, bez cache woła AI (w banerze „Piszę podsumowanie…”, przy błędzie toast). Dzięki temu okno można otworzyć ponownie po zamknięciu i dla starszych miesięcy. Po wygenerowaniu baner pokazuje nagłówek AI. Cache `fitlog_month_summary_v1` jest teraz mapą miesięcy (max 12). Brak zgody na AI: tap otwiera okno zgody.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.91.0: baner podsumowania miesiąca w Historii
 
 ### 4.90.0 · MINOR · 2026-10-25
 

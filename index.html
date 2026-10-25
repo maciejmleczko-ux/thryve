@@ -3861,6 +3861,8 @@ button.stv2-bt{cursor:pointer;}
 .ms-row{display:flex;justify-content:space-between;gap:12px;padding:4px 0;font-size:var(--m-fs-base);color:var(--m-ink);}
 .ms-row-v{font-weight:500;color:var(--m-mint-ink);}
 .ms-note{color:var(--m-muted-text);}
+.ms-banner{margin-top:var(--m-gap-card);}
+.ms-banner:disabled{opacity:.7;}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -10115,7 +10117,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.90.0";
+const APP_VERSION = "4.91.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -20461,7 +20463,7 @@ async function dashAiFetch(job){
    Wymaga konta w chmurze + zgody na AI, minimum MS_MIN_WORKOUTS treningów w miesiącu. Cache: jeden miesiąc = jedno
    wywołanie (klucz userId + ym + MS_VERSION). Test w konsoli: msOpen('2026-10').
    ============================================================ */
-const LS_MS_CACHE = 'fitlog_month_summary_v1';   // {userId, ym, version, model, ai}
+const LS_MS_CACHE = 'fitlog_month_summary_v1';   // {userId, version, months:{ 'YYYY-MM': {model, ai} }}, max 12 miesięcy
 const LS_MS_SEEN = 'fitlog_month_summary_seen_v1'; // ostatni miesiąc, którego okno już pokazano (lub był za pusty)
 const MS_VERSION = 'm1';
 const MS_MIN_WORKOUTS = 4;
@@ -20537,12 +20539,16 @@ function msModel(ym){
     userPreferences: (aiPrefs.goal || aiPrefs.avoid) ? { goal: aiPrefs.goal || null, avoid: aiPrefs.avoid || null } : null,
   };
 }
-function msLoadCache(ym){
+function msCacheAll(){
   if(!cloudSession) return null;
   try{
     const c = JSON.parse(localStorage.getItem(LS_MS_CACHE) || 'null');
-    return c && c.userId === cloudSession.user.id && c.ym === ym && c.version === MS_VERSION && c.ai ? c : null;
+    return c && c.userId === cloudSession.user.id && c.version === MS_VERSION && c.months ? c : null;
   }catch(e){ return null; }
+}
+function msLoadCache(ym){
+  const c = msCacheAll();
+  return c && c.months[ym] && c.months[ym].ai ? c.months[ym] : null;
 }
 async function msFetch(ym, model){
   const res = await callAI('month_summary', model);
@@ -20551,7 +20557,12 @@ async function msFetch(ym, model){
     return null;
   }
   const ai = { headline: res.headline, story: res.story, watch: typeof res.watch === 'string' && res.watch ? res.watch : '', goal: typeof res.goal === 'string' ? res.goal : '' };
-  try{ localStorage.setItem(LS_MS_CACHE, JSON.stringify({ userId: cloudSession.user.id, ym, version: MS_VERSION, model, ai })); }catch(e){}
+  try{
+    const c = msCacheAll() || { userId: cloudSession.user.id, version: MS_VERSION, months: {} };
+    c.months[ym] = { model, ai };
+    Object.keys(c.months).sort().slice(0, -12).forEach(k=> delete c.months[k]);
+    localStorage.setItem(LS_MS_CACHE, JSON.stringify(c));
+  }catch(e){}
   return { model, ai };
 }
 // Wywoływane po każdym renderze Pulpitu; robi coś tylko raz na miesiąc (patrz warunki niżej).
@@ -20602,7 +20613,7 @@ function msBodyHtml(model, ai){
 async function msOpen(ym, data){
   if(!data) data = msLoadCache(ym) || (() => { const m = msModel(ym); return m ? msFetch(ym, m) : null; })();
   data = await data;
-  if(!data) return;
+  if(!data) return false;
   const [y, m] = ym.split('-').map(Number);
   document.getElementById('msTitle').textContent = t('msTitle', 'Podsumowanie miesiąca');
   document.getElementById('msClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
@@ -20611,6 +20622,33 @@ async function msOpen(ym, data){
   msShown = ym;
   try{ localStorage.setItem(LS_MS_SEEN, ym); }catch(e){}
   acctSheetOpen('monthSumSheet');
+  return true;
+}
+// Baner w Historii (miesiąc bez wybranego dnia): wejście do podsumowania także po zamknięciu okna, i dla starszych miesięcy.
+// Tylko dla zakończonych miesięcy z min. MS_MIN_WORKOUTS treningów i zalogowanego konta; zgoda na AI jest pytana po tapnięciu.
+function msBannerHtml(ym, animCls){
+  if(!cloudSession || !isPremium() || ym >= todayStr().slice(0, 7)) return '';
+  let model = null; try{ model = msModel(ym); }catch(e){}
+  if(!model) return '';
+  const cached = msLoadCache(ym);
+  const [y, m] = ym.split('-').map(Number);
+  const text = cached ? cached.ai.headline : t('msBannerText', `Zobacz, jak poszedł ${MONTH_NAMES[m - 1].toLowerCase()}: co się zmieniło i co dalej.`, MONTH_NAMES[m - 1].toLowerCase());
+  return `<button type="button" class="dash-coach ms-banner m-press${animCls}" id="msBanner" style="--i:1" onclick="msBannerTap('${ym}')" aria-haspopup="dialog">` +
+    `<span class="dash-coach-hd"><span class="ph" data-ph="sparks">${PH.sparks || ''}</span><span class="dash-eyebrow">${t('msTitle', 'Podsumowanie miesiąca')}</span>${dashCaret()}</span>` +
+    `<span class="dash-coach-t${cached ? ' is-ai' : ''}" id="msBannerT">${escHtml(text)}</span></button>`;
+}
+let msBannerBusy = false;
+async function msBannerTap(ym){
+  if(msBannerBusy) return;
+  if(!hasAiConsent()){ openAiConsent(); return; }
+  const b = document.getElementById('msBanner'), tx = document.getElementById('msBannerT');
+  const was = tx ? tx.textContent : '';
+  msBannerBusy = true;
+  if(tx) tx.textContent = t('msLoading', 'Piszę podsumowanie…');
+  const ok = await msOpen(ym);
+  msBannerBusy = false;
+  if(!ok){ if(tx) tx.textContent = was; toast(t('msFail', 'Nie udało się przygotować podsumowania. Spróbuj za chwilę.')); return; }
+  if(currentRoute === 'history' || currentRoute === 'history-v2') renderCalendarV2(false);   // baner pokazuje już nagłówek z cache
 }
 function msCloseSheet(viaDrag){ acctSheetClose('monthSumSheet', viaDrag); }
 
@@ -21580,7 +21618,7 @@ function renderHistSumV2(animate){
       <div class="histv2-sum-cell"><p class="v">${cur.n}</p><p class="k">${histCountWordV2(cur.n)}</p></div>
       <div class="histv2-sum-cell"><p class="v">${histFmtDurV2(cur.min)}</p><p class="k">${t('histSumTime', 'czas')}</p></div>
       <div class="histv2-sum-cell"><p class="v">${histFmtTonsV2(cur.vol)}</p><p class="k">${t('histSumVolume', 'objętość')}</p></div>
-    </div>`;
+    </div>${selectedHistDateV2 ? '' : msBannerHtml(prefix, animate ? ' m-rise' : '')}`;
   window.histMonthRecV2 = cur.rec;
 }
 function histRowHtmlV2(kind, item, i, animate){
