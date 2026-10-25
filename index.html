@@ -419,7 +419,7 @@ html.gymfin-open .bottom-nav{z-index:9600;}   /* the real nav stays on top of th
 .gymfin-stat-k{margin:0;line-height:1;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.82);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gymfin-stat-v{margin:0;display:flex;align-items:flex-end;gap:4px;font-size:var(--m-fs-num);font-weight:200;letter-spacing:-.0385em;line-height:.8;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .gymfin-stat-v small{font-size:var(--m-fs-xs);font-weight:400;letter-spacing:0;color:rgba(255,255,255,.8);}
-.gymfin-stat--time{background:var(--m-metric-time);}
+.gymfin-stat--time{background:var(--m-metric-time);cursor:pointer;}
 .gymfin-stat--sky{background:var(--m-sky);}
 .gymfin-stat--kcal{background:var(--m-metric-kcal);cursor:pointer;}
 .gymfin-stat--kcal .gymfin-stat-k{color:rgba(52,57,65,.82);}
@@ -2645,7 +2645,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .histv2-daychip{position:relative;}
 .histv2-daychip::after{content:"";position:absolute;inset:-6px -4px;}   /* 32 px wizualnie, 44 px do kliknięcia */
 .histv2-daychip[hidden]{display:none;}
-.histv2-daychip .ph{width:14px;height:14px;}
+.histv2-daychip .ph,.histv2-addbtn .ph{width:14px;height:14px;}
 .histv2-list{gap:var(--m-gap-card,8px);}
 .histv2-row{display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;min-height:72px;padding:12px 14px 12px 8px;border:none;border-radius:var(--m-r-md);background:var(--m-white);font:inherit;text-align:left;color:var(--m-ink);cursor:pointer;}
 .histv2-row--static{cursor:default;}
@@ -2914,7 +2914,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
    style, so only the duration needs overriding here. Deliberately a
    list, not a global :active — :active also matches ancestors, which
    would speed up the view slide / sheet snapback mid-touch. */
-.plan-pill:active,.topbar-icon-btn:active,.gymfin-cta:active,.gymfin-share:active,.sh-seg-b:active,.sh-arrow:active,.sh-sw:active,.sh-ic:active,.sh-main:active,.sh-bgi:active,.gymfin-stat:active,.ex-tile:active,.save-btn:active,
+.plan-pill:active,.topbar-icon-btn:active,.gymfin-cta:active,.gymfin-share:active,.sh-seg-b:active,.sh-arrow:active,.sh-sw:active,.sh-ic:active,.sh-main:active,.sh-bgi:active,.gymfin-stat:active,.gy-pill-time:active,.ex-tile:active,.save-btn:active,
 .hist-card.collapsed:active,.acct-photo-pick:active,.acct-oauth-btn:active,
 .dash-chat-btn:active,.gymv2-chat-btn:active,.plansv2-chat-btn:active,.histv2-chat-btn:active,.statsv2-chat-btn:active,
 .profil-back:active,.profil-gear:active,.pf-sheet-x:active,.pf-rm-seg:active,.pf-rm-arw:active,.profil-av:active,.pf-link:active,.pf-row:active,.pf-btn:active,.pf-body-c:active,.profil-id-txt:active,
@@ -3006,7 +3006,7 @@ body.gymv2-bg .pg-bg{display:block;}
 .gy-pills{display:flex;gap:4px;margin:0 0 16px;}
 .gy-pill{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:34px;padding:6px 14px;box-sizing:border-box;border-radius:var(--m-r-pill);background:rgba(255,255,255,.6);border:.5px solid var(--m-orange-tint);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);font-size:var(--m-fs-2xs);font-weight:600;color:var(--m-ink);white-space:nowrap;font-variant-numeric:tabular-nums;}
 .gy-pill svg,.gy-pill .ph,.gy-pill .ph svg{width:16px;height:16px;flex:none;display:block;}
-.gy-pill-time{flex:1;min-width:0;background:var(--m-metric-time);border-color:transparent;color:var(--m-white);transition:background-color var(--m-dur-quick) ease;}
+.gy-pill-time{flex:1;min-width:0;background:var(--m-metric-time);border-color:transparent;color:var(--m-white);font-family:inherit;cursor:pointer;transition:background-color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
 .gy-pill-time.is-paused{background:rgba(142,0,69,.42);}
 #view-gym-v2 .gymv2-no-plan{margin-bottom:14px;}
 #view-gym-v2 .gymv2-repeat{height:60px;padding:6px 14px;gap:12px;box-sizing:border-box;background:rgba(59,99,203,.6);border:.5px solid var(--m-orange-tint);border-radius:var(--m-r-pill);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);margin-bottom:26px;}
@@ -4058,7 +4058,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <div class="gymfin-stats" id="gymFinStats">
-        <div class="gymfin-stat gymfin-stat--time"><p class="gymfin-stat-k" data-i18n="gymFinTime">Czas</p><p class="gymfin-stat-v" id="gymFinTimeV">—</p></div>
+        <button type="button" class="gymfin-stat gymfin-stat--time" onclick="gymFinEditTime()"><p class="gymfin-stat-k" data-i18n="gymFinTime">Czas</p><p class="gymfin-stat-v" id="gymFinTimeV">—</p></button>
         <div class="gymfin-stat gymfin-stat--sky"><p class="gymfin-stat-k" data-i18n="gymFinExercises">Ćwiczenia</p><p class="gymfin-stat-v" id="gymFinExV">0</p></div>
         <button type="button" class="gymfin-stat gymfin-stat--kcal" id="gymFinKcal" hidden onclick="gymFinEditKcal()"><p class="gymfin-stat-k" id="gymFinKcalK" data-i18n="gymFinKcal">Kalorie</p><p class="gymfin-stat-v" id="gymFinKcalV">—</p></button>
         <div class="gymfin-stat gymfin-stat--volume gymfin-stat--wide"><p class="gymfin-stat-k" data-i18n="gymFinVolume">Objętość</p><p class="gymfin-stat-v" id="gymFinVolV">0</p></div>
@@ -4138,7 +4138,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="gy-pills" id="gymV2Pills">
         <div class="gy-pill" id="gymV2PillEx"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="gymV2PillExTxt">0/0</span></div>
         <div class="gy-pill" id="gymV2PillKg"><span class="ph" data-ph="barbell"></span><span id="gymV2PillKgTxt">0 kg</span></div>
-        <div class="gy-pill gy-pill-time" id="gymV2PillTime"><span class="ph" data-ph="clock-countdown"></span><span id="gymV2PillTimeTxt">0:00</span></div>
+        <button type="button" class="gy-pill gy-pill-time" id="gymV2PillTime" onclick="openLiveTime()" aria-label="Czas treningu"><span class="ph" data-ph="clock-countdown"></span><span id="gymV2PillTimeTxt">0:00</span></button>
       </div>
 
       <div class="gymv2-no-plan hidden" id="gymV2NoPlan">
@@ -4363,7 +4363,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <div id="histSumV2"></div>
-      <div class="histv2-label-row"><p class="histv2-section-label" id="histListLabelV2">Treningi</p><button type="button" class="histv2-daychip m-press" id="histDayChipV2" hidden onclick="histClearDayV2()"></button><span class="histv2-recpill" id="histRecPillV2" hidden></span><button type="button" class="histv2-addbtn m-press" id="histAddBtnV2" onclick="openBackfillDialog()"><span class="ph" data-ph="plus"></span><span data-i18n="backfillAdd">Dodaj trening</span></button></div>
+      <div class="histv2-label-row"><p class="histv2-section-label" id="histListLabelV2">Treningi</p><button type="button" class="histv2-daychip m-press" id="histDayChipV2" hidden onclick="histClearDayV2()"></button><span class="histv2-recpill" id="histRecPillV2" hidden></span><button type="button" class="histv2-addbtn m-press" id="histAddBtnV2" onclick="openBackfillDialog()"><span class="ph" data-ph="plus-icon"></span><span data-i18n="backfillAdd">Dodaj trening</span></button></div>
       <div class="histv2-list" id="histDetailV2"></div>
     </div>
   </section>
@@ -5998,6 +5998,7 @@ const T_EN = {
   backfillBusy: 'You have a workout in progress. Finish or abort it first.',
   backfillBadDate: 'Pick a day in the past',
   backfillBanner: d => `Workout from ${d}`,
+  backfillRestDay: 'No workout was planned that day. You can still log something.',
   repeatNoWorkout: 'No saved workout to repeat yet',
   repeatDone: d => `Loaded your workout from ${d}`,
   repeatConfirmTitle: 'Repeat your last workout?',
@@ -9607,6 +9608,88 @@ function saveEditKcal(){
   afterKcalEdit();
 }
 
+/* ---------- edit-time sheet (czas treningu) ----------
+   Jedno okno, trzy wejścia: ikona czasu w trakcie treningu (kind:'live', wpisana wartość zatrzymuje zegar),
+   kafel „Czas” na ekranie podsumowania i w Historii (kind:'workout', poprawia zapisany trening). */
+const TIME_MAX_MIN = 600;
+let _timeCtx = null;   // { kind:'live' } | { kind:'workout', id }
+let _time = null;      // { v: tekst cyfr, pad }
+function timePaint(){
+  if(!_time) return;
+  const $ = id => document.getElementById(id);
+  const raw = _time.v, n = raw === '' ? null : parseInt(raw, 10);
+  const bad = n != null && (n < 1 || n > TIME_MAX_MIN);
+  $('timeV').textContent = n == null ? '—' : n + ' min';
+  $('timeErr').hidden = !bad;
+  if(bad) $('timeErr').textContent = t('timeRange', 'Wpisz wartość od 1 do 600 minut.');
+  $('timeSave').disabled = n == null || bad;
+}
+function openEditTime(ctx, cur){
+  _timeCtx = ctx;
+  const $ = id => document.getElementById(id);
+  $('timeTitle').textContent = t('timeTitle', 'CZAS TRENINGU');
+  $('timeL').textContent = t('timeL', 'CZAS');
+  $('timeClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('timeSave').textContent = t('bdSave', 'ZAPISZ');
+  const live = ctx.kind === 'live';
+  $('timeSheetSub').innerHTML = live
+    ? t('timeSubLive', 'Wpisz, ile minut trwa trening.<br>Po zapisie zegar się zatrzyma.')
+    : t('timeSubSaved', 'Wpisz, ile minut trwał trening.<br>Kalorie przeliczą się z nowym czasem.');
+  const rb = $('timeRevertBtn');
+  rb.hidden = !(live && gymLive.manualMin != null);
+  rb.textContent = t('timeBackClock', 'Wróć do zegara');
+  _time = { v: cur > 0 ? String(Math.round(cur)) : '', pad: null };
+  _time.pad = mkPad($('timePad'), { maxDigits: 3, decimals: 0, min: 0, max: TIME_MAX_MIN, value: _time.v, onChange: st=>{ if(_time){ _time.v = st.raw; timePaint(); } } });
+  timePaint();
+  acctSheetOpen('editTimeSheet');
+}
+function closeEditTime(viaDrag){ _time = null; acctSheetClose('editTimeSheet', viaDrag); }
+// 1) w trakcie treningu: ikona czasu
+function openLiveTime(){
+  liveDayCheck();
+  const cur = gymLive.manualMin != null ? gymLive.manualMin : (gymLive.started ? Math.max(1, Math.round(liveElapsedMs(Date.now()) / 60000)) : 0);
+  openEditTime({ kind:'live' }, cur);
+}
+function revertLiveTime(){
+  if(gymLive.manualMin == null){ closeEditTime(); return; }
+  const g = gymLive, now = Date.now();
+  g.accumMs = g.manualMin * 60000;   // zegar rusza dalej od wpisanej wartości
+  delete g.manualMin;
+  g.running = true; g.runStart = now; g.lastAct = now;
+  liveSave(); liveEnsureTick(); liveRender();
+  closeEditTime();
+}
+// 2) ekran podsumowania i 3) Historia: kafel „Czas”
+function openWorkoutTime(wid){
+  const w = workouts.find(x=> x.id === wid);
+  if(!w) return;
+  openEditTime({ kind:'workout', id: wid }, w.durationMin || 0);
+}
+function gymFinEditTime(){ if(gymFinWorkoutId) openWorkoutTime(gymFinWorkoutId); }
+function saveEditTime(){
+  const v = _time && _time.v !== '' ? parseInt(_time.v, 10) : NaN;
+  if(!(v >= 1 && v <= TIME_MAX_MIN)) return;   // ZAPISZ jest wtedy nieaktywny
+  const ctx = _timeCtx;
+  closeEditTime();
+  if(!ctx) return;
+  if(ctx.kind === 'live'){
+    const now = Date.now();
+    if(!gymLive.started) gymLive = { started:true, running:false, accumMs:0, runStart:0, lastAct:now, day:todayStr() };
+    else if(gymLive.running){ gymLive.accumMs += Math.max(0, now - gymLive.runStart); gymLive.running = false; }
+    gymLive.manualMin = v;
+    liveSave(); liveRender();
+    return;
+  }
+  const w = workouts.find(x=> x.id === ctx.id);
+  if(!w) return;
+  w.durationMin = v; saveWorkouts(workouts);
+  recomputeWorkoutCalories();   // szacunek kalorii zależy od czasu
+  const tv = document.getElementById('gymFinTimeV');
+  if(tv && gymFinWorkoutId === w.id) tv.innerHTML = v + '<small>min</small>';
+  if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
+  if(document.getElementById('histDetailV2') && selectedHistDateV2) renderHistDetailV2(false);
+}
+
 /* ---------- workout reminder (native only — @capacitor/local-notifications) ----------
    Days come from the starred plan's schedule (planActiveDays()), hour from
    the user. Recomputed at app launch and whenever this sheet is saved — NOT
@@ -12337,6 +12420,7 @@ function markGymActivity(){
 // there's been a gap since the last tap). Sanity-capped: floor of 1 min so
 // a single quick tap+save doesn't read as "0 min", ceiling of 4h.
 function computeGymSessionDurationMin(){
+  if(gymLive.manualMin > 0) return gymLive.manualMin;   // wpisane ręcznie z ikony czasu: zegar stoi
   if(!gymSessionStartAt || !gymSessionActiveEndAt) return null;
   const now = Date.now();
   const gapMin = (now - gymSessionActiveEndAt) / 60000;
@@ -15360,6 +15444,7 @@ function saveWorkout(){
     endedAt: backfillDate ? null : (gymSessionActiveEndAt || null)
   };
   if(backfillDate) workout.backfilled = true;
+  else if(gymLive.manualMin > 0){ workout.endedAt = Date.now(); workout.startedAt = workout.endedAt - gymLive.manualMin * 60000; }   // czas wpisany ręcznie: okno kończy się teraz
   workouts.push(workout);
   saveWorkouts(workouts);
   resetGymSessionTiming();
@@ -19179,6 +19264,7 @@ Object.assign(T_EN, {
   npTitle: 'NEW PASSWORD', npSub: 'Set a password for your Mekkio account.', npL1: 'New password', npL2: 'Repeat password', npPh2: 'the same password', npMismatch: 'The passwords do not match.',
   npSame: 'Pick a password different from the current one.', npExpired: 'The link has expired. Ask for a new one in the sign-in window ("I forgot my password").', npDone: 'Password changed',
   fbTitle: 'SHARE FEEDBACK', fbSub: 'Report a bug or share an idea.<br>We read every submission.', fbTypeAria: 'Type of report', fbMsgAria: 'Your message', fbPh: 'Describe what happened or what you would like to change in the app',
+  timeTitle: 'WORKOUT TIME', timeL: 'TIME', timeRange: 'Enter a value from 1 to 600 minutes.', timeSubLive: 'Enter how many minutes the workout lasts. The clock stops once you save.', timeSubSaved: 'Enter how many minutes the workout lasted.<br>Calories will be recalculated with the new time.', timeBackClock: 'Back to the clock',
   kcalTitle: 'BURNED CALORIES', kcalL: 'CALORIES', kcalRange: 'Enter a value from 0 to 3000.',
   kcalBackWatch: 'Back to the watch reading (%n)', kcalBackEst: 'Back to the estimate (%n)',
   kcalSubWatch: 'Calories from your watch (Apple Health).<br>You can correct them if you like.', kcalSubEst: 'An estimate from your body weight and workout time.<br>Correct it if you have a more accurate reading from your watch.',
@@ -19627,7 +19713,7 @@ function dashHeroHtml(m, animate){
         <p class="dash-hero-eyebrow">${t('dashYourPlan', 'Twój plan')}</p>
         <h2 class="dash-hero-title">${title}</h2>
         <div class="dash-prog" role="progressbar" aria-valuemin="0" aria-valuemax="${h.exercisesTotal}" aria-valuenow="${h.exercisesDone}"><span style="width:${Math.round(h.ratio * 1000) / 10}%"></span></div>
-        <div class="dash-hero-meta">${dashStat(DASH_SVG_CHECK(16, 16, 12), `${h.exercisesDone}/${h.exercisesTotal} ${t('gymPillExercises', 'ćwiczeń')}`)}${dashStat(ph('clock-counter-clockwise', 'dash-flip'), fmtLiveClock(h.elapsedMs), 'dashHeroClock')}</div>
+        <div class="dash-hero-meta">${dashStat(DASH_SVG_CHECK(16, 16, 12), `${h.exercisesDone}/${h.exercisesTotal} ${t('gymPillExercises', 'ćwiczeń')}`)}${dashStat(ph('clock-counter-clockwise', 'dash-flip'), liveClockText(h.elapsedMs), 'dashHeroClock')}</div>
         ${btn('inprogress', t('dashContinue', 'Kontynuuj'))}
       </div>`;
     }
@@ -20000,7 +20086,7 @@ function dashStartTick(){
   dashTickIv = setInterval(()=>{
     const el = document.getElementById('dashHeroClock');
     if(!el || currentRoute !== 'dashboard'){ dashStopTick(); return; }
-    el.textContent = fmtLiveClock(liveElapsedMs(Date.now()));
+    el.textContent = liveClockText(liveElapsedMs(Date.now()));
   }, 1000);
 }
 
@@ -20326,7 +20412,7 @@ function renderGymV2(){
   const noPlan = document.getElementById('gymV2NoPlan');
   document.getElementById('view-gym-v2').classList.toggle('is-backfill', !!backfillDate);
   if(backfillDate){
-    nameEl.textContent = t('backfillBanner', `Trening z dnia ${fmtDateHuman(backfillDate)}`, fmtDateHuman(backfillDate));
+    nameEl.textContent = t('backfillBanner', `Trening z dnia ${histDayMonthV2(new Date(backfillDate + 'T12:00:00'))}`, histDayMonthV2(new Date(backfillDate + 'T12:00:00')));
     nameEl.hidden = false;
     noPlan.classList.add('hidden');
   } else if(plan){
@@ -20363,6 +20449,7 @@ function renderGymV2(){
     // misleading "Ćwiczenia w planie" header, add a rest-day line.
     head.classList.add('hidden'); grid.classList.remove('hidden');
     restNote.classList.toggle('hidden', !plan); // only when a plan exists but today's a rest day
+    restNote.textContent = backfillDate ? t('backfillRestDay','Tego dnia nie miałeś zaplanowanego treningu. Możesz i tak coś zalogować.') : t('gymV2RestDay','Dziś nie masz zaplanowanego treningu. Możesz i tak coś zalogować.');
   }
 
   updateGymV2RepeatBtn();
@@ -20632,6 +20719,7 @@ function liveEnsureTick(){ if(!liveIv) liveIv = setInterval(liveTick, 1000); }
 function liveActivity(){
   liveDayCheck();
   const now = Date.now(), g = gymLive;
+  if(g.manualMin != null){ g.lastAct = now; liveSave(); return; }   // czas wpisany ręcznie: zegar stoi
   if(!g.started){ gymLive = { started:true, running:true, accumMs:0, runStart:now, lastAct:now, day:todayStr() }; }
   else if(!g.running){ g.running = true; g.runStart = now; g.lastAct = now; }
   else { g.lastAct = now; }
@@ -20644,12 +20732,14 @@ function liveReset(){
 }
 function liveElapsedMs(now){
   const g = gymLive;
+  if(g.manualMin != null) return g.manualMin * 60000;
   return g.started ? g.accumMs + (g.running ? Math.max(0, now - g.runStart) : 0) : 0;
 }
 function liveTick(){
   liveDayCheck();
   if(!gymLive.started) return;
   const g = gymLive, now = Date.now();
+  if(g.manualMin != null) return;
   if(g.started && g.running && now - g.lastAct > GYM_LIVE_IDLE_MS){
     g.accumMs += Math.max(0, g.lastAct - g.runStart);
     g.running = false;
@@ -20661,13 +20751,14 @@ function fmtLiveClock(ms){
   const sec = Math.floor(ms / 1000), h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
   return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
 }
+function liveClockText(ms){ return gymLive.manualMin != null ? gymLive.manualMin + ' min' : fmtLiveClock(ms); }
 function liveRender(){
   const pill = document.getElementById('gymV2PillTime');
   const txt = document.getElementById('gymV2PillTimeTxt');
   if(!pill || !txt) return;
   const g = gymLive;
-  pill.classList.toggle('is-paused', g.started && !g.running);
-  txt.textContent = !g.started ? '0:00' : (!g.running ? t('gymPaused','Wstrzymano') : fmtLiveClock(liveElapsedMs(Date.now())));
+  pill.classList.toggle('is-paused', g.started && !g.running && g.manualMin == null);
+  txt.textContent = g.manualMin != null ? g.manualMin + ' min' : !g.started ? '0:00' : (!g.running ? t('gymPaused','Wstrzymano') : fmtLiveClock(liveElapsedMs(Date.now())));
 }
 function gymSessionVolumeKg(){
   let v = 0;
@@ -21274,6 +21365,7 @@ function renderHistDetailV2Core(animate){
   }
   label.hidden = false;
   renderHistSumV2(animate);
+  hydrateHistIconsV2(document.getElementById('histAddBtnV2'));
   const day = selectedHistDateV2;
   const inScope = d => day ? d === day : d.startsWith(prefix);
   const items = [
@@ -21374,7 +21466,7 @@ function histOpenHtmlV2(w){
         </div>
       </div>` : ''}
       <div class="gymfin-stats">
-        <div class="gymfin-stat gymfin-stat--time" style="grid-column:span ${span1}"><p class="gymfin-stat-k">${t('gymFinTime', 'Czas')}</p><p class="gymfin-stat-v">${w.durationMin ? w.durationMin + '<small>min</small>' : '—'}</p></div>
+        <button type="button" class="gymfin-stat gymfin-stat--time" style="grid-column:span ${span1}" onclick="openWorkoutTime('${escHtml(w.id)}')"><p class="gymfin-stat-k">${t('gymFinTime', 'Czas')}</p><p class="gymfin-stat-v">${w.durationMin ? w.durationMin + '<small>min</small>' : '—'}</p></button>
         <div class="gymfin-stat gymfin-stat--sky" style="grid-column:span ${span1}"><p class="gymfin-stat-k">${t('gymFinExercises', 'Ćwiczenia')}</p><p class="gymfin-stat-v">${doneCount}</p></div>
         ${kcal != null ? `<button type="button" class="gymfin-stat gymfin-stat--kcal" style="grid-column:span ${span1}" onclick="openEditKcal('${escHtml(w.id)}')"><p class="gymfin-stat-k">${t('gymFinKcal', 'Kalorie')}</p><p class="gymfin-stat-v">${kcal}<small>kcal</small></p></button>` : ''}
         <div class="gymfin-stat gymfin-stat--volume gymfin-stat--wide" style="grid-column:span ${span2}"><p class="gymfin-stat-k">${volLabel}</p><p class="gymfin-stat-v">${volVal}</p></div>
