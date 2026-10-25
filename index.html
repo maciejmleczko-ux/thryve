@@ -10117,7 +10117,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.91.0";
+const APP_VERSION = "4.91.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -20533,7 +20533,7 @@ function msModel(ym){
   return {
     ym, workouts: cur.workouts, volumeKg: cur.volumeKg, sets: cur.sets, durationMin: cur.durationMin,
     avgDurationMin: cur.workouts ? Math.round(cur.durationMin / cur.workouts) : null,
-    vsPrevMonth: prev.workouts ? { workoutsDelta: cur.workouts - prev.workouts, volumePct: pctD(cur.volumeKg, prev.volumeKg), durationPct: pctD(cur.durationMin, prev.durationMin) } : null,
+    vsPrevMonth: prev.workouts >= 3 ? { workoutsDelta: cur.workouts - prev.workouts, volumePct: pctD(cur.volumeKg, prev.volumeKg), durationPct: pctD(cur.durationMin, prev.durationMin) } : null,
     trainingDays: dates.length, weeksWithTraining: weekCounts.length, bestWeekWorkouts: Math.max(...weekCounts), longestGapDays,
     prCount, topGains, biggestDrop, muscleShare: share, untrainedGroups, pushSets: push, pullSets: pull, weightDeltaKg,
     userPreferences: (aiPrefs.goal || aiPrefs.avoid) ? { goal: aiPrefs.goal || null, avoid: aiPrefs.avoid || null } : null,
