@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.91.1 (2026-10-25)
+- **Aktualna wersja:** 4.92.0 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.92.0 · MINOR · 2026-10-25
+
+Podsumowanie miesiąca, nowy układ pod pytania użytkownika: co było dobre, co słabsze, gdzie jest progres, co stoi w miejscu i na czym się skupić. Kod liczy „Progres” (`topGains`, do 4) i „Stoi w miejscu” (`stalled`: ćwiczenie z min. 3 sesjami w miesiącu, szacowana siła bez zmiany ±2% przez 3 ostatnie sesje; `msModel()`), a AI (`month_summary` w `ai-proxy`, odpowiedź `headline` / `good[]` / `bad[]` / `focus[]`) pisze tylko „Co poszło dobrze”, „Co poszło słabiej” i 2-3 wskazówki „Na czym się skupić”. Pola `story` / `watch` / `goal` zniknęły, `MS_VERSION` m2 unieważnia stary cache. W payloadzie `biggestDrop` zastąpiono listą `drops`. Poprawka odmiany „9 sesji”.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.92.0: podsumowanie miesiąca w 5 częściach
 
 ### 4.91.1 · PATCH · 2026-10-25
 

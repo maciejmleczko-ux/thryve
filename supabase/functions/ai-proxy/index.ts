@@ -99,60 +99,70 @@ const FEATURES: Record<string, (payload: unknown) => { system: string; user: str
     jsonResponse: true,
   }),
 
-  // Podsumowanie MIJAJĄCEGO miesiąca (2026-10-25). Kafle i listę skoków siły rysuje klient
-  // z tych samych liczb, model pisze tylko tekst. payload (wszystko policzone w kliencie, msModel):
+  // Podsumowanie MIJAJĄCEGO miesiąca (v2, 2026-10-25). Kafle, listę "Progres" (topGains) i listę
+  // "Stoi w miejscu" (stalled) rysuje klient z tych samych liczb. Model pisze: headline, good, bad, focus.
+  // payload (policzone w kliencie, msModel):
   //   ym, workouts, volumeKg, sets, durationMin, avgDurationMin
-  //   vsPrevMonth: {workoutsDelta, volumePct, durationPct} | null (brak poprzedniego miesiąca)
+  //   vsPrevMonth: {workoutsDelta, volumePct, durationPct} | null (poprzedni miesiąc <3 treningi = nie ma z czym)
   //   trainingDays, weeksWithTraining, bestWeekWorkouts, longestGapDays
-  //   prCount (ćwiczenia z nowym rekordem), topGains[]: {name, fromKg, toKg, deltaPct} (szac. siła max)
-  //   biggestDrop: {name, deltaPct} | null
+  //   prCount, topGains[]: {name, fromKg, toKg, deltaPct} (szac. siła max), stalled[]: {name, sessions, e1rmKg},
+  //   drops[]: {name, deltaPct}
   //   muscleShare[]: {group, sharePct}, untrainedGroups[], pushSets, pullSets
   //   weightDeltaKg: number | null, userPreferences: {goal, avoid} | null
   month_summary: (payload) => ({
     system:
       'Piszesz po polsku podsumowanie zakończonego miesiąca treningowego w aplikacji Mekkio, ' +
-      'jak trener, który przejrzał cały miesiąc tej osoby i mówi, co z niego wynika. Aplikacja ' +
-      'już pokazuje użytkownikowi liczbę treningów, objętość, średni czas oraz listę największych ' +
-      'skoków siły, więc NIE przepisuj tych liczb po kolei. Twoja rola to interpretacja: co ' +
-      'się zmieniło, dlaczego to ważne i co dalej.\n\n' +
+      'jak trener, który przejrzał cały miesiąc tej osoby. Użytkownik chce wiedzieć cztery ' +
+      'rzeczy: co było dobre, co słabsze, gdzie jest progres i co stoi w miejscu, oraz na czym ' +
+      'się skupić w kolejnym miesiącu. Aplikacja sama pokazuje kafle (liczba treningów, objętość, ' +
+      'średni czas), listę progresu (topGains) i listę ćwiczeń w zastoju (stalled), więc ty ' +
+      'ich NIE wypisujesz po kolei. Możesz się do nich odwołać nazwą ćwiczenia, jeśli to ' +
+      'uzasadnia wskazówkę.\n\n' +
       'DANE: wszystko jest policzone, niczego nie przeliczaj i nie wymyślaj liczb spoza danych. ' +
-      'vsPrevMonth porównuje z poprzednim miesiącem (null = nie ma z czym). topGains to ćwiczenia ' +
-      'z największym wzrostem szacowanej siły maksymalnej (fromKg → toKg), biggestDrop to ' +
-      'ćwiczenie z wyraźnym spadkiem. longestGapDays to najdłuższa przerwa między treningami w ' +
-      'dniach, weeksWithTraining liczba tygodni z treningiem. muscleShare to udział serii w partiach, ' +
-      'untrainedGroups to partie bez ani jednej serii w miesiącu, pushSets/pullSets to serie ' +
-      'mięśni pchających (klatka, barki, triceps) i ciągnących (plecy, biceps). weightDeltaKg to ' +
-      'zmiana wagi ciała w miesiącu (null = brak pomiarów), bez oceniania, czy to dobrze: zależy od celu.\n\n' +
+      'vsPrevMonth porównuje z poprzednim miesiącem (null = nie ma z czym, nie porównuj). ' +
+      'topGains to ćwiczenia z największym wzrostem szacowanej siły maksymalnej (fromKg → toKg), ' +
+      'stalled to ćwiczenia, w których siła nie ruszyła przez ostatnie 3 sesje, drops to wyraźne ' +
+      'spadki siły. longestGapDays to najdłuższa przerwa między treningami w dniach, ' +
+      'weeksWithTraining liczba tygodni z treningiem, bestWeekWorkouts najlepszy tydzień. ' +
+      'muscleShare to udział serii w partiach, untrainedGroups to partie bez ani jednej serii ' +
+      'w miesiącu, pushSets/pullSets to serie mięśni pchających (klatka, barki, triceps) i ' +
+      'ciągnących (plecy, biceps). weightDeltaKg to zmiana wagi ciała (null = brak pomiarów), ' +
+      'bez oceniania, czy to dobrze: zależy od celu.\n\n' +
       'Zwróć WYŁĄCZNIE JSON, bez markdownu i bez ```: ' +
-      '{"headline": "...", "story": "...", "watch": "...", "goal": "..."}\n' +
-      '- headline: do 8 słów, nazwij charakter miesiąca jedną myślą (np. "Stabilny miesiąc, siła w górę", ' +
-      '"Dwa tygodnie przerwy kosztowały formę"). Bez wykrzyknika i bez samej daty.\n' +
-      '- story: 2-3 zdania. Jak się miesiąc potoczył i jedna zmiana trendu względem poprzedniego ' +
-      '(lub regularność, jeśli nie ma porównania). Jedna lub dwie konkretne liczby, nie więcej. ' +
-      'Jeśli był rekord lub duży skok siły, wspomnij o nim z nazwą ćwiczenia.\n' +
-      '- watch: JEDNO zdanie o jednej rzeczy do poprawy, tylko jeśli dane ją naprawdę pokazują ' +
-      '(długa przerwa, partia pominięta cały miesiąc, wyraźna przewaga pchania nad ciągnięciem lub ' +
-      'odwrotnie, spadek siły w ćwiczeniu). Jeśli nic takiego nie ma, zwróć pusty string "". ' +
-      'Nie zmyślaj problemu.\n' +
-      '- goal: JEDEN mierzalny cel na kolejny miesiąc, realistyczny względem tego, co zrobił ' +
-      '(np. "4 treningi w tygodniu zamiast 3" przy bestWeekWorkouts 4, "wyciskanie na 85 kg" przy ' +
-      'toKg 80). Max 1 zdanie, z liczbą.\n\n' +
+      '{"headline": "...", "good": ["..."], "bad": ["..."], "focus": ["..."]}\n' +
+      '- headline: do 8 słów, jedna myśl o charakterze miesiąca. Bez wykrzyknika i bez samej daty.\n' +
+      '- good: 1-3 krótkie punkty, każdy to jedno zdanie z konkretem z danych (regularność, ' +
+      'rekordy, wzrost objętości, równe tempo, dobra rozpiska partii). Tylko to, co naprawdę ' +
+      'było dobre.\n' +
+      '- bad: 0-3 krótkie punkty, każdy to jedno zdanie z konkretem (długa przerwa, partie ' +
+      'pominięte cały miesiąc, wyraźna przewaga pchania nad ciągnięciem lub odwrotnie, spadek ' +
+      'siły, mniej treningów niż miesiąc wcześniej). Jeśli dane nie pokazują nic słabego, ' +
+      'zwróć []. Nie zmyślaj problemu.\n' +
+      '- focus: 2-3 konkretne wskazówki na kolejny miesiąc, każda jedno zdanie, z liczbą lub ' +
+      'nazwą ćwiczenia. Oprzyj je na tym, co wyszło: zastój (jak go ruszyć: dołożyć powtórzenie, ' +
+      'zmienić zakres powtórzeń, lżejszy tydzień), pominięte partie, przerwy, spadek. Pierwsza ' +
+      'wskazówka dotyczy najważniejszej rzeczy. Jeśli nie ma zastoju ani słabych stron, ' +
+      'wskazówką jest następny realny krok (np. o ile podnieść cel w ćwiczeniu z topGains).\n\n' +
       'Jeśli userPreferences.avoid jest ustawione, nie proponuj dokładania ciężaru w ćwiczeniach, ' +
       'które mogą dotyczyć tego obszaru. userPreferences.goal ("masa", "sila", "wytrzymalosc", ' +
       '"ogolna") tylko lekko dopasuj, co uznajesz za sukces.\n\n' +
-      'JĘZYK: zwykłe słowa dla osoby z siłowni. Bez nazw pól i żargonu (e1RM, push/pull, volume). ' +
-      'Zamiast "objętość +12%" napisz "podniosłeś łącznie o 12% więcej". Ton rzeczowy i ciepły, ' +
-      'bez entuzjazmu, bez ocen typu "świetnie", bez zwrotów motywacyjnych ("tak trzymaj").\n\n' +
-      'PRZYKŁAD DOBRY: {"headline": "Mniej treningów, ale mocniejszych", "story": "Wrzesień ' +
-      'to 9 treningów, o 3 mniej niż w sierpniu, za to wyciskanie poszło z 70 na 77,5 kg. ' +
-      'Najlepszy tydzień miał 3 treningi, najdłuższa przerwa trwała 6 dni.", "watch": ' +
-      '"Plecy dostały tylko 14% serii, a klatka z barkami prawie połowę.", "goal": ' +
-      '"Wróć do 11-12 treningów i dołóż do każdego tygodnia jedno ćwiczenie na plecy."}\n' +
-      'PRZYKŁAD ZŁY: {"headline": "Świetny miesiąc!", "story": "Zrobiłeś 9 treningów, ' +
-      'objętość 41 200 kg i średnio 58 min. Tak trzymaj!", "watch": "", "goal": "Trenuj dalej."}\n\n' +
+      'JĘZYK: zwykłe słowa dla osoby z siłowni. Bez nazw pól i żargonu (e1RM, push/pull, volume, ' +
+      'zastój zastąp słowami "stoi w miejscu" albo "bez zmiany"). Zamiast "objętość +12%" napisz ' +
+      '"podniosłeś łącznie o 12% więcej". Ton rzeczowy i ciepły, bez entuzjazmu, bez ocen typu ' +
+      '"świetnie", bez zwrotów motywacyjnych ("tak trzymaj").\n\n' +
+      'PRZYKŁAD DOBRY: {"headline": "Siła w górę, ale plecy w tyle", "good": ["Trenowałeś w ' +
+      'każdym tygodniu, najlepszy miał 4 treningi.", "Wyciskanie poszło z 70 na 77,5 kg."], ' +
+      '"bad": ["Plecy dostały tylko 14% serii, a klatka z barkami prawie połowę.", "Najdłuższa ' +
+      'przerwa trwała 6 dni."], "focus": ["Dodaj do każdego tygodnia jedno ćwiczenie na plecy, ' +
+      'celuj w co najmniej 4 serie.", "Martwy ciąg stoi od 3 sesji: spróbuj o jedno powtórzenie ' +
+      'więcej w każdej serii przed dołożeniem ciężaru.", "Nie dopuszczaj do przerw dłuższych ' +
+      'niż 3 dni."]}\n' +
+      'PRZYKŁAD ZŁY: {"headline": "Świetny miesiąc!", "good": ["Zrobiłeś 9 treningów, ' +
+      'objętość 41 200 kg i średnio 58 min."], "bad": [], "focus": ["Trenuj dalej, tak ' +
+      'trzymaj!"]}\n\n' +
       PL_LANGUAGE_RULES,
     user: JSON.stringify(payload),
-    maxTokens: 600,
+    maxTokens: 700,
     jsonResponse: true,
   }),
 };

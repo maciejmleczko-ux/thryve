@@ -3859,7 +3859,12 @@ button.stv2-bt{cursor:pointer;}
 .ms-goal .ms-blk-lbl{color:var(--m-mint-ink);}
 .ms-txt{margin:0;font-size:var(--m-fs-base);line-height:1.45;color:var(--m-ink);}
 .ms-row{display:flex;justify-content:space-between;gap:12px;padding:4px 0;font-size:var(--m-fs-base);color:var(--m-ink);}
-.ms-row-v{font-weight:500;color:var(--m-mint-ink);}
+.ms-row-n{display:flex;flex-direction:column;min-width:0;}
+.ms-row-n small{font-size:var(--m-fs-xs);color:var(--m-muted-text);}
+.ms-row-v{font-weight:500;color:var(--m-mint-ink);flex:none;}
+.ms-row-v.is-neutral{color:var(--m-muted-text);}
+.ms-ul{margin:0;padding:0 0 0 18px;font-size:var(--m-fs-base);line-height:1.45;color:var(--m-ink);}
+.ms-ul li+li{margin-top:6px;}
 .ms-note{color:var(--m-muted-text);}
 .ms-banner{margin-top:var(--m-gap-card);}
 .ms-banner:disabled{opacity:.7;}
@@ -10117,7 +10122,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.91.1";
+const APP_VERSION = "4.92.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -20465,7 +20470,7 @@ async function dashAiFetch(job){
    ============================================================ */
 const LS_MS_CACHE = 'fitlog_month_summary_v1';   // {userId, version, months:{ 'YYYY-MM': {model, ai} }}, max 12 miesięcy
 const LS_MS_SEEN = 'fitlog_month_summary_seen_v1'; // ostatni miesiąc, którego okno już pokazano (lub był za pusty)
-const MS_VERSION = 'm1';
+const MS_VERSION = 'm2';
 const MS_MIN_WORKOUTS = 4;
 let msInflight = '', msFailedYm = '', msShown = '';
 function msPrevYm(ym){
@@ -20494,7 +20499,7 @@ function msModel(ym){
     exSetsView(ex).forEach(s=>{ if(s.reps > 0 && statsV2E1rmEligible(s)) e = Math.max(e, statsV2Epley(s.weight, s.reps)); });
     if(e > 0) (sessions[ex.name] = sessions[ex.name] || []).push({ date: w.date, e1rm: e });
   }));
-  const gains = [];
+  const gains = [], stalled = [];
   let prCount = 0;
   Object.entries(sessions).forEach(([name, list])=>{
     const before = list.filter(s=> s.date < from), inM = list.filter(s=> s.date >= from && s.date <= to);
@@ -20503,9 +20508,15 @@ function msModel(ym){
     const base = before.length ? before[before.length - 1].e1rm : (inM.length >= 2 ? inM[0].e1rm : 0);
     if(before.length && end > Math.max(...before.map(s=> s.e1rm))) prCount++;
     if(base > 0) gains.push({ name, fromKg: Math.round(base * 10) / 10, toKg: Math.round(end * 10) / 10, deltaPct: pctD(end, base) });
+    // zastój: 3 ostatnie sesje w miesiącu bez zmiany szacowanej siły (±2%), a ćwiczenie nie rośnie
+    if(inM.length >= 3){
+      const last3 = inM.slice(-3).map(s2=> s2.e1rm), top = Math.max(...last3);
+      if((top - Math.min(...last3)) / top <= 0.02 && !(base > 0 && pctD(end, base) >= 2)) stalled.push({ name, sessions: inM.length, e1rmKg: Math.round(top * 10) / 10 });
+    }
   });
-  const topGains = gains.filter(g=> g.deltaPct >= 2).sort((a,b)=> b.deltaPct - a.deltaPct).slice(0, 3);
-  const biggestDrop = gains.filter(g=> g.deltaPct <= -5).sort((a,b)=> a.deltaPct - b.deltaPct)[0] || null;
+  const topGains = gains.filter(g=> g.deltaPct >= 2).sort((a,b)=> b.deltaPct - a.deltaPct).slice(0, 4);
+  const drops = gains.filter(g=> g.deltaPct <= -5).sort((a,b)=> a.deltaPct - b.deltaPct).slice(0, 2);
+  const stalledTop = stalled.sort((a,b)=> b.sessions - a.sessions).slice(0, 3);
 
   // partie: udział serii w miesiącu, partie bez ani jednej serii, push/pull
   const setsBy = (f, t2) => {
@@ -20535,7 +20546,7 @@ function msModel(ym){
     avgDurationMin: cur.workouts ? Math.round(cur.durationMin / cur.workouts) : null,
     vsPrevMonth: prev.workouts >= 3 ? { workoutsDelta: cur.workouts - prev.workouts, volumePct: pctD(cur.volumeKg, prev.volumeKg), durationPct: pctD(cur.durationMin, prev.durationMin) } : null,
     trainingDays: dates.length, weeksWithTraining: weekCounts.length, bestWeekWorkouts: Math.max(...weekCounts), longestGapDays,
-    prCount, topGains, biggestDrop, muscleShare: share, untrainedGroups, pushSets: push, pullSets: pull, weightDeltaKg,
+    prCount, topGains, stalled: stalledTop, drops, muscleShare: share, untrainedGroups, pushSets: push, pullSets: pull, weightDeltaKg,
     userPreferences: (aiPrefs.goal || aiPrefs.avoid) ? { goal: aiPrefs.goal || null, avoid: aiPrefs.avoid || null } : null,
   };
 }
@@ -20552,11 +20563,12 @@ function msLoadCache(ym){
 }
 async function msFetch(ym, model){
   const res = await callAI('month_summary', model);
-  if(res.error || typeof res.headline !== 'string' || typeof res.story !== 'string'){
+  if(res.error || typeof res.headline !== 'string' || !Array.isArray(res.good) || !Array.isArray(res.focus)){
     console.error('month_summary AI call failed', res.error);
     return null;
   }
-  const ai = { headline: res.headline, story: res.story, watch: typeof res.watch === 'string' && res.watch ? res.watch : '', goal: typeof res.goal === 'string' ? res.goal : '' };
+  const list = a => (Array.isArray(a) ? a : []).filter(x=> typeof x === 'string' && x.trim()).slice(0, 3);
+  const ai = { headline: res.headline, good: list(res.good), bad: list(res.bad), focus: list(res.focus) };
   try{
     const c = msCacheAll() || { userId: cloudSession.user.id, version: MS_VERSION, months: {} };
     c.months[ym] = { model, ai };
@@ -20586,6 +20598,12 @@ async function msMaybeShow(){
   if(currentRoute !== 'dashboard' || document.documentElement.classList.contains('modal-lock')) return;
   msOpen(ym, data);
 }
+function msSessionsWord(n){
+  if(LANG === 'en') return n === 1 ? 'session' : 'sessions';
+  const m10 = n % 10, m100 = n % 100;
+  if(n === 1) return 'sesja';
+  return (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) ? 'sesje' : 'sesji';
+}
 function msTile(num, lbl, delta, goodWhenUp){
   let d = '';
   if(delta != null && delta !== 0){
@@ -20602,11 +20620,16 @@ function msBodyHtml(model, ai){
     msTile(model.volumeKg >= 10000 ? formatDashNum(kgToDisp(model.volumeKg) / 1000, 1) + ' t' : kg(model.volumeKg), { text: t('msVolume', 'objętość'), unit: '%' }, pv ? pv.volumePct : null, true),
     msTile(model.avgDurationMin ? model.avgDurationMin + ' min' : '–', { text: t('msAvgTime', 'średni trening'), unit: '' }, null, true),
   ].join('');
-  const gains = model.topGains.length ? `<div class="ms-block"><p class="ms-blk-lbl">${t('msGains', 'Największe skoki siły')}</p>${model.topGains.map(g=>
-    `<div class="ms-row"><span class="ms-row-n">${E(g.name)}</span><span class="ms-row-v">+${g.deltaPct}%</span></div>`).join('')}</div>` : '';
-  const watch = ai.watch ? `<div class="ms-block"><p class="ms-blk-lbl">${t('msWatch', 'Do poprawy')}</p><p class="ms-txt">${E(ai.watch)}</p></div>` : '';
-  const goal = ai.goal ? `<div class="ms-block ms-goal"><p class="ms-blk-lbl">${t('msGoal', 'Cel na kolejny miesiąc')}</p><p class="ms-txt">${E(ai.goal)}</p></div>` : '';
-  return `<h2 class="ms-headline">${E(ai.headline)}</h2><div class="ms-tiles">${tiles}</div><p class="ms-story">${E(ai.story)}</p>${gains}${watch}${goal}` +
+  const li = a => a.map(x=> `<li>${E(x)}</li>`).join('');
+  const blk = (lbl, inner, cls) => inner ? `<div class="ms-block${cls ? ' ' + cls : ''}"><p class="ms-blk-lbl">${lbl}</p>${inner}</div>` : '';
+  const rows = (arr, right, sub, vcls) => arr.map(g=> `<div class="ms-row"><span class="ms-row-n">${E(g.name)}${sub ? `<small>${E(sub(g))}</small>` : ''}</span><span class="ms-row-v${vcls ? ' ' + vcls : ''}">${right(g)}</span></div>`).join('');
+  const kgE = x=> formatDashNum(kgToDisp(x), 1) + ' ' + wUnit();
+  const good = blk(t('msGood', 'Co poszło dobrze'), ai.good.length ? `<ul class="ms-ul">${li(ai.good)}</ul>` : '');
+  const bad = blk(t('msBad', 'Co poszło słabiej'), ai.bad.length ? `<ul class="ms-ul">${li(ai.bad)}</ul>` : '');
+  const prog = blk(t('msProgress', 'Progres'), rows(model.topGains, g=> `+${g.deltaPct}%`, g=> `${t('msEstMax', 'szac. maks.')} ${kgE(g.fromKg)} → ${kgE(g.toKg)}`));
+  const stall = blk(t('msStalled', 'Stoi w miejscu'), rows(model.stalled, g=> `${g.sessions} ${msSessionsWord(g.sessions)}`, g=> t('msStalledSub', 'bez zmiany siły w ostatnich 3 sesjach'), 'is-neutral'));
+  const focus = blk(t('msFocus', 'Na czym się skupić'), ai.focus.length ? `<ul class="ms-ul">${li(ai.focus)}</ul>` : '', 'ms-goal');
+  return `<h2 class="ms-headline">${E(ai.headline)}</h2><div class="ms-tiles">${tiles}</div>${good}${bad}${prog}${stall}${focus}` +
     `<p class="ai-popup-note ms-note">${t('msNote', 'Podsumowanie tworzy AI na podstawie Twoich treningów. To nie porada medyczna i nie zastąpi trenera.')}</p>`;
 }
 // ym + (opcjonalnie) {model, ai}; bez drugiego argumentu bierze cache albo woła AI (przydatne do testów w konsoli)
