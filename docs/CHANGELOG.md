@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.96.0 (2026-10-25)
-- **Liczba wersji:** 265 · **commitów:** 643
+- **Aktualna wersja:** 4.96.1 (2026-10-25)
+- **Liczba wersji:** 266 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.96.1 · PATCH · 2026-10-25
+
+Przygotowanie do review App Store (guideline 2.1 / 3.1.1): karta „Mekkio AI / Mekkio+” (kłódka, „Wkrótce”) i zakładka „AI” w Wszystkich planach są ukryte za flagą `PLANS_AI_CARD_ENABLED = false` (helper `plansV2AiSectionHtml`, `palAiHtml`, `PAL_SEGS` bez `ai`). Włączyć razem z bramką `isPremium()` i zakupem w aplikacji. Polityka prywatności (3 pliki: `polityka-prywatnosci.html`, `landing/polityka-prywatnosci.html`, `landing/en/privacy.html`): dopisany punkt „Import z innej aplikacji” (plik CSV czytany lokalnie), data aktualizacji 25.10.2026. W `CLAUDE.md` nowa sekcja „App Store: wydania, review i zasady Apple” z listą kontrolną.
+
+**Commity (1):**
+
+- (hash po commicie)
 
 ### 4.96.0 · MINOR · 2026-10-25
 

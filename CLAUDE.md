@@ -20,6 +20,37 @@ Pełna historia wersji (także PATCH) z commitami. **Przy każdym bumpie `APP_VE
 
 Hash commita, który sam dodaje wpis, jest znany dopiero po commicie, więc ten jeden commit wpisz przy następnej wersji albo pomiń. Zaktualizuj też „Aktualna wersja” w nagłówku. Przy większym etapie dopisz wiersz w „Oś czasu”, a przy nowym pliku, kluczu localStorage albo tabeli Supabase zaktualizuj „Architektura w skrócie”.
 
+## App Store: wydania, review i zasady Apple
+
+Aplikacja iOS to Capacitor (`native/`) z kodem wbudowanym w paczkę (`native/www`, brak `server.url` w `capacitor.config.json`). Dlatego:
+
+| Zmiana | Trafia do użytkowników | Review Apple |
+|---|---|---|
+| `index.html`, CSS, logika, teksty, ćwiczenia | web (`app.mekkio.app`) od razu po pushu; **aplikacja iOS dopiero po nowym buildzie** | nowy build = tak (zwykle ≤24 h) |
+| Supabase (tabele, Edge Functions, dane) | od razu, wszędzie | nie |
+| Opis, zrzuty, „Co nowego” w ASC | po zapisie w ASC | tak, lekkie |
+| Nowe uprawnienia, natywne wtyczki, IAP / Mekkio+ | tylko z nowym buildem | tak, dokładniej |
+
+- **Nie ładuj kodu aplikacji z serwera zamiast z paczki** (guideline 2.5.2: kod zmieniający funkcje po review = ryzyko wycofania). Dane (`version.json`, treści) mogą zmieniać się bez review.
+- Nowe wersje grupuj w „duże buildy”. Pilny błąd: najpierw sprawdź, czy da się naprawić po stronie Supabase; w ostateczności Expedited Review w ASC.
+- Pierwsze review: zwykle 24–48 h, realnie 2–7 dni z jedną rundą poprawek. Odrzucenie nie ma kar.
+- Po każdym buildzie aktualizuj kolejkę (`project_pending_native_build`); `version.json` (`ios.build`) podbijaj dopiero po przetworzeniu w TestFlight i teście na iPhonie, i pytaj przed pushem.
+
+### Lista kontrolna przed każdym zgłoszeniem do review
+
+1. **4.2** Opis i notatki dla review wskazują funkcje natywne (HealthKit, haptyka, powiadomienia, Keep Awake) i gdzie je znaleźć.
+2. **2.1** Konto demo `review@mekkio.app` działa na świeżej instalacji, backend żyje; brak niedokończonych funkcji w UI.
+3. **3.1.1** Żadnych płatności, linków do płatności zewnętrznych ani „Mekkio+” z kłódką w UI, dopóki IAP nie jest wdrożone (`isPremium()` zwraca `true`).
+4. **5.1.2(i)** Każde wywołanie AI idzie przez `callAI` i wymaga zgody (`hasAiConsent()`); nie dodawaj omijającej ścieżki.
+5. **1.4.1** Kcal i Trener AI mają widoczne „to nie porada medyczna”; w opisie żadnych obietnic zdrowotnych.
+6. **5.1.1** App Privacy label i `polityka-prywatnosci.html` zgadzają się z tym, co aplikacja robi (HealthKit, zdjęcia postępu, import, AI, GoatCounter, Formspree). Nowe zbieranie danych = najpierw aktualizacja labela i polityki.
+7. **5.1.1(v), 4.8** Usuwanie konta i Sign in with Apple działają (nie psuć w kolejnych buildach).
+8. **2.3.3 / 2.3.7 / 2.3.10** Zrzuty z tego buildu, nazwa ≤30 znaków, w metadanych bez Androida/PWA i bez cudzych marek (Strong, Hevy).
+9. **5.6.1** Tylko systemowe okno oceny aplikacji.
+10. Test na prawdziwym iPhonie: świeża instalacja jako gość, bez internetu, logowanie Apple/Google.
+
+Pełne uzasadnienie i stan: `project_app_store_requirements` (pamięć), wytyczne: developer.apple.com/app-store/review/guidelines.
+
 ## Animacje: obowiązkowy wzorzec dla KAŻDEGO nowego ekranu, popupu i komponentu
 
 Cel: apka ma sprawiać wrażenie natywnej aplikacji iOS. Ruch pomaga zrozumieć, co się stało, a nie jest ozdobą, na którą trzeba czekać. Wszystkie animacje biorą wartości z jednego miejsca: tokenów `--m-ease-*` / `--m-dur-*` w `:root`. Dzięki temu ruch jest identyczny na każdym ekranie, a zmiana tokenu zmienia go wszędzie. Wizualny podgląd z działającymi przykładami: [Mekkio Design Guide → Motion](https://claude.ai/artifact/35fnMV3RPQfMPU72EFibWU#motion). Przy każdej zmianie tokenów zaktualizuj też tę stronę.

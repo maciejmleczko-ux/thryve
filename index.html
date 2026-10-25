@@ -4301,7 +4301,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <button type="button" class="ai-chip" role="radio" aria-checked="true" data-seg="all" onclick="palSetSeg('all')"><span data-i18n="palSegAll">Wszystkie</span></button>
         <button type="button" class="ai-chip" role="radio" aria-checked="false" data-seg="own" onclick="palSetSeg('own')"><span data-i18n="palSegOwn">Moje</span></button>
         <button type="button" class="ai-chip" role="radio" aria-checked="false" data-seg="mekkio" onclick="palSetSeg('mekkio')"><span>Mekkio</span></button>
-        <button type="button" class="ai-chip" role="radio" aria-checked="false" data-seg="ai" onclick="palSetSeg('ai')"><span>AI</span></button>
       </div>
       <div id="palBody"></div>
     </div>
@@ -10240,7 +10239,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.96.0";
+const APP_VERSION = "4.96.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -17749,6 +17748,10 @@ function buildPlanCardV2(p){
   </div>`;
 }
 const PLC_LOCK_SVG = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 80h-32V56a48 48 0 0 0-96 0v24H48a16 16 0 0 0-16 16v112a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16ZM96 56a32 32 0 0 1 64 0v24H96Z"/></svg>';
+/* Karta „Mekkio AI / Mekkio+” (płatna, jeszcze nieistniejąca funkcja) jest ukryta w 1.0: Apple (2.1, 3.1.1) nie lubi niedziałających ani płatnych-bez-IAP elementów.
+   Włączyć razem z bramką Mekkio+ (isPremium) i zakupem w aplikacji. */
+const PLANS_AI_CARD_ENABLED = false;
+function plansV2AiSectionHtml(rcls){ return PLANS_AI_CARD_ENABLED ? plansV2SectionHtml('ai', 'Mekkio AI', buildPlanAiCardV2(), rcls, '', true) : ''; }
 function buildPlanAiCardV2(){
   return `<div class="plc plc--ai m-press" role="button" tabindex="0" data-pa="ai" aria-label="${t('plansV2AiTitle', 'Plan od AI')}, Mekkio+">
     <div class="plc-top"><span class="plc-src">${ph('sparks')}Mekkio AI</span><span class="plc-lvl">${PLC_LOCK_SVG}Mekkio+</span></div>
@@ -18094,7 +18097,7 @@ function pdtOpenMenu(btn){
 let palSeg = 'all';   // 'all' | 'own' | 'mekkio' | 'ai'
 let palFilters = { level: null, goal: null, days: null, equip: [] };
 let palF = null;      // otwarty arkusz wyboru wartości filtra: { k, sel }
-const PAL_SEGS = ['all', 'own', 'mekkio', 'ai'];
+const PAL_SEGS = ['all', 'own', 'mekkio'];   // + 'ai' po włączeniu PLANS_AI_CARD_ENABLED
 const PAL_CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.2 8.4l3 3 6.6-7" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function palFilterOn(){ return !!(palFilters.level || palFilters.goal || palFilters.days || palFilters.equip.length); }
 function palClearFilters(){ palFilters = { level: null, goal: null, days: null, equip: [] }; renderAllPlansV2(false); }
@@ -18164,7 +18167,7 @@ function buildPlanListRowV2(p, rc){
     </div>
   </div>`;
 }
-function palAiHtml(rc){ return `<div class="pal-ai${rc}">${buildPlanAiCardV2()}</div>`; }
+function palAiHtml(rc){ if(!PLANS_AI_CARD_ENABLED) return ''; return `<div class="pal-ai${rc}">${buildPlanAiCardV2()}</div>`; }
 function palEmptyHtml(kind, rc){
   if(kind === 'own') return `<div class="pal-empty${rc}">
     <p class="pal-empty-t">${t('palOwnEmptyT', 'Nie masz jeszcze własnych planów')}</p>
@@ -18202,7 +18205,7 @@ function renderAllPlansV2(animate){
     const mekkio = visiblePlans().filter(p=> p.builtin);
     html = palEmptyHtml('own', rc(0)) + `<div class="pal-more">`
       + (mekkio.length ? plansV2SectionHtml('mekkio', t('plansV2MekkioPlans', 'Plany Mekkio'), mekkio.map(buildPlanCardV2).join(''), rc(1)) : '')
-      + plansV2SectionHtml('ai', 'Mekkio AI', buildPlanAiCardV2(), rc(2), '', true) + `</div>`;
+      + plansV2AiSectionHtml(rc(2)) + `</div>`;
   } else {
     html = palChipsHtml(rc);
     if(!list.length) html += palEmptyHtml('none', rc(1));
@@ -18350,7 +18353,7 @@ function renderPlansListV2(animate){
   const importLink = `<button type="button" class="plansv2-link m-press" data-pa="import">${t('plansV2Import', 'Importuj')}</button>`;
   let html = plansV2SectionHtml('own', t('plansV2MyPlans', 'Moje plany'), own.map(buildPlanCardV2).join('') + newCard, rc(1), importLink);
   if(mekkio.length) html += plansV2SectionHtml('mekkio', t('plansV2MekkioPlans', 'Plany Mekkio'), mekkio.map(buildPlanCardV2).join(''), rc(2));
-  html += plansV2SectionHtml('ai', 'Mekkio AI', buildPlanAiCardV2(), rc(3), '', true);
+  html += plansV2AiSectionHtml(rc(3));
   rowsEl.innerHTML = html;
   if(!animate) rowsEl.querySelectorAll('[data-row]').forEach(r=>{ if(kept[r.dataset.row]) r.scrollLeft = kept[r.dataset.row]; });
 
