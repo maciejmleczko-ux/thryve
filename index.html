@@ -2963,6 +2963,14 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .lg-key svg{width:26px;height:26px;display:block;}
 .lg-key:disabled{opacity:.3;cursor:default;}
 .lg-key-ok{grid-column:1 / -1;background:var(--m-orange);border-color:transparent;color:var(--m-white);font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;}
+.lg-key-sign{display:none;font-size:var(--m-fs-base);}
+.lg-pad.is-signed .lg-key-sign{display:flex;}
+.lg-pad.is-signed .lg-key-ok{grid-column:2 / -1;}
+.lg-load{gap:8px;}
+.lg-load .lg-num{font-size:var(--m-fs-display-sm);}
+.lg-load-hint{margin:0;max-width:260px;text-align:center;font-size:var(--m-fs-2xs);line-height:1.4;color:var(--m-ink);opacity:.6;transition:opacity var(--m-dur-quick) ease;}
+.lg-load-hint.is-hidden{opacity:0;}
+.lg-set-x{color:var(--m-orange);margin-left:6px;}
 .lg-scroll.pad-open{padding-bottom:calc(310px + env(safe-area-inset-bottom));}
 .lg-key:active{transform:scale(.95);transition-duration:var(--m-dur-press-in);}
 .gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active,.lg-set:active,.lg-key:active,.lg-num:active{transition-duration:var(--m-dur-press-in);}
@@ -4594,7 +4602,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="nm-photo">
           <span class="nm-av acct-photo-preview" id="acctPhotoPreview"><span class="ph" data-ph="account"></span></span>
           <div class="nm-btns">
-            <label class="nm-ico m-press" id="nmPick" role="button" aria-label="Zmień zdjęcie" title="Zmień zdjęcie"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1Zm9-13 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><input type="file" accept="image/*" id="acctPhotoInput" onchange="setAvatarFromFile(this.files[0]); this.value='';"></label>
+            <label class="nm-ico m-press" id="nmPick" role="button" aria-label="Zmień zdjęcie" title="Zmień zdjęcie"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.5 6.5l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><input type="file" accept="image/*" id="acctPhotoInput" onchange="setAvatarFromFile(this.files[0]); this.value='';"></label>
             <button type="button" class="nm-ico nm-ico--ghost m-press" id="acctPhotoClearBtn" hidden aria-label="Usuń zdjęcie" title="Usuń zdjęcie" onclick="clearAvatar()"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 12.5h9.4L17.5 7M10 11v5.5M14 11v5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           </div>
         </div>
@@ -6027,6 +6035,7 @@ const T_EN = {
   tuesdayLabel: 'Tuesday:',
   saturdayLabel: 'Saturday:',
   repsUnit: 'reps',
+  loadLabelExtra: 'Extra weight', loadLabelAssist: 'Assistance', loadHint: 'Slide left if you use a band or an assisted machine', loadA11y: 'Extra weight or assistance',
   timeLabel: 'Time', timeLabelSide: 'Time per side', perSideShort: '/side',
   tmStart: 'Start', tmPause: 'Pause', tmResume: 'Resume', tmEnd: 'Finish', tmSkip: 'Skip', tmResetA11y: 'Discard and start over', tmDiscarded: 'Attempt discarded',
   bkWarmup: 'Warm-up', bkStretch: 'Stretching', bkMin: 'min', bkMore: n=>`+${n} more`, bkStart: 'Start', bkRepeat: 'Do it again', bkUndo: 'Mark as not done', bkSkipStep: 'Skip step', bkStop: 'Stop', bkDoneNote: 'Done today.', bkNext: n=>`Next: ${n}`, bkNotifDone: 'Block finished', bkGetReady: 'Get ready',
@@ -10172,7 +10181,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.93.9";
+const APP_VERSION = "4.94.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -13457,6 +13466,10 @@ function weightStepFor(ex){ const bb = BARBELL_EXERCISES.has(ex && ex.name); ret
 /* Okno serii liczy w jednostce użytkownika (lg.w); w danych ciężar zawsze jest w kg. */
 function lgFromKg(kg){ const v = Number(kg) || 0; return isImp() ? Math.round(v / KG_PER_LB * 10) / 10 : v; }
 function lgToKg(v){ const n = Number(v) || 0; return isImp() ? Math.round(n * KG_PER_LB * 100) / 100 : n; }
+/* Ćwiczenia z masą własną: opcjonalny `extraKg` na serii (kg, ze znakiem): + dodatkowy ciężar, − wspomaganie (guma, maszyna). Brak pola = 0. */
+const LG_LOAD_MAX = ()=> isImp() ? 130 : 60;   // zakres linijki: ± w jednostce użytkownika
+function fmtLoadNum(v){ v = Number(v) || 0; return (v > 0 ? '+' : v < 0 ? '−' : '') + fmtKgLocal(Math.abs(v)); }
+function fmtExtraKg(kg){ const v = Number(kg) || 0; return (v > 0 ? '+' : v < 0 ? '−' : '') + fmtGymWeight(Math.abs(v)) + ' ' + wUnit(); }
 function parseRestSeconds(str){
   const s = String(str||'');
   const nums = (s.match(/\d+/g) || []).map(Number);
@@ -13779,11 +13792,12 @@ const LG_RULER_IND = '<svg viewBox="0 0 9 8" fill="currentColor"><path d="M8.87 
 function lgBuildRuler(host, step, value, onUser, opts){
   opts = opts || {};   // the cardio goal reuses this ruler for minutes / km / m: {max, labelEvery, fmt}
   const max = opts.max || (isImp() ? 880 : LG_MAX_KG), every = opts.labelEvery || 4, fmt = opts.fmt || fmtKgLocal;
-  const n = Math.round(max / step);
+  const min = opts.min || 0;   // min < 0: linijka ze znakiem (dodatkowy ciężar / wspomaganie), zero leży w środku zakresu
+  const n = Math.round((max - min) / step), z = Math.round(-min / step);
   let html = '<div class="lg-ruler-sp"></div>';
   for(let i = 0; i <= n; i++){
-    const label = i % every === 0;
-    html += `<div class="lg-tick">${label?`<em>${fmt(Math.round(i*step*100)/100)}</em>`:''}<i></i></div>`;
+    const label = (i - z) % every === 0;
+    html += `<div class="lg-tick">${label?`<em>${fmt(Math.round((min + i*step)*100)/100)}</em>`:''}<i></i></div>`;
   }
   html += '<div class="lg-ruler-sp"></div>';
   host.innerHTML = `<div class="lg-ruler-ind">${LG_RULER_IND}</div><div class="lg-ruler-track">${html}</div>`;
@@ -13792,6 +13806,7 @@ function lgBuildRuler(host, step, value, onUser, opts){
   let painted = -1;
   // ticks past the value go pale; only the stretch that changed is touched
   const paint = vi=>{
+    if(min < 0){ const lo = Math.min(vi, z), hi = Math.max(vi, z); ticks.forEach((t,i)=> t.classList.toggle('ahead', i < lo || i > hi)); painted = vi; return; }   // pełne kreski od zera do wartości
     if(painted === -1){ ticks.forEach((t,i)=> t.classList.toggle('ahead', i > vi)); }
     else { const lo = Math.min(painted, vi), hi = Math.max(painted, vi); for(let i = lo; i <= hi; i++) ticks[i].classList.toggle('ahead', i > vi); }
     painted = vi;
@@ -13818,7 +13833,7 @@ function lgBuildRuler(host, step, value, onUser, opts){
       if(i !== painted) paint(i);
       if(i !== lastIdx){
         lastIdx = i;
-        if(user){ haptic('select'); onUser(Math.round(i * step * 100) / 100); }
+        if(user){ haptic('select'); onUser(Math.round((min + i * step) * 100) / 100); }
       }
     });
     if(!down){ clearTimeout(idleT); idleT = setTimeout(endUser, 220); }
@@ -13828,7 +13843,7 @@ function lgBuildRuler(host, step, value, onUser, opts){
     setValue(v){
       if(down) return;   // never move the ruler under the finger
       user = false;
-      const i = Math.max(0, Math.min(n, Math.round((Number(v)||0) / step)));
+      const i = Math.max(0, Math.min(n, Math.round(((Number(v)||0) - min) / step)));
       lastIdx = i;
       paint(i);
       track.style.scrollSnapType = 'none';
@@ -13850,7 +13865,7 @@ function lgFirstBlank(){
   return -1;
 }
 function lgActiveIdx(){ const b = lgFirstBlank(); return b === -1 ? popupExercise.setValues.length : b; }
-function lgPrefillFor(idx){
+function lgPrefillBase(idx){
   const ex = popupExercise, bw = lgBw();
   const hist = lastSessionsFor(ex.name)[0];
   const ls = hist ? hist.sets : [];
@@ -13861,29 +13876,50 @@ function lgPrefillFor(idx){
   if(last) return { w: bw ? '' : lgFromKg(parseFloat(last.weight) || 20), r: parseInt(last.reps) || (ex.repLow || 10), pre: true };
   return { w: bw ? '' : lgFromKg(20), r: ex.repLow || 10, pre: false };
 }
+function lgPrefillFor(idx){
+  const p = lgPrefillBase(idx);
+  if(!lgBw()) return p;
+  // masa własna: obciążenie przechodzi z poprzedniej serii tej sesji (wtedy jest zapisywane), z historii tylko jako blada podpowiedź
+  const logged = popupExercise.setValues.filter(s => setIsLogged(s, true));
+  const last = logged[logged.length - 1];
+  if(last) return { ...p, w: lgFromKg(last.extraKg), carry: true };
+  const hist = lastSessionsFor(popupExercise.name)[0];
+  const ls = hist ? hist.sets : [];
+  const h = ls[idx] || ls[ls.length - 1] || null;
+  return { ...p, w: lgFromKg(h && h.extraKg), carry: false };
+}
 function lgResetCurrent(){
   if(!popupExercise || !lg) return;
   clearTimeout(lg.timer);
   lg.wt = lg.rt = false;
+  lg.we = false;   // masa własna: czy obciążenie z linijki trafia do zapisywanej serii
   if(lg.editIdx !== null){
     const s = popupExercise.setValues[lg.editIdx];
-    lg.w = lgBw() ? '' : lgFromKg(parseFloat(s.weight) || 0);
+    lg.w = lgBw() ? lgFromKg(s.extraKg) : lgFromKg(parseFloat(s.weight) || 0);
+    if(lgBw()) lg.we = !!s.extraKg;
     lg.r = parseInt(s.reps) || 0;
     lg.wPre = lg.rPre = true;
   } else {
     const p = lgPrefillFor(lgActiveIdx());
     lg.w = p.w; lg.r = p.r; lg.wPre = lg.rPre = p.pre;
+    if(lgBw()) lg.we = !!p.carry && Number(p.w) !== 0;
   }
   lgPaint();
-  if(lg.ruler && !lgBw()) lg.ruler.setValue(lg.w);
+  if(lg.ruler) lg.ruler.setValue(lg.w);
 }
 function lgPaint(){
   const w = document.getElementById('lgW'), r = document.getElementById('lgR');
   const typing = lgPad && lgPad.buf !== '';
   if(w){
-    w.textContent = (typing && lgPad.f === 'w') ? lgPad.buf : (lg.w === '' ? '' : fmtKgLocal(lg.w));
-    w.closest('.lg-wval').classList.toggle('is-pale', !lg.wt && !(lg.editIdx !== null));
+    const bw = lgBw();
+    w.textContent = (typing && lgPad.f === 'w') ? ((bw && lgPad.neg ? '−' : '') + lgPad.buf) : (lg.w === '' ? '' : (bw ? fmtLoadNum(lg.w) : fmtKgLocal(lg.w)));
+    w.closest('.lg-wval').classList.toggle('is-pale', bw ? (!lg.we || Number(lg.w) === 0) : (!lg.wt && !(lg.editIdx !== null)));
     w.classList.toggle('is-editing', !!lgPad && lgPad.f === 'w');
+    if(bw){
+      const lab = document.getElementById('lgLab'), hint = document.getElementById('lgLoadHint');
+      if(lab) lab.textContent = (Number(lg.w) < 0 ? t('loadLabelAssist','Wspomaganie') : t('loadLabelExtra','Dodatkowy ciężar')).toUpperCase();
+      if(hint) hint.classList.toggle('is-hidden', Number(lg.w) !== 0);
+    }
   }
   if(r){
     r.textContent = (typing && lgPad.f === 'r') ? lgPad.buf : (lg.r === '' ? '' : String(lg.r));
@@ -13912,7 +13948,7 @@ function lgSchedule(delay){
 function lgSetW(v, src){
   if(!lg) return;
   if(lgPad) lgPadClose();
-  lg.w = v; lg.wt = true;
+  lg.w = v; lg.wt = true; lg.we = true;
   if(src !== 'ruler' && lg.ruler) lg.ruler.setValue(v);
   lgPaint();
   lgSchedule();
@@ -13934,10 +13970,11 @@ let lgPad = null; // { f: 'w' | 'r', buf: '' }
 function lgPadOpen(f){
   if(!lg || !popupExercise) return;
   if(lgPad && lgPad.f !== f) lgPadApply();
-  lgPad = { f, buf: '' };
+  lgPad = { f, buf: '', neg: lgBw() && f === 'w' && Number(lg.w) < 0 };
   const pad = document.getElementById('lgPad'), scroll = document.getElementById('lgMain');
   if(!pad) return;
   pad.querySelector('.lg-key-dec').disabled = (f === 'r');
+  pad.classList.toggle('is-signed', lgBw() && f === 'w');   // klawisz +/−: obciążenie dodatkowe albo wspomaganie
   scroll.classList.add('pad-open');
   pad.hidden = false;
   void pad.offsetWidth;
@@ -13951,7 +13988,12 @@ function lgPadApply(){
   if(!lgPad || !lg) return;
   const f = lgPad.f, txt = lgPad.buf.replace(',', '.');
   lg[f === 'w' ? 'wt' : 'rt'] = true;     // opening + confirming counts as setting it, even unchanged
-  if(txt !== '' && txt !== '.'){
+  if(f === 'w' && lgBw()){
+    lg.we = true;
+    const mag = (txt !== '' && txt !== '.') ? Math.min(LG_LOAD_MAX(), parseFloat(txt) || 0) : Math.abs(Number(lg.w) || 0);
+    lg.w = (lgPad.neg ? -1 : 1) * mag;
+    if(lg.ruler) lg.ruler.setValue(lg.w);
+  } else if(txt !== '' && txt !== '.'){
     if(f === 'w'){ lg.w = Math.min(999, parseFloat(txt) || 0); if(lg.ruler) lg.ruler.setValue(lg.w); }
     else { lg.r = Math.min(999, parseInt(txt) || 0); }
   }
@@ -13971,6 +14013,7 @@ function lgPadKey(k){
   haptic('light');
   let b = lgPad.buf;
   if(k === 'del') b = b.slice(0, -1);
+  else if(k === '±'){ if(lgPad.f === 'w') lgPad.neg = !lgPad.neg; }
   else if(k === ','){ if(lgPad.f === 'w' && !b.includes(',')) b = (b === '' ? '0' : b) + ','; }
   else if(lgPad.f === 'w'){
     const dec = b.split(',')[1];
@@ -13996,6 +14039,7 @@ function lgCommit(){
   clearTimeout(lg.timer);
   const ex = popupExercise, sv = ex.setValues, bw = lgBw();
   const row = { weight: bw ? '' : String(lgToKg(lg.w)), reps: String(lg.r) };
+  if(bw && lg.we && Number(lg.w)) row.extraKg = lgToKg(lg.w);   // 0 = brak pola, jak w starych treningach
   if(lg.editIdx !== null){
     sv[lg.editIdx] = row;
     haptic('light');
@@ -14062,7 +14106,7 @@ function lgSetsHtml(){
   ex.setValues.forEach((sv, i)=>{
     const logged = setIsLogged(sv, bw);
     const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '');
-    const val = logged ? (sv.durationSec > 0 ? escHtml(ex.metrics && ex.metrics.length ? cardioSetLine(sv, ex.name) : fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}` : `${escHtml(fmtGymWeight(parseFloat(sv.weight)||0))}${wUnit()} x ${escHtml(String(sv.reps))}`) : '—';
+    const val = logged ? (sv.durationSec > 0 ? escHtml(ex.metrics && ex.metrics.length ? cardioSetLine(sv, ex.name) : fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}${sv.extraKg ? `<span class="lg-set-x">${escHtml(fmtExtraKg(sv.extraKg))}</span>` : ''}` : `${escHtml(fmtGymWeight(parseFloat(sv.weight)||0))}${wUnit()} x ${escHtml(String(sv.reps))}`) : '—';
     html += `<div class="lg-set-wrap" data-i="${i}"><div class="lg-set-del" aria-hidden="true">${LG_ICONS.trash}</div>
       <button type="button" class="${cls}" onclick="lgTapSet(${i})"><span class="lg-set-l">${t('seriesLabel', `Seria ${i+1}`, i+1)}</span><span class="lg-set-v">${val}</span><span class="lg-set-c">${LG_ICONS.check}</span></button></div>`;
   });
@@ -14336,6 +14380,14 @@ function popupPlanTitle(){
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   return plan ? planDisplayName(plan) : t('gymTitleTraining','TRENING');
 }
+function lgLoadBlockHtml(r){
+  return `<div class="lg-block lg-load${r}">
+        <span class="lg-lab" id="lgLab">${t('loadLabelExtra','Dodatkowy ciężar').toUpperCase()}</span>
+        <div class="lg-wval is-pale"><button type="button" class="lg-num" id="lgW" onclick="lgPadOpen('w')" aria-label="${escHtml(t('loadA11y','Dodatkowy ciężar albo wspomaganie'))}"></button><span class="lg-unit">${wUnit()}</span></div>
+        <div class="lg-ruler" id="lgRuler" data-nopage></div>
+        <p class="lg-load-hint" id="lgLoadHint">${escHtml(plTypo(t('loadHint','Przesuń w lewo, jeśli używasz gumy lub maszyny')))}</p>
+      </div>`;
+}
 function renderExercisePopupV2(animate){
   const box = document.getElementById('exercisePopupBoxV2');
   if(!popupExercise){ box.innerHTML = ''; return; }
@@ -14401,7 +14453,7 @@ function renderExercisePopupV2(animate){
           </div>
           <button type="button" class="lg-add lg-tm-main m-press" id="tmRow" onclick="tmEnd()" hidden>${t('tmEnd','Zakończ')}</button>
         </div>
-      </div>` : bw ? '' : `
+      </div>` : bw ? lgLoadBlockHtml(rise(3)) : `
       <div class="lg-block${rise(3)}">
         <span class="lg-lab">${t('weightLabel','Ciężar').toUpperCase()}</span>
         <div class="lg-wval is-pale"><button type="button" class="lg-num" id="lgW" onclick="lgPadOpen('w')" aria-label="${escHtml(t('weightLabel','Ciężar'))}"></button><span class="lg-unit">${wUnit()}</span></div>
@@ -14429,6 +14481,7 @@ function renderExercisePopupV2(animate){
       <button type="button" class="lg-key lg-key-dec" onclick="lgPadKey(',')">,</button>
       <button type="button" class="lg-key" onclick="lgPadKey('0')">0</button>
       <button type="button" class="lg-key lg-key-del" onclick="lgPadKey('del')" aria-label="⌫"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5h10a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 19 19H9l-5.5-7L9 5Zm3.5 4.5 5 5m0-5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button type="button" class="lg-key lg-key-sign" onclick="lgPadKey('±')" aria-label="+/−">+/−</button>
       <button type="button" class="lg-key lg-key-ok" onclick="lgPadClose()">OK</button>
     </div>`;
   lgWirePager();
@@ -14439,7 +14492,9 @@ function renderExercisePopupV2(animate){
   if(time) tmPaint();
   requestAnimationFrame(()=>{
     const host = document.getElementById('lgRuler');
-    if(host && lg && !bw && !time){ lg.ruler = lgBuildRuler(host, lg.step, lg.w, v=> lgSetW(v, 'ruler')); }
+    if(host && lg && !time){ lg.ruler = bw
+      ? lgBuildRuler(host, lg.step, lg.w, v=> lgSetW(v, 'ruler'), { max: LG_LOAD_MAX(), min: -LG_LOAD_MAX(), fmt: fmtLoadNum })
+      : lgBuildRuler(host, lg.step, lg.w, v=> lgSetW(v, 'ruler')); }
     if(time && isCardioGoalEx(ex)) cgInit();
   });
 }
@@ -15541,7 +15596,7 @@ function saveWorkout(){
       .filter(s => String(s.weight).trim() !== '' || String(s.reps).trim() !== '' || s.durationSec > 0)
       .map(s=> s.durationSec > 0
         ? {weight: 0, reps: 0, durationSec: Math.round(s.durationSec), ...(s.perSide ? {perSide: true} : {}), ...cardioSetFields(s)}
-        : {weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0}),
+        : {weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0, ...(Number(s.extraKg) ? {extraKg: Number(s.extraKg)} : {})}),
     rpe: ex.rpe || null,
     notes: ex.notes || '',
     version: ex.version || null // execution-version tag, periodized plans only — see resolvePeriodizedVersion()
@@ -21815,6 +21870,7 @@ function histPrevWorkoutV2(w){
 function histPillTxtV2(e, x){
   if(x.durationSec > 0) return fmtDur(x.durationSec, x.perSide);
   const w = +x.weight || 0;
+  if(w <= 0 && +x.extraKg) return `${x.reps} x ${fmtExtraKg(x.extraKg)}`;   // masa własna z dodatkiem / wspomaganiem
   return w > 0 ? `${x.reps} x ${fmtGymWeight(w)} ${wUnit()}` : `${x.reps} ${t('stV2RepsShort', 'powt.')}`;
 }
 // MAX: w tym treningu padł najcięższy ciężar tego ćwiczenia (większy niż we wszystkich wcześniejszych)
@@ -23703,12 +23759,13 @@ function statsFChartHtml(pts, yfmt){
 function statsFShades(sets){
   const pick = f=> sets.map(s=> +s[f] || 0);
   let v = pick('reps'), lo = Math.min(...v), hi = Math.max(...v);
-  if(hi === lo){ v = pick('weight'); lo = Math.min(...v); hi = Math.max(...v); }
+  if(hi === lo){ v = sets.map(s=> (+s.weight || 0) + (+s.extraKg || 0)); lo = Math.min(...v); hi = Math.max(...v); }   // przy równych powtórzeniach rozstrzyga ciężar (u masy własnej: dodatek / wspomaganie)
   return v.map(x=>{ if(hi === lo) return 0; const k = (x - lo) / (hi - lo); return k < .34 ? 0 : k < .67 ? 1 : 2; });
 }
 function statsFPillTxt(name, s){
   if(statsV2IsTime(name)) return statsFValTxt('time', s.reps);
   const w = +s.weight || 0;
+  if(w <= 0 && +s.extraKg) return `${s.reps} x ${fmtExtraKg(s.extraKg)}`;
   return w > 0 ? `${s.reps} x ${fmtGymWeight(w)} ${wUnit()}` : `${s.reps} ${statsV2Unit(name)}`;
 }
 const STATSF_STAR = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3.2l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6-4.4-4.3 6.1-.9L12 3.2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';

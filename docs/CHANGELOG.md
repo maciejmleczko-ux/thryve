@@ -121,7 +121,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 ### 4.93.9 · PATCH · 2026-10-25
 
-Podsumowanie treningu: mała ikona ołówka w prawym górnym rogu kafli, które można edytować (Czas, Kalorie; `.gymfin-stat-edit`), żeby było widać, co da się zmienić, ten sam ołówek co w menu planu (`PDT_ICON_EDIT`).
+Podsumowanie treningu: mała ikona ołówka w prawym górnym rogu kafli, które można edytować (Czas, Kalorie; `.gymfin-stat-edit`), żeby było widać, co da się zmienić, ten sam ołówek co w menu planu (`PDT_ICON_EDIT`); ujednolicony też w oknie „Zmień zdjęcie” (`.nm-ico`), więc w aplikacji jest jeden ołówek.
 
 **Commity (1):**
 
