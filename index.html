@@ -2634,8 +2634,8 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .histv2-sum-cell .k{margin:4px 0 0;font-size:var(--m-fs-2xs);color:var(--m-muted-text);text-transform:uppercase;letter-spacing:.09em;}
 .histv2-recpill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px 0 8px;border-radius:14px;background:var(--m-amber);font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);}
 .histv2-recpill[hidden]{display:none;}
-.histv2-addbtn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px 0 10px;border:none;border-radius:16px;background:var(--m-ink);color:var(--m-white);font:inherit;font-size:var(--m-fs-xs);cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
-.histv2-addbtn:active{transform:scale(.97);}
+.histv2-addbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;margin-top:16px;padding:0 20px;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:var(--m-white);font:inherit;font-size:var(--m-fs-sm);font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.histv2-addbtn:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
 .backfill-date{width:100%;box-sizing:border-box;height:48px;padding:0 14px;border:.5px solid var(--m-orange-tint);border-radius:var(--m-r-sm);background:var(--m-white);color:var(--m-ink);font:inherit;font-size:16px;text-align:center;}
 #view-gym-v2.is-backfill #gymV2PillTime{display:none;}
 .histv2-recpill .ph{width:16px;height:16px;color:var(--m-ink);}
@@ -4363,8 +4363,9 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <div id="histSumV2"></div>
-      <div class="histv2-label-row"><p class="histv2-section-label" id="histListLabelV2">Treningi</p><button type="button" class="histv2-daychip m-press" id="histDayChipV2" hidden onclick="histClearDayV2()"></button><span class="histv2-recpill" id="histRecPillV2" hidden></span><button type="button" class="histv2-addbtn m-press" id="histAddBtnV2" onclick="openBackfillDialog()"><span class="ph" data-ph="plus-icon"></span><span data-i18n="backfillAdd">Dodaj trening</span></button></div>
+      <div class="histv2-label-row"><p class="histv2-section-label" id="histListLabelV2">Treningi</p><button type="button" class="histv2-daychip m-press" id="histDayChipV2" hidden onclick="histClearDayV2()"></button><span class="histv2-recpill" id="histRecPillV2" hidden></span></div>
       <div class="histv2-list" id="histDetailV2"></div>
+      <button type="button" class="histv2-addbtn m-press" id="histAddBtnV2" onclick="openBackfillDialog()"><span class="ph" data-ph="plus-icon"></span><span data-i18n="backfillAdd">Dodaj trening</span></button>
     </div>
   </section>
   <div class="histv2-open" id="histOpenV2" aria-hidden="true">
@@ -9590,6 +9591,7 @@ function afterKcalEdit(){
   closeEditKcal();
   if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
   if(document.getElementById('histDetailV2') && selectedHistDateV2) renderHistDetailV2(false);
+  refreshHistOpenV2();
 }
 function revertKcal(){
   const w = workouts.find(x=> x.id === editKcalWorkoutId);
@@ -9688,6 +9690,7 @@ function saveEditTime(){
   if(tv && gymFinWorkoutId === w.id) tv.innerHTML = v + '<small>min</small>';
   if(typeof refreshGymFinKcal === 'function') refreshGymFinKcal();
   if(document.getElementById('histDetailV2') && selectedHistDateV2) renderHistDetailV2(false);
+  refreshHistOpenV2();
 }
 
 /* ---------- workout reminder (native only — @capacitor/local-notifications) ----------
@@ -10053,7 +10056,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.87.0";
+const APP_VERSION = "4.88.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -21496,6 +21499,14 @@ function openHistWorkoutV2(id){
   el.classList.add('open');
   document.documentElement.classList.add('modal-lock');
   haptic('light');
+}
+function refreshHistOpenV2(){   // otwarty trening z Historii po edycji czasu / kalorii: przerysuj kafle, zachowaj przewinięcie
+  if(!histOpenIdV2) return;
+  const w = workouts.find(x=>x.id===histOpenIdV2); if(!w) return;
+  const sc = document.getElementById('histOpenScrollV2'), top = sc.scrollTop;
+  sc.innerHTML = histOpenHtmlV2(w);
+  hydrateHistIconsV2(document.getElementById('histOpenV2'));
+  sc.scrollTop = top;
 }
 function closeHistWorkoutV2(){
   const el = document.getElementById('histOpenV2');
