@@ -3846,7 +3846,7 @@ button.stv2-bt{cursor:pointer;}
 #monthSumSheet .m2-body{padding-bottom:120px;gap:var(--m-gap-card);}
 .ms-top{padding:16px;border-radius:var(--m-r-md);background:#000;color:var(--m-white);}
 .ms-top-eb{margin:0 0 10px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-orange);}
-.ms-headline{margin:0;font-size:var(--m-fs-2xl);font-weight:300;line-height:1.1;letter-spacing:-.01em;color:var(--m-white);}
+.ms-headline{text-wrap:balance;margin:0;font-size:var(--m-fs-2xl);font-weight:300;line-height:1.1;letter-spacing:-.01em;color:var(--m-white);}
 .ms-share{display:flex;flex-direction:column;gap:var(--m-gap-card);}
 .ms-hero{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:18px 16px 16px;border-radius:var(--m-r-md);background:var(--m-orange);color:var(--m-white);}
 .ms-hero-n{font-size:var(--m-fs-num-lg);font-weight:200;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
@@ -3876,7 +3876,7 @@ button.stv2-bt{cursor:pointer;}
 .ms-chip{padding:3px 10px;border-radius:var(--m-r-pill);background:var(--m-mint-tint);color:var(--m-mint-ink);font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;}
 .ms-card{padding:4px 16px;border-radius:var(--m-r-md);background:var(--m-white);}
 .ms-ul{margin:0;padding:0;list-style:none;font-size:var(--m-fs-base);line-height:1.45;color:var(--m-ink);}
-.ms-ul li{position:relative;padding:12px 0 12px 16px;}
+.ms-ul li{position:relative;padding:12px 0 12px 16px;text-wrap:pretty;}
 .ms-ul li+li{border-top:.5px solid var(--m-orange-tint);}
 .ms-ul li::before{content:"";position:absolute;left:0;top:1.15em;width:6px;height:6px;border-radius:var(--m-r-pill);}
 .ms-ul.is-good li::before{background:var(--m-mint);}
@@ -3906,7 +3906,7 @@ button.stv2-bt{cursor:pointer;}
   background:linear-gradient(90deg,var(--m-ai-fill-from) 0%,var(--m-ai-fill-mid) 55%,var(--m-ai-fill-to) 175%) padding-box,linear-gradient(142deg,color-mix(in srgb,var(--m-ai-from) 22%,var(--m-ai-fill-to)) 0%,color-mix(in srgb,var(--m-ai-to) 45%,var(--m-ai-fill-to)) 83%) border-box;
   box-shadow:inset 0 0 15.4px var(--m-ai-inset),inset 0 0 6px var(--m-ai-inset-2);}
 .ms-ol{margin:0;padding:0;list-style:none;counter-reset:ms;font-size:var(--m-fs-base);font-weight:300;line-height:1.45;color:var(--m-white);}
-.ms-ol li{position:relative;padding-left:30px;counter-increment:ms;}
+.ms-ol li{position:relative;padding-left:30px;counter-increment:ms;text-wrap:pretty;}
 .ms-ol li+li{margin-top:10px;}
 .ms-ol li::before{content:counter(ms);position:absolute;left:0;top:0;width:20px;height:20px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.18);font-size:var(--m-fs-2xs);font-weight:500;line-height:20px;text-align:center;}
 .ms-note{margin-top:8px;color:var(--m-muted-text);}
@@ -10166,7 +10166,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.93.2";
+const APP_VERSION = "4.93.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -20493,8 +20493,8 @@ async function dashAiFetch(job){
   } else {
     // v11 odpowiedź: headline / insight / next[{exercise,target}] → kształt używany przez kartę, popup i wskazówkę przy serii
     lastAiSummaryData = {
-      summary: res.headline ?? res.summary, analysis: res.insight ?? res.analysis ?? '',
-      actions: (Array.isArray(res.next) ? res.next : []).filter(n=> n && n.exercise && n.target).map(n=>({ exercise: n.exercise, action: n.target })),
+      summary: plTypo(res.headline ?? res.summary), analysis: plTypo(res.insight ?? res.analysis ?? ''),
+      actions: (Array.isArray(res.next) ? res.next : []).filter(n=> n && n.exercise && n.target).map(n=>({ exercise: n.exercise, action: plTypo(n.target) })),
     };
     dashAiStatus = 'ready';
     try {
@@ -20512,6 +20512,12 @@ async function dashAiFetch(job){
    Wymaga konta w chmurze + zgody na AI, minimum MS_MIN_WORKOUTS treningów w miesiącu. Cache: jeden miesiąc = jedno
    wywołanie (klucz userId + ym + MS_VERSION). Test w konsoli: msOpen('2026-10').
    ============================================================ */
+// Polska typografia (zasada: żadnego jednoliterowego spójnika/przyimka na końcu wiersza): a, i, o, u, w, z + następne słowo
+// oraz liczba + jednostka/rzeczownik sklejone twardą spacją. Dla tekstów z AI i etykiet; EN bez zmian. Stosować na tekście, nie na HTML.
+function plTypo(str){
+  if(LANG === 'en' || typeof str !== 'string') return str;
+  return str.replace(/(^|[\s(])([aiouwzAIOUWZ]) (?=\S)/g, '$1$2\u00a0').replace(/(\d) (?=[A-Za-zĄ-ž%])/g, '$1\u00a0');
+}
 const LS_MS_CACHE = 'fitlog_month_summary_v1';   // {userId, version, months:{ 'YYYY-MM': {model, ai} }}, max 12 miesięcy
 const LS_MS_SEEN = 'fitlog_month_summary_seen_v1'; // ostatni miesiąc, którego okno już pokazano (lub był za pusty)
 const MS_VERSION = 'm2';
@@ -20659,12 +20665,12 @@ function msBodyHtml(model, ai){
   let n = 0;   // kolejność wejścia: --i rośnie o 1 na element (60 ms), start dopiero gdy sheet prawie wjechał
   const kg = x=> formatDashNum(kgToDisp(x), 0) + ' ' + wUnit();
   const kgE = x=> formatDashNum(kgToDisp(x), 1) + ' ' + wUnit();
-  const li = a => a.map(x=> `<li>${E(x)}</li>`).join('');
+  const li = a => a.map(x=> `<li>${E(plTypo(x))}</li>`).join('');
   const sec = (lbl, inner, right) => inner ? `<section class="ms-sec m-rise" style="--i:${n++}"><div class="ms-sec-hd"><p class="ms-sec-lbl">${lbl}</p>${right || ''}</div>${inner}</section>` : '';
   const [yy, mm] = model.ym.split('-').map(Number);
   const prevAbbr = String(MONTH_ABBR_PL[(mm + 10) % 12]).toLowerCase();   // poprzedni miesiąc, 3 litery
   // nagłówek AI: czarna karta jak „Postęp tygodniowy” w Postępach
-  const head = `<section class="ms-top m-rise" style="--i:${n++}"><p class="ms-top-eb">${MONTH_NAMES[mm - 1]} ${yy}</p><h2 class="ms-headline">${E(ai.headline)}</h2></section>`;
+  const head = `<section class="ms-top m-rise" style="--i:${n++}"><p class="ms-top-eb">${MONTH_NAMES[mm - 1]} ${yy}</p><h2 class="ms-headline">${E(plTypo(ai.headline))}</h2></section>`;
   // kafle jak karta „Udostępnij postępy”: pomarańczowy z objętością + 3 mini (treningi, rekordy, średni czas); strzałka ↗/↘ = vs poprzedni miesiąc
   const arrow = (v, big) => v == null || v === 0 ? '' : `<span class="ms-arr${big ? ' ms-arr--big' : ''}${v < 0 ? ' is-down' : ''}" aria-hidden="true">${PH['arrow-up-right']}</span>`;
   const sgn = v => v == null || v === 0 ? '' : `${v > 0 ? '+' : '−'}${Math.abs(v)}`;
@@ -20682,19 +20688,19 @@ function msBodyHtml(model, ai){
   const bad = sec(t('msBad', 'Co poszło słabiej'), list(ai.bad, 'is-bad'));
   // progres: wiersze jak „Rekordy” (nazwa, opis, wartość po prawej)
   const prog = sec(t('msProgress', 'Progres'), model.topGains.length ? `<div class="ms-card">${model.topGains.map(g=>
-    `<div class="ms-row"><span class="ms-row-n"><b>${E(g.name)}</b><small>${t('msEstMax', 'szac. maks.')} ${kgE(g.fromKg)} → ${kgE(g.toKg)}</small></span><span class="ms-row-v is-up">↑ +${g.deltaPct}%</span></div>`).join('')}</div>` : '');
+    `<div class="ms-row"><span class="ms-row-n"><b>${E(g.name)}</b><small>${plTypo(t('msEstMax', 'szac. maks.') + ' ' + kgE(g.fromKg) + ' → ' + kgE(g.toKg))}</small></span><span class="ms-row-v is-up">↑ +${g.deltaPct}%</span></div>`).join('')}</div>` : '');
   // stoi w miejscu: jak „Bez postępu” (bursztynowe kółko ze strzałką, pastylka z ciężarem, opis)
   const stall = sec(t('msStalled', 'Stoi w miejscu'), model.stalled.length ? `<div class="ms-card">${model.stalled.map(g=>
-    `<div class="ms-row ms-row--stall"><span class="ms-stall-ico" aria-hidden="true">→</span><span class="ms-row-n"><b>${E(g.name)}</b><small><span class="ms-pill">${E(kgE(g.e1rmKg))}</span> ${t('msStalledSub', 'bez zmiany w ostatnich 3 sesjach')}</small></span></div>`).join('')}</div>` : '');
+    `<div class="ms-row ms-row--stall"><span class="ms-stall-ico" aria-hidden="true">→</span><span class="ms-row-n"><b>${E(g.name)}</b><small><span class="ms-pill">${E(kgE(g.e1rmKg))}</span> ${plTypo(t('msStalledSub', 'bez zmiany w ostatnich 3 sesjach'))}</small></span></div>`).join('')}</div>` : '');
   // rozkład partii: czerwone paski jak „Rozkład mięśni” + bursztynowy baner partii bez serii
   const maxShare = Math.max(1, ...model.muscleShare.map(m=> m.sharePct));
   const bars = sec(t('msMuscles', 'Rozkład partii'), model.muscleShare.length ? `<div class="ms-card">${model.muscleShare.map(m=>
     `<div class="ms-bar-row"><span class="ms-bar-n">${E(m.group)}</span><span class="ms-bar"><i style="width:${Math.round(m.sharePct / maxShare * 100)}%"></i></span><span class="ms-bar-v">${m.sharePct}%</span></div>`).join('')}</div>` : '',
     `<span class="ms-chip">${E(MONTH_NAMES[mm - 1])}</span>`);
-  const warn = model.untrainedGroups.length ? `<div class="ms-warn m-rise" style="--i:${n++}"><span class="ms-warn-i" aria-hidden="true">!</span><span class="ms-warn-t"><b>${t('msLeast', 'Najmniej trenowane')}</b><small>${E(model.untrainedGroups.slice(0, 3).join(', '))}: ${t('msNoSets', 'bez serii w miesiącu')}</small></span></div>` : '';
+  const warn = model.untrainedGroups.length ? `<div class="ms-warn m-rise" style="--i:${n++}"><span class="ms-warn-i" aria-hidden="true">!</span><span class="ms-warn-t"><b>${t('msLeast', 'Najmniej trenowane')}</b><small>${E(model.untrainedGroups.slice(0, 3).join(', '))}: ${plTypo(t('msNoSets', 'bez serii w miesiącu'))}</small></span></div>` : '';
   const focus = ai.focus.length ? `<section class="ms-sec m-rise" style="--i:${n++}"><div class="ms-sec-hd"><p class="ms-sec-lbl">${t('msFocus', 'Na czym się skupić')}</p></div><div class="ms-focus"><ol class="ms-ol">${li(ai.focus)}</ol></div></section>` : '';
   return `${head}${hero}${good}${bad}${prog}${stall}${bars}${warn}${focus}` +
-    `<p class="ai-popup-note ms-note">${t('msNote', 'Podsumowanie tworzy AI na podstawie Twoich treningów. To nie porada medyczna i nie zastąpi trenera.')}</p>`;
+    `<p class="ai-popup-note ms-note">${plTypo(t('msNote', 'Podsumowanie tworzy AI na podstawie Twoich treningów. To nie porada medyczna i nie zastąpi trenera.'))}</p>`;
 }
 // ym + (opcjonalnie) {model, ai}; bez drugiego argumentu bierze cache albo woła AI (przydatne do testów w konsoli)
 async function msOpen(ym, data){
