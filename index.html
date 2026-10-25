@@ -700,7 +700,7 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
    straight from the finish screen too. Only the few genuinely new bits
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
-#nameEditOverlay,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#recordDetailSheet,#newBadgeSheet,#langSheet,#unitsSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
+#nameEditOverlay,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#editTimeSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#recordDetailSheet,#newBadgeSheet,#langSheet,#unitsSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
 /* mConfirm() is opened from inside the account panel (z 95) and its sheets
    (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
 #mConfirmOverlay{z-index:9650;}
@@ -2634,6 +2634,10 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .histv2-sum-cell .k{margin:4px 0 0;font-size:var(--m-fs-2xs);color:var(--m-muted-text);text-transform:uppercase;letter-spacing:.09em;}
 .histv2-recpill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px 0 8px;border-radius:14px;background:var(--m-amber);font-size:var(--m-fs-xs);font-weight:500;color:var(--m-ink);}
 .histv2-recpill[hidden]{display:none;}
+.histv2-addbtn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px 0 10px;border:none;border-radius:16px;background:var(--m-ink);color:var(--m-white);font:inherit;font-size:var(--m-fs-xs);cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.histv2-addbtn:active{transform:scale(.97);}
+.backfill-date{width:100%;box-sizing:border-box;height:48px;padding:0 14px;border:.5px solid var(--m-orange-tint);border-radius:var(--m-r-sm);background:var(--m-white);color:var(--m-ink);font:inherit;font-size:16px;text-align:center;}
+#view-gym-v2.is-backfill #gymV2PillTime{display:none;}
 .histv2-recpill .ph{width:16px;height:16px;color:var(--m-ink);}
 .histv2-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin-bottom:4px;}
 .histv2-label-row .histv2-section-label{margin:0;}
@@ -4359,7 +4363,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <div id="histSumV2"></div>
-      <div class="histv2-label-row"><p class="histv2-section-label" id="histListLabelV2">Treningi</p><button type="button" class="histv2-daychip m-press" id="histDayChipV2" hidden onclick="histClearDayV2()"></button><span class="histv2-recpill" id="histRecPillV2" hidden></span></div>
+      <div class="histv2-label-row"><p class="histv2-section-label" id="histListLabelV2">Treningi</p><button type="button" class="histv2-daychip m-press" id="histDayChipV2" hidden onclick="histClearDayV2()"></button><span class="histv2-recpill" id="histRecPillV2" hidden></span><button type="button" class="histv2-addbtn m-press" id="histAddBtnV2" onclick="openBackfillDialog()"><span class="ph" data-ph="plus"></span><span data-i18n="backfillAdd">Dodaj trening</span></button></div>
       <div class="histv2-list" id="histDetailV2"></div>
     </div>
   </section>
@@ -4873,6 +4877,32 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
     <div class="m2-actions">
       <button type="button" class="m2-btn" id="kcalSave" onclick="saveEditKcal()">ZAPISZ</button>
+    </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="editTimeSheet" onclick="if(event.target===this) closeEditTime()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="timeTitle">CZAS TRENINGU</h1>
+          <button type="button" class="m2-x" id="timeClose" aria-label="Zamknij" onclick="closeEditTime()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="timeSheetSub">Wpisz, ile minut trwał trening.</p>
+      </div>
+      <div class="m2-body">
+        <div class="m2-field kc-field">
+          <div class="m2-row m2-row--lg"><span class="m2-row-l" id="timeL">CZAS</span><span class="m2-row-v" id="timeV"></span></div>
+        </div>
+        <p class="m2-err" id="timeErr" role="alert" hidden></p>
+        <button type="button" class="m2-link m2-link--c" id="timeRevertBtn" hidden onclick="revertLiveTime()"></button>
+        <div class="ws-pad" id="timePad"></div>
+      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="timeSave" onclick="saveEditTime()">ZAPISZ</button>
     </div>
   </div>
 </div>
@@ -5549,6 +5579,17 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 </div>
 
 <!-- "Powtórz ostatni trening" overwrite confirm (#1) -->
+<div class="onboard-overlay hidden m-dialog" id="backfillOverlay" onclick="if(event.target===this) closeBackfillDialog()">
+  <div class="onboard-box new-ex-form">
+    <h3 data-i18n="backfillTitle">Dodaj trening wstecz</h3>
+    <p data-i18n="backfillBody">Wybierz dzień, w którym był trening. Wpiszesz ćwiczenia i serie tak jak zwykle, ale bez licznika czasu.</p>
+    <input type="date" id="backfillDateInput" class="backfill-date">
+    <div class="onboard-actions">
+      <button type="button" class="save" onclick="startBackfillWorkout()" data-i18n="backfillGo">Dalej</button>
+      <button type="button" class="skip" onclick="closeBackfillDialog()" data-i18n="cancel">Anuluj</button>
+    </div>
+  </div>
+</div>
 <div class="onboard-overlay hidden m-dialog" id="repeatConfirmOverlay" onclick="if(event.target===this) closeRepeatConfirm()">
   <div class="onboard-box new-ex-form">
     <h3 data-i18n="repeatConfirmTitle">Powtórzyć ostatni trening?</h3>
@@ -5950,6 +5991,13 @@ const T_EN = {
   swapV2Revert: 'Restore the original',
   swapV2Logged: "This exercise already has logged sets — it can't be swapped.",
   repeatLastWorkout: 'Repeat last workout',
+  backfillAdd: 'Add workout',
+  backfillTitle: 'Add a past workout',
+  backfillBody: 'Pick the day the workout happened. You log exercises and sets as usual, without the timer.',
+  backfillGo: 'Continue',
+  backfillBusy: 'You have a workout in progress. Finish or abort it first.',
+  backfillBadDate: 'Pick a day in the past',
+  backfillBanner: d => `Workout from ${d}`,
   repeatNoWorkout: 'No saved workout to repeat yet',
   repeatDone: d => `Loaded your workout from ${d}`,
   repeatConfirmTitle: 'Repeat your last workout?',
@@ -7950,7 +7998,7 @@ function fmtKg(n){ const s = Number(kgToDisp(Number(n))).toFixed(1); return LANG
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
+const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -9922,7 +9970,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.86.4";
+const APP_VERSION = "4.87.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -12218,6 +12266,8 @@ let extraGymTiles = []; // exercises picked via "Wybierz inne ćwiczenie" for to
    with that workout's weights/reps when you open each one. Cleared on
    save or when the user taps the button again to go back to the plan. */
 let repeatMode = null; // { date, names:[], prefill:{name:[{weight,reps}]} }
+/* Trening dopisany wstecz (Historia → „Dodaj trening”): RRRR-MM-DD dnia, którego dotyczy. null = zwykły trening „na żywo”. */
+let backfillDate = null;
 // Typed-but-not-confirmed sets, keyed by exercise name — set when the popup
 // is closed (backdrop tap, swipe-down, accidental nav) without tapping
 // "Dodaj do treningu". Restores on reopen instead of starting blank
@@ -12315,9 +12365,9 @@ const GYM_DRAFT_MAX_AGE_H = 24;
 function persistGymSession(){
   try{
     const hasDrafts = Object.keys(popupDrafts).length > 0;
-    if(sessionExercises.length || extraGymTiles.length || repeatMode || hasDrafts){
+    if(sessionExercises.length || extraGymTiles.length || repeatMode || hasDrafts || backfillDate){
       localStorage.setItem(LS_GYM_SESSION_DRAFT, JSON.stringify({
-        savedAt: Date.now(), date: todayStr(), sessionExercises, extraGymTiles, repeatMode, popupDrafts
+        savedAt: Date.now(), date: todayStr(), sessionExercises, extraGymTiles, repeatMode, popupDrafts, backfillDate
       }));
     } else {
       localStorage.removeItem(LS_GYM_SESSION_DRAFT);
@@ -12339,6 +12389,7 @@ function restoreGymSession(){
     if(Array.isArray(obj.extraGymTiles)) extraGymTiles = obj.extraGymTiles;
     if(obj.repeatMode && Array.isArray(obj.repeatMode.names)) repeatMode = obj.repeatMode;
     if(obj.popupDrafts && typeof obj.popupDrafts === 'object') popupDrafts = obj.popupDrafts;
+    if(typeof obj.backfillDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(obj.backfillDate)) backfillDate = obj.backfillDate;
   }catch(e){}
 }
 restoreGymSession();
@@ -12675,7 +12726,7 @@ function todayPlanExerciseNames(){
   if(!starredPlanId) return null;
   const plan = trainingPlans.find(p=>p.id===starredPlanId);
   if(!plan) return null;
-  const list = planExercisesFor(plan, todayStr());
+  const list = planExercisesFor(plan, backfillDate || todayStr());
   if(!list.length) return null;
   if(!plan.periodized) return list.map(withLibraryTime);
   // Periodized plan: tag each non-bookend exercise with the cycle its
@@ -12968,7 +13019,7 @@ mSheetDrag('whatsnewOverlay', closeWhatsNew);
 mSheetDrag('releaseOverlay', closeRelease);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','swapExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightListSheet','weightSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
+['nameEditOverlay','weightListSheet','weightSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 mSheetDrag('bodyDataSheet', closeBodyDataSheet);     // zamknięcie przeciągnięciem czyści też stan okna (klawiatura, pola)
 mSheetDrag('badgeDetailSheet', closeBadgeDetail);
@@ -15296,18 +15347,19 @@ function saveWorkout(){
   const cls = classifySession(result.map(e=>e.name));
   const workout = {
     id: 'w_' + Date.now(),
-    date: todayStr(),
-    startDate: workoutStartDateNow(),   // lokalny dzień STARTU treningu (RRRR-MM-DD); date = dzień zapisu
+    date: backfillDate || todayStr(),
+    startDate: backfillDate || workoutStartDateNow(),   // lokalny dzień STARTU treningu (RRRR-MM-DD); date = dzień zapisu
     planId: activePlanIdNow(),          // plan aktywny w chwili zapisu; null = trening bez planu
     day: cls.label,
     exercises: result,
-    durationMin: computeGymSessionDurationMin(), // null if no tile was ever tapped this session
+    durationMin: backfillDate ? null : computeGymSessionDurationMin(), // null if no tile was ever tapped this session; trening dopisany wstecz nie ma czasu
     // Real start/end of the active window (ms epoch) — lets syncHealthData()
     // match this session to a watch workout in Apple Health by time overlap.
     // Local-only (not in cloudWorkoutRow); the pull keeps local fields.
-    startedAt: gymSessionStartAt || null,
-    endedAt: gymSessionActiveEndAt || null
+    startedAt: backfillDate ? null : (gymSessionStartAt || null),
+    endedAt: backfillDate ? null : (gymSessionActiveEndAt || null)
   };
+  if(backfillDate) workout.backfilled = true;
   workouts.push(workout);
   saveWorkouts(workouts);
   resetGymSessionTiming();
@@ -15318,6 +15370,7 @@ function saveWorkout(){
   extraGymTiles = [];
   repeatMode = null;
   popupDrafts = {};
+  backfillDate = null;
   persistGymSession(); // clears the autosaved in-progress draft
   todaySwaps = {};
   persistTodaySwaps(); // today's swaps don't carry past a saved workout
@@ -15918,7 +15971,7 @@ function workoutSumStats(w){
 }
 function saveWorkoutV2(){
   // the previous workout (most recent by date), for the "Vs poprzedni" tile
-  const prevWorkout = workouts.slice().sort((a,b)=> b.date.localeCompare(a.date))[0] || null;
+  const prevWorkout = workouts.filter(x=> !backfillDate || x.date < backfillDate).sort((a,b)=> b.date.localeCompare(a.date))[0] || null;
   const prevStats = prevWorkout ? workoutSumStats(prevWorkout) : null;
 
   const badgesBefore = badgesEarnedIds();   // Nowa odznaka (Figma 15): stan odznak przed zapisem tego treningu
@@ -20267,11 +20320,16 @@ const GYMV2_DAY_NAMES_PL = LANG==='en'
   ? ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
   : ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
 function renderGymV2(){
-  const iso = todayStr();
+  const iso = backfillDate || todayStr();
   const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   const nameEl = document.getElementById('gymV2PlanName');
   const noPlan = document.getElementById('gymV2NoPlan');
-  if(plan){
+  document.getElementById('view-gym-v2').classList.toggle('is-backfill', !!backfillDate);
+  if(backfillDate){
+    nameEl.textContent = t('backfillBanner', `Trening z dnia ${fmtDateHuman(backfillDate)}`, fmtDateHuman(backfillDate));
+    nameEl.hidden = false;
+    noPlan.classList.add('hidden');
+  } else if(plan){
     nameEl.textContent = planDisplayName(plan);
     nameEl.hidden = false;
     noPlan.classList.add('hidden');
@@ -20340,6 +20398,33 @@ function updateGymV2RepeatBtn(){
   tEl.textContent = t('repeatLastWorkout','Powtórz ostatni trening');
   sEl.textContent = `${fmtDateHuman(last.date)} · ${planExCountText(n)}` + (vol > 0 ? ` · ${formatDashNum(kgToDisp(vol), 0)} ${wUnit()}` : '');
   btn.hidden = false;
+}
+/* Historia → „Dodaj trening”: dopisanie treningu, który odbył się w przeszłości. Używa ekranu GYM
+   z ustawionym backfillDate (plan dnia, brak licznika, zapis z tą datą). */
+function openBackfillDialog(){
+  if(gymHasProgress() && !backfillDate){ toast(t('backfillBusy','Masz rozpoczęty trening. Zakończ go albo przerwij.')); return; }
+  const inp = document.getElementById('backfillDateInput');
+  const today = todayStr();
+  const yest = dateStr(new Date(Date.now() - 86400000));
+  const min = dateStr(new Date(Date.now() - 400*86400000));
+  inp.max = yest; inp.min = min;
+  inp.value = (selectedHistDateV2 && selectedHistDateV2 < today) ? selectedHistDateV2 : (backfillDate || yest);
+  document.getElementById('backfillOverlay').classList.remove('hidden');
+  document.documentElement.classList.add('modal-lock');
+}
+function closeBackfillDialog(){
+  document.getElementById('backfillOverlay').classList.add('hidden');
+  document.documentElement.classList.remove('modal-lock');
+}
+function startBackfillWorkout(){
+  const v = document.getElementById('backfillDateInput').value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v) || v >= todayStr()){ toast(t('backfillBadDate','Wybierz dzień z przeszłości')); return; }
+  closeBackfillDialog();
+  if(backfillDate !== v){ sessionExercises = []; extraGymTiles = []; repeatMode = null; popupDrafts = {}; todaySwaps = {}; persistTodaySwaps(); }
+  backfillDate = v;
+  persistGymSession();
+  goRoute('gym-v2');
+  renderGymV2();
 }
 function repeatLastWorkoutV2(){
   if(repeatMode){   // already in repeat mode — tap = back to the plan
@@ -20635,14 +20720,14 @@ function gymHasProgress(){
 /* X — abort the workout (asks first when there is anything to lose). */
 function gymAbortV2(){
   if(popupExercise) return;
-  if(!gymHasProgress()){ goRoute('dashboard'); return; }
+  if(!gymHasProgress()){ backfillDate = null; persistGymSession(); goRoute('dashboard'); return; }
   gymConfirmV2({
     title: t('gymAbortTitleDlg','Przerwać trening?'),
     body: t('gymAbortBody','Wszystko, co dziś zalogowałeś w tym treningu, zniknie.'),
     yes: t('gymAbortYes','Przerwij'),
     no: t('gymAbortNo','Wróć do treningu'),
     onYes: ()=>{
-      sessionExercises = []; extraGymTiles = []; repeatMode = null; popupDrafts = {};
+      sessionExercises = []; extraGymTiles = []; repeatMode = null; popupDrafts = {}; backfillDate = null;
       todaySwaps = {}; persistTodaySwaps();
       persistGymSession(); resetGymSessionTiming(); liveReset(); restStop();
       goRoute('dashboard');

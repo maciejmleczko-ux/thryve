@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.86.4 (2026-10-23)
+- **Aktualna wersja:** 4.87.0 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.87.0 · MINOR · 2026-10-25
+
+Dodawanie treningu wstecz: w Historii przycisk „Dodaj trening” → wybór dnia z przeszłości → ekran GYM w trybie `backfillDate` (plan z dnia tygodnia tej daty, baner „Trening z dnia…”, bez licznika czasu). Zapis z `date`/`startDate` = wybrany dzień, `durationMin`/`startedAt`/`endedAt` = null, flaga `backfilled`. „Vs poprzedni” liczy się względem treningu sprzed tej daty.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.87.0: dodawanie treningu wstecz z Historii
 
 ### 4.86.4 · PATCH · 2026-10-23
 
