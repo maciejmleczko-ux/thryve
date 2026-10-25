@@ -3851,8 +3851,11 @@ button.stv2-bt{cursor:pointer;}
 .ms-hero{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:18px 16px 16px;border-radius:var(--m-r-md);background:var(--m-orange);color:var(--m-white);}
 .ms-hero-n{font-size:var(--m-fs-num-lg);font-weight:200;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
 .ms-hero-n small{font-size:var(--m-fs-xl);font-weight:300;}
+.ms-d{display:inline-flex;align-items:center;gap:4px;margin-top:2px;font-size:var(--m-fs-2xs);line-height:15px;color:inherit;white-space:nowrap;}
+.ms-hero .ms-d{margin-top:6px;font-size:var(--m-fs-xs);}
+.ms-d svg{display:block;flex:none;width:12px;height:12px;}
+.ms-d svg.is-down{transform:rotate(180deg);}
 .ms-hero-k{font-size:var(--m-fs-xs);letter-spacing:.1em;text-transform:uppercase;}
-.ms-hero-d{margin-top:6px;padding:2px 10px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.2);font-size:var(--m-fs-xs);}
 .ms-minis{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--m-gap-card);}
 .ms-mini{position:relative;display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:var(--m-r-sm);color:var(--m-white);min-width:0;}
 .ms-mini--vol{background:var(--m-metric-volume);}   /* treningi: ciemna czerwień jak dawna objętość */
@@ -3861,15 +3864,6 @@ button.stv2-bt{cursor:pointer;}
 .ms-mini-k{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;}
 .ms-mini-v{font-size:var(--m-fs-xl);font-weight:300;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .ms-mini-v small{font-size:var(--m-fs-xs);font-weight:400;}
-.ms-mini-d{font-size:var(--m-fs-2xs);opacity:.9;}
-/* strzałka z Figmy (↗) obok liczby; spadek = obrócona o 90° (↘). Rozmiary jawne na każdej warstwie (Safari). */
-.ms-arr{flex:none;display:block;width:18px;height:18px;color:var(--m-white);}
-.ms-arr .ph,.ms-arr svg{display:block;width:18px;height:18px;}
-.ms-arr--big{width:28px;height:28px;}
-.ms-arr--big .ph,.ms-arr--big svg{width:28px;height:28px;}
-.ms-hero-nr,.ms-mini-vr{display:flex;align-items:center;gap:8px;}
-.ms-hero-nr{gap:10px;}
-.ms-arr.is-down{transform:rotate(90deg);}
 .ms-sec{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
 .ms-sec-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .ms-sec-lbl{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-muted-text);}   /* jak „Rekordy”, „Bez postępu” w Postępach */
@@ -10166,7 +10160,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.93.3";
+const APP_VERSION = "4.93.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -20672,16 +20666,16 @@ function msBodyHtml(model, ai){
   // nagłówek AI: czarna karta jak „Postęp tygodniowy” w Postępach
   const head = `<section class="ms-top m-rise" style="--i:${n++}"><p class="ms-top-eb">${MONTH_NAMES[mm - 1]} ${yy}</p><h2 class="ms-headline">${E(plTypo(ai.headline))}</h2></section>`;
   // kafle jak karta „Udostępnij postępy”: pomarańczowy z objętością + 3 mini (treningi, rekordy, średni czas); strzałka ↗/↘ = vs poprzedni miesiąc
-  const arrow = (v, big) => v == null || v === 0 ? '' : `<span class="ms-arr${big ? ' ms-arr--big' : ''}${v < 0 ? ' is-down' : ''}" aria-hidden="true">${PH['arrow-up-right']}</span>`;
-  const sgn = v => v == null || v === 0 ? '' : `${v > 0 ? '+' : '−'}${Math.abs(v)}`;
+  // zmiana vs poprzedni miesiąc: zwykła strzałka pionowa + „+6 vs sie”, jak w Postępach i na Pulpicie (DASH_SVG_ARROW, w dół obrócona)
+  const sgn = v => `${v > 0 ? '+' : '−'}${Math.abs(v)}`;
+  const delta = (v, unit) => v == null || v === 0 ? '' : `<span class="ms-d">${DASH_SVG_ARROW(v < 0 ? 'is-down' : '')}<span>${sgn(v)}${unit}</span><span>vs ${prevAbbr}</span></span>`;
   const volBig = model.volumeKg >= 10000 ? formatDashNum(kgToDisp(model.volumeKg) / 1000, 1) + '<small> t</small>' : E(kg(model.volumeKg));
-  const volChip = pv && pv.volumePct ? `<span class="ms-hero-d">${sgn(pv.volumePct)}% vs ${prevAbbr}</span>` : '';
-  const mini = (cls, k, v, v2, d) => `<div class="ms-mini ms-mini--${cls}"><span class="ms-mini-k">${k}</span><span class="ms-mini-vr"><span class="ms-mini-v">${v}</span>${arrow(d)}</span>${v2 ? `<span class="ms-mini-d">${v2}</span>` : ''}</div>`;
-  const hero = `<section class="ms-share m-rise" style="--i:${n++}"><div class="ms-hero"><span class="ms-hero-nr"><span class="ms-hero-n">${volBig}</span>${arrow(pv && pv.volumePct, true)}</span><span class="ms-hero-k">${t('msVolume', 'objętość')}</span>${volChip}</div>` +
+  const mini = (cls, k, v, d) => `<div class="ms-mini ms-mini--${cls}"><span class="ms-mini-k">${k}</span><span class="ms-mini-v">${v}</span>${d}</div>`;
+  const hero = `<section class="ms-share m-rise" style="--i:${n++}"><div class="ms-hero"><span class="ms-hero-n">${volBig}</span><span class="ms-hero-k">${t('msVolume', 'objętość')}</span>${pv ? delta(pv.volumePct, '%') : ''}</div>` +
     `<div class="ms-minis">` +
-    mini('vol', t('msWorkouts', 'treningi'), String(model.workouts), pv && pv.workoutsDelta ? `${sgn(pv.workoutsDelta)} vs ${prevAbbr}` : '', pv ? pv.workoutsDelta : null) +
-    mini('rec', t('msRecords', 'rekordy'), String(model.prCount), pv && pv.recordsDelta ? `${sgn(pv.recordsDelta)} vs ${prevAbbr}` : '', pv ? pv.recordsDelta : null) +
-    mini('time', t('msAvgTime', 'średni trening'), `${model.avgDurationMin || '–'}<small> min</small>`, pv && pv.avgDurationDelta ? `${sgn(pv.avgDurationDelta)} min vs ${prevAbbr}` : '', pv ? pv.avgDurationDelta : null) +
+    mini('vol', t('msWorkouts', 'treningi'), String(model.workouts), pv ? delta(pv.workoutsDelta, '') : '') +
+    mini('rec', t('msRecords', 'rekordy'), String(model.prCount), pv ? delta(pv.recordsDelta, '') : '') +
+    mini('time', t('msAvgTime', 'średni trening'), `${model.avgDurationMin || '–'}<small> min</small>`, pv ? delta(pv.avgDurationDelta, ' min') : '') +
     `</div></section>`;
   const list = (arr, cls) => arr.length ? `<div class="ms-card"><ul class="ms-ul ${cls}">${li(arr)}</ul></div>` : '';
   const good = sec(t('msGood', 'Co poszło dobrze'), list(ai.good, 'is-good'));

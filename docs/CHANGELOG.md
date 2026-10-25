@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.93.3 (2026-10-25)
+- **Aktualna wersja:** 4.93.4 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.93.4 · PATCH · 2026-10-25
+
+Podsumowanie miesiąca: rezygnacja ze strzałki ↗ przy cyfrach. Zmiana względem poprzedniego miesiąca ma standardowy zapis aplikacji (jak w Postępach i na Pulpicie): pionowa strzałka `DASH_SVG_ARROW` (w dół obrócona o 180°), liczba i „vs sie”, pod liczbą kafla (`.ms-d`). Usunięte `.ms-arr*` i pastylka na kaflu objętości.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.93.4: podsumowanie miesiąca, standardowy zapis zmiany
 
 ### 4.93.3 · PATCH · 2026-10-25
 
