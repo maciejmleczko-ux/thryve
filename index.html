@@ -700,7 +700,7 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
    straight from the finish screen too. Only the few genuinely new bits
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
-#nameEditOverlay,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#editTimeSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#recordDetailSheet,#newBadgeSheet,#langSheet,#unitsSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
+#nameEditOverlay,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#editTimeSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#monthSumSheet,#recordDetailSheet,#newBadgeSheet,#langSheet,#unitsSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
 /* mConfirm() is opened from inside the account panel (z 95) and its sheets
    (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
 #mConfirmOverlay{z-index:9650;}
@@ -3834,6 +3834,26 @@ button.stv2-bt{cursor:pointer;}
   .stg-swap{animation:stgSwapIn var(--m-dur-fade) ease backwards;}
 }
 .stg-cnt{display:inline-block;}   /* końcowa spacja z animateDashNumber nie dokłada odstępu */
+/* ---- Podsumowanie miesiąca (#monthSumSheet): nagłówek AI, 3 kafle liczone w kodzie, tekst AI, skoki siły ---- */
+#monthSumSheet .m2-body{padding-bottom:120px;}
+.ms-month{margin:0 0 6px;font-size:var(--m-fs-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--m-muted-text);}
+.ms-headline{margin:0 0 16px;font-size:var(--m-fs-headline);font-weight:300;line-height:1.08;letter-spacing:-.02em;color:var(--m-ink);}
+.ms-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--m-gap-card);margin-bottom:16px;}
+.ms-tile{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:var(--m-r-md);background:var(--m-panel);min-width:0;}
+.ms-num{font-size:var(--m-fs-xl);font-weight:300;line-height:1.1;color:var(--m-ink);letter-spacing:-.02em;}
+.ms-lbl{font-size:var(--m-fs-xs);color:var(--m-muted-text);}
+.ms-d{font-size:var(--m-fs-xs);font-weight:500;}
+.ms-d.is-good{color:var(--m-mint-ink);}
+.ms-d.is-bad{color:var(--m-red-page);}
+.ms-story{margin:0 0 16px;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);}
+.ms-block{margin:0 0 var(--m-gap-card);padding:14px 16px;border-radius:var(--m-r-md);background:var(--m-panel);}
+.ms-goal{background:var(--m-mint-tint);}
+.ms-blk-lbl{margin:0 0 6px;font-size:var(--m-fs-xs);letter-spacing:.06em;text-transform:uppercase;color:var(--m-muted-text);}
+.ms-goal .ms-blk-lbl{color:var(--m-mint-ink);}
+.ms-txt{margin:0;font-size:var(--m-fs-base);line-height:1.45;color:var(--m-ink);}
+.ms-row{display:flex;justify-content:space-between;gap:12px;padding:4px 0;font-size:var(--m-fs-base);color:var(--m-ink);}
+.ms-row-v{font-weight:500;color:var(--m-mint-ink);}
+.ms-note{color:var(--m-muted-text);}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -4991,6 +5011,23 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 </div>
 
 <!-- Szczegół odznaki (Figma 08 / 09): wejście z kafla w arkuszu Odznaki i z ikon w sekcji Odznaki; tylko odczyt, bez zapisu stanu -->
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="monthSumSheet" onclick="if(event.target===this) msCloseSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="msTitle"></h1>
+          <button type="button" class="m2-x" id="msClose" aria-label="Zamknij" onclick="msCloseSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+      <div class="m2-body ms-body" id="msBody"></div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="msBtn" onclick="msCloseSheet()">ZAMKNIJ</button>
+    </div>
+  </div>
+</div>
 <div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="badgeDetailSheet" onclick="if(event.target===this) closeBadgeDetail()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
@@ -8000,7 +8037,7 @@ function fmtKg(n){ const s = Number(kgToDisp(Number(n))).toFixed(1); return LANG
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
+const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','monthSumSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -10056,7 +10093,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.89.0";
+const APP_VERSION = "4.90.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -13110,6 +13147,7 @@ mSheetDrag('releaseOverlay', closeRelease);
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 mSheetDrag('bodyDataSheet', closeBodyDataSheet);     // zamknięcie przeciągnięciem czyści też stan okna (klawiatura, pola)
 mSheetDrag('badgeDetailSheet', closeBadgeDetail);
+mSheetDrag('monthSumSheet', msCloseSheet);
 mSheetDrag('newBadgeSheet', closeNewBadge);
 mSheetDrag('langSheet', closeLangSheet);
 mSheetDrag('unitsSheet', closeUnitsSheet);
@@ -20296,6 +20334,7 @@ function renderDashboardInner(animate){
   const aiJob = dashAiPrepare(lastWorkoutPayload, lastWorkout ? lastWorkout.id : null);
   renderDashShell(!!animate);
   if(aiJob) dashAiFetch(aiJob);
+  msMaybeShow();
 }
 
 /* AI asystent — Krok 1: narracyjne podsumowanie OSTATNIEGO TRENINGU (czarna
@@ -20391,6 +20430,167 @@ async function dashAiFetch(job){
   }
   if(currentRoute === 'dashboard') dashRenderCoach();
 }
+
+/* ============================================================
+   Podsumowanie miesiąca (Trener AI), 2026-10-25.
+   Raz w miesiącu, przy pierwszym otwarciu Pulpitu w nowym miesiącu kalendarzowym, pokazuje się okno z podsumowaniem
+   MIJAJĄCEGO miesiąca (nie bieżącego: w ostatnim dniu mógłby jeszcze dojść trening). Liczby, kafle i skoki siły liczy
+   KOD (msModel); model dostaje je gotowe i pisze tylko tekst: headline / story / watch / goal (ai-proxy: month_summary).
+   Wymaga konta w chmurze + zgody na AI, minimum MS_MIN_WORKOUTS treningów w miesiącu. Cache: jeden miesiąc = jedno
+   wywołanie (klucz userId + ym + MS_VERSION). Test w konsoli: msOpen('2026-10').
+   ============================================================ */
+const LS_MS_CACHE = 'fitlog_month_summary_v1';   // {userId, ym, version, model, ai}
+const LS_MS_SEEN = 'fitlog_month_summary_seen_v1'; // ostatni miesiąc, którego okno już pokazano (lub był za pusty)
+const MS_VERSION = 'm1';
+const MS_MIN_WORKOUTS = 4;
+let msInflight = '', msFailedYm = '', msShown = '';
+function msPrevYm(ym){
+  let [y, m] = ym.split('-').map(Number); m--; if(m < 1){ m = 12; y--; }
+  return y + '-' + String(m).padStart(2, '0');
+}
+function msModel(ym){
+  const from = ym + '-01', to = ym + '-31', pym = msPrevYm(ym);
+  const order = statsV2Order().slice().sort((a,b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  const inMonth = order.filter(w=> w.date >= from && w.date <= to);
+  if(inMonth.length < MS_MIN_WORKOUTS) return null;
+  const cur = statsV2Agg(order, from, to), prev = statsV2Agg(order, pym + '-01', pym + '-31');
+  const pctD = (a, b) => b > 0 ? Math.round((a / b - 1) * 100) : null;
+  const dates = [...new Set(inMonth.map(w=> w.date))].sort();
+  let longestGapDays = 0;
+  for(let i = 1; i < dates.length; i++) longestGapDays = Math.max(longestGapDays, dashDaysBetween(dates[i-1], dates[i]) - 1);
+  const perWeek = {};
+  inMonth.forEach(w=>{ const k = dashWeekStartIso(w.date); perWeek[k] = (perWeek[k] || 0) + 1; });
+  const weekCounts = Object.values(perWeek);
+
+  // siła: najlepszy szacowany 1RM ćwiczenia w miesiącu vs ostatnia sesja przed miesiącem (bez niej: pierwsza w miesiącu)
+  const sessions = {};   // name -> [{date, e1rm}]
+  order.forEach(w=> w.exercises.forEach(ex=>{
+    if(!statsV2IsStrengthEx(ex)) return;
+    let e = 0;
+    exSetsView(ex).forEach(s=>{ if(s.reps > 0 && statsV2E1rmEligible(s)) e = Math.max(e, statsV2Epley(s.weight, s.reps)); });
+    if(e > 0) (sessions[ex.name] = sessions[ex.name] || []).push({ date: w.date, e1rm: e });
+  }));
+  const gains = [];
+  let prCount = 0;
+  Object.entries(sessions).forEach(([name, list])=>{
+    const before = list.filter(s=> s.date < from), inM = list.filter(s=> s.date >= from && s.date <= to);
+    if(!inM.length) return;
+    const end = Math.max(...inM.map(s=> s.e1rm));
+    const base = before.length ? before[before.length - 1].e1rm : (inM.length >= 2 ? inM[0].e1rm : 0);
+    if(before.length && end > Math.max(...before.map(s=> s.e1rm))) prCount++;
+    if(base > 0) gains.push({ name, fromKg: Math.round(base * 10) / 10, toKg: Math.round(end * 10) / 10, deltaPct: pctD(end, base) });
+  });
+  const topGains = gains.filter(g=> g.deltaPct >= 2).sort((a,b)=> b.deltaPct - a.deltaPct).slice(0, 3);
+  const biggestDrop = gains.filter(g=> g.deltaPct <= -5).sort((a,b)=> a.deltaPct - b.deltaPct)[0] || null;
+
+  // partie: udział serii w miesiącu, partie bez ani jednej serii, push/pull
+  const setsBy = (f, t2) => {
+    const o = {}; let tot = 0;
+    order.forEach(w=>{ if(w.date < f || w.date > t2) return; w.exercises.forEach(ex=>{
+      if(!statsV2IsStrengthEx(ex)) return;
+      const n = exSetsView(ex).filter(s=> s.reps > 0).length; if(!n) return;
+      const g = muscleGroupBucket(ex.group).key; o[g] = (o[g] || 0) + n; tot += n;
+    }); });
+    return { o, tot };
+  };
+  const mc = setsBy(from, to);
+  const share = Object.entries(mc.o).map(([group, n])=> ({ group, sharePct: Math.round(n / mc.tot * 100) })).sort((a,b)=> b.sharePct - a.sharePct).slice(0, 5);
+  const untrainedGroups = PLAN_EX_GROUPS.filter(g=> g.key !== 'Wlasne' && g.strength !== false && !mc.o[g.key]).map(g=> g.key);
+  const push = ['Klatka','Barki','Triceps'].reduce((s,g)=> s + (mc.o[g] || 0), 0), pull = ['Plecy','Biceps'].reduce((s,g)=> s + (mc.o[g] || 0), 0);
+
+  // waga ciała: ostatni wpis w miesiącu vs ostatni przed miesiącem (bez niego: pierwszy w miesiącu)
+  let weightDeltaKg = null;
+  const wl = (weightLog || []).filter(e=> e && e.kg > 0 && e.date <= to);
+  const wIn = wl.filter(e=> e.date >= from), wBefore = wl.filter(e=> e.date < from);
+  if(wIn.length){
+    const base = wBefore.length ? wBefore[wBefore.length - 1] : wIn[0], end = wIn[wIn.length - 1];
+    if(base !== end) weightDeltaKg = Math.round((end.kg - base.kg) * 10) / 10;
+  }
+  return {
+    ym, workouts: cur.workouts, volumeKg: cur.volumeKg, sets: cur.sets, durationMin: cur.durationMin,
+    avgDurationMin: cur.workouts ? Math.round(cur.durationMin / cur.workouts) : null,
+    vsPrevMonth: prev.workouts ? { workoutsDelta: cur.workouts - prev.workouts, volumePct: pctD(cur.volumeKg, prev.volumeKg), durationPct: pctD(cur.durationMin, prev.durationMin) } : null,
+    trainingDays: dates.length, weeksWithTraining: weekCounts.length, bestWeekWorkouts: Math.max(...weekCounts), longestGapDays,
+    prCount, topGains, biggestDrop, muscleShare: share, untrainedGroups, pushSets: push, pullSets: pull, weightDeltaKg,
+    userPreferences: (aiPrefs.goal || aiPrefs.avoid) ? { goal: aiPrefs.goal || null, avoid: aiPrefs.avoid || null } : null,
+  };
+}
+function msLoadCache(ym){
+  if(!cloudSession) return null;
+  try{
+    const c = JSON.parse(localStorage.getItem(LS_MS_CACHE) || 'null');
+    return c && c.userId === cloudSession.user.id && c.ym === ym && c.version === MS_VERSION && c.ai ? c : null;
+  }catch(e){ return null; }
+}
+async function msFetch(ym, model){
+  const res = await callAI('month_summary', model);
+  if(res.error || typeof res.headline !== 'string' || typeof res.story !== 'string'){
+    console.error('month_summary AI call failed', res.error);
+    return null;
+  }
+  const ai = { headline: res.headline, story: res.story, watch: typeof res.watch === 'string' && res.watch ? res.watch : '', goal: typeof res.goal === 'string' ? res.goal : '' };
+  try{ localStorage.setItem(LS_MS_CACHE, JSON.stringify({ userId: cloudSession.user.id, ym, version: MS_VERSION, model, ai })); }catch(e){}
+  return { model, ai };
+}
+// Wywoływane po każdym renderze Pulpitu; robi coś tylko raz na miesiąc (patrz warunki niżej).
+async function msMaybeShow(){
+  if(!cloudSession || !isPremium() || !hasAiConsent()) return;
+  const ym = msPrevYm(todayStr().slice(0, 7));
+  if(msInflight || msFailedYm === ym || msShown === ym) return;
+  let seen = ''; try{ seen = localStorage.getItem(LS_MS_SEEN) || ''; }catch(e){}
+  if(seen >= ym) return;
+  // nowy użytkownik bez historii sprzed tego miesiąca: nie ma czego podsumowywać
+  const model = msModel(ym);
+  if(!model){ try{ localStorage.setItem(LS_MS_SEEN, ym); }catch(e){} return; }
+  let data = msLoadCache(ym);
+  if(!data){
+    msInflight = ym;
+    data = await msFetch(ym, model);
+    msInflight = '';
+    if(!data){ msFailedYm = ym; return; }
+  }
+  // użytkownik mógł w międzyczasie wyjść z Pulpitu albo otworzyć inne okno: wtedy zostaje do następnej wizyty
+  if(currentRoute !== 'dashboard' || document.documentElement.classList.contains('modal-lock')) return;
+  msOpen(ym, data);
+}
+function msTile(num, lbl, delta, goodWhenUp){
+  let d = '';
+  if(delta != null && delta !== 0){
+    const up = delta > 0;
+    d = `<span class="ms-d ${up === goodWhenUp ? 'is-good' : 'is-bad'}">${up ? '+' : '−'}${Math.abs(delta)}${lbl.unit || ''}</span>`;
+  }
+  return `<div class="ms-tile"><span class="ms-num">${escHtml(num)}</span><span class="ms-lbl">${escHtml(lbl.text)}</span>${d}</div>`;
+}
+function msBodyHtml(model, ai){
+  const E = escHtml, pv = model.vsPrevMonth;
+  const kg = x=> formatDashNum(kgToDisp(x), 0) + ' ' + wUnit();
+  const tiles = [
+    msTile(String(model.workouts), { text: t('msWorkouts', 'treningów'), unit: '' }, pv ? pv.workoutsDelta : null, true),
+    msTile(model.volumeKg >= 10000 ? formatDashNum(kgToDisp(model.volumeKg) / 1000, 1) + ' t' : kg(model.volumeKg), { text: t('msVolume', 'objętość'), unit: '%' }, pv ? pv.volumePct : null, true),
+    msTile(model.avgDurationMin ? model.avgDurationMin + ' min' : '–', { text: t('msAvgTime', 'średni trening'), unit: '' }, null, true),
+  ].join('');
+  const gains = model.topGains.length ? `<div class="ms-block"><p class="ms-blk-lbl">${t('msGains', 'Największe skoki siły')}</p>${model.topGains.map(g=>
+    `<div class="ms-row"><span class="ms-row-n">${E(g.name)}</span><span class="ms-row-v">+${g.deltaPct}%</span></div>`).join('')}</div>` : '';
+  const watch = ai.watch ? `<div class="ms-block"><p class="ms-blk-lbl">${t('msWatch', 'Do poprawy')}</p><p class="ms-txt">${E(ai.watch)}</p></div>` : '';
+  const goal = ai.goal ? `<div class="ms-block ms-goal"><p class="ms-blk-lbl">${t('msGoal', 'Cel na kolejny miesiąc')}</p><p class="ms-txt">${E(ai.goal)}</p></div>` : '';
+  return `<h2 class="ms-headline">${E(ai.headline)}</h2><div class="ms-tiles">${tiles}</div><p class="ms-story">${E(ai.story)}</p>${gains}${watch}${goal}` +
+    `<p class="ai-popup-note ms-note">${t('msNote', 'Podsumowanie tworzy AI na podstawie Twoich treningów. To nie porada medyczna i nie zastąpi trenera.')}</p>`;
+}
+// ym + (opcjonalnie) {model, ai}; bez drugiego argumentu bierze cache albo woła AI (przydatne do testów w konsoli)
+async function msOpen(ym, data){
+  if(!data) data = msLoadCache(ym) || (() => { const m = msModel(ym); return m ? msFetch(ym, m) : null; })();
+  data = await data;
+  if(!data) return;
+  const [y, m] = ym.split('-').map(Number);
+  document.getElementById('msTitle').textContent = t('msTitle', 'Podsumowanie miesiąca');
+  document.getElementById('msClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  document.getElementById('msBtn').textContent = t('bgClose', 'ZAMKNIJ');
+  document.getElementById('msBody').innerHTML = `<p class="ms-month">${MONTH_NAMES[m - 1]} ${y}</p>` + msBodyHtml(data.model, data.ai);
+  msShown = ym;
+  try{ localStorage.setItem(LS_MS_SEEN, ym); }catch(e){}
+  acctSheetOpen('monthSumSheet');
+}
+function msCloseSheet(viaDrag){ acctSheetClose('monthSumSheet', viaDrag); }
 
 /* ============================================================
    GYM v2 — second screen of the "v3" preview (see [[project_thryve_roadmap]]).

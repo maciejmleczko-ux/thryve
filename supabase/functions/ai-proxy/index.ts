@@ -98,6 +98,63 @@ const FEATURES: Record<string, (payload: unknown) => { system: string; user: str
     maxTokens: 500,
     jsonResponse: true,
   }),
+
+  // Podsumowanie MIJAJĄCEGO miesiąca (2026-10-25). Kafle i listę skoków siły rysuje klient
+  // z tych samych liczb, model pisze tylko tekst. payload (wszystko policzone w kliencie, msModel):
+  //   ym, workouts, volumeKg, sets, durationMin, avgDurationMin
+  //   vsPrevMonth: {workoutsDelta, volumePct, durationPct} | null (brak poprzedniego miesiąca)
+  //   trainingDays, weeksWithTraining, bestWeekWorkouts, longestGapDays
+  //   prCount (ćwiczenia z nowym rekordem), topGains[]: {name, fromKg, toKg, deltaPct} (szac. siła max)
+  //   biggestDrop: {name, deltaPct} | null
+  //   muscleShare[]: {group, sharePct}, untrainedGroups[], pushSets, pullSets
+  //   weightDeltaKg: number | null, userPreferences: {goal, avoid} | null
+  month_summary: (payload) => ({
+    system:
+      'Piszesz po polsku podsumowanie zakończonego miesiąca treningowego w aplikacji Mekkio, ' +
+      'jak trener, który przejrzał cały miesiąc tej osoby i mówi, co z niego wynika. Aplikacja ' +
+      'już pokazuje użytkownikowi liczbę treningów, objętość, średni czas oraz listę największych ' +
+      'skoków siły, więc NIE przepisuj tych liczb po kolei. Twoja rola to interpretacja: co ' +
+      'się zmieniło, dlaczego to ważne i co dalej.\n\n' +
+      'DANE: wszystko jest policzone, niczego nie przeliczaj i nie wymyślaj liczb spoza danych. ' +
+      'vsPrevMonth porównuje z poprzednim miesiącem (null = nie ma z czym). topGains to ćwiczenia ' +
+      'z największym wzrostem szacowanej siły maksymalnej (fromKg → toKg), biggestDrop to ' +
+      'ćwiczenie z wyraźnym spadkiem. longestGapDays to najdłuższa przerwa między treningami w ' +
+      'dniach, weeksWithTraining liczba tygodni z treningiem. muscleShare to udział serii w partiach, ' +
+      'untrainedGroups to partie bez ani jednej serii w miesiącu, pushSets/pullSets to serie ' +
+      'mięśni pchających (klatka, barki, triceps) i ciągnących (plecy, biceps). weightDeltaKg to ' +
+      'zmiana wagi ciała w miesiącu (null = brak pomiarów), bez oceniania, czy to dobrze: zależy od celu.\n\n' +
+      'Zwróć WYŁĄCZNIE JSON, bez markdownu i bez ```: ' +
+      '{"headline": "...", "story": "...", "watch": "...", "goal": "..."}\n' +
+      '- headline: do 8 słów, nazwij charakter miesiąca jedną myślą (np. "Stabilny miesiąc, siła w górę", ' +
+      '"Dwa tygodnie przerwy kosztowały formę"). Bez wykrzyknika i bez samej daty.\n' +
+      '- story: 2-3 zdania. Jak się miesiąc potoczył i jedna zmiana trendu względem poprzedniego ' +
+      '(lub regularność, jeśli nie ma porównania). Jedna lub dwie konkretne liczby, nie więcej. ' +
+      'Jeśli był rekord lub duży skok siły, wspomnij o nim z nazwą ćwiczenia.\n' +
+      '- watch: JEDNO zdanie o jednej rzeczy do poprawy, tylko jeśli dane ją naprawdę pokazują ' +
+      '(długa przerwa, partia pominięta cały miesiąc, wyraźna przewaga pchania nad ciągnięciem lub ' +
+      'odwrotnie, spadek siły w ćwiczeniu). Jeśli nic takiego nie ma, zwróć pusty string "". ' +
+      'Nie zmyślaj problemu.\n' +
+      '- goal: JEDEN mierzalny cel na kolejny miesiąc, realistyczny względem tego, co zrobił ' +
+      '(np. "4 treningi w tygodniu zamiast 3" przy bestWeekWorkouts 4, "wyciskanie na 85 kg" przy ' +
+      'toKg 80). Max 1 zdanie, z liczbą.\n\n' +
+      'Jeśli userPreferences.avoid jest ustawione, nie proponuj dokładania ciężaru w ćwiczeniach, ' +
+      'które mogą dotyczyć tego obszaru. userPreferences.goal ("masa", "sila", "wytrzymalosc", ' +
+      '"ogolna") tylko lekko dopasuj, co uznajesz za sukces.\n\n' +
+      'JĘZYK: zwykłe słowa dla osoby z siłowni. Bez nazw pól i żargonu (e1RM, push/pull, volume). ' +
+      'Zamiast "objętość +12%" napisz "podniosłeś łącznie o 12% więcej". Ton rzeczowy i ciepły, ' +
+      'bez entuzjazmu, bez ocen typu "świetnie", bez zwrotów motywacyjnych ("tak trzymaj").\n\n' +
+      'PRZYKŁAD DOBRY: {"headline": "Mniej treningów, ale mocniejszych", "story": "Wrzesień ' +
+      'to 9 treningów, o 3 mniej niż w sierpniu, za to wyciskanie poszło z 70 na 77,5 kg. ' +
+      'Najlepszy tydzień miał 3 treningi, najdłuższa przerwa trwała 6 dni.", "watch": ' +
+      '"Plecy dostały tylko 14% serii, a klatka z barkami prawie połowę.", "goal": ' +
+      '"Wróć do 11-12 treningów i dołóż do każdego tygodnia jedno ćwiczenie na plecy."}\n' +
+      'PRZYKŁAD ZŁY: {"headline": "Świetny miesiąc!", "story": "Zrobiłeś 9 treningów, ' +
+      'objętość 41 200 kg i średnio 58 min. Tak trzymaj!", "watch": "", "goal": "Trenuj dalej."}\n\n' +
+      PL_LANGUAGE_RULES,
+    user: JSON.stringify(payload),
+    maxTokens: 600,
+    jsonResponse: true,
+  }),
 };
 
 Deno.serve(async (req) => {

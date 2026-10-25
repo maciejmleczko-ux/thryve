@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.89.0 (2026-10-25)
+- **Aktualna wersja:** 4.90.0 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.90.0 · MINOR · 2026-10-25
+
+Podsumowanie miesiąca (Trener AI). Okno `#monthSumSheet` (szkielet `.m-sheet2`, `mSheetDrag`) pojawia się raz w miesiącu, przy pierwszym otwarciu Pulpitu w nowym miesiącu kalendarzowym, i opisuje miesiąc, który się skończył (`msMaybeShow()` wołane z `renderDashboardInner()`). Liczby liczy kod (`msModel()`: treningi, objętość, średni czas, zmiana vs poprzedni miesiąc, najlepszy tydzień, najdłuższa przerwa, skoki szacowanej siły z `statsV2Epley`, udział partii, partie bez serii, push/pull, zmiana wagi), kafle i listę skoków rysuje klient, a nowa funkcja `month_summary` w `ai-proxy` pisze tylko `headline` / `story` / `watch` / `goal`. Warunki: konto w chmurze, zgoda na AI, minimum 4 treningi w miesiącu. Cache: `fitlog_month_summary_v1` (jeden miesiąc = jedno wywołanie, `MS_VERSION`), znacznik pokazania `fitlog_month_summary_seen_v1`. Test w konsoli: `msOpen('2026-10')`. Wymaga wdrożenia `ai-proxy`.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.90.0: podsumowanie miesiąca AI
 
 ### 4.89.0 · MINOR · 2026-10-25
 
