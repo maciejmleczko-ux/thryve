@@ -3862,11 +3862,13 @@ button.stv2-bt{cursor:pointer;}
 .ms-mini-v{font-size:var(--m-fs-xl);font-weight:300;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .ms-mini-v small{font-size:var(--m-fs-xs);font-weight:400;}
 .ms-mini-d{font-size:var(--m-fs-2xs);opacity:.9;}
-/* strzałka z Figmy (↗ w rogu kafla); spadek = obrócona o 90° (↘). Rozmiary jawne na każdej warstwie (Safari). */
-.ms-arr{position:absolute;top:10px;right:10px;display:block;width:18px;height:18px;color:var(--m-white);}
+/* strzałka z Figmy (↗) obok liczby; spadek = obrócona o 90° (↘). Rozmiary jawne na każdej warstwie (Safari). */
+.ms-arr{flex:none;display:block;width:18px;height:18px;color:var(--m-white);}
 .ms-arr .ph,.ms-arr svg{display:block;width:18px;height:18px;}
-.ms-arr--big{top:14px;right:14px;width:24px;height:24px;}
-.ms-arr--big .ph,.ms-arr--big svg{width:24px;height:24px;}
+.ms-arr--big{width:28px;height:28px;}
+.ms-arr--big .ph,.ms-arr--big svg{width:28px;height:28px;}
+.ms-hero-nr,.ms-mini-vr{display:flex;align-items:center;gap:8px;}
+.ms-hero-nr{gap:10px;}
 .ms-arr.is-down{transform:rotate(90deg);}
 .ms-sec{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
 .ms-sec-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -10164,7 +10166,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.93.1";
+const APP_VERSION = "4.93.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -20668,8 +20670,8 @@ function msBodyHtml(model, ai){
   const sgn = v => v == null || v === 0 ? '' : `${v > 0 ? '+' : '−'}${Math.abs(v)}`;
   const volBig = model.volumeKg >= 10000 ? formatDashNum(kgToDisp(model.volumeKg) / 1000, 1) + '<small> t</small>' : E(kg(model.volumeKg));
   const volChip = pv && pv.volumePct ? `<span class="ms-hero-d">${sgn(pv.volumePct)}% vs ${prevAbbr}</span>` : '';
-  const mini = (cls, k, v, v2, d) => `<div class="ms-mini ms-mini--${cls}">${arrow(d)}<span class="ms-mini-k">${k}</span><span class="ms-mini-v">${v}</span>${v2 ? `<span class="ms-mini-d">${v2}</span>` : ''}</div>`;
-  const hero = `<section class="ms-share m-rise" style="--i:${n++}"><div class="ms-hero">${arrow(pv && pv.volumePct, true)}<span class="ms-hero-n">${volBig}</span><span class="ms-hero-k">${t('msVolume', 'objętość')}</span>${volChip}</div>` +
+  const mini = (cls, k, v, v2, d) => `<div class="ms-mini ms-mini--${cls}"><span class="ms-mini-k">${k}</span><span class="ms-mini-vr"><span class="ms-mini-v">${v}</span>${arrow(d)}</span>${v2 ? `<span class="ms-mini-d">${v2}</span>` : ''}</div>`;
+  const hero = `<section class="ms-share m-rise" style="--i:${n++}"><div class="ms-hero"><span class="ms-hero-nr"><span class="ms-hero-n">${volBig}</span>${arrow(pv && pv.volumePct, true)}</span><span class="ms-hero-k">${t('msVolume', 'objętość')}</span>${volChip}</div>` +
     `<div class="ms-minis">` +
     mini('vol', t('msWorkouts', 'treningi'), String(model.workouts), pv && pv.workoutsDelta ? `${sgn(pv.workoutsDelta)} vs ${prevAbbr}` : '', pv ? pv.workoutsDelta : null) +
     mini('rec', t('msRecords', 'rekordy'), String(model.prCount), pv && pv.recordsDelta ? `${sgn(pv.recordsDelta)} vs ${prevAbbr}` : '', pv ? pv.recordsDelta : null) +
