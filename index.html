@@ -3854,13 +3854,8 @@ button.stv2-bt{cursor:pointer;}
 .ms-lbl{font-size:var(--m-fs-2xs);letter-spacing:.06em;text-transform:uppercase;opacity:.8;}
 .ms-d{font-size:var(--m-fs-xs);font-weight:500;}
 .ms-block{padding:14px 16px;border-radius:var(--m-r-md);background:var(--m-panel);}
-.ms-blk-lbl{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:var(--m-fs-xs);letter-spacing:.06em;text-transform:uppercase;color:var(--m-muted-text);}
-.ms-ico{flex:none;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:var(--m-r-pill);}
-.ms-ico svg{display:block;width:14px;height:14px;}
-.ms-block--good .ms-ico{background:var(--m-mint-tint);color:var(--m-mint-ink);}
-.ms-block--bad .ms-ico{background:var(--m-red-wash);color:var(--m-red-page);}
-.ms-block--prog .ms-ico{background:var(--m-sky-tint);color:var(--m-sky-ink);}
-.ms-block--stall .ms-ico{background:var(--m-amber-tint);color:var(--m-ink);}
+.ms-sec{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.ms-sec-lbl{margin:0;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--m-ink);}   /* jak „Treningi” w Historii: nazwa sekcji nad kartą */
 .ms-ul{margin:0;padding:0;list-style:none;font-size:var(--m-fs-base);line-height:1.45;color:var(--m-ink);}
 .ms-ul li{position:relative;padding-left:14px;}
 .ms-ul li+li{margin-top:8px;}
@@ -3878,8 +3873,6 @@ button.stv2-bt{cursor:pointer;}
 .ms-focus{padding:16px;border-radius:var(--m-r-sm);color:var(--m-white);border:.5px solid transparent;
   background:linear-gradient(90deg,var(--m-ai-fill-from) 0%,var(--m-ai-fill-mid) 55%,var(--m-ai-fill-to) 175%) padding-box,linear-gradient(142deg,color-mix(in srgb,var(--m-ai-from) 22%,var(--m-ai-fill-to)) 0%,color-mix(in srgb,var(--m-ai-to) 45%,var(--m-ai-fill-to)) 83%) border-box;
   box-shadow:inset 0 0 15.4px var(--m-ai-inset),inset 0 0 6px var(--m-ai-inset-2);}
-.ms-focus .ms-blk-lbl{color:var(--m-on-dark-1);}
-.ms-focus .ms-ico{background:rgba(255,255,255,.14);color:var(--m-white);}
 .ms-ol{margin:0;padding:0;list-style:none;counter-reset:ms;font-size:var(--m-fs-base);font-weight:300;line-height:1.45;color:var(--m-white);}
 .ms-ol li{position:relative;padding-left:30px;counter-increment:ms;}
 .ms-ol li+li{margin-top:10px;}
@@ -10141,7 +10134,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.92.1";
+const APP_VERSION = "4.92.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -20623,14 +20616,6 @@ function msSessionsWord(n){
   if(n === 1) return 'sesja';
   return (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) ? 'sesje' : 'sesji';
 }
-// Ikony okna: check-circle i chart-line-up z PH, reszty tam nie ma (inline, w stylu Phosphor, jawny width/height dla Safari)
-const MS_SVG = (d)=> `<svg viewBox="0 0 256 256" width="14" height="14" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
-const MS_ICONS = {
-  down: MS_SVG('<path d="M72 72l112 112M184 88v96H88"/>'),
-  pause: MS_SVG('<path d="M92 60v136M164 60v136"/>'),
-  target: MS_SVG('<circle cx="128" cy="128" r="96"/><circle cx="128" cy="128" r="52"/><circle cx="128" cy="128" r="4"/>'),
-};
-const msIcon = name => MS_ICONS[name] || PH[name] || '';
 function msTile(cls, num, lbl, delta, i){
   let d = '';
   if(delta != null && delta !== 0) d = `<span class="ms-d">${delta > 0 ? '+' : '−'}${Math.abs(delta)}${lbl.unit || ''}</span>`;
@@ -20648,13 +20633,13 @@ function msBodyHtml(model, ai){
     msTile('time', model.avgDurationMin ? model.avgDurationMin + ' min' : '–', { text: t('msAvgTime', 'średni trening'), unit: '' }, null, n++),
   ].join('');
   const li = a => a.map(x=> `<li>${E(x)}</li>`).join('');
-  const blk = (kind, icon, lbl, inner) => inner ? `<section class="ms-block ms-block--${kind} m-rise" style="--i:${n++}"><p class="ms-blk-lbl"><span class="ms-ico">${msIcon(icon)}</span>${lbl}</p>${inner}</section>` : '';
+  const blk = (kind, lbl, inner) => inner ? `<section class="ms-sec m-rise" style="--i:${n++}"><p class="ms-sec-lbl">${lbl}</p><div class="ms-block ms-block--${kind}">${inner}</div></section>` : '';
   const rows = (arr, right, sub) => arr.map(g=> `<div class="ms-row"><span class="ms-row-n">${E(g.name)}<small>${E(sub(g))}</small></span><span class="ms-row-v">${right(g)}</span></div>`).join('');
-  const good = blk('good', 'check-circle', t('msGood', 'Co poszło dobrze'), ai.good.length ? `<ul class="ms-ul">${li(ai.good)}</ul>` : '');
-  const bad = blk('bad', 'down', t('msBad', 'Co poszło słabiej'), ai.bad.length ? `<ul class="ms-ul">${li(ai.bad)}</ul>` : '');
-  const prog = blk('prog', 'chart-line-up', t('msProgress', 'Progres'), rows(model.topGains, g=> `+${g.deltaPct}%`, g=> `${t('msEstMax', 'szac. maks.')} ${kgE(g.fromKg)} → ${kgE(g.toKg)}`));
-  const stall = blk('stall', 'pause', t('msStalled', 'Stoi w miejscu'), rows(model.stalled, g=> `${g.sessions} ${msSessionsWord(g.sessions)}`, ()=> t('msStalledSub', 'bez zmiany siły w ostatnich 3 sesjach')));
-  const focus = ai.focus.length ? `<section class="ms-focus m-rise" style="--i:${n++}"><p class="ms-blk-lbl"><span class="ms-ico">${msIcon('target')}</span>${t('msFocus', 'Na czym się skupić')}</p><ol class="ms-ol">${li(ai.focus)}</ol></section>` : '';
+  const good = blk('good', t('msGood', 'Co poszło dobrze'), ai.good.length ? `<ul class="ms-ul">${li(ai.good)}</ul>` : '');
+  const bad = blk('bad', t('msBad', 'Co poszło słabiej'), ai.bad.length ? `<ul class="ms-ul">${li(ai.bad)}</ul>` : '');
+  const prog = blk('prog', t('msProgress', 'Progres'), rows(model.topGains, g=> `+${g.deltaPct}%`, g=> `${t('msEstMax', 'szac. maks.')} ${kgE(g.fromKg)} → ${kgE(g.toKg)}`));
+  const stall = blk('stall', t('msStalled', 'Stoi w miejscu'), rows(model.stalled, g=> `${g.sessions} ${msSessionsWord(g.sessions)}`, ()=> t('msStalledSub', 'bez zmiany siły w ostatnich 3 sesjach')));
+  const focus = ai.focus.length ? `<section class="ms-sec m-rise" style="--i:${n++}"><p class="ms-sec-lbl">${t('msFocus', 'Na czym się skupić')}</p><div class="ms-focus"><ol class="ms-ol">${li(ai.focus)}</ol></div></section>` : '';
   return `<h2 class="ms-headline m-rise" style="--i:0">${E(ai.headline)}</h2><div class="ms-tiles">${tiles}</div>${good}${bad}${prog}${stall}${focus}` +
     `<p class="ai-popup-note ms-note">${t('msNote', 'Podsumowanie tworzy AI na podstawie Twoich treningów. To nie porada medyczna i nie zastąpi trenera.')}</p>`;
 }
