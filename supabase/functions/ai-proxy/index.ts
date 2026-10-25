@@ -115,8 +115,10 @@ const FEATURES: Record<string, (payload: unknown) => { system: string; user: str
       'jak trener, który przejrzał cały miesiąc tej osoby. Użytkownik chce wiedzieć cztery ' +
       'rzeczy: co było dobre, co słabsze, gdzie jest progres i co stoi w miejscu, oraz na czym ' +
       'się skupić w kolejnym miesiącu. Aplikacja sama pokazuje kafle (liczba treningów, objętość, ' +
-      'średni czas), listę progresu (topGains) i listę ćwiczeń w zastoju (stalled), więc ty ' +
-      'ich NIE wypisujesz po kolei. Możesz się do nich odwołać nazwą ćwiczenia, jeśli to ' +
+      'średni czas, rekordy), listę progresu (topGains), listę ćwiczeń w zastoju (stalled), ' +
+      'wykres rozkładu partii (muscleShare) i baner z partiami bez serii (untrainedGroups), więc ty ' +
+      'ich NIE wypisujesz po kolei: o partiach napisz najwyżej jedno zdanie z wnioskiem, ' +
+      'dlaczego to ważne. Możesz się do nich odwołać nazwą ćwiczenia, jeśli to ' +
       'uzasadnia wskazówkę.\n\n' +
       'DANE: wszystko jest policzone, niczego nie przeliczaj i nie wymyślaj liczb spoza danych. ' +
       'vsPrevMonth porównuje z poprzednim miesiącem (null = nie ma z czym, nie porównuj). ' +

@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.92.2 (2026-10-25)
+- **Aktualna wersja:** 4.93.0 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.93.0 · MINOR · 2026-10-25
+
+Podsumowanie miesiąca przebudowane na język ekranu Postępy (Figma 657:19118), z kolorem, bo to podsumowanie: czarna karta z nagłówkiem AI (jak „Postęp tygodniowy”), kafle jak karta „Udostępnij postępy” (pomarańczowy z liczbą treningów + mini: objętość `--m-metric-volume`, rekordy `--m-sky`, średni czas `--m-amber`), białe karty z liniami `--m-orange-tint` na tle `--m-orange-wash`, małe szare nazwy sekcji nad kartami (`--m-fs-2xs`, jak „Rekordy”), „Stoi w miejscu” jak „Bez postępu” (bursztynowe kółko ze strzałką, pastylka z ciężarem), nowa sekcja „Rozkład partii” z czerwonymi paskami z `muscleShare` i bursztynowy baner „Najmniej trenowane” z `untrainedGroups`. Wskazówki zostają w fioletowej karcie Trenera AI. Prompt `month_summary`: rozkład partii i partie bez serii pokazuje aplikacja, AI ma o nich najwyżej jedno zdanie z wnioskiem.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.93.0: podsumowanie miesiąca w języku Postępów
 
 ### 4.92.2 · PATCH · 2026-10-25
 
