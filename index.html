@@ -3848,6 +3848,11 @@ button.stv2-bt{cursor:pointer;}
 /* ---- Podsumowanie miesiąca (#monthSumSheet): język Postępów (Figma 657:19118): czarna karta, kafle z karty „Udostępnij”, białe karty z liniami, paski partii, bursztynowy baner ---- */
 #monthSumSheet .plansv2-customize-stack{background:var(--m-orange-wash);}
 #monthSumSheet .m2-body{padding-bottom:120px;gap:var(--m-gap-card);}
+#monthSumSheet .m2-head,#monthSumSheet .m2-actions{background:rgba(255,244,241,.85);}   /* szkło w kolorze tła okna (--m-orange-wash), inaczej białe pasy odcinają się od treści */
+/* treść wygasza się przy pasku zamiast kończyć się twardą krawędzią */
+#monthSumSheet .m2-head::after,#monthSumSheet .m2-actions::before{content:"";position:absolute;left:0;right:0;height:22px;pointer-events:none;}
+#monthSumSheet .m2-head::after{top:100%;background:linear-gradient(to bottom,rgba(255,244,241,.85),rgba(255,244,241,0));}
+#monthSumSheet .m2-actions::before{bottom:100%;background:linear-gradient(to top,rgba(255,244,241,.85),rgba(255,244,241,0));}
 .ms-top{padding:16px;border-radius:var(--m-r-md);background:#000;color:var(--m-white);}
 .ms-top-eb{margin:0 0 10px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-orange);}
 .ms-headline{text-wrap:balance;margin:0;font-size:var(--m-fs-2xl);font-weight:300;line-height:1.1;letter-spacing:-.01em;color:var(--m-white);}
@@ -10164,7 +10169,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.93.6";
+const APP_VERSION = "4.93.7";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {

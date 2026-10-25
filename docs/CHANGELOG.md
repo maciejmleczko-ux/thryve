@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.93.6 (2026-10-25)
+- **Aktualna wersja:** 4.93.7 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.93.7 · PATCH · 2026-10-25
+
+Podsumowanie miesiąca: koniec twardych odcięć przy nagłówku i przycisku. Szkło pasków (`.m2-head`, `.m2-actions`) ma kolor tła okna (`rgba(255,244,241,.85)` = `--m-orange-wash`) zamiast białego, a treść wygasza się przy obu paskach gradientem 22 px (`::after` / `::before`), więc kafle i karty nie kończą się ostrą linią.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.93.7: podsumowanie miesiąca, miękkie krawędzie pasków
 
 ### 4.93.6 · PATCH · 2026-10-25
 
