@@ -416,6 +416,9 @@ html.gymfin-open .bottom-nav{z-index:9600;}   /* the real nav stays on top of th
 .gymfin-stat{grid-column:span 2;min-width:0;box-sizing:border-box;border:0;border-radius:var(--m-r-sm);padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;text-align:left;font-family:inherit;color:var(--m-white);transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymfin-stat--wide{grid-column:span 3;min-height:78px;gap:8px;}   /* Figma: 78px with space-between; min-height + 8px gap so the 11px caption (Figma 8px) never squeezes the label */
 .gymfin-stat[hidden]{display:none;}
+.gymfin-stat:has(.gymfin-stat-edit){position:relative;}
+.gymfin-stat-edit{position:absolute;top:10px;right:10px;width:14px;height:14px;color:rgba(255,255,255,.7);pointer-events:none;}
+.gymfin-stat:has(.gymfin-stat-edit) .gymfin-stat-k{padding-right:20px;}
 .gymfin-stat-k{margin:0;line-height:1;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.82);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gymfin-stat-v{margin:0;display:flex;align-items:flex-end;gap:4px;font-size:var(--m-fs-num);font-weight:200;letter-spacing:-.0385em;line-height:.8;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .gymfin-stat-v small{font-size:var(--m-fs-xs);font-weight:400;letter-spacing:0;color:rgba(255,255,255,.8);}
@@ -4139,9 +4142,9 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <div class="gymfin-stats" id="gymFinStats">
-        <button type="button" class="gymfin-stat gymfin-stat--time" onclick="gymFinEditTime()"><p class="gymfin-stat-k" data-i18n="gymFinTime">Czas</p><p class="gymfin-stat-v" id="gymFinTimeV">—</p></button>
+        <button type="button" class="gymfin-stat gymfin-stat--time" onclick="gymFinEditTime()"><svg class="gymfin-stat-edit" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4zM13.5 6.5l4 4"/></svg><p class="gymfin-stat-k" data-i18n="gymFinTime">Czas</p><p class="gymfin-stat-v" id="gymFinTimeV">—</p></button>
         <div class="gymfin-stat gymfin-stat--sky"><p class="gymfin-stat-k" data-i18n="gymFinExercises">Ćwiczenia</p><p class="gymfin-stat-v" id="gymFinExV">0</p></div>
-        <button type="button" class="gymfin-stat gymfin-stat--kcal" id="gymFinKcal" hidden onclick="gymFinEditKcal()"><p class="gymfin-stat-k" id="gymFinKcalK" data-i18n="gymFinKcal">Kalorie</p><p class="gymfin-stat-v" id="gymFinKcalV">—</p></button>
+        <button type="button" class="gymfin-stat gymfin-stat--kcal" id="gymFinKcal" hidden onclick="gymFinEditKcal()"><svg class="gymfin-stat-edit" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4zM13.5 6.5l4 4"/></svg><p class="gymfin-stat-k" id="gymFinKcalK" data-i18n="gymFinKcal">Kalorie</p><p class="gymfin-stat-v" id="gymFinKcalV">—</p></button>
         <div class="gymfin-stat gymfin-stat--volume gymfin-stat--wide"><p class="gymfin-stat-k" data-i18n="gymFinVolume">Objętość</p><p class="gymfin-stat-v" id="gymFinVolV">0</p></div>
         <div class="gymfin-stat gymfin-stat--vs gymfin-stat--wide" id="gymFinVs" hidden>
           <p class="gymfin-stat-k" data-i18n="gymFinVs">Vs poprzedni</p>
@@ -10169,7 +10172,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.93.8";
+const APP_VERSION = "4.93.9";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
