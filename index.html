@@ -5006,7 +5006,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <!-- Przypomnienie o treningu — lokalne powiadomienie, tylko w apce natywnej
      (@capacitor/local-notifications; brak sensownego odpowiednika w PWA bez
      serwera push). Dni bierze z aktywnego planu (planActiveDays()); godzina
-     wybierana przez użytkownika. Przeliczane przy starcie apki i przy
+     wybierana przez użytkownika. Przeliczane przy starcie aplikacji i przy
      zapisie tego arkusza — NIE na żywo przy każdej zmianie planu (patrz
      scheduleWorkoutReminders()). -->
 
@@ -5372,7 +5372,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <div class="onboard-overlay hidden m-dialog" id="installPromptOverlay" onclick="if(event.target===this) dismissInstallPrompt()">
   <div class="onboard-box new-ex-form">
     <h3 data-i18n="installPromptTitle">Zainstaluj Mekkio</h3>
-    <p data-i18n="installPromptBody">Używasz apki w przeglądarce. Jeśli masz (albo planujesz mieć) Mekkio zainstalowaną na ekranie głównym albo w docku, to osobne miejsce na dane — to, co dodasz tutaj, może się tam nie pojawić. Zainstaluj i korzystaj z jednego miejsca.</p>
+    <p data-i18n="installPromptBody">Używasz aplikacji w przeglądarce. Jeśli masz (albo planujesz mieć) Mekkio zainstalowaną na ekranie głównym albo w docku, to osobne miejsce na dane — to, co dodasz tutaj, może się tam nie pojawić. Zainstaluj i korzystaj z jednego miejsca.</p>
     <p id="installPromptHowTo" style="font-weight:600;"></p>
     <div class="btns">
       <button type="button" class="cancel" onclick="dismissInstallPrompt()" data-i18n="installPromptDismiss">Rozumiem, później</button>
@@ -5758,7 +5758,7 @@ try{ const v = localStorage.getItem(LANG_KEY); if(v === 'pl' || v === 'en') LANG
 const LANG = LANG_OVERRIDE || ((navigator.language || '').toLowerCase().startsWith('pl') ? 'pl' : 'en');
 /* ---- Jednostki: metryczne (kg, cm, km) albo imperialne (lb, ft/in, mi). Dane ZAWSZE leżą w kg / cm / m / km (historia, chmura, kalorie,
    rekordy), przeliczamy tylko przy wyświetlaniu (kgToDisp) i przy zapisie wpisanej liczby (dispToKg). Wybór jest lokalny
-   (jak język), zmiana przeładowuje apkę. Domyślnie: imperialne dla en-US / en-LR / my-MM, w reszcie świata metryczne. ---- */
+   (jak język), zmiana przeładowuje aplikację. Domyślnie: imperialne dla en-US / en-LR / my-MM, w reszcie świata metryczne. ---- */
 const UNITS_KEY = 'mekkio_units_v1';   // 'metric' | 'imperial'; brak klucza = wg regionu telefonu
 const KG_PER_LB = 0.45359237, KM_PER_MI = 1.609344, CM_PER_IN = 2.54;
 let UNITS_OVERRIDE = null;
@@ -8830,7 +8830,7 @@ function syncSig(v){
 /* Kolumny dodane w 4.66.0 (migracja supabase/migrations/20261013_workouts_plan_meta.sql, uruchamia ją
    Maciej): plans.meta, workouts.start_date, workouts.plan_id. Dopóki ich nie ma w bazie, wysyłka z nimi
    kończy się błędem kolumny (PGRST204 / 42703); wtedy upsertChunked powtarza zapis bez nich i ustawia
-   flagę poniżej. Flaga żyje TYLKO w pamięci sesji (nie w localStorage): po restarcie apka znowu próbuje
+   flagę poniżej. Flaga żyje TYLKO w pamięci sesji (nie w localStorage): po restarcie aplikacja znowu próbuje
    z nowymi polami. Pola dopisujemy do wiersza tylko gdy rekord je ma, więc stare rekordy mają wiersz
    i podpis identyczne jak przed 4.66.0 (brak masowego ponownego wysyłania). */
 let _cloudNewColsOk = true;
@@ -9614,7 +9614,7 @@ async function clearCachedCloudResponses(){
    Kasuje auth.users przez Edge Function z service_role (klient nie ma i nie
    może mieć tego klucza) — cascade w supabase-schema.sql zabiera przy okazji
    profiles/plans/workouts/ai_usage. Po sukcesie czyścimy też lokalny cache,
-   bo inaczej apka po restarcie pokazałaby dane usuniętego konta jako "dane
+   bo inaczej aplikacja po restarcie pokazałaby dane usuniętego konta jako "dane
    gościa". Pełny reload zamiast ręcznego resetu ~15 tablic w pamięci —
    prostsze i bezpieczniejsze niż dorenderowywanie każdego widoku z osobna. */
 const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/delete-account';
@@ -9978,7 +9978,7 @@ async function scheduleWorkoutReminders(){
   const notifications = days.map((d, i)=> ({
     id: 90000 + i,
     title: 'Czas na trening',
-    body: 'Dziś masz zaplanowany trening w Mekkio — otwórz apkę i zacznij.',
+    body: 'Dziś masz zaplanowany trening w Mekkio — otwórz aplikację i zacznij.',
     schedule: { on: { weekday: WEEKDAY_NUM[d], hour, minute }, repeats: true, allowWhileIdle: true }
   }));
   try{ await LN.schedule({ notifications }); }catch(e){ console.error('scheduleWorkoutReminders: schedule', e); }
@@ -10011,7 +10011,7 @@ async function checkNativeUpdate(){
     _updatePromptOpen = true;
     const r = await Dlg.confirm({
       title: 'Nowa wersja Mekkio',
-      message: 'Jest nowsza wersja apki. Zaktualizuj ją w TestFlight, żeby mieć najnowsze poprawki.',
+      message: 'Jest nowsza wersja aplikacji. Zaktualizuj ją w TestFlight, żeby mieć najnowsze poprawki.',
       okButtonTitle: 'Aktualizuj',
       cancelButtonTitle: 'Później'
     });
@@ -10240,7 +10240,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.96.3";
+const APP_VERSION = "4.96.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -10493,7 +10493,7 @@ const CHANGELOG = {
   },
   "4.44.0": {
     pl: [
-      {featured:true, icon:'arrow-clockwise', badge:'Nowość', title:'Ćwiczenia i notatki na koncie', text:'Własne ćwiczenia i notatki do ćwiczeń zapisują się teraz na koncie, więc zobaczysz je na każdym telefonie, na którym się zalogujesz. Jeśli wcześniej używałeś apki bez konta, po zalogowaniu nic nie przepada: ćwiczenia, notatki, waga i własne plany dołączą do konta.'},
+      {featured:true, icon:'arrow-clockwise', badge:'Nowość', title:'Ćwiczenia i notatki na koncie', text:'Własne ćwiczenia i notatki do ćwiczeń zapisują się teraz na koncie, więc zobaczysz je na każdym telefonie, na którym się zalogujesz. Jeśli wcześniej używałeś aplikacji bez konta, po zalogowaniu nic nie przepada: ćwiczenia, notatki, waga i własne plany dołączą do konta.'},
     ],
     en: [
       {featured:true, icon:'arrow-clockwise', badge:'New', title:'Exercises and notes in your account', text:'Custom exercises and exercise notes now save to your account, so they show up on every phone you sign in on. If you used the app without an account before, nothing gets lost when you sign in: exercises, notes, weight and your own plans join your account.'},
@@ -10501,7 +10501,7 @@ const CHANGELOG = {
   },
   "4.43.1": {
     pl: [
-      'Edycje planów, nowe wpisy wagi, zmiany w profilu i ręczne korekty kalorii zapisują się teraz w chmurze. Wcześniej po ponownym otwarciu apki potrafiły wrócić do starszej wersji.',
+      'Edycje planów, nowe wpisy wagi, zmiany w profilu i ręczne korekty kalorii zapisują się teraz w chmurze. Wcześniej po ponownym otwarciu aplikacji potrafiły wrócić do starszej wersji.',
     ],
     en: [
       'Plan edits, new weight entries, profile changes and manual calorie corrections now save to the cloud. Before, reopening the app could roll them back to an older version.',
@@ -10565,7 +10565,7 @@ const CHANGELOG = {
   },
   "4.36.0": {
     pl: [
-      'Ekran GYM i kreator planu (BUILDER) nie mają już czerwonego tła pod panelem — teraz są w tym samym liliowym kolorze co reszta apki.',
+      'Ekran GYM i kreator planu (BUILDER) nie mają już czerwonego tła pod panelem — teraz są w tym samym liliowym kolorze co reszta aplikacji.',
     ],
     en: [
       'The GYM screen and the plan editor (BUILDER) no longer have a red background behind the panel — both now match the app\'s usual lilac.',
@@ -10675,7 +10675,7 @@ const CHANGELOG = {
   },
   "4.23.0": {
     pl: [
-      {featured:true, icon:'upload-simple', badge:'Zmiana', title:'Kopia zapasowa obejmuje całą apkę', text:'Kopia zapasowa zapisuje teraz też log wagi, dane do kalorii, zdjęcie profilowe, notatki do ćwiczeń i ukryte plany. Wcześniej zostawały tylko na jednym urządzeniu. Zrób świeżą kopię, żeby mieć w niej wszystko.'},
+      {featured:true, icon:'upload-simple', badge:'Zmiana', title:'Kopia zapasowa obejmuje całą aplikację', text:'Kopia zapasowa zapisuje teraz też log wagi, dane do kalorii, zdjęcie profilowe, notatki do ćwiczeń i ukryte plany. Wcześniej zostawały tylko na jednym urządzeniu. Zrób świeżą kopię, żeby mieć w niej wszystko.'},
       'Poprawka: na krótszych ekranach panel konta bywał ścięty na sekcji „Dane do kalorii”, a wiersze rozjeżdżały się względem karty. Panel przewija się teraz do końca.',
     ],
     en: [
@@ -10693,7 +10693,7 @@ const CHANGELOG = {
   },
   "4.21.0": {
     pl: [
-      {featured:true, icon:'account', badge:'Nowość', title:'Zdjęcie na avatar', text:'W panelu konta, w profilu, wgrasz własne zdjęcie. Pokaże się w panelu i na ikonie konta w rogu ekranu. Zdjęcie zostaje na tym urządzeniu, nigdzie go nie wysyłamy. Sam panel dostał też nagłówek jak reszta apki: strzałka wstecz i ikona zamiast krzyżyka.'},
+      {featured:true, icon:'account', badge:'Nowość', title:'Zdjęcie na avatar', text:'W panelu konta, w profilu, wgrasz własne zdjęcie. Pokaże się w panelu i na ikonie konta w rogu ekranu. Zdjęcie zostaje na tym urządzeniu, nigdzie go nie wysyłamy. Sam panel dostał też nagłówek jak reszta aplikacji: strzałka wstecz i ikona zamiast krzyżyka.'},
     ],
     en: [
       {featured:true, icon:'account', badge:'New', title:'Avatar photo', text:'In the account panel, under your profile, you can upload a photo. It shows in the panel and on the account icon in the screen corner. The photo stays on this device and is never uploaded anywhere. The panel header also matches the rest of the app now: a back arrow and icon instead of a close X.'},
@@ -10757,7 +10757,7 @@ const CHANGELOG = {
   },
   "4.13.0": {
     pl: [
-      {featured:true, icon:'check-circle', badge:'Nowość', title:'Trening już nie przepada', text:'Zamkniesz apkę w trakcie treningu albo ją odświeżysz — wpisane serie czekają na miejscu, kiedy wrócisz do GYM. A serie, których nie wypełnisz, nie trafiają już do historii jako zera.'},
+      {featured:true, icon:'check-circle', badge:'Nowość', title:'Trening już nie przepada', text:'Zamkniesz aplikację w trakcie treningu albo ją odświeżysz — wpisane serie czekają na miejscu, kiedy wrócisz do GYM. A serie, których nie wypełnisz, nie trafiają już do historii jako zera.'},
       'Zamień ćwiczenie na dziś: przy kaflu w GYM jest ikonka, która pokaże zamienniki na tę samą partię. Zmiana łapie się tylko na dzisiejszy trening, plan zostaje jaki był.',
       'Panele — logowanie serii, dostosowanie planu, dodawanie ćwiczenia, opinia — wjeżdżają teraz od dołu ekranu. Żeby zamknąć, zsuń je palcem w dół.',
       'Import kopii zapasowej pyta wprost: Połącz, Zastąp wszystko albo Anuluj. Wcześniej „Anuluj" i tak nadpisywał dane.',
@@ -10862,7 +10862,7 @@ const CHANGELOG = {
   "4.1.0": {
     pl: [
       {featured:true, icon:'heart-fill', badge:'Nowość', title:'GYM po nowemu', text:'Siatka ćwiczeń w GYM podzielona na partie mięśniowe, plus ulubione (serduszko) i filtr sprzętu (hantle/maszyny) — łatwiej znaleźć to, czego szukasz.'},
-      'GYM: bez wybranego planu apka najpierw zaproponuje Ci jego stworzenie, zamiast pokazywać od razu wszystkie 40 ikon — pełną listę wciąż zobaczysz jednym kliknięciem',
+      'GYM: bez wybranego planu aplikacja najpierw zaproponuje Ci jego stworzenie, zamiast pokazywać od razu wszystkie 40 ikon — pełną listę wciąż zobaczysz jednym kliknięciem',
       'Plany treningowe: 2 nowe gotowe warianty (Push/Pull/Legs, Upper/Lower Split) i kopiowanie dnia do innych dni jednym kliknięciem',
       'Pierwsze uruchomienie: wybór planu można teraz pominąć i zdecydować się później',
       'Nowa ikona aplikacji',
@@ -10904,7 +10904,7 @@ const CHANGELOG = {
     en: ["GYM: adding a custom exercise now opens as a popup instead of expanding inline"],
   },
   "3.1.0": {
-    pl: ["GYM: przy dodawaniu własnego ćwiczenia apka sama podpowie pasującą ikonkę — 22 nowe ikony do wyboru"],
+    pl: ["GYM: przy dodawaniu własnego ćwiczenia aplikacja sama podpowie pasującą ikonkę — 22 nowe ikony do wyboru"],
     en: ["GYM: adding a custom exercise now suggests a matching icon automatically — 22 new icons to draw from"],
   },
   "3.0.0": {
@@ -11038,7 +11038,7 @@ function feedbackPayload(type, message){
     typ: type,
     wiadomosc: message,
     wersja: APP_VERSION,
-    platforma: IS_NATIVE ? 'iOS (apka)' : 'przeglądarka',
+    platforma: IS_NATIVE ? 'iOS (aplikacja)' : 'przeglądarka',
     ekran: currentRoute,
     jezyk: LANG,
     imie: (typeof profileName !== 'undefined' && profileName) ? profileName : '',
@@ -11581,7 +11581,7 @@ function newBadgeSee(){
   if(typeof gymFinDismissFn === 'function') gymFinDismissFn(go); else go();
 }
 
-/* ---- Język (Figma 17): okno wyboru Polski / English / Automatycznie. Apka zna dziś tylko język z przeglądarki (stała LANG),
+/* ---- Język (Figma 17): okno wyboru Polski / English / Automatycznie. Aplikacja zna dziś tylko język z przeglądarki (stała LANG),
    więc okno jest samo w sobie: bez wejścia z Ustawień i bez zapisu wyboru (nowy klucz localStorage wymaga osobnej decyzji). ---- */
 let _lng = null;   // { sel:'pl'|'en', auto:boolean }
 function langPaint(){
@@ -11609,13 +11609,13 @@ function saveLangSheet(){
   if((next || null) === (LANG_OVERRIDE || null)) return;   // bez zmiany: nic nie rób
   if(gymSessionStartAt){ toast(t('lngBlocked', 'Język zmienisz po zakończeniu treningu.')); return; }   // reload w trakcie treningu: nie ryzykujemy
   try{ if(next) localStorage.setItem(LANG_KEY, next); else localStorage.removeItem(LANG_KEY); }catch(e){ return; }
-  // Cała apka renderuje teksty przy starcie (LANG jest stałą), więc najbezpieczniej przeładować; dane są już w localStorage.
+  // Cała aplikacja renderuje teksty przy starcie (LANG jest stałą), więc najbezpieczniej przeładować; dane są już w localStorage.
   const nl = next || ((navigator.language || '').toLowerCase().startsWith('pl') ? 'pl' : 'en');
   toast((nl === 'en' ? T_EN.lngApplying : 'Zmieniam język…'));
   setTimeout(()=> location.reload(), 650);
 }
 
-/* ---- Jednostki (Ustawienia → Jednostki): Metryczne (kg, cm, km) / Imperialne (lb, ft, mi). Jak język: wybór lokalny, zmiana przeładowuje apkę. ---- */
+/* ---- Jednostki (Ustawienia → Jednostki): Metryczne (kg, cm, km) / Imperialne (lb, ft, mi). Jak język: wybór lokalny, zmiana przeładowuje aplikację. ---- */
 let _uni = null;   // 'metric' | 'imperial'
 function unitsPaint(){
   document.querySelectorAll('#unitsSheet .lng-row').forEach(r=>{ const on = r.dataset.un === _uni; r.classList.toggle('is-on', on); r.setAttribute('aria-checked', on ? 'true' : 'false'); });
@@ -18896,7 +18896,7 @@ function planShareCode(plan){
   PLAN_DAYS.forEach(d=>{
     plainSchedule[d] = (plan.schedule[d]||[]).map(ex=> byName.has(ex.name) ? ex.name : ex);
   });
-  // opcjonalne „m” (od 4.66.0): cel, poziom, sprzęt, opis; starsza apka je pomija, stare kody go nie mają
+  // opcjonalne „m” (od 4.66.0): cel, poziom, sprzęt, opis; starsza aplikacja je pomija, stare kody go nie mają
   const meta = planMetaOf(plan), m = {};
   if(meta){
     if(meta.goal) m.g = meta.goal;
@@ -18976,7 +18976,7 @@ async function sharePlan(plan){
 function planShareText(plan){
   const code = planShareCode(plan);
   return t('sharePlanText',
-    `Plan treningowy „${plan.name}” z Mekkio. Otwórz apkę → Plany → „Importuj plan” i wklej ten kod:\n\n${code}`,
+    `Plan treningowy „${plan.name}” z Mekkio. Otwórz aplikację → Plany → „Importuj plan” i wklej ten kod:\n\n${code}`,
     plan.name, code);
 }
 // Kopiowanie do schowka (wiadomość z kodem, jak dotąd): Clipboard API, potem execCommand, na końcu okno z tekstem do skopiowania ręcznie
@@ -26245,7 +26245,7 @@ function impPlan(parsed, libNames, weightUnit){
   return { factor, map, unmatched, count: parsed.sessions.length, first: days[0] || null, last: days[days.length - 1] || null,
     setCount: parsed.sessions.reduce((n, s) => n + s.exercises.reduce((m, e) => m + e.sets.length, 0), 0) };
 }
-/* Pełne obiekty treningów w modelu Mekkio (ciężary w kg, zaokrąglone do 0,01 jak w reszcie apki) */
+/* Pełne obiekty treningów w modelu Mekkio (ciężary w kg, zaokrąglone do 0,01 jak w reszcie aplikacji) */
 function impToWorkouts(parsed, plan, groupOf){
   const r2 = x => Math.round(x * 100) / 100;
   return parsed.sessions.map(s => {

@@ -10,7 +10,7 @@
 <link href="vendor/geist/geist.css" rel="stylesheet">
 <!-- Prywatny dashboard właściciela. Dane liczy Edge Function admin-stats:
      tylko zbiorcze liczby i tylko dla kont z sekretu STATS_ADMIN_EMAILS.
-     Ta sama domena co apka, więc sesja z app.mekkio.app działa od razu. -->
+     Ta sama domena co aplikacja, więc sesja z app.mekkio.app działa od razu. -->
 <script src="vendor/supabase-2.117.2.js"></script>
 <style>
 :root{
@@ -111,9 +111,9 @@ h2{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
     <h2>Aktualni użytkownicy</h2>
     <div class="grid">
-      <div class="card"><p class="k">Dziś</p><div class="v" id="activeToday">–</div><p class="hint">osób użyło apki</p></div>
-      <div class="card"><p class="k">Ostatnie 7 dni</p><div class="v" id="active7">–</div><p class="hint">osób użyło apki</p></div>
-      <div class="card wide"><p class="k">Ostatnie 30 dni</p><div class="v" id="active30">–</div><p class="hint">osób użyło apki</p></div>
+      <div class="card"><p class="k">Dziś</p><div class="v" id="activeToday">–</div><p class="hint">osób użyło aplikacji</p></div>
+      <div class="card"><p class="k">Ostatnie 7 dni</p><div class="v" id="active7">–</div><p class="hint">osób użyło aplikacji</p></div>
+      <div class="card wide"><p class="k">Ostatnie 30 dni</p><div class="v" id="active30">–</div><p class="hint">osób użyło aplikacji</p></div>
     </div>
 
     <h2>Nowi użytkownicy</h2>
@@ -130,7 +130,7 @@ h2{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     <div class="card">
       <div class="seg" id="segBar"></div>
       <div class="seg-list" id="segList"></div>
-      <p class="hint">Liczone z ostatnich 4 tygodni: w ilu z nich ktoś choć raz użył apki.</p>
+      <p class="hint">Liczone z ostatnich 4 tygodni: w ilu z nich ktoś choć raz użył aplikacji.</p>
     </div>
     <div class="card" style="margin-top:10px">
       <p class="k">Wrócili w ostatnich 7 dniach</p>
@@ -140,13 +140,13 @@ h2{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
     <h2>Tydzień po tygodniu · 12 tygodni</h2>
     <div class="grid g2">
-      <div class="card wide"><p class="legend">Osoby, które użyły apki</p><div id="weeksActive"></div></div>
+      <div class="card wide"><p class="legend">Osoby, które użyły aplikacji</p><div id="weeksActive"></div></div>
       <div class="card wide"><p class="legend">Nowe konta</p><div id="weeksNew"></div></div>
     </div>
 
     <p class="note">
-      „Użył apki” = zapisał trening, zapytał Trenera AI albo się zalogował. Liczą się tylko osoby z kontem w chmurze. Goście trzymają dane na telefonie, więc ich tu nie widać.<br>
-      Pobrania apki, instalacje z TestFlight i crashe są w <a href="https://appstoreconnect.apple.com/" target="_blank" rel="noopener">App Store Connect</a>.
+      „Użył aplikacji” = zapisał trening, zapytał Trenera AI albo się zalogował. Liczą się tylko osoby z kontem w chmurze. Goście trzymają dane na telefonie, więc ich tu nie widać.<br>
+      Pobrania aplikacji, instalacje z TestFlight i crashe są w <a href="https://appstoreconnect.apple.com/" target="_blank" rel="noopener">App Store Connect</a>.
     </p>
   </main>
 </div>
@@ -191,7 +191,7 @@ async function load(){
 }
 
 const SEGMENTS = [
-  { key:'regular',    label:'Regularni',   desc:'używali apki w co najmniej 3 z 4 ostatnich tygodni', color:'#ff3300' },
+  { key:'regular',    label:'Regularni',   desc:'używali aplikacji w co najmniej 3 z 4 ostatnich tygodni', color:'#ff3300' },
   { key:'occasional', label:'Okazjonalni', desc:'1–2 tygodnie z 4',                                   color:'#ffa390' },
   { key:'fresh',      label:'Nowi',        desc:'konto młodsze niż 2 tygodnie, za wcześnie oceniać',  color:'#343941' },
   { key:'dormant',    label:'Uśpieni',     desc:'brak aktywności od 4 tygodni',                         color:'#cfcbd6' },
@@ -224,10 +224,10 @@ function render(s){
   const r = s.returning;
   if(r.prev > 0){
     $('retPct').innerHTML = Math.round(r.back / r.prev * 100) + '<small>%</small>';
-    $('retText').textContent = r.back + ' z ' + r.prev + ' osób, które używały apki tydzień wcześniej (8–14 dni temu), wróciło w ostatnich 7 dniach.';
+    $('retText').textContent = r.back + ' z ' + r.prev + ' osób, które używały aplikacji tydzień wcześniej (8–14 dni temu), wróciło w ostatnich 7 dniach.';
   }else{
     $('retPct').textContent = '–';
-    $('retText').textContent = 'Tydzień wcześniej nikt nie używał apki, więc nie ma czego porównać.';
+    $('retText').textContent = 'Tydzień wcześniej nikt nie używał aplikacji, więc nie ma czego porównać.';
   }
 
   weekRows($('weeksActive'), s.weeks, 'active');

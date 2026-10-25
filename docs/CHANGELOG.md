@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.96.3 (2026-10-25)
+- **Aktualna wersja:** 4.96.4 (2026-10-26)
 - **Liczba wersji:** 266 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.96.4 · PATCH · 2026-10-26
+
+„apka” → „aplikacja” wszędzie, z odmianą (aplikacji, aplikację, aplikacją): przypomnienie o treningu, komunikat o nowej wersji, tekst udostępniania planu, okno instalacji w przeglądarce, starsze wpisy „Co nowego”, pole platformy w opinii, komentarze; polityka prywatności (aplikacja i landing, treść bez zmian merytorycznych), panel statystyk `stats.html`, landing mekkio.app (strona główna, Pomoc i kontakt).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-26 — 4.96.4: „apka” → „aplikacja”
 
 ### 4.96.3 · PATCH · 2026-10-25
 
