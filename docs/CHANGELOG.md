@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.95.0 (2026-10-25)
+- **Aktualna wersja:** 4.96.0 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.96.0 · MINOR · 2026-10-25
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Masa ciała z obciążeniem: przy podciąganiu, pompkach i innych ćwiczeniach z masą ciała ustawisz suwakiem dodatkowy ciężar albo wspomaganie (guma, maszyna). Liczy się do objętości, kalorii i rekordów, a rekordy są osobno dla każdego wariantu.
+
+Masa własna, etap E3: trzy osobne rekordy na ćwiczenie z masą własną (silnik rekordów, `recAnalyze` / `recBuildIndex`): czyste serie (najwięcej powtórzeń, jak dotąd, ale bez serii z dodatkiem i wspomaganiem), dodatkowy ciężar (zdarzenie `kind:'weight'` z `extra:'load'`, wartość dodatnia, zasady jak przy ciężarze sztangi) i wspomaganie (`extra:'assist'`, wartość ze znakiem, np. −15, rekordem jest mniejsze wspomaganie, więc `delta` poprawy jest dodatnia). `exerciseRecords` zwraca też `extra` i `assist`. Rekord pokazują Gratulacje, Historia, karta, Profil i okno szczegółu rekordu (`+12,5 kg`, `−15 kg`, „o 5 kg mniej wspomagania niż poprzednio”). Podpowiedzi progresji (`buildSuggestion`) dla serii z dodatkiem lub wspomaganiem mówią w kilogramach: dołóż / zmniejsz wspomaganie o krok linijki. Pierwsze wykonanie wariantu niczego nie bije. Rekord objętości treningu zostaje po powtórzeniach (zatwierdzona definicja z 2026-10-13); „Vs poprzedni” liczy objętość z masą ciała (E2).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.96.0: masa własna E3, rekordy dodatku i wspomagania, podpowiedzi progresji
 
 ### 4.95.0 · MINOR · 2026-10-25
 

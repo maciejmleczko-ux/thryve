@@ -6038,6 +6038,12 @@ const T_EN = {
   tuesdayLabel: 'Tuesday:',
   saturdayLabel: 'Saturday:',
   repsUnit: 'reps',
+  gymFinRecordLessAssist: d => `${d} less assistance than before`, rdAssistLess: d => `${d} less assistance`,
+  suggestUpBwLoad: (n, step) => `Last time ${n}+ reps in every set with extra weight. Add ${step}.`,
+  suggestUpBwAssist: (n, step) => `Last time ${n}+ reps in every set. Reduce the assistance by ${step}, e.g. use a lighter band.`,
+  suggestDownBwLoad: (n, k) => `Last time you missed ${n} reps in ${k} sets. Reduce the extra weight or rest longer.`,
+  suggestDownBwAssist: (n, k) => `Last time you missed ${n} reps in ${k} sets. Add assistance or rest longer.`,
+  suggestHoldBwLoad: (cur, n) => `Stay at ${cur} and try to reach ${n} reps in every set.`,
   bwNote: txt => `Calculated with body weight ${txt}`,
   loadLabelExtra: 'Extra weight', loadLabelAssist: 'Assistance', loadHint: 'Using a band or machine? Slide left.', loadA11y: 'Extra weight or assistance',
   timeLabel: 'Time', timeLabelSide: 'Time per side', perSideShort: '/side',
@@ -10234,9 +10240,17 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.95.0";
+const APP_VERSION = "4.96.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "4.96.0": {
+    pl: [
+      {icon:'sparks', badge:'Nowość', title:'Masa ciała z obciążeniem', text:'Przy podciąganiu, pompkach i innych ćwiczeniach z masą ciała ustawisz suwakiem dodatkowy ciężar albo wspomaganie (guma, maszyna). Liczy się do objętości, kalorii i rekordów, a rekordy są osobno dla każdego wariantu.' },
+    ],
+    en: [
+      {icon:'sparks', badge:'New', title:'Bodyweight with load', text:'For pull-ups, push-ups and other bodyweight exercises you can now set extra weight or assistance (band, machine) with a slider. It counts toward volume, calories and records, with separate records for each variant.' },
+    ],
+  },
   "4.86.0": {
     release: {
       pl: { title: 'Mekkio 4\njest gotowe', text: 'Skończyliśmy prace nad wersją 4.\nTo wersja finalna. Zapraszam do testów.\n\nJeśli coś nie działa, czegoś brakuje albo po prostu Ci się podoba, daj znać.\n\nKażda uwaga się liczy.' },
@@ -11654,23 +11668,24 @@ function rdValueText(kind, v, perSide){
 }
 function recordDetailHtml(r, ex, pm){
   const E = escHtml, kind = r.kind === 'reps' || r.kind === 'time' ? r.kind : 'weight';
-  const cur = ex && ex[kind] ? ex[kind] : null;
+  const cur = r.extra ? (ex ? (r.extra === 'assist' ? ex.assist : ex.extra) : null) : (ex && ex[kind] ? ex[kind] : null);
   const ev = ex ? ex.events.find(e=> e.kind === kind && e.workoutId === r.workoutId && e.value === r.value) : null;
   const delta = ev ? ev.delta : (r.delta > 0 ? r.delta : 0);
   let num, unit = '', numCls = 'rd-num';
-  if(kind === 'weight'){ num = fmtGymWeight(r.value); unit = wUnit(); }
+  if(kind === 'weight'){ num = r.extra ? ((r.value > 0 ? '+' : '−') + fmtGymWeight(Math.abs(r.value))) : fmtGymWeight(r.value); unit = wUnit(); }
   else if(kind === 'reps'){ num = String(r.value); unit = t('repsUnit', 'powt.'); }
   else { num = fmtDur(r.value, r.perSide); numCls += ' rd-num--sm'; }
   let dTxt = '';
   if(delta > 0){
-    const d = kind === 'weight' ? `+${fmtGymWeight(delta)} ${wUnit()}` : kind === 'reps' ? `+${delta} ${t('repsUnit', 'powt.')}` : `+${fmtDur(delta)}`;
-    dTxt = `${d} ${t('rdVsPrev', 'względem poprzedniego')}`;
+    const dKg = `${fmtGymWeight(delta)} ${wUnit()}`;
+    const d = kind === 'weight' ? (r.extra === 'assist' ? t('rdAssistLess', `o ${dKg} mniej wspomagania`, dKg) : `+${dKg}`) : kind === 'reps' ? `+${delta} ${t('repsUnit', 'powt.')}` : `+${fmtDur(delta)}`;
+    dTxt = r.extra === 'assist' ? d : `${d} ${t('rdVsPrev', 'względem poprzedniego')}`;
   } else dTxt = t('rdFirst', 'Pierwszy zapisany wynik');
   const row = (l, v)=> `<div class="m2-row"><span class="m2-row-l">${E(l)}</span><span class="m2-row-v">${v}</span></div>`;
   let rows = row(t('rdSet', 'REKORD USTANOWIONY'), E(pfFmtFullDate(r.date)));
-  if(cur && cur.value > r.value) rows += row(t('rdCurrent', 'AKTUALNY REKORD'), E(rdValueText(kind, cur.value, cur.perSide)));
-  if(kind === 'weight' && pm && pm.value > 0) rows += row(t('rdProj', 'PROGNOZA MAXA'), `<span class="rd-chip">≈ ${E(fmtW0(pm.value))} ${wUnit()}</span>`);
-  const vol = ex && ex.volume ? (kind === 'weight' ? ex.volume.kg : kind === 'reps' ? ex.volume.reps : null) : null;
+  if(cur && cur.value > r.value) rows += row(t('rdCurrent', 'AKTUALNY REKORD'), E(r.extra ? fmtExtraKg(cur.value) : rdValueText(kind, cur.value, cur.perSide)));
+  if(kind === 'weight' && !r.extra && pm && pm.value > 0) rows += row(t('rdProj', 'PROGNOZA MAXA'), `<span class="rd-chip">≈ ${E(fmtW0(pm.value))} ${wUnit()}</span>`);
+  const vol = ex && ex.volume && !r.extra ? (kind === 'weight' ? ex.volume.kg : kind === 'reps' ? ex.volume.reps : null) : null;
   if(vol) rows += row(t('rdVol', 'NAJWIĘKSZA OBJĘTOŚĆ'), E(`${rdGroup(kind === 'weight' ? kgToDisp(vol.value) : vol.value)} ${kind === 'weight' ? wUnit() : t('repsUnit', 'powt.')}`));
   return `<div class="rd-val"><span class="${numCls}">${E(num)}</span>${unit ? `<span class="rd-unit">${E(unit)}</span>` : ''}</div><p class="rd-delta">${E(dTxt)}</p><div class="m2-field rd-card">${rows}</div>`;
 }
@@ -11740,6 +11755,7 @@ function profileRecordsModel(now){
   });
 }
 function pfRecValue(r){
+  if(r.extra) return fmtExtraKg(r.value);
   if(r.kind === 'reps') return `${r.value} ${t('repsUnit', 'powt.')}`;
   if(r.kind === 'time') return fmtDur(r.value, r.perSide);
   return `${fmtGymWeight(r.value)} ${wUnit()}`;
@@ -12895,6 +12911,22 @@ function buildSuggestion(exMeta, history){
   const allTop = validSets.every(s => s.reps >= exMeta.repHigh);
   const lowFails = validSets.filter(s => s.reps < exMeta.repLow).length;
   if(isBodyweightEx){
+    // masa własna z dodatkiem albo wspomaganiem w ostatniej serii: podpowiedź w kilogramach, nie „trudniejszy wariant”
+    const xk = +validSets[validSets.length - 1].extraKg || 0;
+    if(xk !== 0){
+      const stepTxt = `${fmtKgLocal(weightStepFor(exMeta))} ${wUnit()}`, cur = fmtExtraKg(xk);
+      if(allTop){
+        return xk > 0
+          ? {cls:'up', text:t('suggestUpBwLoad', `Ostatnio ${exMeta.repHigh}+ powtórzeń we wszystkich seriach z dodatkowym ciężarem. Dołóż ${stepTxt}.`, exMeta.repHigh, stepTxt)}
+          : {cls:'up', text:t('suggestUpBwAssist', `Ostatnio ${exMeta.repHigh}+ powtórzeń we wszystkich seriach. Zmniejsz wspomaganie o ${stepTxt}, np. weź cieńszą gumę.`, exMeta.repHigh, stepTxt)};
+      }
+      if(lowFails>=2){
+        return xk > 0
+          ? {cls:'down', text:t('suggestDownBwLoad', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach. Zmniejsz dodatkowy ciężar albo wydłuż odpoczynek.`, exMeta.repLow, lowFails)}
+          : {cls:'down', text:t('suggestDownBwAssist', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach. Zwiększ wspomaganie albo wydłuż odpoczynek.`, exMeta.repLow, lowFails)};
+      }
+      return {cls:'', text:t('suggestHoldBwLoad', `Zostań przy ${cur} i spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, cur, exMeta.repHigh)};
+    }
     if(allTop){
       return {cls:'up', text:t('suggestUpBw', `Ostatnio ${exMeta.repHigh}+ powtórzeń we wszystkich seriach. Spróbuj trudniejszego wariantu albo dobij do góry zakresu z zapasem.`, exMeta.repHigh)};
     }
@@ -16016,6 +16048,8 @@ function recChrono(src){
 }
 // jeden trening: wyniki każdego ćwiczenia (dwa wpisy tego samego ćwiczenia w treningu łączą się w jeden wynik) + sumy treningu
 function recRound6(v){ return Math.round(v * 1e6) / 1e6; }
+// masa własna: dodatek (+) albo wspomaganie (−) zapisane na serii, w kg
+function recExtra(s){ const n = typeof s.extraKg === 'number' ? s.extraKg : parseFloat(s.extraKg); return isFinite(n) ? recRound6(n) : 0; }
 function recAnalyze(w){
   const per = new Map();
   let vol = 0, repsAll = 0;
@@ -16024,7 +16058,7 @@ function recAnalyze(w){
     const sets = recSetsOf(ex);
     if(!sets.length) return;
     let p = per.get(ex.name);
-    if(!p){ p = { name: ex.name, topW: 0, topWReps: 0, topReps: 0, topTime: 0, perSide: false, weighted: false, repsNoW: 0, topSet: null, e1: null, vol: 0 }; per.set(ex.name, p); }
+    if(!p){ p = { name: ex.name, topW: 0, topWReps: 0, topReps: 0, topTime: 0, perSide: false, weighted: false, repsNoW: 0, topSet: null, e1: null, vol: 0, loadTop: 0, loadTopReps: 0, assistMin: 0, assistTopReps: 0 }; per.set(ex.name, p); }
     sets.forEach(s=>{
       const wt = recNum(s.weight), rp = recNum(s.reps), du = recNum(s.durationSec);
       if(du > p.topTime){ p.topTime = du; p.perSide = !!s.perSide; }
@@ -16034,8 +16068,13 @@ function recAnalyze(w){
         vol += wt * rp; p.vol += wt * rp;
         if(rp <= STATSV2_E1RM_REP_CAP){ const e = statsV2Epley(wt, rp); if(!p.e1 || e > p.e1.value) p.e1 = { value: e, weight: wt, reps: rp }; }
       } else if(wt === 0 && rp > 0){
-        p.repsNoW += rp; if(rp > p.topReps) p.topReps = rp;
+        p.repsNoW += rp;
         repsAll += rp;
+        // trzy osobne rekordy masy własnej: czyste serie (powtórzenia), z dodatkowym ciężarem (+kg), ze wspomaganiem (im mniej, tym lepiej)
+        const xk = recExtra(s);
+        if(xk > 0){ if(xk > p.loadTop || (xk === p.loadTop && rp > p.loadTopReps)){ p.loadTop = xk; p.loadTopReps = rp; } }
+        else if(xk < 0){ const a = -xk; if(!p.assistMin || a < p.assistMin || (a === p.assistMin && rp > p.assistTopReps)){ p.assistMin = a; p.assistTopReps = rp; } }
+        else if(rp > p.topReps) p.topReps = rp;
       }
       // najlepsza seria do karty "Twój postęp": najcięższa, przy remisie z większą liczbą powtórzeń (jak gymFinTopSet)
       if(wt > 0 || rp > 0){ if(!p.topSet || wt > p.topSet.weight || (wt === p.topSet.weight && rp > p.topSet.reps)) p.topSet = { weight: wt, reps: rp }; }
@@ -16050,7 +16089,7 @@ function recBuildIndex(src){
   const order = recChrono(src);
   const state = new Map(), byWorkout = new Map(), byId = new Map(), timeline = [];
   const volBest = { kg: null, reps: null };
-  const newState = name => ({ name, w: null, r: null, t: null, hw: [], hr: [], ht: [], proj: null, v: { kg: null, reps: null }, projByMonth: new Map(), sessions: 0, firstDate: null, lastDate: null, lastTop: null, events: [] });
+  const newState = name => ({ name, w: null, r: null, t: null, x: null, a: null, hw: [], hr: [], ht: [], hx: [], ha: [], proj: null, v: { kg: null, reps: null }, projByMonth: new Map(), sessions: 0, firstDate: null, lastDate: null, lastTop: null, events: [] });
   order.forEach((w, pos)=>{
     const an = recAnalyze(w);
     const records = [], exVolumes = [], prevTop = new Map();
@@ -16064,7 +16103,17 @@ function recBuildIndex(src){
         if(!st.w || p.topW > st.w.value){ st.w = { value: p.topW, reps: p.topWReps, date: w.date, workoutId: w.id }; st.hw.push({ date: w.date, value: p.topW }); }
         else if(p.topW === st.w.value && p.topWReps > st.w.reps) st.w.reps = p.topWReps;
       }
-      if(p.bw){
+      if(p.loadTop > 0){   // dodatkowy ciężar: jak rekord ciężaru (pierwszy raz i remis niczego nie biją, powtórzenia rozstrzygają remis)
+        if(st.x && p.loadTop > st.x.value) push(st, { kind: 'weight', extra: 'load', unit: 'kg', name: p.name, value: p.loadTop, reps: p.loadTopReps, prev: st.x.value });
+        if(!st.x || p.loadTop > st.x.value){ st.x = { value: p.loadTop, reps: p.loadTopReps, date: w.date, workoutId: w.id }; st.hx.push({ date: w.date, value: p.loadTop }); }
+        else if(p.loadTop === st.x.value && p.loadTopReps > st.x.reps) st.x.reps = p.loadTopReps;
+      }
+      if(p.assistMin > 0){   // wspomaganie: rekord = mniejsze wspomaganie; wartość zdarzenia ze znakiem (−15), więc delta = poprawa jest dodatnia
+        if(st.a && p.assistMin < st.a.value) push(st, { kind: 'weight', extra: 'assist', unit: 'kg', name: p.name, value: -p.assistMin, reps: p.assistTopReps, prev: -st.a.value });
+        if(!st.a || p.assistMin < st.a.value){ st.a = { value: p.assistMin, reps: p.assistTopReps, date: w.date, workoutId: w.id }; st.ha.push({ date: w.date, value: -p.assistMin }); }
+        else if(p.assistMin === st.a.value && p.assistTopReps > st.a.reps) st.a.reps = p.assistTopReps;
+      }
+      if(p.bw && p.topReps > 0){
         if(st.r && p.topReps > st.r.value) push(st, { kind: 'reps', unit: 'reps', name: p.name, value: p.topReps, prev: st.r.value });
         if(!st.r || p.topReps > st.r.value){ st.r = { value: p.topReps, date: w.date, workoutId: w.id }; st.hr.push({ date: w.date, value: p.topReps }); }
       }
@@ -16148,6 +16197,8 @@ function exerciseRecords(name, list){
     weight: st.w ? { value: st.w.value, reps: st.w.reps, date: st.w.date, workoutId: st.w.workoutId, history: st.hw } : null,
     reps: st.r ? { value: st.r.value, date: st.r.date, workoutId: st.r.workoutId, history: st.hr } : null,
     time: st.t ? { value: st.t.value, perSide: st.t.perSide, date: st.t.date, workoutId: st.t.workoutId, history: st.ht } : null,
+    extra: st.x ? { value: st.x.value, reps: st.x.reps, date: st.x.date, workoutId: st.x.workoutId, history: st.hx } : null,                 // dodatkowy ciężar (+kg)
+    assist: st.a ? { value: -st.a.value, reps: st.a.reps, date: st.a.date, workoutId: st.a.workoutId, history: st.ha } : null,              // wspomaganie (wartość ze znakiem, np. −15)
     volume: { kg: st.v.kg, reps: st.v.reps },   // największa objętość ćwiczenia w jednym treningu: { value, date, workoutId } | null (osobno od rekordów)
     sessions: st.sessions, firstDate: st.firstDate, lastDate: st.lastDate, events: st.events,
   };
@@ -16273,7 +16324,12 @@ function gymFinRecordFrom(rec){
   const isKgVol = isVol && rec.unit === 'kg';
   const out = { name: rec.name, label: isVol ? t('gymFinRecordVolume','Nowy rekord objętości') : t('gymFinRecordLabel','Nowy rekord'), icon: (rec.kind === 'weight' || isKgVol) ? 'barbell' : 'trophy' };
   // rekord = sam najcięższy ciężar, bez serii ("102,5 kg"); reps zostają w danych (out.reps), ale nie są pokazywane
-  if(rec.kind === 'weight'){ out.value = fmtGymWeight(rec.value); out.unit = wUnit(); out.reps = rec.reps || 0; out.unitSig = wUnit(); out.sub = plus(fmtGymWeight(d) + ' ' + wUnit()); }
+  if(rec.kind === 'weight' && rec.extra){   // masa własna: +dodatkowy ciężar albo −wspomaganie
+    out.value = (rec.value > 0 ? '+' : '−') + fmtGymWeight(Math.abs(rec.value)); out.unit = wUnit(); out.reps = rec.reps || 0; out.unitSig = wUnit();
+    const dTxt = fmtGymWeight(d) + ' ' + wUnit();
+    out.sub = d > 0 ? (rec.extra === 'assist' ? t('gymFinRecordLessAssist', `o ${dTxt} mniej wspomagania niż poprzednio`, dTxt) : plus(dTxt)) : '';
+  }
+  else if(rec.kind === 'weight'){ out.value = fmtGymWeight(rec.value); out.unit = wUnit(); out.reps = rec.reps || 0; out.unitSig = wUnit(); out.sub = plus(fmtGymWeight(d) + ' ' + wUnit()); }
   else if(isKgVol){ out.value = formatDashNum(Math.round(kgToDisp(rec.value)), 0); out.unit = wUnit(); out.sub = plus(formatDashNum(Math.round(kgToDisp(d)), 0) + ' ' + wUnit()); }
   else if(rec.unit === 'reps'){ const v = Math.round(rec.value); out.value = String(v); out.unit = gymFinRepsWord(v); out.sub = plus(String(Math.round(d))); }
   else { out.value = fmtDur(rec.value, rec.perSide); out.unit = ''; out.sub = plus(Math.round(d) + ' s'); }
@@ -20037,7 +20093,7 @@ function dashOpenRecord(){
         const ex = exerciseRecords(rec.name);
         const kind = rec.kind === 'reps' || rec.kind === 'time' ? rec.kind : 'weight';
         const ev = ex && ex.events.filter(e=> e.kind === kind && e.value === rec.value).pop();
-        if(ev) r = { name: rec.name, kind, unit: rec.unit, value: rec.value, delta: ev.delta, date: ev.date, workoutId: ev.workoutId, perSide: ev.perSide };
+        if(ev) r = { name: rec.name, kind, unit: rec.unit, value: rec.value, delta: ev.delta, date: ev.date, workoutId: ev.workoutId, perSide: ev.perSide, extra: ev.extra };
       });
     }catch(err){ console.error('dash record failed', err); }
   }
