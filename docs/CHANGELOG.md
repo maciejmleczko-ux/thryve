@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.93.7 (2026-10-25)
+- **Aktualna wersja:** 4.93.8 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.93.8 · PATCH · 2026-10-25
+
+Popup serii: automatyczne dodanie serii po 450 ms zamiast 2 s (`LG_COMMIT_MS`), bo użytkownicy szukali przycisku „Dodaj serię”. Timer nadal czeka na puszczenie linijki i zeruje się przy każdej zmianie wagi lub powtórzeń.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.93.8: szybsze automatyczne dodawanie serii
 
 ### 4.93.7 · PATCH · 2026-10-25
 
