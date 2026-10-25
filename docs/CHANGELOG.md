@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.92.0 (2026-10-25)
+- **Aktualna wersja:** 4.92.1 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.92.1 · PATCH · 2026-10-25
+
+Okno „Podsumowanie miesiąca” ostylowane zgodnie z systemem: kafle w kolorach metryk jak w Historii (liczba = niebo, objętość = czerwień, czas = śliwka), sekcje z ikoną w kółku w kolorze znaczenia (dobrze = mięta, słabiej = czerwień, progres = niebo, zastój = bursztyn), wiersze progresu i zastoju z liniami `--m-line`, a „Na czym się skupić” w fioletowej karcie Trenera AI z `.dash-coach` (te same tokeny `--m-ai-*`) i numerowanymi punktami. Wejście elementów przez `.m-rise` z `--i` (60 ms) i `--m-delay` 220 ms, po wjeździe sheetu. Brakujące w `PH` ikony (strzałka w dół, pauza, cel) są inline SVG z jawnym `width`/`height` (Safari), `MS_ICONS`.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.92.1: podsumowanie miesiąca, stylizacja
 
 ### 4.92.0 · MINOR · 2026-10-25
 

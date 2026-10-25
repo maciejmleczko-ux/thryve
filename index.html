@@ -3841,31 +3841,50 @@ button.stv2-bt{cursor:pointer;}
   .stg-swap{animation:stgSwapIn var(--m-dur-fade) ease backwards;}
 }
 .stg-cnt{display:inline-block;}   /* końcowa spacja z animateDashNumber nie dokłada odstępu */
-/* ---- Podsumowanie miesiąca (#monthSumSheet): nagłówek AI, 3 kafle liczone w kodzie, tekst AI, skoki siły ---- */
-#monthSumSheet .m2-body{padding-bottom:120px;}
+/* ---- Podsumowanie miesiąca (#monthSumSheet): kafle w kolorach metryk (Historia), sekcje z ikoną w kolorze znaczenia, wskazówki w karcie Trenera AI ---- */
+#monthSumSheet .m2-body{padding-bottom:120px;gap:var(--m-gap-card);}
 .ms-month{margin:0 0 6px;font-size:var(--m-fs-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--m-muted-text);}
-.ms-headline{margin:0 0 16px;font-size:var(--m-fs-headline);font-weight:300;line-height:1.08;letter-spacing:-.02em;color:var(--m-ink);}
-.ms-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--m-gap-card);margin-bottom:16px;}
-.ms-tile{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:var(--m-r-md);background:var(--m-panel);min-width:0;}
-.ms-num{font-size:var(--m-fs-xl);font-weight:300;line-height:1.1;color:var(--m-ink);letter-spacing:-.02em;}
-.ms-lbl{font-size:var(--m-fs-xs);color:var(--m-muted-text);}
+.ms-headline{margin:0 0 8px;font-size:var(--m-fs-headline);font-weight:300;line-height:1.08;letter-spacing:-.02em;color:var(--m-ink);}
+.ms-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--m-gap-card);}
+.ms-tile{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:var(--m-r-md);min-width:0;}
+.ms-tile--count{background:var(--m-sky-tint);color:var(--m-sky-ink);}
+.ms-tile--vol{background:var(--m-red-wash);color:var(--m-metric-volume);}
+.ms-tile--time{background:var(--m-plum-tint);color:var(--m-plum-ink);}
+.ms-num{font-size:var(--m-fs-xl);font-weight:300;line-height:1.1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.ms-lbl{font-size:var(--m-fs-2xs);letter-spacing:.06em;text-transform:uppercase;opacity:.8;}
 .ms-d{font-size:var(--m-fs-xs);font-weight:500;}
-.ms-d.is-good{color:var(--m-mint-ink);}
-.ms-d.is-bad{color:var(--m-red-page);}
-.ms-story{margin:0 0 16px;font-size:var(--m-fs-md);line-height:1.45;color:var(--m-ink);}
-.ms-block{margin:0 0 var(--m-gap-card);padding:14px 16px;border-radius:var(--m-r-md);background:var(--m-panel);}
-.ms-goal{background:var(--m-mint-tint);}
-.ms-blk-lbl{margin:0 0 6px;font-size:var(--m-fs-xs);letter-spacing:.06em;text-transform:uppercase;color:var(--m-muted-text);}
-.ms-goal .ms-blk-lbl{color:var(--m-mint-ink);}
-.ms-txt{margin:0;font-size:var(--m-fs-base);line-height:1.45;color:var(--m-ink);}
-.ms-row{display:flex;justify-content:space-between;gap:12px;padding:4px 0;font-size:var(--m-fs-base);color:var(--m-ink);}
+.ms-block{padding:14px 16px;border-radius:var(--m-r-md);background:var(--m-panel);}
+.ms-blk-lbl{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:var(--m-fs-xs);letter-spacing:.06em;text-transform:uppercase;color:var(--m-muted-text);}
+.ms-ico{flex:none;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:var(--m-r-pill);}
+.ms-ico svg{display:block;width:14px;height:14px;}
+.ms-block--good .ms-ico{background:var(--m-mint-tint);color:var(--m-mint-ink);}
+.ms-block--bad .ms-ico{background:var(--m-red-wash);color:var(--m-red-page);}
+.ms-block--prog .ms-ico{background:var(--m-sky-tint);color:var(--m-sky-ink);}
+.ms-block--stall .ms-ico{background:var(--m-amber-tint);color:var(--m-ink);}
+.ms-ul{margin:0;padding:0;list-style:none;font-size:var(--m-fs-base);line-height:1.45;color:var(--m-ink);}
+.ms-ul li{position:relative;padding-left:14px;}
+.ms-ul li+li{margin-top:8px;}
+.ms-ul li::before{content:"";position:absolute;left:0;top:.55em;width:5px;height:5px;border-radius:var(--m-r-pill);background:var(--m-line);}
+.ms-block--good .ms-ul li::before{background:var(--m-mint);}
+.ms-block--bad .ms-ul li::before{background:var(--m-red-page);}
+.ms-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 0;font-size:var(--m-fs-base);color:var(--m-ink);}
+.ms-row+.ms-row{border-top:.5px solid var(--m-line);}
 .ms-row-n{display:flex;flex-direction:column;min-width:0;}
 .ms-row-n small{font-size:var(--m-fs-xs);color:var(--m-muted-text);}
-.ms-row-v{font-weight:500;color:var(--m-mint-ink);flex:none;}
-.ms-row-v.is-neutral{color:var(--m-muted-text);}
-.ms-ul{margin:0;padding:0 0 0 18px;font-size:var(--m-fs-base);line-height:1.45;color:var(--m-ink);}
-.ms-ul li+li{margin-top:6px;}
-.ms-note{color:var(--m-muted-text);}
+.ms-row-v{flex:none;font-weight:500;font-variant-numeric:tabular-nums;}
+.ms-block--prog .ms-row-v{color:var(--m-sky-ink);}
+.ms-block--stall .ms-row-v{color:var(--m-muted-text);}
+/* wskazówki: ta sama karta co Trener AI na Pulpicie (.dash-coach) */
+.ms-focus{padding:16px;border-radius:var(--m-r-sm);color:var(--m-white);border:.5px solid transparent;
+  background:linear-gradient(90deg,var(--m-ai-fill-from) 0%,var(--m-ai-fill-mid) 55%,var(--m-ai-fill-to) 175%) padding-box,linear-gradient(142deg,color-mix(in srgb,var(--m-ai-from) 22%,var(--m-ai-fill-to)) 0%,color-mix(in srgb,var(--m-ai-to) 45%,var(--m-ai-fill-to)) 83%) border-box;
+  box-shadow:inset 0 0 15.4px var(--m-ai-inset),inset 0 0 6px var(--m-ai-inset-2);}
+.ms-focus .ms-blk-lbl{color:var(--m-on-dark-1);}
+.ms-focus .ms-ico{background:rgba(255,255,255,.14);color:var(--m-white);}
+.ms-ol{margin:0;padding:0;list-style:none;counter-reset:ms;font-size:var(--m-fs-base);font-weight:300;line-height:1.45;color:var(--m-white);}
+.ms-ol li{position:relative;padding-left:30px;counter-increment:ms;}
+.ms-ol li+li{margin-top:10px;}
+.ms-ol li::before{content:counter(ms);position:absolute;left:0;top:0;width:20px;height:20px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.18);font-size:var(--m-fs-2xs);font-weight:500;line-height:20px;text-align:center;}
+.ms-note{margin-top:8px;color:var(--m-muted-text);}
 .ms-banner{margin-top:var(--m-gap-card);}
 .ms-banner:disabled{opacity:.7;}
 </style>
@@ -10122,7 +10141,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.92.0";
+const APP_VERSION = "4.92.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -20604,32 +20623,39 @@ function msSessionsWord(n){
   if(n === 1) return 'sesja';
   return (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) ? 'sesje' : 'sesji';
 }
-function msTile(num, lbl, delta, goodWhenUp){
+// Ikony okna: check-circle i chart-line-up z PH, reszty tam nie ma (inline, w stylu Phosphor, jawny width/height dla Safari)
+const MS_SVG = (d)=> `<svg viewBox="0 0 256 256" width="14" height="14" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const MS_ICONS = {
+  down: MS_SVG('<path d="M72 72l112 112M184 88v96H88"/>'),
+  pause: MS_SVG('<path d="M92 60v136M164 60v136"/>'),
+  target: MS_SVG('<circle cx="128" cy="128" r="96"/><circle cx="128" cy="128" r="52"/><circle cx="128" cy="128" r="4"/>'),
+};
+const msIcon = name => MS_ICONS[name] || PH[name] || '';
+function msTile(cls, num, lbl, delta, i){
   let d = '';
-  if(delta != null && delta !== 0){
-    const up = delta > 0;
-    d = `<span class="ms-d ${up === goodWhenUp ? 'is-good' : 'is-bad'}">${up ? '+' : '−'}${Math.abs(delta)}${lbl.unit || ''}</span>`;
-  }
-  return `<div class="ms-tile"><span class="ms-num">${escHtml(num)}</span><span class="ms-lbl">${escHtml(lbl.text)}</span>${d}</div>`;
+  if(delta != null && delta !== 0) d = `<span class="ms-d">${delta > 0 ? '+' : '−'}${Math.abs(delta)}${lbl.unit || ''}</span>`;
+  return `<div class="ms-tile ms-tile--${cls} m-rise" style="--i:${i}"><span class="ms-num">${escHtml(num)}</span><span class="ms-lbl">${escHtml(lbl.text)}</span>${d}</div>`;
 }
 function msBodyHtml(model, ai){
   const E = escHtml, pv = model.vsPrevMonth;
+  let n = 0;   // kolejność wejścia: --i rośnie o 1 na element (60 ms), start dopiero gdy sheet prawie wjechał
   const kg = x=> formatDashNum(kgToDisp(x), 0) + ' ' + wUnit();
+  const kgE = x=> formatDashNum(kgToDisp(x), 1) + ' ' + wUnit();
+  // kolory jak kafle metryk w Historii: liczba = niebo, objętość = czerwień, czas = śliwka
   const tiles = [
-    msTile(String(model.workouts), { text: t('msWorkouts', 'treningów'), unit: '' }, pv ? pv.workoutsDelta : null, true),
-    msTile(model.volumeKg >= 10000 ? formatDashNum(kgToDisp(model.volumeKg) / 1000, 1) + ' t' : kg(model.volumeKg), { text: t('msVolume', 'objętość'), unit: '%' }, pv ? pv.volumePct : null, true),
-    msTile(model.avgDurationMin ? model.avgDurationMin + ' min' : '–', { text: t('msAvgTime', 'średni trening'), unit: '' }, null, true),
+    msTile('count', String(model.workouts), { text: t('msWorkouts', 'treningów'), unit: '' }, pv ? pv.workoutsDelta : null, n++),
+    msTile('vol', model.volumeKg >= 10000 ? formatDashNum(kgToDisp(model.volumeKg) / 1000, 1) + ' t' : kg(model.volumeKg), { text: t('msVolume', 'objętość'), unit: '%' }, pv ? pv.volumePct : null, n++),
+    msTile('time', model.avgDurationMin ? model.avgDurationMin + ' min' : '–', { text: t('msAvgTime', 'średni trening'), unit: '' }, null, n++),
   ].join('');
   const li = a => a.map(x=> `<li>${E(x)}</li>`).join('');
-  const blk = (lbl, inner, cls) => inner ? `<div class="ms-block${cls ? ' ' + cls : ''}"><p class="ms-blk-lbl">${lbl}</p>${inner}</div>` : '';
-  const rows = (arr, right, sub, vcls) => arr.map(g=> `<div class="ms-row"><span class="ms-row-n">${E(g.name)}${sub ? `<small>${E(sub(g))}</small>` : ''}</span><span class="ms-row-v${vcls ? ' ' + vcls : ''}">${right(g)}</span></div>`).join('');
-  const kgE = x=> formatDashNum(kgToDisp(x), 1) + ' ' + wUnit();
-  const good = blk(t('msGood', 'Co poszło dobrze'), ai.good.length ? `<ul class="ms-ul">${li(ai.good)}</ul>` : '');
-  const bad = blk(t('msBad', 'Co poszło słabiej'), ai.bad.length ? `<ul class="ms-ul">${li(ai.bad)}</ul>` : '');
-  const prog = blk(t('msProgress', 'Progres'), rows(model.topGains, g=> `+${g.deltaPct}%`, g=> `${t('msEstMax', 'szac. maks.')} ${kgE(g.fromKg)} → ${kgE(g.toKg)}`));
-  const stall = blk(t('msStalled', 'Stoi w miejscu'), rows(model.stalled, g=> `${g.sessions} ${msSessionsWord(g.sessions)}`, g=> t('msStalledSub', 'bez zmiany siły w ostatnich 3 sesjach'), 'is-neutral'));
-  const focus = blk(t('msFocus', 'Na czym się skupić'), ai.focus.length ? `<ul class="ms-ul">${li(ai.focus)}</ul>` : '', 'ms-goal');
-  return `<h2 class="ms-headline">${E(ai.headline)}</h2><div class="ms-tiles">${tiles}</div>${good}${bad}${prog}${stall}${focus}` +
+  const blk = (kind, icon, lbl, inner) => inner ? `<section class="ms-block ms-block--${kind} m-rise" style="--i:${n++}"><p class="ms-blk-lbl"><span class="ms-ico">${msIcon(icon)}</span>${lbl}</p>${inner}</section>` : '';
+  const rows = (arr, right, sub) => arr.map(g=> `<div class="ms-row"><span class="ms-row-n">${E(g.name)}<small>${E(sub(g))}</small></span><span class="ms-row-v">${right(g)}</span></div>`).join('');
+  const good = blk('good', 'check-circle', t('msGood', 'Co poszło dobrze'), ai.good.length ? `<ul class="ms-ul">${li(ai.good)}</ul>` : '');
+  const bad = blk('bad', 'down', t('msBad', 'Co poszło słabiej'), ai.bad.length ? `<ul class="ms-ul">${li(ai.bad)}</ul>` : '');
+  const prog = blk('prog', 'chart-line-up', t('msProgress', 'Progres'), rows(model.topGains, g=> `+${g.deltaPct}%`, g=> `${t('msEstMax', 'szac. maks.')} ${kgE(g.fromKg)} → ${kgE(g.toKg)}`));
+  const stall = blk('stall', 'pause', t('msStalled', 'Stoi w miejscu'), rows(model.stalled, g=> `${g.sessions} ${msSessionsWord(g.sessions)}`, ()=> t('msStalledSub', 'bez zmiany siły w ostatnich 3 sesjach')));
+  const focus = ai.focus.length ? `<section class="ms-focus m-rise" style="--i:${n++}"><p class="ms-blk-lbl"><span class="ms-ico">${msIcon('target')}</span>${t('msFocus', 'Na czym się skupić')}</p><ol class="ms-ol">${li(ai.focus)}</ol></section>` : '';
+  return `<h2 class="ms-headline m-rise" style="--i:0">${E(ai.headline)}</h2><div class="ms-tiles">${tiles}</div>${good}${bad}${prog}${stall}${focus}` +
     `<p class="ai-popup-note ms-note">${t('msNote', 'Podsumowanie tworzy AI na podstawie Twoich treningów. To nie porada medyczna i nie zastąpi trenera.')}</p>`;
 }
 // ym + (opcjonalnie) {model, ai}; bez drugiego argumentu bierze cache albo woła AI (przydatne do testów w konsoli)
@@ -20641,6 +20667,7 @@ async function msOpen(ym, data){
   document.getElementById('msTitle').textContent = t('msTitle', 'Podsumowanie miesiąca');
   document.getElementById('msClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
   document.getElementById('msBtn').textContent = t('bgClose', 'ZAMKNIJ');
+  document.getElementById('msBody').style.setProperty('--m-delay','220ms');
   document.getElementById('msBody').innerHTML = `<p class="ms-month">${MONTH_NAMES[m - 1]} ${y}</p>` + msBodyHtml(data.model, data.ai);
   msShown = ym;
   try{ localStorage.setItem(LS_MS_SEEN, ym); }catch(e){}
