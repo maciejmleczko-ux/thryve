@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.93.0 (2026-10-25)
+- **Aktualna wersja:** 4.93.1 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.93.1 · PATCH · 2026-10-25
+
+Podsumowanie miesiąca: największym kaflem jest objętość, a liczba treningów schodzi do rzędu mini kafli (treningi, rekordy, średni trening). Na kaflach strzałka z Figmy (`arrow-up-right` z `PH`, w dół obrócona o 90°) z porównaniem do poprzedniego miesiąca; `msModel()` liczy teraz też `recordsDelta` i `avgDurationDelta` (tylko gdy poprzedni miesiąc ma min. 3 treningi). Baner w Historii pokazuje sam tytuł „Podsumowanie miesiąca”, bez linijki tekstu (`min-height:0`). Eyebrow w czarnej karcie to sam „WRZESIEŃ 2026”.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.93.1: podsumowanie miesiąca, objętość jako główny kafel, strzałki
 
 ### 4.93.0 · MINOR · 2026-10-25
 

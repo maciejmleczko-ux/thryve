@@ -3848,19 +3848,26 @@ button.stv2-bt{cursor:pointer;}
 .ms-top-eb{margin:0 0 10px;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-orange);}
 .ms-headline{margin:0;font-size:var(--m-fs-2xl);font-weight:300;line-height:1.1;letter-spacing:-.01em;color:var(--m-white);}
 .ms-share{display:flex;flex-direction:column;gap:var(--m-gap-card);}
-.ms-hero{display:flex;flex-direction:column;align-items:center;gap:2px;padding:18px 16px 16px;border-radius:var(--m-r-md);background:var(--m-orange);color:var(--m-white);}
+.ms-hero{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:18px 16px 16px;border-radius:var(--m-r-md);background:var(--m-orange);color:var(--m-white);}
 .ms-hero-n{font-size:var(--m-fs-num-lg);font-weight:200;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+.ms-hero-n small{font-size:var(--m-fs-xl);font-weight:300;}
 .ms-hero-k{font-size:var(--m-fs-xs);letter-spacing:.1em;text-transform:uppercase;}
 .ms-hero-d{margin-top:6px;padding:2px 10px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.2);font-size:var(--m-fs-xs);}
 .ms-minis{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--m-gap-card);}
-.ms-mini{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:var(--m-r-sm);color:var(--m-white);min-width:0;}
-.ms-mini--vol{background:var(--m-metric-volume);}
+.ms-mini{position:relative;display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:var(--m-r-sm);color:var(--m-white);min-width:0;}
+.ms-mini--vol{background:var(--m-metric-volume);}   /* treningi: ciemna czerwień jak dawna objętość */
 .ms-mini--rec{background:var(--m-sky);}
 .ms-mini--time{background:var(--m-amber);}
 .ms-mini-k{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;}
 .ms-mini-v{font-size:var(--m-fs-xl);font-weight:300;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .ms-mini-v small{font-size:var(--m-fs-xs);font-weight:400;}
 .ms-mini-d{font-size:var(--m-fs-2xs);opacity:.9;}
+/* strzałka z Figmy (↗ w rogu kafla); spadek = obrócona o 90° (↘). Rozmiary jawne na każdej warstwie (Safari). */
+.ms-arr{position:absolute;top:10px;right:10px;display:block;width:18px;height:18px;color:var(--m-white);}
+.ms-arr .ph,.ms-arr svg{display:block;width:18px;height:18px;}
+.ms-arr--big{top:14px;right:14px;width:24px;height:24px;}
+.ms-arr--big .ph,.ms-arr--big svg{width:24px;height:24px;}
+.ms-arr.is-down{transform:rotate(90deg);}
 .ms-sec{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
 .ms-sec-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .ms-sec-lbl{margin:0;font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.0909em;text-transform:uppercase;color:var(--m-muted-text);}   /* jak „Rekordy”, „Bez postępu” w Postępach */
@@ -3901,7 +3908,7 @@ button.stv2-bt{cursor:pointer;}
 .ms-ol li+li{margin-top:10px;}
 .ms-ol li::before{content:counter(ms);position:absolute;left:0;top:0;width:20px;height:20px;border-radius:var(--m-r-pill);background:rgba(255,255,255,.18);font-size:var(--m-fs-2xs);font-weight:500;line-height:20px;text-align:center;}
 .ms-note{margin-top:8px;color:var(--m-muted-text);}
-.ms-banner{margin-top:var(--m-gap-card);}
+.ms-banner{margin-top:var(--m-gap-card);min-height:0;}   /* sam tytuł, bez linijki tekstu */
 .ms-banner:disabled{opacity:.7;}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -10157,7 +10164,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.93.0";
+const APP_VERSION = "4.93.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.86.0": {
@@ -20549,6 +20556,11 @@ function msModel(ym){
       if((top - Math.min(...last3)) / top <= 0.02 && !(base > 0 && pctD(end, base) >= 2)) stalled.push({ name, sessions: inM.length, e1rmKg: Math.round(top * 10) / 10 });
     }
   });
+  // rekordy w oknie [f..t2] (ta sama definicja co prCount): do strzałek „vs poprzedni miesiąc”
+  const prsIn = (f, t2) => Object.values(sessions).reduce((c, list)=>{
+    const before = list.filter(x=> x.date < f), inM2 = list.filter(x=> x.date >= f && x.date <= t2);
+    return c + (before.length && inM2.length && Math.max(...inM2.map(x=> x.e1rm)) > Math.max(...before.map(x=> x.e1rm)) ? 1 : 0);
+  }, 0);
   const topGains = gains.filter(g=> g.deltaPct >= 2).sort((a,b)=> b.deltaPct - a.deltaPct).slice(0, 4);
   const drops = gains.filter(g=> g.deltaPct <= -5).sort((a,b)=> a.deltaPct - b.deltaPct).slice(0, 2);
   const stalledTop = stalled.sort((a,b)=> b.sessions - a.sessions).slice(0, 3);
@@ -20579,7 +20591,8 @@ function msModel(ym){
   return {
     ym, workouts: cur.workouts, volumeKg: cur.volumeKg, sets: cur.sets, durationMin: cur.durationMin,
     avgDurationMin: cur.workouts ? Math.round(cur.durationMin / cur.workouts) : null,
-    vsPrevMonth: prev.workouts >= 3 ? { workoutsDelta: cur.workouts - prev.workouts, volumePct: pctD(cur.volumeKg, prev.volumeKg), durationPct: pctD(cur.durationMin, prev.durationMin) } : null,
+    vsPrevMonth: prev.workouts >= 3 ? { workoutsDelta: cur.workouts - prev.workouts, volumePct: pctD(cur.volumeKg, prev.volumeKg), durationPct: pctD(cur.durationMin, prev.durationMin),
+      recordsDelta: prCount - prsIn(pym + '-01', pym + '-31'), avgDurationDelta: cur.workouts && prev.durationMin ? Math.round(cur.durationMin / cur.workouts - prev.durationMin / prev.workouts) : null } : null,
     trainingDays: dates.length, weeksWithTraining: weekCounts.length, bestWeekWorkouts: Math.max(...weekCounts), longestGapDays,
     prCount, topGains, stalled: stalledTop, drops, muscleShare: share, untrainedGroups, pushSets: push, pullSets: pull, weightDeltaKg,
     userPreferences: (aiPrefs.goal || aiPrefs.avoid) ? { goal: aiPrefs.goal || null, avoid: aiPrefs.avoid || null } : null,
@@ -20648,14 +20661,20 @@ function msBodyHtml(model, ai){
   const sec = (lbl, inner, right) => inner ? `<section class="ms-sec m-rise" style="--i:${n++}"><div class="ms-sec-hd"><p class="ms-sec-lbl">${lbl}</p>${right || ''}</div>${inner}</section>` : '';
   const [yy, mm] = model.ym.split('-').map(Number);
   const prevAbbr = String(MONTH_ABBR_PL[(mm + 10) % 12]).toLowerCase();   // poprzedni miesiąc, 3 litery
-  const dlt = (v, unit)=> v == null || v === 0 ? '' : `<span class="ms-hero-d ${v > 0 ? 'is-up' : 'is-down'}">${v > 0 ? '↑ +' : '↓ −'}${Math.abs(v)}${unit} vs ${prevAbbr}</span>`;
   // nagłówek AI: czarna karta jak „Postęp tygodniowy” w Postępach
   const head = `<section class="ms-top m-rise" style="--i:${n++}"><p class="ms-top-eb">${MONTH_NAMES[mm - 1]} ${yy}</p><h2 class="ms-headline">${E(ai.headline)}</h2></section>`;
-  // kafle jak karta „Udostępnij postępy”: pomarańczowy z liczbą treningów + 3 mini (objętość, rekordy, czas)
-  const hero = `<section class="ms-share m-rise" style="--i:${n++}"><div class="ms-hero"><span class="ms-hero-n">${model.workouts}</span><span class="ms-hero-k">${t('msWorkouts', 'treningów')}</span>${pv ? dlt(pv.workoutsDelta, '') : ''}</div>` +
-    `<div class="ms-minis"><div class="ms-mini ms-mini--vol"><span class="ms-mini-k">${t('msVolume', 'objętość')}</span><span class="ms-mini-v">${model.volumeKg >= 10000 ? formatDashNum(kgToDisp(model.volumeKg) / 1000, 1) + '<small> t</small>' : E(kg(model.volumeKg))}</span>${pv && pv.volumePct ? `<span class="ms-mini-d">${pv.volumePct > 0 ? '↑ +' : '↓ −'}${Math.abs(pv.volumePct)}%</span>` : ''}</div>` +
-    `<div class="ms-mini ms-mini--rec"><span class="ms-mini-k">${t('msRecords', 'rekordy')}</span><span class="ms-mini-v">${model.prCount}</span></div>` +
-    `<div class="ms-mini ms-mini--time"><span class="ms-mini-k">${t('msAvgTime', 'średni trening')}</span><span class="ms-mini-v">${model.avgDurationMin || '–'}<small> min</small></span></div></div></section>`;
+  // kafle jak karta „Udostępnij postępy”: pomarańczowy z objętością + 3 mini (treningi, rekordy, średni czas); strzałka ↗/↘ = vs poprzedni miesiąc
+  const arrow = (v, big) => v == null || v === 0 ? '' : `<span class="ms-arr${big ? ' ms-arr--big' : ''}${v < 0 ? ' is-down' : ''}" aria-hidden="true">${PH['arrow-up-right']}</span>`;
+  const sgn = v => v == null || v === 0 ? '' : `${v > 0 ? '+' : '−'}${Math.abs(v)}`;
+  const volBig = model.volumeKg >= 10000 ? formatDashNum(kgToDisp(model.volumeKg) / 1000, 1) + '<small> t</small>' : E(kg(model.volumeKg));
+  const volChip = pv && pv.volumePct ? `<span class="ms-hero-d">${sgn(pv.volumePct)}% vs ${prevAbbr}</span>` : '';
+  const mini = (cls, k, v, v2, d) => `<div class="ms-mini ms-mini--${cls}">${arrow(d)}<span class="ms-mini-k">${k}</span><span class="ms-mini-v">${v}</span>${v2 ? `<span class="ms-mini-d">${v2}</span>` : ''}</div>`;
+  const hero = `<section class="ms-share m-rise" style="--i:${n++}"><div class="ms-hero">${arrow(pv && pv.volumePct, true)}<span class="ms-hero-n">${volBig}</span><span class="ms-hero-k">${t('msVolume', 'objętość')}</span>${volChip}</div>` +
+    `<div class="ms-minis">` +
+    mini('vol', t('msWorkouts', 'treningi'), String(model.workouts), pv && pv.workoutsDelta ? `${sgn(pv.workoutsDelta)} vs ${prevAbbr}` : '', pv ? pv.workoutsDelta : null) +
+    mini('rec', t('msRecords', 'rekordy'), String(model.prCount), pv && pv.recordsDelta ? `${sgn(pv.recordsDelta)} vs ${prevAbbr}` : '', pv ? pv.recordsDelta : null) +
+    mini('time', t('msAvgTime', 'średni trening'), `${model.avgDurationMin || '–'}<small> min</small>`, pv && pv.avgDurationDelta ? `${sgn(pv.avgDurationDelta)} min vs ${prevAbbr}` : '', pv ? pv.avgDurationDelta : null) +
+    `</div></section>`;
   const list = (arr, cls) => arr.length ? `<div class="ms-card"><ul class="ms-ul ${cls}">${li(arr)}</ul></div>` : '';
   const good = sec(t('msGood', 'Co poszło dobrze'), list(ai.good, 'is-good'));
   const bad = sec(t('msBad', 'Co poszło słabiej'), list(ai.bad, 'is-bad'));
@@ -20697,12 +20716,8 @@ function msBannerHtml(ym, animCls){
   if(!cloudSession || !isPremium() || ym >= todayStr().slice(0, 7)) return '';
   let model = null; try{ model = msModel(ym); }catch(e){}
   if(!model) return '';
-  const cached = msLoadCache(ym);
-  const [y, m] = ym.split('-').map(Number);
-  const text = cached ? cached.ai.headline : t('msBannerText', `Zobacz, jak poszedł ${MONTH_NAMES[m - 1].toLowerCase()}: co się zmieniło i co dalej.`, MONTH_NAMES[m - 1].toLowerCase());
   return `<button type="button" class="dash-coach ms-banner m-press${animCls}" id="msBanner" style="--i:1" onclick="msBannerTap('${ym}')" aria-haspopup="dialog">` +
-    `<span class="dash-coach-hd"><span class="ph" data-ph="sparks">${PH.sparks || ''}</span><span class="dash-eyebrow">${t('msTitle', 'Podsumowanie miesiąca')}</span>${dashCaret()}</span>` +
-    `<span class="dash-coach-t${cached ? ' is-ai' : ''}" id="msBannerT">${escHtml(text)}</span></button>`;
+    `<span class="dash-coach-hd"><span class="ph" data-ph="sparks">${PH.sparks || ''}</span><span class="dash-eyebrow" id="msBannerT">${t('msTitle', 'Podsumowanie miesiąca')}</span>${dashCaret()}</span></button>`;
 }
 let msBannerBusy = false;
 async function msBannerTap(ym){
