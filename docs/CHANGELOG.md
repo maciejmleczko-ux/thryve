@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.93.9 (2026-10-25)
+- **Aktualna wersja:** 4.94.0 (2026-10-25)
 - **Liczba wersji:** 265 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.94.0 · MINOR · 2026-10-25
+
+Masa własna, etap E1 (plan: `docs/plan-masa-wlasna.md`): w popupie serii ćwiczeń „masa ciała” (nie czasowych) jest linijka ze znakiem, od −60 do +60 kg: powyżej zera „Dodatkowy ciężar”, poniżej „Wspomaganie” (guma, maszyna). Wartość zapisuje się na serii jako opcjonalne `extraKg` (kg, ze znakiem; brak pola = 0, więc stare treningi bez zmian), przechodzi na kolejne serie sesji, a z historii tylko podpowiada się blado. Klawiatura liczbowa ma klawisz +/−. Seria w popupie i w Historii: `+10 kg` / `−20 kg` (pastylka „8 x +10 kg”). `lgBuildRuler` dostał zakres ujemny (`opts.min`, pełne kreski od zera do wartości). Kalorie, rekordy i objętość jeszcze nie uwzględniają `extraKg` (E2, E3).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-25 — 4.94.0: masa własna E1, linijka dodatkowego ciężaru / wspomagania
 
 ### 4.93.9 · PATCH · 2026-10-25
 
