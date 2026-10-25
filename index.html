@@ -2636,7 +2636,14 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .histv2-recpill[hidden]{display:none;}
 .histv2-addbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;margin-top:16px;padding:0 20px;border:none;border-radius:var(--m-r-pill);background:var(--m-orange);color:var(--m-white);font:inherit;font-size:var(--m-fs-sm);font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .histv2-addbtn:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
-.backfill-date{width:100%;box-sizing:border-box;height:48px;padding:0 14px;border:.5px solid var(--m-orange-tint);border-radius:var(--m-r-sm);background:var(--m-white);color:var(--m-ink);font:inherit;font-size:16px;text-align:center;}
+#backfillOverlay .onboard-box.new-ex-form{max-width:355px;width:calc(100% - 20px);padding:24px 0 24px;}
+#backfillOverlay .onboard-box.new-ex-form>h3,#backfillOverlay .onboard-box.new-ex-form>p,#backfillOverlay .onboard-box.new-ex-form>.onboard-actions{box-sizing:border-box;width:100%;padding:0 30px;}
+#backfillOverlay .backfill-cal{margin-left:10px;margin-right:10px;width:calc(100% - 20px);}
+#backfillOverlay .backfill-cal{margin-top:6px;}
+#backfillOverlay .histv2-cal-day:disabled{cursor:default;}
+#backfillOverlay .histv2-cal-month-label{font-size:var(--m-fs-lg);min-width:0;}
+#backfillOverlay .histv2-cal-nav-month{gap:4px;}
+#backfillOverlay .onboard-box.new-ex-form>.onboard-actions{margin-top:16px;}
 #view-gym-v2.is-backfill #gymV2PillTime{display:none;}
 .histv2-recpill .ph{width:16px;height:16px;color:var(--m-ink);}
 .histv2-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin-bottom:4px;}
@@ -5620,8 +5627,23 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 <div class="onboard-overlay hidden m-dialog" id="backfillOverlay" onclick="if(event.target===this) closeBackfillDialog()">
   <div class="onboard-box new-ex-form">
     <h3 data-i18n="backfillTitle">Dodaj trening wstecz</h3>
-    <p data-i18n="backfillBody">Wybierz dzień, w którym był trening. Wpiszesz ćwiczenia i serie tak jak zwykle, ale bez licznika czasu.</p>
-    <input type="date" id="backfillDateInput" class="backfill-date">
+    <p data-i18n="backfillBody">Wybierz dzień, w którym był trening.</p>
+    <div class="histv2-cal-card backfill-cal">
+      <div class="histv2-cal-head">
+        <div class="histv2-cal-nav-month">
+          <span class="ph" data-ph="caret-down" style="transform:rotate(90deg)" onclick="bfCalMove(-1)"></span>
+          <span class="histv2-cal-month-label" id="bfCalMonthLabel"></span>
+          <span class="ph" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="bfCalMove(1)"></span>
+        </div>
+        <div class="histv2-cal-nav-year">
+          <span class="ph" data-ph="caret-down" style="transform:rotate(90deg)" onclick="bfCalMove(-12)"></span>
+          <span class="histv2-cal-year-label" id="bfCalYearLabel"></span>
+          <span class="ph" data-ph="caret-down" style="transform:rotate(-90deg)" onclick="bfCalMove(12)"></span>
+        </div>
+      </div>
+      <div class="histv2-cal-dow-row" id="bfCalDow"></div>
+      <div class="histv2-cal-days" id="bfCalGrid"></div>
+    </div>
     <div class="onboard-actions">
       <button type="button" class="save" onclick="startBackfillWorkout()" data-i18n="backfillGo">Dalej</button>
       <button type="button" class="skip" onclick="closeBackfillDialog()" data-i18n="cancel">Anuluj</button>
@@ -6031,7 +6053,7 @@ const T_EN = {
   repeatLastWorkout: 'Repeat last workout',
   backfillAdd: 'Add workout',
   backfillTitle: 'Add a past workout',
-  backfillBody: 'Pick the day the workout happened. You log exercises and sets as usual, without the timer.',
+  backfillBody: 'Pick the day the workout happened.',
   backfillGo: 'Continue',
   backfillBusy: 'You have a workout in progress. Finish or abort it first.',
   backfillBadDate: 'Pick a day in the past',
@@ -20707,14 +20729,50 @@ function updateGymV2RepeatBtn(){
 }
 /* Historia → „Dodaj trening”: dopisanie treningu, który odbył się w przeszłości. Używa ekranu GYM
    z ustawionym backfillDate (plan dnia, brak licznika, zapis z tą datą). */
+let bfSel = null, bfCal = {year:0, month:0};
+function bfCalMove(deltaMonths){
+  let m = bfCal.month + deltaMonths, y = bfCal.year;
+  y += Math.floor(m / 12); m = ((m % 12) + 12) % 12;
+  bfCal = {year:y, month:m};
+  renderBfCal();
+}
+function bfCalPick(iso){ bfSel = iso; renderBfCal(); }
+// Kalendarz w oknie „Dodaj trening wstecz”: ten sam wygląd i oznaczenia dni co w Historii; dziś i przyszłość są nieaktywne
+function renderBfCal(){
+  const {year, month} = bfCal;
+  document.getElementById('bfCalMonthLabel').textContent = MONTH_NAMES[month];
+  document.getElementById('bfCalYearLabel').textContent = year;
+  const dow = document.getElementById('bfCalDow');
+  if(!dow.childElementCount) dow.innerHTML = DOW_LABELS.map(d=>`<div class="histv2-cal-dow">${d}</div>`).join('');
+  const first = new Date(year, month, 1);
+  const startOffset = first.getDay()===0 ? 6 : first.getDay()-1;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+  const logged = datesWithLogs();
+  const todayIso = todayStr();
+  const mk = `${year}-${String(month+1).padStart(2,'0')}`;
+  let html = '';
+  for(let i=0;i<startOffset;i++) html += `<button type="button" class="histv2-cal-day outside" disabled>${prevMonthDays-startOffset+1+i}</button>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const iso = `${mk}-${String(d).padStart(2,'0')}`;
+    if(iso >= todayIso){ html += `<button type="button" class="histv2-cal-day outside" disabled>${d}</button>`; continue; }
+    const cls = ['histv2-cal-day'];
+    if(logged.get(iso)) cls.push('has-log');
+    if(iso === bfSel) cls.push('selected');
+    html += `<button type="button" class="${cls.join(' ')}" onclick="bfCalPick('${iso}')">${d}</button>`;
+  }
+  const trailing = (7 - ((startOffset + daysInMonth) % 7)) % 7;
+  for(let i=1;i<=trailing;i++) html += `<button type="button" class="histv2-cal-day outside" disabled>${i}</button>`;
+  document.getElementById('bfCalGrid').innerHTML = html;
+  hydrateHistIconsV2(document.getElementById('backfillOverlay'));
+}
 function openBackfillDialog(){
   if(gymHasProgress() && !backfillDate){ toast(t('backfillBusy','Masz rozpoczęty trening. Zakończ go albo przerwij.')); return; }
-  const inp = document.getElementById('backfillDateInput');
   const today = todayStr();
   const yest = dateStr(new Date(Date.now() - 86400000));
-  const min = dateStr(new Date(Date.now() - 400*86400000));
-  inp.max = yest; inp.min = min;
-  inp.value = (selectedHistDateV2 && selectedHistDateV2 < today) ? selectedHistDateV2 : (backfillDate || yest);
+  bfSel = (selectedHistDateV2 && selectedHistDateV2 < today) ? selectedHistDateV2 : (backfillDate || yest);
+  bfCal = {year:+bfSel.slice(0,4), month:+bfSel.slice(5,7)-1};
+  renderBfCal();
   document.getElementById('backfillOverlay').classList.remove('hidden');
   document.documentElement.classList.add('modal-lock');
 }
@@ -20723,8 +20781,8 @@ function closeBackfillDialog(){
   document.documentElement.classList.remove('modal-lock');
 }
 function startBackfillWorkout(){
-  const v = document.getElementById('backfillDateInput').value;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(v) || v >= todayStr()){ toast(t('backfillBadDate','Wybierz dzień z przeszłości')); return; }
+  const v = bfSel;
+  if(!v || !/^\d{4}-\d{2}-\d{2}$/.test(v) || v >= todayStr()){ toast(t('backfillBadDate','Wybierz dzień z przeszłości')); return; }
   closeBackfillDialog();
   if(backfillDate !== v){ sessionExercises = []; extraGymTiles = []; repeatMode = null; popupDrafts = {}; todaySwaps = {}; persistTodaySwaps(); }
   backfillDate = v;
