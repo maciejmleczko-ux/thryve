@@ -707,7 +707,7 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
    straight from the finish screen too. Only the few genuinely new bits
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
-#nameEditOverlay,#wnameSheet,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#editTimeSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#monthSumSheet,#recordDetailSheet,#newBadgeSheet,#langSheet,#unitsSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
+#nameEditOverlay,#wnameSheet,#planTodaySheet,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#editTimeSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#monthSumSheet,#recordDetailSheet,#newBadgeSheet,#langSheet,#unitsSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
 /* mConfirm() is opened from inside the account panel (z 95) and its sheets
    (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
 #mConfirmOverlay{z-index:9650;}
@@ -1516,6 +1516,25 @@ a.pf-row{text-decoration:none;}
 .dash-hero-eyebrow{margin:0;display:flex;align-items:center;gap:8px;font-size:var(--m-fs-2xs);font-weight:500;line-height:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--m-orange-tint);}
 .dash-hero-eyebrow svg{display:block;width:14px;height:12px;flex:none;}
 /* The title box is trimmed to cap height (Figma "vertical trim"): 26px for the 36px type. */
+.dash-hero-title[data-pick]{cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.dash-hero-title[data-pick]:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
+.dash-hero-title .dash-hero-caret{display:inline-block;vertical-align:middle;position:relative;top:-3px;margin-left:8px;width:26px;height:26px;opacity:.9;}
+.dash-hero-title .dash-hero-caret svg{display:block;width:100%;height:100%;}
+.pt-list{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.pt-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;box-sizing:border-box;min-height:64px;padding:12px 16px;border:0;border-radius:var(--m-r-sm);background:var(--pt-bg);color:var(--pt-fg);font:inherit;font-size:var(--m-fs-base);letter-spacing:.02em;text-transform:uppercase;text-align:left;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.pt-row:active{transform:scale(.97);transition-duration:var(--m-dur-press-in);}
+.pt-t{display:flex;flex-direction:column;gap:8px;min-width:0;}
+.pt-row .plc-stats{gap:14px;text-transform:none;letter-spacing:0;}
+.pt-dot{position:relative;flex:none;width:24px;height:24px;border-radius:50%;box-sizing:border-box;border:1.5px solid currentColor;opacity:.8;transition:background-color var(--m-dur-quick) ease,opacity var(--m-dur-quick) ease;}
+.pt-dot svg{position:absolute;left:5px;top:5px;width:12px;height:12px;opacity:0;transition:opacity var(--m-dur-quick) ease;}
+.pt-row.is-on{box-shadow:inset 0 0 0 2px var(--m-white),0 0 0 2px var(--pt-bg);}
+.pt-row.is-on .pt-dot{background:var(--m-white);border-color:var(--m-white);opacity:1;}
+.pt-row.is-on .pt-dot svg{opacity:1;}
+.pt-row.is-on .pt-dot svg path{stroke:var(--pt-bg);}
+.pt-row.is-own{border:1px solid var(--m-line);background:var(--m-white);color:var(--m-ink);}
+.pt-row.is-own.is-on{box-shadow:none;border-color:var(--m-orange);}
+.pt-row.is-own.is-on .pt-dot{background:var(--m-orange);border-color:var(--m-orange);}
+.pt-row.is-own.is-on .pt-dot svg path{stroke:var(--m-white);}
 .dash-hero-title{margin:8px 0 0;font-size:var(--m-fs-title);font-weight:200;line-height:26px;letter-spacing:.04em;text-transform:uppercase;overflow-wrap:anywhere;}
 @supports (text-box:trim-both cap alphabetic){
   .dash-hero-title{line-height:1.1;text-box:trim-both cap alphabetic;}
@@ -5190,6 +5209,27 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<!-- Plan na dziś (4.99.0): tap w nazwę planu na Pulpicie. Wzór: okno Język; wiersze w kolorach planów jak na ekranie Plany. -->
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="planTodaySheet" onclick="if(event.target===this) closePlanToday()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="ptTitle">TWÓJ PLAN</h1>
+          <button type="button" class="m2-x" id="ptClose" aria-label="Zamknij" onclick="closePlanToday()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="ptSub"></p>
+      </div>
+      <div class="m2-body"><div class="pt-list" id="ptList" role="radiogroup" aria-labelledby="ptTitle"></div></div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="ptAll" onclick="planTodayGoPlans()">WSZYSTKIE PLANY</button>
+      <button type="button" class="m2-btn m2-btn--ghost" id="ptNew" onclick="planTodayCreate()">STWÓRZ PLAN</button>
+    </div>
+  </div>
+</div>
+
 <!-- Jednostki: okno wyboru Metryczne / Imperialne (wzór: okno Język). Dane zawsze w kg / cm / km, zmiana tylko przelicza wyświetlanie. -->
 <div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="unitsSheet" onclick="if(event.target===this) closeUnitsSheet()">
   <div class="plansv2-customize-stack">
@@ -8212,7 +8252,7 @@ function fmtKg(n){ const s = Number(kgToDisp(Number(n))).toFixed(1); return LANG
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','wnameSheet','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','monthSumSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
+const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','wnameSheet','planTodaySheet','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','monthSumSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -9752,6 +9792,47 @@ function kcalPaint(){
   if(bad) $('kcalErr').textContent = t('kcalRange', 'Wpisz wartość od 0 do 3000.');
   $('kcalSave').disabled = n == null || bad;
 }
+/* ---------- plan na dziś: okno z Pulpitu ---------- */
+function planTodayRowsHtml(){
+  const cur = todayPlanId();
+  return visiblePlans().map(p=>{
+    const tn = planTone(p), f = planFacts(p), on = p.id === cur;
+    return `<button type="button" class="pt-row ${tn.cls}${on ? ' is-on' : ''}${tn.own ? ' is-own' : ''}" role="radio" aria-checked="${on}" style="--pt-bg:${tn.bg};--pt-fg:${tn.fg}" onclick="planTodayPick('${escHtml(p.id)}')">
+      <span class="pt-t"><span>${escHtml(dashPlanShortName(planDisplayName(p)))}</span><span class="plc-stats"><span class="plc-stat">${ph('calendar-dots')}${escHtml(palDaysText(f.daysCount))}</span><span class="plc-stat">${ph('barbell')}${escHtml(planExCountText(plcPerDay(f)))}</span><span class="plc-stat">${ph('clock-countdown')}~${f.minutes} min</span></span></span>
+      <span class="pt-dot"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 6.4l2.4 2.4 4.6-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>`;
+  }).join('');
+}
+function openPlanToday(){
+  const $ = id => document.getElementById(id);
+  const main = starredPlanId ? trainingPlans.find(p=> p.id === starredPlanId) : null;
+  $('ptTitle').textContent = t('ptTitle', 'TWÓJ PLAN');
+  $('ptSub').textContent = main
+    ? t('ptSub', `Zmiana tylko na dziś. Jutro wracasz do planu „${dashPlanShortName(planDisplayName(main))}”.`, dashPlanShortName(planDisplayName(main)))
+    : t('ptSubNone', 'Zmiana tylko na dziś.');
+  $('ptAll').textContent = t('ptAll', 'WSZYSTKIE PLANY');
+  $('ptNew').textContent = t('ptNew', 'STWÓRZ PLAN');
+  $('ptClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  $('ptList').innerHTML = planTodayRowsHtml();
+  acctSheetOpen('planTodaySheet');
+}
+function closePlanToday(viaDrag){ acctSheetClose('planTodaySheet', viaDrag); }
+function planTodaySet(id){   // id planu głównego albo null = zdejmij nadpisanie
+  if(id && id !== starredPlanId) localStorage.setItem(LS_PLAN_TODAY, JSON.stringify({ date: todayStr(), planId: id }));
+  else localStorage.removeItem(LS_PLAN_TODAY);
+  if(typeof updateTodayPlanBanner === 'function') updateTodayPlanBanner();
+  if(typeof renderDashboard === 'function') renderDashboard();
+}
+function planTodayPick(id){
+  const p = trainingPlans.find(x=> x.id === id); if(!p) return;
+  const prev = todayPlanId();
+  if(id === prev){ closePlanToday(); return; }
+  planTodaySet(id);
+  closePlanToday();
+  const name = dashPlanShortName(planDisplayName(p));
+  toast(t('ptToast', `Na dziś: „${name}”`, name), { undo: ()=>{ planTodaySet(prev); } });
+}
+function planTodayGoPlans(){ closePlanToday(); goRoute('plans-v2'); }
+function planTodayCreate(){ closePlanToday(); openPlanEditorV2(null); }
 /* ---------- nazwa treningu: własna (w.name) albo, gdy pusta, nazwa planu aktywnego przy zapisie ---------- */
 let _wnId = null;
 function openWorkoutName(wid){
@@ -10302,7 +10383,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.98.0";
+const APP_VERSION = "4.99.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -13082,8 +13163,9 @@ function buildExerciseTileV2(ex, state, opts){
   return btn;
 }
 function todayPlanExerciseNames(){
-  if(!starredPlanId) return null;
-  const plan = trainingPlans.find(p=>p.id===starredPlanId);
+  const tpId = todayPlanId();
+  if(!tpId) return null;
+  const plan = trainingPlans.find(p=>p.id===tpId);
   if(!plan) return null;
   const list = planExercisesFor(plan, backfillDate || todayStr());
   if(!list.length) return null;
@@ -13378,7 +13460,7 @@ mSheetDrag('whatsnewOverlay', closeWhatsNew);
 mSheetDrag('releaseOverlay', closeRelease);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','swapExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','wnameSheet','weightListSheet','weightSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
+['nameEditOverlay','wnameSheet','planTodaySheet','weightListSheet','weightSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 mSheetDrag('bodyDataSheet', closeBodyDataSheet);     // zamknięcie przeciągnięciem czyści też stan okna (klawiatura, pola)
 mSheetDrag('badgeDetailSheet', closeBadgeDetail);
@@ -14524,7 +14606,7 @@ function lgWirePager(){
 }
 /* ---- popup shell ---- */
 function popupPlanTitle(){
-  const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
+  const plan = todayPlanId() ? trainingPlans.find(p=>p.id===todayPlanId()) : null;
   return plan ? planDisplayName(plan) : t('gymTitleTraining','TRENING');
 }
 function lgLoadBlockHtml(r){
@@ -15728,7 +15810,8 @@ function workoutStartDateNow(){
 }
 // id aktywnego (oznaczonego gwiazdką) planu, o ile ten plan nadal istnieje; inaczej null
 function activePlanIdNow(){
-  return (starredPlanId && trainingPlans.some(p=>p.id===starredPlanId)) ? starredPlanId : null;
+  const id = todayPlanId();
+  return (id && trainingPlans.some(p=>p.id===id)) ? id : null;
 }
 function saveWorkout(){
   if(!sessionExercises.length){ showEmptyWorkoutPopup(t('addAtLeastOneExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
@@ -16933,6 +17016,19 @@ function restoreDeletedBuiltinPlansOnce(){
 }
 restoreDeletedBuiltinPlansOnce();
 let starredPlanId = localStorage.getItem(LS_STARRED_PLAN) || null;
+/* Plan „tylko na dziś” (4.99.0): zmiana z Pulpitu (tap w nazwę planu). Lokalnie, bez synca; ważna do końca dnia, jutro wraca plan
+   z gwiazdką (starredPlanId, ten z Plany). Dotyczy dzisiejszego treningu: hero Pulpitu, GYM, planId zapisanego treningu.
+   Postęp tygodniowy, kalendarz i ekran Plany dalej liczą się z planu głównego. */
+const LS_PLAN_TODAY = 'fitlog_plan_today_v1';
+function planTodayOverrideId(){
+  try{
+    const o = JSON.parse(localStorage.getItem(LS_PLAN_TODAY) || 'null');
+    if(o && o.date === todayStr() && o.planId !== starredPlanId && trainingPlans.some(p=> p.id === o.planId)) return o.planId;
+  }catch(e){}
+  return null;
+}
+// plan dzisiejszego treningu: nadpisanie na dziś albo plan z gwiazdką; trening dopisywany wstecz zawsze wg planu głównego
+function todayPlanId(){ return (!backfillDate && planTodayOverrideId()) || starredPlanId; }
 let planOnboardingActive = false; // true while a brand-new user is being forced to pick/create their first plan
 function exitPlanOnboarding(){
   planOnboardingActive = false;
@@ -19305,7 +19401,7 @@ async function triggerInstallPrompt(){
 function updateTodayPlanBanner(){
   const banner = document.getElementById('todayPlanBanner');
   if(!banner) return;
-  const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
+  const plan = todayPlanId() ? trainingPlans.find(p=>p.id===todayPlanId()) : null;
   if(!plan){ banner.classList.add('hidden'); return; }
   const iso = document.getElementById('gymDate').value || todayStr();
   const exercises = planExercisesFor(plan, iso);
@@ -19891,7 +19987,7 @@ function dashboardModel(now){
 function dashboardModelCore(now){
   now = now || new Date();
   const todayIso = dateStr(now);
-  const plan = starredPlanId ? (trainingPlans.find(p=>p.id===starredPlanId) || null) : null;
+  const plan = todayPlanId() ? (trainingPlans.find(p=>p.id===todayPlanId()) || null) : null;
   const hasPlan = !!plan;
   const hasHistory = workouts.length > 0 || runs.length > 0;
   const sets = dashboardAllSets();
@@ -19946,7 +20042,7 @@ function dashboardModelCore(now){
   };
 
   // ---- hero: jeden z 8 stanów (kolejność = priorytet) ----
-  const base = { plan: dashPlanSummary(plan), planName: plan ? planDisplayName(plan) : null };
+  const base = { plan: dashPlanSummary(plan), planName: plan ? planDisplayName(plan) : null, planToday: !!planTodayOverrideId() };
   let hero;
   if(gymHasProgress()){
     hero = { state:'inprogress', ...base, ...dashGymProgress(now) };
@@ -20049,9 +20145,12 @@ function dashHeroHtml(m, animate){
     case 'train':
     case 'planready': {
       const info = h.state === 'train' ? h : (h.todayIsTraining ? h.today : (h.next || h.today));
+      const pickable = h.state === 'train';   // tap w nazwę = zmiana planu na dziś (okno „Twój plan”)
+      const titleHtml = pickable ? title + ph('caret-down', 'dash-hero-caret') : title;
+      const titleAttrs = pickable ? ` role="button" tabindex="0" onclick="openPlanToday()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPlanToday();}" aria-label="${escHtml(t('ptA11y', 'Zmień plan na dziś'))}" data-pick="1"` : '';
       const html = `<div class="dash-hero${rc(1)}">
-        <p class="dash-hero-eyebrow">${t('dashYourPlan', 'Twój plan')}</p>
-        <h2 class="dash-hero-title">${title}</h2>
+        <p class="dash-hero-eyebrow">${h.planToday ? t('dashPlanToday', 'Plan na dziś') : t('dashYourPlan', 'Twój plan')}</p>
+        <h2 class="dash-hero-title"${titleAttrs}>${titleHtml}</h2>
         ${dashPlanStats(info.exerciseCount, info.estMin)}
         ${btn(h.state, t('dashStart', 'Start'))}
       </div>`;
@@ -21021,7 +21120,7 @@ const GYMV2_DAY_NAMES_PL = LANG==='en'
   : ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
 function renderGymV2(){
   const iso = backfillDate || todayStr();
-  const plan = starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
+  const plan = todayPlanId() ? trainingPlans.find(p=>p.id===todayPlanId()) : null;
   const nameEl = document.getElementById('gymV2PlanName');
   const noPlan = document.getElementById('gymV2NoPlan');
   document.getElementById('view-gym-v2').classList.toggle('is-backfill', !!backfillDate);

@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.98.0 (2026-10-26)
+- **Aktualna wersja:** 4.99.0 (2026-10-26)
 - **Liczba wersji:** 267 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.99.0 · MINOR · 2026-10-26
+
+Pulpit: tap w nazwę planu (ze strzałką) otwiera okno „Twój plan” z planami w ich kolorach i zapisem „dni · ćwiczenia · czas” jak w Planach. Wybór **zmienia plan tylko na dziś** (`fitlog_plan_today_v1`, lokalnie, wygasa o północy; jutro wraca plan z gwiazdką): hero Pulpitu („Plan na dziś”), GYM i `planId` zapisanego treningu. Postęp tygodniowy, kalendarz i ekran Plany liczą się dalej z planu głównego. Toast z „COFNIJ”; w oknie „Wszystkie plany” i „Stwórz plan”. Strzałka tylko w stanie „Start” (nie w trakcie treningu).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-26 — 4.99.0: plan na dziś z Pulpitu
 
 ### 4.98.0 · MINOR · 2026-10-26
 
