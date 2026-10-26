@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.96.5 (2026-10-26)
+- **Aktualna wersja:** 4.97.0 (2026-10-26)
 - **Liczba wersji:** 266 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.97.0 · MINOR · 2026-10-26
+
+Własna nazwa treningu: ołówek obok tytułu na ekranie treningu w Historii otwiera okno „Nazwa treningu”. Nazwa (`workout.name`) wygrywa z nazwą planu w Historii, na Pulpicie („Ostatni trening”) i na karcie do udostępnienia; puste pole = dotychczasowa nazwa automatyczna (plan aktywny przy zapisie). Synchronizacja: kolumna `workouts.name` (migracja `supabase/migrations/20261026_workouts_name.sql`, do uruchomienia raz w SQL Editor; do tego czasu klient działa bez niej dzięki `_cloudNewColsOk`).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-26 — 4.97.0: edycja nazwy treningu
 
 ### 4.96.5 · PATCH · 2026-10-26
 

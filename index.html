@@ -392,6 +392,8 @@ html.gymfin-open .bottom-nav{z-index:9600;}   /* the real nav stays on top of th
 .gymfin-check svg{width:52px;height:52px;display:block;}
 .gymfin-heads{display:flex;flex-direction:column;align-items:center;gap:4px;width:286px;max-width:100%;margin-bottom:46px;}
 .gymfin-title{margin:0;font-size:var(--m-fs-2xs);font-weight:500;color:var(--m-orange);letter-spacing:.1em;text-transform:uppercase;line-height:1.3;}
+.gymfin-sub--edit{display:inline-flex;align-items:center;justify-content:center;gap:8px;max-width:100%;padding:0;border:0;background:none;font-family:inherit;text-align:center;cursor:pointer;}
+.gymfin-sub--edit svg{flex:none;width:16px;height:16px;color:var(--m-muted-text);}
 .gymfin-sub{margin:0;font-size:var(--m-fs-headline);font-weight:300;color:var(--m-ink);letter-spacing:-.02em;line-height:1.04;}
 
 /* new-record card: glass, hero number */
@@ -705,7 +707,7 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
    straight from the finish screen too. Only the few genuinely new bits
    below; everything else reuses .plansv2-customize-* / .exv2-field /
    .plansv2-choice-*. */
-#nameEditOverlay,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#editTimeSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#monthSumSheet,#recordDetailSheet,#newBadgeSheet,#langSheet,#unitsSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
+#nameEditOverlay,#wnameSheet,#weightListSheet,#weightSheet,#bodyDataSheet,#editKcalSheet,#editTimeSheet,#changelogHistorySheet,#authSheet,#newPasswordSheet,#reminderSheet,#healthSheet,#badgeDetailSheet,#monthSumSheet,#recordDetailSheet,#newBadgeSheet,#langSheet,#unitsSheet{z-index:9600;}   /* #weightSheet po #weightListSheet w DOM: okno pomiaru otwiera się nad listą */
 /* mConfirm() is opened from inside the account panel (z 95) and its sheets
    (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
 #mConfirmOverlay{z-index:9650;}
@@ -1164,6 +1166,7 @@ html.modal-lock.statsx-lock.statsx-scrollable, html.modal-lock.statsx-lock.stats
 .nm-name{display:flex;flex-direction:column;align-items:center;margin-top:20px;}
 .nm-name label{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--m-ink);padding:10px 0 2px;}
 .nm-name input{width:100%;box-sizing:border-box;margin:0;padding:0 0 4px;border:0;border-bottom:1px solid var(--m-orange-tint);border-radius:0;background:none;text-align:center;font-family:inherit;font-size:48px;font-weight:200;line-height:1.15;letter-spacing:-.02em;color:var(--m-orange);outline:0;transition:border-color var(--m-dur-quick) ease;}
+#wnInput{font-size:var(--m-fs-xl);}
 .nm-name input:focus{border-bottom-color:var(--m-orange);}
 .nm-name input::placeholder{color:var(--m-muted-text);opacity:.6;}
 @media (max-height:620px){
@@ -4617,6 +4620,31 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
     <div class="m2-actions">
       <button type="button" class="m2-btn" id="nmSave" onclick="saveNameEdit()">ZAPISZ</button>
+    </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="wnameSheet" onclick="if(event.target===this) closeWorkoutName()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="wnTitle">NAZWA TRENINGU</h1>
+          <button type="button" class="m2-x" id="wnClose" aria-label="Zamknij" onclick="closeWorkoutName()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="wnSub">Zobaczysz ją w Historii i na karcie do udostępnienia.</p>
+      </div>
+      <div class="m2-body">
+        <div class="nm-name">
+          <label for="wnInput" id="wnLbl">NAZWA</label>
+          <input type="text" id="wnInput" maxlength="40" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" onkeydown="if(event.key==='Enter'){event.preventDefault();saveWorkoutName();}">
+        </div>
+        <button type="button" class="m2-link m2-link--c" id="wnRevert" hidden onclick="revertWorkoutName()"></button>
+      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="wnSave" onclick="saveWorkoutName()">ZAPISZ</button>
     </div>
   </div>
 </div>
@@ -8184,7 +8212,7 @@ function fmtKg(n){ const s = Number(kgToDisp(Number(n))).toFixed(1); return LANG
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','monthSumSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
+const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','wnameSheet','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','monthSumSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -8834,14 +8862,14 @@ function syncSig(v){
    z nowymi polami. Pola dopisujemy do wiersza tylko gdy rekord je ma, więc stare rekordy mają wiersz
    i podpis identyczne jak przed 4.66.0 (brak masowego ponownego wysyłania). */
 let _cloudNewColsOk = true;
-const CLOUD_NEW_COLS = ['meta', 'start_date', 'plan_id'];
+const CLOUD_NEW_COLS = ['meta', 'start_date', 'plan_id', 'name'];
 const stripCloudNewCols = row => { const r = {...row}; CLOUD_NEW_COLS.forEach(c=>{ delete r[c]; }); return r; };
 function isCloudNewColsError(err){
   if(!err) return false;
   const msg = [err.message, err.details, err.hint].filter(Boolean).join(' ');
   const colError = err.code === 'PGRST204' || err.code === '42703'
     || /column .* does not exist|could not find the .* column/i.test(msg);
-  return colError && /\b(meta|start_date|plan_id)\b/.test(msg);
+  return colError && /\b(meta|start_date|plan_id|name)\b/.test(msg);
 }
 const ISO_DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 function cloudPlanRow(p, uid, withNew){
@@ -8855,6 +8883,7 @@ function cloudWorkoutRow(w, uid, withNew){
   if(withNew === undefined ? _cloudNewColsOk : withNew){
     if(typeof w.startDate === 'string' && ISO_DAY_RE.test(w.startDate)) row.start_date = w.startDate;
     if(typeof w.planId === 'string' && w.planId) row.plan_id = w.planId;
+    row.name = (typeof w.name === 'string' && w.name.trim()) ? w.name.trim() : null;
   }
   return row;
 }
@@ -9194,6 +9223,7 @@ async function syncCloudData(){
         // start_date / plan_id: columns since 4.66.0; missing column or null keeps the local value (no error)
         if(typeof row.start_date === 'string' && ISO_DAY_RE.test(row.start_date.slice(0, 10))) w.startDate = row.start_date.slice(0, 10);
         if(typeof row.plan_id === 'string' && row.plan_id) w.planId = row.plan_id;
+        if(typeof row.name === 'string' && row.name.trim()) w.name = row.name.trim(); else if('name' in row) delete w.name;
         return w;
       }).concat(keptWorkouts);
       workouts.forEach(w=> cleanExerciseList(w.exercises));
@@ -9722,6 +9752,38 @@ function kcalPaint(){
   if(bad) $('kcalErr').textContent = t('kcalRange', 'Wpisz wartość od 0 do 3000.');
   $('kcalSave').disabled = n == null || bad;
 }
+/* ---------- nazwa treningu: własna (w.name) albo, gdy pusta, nazwa planu aktywnego przy zapisie ---------- */
+let _wnId = null;
+function openWorkoutName(wid){
+  const w = workouts.find(x=> x.id === wid); if(!w) return;
+  _wnId = wid;
+  const $ = id => document.getElementById(id);
+  $('wnTitle').textContent = t('wnTitle', 'NAZWA TRENINGU');
+  $('wnSub').textContent = t('wnSub', 'Zobaczysz ją w Historii i na karcie do udostępnienia.');
+  $('wnLbl').textContent = t('wnLbl', 'NAZWA');
+  $('wnSave').textContent = t('nmSave', 'ZAPISZ');
+  $('wnClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  const auto = histWorkoutNameV2({ ...w, name: '' });
+  $('wnInput').value = w.name || '';
+  $('wnInput').placeholder = auto;
+  const rb = $('wnRevert');
+  rb.hidden = !w.name;
+  rb.textContent = t('wnRevert', 'Wróć do nazwy automatycznej (%n)').replace('%n', auto);
+  acctSheetOpen('wnameSheet');
+}
+function closeWorkoutName(viaDrag){ _wnId = null; acctSheetClose('wnameSheet', viaDrag); }
+function _wnApply(val){
+  const w = workouts.find(x=> x.id === _wnId); if(!w) return;
+  if(val) w.name = val; else delete w.name;
+  saveWorkouts(workouts);
+  scheduleCloudPush();
+  closeWorkoutName();
+  refreshHistOpenV2();
+  if(typeof renderHistDetailV2 === 'function' && document.getElementById('histDetailV2') && selectedHistDateV2) renderHistDetailV2(false);
+  if(typeof renderDashboard === 'function') renderDashboard();
+}
+function saveWorkoutName(){ _wnApply(cleanName(document.getElementById('wnInput').value).trim().slice(0, 40)); }
+function revertWorkoutName(){ _wnApply(''); }
 function openEditKcal(wid){
   const w = workouts.find(x=> x.id === wid);
   if(!w){ return; }
@@ -10240,7 +10302,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.96.5";
+const APP_VERSION = "4.97.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -13316,7 +13378,7 @@ mSheetDrag('whatsnewOverlay', closeWhatsNew);
 mSheetDrag('releaseOverlay', closeRelease);
 ['planCustomizeOverlay','newExerciseOverlayV2','pickExerciseOverlayV2','swapExerciseOverlayV2','feedbackOverlayV2']
   .forEach(id=> mSheetDrag(id, viaDrag=>closePlansCustomizeSheet(id, viaDrag)));
-['nameEditOverlay','weightListSheet','weightSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
+['nameEditOverlay','wnameSheet','weightListSheet','weightSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet']
   .forEach(id=> mSheetDrag(id, viaDrag=>acctSheetClose(id, viaDrag)));
 mSheetDrag('bodyDataSheet', closeBodyDataSheet);     // zamknięcie przeciągnięciem czyści też stan okna (klawiatura, pola)
 mSheetDrag('badgeDetailSheet', closeBadgeDetail);
@@ -19418,6 +19480,7 @@ function dashNextPlanDay(plan, fromIso, refIso){
 // nazwa planu, z którego pochodzi zapisany trening (workout.day to tylko „A”/„B”/„własny”):
 // plan, którego jakiś dzień ma te same ćwiczenia (>=50% wspólnych); null = własny trening
 function dashWorkoutPlanName(w){
+  if(typeof w.name === 'string' && w.name.trim()) return w.name.trim();
   const names = new Set(w.exercises.map(e=>e.name).filter(n=>!BOOKEND_EX_NAMES.has(n)));
   let best = null, bestScore = 0;
   trainingPlans.forEach(p=> PLAN_DAYS.forEach(d=>{
@@ -21865,6 +21928,7 @@ function histWorkoutStatsV2(w){
   return { vol, sets };
 }
 function histWorkoutNameV2(w){
+  if(typeof w.name === 'string' && w.name.trim()) return w.name.trim();
   const p = w.planId ? trainingPlans.find(x=>x.id===w.planId) : null;
   if(p && p.name) return p.name;
   if(w.imported && w.day && w.day !== 'własny') return w.day;   // import: nazwa treningu z pliku (np. „Push”)
@@ -22037,7 +22101,7 @@ function histOpenHtmlV2(w){
     <div class="gymfin-inner histv2-open-inner">
       <div class="gymfin-heads">
         <p class="gymfin-title">${HIST_DOW_FULL_V2[d.getDay()]}, ${histDayMonthV2(d)}</p>
-        <p class="gymfin-sub">${escHtml(histWorkoutNameV2(w))}</p>
+        <button type="button" class="gymfin-sub gymfin-sub--edit m-press" onclick="openWorkoutName('${escHtml(w.id)}')" aria-label="${escHtml(t('wnEditA11y', 'Zmień nazwę treningu'))}">${escHtml(histWorkoutNameV2(w))}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="M13.5 6.5l4 4"/></svg></button>
       </div>
       ${rec ? `<div class="gymfin-record">
         <p class="gymfin-record-k">${escHtml(rec.label)}</p>
@@ -25268,7 +25332,7 @@ function scCardData(w){
     totalVol, totalReps, setCount, exCount,
     bodyweight: totalVol === 0,                    // 0 kg: the volume slot shows the sets instead
     durationMin: w.durationMin || 0,
-    planName: String(w.day || '').trim() || t('shareDefaultPlan','Trening'),
+    planName: (typeof w.name === 'string' && w.name.trim()) || String(w.day || '').trim() || t('shareDefaultPlan','Trening'),
     record: rec,
     classicRec: rec ? { name: rec.name, valueText: rec.value, unitText: rec.unit } : null
   };
