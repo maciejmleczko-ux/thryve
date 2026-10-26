@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.97.2 (2026-10-26)
+- **Aktualna wersja:** 4.98.0 (2026-10-26)
 - **Liczba wersji:** 267 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.98.0 · MINOR · 2026-10-26
+
+Pulpit: kafel „Zeszły tydzień” / „Ten tydzień” jest klikalny i prowadzi do Postępów (z „Ten tydzień” od razu okres Tydzień). Wcześniej tapnięcie nic nie robiło.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-26 — 4.98.0: kafel tygodnia na Pulpicie otwiera Postępy
 
 ### 4.97.2 · PATCH · 2026-10-26
 

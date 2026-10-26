@@ -1627,7 +1627,7 @@ button.dash-card{cursor:pointer;}
 
 /* week + record + badge row (533:8472) */
 .dash-wkrow{display:flex;align-items:stretch;gap:var(--m-gap-card);}
-.dash-wk{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:20px;padding:12px;border-radius:var(--m-r-sm);background:var(--m-plan-hard);color:var(--m-white);}
+.dash-wk{cursor:pointer;flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:20px;padding:12px;border-radius:var(--m-r-sm);background:var(--m-plan-hard);color:var(--m-white);}
 .dash-wk-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:17px;}
 .dash-wk .dash-lbl{color:var(--m-on-dark-1);white-space:nowrap;}
 .dash-range{flex:none;display:inline-flex;align-items:center;justify-content:center;height:17px;padding:0 12px;border-radius:var(--m-r-pill);background:var(--m-plan-easy);color:var(--m-white);font-size:var(--m-fs-2xs);font-weight:500;line-height:1.4;letter-spacing:.1em;text-transform:uppercase;}
@@ -10302,7 +10302,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.97.2";
+const APP_VERSION = "4.98.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -20131,6 +20131,8 @@ function dashCta(kind, arg){
     case 'done': dashOpenTodaySummary(); break;
     case 'record': dashOpenRecord(); break;
     case 'kcal': goRoute('stats-v2'); break;
+    case 'week': statsV2Period = 'week'; goRoute('stats-v2'); break;   // kafel „Ten tydzień” → Postępy, okres Tydzień
+    case 'lastweek': goRoute('stats-v2'); break;                       // „Zeszły tydzień” → Postępy w bieżącym okresie (bieżący tydzień jest jeszcze pusty)
     case 'consistency': goRoute('history-v2'); break;
     case 'last': if(dashLastModel && dashLastModel.lastWorkout) dashOpenHistoryDay(dashLastModel.lastWorkout.date, dashLastModel.lastWorkout.id); break;
     case 'last-repeat': if(repeatMode) goRoute('gym-v2'); else repeatLastWorkoutV2(); break;   // repeatLastWorkoutV2() toggles when already in repeat mode
@@ -20213,7 +20215,7 @@ function dashWeekHtml(m, animate, rc){
   const range = showRange ? (w.compare.days === 1 ? DASH_DAY_ABBR_UP[1] : `${DASH_DAY_ABBR_UP[1]}–${DASH_DAY_ABBR_UP[dashDow(dashAddDays(w.from, w.compare.days - 1))]}`) : '';
   const delta = (txt, raw, unit)=> !w.hasPrev ? '' : (raw === 0 ? t('dashDeltaSame', 'bez zmian') : `${txt} ${unit}`);
   const row = (ico, v, unit, d)=> `<div class="dash-wk-row"><span class="dash-wk-ico">${ico}</span><div class="dash-wk-txt"><div class="dash-big">${dashNum(v, animate)}<small>${unit}</small></div><p class="dash-wk-delta">${d}</p></div></div>`;
-  const tile = `<div class="dash-wk${rc(2)}">
+  const tile = `<div class="dash-wk m-press${rc(2)}" role="button" tabindex="0" onclick="dashCta('${last ? 'lastweek' : 'week'}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();dashCta('${last ? 'lastweek' : 'week'}');}" aria-label="${escHtml(last ? t('dashLastWeek', 'Zeszły tydzień') : t('dashThisWeek', 'Ten tydzień'))}">
       <div class="dash-wk-hd"><p class="dash-lbl">${last ? t('dashLastWeek', 'Zeszły tydzień') : t('dashThisWeek', 'Ten tydzień')}</p>${range ? `<span class="dash-range">${range}</span>` : ''}</div>
       <div class="dash-wk-body">
         <div class="dash-wk-rows">
