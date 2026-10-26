@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.97.1 (2026-10-26)
-- **Liczba wersji:** 266 · **commitów:** 643
+- **Aktualna wersja:** 4.97.2 (2026-10-26)
+- **Liczba wersji:** 267 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -119,13 +119,21 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.97.2 · PATCH · 2026-10-26
+
+Nowa ikona aplikacji (litery „KK” na czerwonym tle) z Apple Icon Composer: plik `native/ios/App/App/AppIcon.icon` podpięty w projekcie Xcode (wejdzie z kolejnym buildem iOS) oraz odświeżone ikony PWA (`apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `favicon.png`) jako pełny kwadrat bez przezroczystości.
+
+**Commity (1):**
+
+- `8e0db70` 2026-10-26 — Nowa ikona aplikacji (Icon Composer) + ikony PWA
+
 ### 4.97.1 · PATCH · 2026-10-26
 
 Trening kalisteniczny (same serie bez ciężaru) pokazuje w podsumowaniu po zapisie i w szczegółach Historii **Objętość** liczoną z masą ciała, a nie same powtórzenia. Powtórzenia zostają tylko wtedy, gdy nie znamy wagi (objętość = 0). Karta do udostępnienia już tak działała.
 
 **Commity (1):**
 
-- (hash po commicie) 2026-10-26 — 4.97.1: objętość w podsumowaniu treningu z masą własną
+- `8afadac` 2026-10-26 — 4.97.1: objętość w podsumowaniu treningu z masą własną
 
 ### 4.97.0 · MINOR · 2026-10-26
 
