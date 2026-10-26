@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.99.1 (2026-10-26)
+- **Aktualna wersja:** 4.99.2 (2026-10-26)
 - **Liczba wersji:** 267 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -119,13 +119,21 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.99.2 · PATCH · 2026-10-26
+
+Karta udostępniania: trzy tła zdjęciowe z sekcji „gym” (gym-1, gym-3, gym-5) zastąpione nowymi bez twarzy (talerz 20 KG, kettlebell na niebieskim, czarny kettlebell na pomarańczowym). Jasne tła mają większe przyciemnienie pod białym tekstem (0.35 i 0.45, oszacowane, nie zmierzone).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-26 — 4.99.2: nowe tła karty udostępniania bez twarzy
+
 ### 4.99.1 · PATCH · 2026-10-26
 
 Angielskie tłumaczenia brakujących tekstów: Plany (lista, szczegóły, edytor, filtry), wyszukiwarka ćwiczeń, podsumowanie miesiąca, zmiana planu na dziś, okno instalacji. Bez zmian w polskiej wersji.
 
 **Commity (1):**
 
-- (hash po commicie) 2026-10-26 — 4.99.1: brakujące tłumaczenia EN
+- `8fca286` 2026-10-26 — 4.99.1: brakujące tłumaczenia EN
 
 ### 4.99.0 · MINOR · 2026-10-26
 
