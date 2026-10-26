@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.97.0 (2026-10-26)
+- **Aktualna wersja:** 4.97.1 (2026-10-26)
 - **Liczba wersji:** 266 · **commitów:** 643
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.97.1 · PATCH · 2026-10-26
+
+Trening kalisteniczny (same serie bez ciężaru) pokazuje w podsumowaniu po zapisie i w szczegółach Historii **Objętość** liczoną z masą ciała, a nie same powtórzenia. Powtórzenia zostają tylko wtedy, gdy nie znamy wagi (objętość = 0). Karta do udostępnienia już tak działała.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-26 — 4.97.1: objętość w podsumowaniu treningu z masą własną
 
 ### 4.97.0 · MINOR · 2026-10-26
 

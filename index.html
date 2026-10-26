@@ -10302,7 +10302,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.97.0";
+const APP_VERSION = "4.97.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -16413,12 +16413,12 @@ function saveWorkoutV2(){
   if(!ok) return;
 
   const w = workouts[workouts.length - 1];
-  const isBw = workoutIsBodyweightOnly(w);
   let volume = 0, repsTotal = 0;
   w.exercises.forEach(ex=> exSetsView(ex).forEach(st=>{
     volume += setVolumeKg(ex.name, st);
     repsTotal += st.reps || 0;
   }));
+  const isBw = workoutIsBodyweightOnly(w) && !(volume > 0);   // z masą własną objętość jest > 0; powtórzenia zamiast niej tylko, gdy nie znamy wagi
   const exCount = w.exercises.filter(ex=> ex.sets.some(s=> s.weight > 0 || s.reps > 0 || s.durationSec > 0)).length;
 
   // --- calories (F3): estimate from bodyweight-on-the-day + session METs ---
@@ -22078,8 +22078,9 @@ function histExBlockV2(w, e){
 }
 function histOpenHtmlV2(w){
   const d = new Date(w.date + 'T12:00:00');
-  const isBw = workoutIsBodyweightOnly(w), timed = workoutIsTimedOnly(w);
+  const timed = workoutIsTimedOnly(w);
   const sum = workoutSumStats(w);
+  const isBw = workoutIsBodyweightOnly(w) && !(sum.volume > 0);   // jak przy zapisie: objętość z masą własną, powtórzenia tylko bez znanej wagi
   const doneCount = w.exercises.filter(e=> e.sets.some(s=> s.weight > 0 || s.reps > 0 || s.durationSec > 0)).length || w.exercises.length;
   const rec = gymFinRecordFrom(workoutRecord(w));
   const prev = histPrevWorkoutV2(w);
