@@ -10240,7 +10240,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.96.4";
+const APP_VERSION = "4.96.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -22576,7 +22576,7 @@ function statsV2Agg(order, from, to){
       w.exercises.forEach(ex=>{
         if(!statsV2IsStrengthEx(ex)) return;
         a.sets += statsV2CountSets(ex);
-        recSetsOf(ex).forEach(s=>{ const wt = recNum(s.weight), rp = recNum(s.reps); if(wt > 0 && rp > 0) a.volumeKg += wt * rp; });
+        recSetsOf(ex).forEach(s=>{ if(recNum(s.reps) > 0) a.volumeKg += setVolumeKg(ex.name, s); });   // jak Pulpit: z masą własną
       });
     }catch(e){}
     const d = recNum(w.durationMin); if(d > 0) a.durationMin += d;
@@ -23047,7 +23047,7 @@ function stv2VolumeSeries(win){
   statsV2Order().forEach(w=>{
     if(w.date < win.start || w.date > win.end) return;
     let v = 0;
-    stv2Safe(()=> w.exercises.forEach(ex=>{ if(!statsV2IsStrengthEx(ex)) return; recSetsOf(ex).forEach(s=>{ const wt = recNum(s.weight), rp = recNum(s.reps); if(wt > 0 && rp > 0) v += wt * rp; }); }));
+    stv2Safe(()=> w.exercises.forEach(ex=>{ if(!statsV2IsStrengthEx(ex)) return; recSetsOf(ex).forEach(s=>{ if(recNum(s.reps) > 0) v += setVolumeKg(ex.name, s); }); }));
     cum += v;
     if(dates.length && dates[dates.length - 1] === w.date) vals[vals.length - 1] = cum; else { vals.push(cum); dates.push(w.date); }
   });
