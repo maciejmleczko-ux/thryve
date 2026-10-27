@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.99.2 (2026-10-26)
+- **Aktualna wersja:** 4.99.3 (2026-10-27)
 - **Liczba wersji:** 267 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.99.3 · PATCH · 2026-10-27
+
+Trener AI wyłączony w 1.0 flagą `AI_COACH_ENABLED = false` (każde wywołanie kosztuje, wróci razem z Mekkio+): `callAI`, okno zgody i okno analizy nie działają, ukryte są podsumowanie miesiąca w Historii i sekcja „Cele i trener” w panelu konta. Karta na Pulpicie zostaje jako reguła-podpowiedź z napisem „Podpowiedź” (bez ikony AI).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-27 — 4.99.3: Trener AI wyłączony flagą
 
 ### 4.99.2 · PATCH · 2026-10-26
 

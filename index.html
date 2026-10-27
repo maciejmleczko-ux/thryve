@@ -4236,7 +4236,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <section id="dashSecWeek" aria-label="Ten tydzień, rekord, odznaka"></section>
         <section id="dashSecConsistency" aria-label="Konsystencja"></section>
         <section id="dashSecLast" aria-label="Ostatni trening"></section>
-        <section id="dashSecCoach" aria-label="Trener AI"></section>
+        <section id="dashSecCoach" aria-label="Podpowiedź"></section>
         <section id="dashSecPlanWeek" aria-label="Plan tygodnia"></section>
         <section id="dashSecBody" aria-label="Waga i kalorie"></section>
       </div>
@@ -6301,7 +6301,7 @@ stV2SessionsSub: 'with cardio exercises',
   dashThisWeek: 'This week', dashLastWeek: 'Last week', dashNewWeek: 'New week', dashRepsWord: 'reps',
   dashBadge: 'Badge', dashRecordNew: 'new', dashConsistency: 'Consistency', dashStreak: n => `${n}-week streak`,
   dashLastWorkout: 'Last workout', dashRepeat: 'Repeat this workout', dashVolume: 'Volume', dashSets: 'Sets',
-  dashCoach: 'AI Coach', dashPlanWeek: 'Weekly plan', dashTreningWord: n => n === 1 ? 'workout' : 'workouts',
+  dashCoach: 'AI Coach', dashTip: 'Tip', dashPlanWeek: 'Weekly plan', dashTreningWord: n => n === 1 ? 'workout' : 'workouts',
   dashWeight: 'Weight', dashKcal: 'Calories', dashAddWeight: 'Add weight', dashDays: 'days',
   dashDeltaSame: 'no change', dashVsLast: 'vs last week', dashKcalThisWeek: 'this week', dashKcalLastWeek: 'last week',
   dashRuleFirst: 'Take lighter weights for your first workout and keep something in reserve for the last set.',
@@ -8838,6 +8838,7 @@ function hasAiConsent(){
   try { const c = JSON.parse(localStorage.getItem(LS_AI_CONSENT) || 'null'); return !!(c && c.userId === cloudSession.user.id); } catch(e){ return false; }
 }
 function openAiConsent(){
+  if(!AI_COACH_ENABLED) return;
   const $ = id => document.getElementById(id);
   if(!cloudSession || !cloudSession.user){ toast(t('aiConsentLogin', 'Zaloguj się, żeby włączyć Trenera AI')); return; }
   const on = hasAiConsent();
@@ -9405,6 +9406,7 @@ async function syncCloudData(){
 const AI_PROXY_URL = SUPABASE_URL + '/functions/v1/ai-proxy';
 
 async function callAI(feature, payload){
+  if(!AI_COACH_ENABLED) return { error: 'disabled' };
   if(!cloudSession || !cloudSession.access_token) return { error: 'not_logged_in' };
   if(!hasAiConsent()) return { error: 'no_consent' };
   try {
@@ -10457,7 +10459,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.99.2";
+const APP_VERSION = "4.99.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -12258,7 +12260,7 @@ function profileHtml(m, animate){
   const goalTxt = AI_GOAL_LABELS[aiPrefs.goal] ? t('aiGoal_' + aiPrefs.goal, AI_GOAL_LABELS[aiPrefs.goal]) : fillTxt;
   const avoidTxt = aiPrefs.avoid ? (aiPrefs.avoid.length > 24 ? aiPrefs.avoid.slice(0, 24) + '…' : aiPrefs.avoid) : fillTxt;
   const aiRow = (n, v, id)=> `<button type="button" class="pf-row pf-row--help m-press" onclick="openAiPrefsSheet()"><span class="pf-row-l"><span class="pf-row-n">${n}</span><span class="pf-row-s" id="${id}">${E(v)}</span></span>${chev}</button>`;
-  const aiSec = `<section class="pf-sec${rc(5)}"${m.isNew ? ' hidden' : ''}><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('pfGoals', 'CELE I TRENER')}</h2></div>
+  const aiSec = `<section class="pf-sec${rc(5)}"${(m.isNew || !AI_COACH_ENABLED) ? ' hidden' : ''}><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('pfGoals', 'CELE I TRENER')}</h2></div>
     <div class="pf-card"><div class="pf-rows pf-rows--dyn">${aiRow(t('pfGoal', 'Cel treningowy'), goalTxt, 'acctAiGoalV')}${aiRow(t('pfAvoid', 'Czego unikać'), avoidTxt, 'acctAiAvoidV')}<button type="button" class="pf-row pf-row--help m-press" onclick="openAiConsent()"><span class="pf-row-l"><span class="pf-row-n">${t('pfCoach', 'Trener AI')}</span><span class="pf-row-s">${hasAiConsent() ? t('pfCoachOn', 'Włączony') : t('pfCoachOff', 'Wyłączony, wymaga zgody')}</span></span>${chev}</button></div></div><p class="set-hint" id="pfCoachNote">${t('pfCoachNote', 'Trener AI patrzy na Twoje treningi i preferencje. To nie porada medyczna.')}</p></section>`;
   // ---- Połączenia: widoczne tylko w apce na iPhone'ie (jak dawne renderHealthRow / renderReminderRow) ----
   const showHealth = IS_NATIVE && !!capPlugin('HealthPlugin'), showRem = IS_NATIVE;
@@ -17984,6 +17986,9 @@ const PLC_LOCK_SVG = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden
 /* Karta „Mekkio AI / Mekkio+” (płatna, jeszcze nieistniejąca funkcja) jest ukryta w 1.0: Apple (2.1, 3.1.1) nie lubi niedziałających ani płatnych-bez-IAP elementów.
    Włączyć razem z bramką Mekkio+ (isPremium) i zakupem w aplikacji. */
 const PLANS_AI_CARD_ENABLED = false;
+/* Trener AI (analiza ostatniego treningu, podsumowanie miesiąca) jest wyłączony w 1.0: każde wywołanie kosztuje (ai-proxy → model), więc ma wejść razem z bramką Mekkio+.
+   false = żadnych wywołań AI, ukryte: karta AI na Pulpicie, podsumowanie miesiąca w Historii, sekcja „Cele i trener” w panelu konta. Reguły-podpowiedzi na Pulpicie zostają. */
+const AI_COACH_ENABLED = false;
 function plansV2AiSectionHtml(rcls){ return PLANS_AI_CARD_ENABLED ? plansV2SectionHtml('ai', 'Mekkio AI', buildPlanAiCardV2(), rcls, '', true) : ''; }
 function buildPlanAiCardV2(){
   return `<div class="plc plc--ai m-press" role="button" tabindex="0" data-pa="ai" aria-label="${t('plansV2AiTitle', 'Plan od AI')}, Mekkio+">
@@ -20040,7 +20045,7 @@ function dashCoachRule(ctx){
   } else if(week.mode === 'current' && week.hasPrev && week.delta.kg < 0){
     id = 'volume-down'; text = t('dashRuleVolumeDown','Na razie podnosisz mniej niż tydzień temu. Jeśli to lżejszy tydzień z założenia, wszystko gra.');
   }
-  return { id, text, aiEnabled: isPremium() && !!cloudSession };
+  return { id, text, aiEnabled: AI_COACH_ENABLED && isPremium() && !!cloudSession };
 }
 
 // Poprawna data zapisu: RRRR-MM-DD i istniejący dzień kalendarza (nie '2026-02-31', nie '', nie liczba)
@@ -20472,7 +20477,7 @@ function dashCoachParts(m){
 function dashCoachHtml(m, animate, rc){
   const c = dashCoachParts(m);
   if(!c.text) return '';
-  const head = `<span class="dash-coach-hd"><span class="ph" data-ph="sparks">${PH.sparks || ''}</span><span class="dash-eyebrow">${t('dashCoach', 'Trener AI')}</span>${c.tappable ? dashCaret() : ''}</span>`;
+  const head = `<span class="dash-coach-hd">${AI_COACH_ENABLED ? `<span class="ph" data-ph="sparks">${PH.sparks || ''}</span>` : ''}<span class="dash-eyebrow">${AI_COACH_ENABLED ? t('dashCoach', 'Trener AI') : t('dashTip', 'Podpowiedź')}</span>${c.tappable ? dashCaret() : ''}</span>`;
   const body = `<span class="dash-coach-t${c.ai ? ' is-ai' : ''}">${escHtml(c.text)}</span>`;
   // karta otwierana (analiza AI / zgoda / ładowanie): sam tytuł ze strzałką, treść jest w oknie; bez AI zostaje podpowiedź reguły
   return c.tappable
@@ -20846,6 +20851,7 @@ let lastAiSummaryData = null; // {summary, analysis, actions[]} once fetched/cac
 let dashAiStatus = 'off';
 let dashAiInflight = '';   // fingerprint being fetched right now (no duplicate calls while a render re-enters)
 function openAiPopup(){
+  if(!AI_COACH_ENABLED) return;
   if(!lastAiWorkoutPayload) return;
   if(!hasAiConsent()){ openAiConsent(); return; }
   const p = lastAiWorkoutPayload;
@@ -20877,7 +20883,7 @@ function closeAiPopup(){
 }
 // Sync half: decides what the Trener AI card can show. Returns a fetch job when nothing is cached.
 function dashAiPrepare(payload, workoutId){
-  if(!isPremium() || !cloudSession || !workoutId){
+  if(!AI_COACH_ENABLED || !isPremium() || !cloudSession || !workoutId){
     dashAiStatus = 'off'; lastAiSummaryData = null;
     return null;
   }
@@ -21053,7 +21059,7 @@ async function msFetch(ym, model){
 }
 // Wywoływane po każdym renderze Pulpitu; robi coś tylko raz na miesiąc (patrz warunki niżej).
 async function msMaybeShow(){
-  if(!cloudSession || !isPremium() || !hasAiConsent()) return;
+  if(!AI_COACH_ENABLED || !cloudSession || !isPremium() || !hasAiConsent()) return;
   const ym = msPrevYm(todayStr().slice(0, 7));
   if(msInflight || msFailedYm === ym || msShown === ym) return;
   let seen = ''; try{ seen = localStorage.getItem(LS_MS_SEEN) || ''; }catch(e){}
@@ -22127,7 +22133,7 @@ function renderHistSumV2(animate){
       <div class="histv2-sum-cell"><p class="v">${cur.n}</p><p class="k">${histCountWordV2(cur.n)}</p></div>
       <div class="histv2-sum-cell"><p class="v">${histFmtDurV2(cur.min)}</p><p class="k">${t('histSumTime', 'czas')}</p></div>
       <div class="histv2-sum-cell"><p class="v">${histFmtTonsV2(cur.vol)}</p><p class="k">${t('histSumVolume', 'objętość')}</p></div>
-    </div>${selectedHistDateV2 ? '' : msBannerHtml(prefix, animate ? ' m-rise' : '')}`;
+    </div>${(selectedHistDateV2 || !AI_COACH_ENABLED) ? '' : msBannerHtml(prefix, animate ? ' m-rise' : '')}`;
   window.histMonthRecV2 = cur.rec;
 }
 function histRowHtmlV2(kind, item, i, animate){
