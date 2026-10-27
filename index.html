@@ -1720,6 +1720,10 @@ button.dash-card{cursor:pointer;}
   background:linear-gradient(90deg,var(--m-ai-fill-from) 0%,var(--m-ai-fill-mid) 55%,var(--m-ai-fill-to) 175%) padding-box,linear-gradient(142deg,color-mix(in srgb,var(--m-ai-from) 22%,var(--m-ai-fill-to)) 0%,color-mix(in srgb,var(--m-ai-to) 45%,var(--m-ai-fill-to)) 83%) border-box;   /* hairline softened to the Figma look (533:8672) */
   box-shadow:inset 0 0 15.4px var(--m-ai-inset),inset 0 0 6px var(--m-ai-inset-2);}
 button.dash-coach{cursor:pointer;}
+/* sama podpowiedź (Trener AI wyłączony): ten sam czarny box z pomarańczowym tytułem co „Wskazówka treningowa” w GYM (.lg-tip) */
+.dash-coach--tip{background:var(--m-ink);border-color:transparent;box-shadow:none;}
+.dash-coach--tip .dash-coach-hd .dash-eyebrow{color:var(--m-orange);font-size:var(--m-fs-2xs);font-weight:700;letter-spacing:.09em;text-transform:uppercase;}
+.dash-coach--tip .dash-coach-t{color:var(--m-card);}
 .dash-coach--title{min-height:0;}   /* sam tytuł: bez linijki tekstu */
 .dash-coach--title .dash-coach-hd .dash-eyebrow,.ms-banner .dash-coach-hd .dash-eyebrow{margin-right:auto;}   /* strzałka przy prawej krawędzi, jak na innych boxach */
 .dash-coach--title .dash-coach-hd .dash-caret,.ms-banner .dash-coach-hd .dash-caret{margin-left:0;}
@@ -10459,7 +10463,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.99.3";
+const APP_VERSION = "4.99.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -20482,7 +20486,7 @@ function dashCoachHtml(m, animate, rc){
   // karta otwierana (analiza AI / zgoda / ładowanie): sam tytuł ze strzałką, treść jest w oknie; bez AI zostaje podpowiedź reguły
   return c.tappable
     ? `<button type="button" class="dash-coach dash-coach--title m-press${rc(7)}" onclick="dashCta('coach')" aria-haspopup="dialog">${head}</button>`
-    : `<div class="dash-coach${rc(7)}">${head}${body}</div>`;
+    : `<div class="dash-coach${AI_COACH_ENABLED ? '' : ' dash-coach--tip'}${rc(7)}">${head}${body}</div>`;
 }
 // silent refresh of the coach slot only (AI arrived / failed): never animates
 function dashRenderCoach(){

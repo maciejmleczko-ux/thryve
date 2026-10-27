@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.99.3 (2026-10-27)
+- **Aktualna wersja:** 4.99.4 (2026-10-27)
 - **Liczba wersji:** 267 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,11 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.99.4 · PATCH · 2026-10-27
+
+Karta „Podpowiedź” na Pulpicie (Trener AI wyłączony) ma ten sam wygląd co „Wskazówka treningowa” w GYM: ciemny box z pomarańczowym tytułem, bez gradientu AI (klasa `dash-coach--tip`). Nie jest w buildzie 71; trafi do następnego.
+
 
 ### 4.99.3 · PATCH · 2026-10-27
 
