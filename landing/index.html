@@ -649,7 +649,6 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
         <nav class="nav-links" aria-label="Sekcje strony">
           <a href="#ekrany">Jak to działa</a>
           <a href="#funkcje">Funkcje</a>
-          <a href="#trener">Trener AI</a>
           <a href="#faq">Pytania</a>
           <a href="/kontakt">Kontakt</a>
         </nav>
@@ -833,7 +832,8 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
   </div>
 </section>
 
-<!-- ================= AI COACH ================= -->
+<!-- AI COACH: ukryte, bo Trener AI jest wyłączony w aplikacji (AI_COACH_ENABLED=false). Przywróć blok z komentarza, gdy wróci.
+<!-- ================= AI COACH ================= -- >
 <section class="sec" id="trener" aria-labelledby="trener-h">
   <div class="dark-panel">
     <div class="ai">
@@ -868,6 +868,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
     </div>
   </div>
 </section>
+-->
 
 <!-- ================= PRIVACY ================= -->
 <section class="sec" id="dane" aria-labelledby="dane-h">
@@ -894,7 +895,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
       </article>
       <article style="--i:3">
         <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></svg></div>
-        <h3>Usuń konto w apce</h3>
+        <h3>Usuń konto w aplikacji</h3>
         <p>Bez maili do supportu. Konto i dane w chmurze znikają ze wszystkich urządzeń.</p>
       </article>
     </div>
@@ -910,7 +911,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
       <div>
         <span class="pill-label">Cena</span>
         <h2 id="cena-h" style="margin-top:20px; font-size:clamp(2rem,4vw,3.2rem)">Teraz płacisz zero.</h2>
-        <p class="lede" style="margin-top:18px">Wszystkie funkcje są teraz darmowe, łącznie z Trenerem AI. Jeśli kiedyś pojawi się płatna wersja, dowiesz się o tym w apce, zanim cokolwiek się zmieni.</p>
+        <p class="lede" style="margin-top:18px">Wszystkie funkcje są teraz darmowe. Jeśli kiedyś pojawi się płatna wersja, dowiesz się o tym w aplikacji, zanim cokolwiek się zmieni.</p>
       </div>
     </div>
   </div>
@@ -935,7 +936,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
       </details>
       <details>
         <summary>Czy muszę zakładać konto?</summary>
-        <div><p>Nie. Bez konta wszystko działa, a dane zostają na tym jednym telefonie. Konto przydaje się, kiedy chcesz mieć treningi na kilku urządzeniach, nie stracić ich przy zmianie telefonu albo korzystać z Trenera AI.</p></div>
+        <div><p>Nie. Bez konta wszystko działa, a dane zostają na tym jednym telefonie. Konto przydaje się, kiedy chcesz mieć treningi na kilku urządzeniach, albo nie stracić ich przy zmianie telefonu.</p></div>
       </details>
       <details>
         <summary>Co się stanie z moimi danymi, kiedy zmienię telefon?</summary>
@@ -944,10 +945,6 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
       <details>
         <summary>Czy Mekkio łączy się z Apple Zdrowie?</summary>
         <div><p>Tak, jeśli chcesz. Po włączeniu w Profilu Mekkio pobiera z Apple Zdrowie wagę i kalorie spalone na treningu, które zmierzył zegarek. Dostęp odbierzesz w każdej chwili w Ustawieniach iPhone'a.</p></div>
-      </details>
-      <details>
-        <summary>Czy Trener AI zastąpi prawdziwego trenera?</summary>
-        <div><p>Nie. Dobrze pilnuje progresji i łapie spadki formy, ale nie widzi Twojej techniki. Traktuj jego sugestie jak podpowiedzi. Przy bólu albo kontuzji skonsultuj się z fizjoterapeutą lub lekarzem.</p></div>
       </details>
       <details>
         <summary>Mam już swój plan. Muszę układać go od nowa?</summary>
@@ -1027,6 +1024,7 @@ document.documentElement.classList.add('js');
     split.style.setProperty('--p', ease(clamp01(p / .7)).toFixed(4));
     var narrow = window.innerWidth < 700;  // phones leave the screen first, then the line comes in
     split.style.setProperty('--t', ease(clamp01((p - (narrow ? .4 : .34)) / (narrow ? .3 : .4))).toFixed(4));
+    if(!aiPhone) return;
     var a = aiPhone.getBoundingClientRect();
     var d = Math.abs(a.top + a.height/2 - vh/2) / (vh * .5);
     var pp = ease(clamp01((1 - d) / .55));

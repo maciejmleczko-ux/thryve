@@ -649,7 +649,6 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
         <nav class="nav-links" aria-label="Page sections">
           <a href="#ekrany">How it works</a>
           <a href="#funkcje">Features</a>
-          <a href="#trener">AI Coach</a>
           <a href="#faq">FAQ</a>
           <a href="/en/contact">Contact</a>
         </nav>
@@ -833,7 +832,8 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
   </div>
 </section>
 
-<!-- ================= AI COACH ================= -->
+<!-- AI COACH: ukryte, bo Trener AI jest wyłączony w aplikacji (AI_COACH_ENABLED=false). Przywróć blok z komentarza, gdy wróci.
+<!-- ================= AI COACH ================= -- >
 <section class="sec" id="trener" aria-labelledby="trener-h">
   <div class="dark-panel">
     <div class="ai">
@@ -868,6 +868,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
     </div>
   </div>
 </section>
+-->
 
 <!-- ================= PRIVACY ================= -->
 <section class="sec" id="dane" aria-labelledby="dane-h">
@@ -910,7 +911,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
       <div>
         <span class="pill-label">Price</span>
         <h2 id="cena-h" style="margin-top:20px; font-size:clamp(2rem,4vw,3.2rem)">Right now it costs nothing.</h2>
-        <p class="lede" style="margin-top:18px">Every feature is free right now, AI Coach included. If a paid version ever arrives, you'll hear about it in the app before anything changes.</p>
+        <p class="lede" style="margin-top:18px">Every feature is free right now. If a paid version ever arrives, you'll hear about it in the app before anything changes.</p>
       </div>
     </div>
   </div>
@@ -935,7 +936,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
       </details>
       <details>
         <summary>Do I need an account?</summary>
-        <div><p>No. Everything works without one, and your data stays on this one phone. An account helps when you want your workouts on several devices, don't want to lose them when you switch phones, or want to use AI Coach.</p></div>
+        <div><p>No. Everything works without one, and your data stays on this one phone. An account helps when you want your workouts on several devices, or don't want to lose them when you switch phones.</p></div>
       </details>
       <details>
         <summary>What happens to my data when I switch phones?</summary>
@@ -944,10 +945,6 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
       <details>
         <summary>Does Mekkio connect to Apple Health?</summary>
         <div><p>Yes, if you want it to. Turn it on in your Profile and Mekkio reads your weight and the workout calories your watch measured from Apple Health. You can revoke access anytime in your iPhone's Settings.</p></div>
-      </details>
-      <details>
-        <summary>Will AI Coach replace a real coach?</summary>
-        <div><p>No. It's good at keeping track of progression and catching drops in strength, but it can't see your technique. Treat its suggestions as tips. If you're in pain or injured, see a physiotherapist or a doctor.</p></div>
       </details>
       <details>
         <summary>I already have a plan. Do I have to build it from scratch?</summary>
@@ -1027,6 +1024,7 @@ document.documentElement.classList.add('js');
     split.style.setProperty('--p', ease(clamp01(p / .7)).toFixed(4));
     var narrow = window.innerWidth < 700;  // phones leave the screen first, then the line comes in
     split.style.setProperty('--t', ease(clamp01((p - (narrow ? .4 : .34)) / (narrow ? .3 : .4))).toFixed(4));
+    if(!aiPhone) return;
     var a = aiPhone.getBoundingClientRect();
     var d = Math.abs(a.top + a.height/2 - vh/2) / (vh * .5);
     var pp = ease(clamp01((1 - d) / .55));
