@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.99.8 (2026-10-30)
+- **Aktualna wersja:** 4.99.9 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.99.9 · PATCH · 2026-10-30
+
+Spójny styl przycisków ikon w nagłówkach: koło 40 px w dwóch wersjach. Drugorzędne (✕, ←, zębatka): ramka .5 px w pomarańczu, bez wypełnienia (`.m2-x`, `.profil-back`, `.v2-hdr-back`, `.ob-back`, `.profil-gear`, `.opk-x`). Główne (✓, udostępnij): pełne pomarańczowe koło (`.gymfin-share`, `.gy-ok`, `.histv2-open-sharebtn`). Na zdjęciu i ciemnym tle ramka biała (`.wn-close`, `.rl-x`, `.ai-popup-close`). Reguła dopisana do `CLAUDE.md`.
+
+**Commity (1):**
+
+- (hash po commicie)
 
 ### 4.99.8 · PATCH · 2026-10-30
 
