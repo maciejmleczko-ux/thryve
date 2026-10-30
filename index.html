@@ -10557,7 +10557,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.106.0";
+const APP_VERSION = "4.106.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -18856,8 +18856,8 @@ function renderPlansListV2(animate){
   const mekkio = plansV2OnbOrder(listed.filter(p=> p.builtin));
   heroEl.innerHTML = plansV2HeroHtml(animate);
   const newCard = `<div class="plc plc--new m-press" role="button" tabindex="0" data-pa="new" aria-label="${t('plansV2AddTitle', 'Dodaj plan')}">${ph('plus-icon')}<span class="plc-newl">${t('plansV2NewPlan', 'Nowy plan')}</span></div>`;
-  const importLink = `<button type="button" class="plansv2-link m-press" data-pa="import">${t('plansV2Import', 'Importuj')}</button>`;
-  let html = plansV2SectionHtml('own', t('plansV2MyPlans', 'Moje plany'), own.map(buildPlanCardV2).join('') + newCard, rc(1), importLink);
+  const importCard = `<div class="plc plc--new m-press" role="button" tabindex="0" data-pa="import" aria-label="${t('plansV2ImportTitle', 'Importuj plan')}">${ph('download-simple')}<span class="plc-newl">${t('plansV2Import', 'Importuj')}</span></div>`;
+  let html = plansV2SectionHtml('own', t('plansV2MyPlans', 'Moje plany'), own.map(buildPlanCardV2).join('') + newCard + importCard, rc(1));
   if(trainings.length) html += plansV2SectionHtml('trainings', t('plansV2MyTrainings', 'Moje treningi'), trainings.map(buildPlanCardV2).join(''), rc(2), '', true);
   if(mekkio.length) html += plansV2SectionHtml('mekkio', t('plansV2MekkioPlans', 'Plany Mekkio'), mekkio.map(buildPlanCardV2).join(''), rc(2));
   html += plansV2AiSectionHtml(rc(3));
