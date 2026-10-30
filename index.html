@@ -3960,16 +3960,21 @@ button.stv2-bt{cursor:pointer;}
    Główne (✓, udostępnij): pełne pomarańczowe koło 40 px, biała ikona. Na zdjęciu i ciemnym tle: ramka i ikona białe.
    Pole dotyku 44 px (::after / opakowanie 44 px), glify 18 px. Nowy przycisk ikony bierze jedną z tych dwóch wersji. */
 /* ramka 1 px + lekkie białe tło: przy .5 px koło ginęło na zdjęciu tła (✕ wyglądał jak sam znak) */
-.x-ring,.plansv2-customize-close,.newex-v2-close,.exv2-close,.plansv2-close,.histv2-card-close,.gy-circ.gy-x,.profil-gear{border:1px solid var(--m-orange);background:rgba(255,255,255,.6);}
-.m2-x::before,.opk-x::before{background:rgba(255,255,255,.6);border:1px solid var(--m-orange);}
+.x-ring,.plansv2-customize-close,.newex-v2-close,.exv2-close,.plansv2-close,.histv2-card-close,.profil-gear{border:1px solid var(--m-orange);background:rgba(255,255,255,.6);}
+.m2-x::before{background:rgba(255,255,255,.6);border:1px solid var(--m-orange);}
 .m2-x svg path{stroke:var(--m-ink);}
 .profil-gear{box-sizing:border-box;box-shadow:none;color:var(--m-ink);-webkit-backdrop-filter:none;backdrop-filter:none;}
-.opk-x::before{inset:2px;}
-.opk-btn svg{width:18px;height:18px;}
 .wn-close,.rl-x,.ai-popup-close{box-sizing:border-box;width:40px;height:40px;top:16px;right:16px;padding:0;border:.5px solid rgba(255,255,255,.7);border-radius:50%;background:none;color:var(--m-white);}
 .ai-popup-close .ph,.wn-hero .wn-close.ph svg{width:18px;height:18px;}
 .gymfin-share{width:40px;height:40px;border:.5px solid var(--m-orange-tint);background:var(--m-orange);color:var(--m-white);-webkit-backdrop-filter:none;backdrop-filter:none;}
 .gymfin-share svg{width:20px;height:20px;}
+/* Ikony po lewej stronie nagłówka (← i ✕): same znaki, bez obrysu, ten sam rozmiar glifu we wszystkich ekranach (2026-10-30). */
+.profil-back,.v2-hdr-back,.ob-back,.gy-circ.gy-x,.opk-x,.lg-circ:not(.fill):not(.ghost){box-sizing:border-box;width:40px;height:40px;border:0;background:none;color:var(--m-ink);}
+.opk-x::before{display:none;}
+.profil-back .ph.ph,.profil-back .ph.ph svg,.v2-hdr-back .ph.ph,.v2-hdr-back .ph.ph svg{width:22px;height:22px;}   /* .ph.ph: wyższa specyficzność niż reguły 18 px per ekran */
+.ob-back svg{width:24px;height:24px;}
+.gy-circ.gy-x svg{width:28px;height:28px;}
+.opk-x svg{width:26px;height:26px;}
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -10481,7 +10486,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.99.11";
+const APP_VERSION = "4.99.12";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
