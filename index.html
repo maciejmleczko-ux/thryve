@@ -3211,7 +3211,8 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-set.is-editing .lg-set-c i{background:transparent;border-color:var(--m-white);}
 .lg-set.is-editing .lg-set-c svg{display:block;}
 .lg-set.is-editing .lg-set-bar{background:var(--m-white);}
-.lg-set.is-dim,.lg-set.is-dim:active:not(:has(.lg-set-c:active)){opacity:.7;border-color:var(--m-grey-200);}   /* podczas edycji pozostałe serie są przygaszone: 70% krycia, obwódka i ptaszek szare (pomarańcz przy przezroczystości dawał różową poświatę) */
+.lg-set.is-dim{border-color:var(--m-grey-200);}   /* podczas edycji pozostałe serie są przygaszone: 70% krycia tylko na zawartości, tło wiersza zostaje pełne (pod wierszem leży pomarańczowa warstwa kosza i przez przezroczysty wiersz dawała poświatę) */
+.lg-set.is-dim > *{opacity:.7;}
 .lg-set.is-dim .lg-set-c i{background:var(--m-grey-450);border-color:var(--m-grey-450);}
 .lg-set-x{margin-left:6px;}
 @media (prefers-reduced-motion: no-preference){
@@ -3443,7 +3444,7 @@ body.gymv2-bg .pg-bg{display:block;}
   @keyframes lgRestPop{0%{transform:scale(1);}35%{transform:scale(1.1);}100%{transform:scale(1);}}
 }
 .gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active{transform:scale(.94);}
-.lg-set:active:not(:has(.lg-set-c:active)){opacity:.88;}   /* wiersz: bez skalowania (dotyk i przytrzymanie), tylko lekkie przygaszenie */
+.lg-set:active:not(:has(.lg-set-c:active)) > .lg-set-l,.lg-set:active:not(:has(.lg-set-c:active)) > .lg-set-v{opacity:.7;}   /* wiersz: bez skalowania (dotyk i przytrzymanie), tylko lekkie przygaszenie treści; samego wiersza nie przezroczymy, bo pod nim leży pomarańczowa warstwa kosza */
 .lg-set-c:active i{transform:scale(.9);}
 /* App feel: no text selection / image long-press menu anywhere, except where the user types */
 html{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
@@ -10519,7 +10520,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.100.3";
+const APP_VERSION = "4.100.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
