@@ -10557,7 +10557,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.103.2";
+const APP_VERSION = "4.103.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21533,7 +21533,6 @@ function gymWorkoutCatalogV2(){
   return entries.map((en, i)=> ({...en, _i: i}))
     .sort((a, b)=> a.lastDate === b.lastDate ? a._i - b._i : (a.lastDate < b.lastDate ? -1 : 1));
 }
-const GYM_WS_LIMIT = 6;
 function gymLastAgoText(iso){
   if(!iso) return '';   // nigdy niewykonany: bez podpisu
   const days = Math.max(0, Math.round((new Date(todayStr() + 'T12:00:00') - new Date(iso + 'T12:00:00')) / 86400000));
@@ -21573,7 +21572,7 @@ function renderGymPlanTileV2(animate){
 function renderGymEmptyV2(animate){
   renderGymPlanTileV2(animate);
   const all = gymWorkoutCatalogV2();
-  const own = all.filter(e=> e.session).slice(0, GYM_WS_LIMIT), fromPlans = all.filter(e=> !e.session).slice(0, GYM_WS_LIMIT);
+  const own = all.filter(e=> e.session), fromPlans = all.filter(e=> !e.session);   // bez limitu: wszystkie treningi ze wszystkich planów
   gymWsList = own.concat(fromPlans);
   const fill = (secId, rowId, labelId, labelKey, labelPl, list, offset)=>{
     document.getElementById(labelId).textContent = t(labelKey, labelPl);
