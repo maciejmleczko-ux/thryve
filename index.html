@@ -8918,11 +8918,13 @@ function closeAiPrefsSheet(viaDrag){
 function saveAiPrefsSheet(){
   if(!cloudSession || !cloudSession.user){ toast('Zaloguj się, żeby zapisać preferencje'); return; }
   const avoid = AI_COACH_ENABLED ? document.getElementById('aiAvoidInput').value.trim() : (aiPrefs.avoid || '');
+  const prevGoal = aiPrefs.goal;
   aiPrefs = { goal: _pickAiGoal || undefined, avoid: avoid || undefined };
   supabaseClient.from('profiles').update({ ai_preferences: aiPrefs }).eq('id', cloudSession.user.id)
     .then(({error})=>{ if(error) console.error('saveAiPrefsSheet: push', error); });
   renderAccountPanel();
   closeAiPrefsSheet();
+  if(aiPrefs.goal && aiPrefs.goal !== prevGoal) offerProfileGoalToPlan(aiPrefs.goal);
 }
 
 /* ---------- zgoda na Trenera AI (Apple 5.1.2(i)) ----------
@@ -10555,7 +10557,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.105.2";
+const APP_VERSION = "4.106.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -17871,6 +17873,44 @@ function applyPlanCustomizeV2(){
   toast(t('planCustomized','Plan dostosowany'));
   updateTodayPlanBanner();
   renderPlansList(); // tail-calls renderPlansListV2(), keeps both screens in sync
+}
+/* Zmiana celu w Profilu dotyka też aktywnego planu: lekko, jak „Dostosuj” w wersji z samym celem (serie, powtórzenia, przerwy;
+   ćwiczenia, dni i kolejność zostają). Plan Mekkio zostaje nietknięty, powstaje kopia. Pełny plan (generator) zachowuje
+   poziom, sprzęt i dni, zmienia się tylko `goal`. Sprawność (`ogolna`) nie ma odpowiednika w planach, więc nic nie pyta. */
+const PROFILE_GOAL_TO_PLAN = { masa:'mass', sila:'strength', wytrzymalosc:'endurance' };
+function planv2ApplyProfileGoal(plan, goal){
+  const prev = plan.customizationV2 || {};
+  const schedule = planv2ApplyGoalToSchedule(plan.schedule, goal);
+  const customizationV2 = prev.goalOnly || !plan.customizationV2
+    ? { goal, goalOnly:true, sourceId: prev.sourceId || plan.id, difficulty: prev.difficulty || planLevelKey(plan) || planDifficultyKey(planAvgExercisesPerDay(plan)) }
+    : { ...prev, goal };
+  if(plan.builtin){
+    const newId = 'plan_' + Date.now();
+    trainingPlans.push({id:newId, name: planDisplayName(plan), builtin:false, schedule, customizationV2, meta: planMetaForEdit(plan)});
+    if(starredPlanId === plan.id){ starredPlanId = newId; localStorage.setItem(LS_STARRED_PLAN, newId); }
+  } else {
+    plan.schedule = schedule;
+    plan.customizationV2 = customizationV2;
+    plan.meta = planMetaForEdit(plan);
+  }
+  saveTrainingPlansList();
+  toast(t('planCustomized','Plan dostosowany'));
+  updateTodayPlanBanner();
+  renderPlansList();
+}
+async function offerProfileGoalToPlan(profileGoal){
+  const goal = PROFILE_GOAL_TO_PLAN[profileGoal];
+  const plan = goal && starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
+  if(!plan || isPlanHidden(plan) || planCustomizeKind(plan) === null) return;
+  if(plan.customizationV2 && plan.customizationV2.goal === goal) return;
+  const name = planDisplayName(plan), label = PLANSV2_GOAL_LABEL[goal];
+  if(!await mConfirm({
+    title: t('pgoTitle', 'Zmienić też plan?'),
+    text: plTypo(t('pgoText', `Cel to teraz: ${label}. Dostosować serie, powtórzenia i przerwy w planie „${name}”? Ćwiczenia i dni zostają.`, label, name)),
+    ok: t('pgoOk', 'Dostosuj plan'), cancel: t('pgoNo', 'Zostaw plan'), gym: true
+  })) return;
+  const cur = trainingPlans.find(p=>p.id===plan.id);
+  if(cur) planv2ApplyProfileGoal(cur, goal);
 }
 function updatePlanPillLabel(){
   const label = document.getElementById('planPillLabel');
