@@ -3211,6 +3211,7 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-set.is-editing .lg-set-c i{background:transparent;border-color:var(--m-white);}
 .lg-set.is-editing .lg-set-c svg{display:block;}
 .lg-set.is-editing .lg-set-bar{background:var(--m-white);}
+.lg-set.is-dim,.lg-set.is-dim:active:not(:has(.lg-set-c:active)){opacity:.5;}   /* podczas edycji pozostałe serie są przygaszone */
 .lg-set-x{margin-left:6px;}
 @media (prefers-reduced-motion: no-preference){
   .lg-set.is-counting .lg-set-bar{opacity:1;animation:lgSetCount var(--m-dur-auto) linear forwards;}
@@ -10517,7 +10518,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.100.1";
+const APP_VERSION = "4.100.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -14521,7 +14522,7 @@ function lgSetsHtml(){
   ex.setValues.forEach((sv, i)=>{
     const logged = setIsLogged(sv, bw);
     const live = lg.editIdx === i || (lg.editIdx === null && !logged && i === active);
-    const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '') + (live ? ' is-live' : '') + (just === i ? ' is-just' : '');
+    const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '') + (live ? ' is-live' : '') + (lg.editIdx !== null && lg.editIdx !== i ? ' is-dim' : '') + (just === i ? ' is-just' : '');
     const val = logged ? (sv.durationSec > 0 ? escHtml(ex.metrics && ex.metrics.length ? cardioSetLine(sv, ex.name) : fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}${sv.extraKg ? `<span class="lg-set-x">${escHtml(fmtExtraKg(sv.extraKg))}</span>` : ''}` : `<b>${escHtml(fmtGymWeight(parseFloat(sv.weight)||0))}${wUnit()}</b> × ${escHtml(String(sv.reps))}`) : '—';
     html += `<div class="lg-set-wrap" data-i="${i}"><div class="lg-set-del" aria-hidden="true">${LG_ICONS.trash}</div>
       <div class="${cls}" role="button" tabindex="0" onclick="lgTapSet(${i})"><span class="lg-set-l">${t('seriesLabel', `Seria ${i+1}`, i+1)}</span><span class="lg-set-v">${val}</span><button type="button" class="lg-set-c" onclick="event.stopPropagation();lgTickSet(${i})" aria-label="${escHtml(t('gymTickSet','Zapisz serię'))}"><i>${LG_ICONS.check}</i></button>${live ? '<span class="lg-set-bar"></span>' : ''}</div></div>`;
