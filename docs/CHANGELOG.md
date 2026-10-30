@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.99.15 (2026-10-30)
+- **Aktualna wersja:** 4.100.0 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.100.0 · MINOR · 2026-10-30
+
+Logowanie serii: w wierszu serii jest ptaszek. Tap zapisuje serię od razu, także samą sugestię z poprzedniego treningu. Zapisana seria jest cała pomarańczowa z białym ptaszkiem. Zapis automatyczny rusza po 3 s (było 2 s) dopiero, gdy użytkownik zmienił obie wartości (ciężar i powtórzenia), a pasek pod wierszem pokazuje odliczanie. Edycja zapisanej serii: biały wiersz z pomarańczową ramką, wystarczy zmiana jednej wartości. Przycisk „Dodatkowa seria” nazywa się teraz „+ Seria ponad plan”. Nowy token `--m-dur-auto` (3 s).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-30 — ptaszek w wierszu serii, odliczanie 3 s, nowy wygląd edycji
 
 ### 4.99.15 · PATCH · 2026-10-30
 

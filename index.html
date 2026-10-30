@@ -66,6 +66,7 @@
   --m-dur-pop:.5s;         /* success pop, icon spin, finish-screen items */
   --m-dur-tile:.7s;        /* big tiles / hero */
   --m-dur-draw:.9s;        /* chart line draw */
+  --m-dur-auto:3s;         /* odliczanie do automatycznego zapisu serii (== LG_COMMIT_MS) */
   /* top inset + 5px extra so headers sit clear of the iOS 27 status-bar blur band (one knob) */
   --top-inset:calc(env(safe-area-inset-top, 0px) + 5px);
   --bg:#2c2727;
@@ -2998,10 +2999,9 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .lg-load .lg-num{font-size:var(--m-fs-display-sm);}
 .lg-load-hint{margin:0;max-width:260px;text-align:center;font-size:var(--m-fs-2xs);line-height:1.4;color:var(--m-ink);opacity:.6;transition:opacity var(--m-dur-quick) ease;}
 .lg-load-hint.is-hidden{opacity:0;}
-.lg-set-x{color:var(--m-orange);margin-left:6px;}
 .lg-scroll.pad-open{padding-bottom:calc(310px + env(safe-area-inset-bottom));}
 .lg-key:active{transform:scale(.95);transition-duration:var(--m-dur-press-in);}
-.gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active,.lg-set:active,.lg-key:active,.lg-num:active{transition-duration:var(--m-dur-press-in);}
+.gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active,.lg-set:active,.lg-set-c:active i,.lg-key:active,.lg-num:active{transition-duration:var(--m-dur-press-in);}
 /* ==== GYM 5.0 — workout in progress (Figma 459:6092) + set logging (Figma 461:7553) ==== */
 :root{--m-fs-display:108px;--m-fs-display-sm:60px;--m-sheet-top:max(30px, calc(var(--top-inset) + 4px));
   /* Floating sheets, concentric with the screen corner (Maciej, 2026-10-05):
@@ -3187,17 +3187,37 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-set-wrap{position:relative;border-radius:16px;overflow:hidden;}
 .lg-set-del{position:absolute;inset:0;background:var(--m-orange);display:flex;align-items:center;justify-content:flex-end;padding-right:20px;color:var(--m-white);}
 .lg-set-del svg{width:22px;height:22px;display:block;}
-.lg-set{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box;background:var(--m-grey-100);border:1.5px solid transparent;border-radius:16px;padding:10px 16px;text-align:left;font-family:inherit;cursor:pointer;touch-action:pan-y;transition:border-color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
-.lg-set-l{width:76px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(52,57,65,.71);}
-.lg-set-v{flex:1;min-width:0;font-size:var(--m-fs-md);color:var(--m-ink);font-variant-numeric:tabular-nums;}
-.lg-set-c{width:24px;height:24px;border-radius:50%;flex:none;background:var(--m-orange);color:var(--m-white);display:flex;align-items:center;justify-content:center;box-sizing:border-box;}
+.lg-set{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box;min-height:52px;overflow:hidden;background:var(--m-orange);border:1.5px solid transparent;border-radius:16px;padding:10px 16px;text-align:left;font-family:inherit;cursor:pointer;touch-action:pan-y;transition:background-color var(--m-dur-quick) ease,border-color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
+.lg-set-l{width:76px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:var(--m-white);transition:color var(--m-dur-quick) ease;}
+.lg-set-v{flex:1;min-width:0;font-size:var(--m-fs-md);color:var(--m-white);font-variant-numeric:tabular-nums;transition:color var(--m-dur-quick) ease;}
+.lg-set-v b{font-weight:600;}
+/* ptaszek = osobny przycisk: pole dotyku 44 px, glif 24 px */
+.lg-set-c{position:relative;width:44px;height:44px;margin:-10px -10px -10px 0;flex:none;padding:0;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.lg-set-c i{width:24px;height:24px;border-radius:50%;flex:none;box-sizing:border-box;background:var(--m-white);border:1.5px solid var(--m-white);color:var(--m-orange);display:flex;align-items:center;justify-content:center;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-quick) ease,border-color var(--m-dur-quick) ease;}
 .lg-set-c svg{width:12px;height:12px;display:block;}
+.lg-set-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--m-orange);transform:scaleX(0);transform-origin:left;opacity:0;pointer-events:none;}
 .lg-set.is-blank{background:var(--m-grey-75);}
+.lg-set.is-blank .lg-set-l{color:rgba(52,57,65,.71);}
 .lg-set.is-blank .lg-set-v{color:var(--m-grey-450);}
-.lg-set.is-blank .lg-set-c{background:transparent;border:1.5px solid var(--m-grey-300);}
+.lg-set.is-blank .lg-set-c i{background:transparent;border-color:var(--m-grey-300);}
 .lg-set.is-blank .lg-set-c svg{display:none;}
 .lg-set.is-active{border-color:rgba(255,51,0,.32);}
-.lg-set.is-editing{border-color:var(--m-orange);}
+.lg-set.is-active .lg-set-v{color:var(--m-grey-500);}
+.lg-set.is-active.is-set .lg-set-v{color:var(--m-ink);}
+.lg-set.is-active.can .lg-set-c i{border-color:var(--m-orange);}
+.lg-set.is-active:not(.is-set) .lg-set-v b{font-weight:400;}
+.lg-set.is-editing{background:var(--m-white);border-color:var(--m-orange);}
+.lg-set.is-editing .lg-set-l{color:var(--m-orange);}
+.lg-set.is-editing .lg-set-v{color:var(--m-ink);}
+.lg-set.is-editing .lg-set-c i{background:transparent;border-color:var(--m-orange);}
+.lg-set.is-editing .lg-set-c svg{display:block;}
+.lg-set-x{margin-left:6px;}
+@media (prefers-reduced-motion: no-preference){
+  .lg-set.is-counting .lg-set-bar{opacity:1;animation:lgSetCount var(--m-dur-auto) linear forwards;}
+  @keyframes lgSetCount{to{transform:scaleX(1);}}
+  .lg-set.is-just .lg-set-c svg{animation:lgSetTick var(--m-dur-pop) var(--m-ease-spring) backwards;}
+  @keyframes lgSetTick{from{opacity:0;transform:scale(.4);}to{opacity:1;transform:scale(1);}}
+}
 .lg-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);letter-spacing:.07em;text-transform:uppercase;color:var(--m-black);}
 .lg-hint[hidden]{display:none;}
 .lg-warn{font-size:var(--m-fs-xs);line-height:1.4;color:var(--m-danger);text-align:center;}
@@ -3422,6 +3442,7 @@ body.gymv2-bg .pg-bg{display:block;}
 }
 .gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active{transform:scale(.94);}
 .lg-set:active{transform:scale(.99);}
+.lg-set-c:active i{transform:scale(.9);}
 /* App feel: no text selection / image long-press menu anywhere, except where the user types */
 html{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 img,svg{-webkit-user-drag:none;-webkit-touch-callout:none;}
@@ -5913,7 +5934,7 @@ const T_EN = {
   gymFinishDlgTitle: 'Finish workout?', gymFinishBody: (n, kg)=>`We'll save ${n} and ${kg} ${wUnit()}.`, gymFinishPartial: 'Some exercises have incomplete sets; we will save them as they are.', gymFinishYes: 'Finish and save', gymFinishNo: 'Back',
   gymUnsavedTitle: 'Changes not saved', gymUnsavedBody: 'This exercise was already done. To save your changes, go back and tap ✓.', gymUnsavedYes: 'Leave without saving', gymUnsavedNo: 'Back',
   gymEmptyTitle: 'The workout is empty', gymEmptyBody: "You haven't logged an exercise yet. Add the first one?", gymEmptyYes: 'Add exercise',
-  gymLeaveLogging: 'Leave logging', gymAddExerciseDone: 'Add exercise to workout', gymSwipeHint: 'Swipe a set left to delete it', gymLogWarn: 'Log at least one set to add the exercise.', gymExtraSet: 'Extra set',
+  gymLeaveLogging: 'Leave logging', gymAddExerciseDone: 'Add exercise to workout', gymSwipeHint: 'Swipe a set left to delete it', gymLogWarn: 'Log at least one set to add the exercise.', gymExtraSet: '+ Extra set', gymTickSet: 'Save set',
   lgOvGoal: 'Goal for today', lgOvLast: 'Last time', lgOvRecord: 'RECORD', lgOvRecordE1rm: 'PROJECTED MAX', lgOvFrom: 'from', lgOvRepsWord: 'reps', lgOvWeeks: 'in 4 wks', lgOvSets: 'Sets', lgOvReps: 'Reps', lgOvRest: 'Rest',
   trainerAi: 'AI COACH', exNoteSheetTitle: 'NOTE', exHowtoTitle: 'How to do it', exHowtoSheetTitle: 'HOW TO DO IT', exHowtoSetup: 'SETUP', exHowtoMove: 'MOVEMENT', exHowtoMistake: 'COMMON MISTAKE',
   planPill: 'Training plans',
@@ -10496,7 +10517,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.99.15";
+const APP_VERSION = "4.100.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -14209,7 +14230,7 @@ function lgBuildRuler(host, step, value, onUser, opts){
 
 /* ---- current-set composer state ---- */
 let lg = null; // { editIdx, timer, ruler, step, w, r, wt, rt, wPre, rPre }
-const LG_COMMIT_MS = 2000;
+const LG_COMMIT_MS = 3000;   // == --m-dur-auto (pasek odliczania pod wierszem serii)
 function lgBw(){ return !!popupExercise && popupExercise.equipment === 'masa ciała'; }
 function lgFirstBlank(){
   const sv = popupExercise.setValues, bw = lgBw();
@@ -14278,6 +14299,7 @@ function lgPaint(){
     r.classList.toggle('is-pale', !lg.rt && !(lg.editIdx !== null));
     r.classList.toggle('is-editing', !!lgPad && lgPad.f === 'r');
   }
+  lgRowPaint();
 }
 function lgReady(){
   if(!lg || lgPad || isTimeEx(popupExercise)) return false;
@@ -14296,6 +14318,45 @@ function lgSchedule(delay){
     if(lg && lg.ruler && lg.ruler.isDown()){ lgSchedule(); return; }   // still dragging — wait for the release
     lgCommit();
   }, delay === undefined ? LG_COMMIT_MS : delay);
+  lgBarSync();
+}
+/* pasek pod wierszem, który się wypełnia: tylko gdy czeka zapis automatyczny (restart przy każdej zmianie) */
+function lgBarSync(){
+  const row = document.querySelector('#lgSets .lg-set.is-live');
+  if(!row) return;
+  row.classList.remove('is-counting');
+  if(lg && lg.timer && lgReady()){ void row.offsetWidth; row.classList.add('is-counting'); }
+}
+/* czy ptaszek może zapisać serię od razu: wartości są sensowne i pochodzą z historii albo od użytkownika */
+function lgCanCommit(){
+  if(!lg || !popupExercise || isTimeEx(popupExercise)) return false;
+  if(lg.w === '' && !lgBw()) return false;
+  if(lg.r === '' || lg.r < 1) return false;
+  return lg.editIdx !== null || !!lg.wPre || (lg.wt && lg.rt);
+}
+function lgLiveVal(){
+  if(lgBw()) return `${escHtml(String(lg.r))} ${t('repsUnit','powt.')}${lg.we && Number(lg.w) ? `<span class="lg-set-x">${escHtml(fmtExtraKg(lgToKg(lg.w)))}</span>` : ''}`;
+  return `<b>${escHtml(fmtGymWeight(lgToKg(lg.w)))}${wUnit()}</b> × ${escHtml(String(lg.r))}`;
+}
+/* wiersz, który właśnie wypełniamy (nowa seria albo edycja), pokazuje wartości na żywo */
+function lgRowPaint(){
+  const row = document.querySelector('#lgSets .lg-set.is-live');
+  if(!row || !lg) return;
+  const can = lgCanCommit();
+  const v = row.querySelector('.lg-set-v');
+  if(v) v.innerHTML = (can || lg.editIdx !== null) ? lgLiveVal() : '—';
+  row.classList.toggle('can', can);
+  row.classList.toggle('is-set', lgReady());
+}
+function lgTickSet(i){
+  if(!popupExercise || !lg) return;
+  if(Date.now() - lgSwipeAt < 400) return;
+  const sv = popupExercise.setValues[i];
+  const live = lg.editIdx === i || (lg.editIdx === null && sv && !setIsLogged(sv, lgBw()) && i === lgActiveIdx());
+  if(!live){ lgTapSet(i); return; }
+  if(lgPad) lgPadClose();
+  if(!lgCanCommit()){ haptic('light'); return; }
+  lgCommit(true);
 }
 function lgSetW(v, src){
   if(!lg) return;
@@ -14386,8 +14447,8 @@ function lgPersistDraft(){
   popupDrafts[popupExercise.name] = { setValues: popupExercise.setValues.map(s => ({...s})), rpe: popupExercise.rpe || '', notes: popupExercise.notes || '', planned: popupExercise.planned };
   persistGymSession();
 }
-function lgCommit(){
-  if(!popupExercise || !lg || !lgReady()) return;
+function lgCommit(force){
+  if(!popupExercise || !lg || (!force && !lgReady())) return;
   clearTimeout(lg.timer);
   const ex = popupExercise, sv = ex.setValues, bw = lgBw();
   const row = { weight: bw ? '' : String(lgToKg(lg.w)), reps: String(lg.r) };
@@ -14398,8 +14459,9 @@ function lgCommit(){
     lg.editIdx = null;
   } else {
     let idx = lgFirstBlank();
-    if(idx === -1){ sv.push(row); } else { sv[idx] = row; }
+    if(idx === -1){ sv.push(row); idx = sv.length - 1; } else { sv[idx] = row; }
     ex.sets = sv.length;
+    lg.justIdx = idx;
     haptic('medium');
     markGymActivity();
     liveActivity();
@@ -14454,13 +14516,15 @@ function lgAddExtra(){
 function lgSetsHtml(){
   const ex = popupExercise, bw = lgBw();
   const active = lgActiveIdx();
+  const just = lg.justIdx; lg.justIdx = null;
   let html = '';
   ex.setValues.forEach((sv, i)=>{
     const logged = setIsLogged(sv, bw);
-    const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '');
-    const val = logged ? (sv.durationSec > 0 ? escHtml(ex.metrics && ex.metrics.length ? cardioSetLine(sv, ex.name) : fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}${sv.extraKg ? `<span class="lg-set-x">${escHtml(fmtExtraKg(sv.extraKg))}</span>` : ''}` : `${escHtml(fmtGymWeight(parseFloat(sv.weight)||0))}${wUnit()} x ${escHtml(String(sv.reps))}`) : '—';
+    const live = lg.editIdx === i || (lg.editIdx === null && !logged && i === active);
+    const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '') + (live ? ' is-live' : '') + (just === i ? ' is-just' : '');
+    const val = logged ? (sv.durationSec > 0 ? escHtml(ex.metrics && ex.metrics.length ? cardioSetLine(sv, ex.name) : fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}${sv.extraKg ? `<span class="lg-set-x">${escHtml(fmtExtraKg(sv.extraKg))}</span>` : ''}` : `<b>${escHtml(fmtGymWeight(parseFloat(sv.weight)||0))}${wUnit()}</b> × ${escHtml(String(sv.reps))}`) : '—';
     html += `<div class="lg-set-wrap" data-i="${i}"><div class="lg-set-del" aria-hidden="true">${LG_ICONS.trash}</div>
-      <button type="button" class="${cls}" onclick="lgTapSet(${i})"><span class="lg-set-l">${t('seriesLabel', `Seria ${i+1}`, i+1)}</span><span class="lg-set-v">${val}</span><span class="lg-set-c">${LG_ICONS.check}</span></button></div>`;
+      <div class="${cls}" role="button" tabindex="0" onclick="lgTapSet(${i})"><span class="lg-set-l">${t('seriesLabel', `Seria ${i+1}`, i+1)}</span><span class="lg-set-v">${val}</span><button type="button" class="lg-set-c" onclick="event.stopPropagation();lgTickSet(${i})" aria-label="${escHtml(t('gymTickSet','Zapisz serię'))}"><i>${LG_ICONS.check}</i></button>${live ? '<span class="lg-set-bar"></span>' : ''}</div></div>`;
   });
   return html;
 }
@@ -14474,6 +14538,7 @@ function lgRenderSets(){
   });
   const hint = document.getElementById('lgHint');
   if(hint) hint.hidden = !popupExercise.setValues.some(s => setIsLogged(s, lgBw()));
+  lgRowPaint();
 }
 /* swipe a logged set left → it slides out and is deleted (past 35% of its width or a quick flick) */
 function lgAttachSwipe(wrap, idx){
@@ -14824,7 +14889,7 @@ function renderExercisePopupV2(animate){
         <p class="lg-hint" id="lgHint" hidden>${t('gymSwipeHint','Przesuń serię w lewo, żeby ją usunąć')}</p>
       </div>
       ${popupShowWarning ? `<div class="lg-warn">${t('gymLogWarn','Zaloguj choć jedną serię, żeby dodać ćwiczenie.')}</div>` : ''}
-      <button type="button" class="lg-add${rise(6)}" onclick="lgAddExtra()">${t('gymExtraSet','Dodatkowa seria')}</button>
+      <button type="button" class="lg-add${rise(6)}" onclick="lgAddExtra()">${t('gymExtraSet','+ Seria ponad plan')}</button>
     </div>
     ${howHtml}
     </div></div>

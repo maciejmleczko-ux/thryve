@@ -90,6 +90,7 @@ Wszystkie krzywe i czasy siedzą w `:root` w `index.html` (blok „Mekkio motion
 | `--m-dur-pop` | .5s | „sukces”, obrót ikony, elementy ekranu końca treningu |
 | `--m-dur-tile` | .7s | duże kafle / hero |
 | `--m-dur-draw` | .9s | rysowanie linii wykresu |
+| `--m-dur-auto` | 3s | odliczanie do automatycznego zapisu serii (pasek pod wierszem; równe `LG_COMMIT_MS`) |
 
 Potrzebujesz innej wartości? Najpierw zapytaj, czy na pewno. Jeśli tak, dodaj nowy token do `:root` i do tej tabeli, nigdy lokalnej liczby.
 
