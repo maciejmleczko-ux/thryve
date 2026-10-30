@@ -2054,6 +2054,9 @@ button.dash-coach{cursor:pointer;}
 .plc--new .ph{width:48px;height:48px;color:var(--m-orange);}
 .plc--new .ph svg{width:48px;height:48px;}
 .plc-newl{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.04em;text-transform:uppercase;}
+.plc--new{flex-basis:132px;padding:12px;gap:6px;}   /* 50% szerokości zwykłej karty (264 px): Nowy plan i Importuj to skróty, nie plany */
+.plc--new .ph,.plc--new .ph svg{width:32px;height:32px;}
+.plc.plc--import{background:var(--m-orange-tint)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border:0;}   /* Importuj: pełne tło zamiast przerywanej ramki Nowego planu */
 .plc--ai{--plc-fg:var(--m-white);flex:0 0 min(100%,355px);min-height:115px;border:.5px solid transparent;
   background:linear-gradient(47deg,var(--m-ai-fill-from) 9%,var(--m-ai-fill-mid) 66%,var(--m-ai-fill-to) 100%) padding-box,linear-gradient(142deg,color-mix(in srgb,var(--m-ai-from) 22%,var(--m-ai-fill-to)) 0%,color-mix(in srgb,var(--m-ai-to) 45%,var(--m-ai-fill-to)) 83%) border-box;
   box-shadow:inset 0 0 15.4px var(--m-ai-inset),inset 0 0 6px var(--m-ai-inset-2);}
@@ -10557,7 +10560,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.106.1";
+const APP_VERSION = "4.106.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -18856,7 +18859,7 @@ function renderPlansListV2(animate){
   const mekkio = plansV2OnbOrder(listed.filter(p=> p.builtin));
   heroEl.innerHTML = plansV2HeroHtml(animate);
   const newCard = `<div class="plc plc--new m-press" role="button" tabindex="0" data-pa="new" aria-label="${t('plansV2AddTitle', 'Dodaj plan')}">${ph('plus-icon')}<span class="plc-newl">${t('plansV2NewPlan', 'Nowy plan')}</span></div>`;
-  const importCard = `<div class="plc plc--new m-press" role="button" tabindex="0" data-pa="import" aria-label="${t('plansV2ImportTitle', 'Importuj plan')}">${ph('download-simple')}<span class="plc-newl">${t('plansV2Import', 'Importuj')}</span></div>`;
+  const importCard = `<div class="plc plc--new plc--import m-press" role="button" tabindex="0" data-pa="import" aria-label="${t('plansV2ImportTitle', 'Importuj plan')}">${ph('download-simple')}<span class="plc-newl">${t('plansV2Import', 'Importuj')}</span></div>`;
   let html = plansV2SectionHtml('own', t('plansV2MyPlans', 'Moje plany'), own.map(buildPlanCardV2).join('') + newCard + importCard, rc(1));
   if(trainings.length) html += plansV2SectionHtml('trainings', t('plansV2MyTrainings', 'Moje treningi'), trainings.map(buildPlanCardV2).join(''), rc(2), '', true);
   if(mekkio.length) html += plansV2SectionHtml('mekkio', t('plansV2MekkioPlans', 'Plany Mekkio'), mekkio.map(buildPlanCardV2).join(''), rc(2));
