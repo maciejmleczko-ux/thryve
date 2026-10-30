@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.99.5 (2026-10-30)
+- **Aktualna wersja:** 4.99.6 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.99.6 · PATCH · 2026-10-30
+
+Podpowiedź „Cel na dziś” przy ćwiczeniu z historią tylko z innej wersji periodyzacji nie cofa już użytkownika. Gdy ostatni wynik mieści się w dzisiejszym zakresie powtórzeń (np. 10 kg × 15 przy zakresie 10–20), zostaje ten sam ciężar i cel to o jedno powtórzenie więcej; przy górze zakresu podpowiedź dokłada ciężar. Wcześniej wyliczała ciężar z szacowanego maksa (powt. > limit Epleya są pomijane) i proponowała 10 kg × 10.
+
+**Commity (1):**
+
+- (hash po commicie)
 
 ### 4.99.5 · PATCH · 2026-10-30
 

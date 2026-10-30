@@ -6065,6 +6065,8 @@ const T_EN = {
   tipOtherVersion: (w, r, range, target) => `Last time: ${w} ${wUnit()} × ${r}. For ${range}, try ${target} ${wUnit()}, with 1-2 reps in reserve.`,
   tipOtherVersionCapped: (w, r, range, target) => `Last time: ${w} ${wUnit()} × ${r}. For ${range}, start at ${target} ${wUnit()} and add more if you feel you have reps to spare.`,
   tipOtherVersionNoEst: (w, r, range) => `Last time: ${w} ${wUnit()} × ${r}. Pick a weight that fits ${range} reps with 1-2 reps in reserve.`,
+  tipOtherVersionUp: (w, r, next, lo) => `Last time: ${w} ${wUnit()} × ${r}. Try ${next} ${wUnit()} and go back to ${lo} reps.`,
+  tipOtherVersionFits: (w, r, range, n) => `Last time: ${w} ${wUnit()} × ${r}, which fits the ${range} range. Stay at ${w} ${wUnit()} and aim for ${n} reps.`,
   tipOtherVersionBw: (r, range) => `Last time ${r} reps. Now aim for ${range} reps per set, with 1-2 reps in reserve.`,
   suggestUp: (w, rh, next, rl) => `Last time ${w} ${wUnit()} × ${rh}+ across all sets. Try ${next} ${wUnit()} and drop back to ${rl} reps.`,
   suggestUpMixed: (rh, w, step) => `Last time you hit ${rh}+ reps on every set, heaviest at ${w} ${wUnit()}. Bring the lighter sets up to that, or add ${step} ${wUnit()} on your heaviest.`,
@@ -10463,7 +10465,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.99.5";
+const APP_VERSION = "4.99.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -13114,6 +13116,15 @@ function buildSuggestion(exMeta, history){
       const range = tipRepsRange(exMeta.repLow, exMeta.repHigh), loc = tipRepsLoc(exMeta.repLow, exMeta.repHigh);
       if(isBodyweightEx){
         return {cls:'', text:t('tipOtherVersionBw', `Ostatnio ${best.reps} powt. Teraz celuj w ${range} powtórzeń w serii, z zapasem 1–2 powtórzeń.`, best.reps, range)};
+      }
+      // the last weight already fit today's rep range (e.g. 10 kg × 15 for a 10–20 day): don't send the user back to fewer reps
+      if((best.weight||0) > 0 && best.reps >= exMeta.repLow){
+        if(best.reps >= exMeta.repHigh){
+          const next = Math.round((best.weight + tipStepUpKg(best.weight)) * 100) / 100;
+          return {cls:'up', text:t('tipOtherVersionUp', `Ostatnio: ${kg(best.weight)} ${wUnit()} × ${best.reps}. Spróbuj ${kgT(next)} ${wUnit()} i wróć do ${exMeta.repLow} powt.`, kg(best.weight), best.reps, kgT(next), exMeta.repLow), goal:{w:next, reps:exMeta.repLow}};
+        }
+        const nextReps = best.reps + 1;
+        return {cls:'', text:t('tipOtherVersionFits', `Ostatnio: ${kg(best.weight)} ${wUnit()} × ${best.reps}, to mieści się w zakresie ${range}. Zostań przy ${kg(best.weight)} ${wUnit()} i spróbuj ${nextReps} powt.`, kg(best.weight), best.reps, range, nextReps), goal:{w:best.weight, reps:nextReps}};
       }
       const est = estimateWeightForReps(history, exMeta.repLow);
       if(!est){
