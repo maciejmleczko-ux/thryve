@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.100.0 (2026-10-30)
+- **Aktualna wersja:** 4.100.1 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.100.1 · PATCH · 2026-10-30
+
+Wiersze serii: kolory odwrócone. Zapisana seria jest biała z pomarańczową obwódką i pomarańczowym ptaszkiem, a seria w edycji pełna pomarańczowa (pasek odliczania biały). Dotknięcie i przytrzymanie wiersza już go nie skaluje, tylko lekko przygasza; skala zostaje wyłącznie na samym ptaszku.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-30 — odwrócone kolory zapisanej i edytowanej serii, bez skalowania wiersza przy przytrzymaniu
 
 ### 4.100.0 · MINOR · 2026-10-30
 

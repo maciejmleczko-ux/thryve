@@ -3187,17 +3187,16 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-set-wrap{position:relative;border-radius:16px;overflow:hidden;}
 .lg-set-del{position:absolute;inset:0;background:var(--m-orange);display:flex;align-items:center;justify-content:flex-end;padding-right:20px;color:var(--m-white);}
 .lg-set-del svg{width:22px;height:22px;display:block;}
-.lg-set{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box;min-height:52px;overflow:hidden;background:var(--m-orange);border:1.5px solid transparent;border-radius:16px;padding:10px 16px;text-align:left;font-family:inherit;cursor:pointer;touch-action:pan-y;transition:background-color var(--m-dur-quick) ease,border-color var(--m-dur-quick) ease,transform var(--m-dur-press-out) var(--m-ease);}
-.lg-set-l{width:76px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:var(--m-white);transition:color var(--m-dur-quick) ease;}
-.lg-set-v{flex:1;min-width:0;font-size:var(--m-fs-md);color:var(--m-white);font-variant-numeric:tabular-nums;transition:color var(--m-dur-quick) ease;}
+.lg-set{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box;min-height:52px;overflow:hidden;background:var(--m-white);border:1.5px solid var(--m-orange);border-radius:16px;padding:10px 16px;text-align:left;font-family:inherit;cursor:pointer;touch-action:pan-y;transition:background-color var(--m-dur-quick) ease,border-color var(--m-dur-quick) ease,opacity var(--m-dur-quick) ease;}
+.lg-set-l{width:76px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(52,57,65,.71);transition:color var(--m-dur-quick) ease;}
+.lg-set-v{flex:1;min-width:0;font-size:var(--m-fs-md);color:var(--m-ink);font-variant-numeric:tabular-nums;transition:color var(--m-dur-quick) ease;}
 .lg-set-v b{font-weight:600;}
 /* ptaszek = osobny przycisk: pole dotyku 44 px, glif 24 px */
 .lg-set-c{position:relative;width:44px;height:44px;margin:-10px -10px -10px 0;flex:none;padding:0;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.lg-set-c i{width:24px;height:24px;border-radius:50%;flex:none;box-sizing:border-box;background:var(--m-white);border:1.5px solid var(--m-white);color:var(--m-orange);display:flex;align-items:center;justify-content:center;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-quick) ease,border-color var(--m-dur-quick) ease;}
+.lg-set-c i{width:24px;height:24px;border-radius:50%;flex:none;box-sizing:border-box;background:var(--m-orange);border:1.5px solid var(--m-orange);color:var(--m-white);display:flex;align-items:center;justify-content:center;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-quick) ease,border-color var(--m-dur-quick) ease;}
 .lg-set-c svg{width:12px;height:12px;display:block;}
 .lg-set-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--m-orange);transform:scaleX(0);transform-origin:left;opacity:0;pointer-events:none;}
-.lg-set.is-blank{background:var(--m-grey-75);}
-.lg-set.is-blank .lg-set-l{color:rgba(52,57,65,.71);}
+.lg-set.is-blank{background:var(--m-grey-75);border-color:transparent;}
 .lg-set.is-blank .lg-set-v{color:var(--m-grey-450);}
 .lg-set.is-blank .lg-set-c i{background:transparent;border-color:var(--m-grey-300);}
 .lg-set.is-blank .lg-set-c svg{display:none;}
@@ -3206,11 +3205,12 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-set.is-active.is-set .lg-set-v{color:var(--m-ink);}
 .lg-set.is-active.can .lg-set-c i{border-color:var(--m-orange);}
 .lg-set.is-active:not(.is-set) .lg-set-v b{font-weight:400;}
-.lg-set.is-editing{background:var(--m-white);border-color:var(--m-orange);}
-.lg-set.is-editing .lg-set-l{color:var(--m-orange);}
-.lg-set.is-editing .lg-set-v{color:var(--m-ink);}
-.lg-set.is-editing .lg-set-c i{background:transparent;border-color:var(--m-orange);}
+/* edycja zapisanej serii: pełny pomarańcz (odwrotność zapisanej: biała z obwódką) */
+.lg-set.is-editing{background:var(--m-orange);border-color:var(--m-orange);}
+.lg-set.is-editing .lg-set-l,.lg-set.is-editing .lg-set-v{color:var(--m-white);}
+.lg-set.is-editing .lg-set-c i{background:transparent;border-color:var(--m-white);}
 .lg-set.is-editing .lg-set-c svg{display:block;}
+.lg-set.is-editing .lg-set-bar{background:var(--m-white);}
 .lg-set-x{margin-left:6px;}
 @media (prefers-reduced-motion: no-preference){
   .lg-set.is-counting .lg-set-bar{opacity:1;animation:lgSetCount var(--m-dur-auto) linear forwards;}
@@ -3441,7 +3441,7 @@ body.gymv2-bg .pg-bg{display:block;}
   @keyframes lgRestPop{0%{transform:scale(1);}35%{transform:scale(1.1);}100%{transform:scale(1);}}
 }
 .gy-circ:active,.lg-circ:active,.lg-ic:active,.lg-step:active,.lg-add:active{transform:scale(.94);}
-.lg-set:active{transform:scale(.99);}
+.lg-set:active:not(:has(.lg-set-c:active)){opacity:.88;}   /* wiersz: bez skalowania (dotyk i przytrzymanie), tylko lekkie przygaszenie */
 .lg-set-c:active i{transform:scale(.9);}
 /* App feel: no text selection / image long-press menu anywhere, except where the user types */
 html{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
@@ -10517,7 +10517,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.100.0";
+const APP_VERSION = "4.100.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
