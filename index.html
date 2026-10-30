@@ -3081,6 +3081,8 @@ body.gymv2-bg .pg-bg{display:block;}
 .gymv2-empty[hidden]{display:none;}
 .gymv2-empty{--plansv2-gutter:10px;}
 #gymV2WsSec[hidden],#gymV2WsSec2[hidden]{display:none;}
+.gymv2-plan-tile{margin-bottom:var(--m-gap-card);}
+.gymv2-plan-tile[hidden]{display:none;}
 .gymv2-ws-sm .plc{flex-basis:218px;}   /* węższa karta jak w „Plany Mekkio” (Figma 542:15828) */
 .gymv2-blank{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;padding:10px 14px;box-sizing:border-box;font-family:inherit;color:var(--m-ink);background:transparent;border:1.5px dashed var(--m-orange);border-radius:var(--m-r-md);cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymv2-blank-ico svg{width:22px;height:22px;display:block;color:var(--m-orange);}
@@ -4335,6 +4337,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <p data-i18n="gymV2NoPlanMsg">Nie masz jeszcze wygwiazdkowanego planu.</p>
         <button type="button" class="add-pill" onclick="goRoute('plans-v2')">+<span data-i18n="gymV2CreatePlan">Stwórz lub wybierz plan</span></button>
       </div>
+
+      <div id="gymV2PlanTile" class="gymv2-plan-tile" hidden></div>
 
       <button type="button" class="gymv2-repeat" id="gymV2RepeatBtn" onclick="repeatLastWorkoutV2()" hidden>
         <span class="gymv2-repeat-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg></span>
@@ -10552,7 +10556,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.103.0";
+const APP_VERSION = "4.103.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21484,6 +21488,7 @@ function syncGymEmptyV2(force){
   const was = root.classList.contains('is-empty');
   root.classList.toggle('is-empty', empty);
   box.hidden = !empty;
+  if(!empty) document.getElementById('gymV2PlanTile').hidden = true;
   if(empty && (force || !was)) renderGymEmptyV2(!was);
 }
 /* Katalog treningów do slidera: dni planów z dniami + sesje planów elastycznych. „Ostatnio” liczone z historii:
@@ -21553,7 +21558,24 @@ function gymWsCardHtml(en, i, animate){
 }
 /* Hierarchia jak na ekranie Plany (Figma 542:15828): treningi stworzone przez użytkownika (sesje planów elastycznych) wyżej i na pełnej karcie,
    dni z planów niżej na węższych kartach; nazwa jest największa, dzień tylko małą etykietą. Kolejność na karcie: nazwa, partie w pastylkach, liczba ćwiczeń; bez znaczka „Proponowany” (kolejność: najdawniej robiony pierwszy). */
+/* Pierwszy kafel stanu pustego: wybrany (z gwiazdką) plan, ten sam kafel „Twój plan” co w Planach; Start uruchamia jego trening także poza dniem z kalendarza. */
+function renderGymPlanTileV2(animate){
+  const box = document.getElementById('gymV2PlanTile');
+  const plan = starredPlanId ? visiblePlans().find(p=> p.id === starredPlanId) : null;
+  const f = plan && planFacts(plan);
+  box.hidden = !f;
+  if(!f){ box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="dash-hero${animate ? ' m-rise-tile' : ''}"${animate ? ' style="--i:0"' : ''}>
+    <p class="dash-hero-eyebrow">${t('dashYourPlan', 'Twój plan')}</p>
+    <h2 class="dash-hero-title">${escHtml(dashPlanShortName(planDisplayName(plan)))}</h2>
+    <div class="dash-hero-meta">${dashStat(ph('calendar-dots'), escHtml(palDaysText(f.daysCount)))}${dashStat(ph('barbell'), escHtml(planExCountText(plcPerDay(f))))}${dashStat(ph('clock-countdown'), '~' + f.minutes + ' min')}</div>
+    <div class="plansv2-hero-btns">
+      <button type="button" class="dash-hero-btn m-press" onclick="startPlanWorkoutV2('${escHtml(plan.id)}')">${t('dashStart', 'Start')}</button>
+    </div>
+  </div>`;
+}
 function renderGymEmptyV2(animate){
+  renderGymPlanTileV2(animate);
   const all = gymWorkoutCatalogV2();
   const own = all.filter(e=> e.session).slice(0, GYM_WS_LIMIT), fromPlans = all.filter(e=> !e.session).slice(0, GYM_WS_LIMIT);
   gymWsList = own.concat(fromPlans);

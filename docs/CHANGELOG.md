@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.103.0 (2026-10-30)
+- **Aktualna wersja:** 4.103.1 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.103.1 · PATCH · 2026-10-30
+
+Ekran Trening bez treningu na dziś: pierwszym kafelkiem jest wybrany (z gwiazdką) plan, kafel „Twój plan” jak w Planach (`dash-hero`: nazwa, dni, ćwiczenia, czas, przycisk Start → `startPlanWorkoutV2`). Bez planu z gwiazdką kafla nie ma. Pod nim Powtórz ostatni, treningi i pusty trening.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-30 — kafel wybranego planu na ekranie Trening
 
 ### 4.103.0 · MINOR · 2026-10-30
 
