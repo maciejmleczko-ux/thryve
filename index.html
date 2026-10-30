@@ -10520,7 +10520,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.100.4";
+const APP_VERSION = "4.100.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -14319,7 +14319,7 @@ function lgSchedule(delay){
   clearTimeout(lg.timer);
   if(lgReady()) lg.timer = setTimeout(()=>{
     if(lg && lg.ruler && lg.ruler.isDown()){ lgSchedule(); return; }   // still dragging — wait for the release
-    lgCommit();
+    lgCommit(false, true);
   }, delay === undefined ? LG_COMMIT_MS : delay);
   lgBarSync();
 }
@@ -14450,7 +14450,8 @@ function lgPersistDraft(){
   popupDrafts[popupExercise.name] = { setValues: popupExercise.setValues.map(s => ({...s})), rpe: popupExercise.rpe || '', notes: popupExercise.notes || '', planned: popupExercise.planned };
   persistGymSession();
 }
-function lgCommit(force){
+/* auto: zapis po odliczaniu (bez dotyku) daje mocniejszą haptykę 'success', zapis tapem w ptaszek 'medium' */
+function lgCommit(force, auto){
   if(!popupExercise || !lg || (!force && !lgReady())) return;
   clearTimeout(lg.timer);
   const ex = popupExercise, sv = ex.setValues, bw = lgBw();
@@ -14458,14 +14459,14 @@ function lgCommit(force){
   if(bw && lg.we && Number(lg.w)) row.extraKg = lgToKg(lg.w);   // 0 = brak pola, jak w starych treningach
   if(lg.editIdx !== null){
     sv[lg.editIdx] = row;
-    haptic('light');
+    haptic(auto ? 'success' : 'medium');
     lg.editIdx = null;
   } else {
     let idx = lgFirstBlank();
     if(idx === -1){ sv.push(row); idx = sv.length - 1; } else { sv[idx] = row; }
     ex.sets = sv.length;
     lg.justIdx = idx;
-    haptic('medium');
+    haptic(auto ? 'success' : 'medium');
     markGymActivity();
     liveActivity();
     restStart(ex);
