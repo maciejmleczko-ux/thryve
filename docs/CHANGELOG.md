@@ -119,6 +119,14 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.106.7 · PATCH · 2026-10-31
+
+Trening: kafle Rozgrzewka i Rozciąganie są białe jak zwykłe ćwiczenia (bez niebieskiego tła). Odróżnia je pastylka z czasem w kolorze licznika czasu (`--m-metric-time`, biały tekst). Zmiana tylko w CSS (`.gymv2-block-min`).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-31 — Trening: kafle bloków białe, pastylka w kolorze licznika czasu
+
 ### 4.106.6 · PATCH · 2026-10-31
 
 Trening: Rozgrzewka i Rozciąganie to kafle w siatce ćwiczeń (ten sam rozmiar, `buildExerciseTileV2` + klasa `gymv2-block-tile`, jasnoniebieskie tło, pastylka z minutami w rogu, ptaszek po wykonaniu) zamiast szerokich belek. Rozgrzewka jest pierwszym kaflem, Rozciąganie ostatnim, przed „Wybierz inne” i „Dodaj”. Dotyk otwiera to samo okno z krokami. Usunięto reguły `.gymv2-block*`.
