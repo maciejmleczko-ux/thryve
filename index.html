@@ -3082,6 +3082,10 @@ body.gymv2-bg .pg-bg{display:block;}
 .gymv2-empty{--plansv2-gutter:10px;}
 #gymV2WsSec[hidden],#gymV2WsSec2[hidden],.gymv2-ws-sm .plansv2-row[hidden]{display:none;}
 #gymV2QuickChips{margin-top:8px;}
+.gymv2-quick-chips{--onb-glass:rgba(255,255,255,.6);display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}   /* chipy jak „cel” w onboardingu (.onb-goal-chip), wielokrotny wybór */
+.gymv2-quick-chips .onb-goal-chip{flex:0 0 auto;min-width:72px;font-size:var(--m-fs-xs);}
+#gymV2QuickGoWrap{display:flex;justify-content:center;padding:14px 0 0;}
+#gymV2QuickGoWrap[hidden]{display:none;}
 .gymv2-ws-g{white-space:normal;}
 .gymv2-plan-tile{margin-bottom:var(--m-gap-card);}
 .gymv2-plan-tile[hidden]{display:none;}
@@ -4357,7 +4361,8 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </section>
         <section class="plansv2-sec" id="gymV2QuickSec" aria-labelledby="gymV2QuickLabel">
           <div class="plansv2-sec-head"><p class="plansv2-sec-label" id="gymV2QuickLabel">Trenuj dzisiaj</p></div>
-          <div class="pal-chips" id="gymV2QuickChips"></div>
+          <div class="gymv2-quick-chips" id="gymV2QuickChips"></div>
+          <div class="gymv2-quick-go" id="gymV2QuickGoWrap" hidden><button type="button" class="gymv2-save m-press" id="gymV2QuickGo" onclick="startGymQuickV2()"></button></div>
         </section>
         <section class="plansv2-sec gymv2-ws-sm" id="gymV2WsSec2" aria-labelledby="gymV2WsLabel2" hidden>
           <div class="plansv2-sec-head"><p class="plansv2-sec-label" id="gymV2WsLabel2">Treningi z planów</p>
@@ -10563,7 +10568,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.104.0";
+const APP_VERSION = "4.104.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21619,17 +21624,35 @@ const GYM_QUICK_GROUPS = [
   {k:'Rece', keys:['Biceps','Triceps'], pl:'Ręce', en:'Arms'},
   {k:'Brzuch', keys:['Brzuch'], pl:'Brzuch', en:'Abs'},
 ];
+let gymQuickSel = new Set();
 function renderGymQuickV2(){
   document.getElementById('gymV2QuickLabel').textContent = t('gymQuickTitle', 'Trenuj dzisiaj');
+  gymQuickSel = new Set();
   document.getElementById('gymV2QuickChips').innerHTML = GYM_QUICK_GROUPS.map(g=>
-    `<button type="button" class="pal-chip m-press" onclick="startGymQuickV2('${g.k}')"><span class="pal-chip-i">${LANG === 'en' ? g.en : g.pl}</span></button>`).join('');
+    `<button type="button" class="onb-goal-chip m-press" aria-pressed="false" onclick="toggleGymQuickV2('${g.k}', this)">${LANG === 'en' ? g.en : g.pl}</button>`).join('');
+  syncGymQuickGoV2();
 }
-function startGymQuickV2(k){
-  const g = GYM_QUICK_GROUPS.find(x=> x.k === k); if(!g) return;
-  const lib = orderedExerciseLibrary().filter(ex=> ex.type !== 'checklist' && !BOOKEND_EX_NAMES.has(ex.name) && g.keys.includes(muscleGroupBucket(ex.group).key));
-  const list = sortExercisesByKey(lib).slice(0, 5);
-  if(!list.length){ toast(t('gymQuickNone', 'Brak ćwiczeń dla tej partii')); return; }
-  startGymWorkoutFromList({ names: list.map(e=> e.name), prefill: {}, label: LANG === 'en' ? g.en : g.pl });
+function toggleGymQuickV2(k, el){
+  if(gymQuickSel.has(k)) gymQuickSel.delete(k); else gymQuickSel.add(k);
+  el.classList.toggle('active', gymQuickSel.has(k));
+  el.setAttribute('aria-pressed', gymQuickSel.has(k) ? 'true' : 'false');
+  syncGymQuickGoV2();
+}
+function syncGymQuickGoV2(){
+  const wrap = document.getElementById('gymV2QuickGoWrap'), btn = document.getElementById('gymV2QuickGo');
+  wrap.hidden = !gymQuickSel.size;
+  btn.textContent = `${t('gymQuickGo', 'TRENUJ')}${gymQuickSel.size > 1 ? ' (' + gymQuickSel.size + ')' : ''}`;
+}
+/* Wybrane partie (jedna albo kilka) układają gotowy trening: razem do ~6 ćwiczeń (5 / 3 na partię / 2 na partię), wielostawowe najpierw, kolejność jak w BUILDER. */
+function startGymQuickV2(){
+  const groups = GYM_QUICK_GROUPS.filter(g=> gymQuickSel.has(g.k)); if(!groups.length) return;
+  const per = groups.length === 1 ? 5 : groups.length === 2 ? 3 : 2;
+  const lib = orderedExerciseLibrary().filter(ex=> ex.type !== 'checklist' && !BOOKEND_EX_NAMES.has(ex.name));
+  let picked = [];
+  groups.forEach(g=>{ picked = picked.concat(sortExercisesByKey(lib.filter(ex=> g.keys.includes(muscleGroupBucket(ex.group).key))).slice(0, per)); });
+  if(!picked.length){ toast(t('gymQuickNone', 'Brak ćwiczeń dla tej partii')); return; }
+  picked = sortExercisesByKey(picked);
+  startGymWorkoutFromList({ names: picked.map(e=> e.name), prefill: {}, label: groups.map(g=> LANG === 'en' ? g.en : g.pl).join(', ') });
 }
 function startGymWorkoutFromCatalogV2(i){ startGymEntryV2(gymWsList[i]); }
 /* „Start” w Planach (karta planu i szczegół): uruchamia trening tego planu także w dzień, w którym go nie ma w kalendarzu.
