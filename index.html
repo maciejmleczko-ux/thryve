@@ -10555,7 +10555,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.105.1";
+const APP_VERSION = "4.105.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -17577,7 +17577,10 @@ function planCustomizeKind(p){
   if(!p) return null;
   if(p.customizationV2) return p.customizationV2.goalOnly ? 'goal' : 'full';
   if(PLANSV2_CUSTOMIZABLE_IDS.has(p.id)) return 'full';
-  return BUILTIN_PLAN_DEF_BY_ID.has(p.id) ? 'goal' : null;
+  if(BUILTIN_PLAN_DEF_BY_ID.has(p.id)) return 'goal';
+  // plan zmodyfikowany w edytorze (fork bez customizationV2) i plan własny: sam cel, ćwiczenia zostają.
+  // Trening bez dni nie ma serii w schedule, więc tam zmiana celu nic by nie zrobiła.
+  return planIsFlexible(p) ? null : 'goal';
 }
 // Sets/rep-range/rest per goal — standard, uncontroversial baseline
 // splits (low reps+heavy+long rest for strength; moderate reps/rest for
@@ -18546,7 +18549,7 @@ function pdtOpenMenu(btn){
     { icon: PDT_ICON_COPY, label: t('pdtDuplicate', 'Powiel'), sub: t('pdtDuplicateSub', 'Kopia trafi do Twoich planów'), onSelect: ()=> duplicatePlanV2(id) },
     { icon: PDT_ICON_SHARE, label: t('pdtShare', 'Udostępnij'), onSelect: ()=> openPlanShareSheet(plan) },
   ];
-  if(planIsDostosujable(plan)) items.splice(2, 0, { icon: PDT_ICON_EDIT, label: t('pdtCustomize', 'Dostosuj'), sub: t('pdtCustomizeSub', 'Cel, poziom, sprzęt i dni'), onSelect: ()=> openPlanCustomizeV2(id) });   // wejście do arkusza „Dostosuj plan” (E6), tylko dla planów, które da się dostosować
+  if(planIsDostosujable(plan)) items.splice(2, 0, { icon: PDT_ICON_EDIT, label: t('pdtCustomize', 'Dostosuj'), sub: planCustomizeKind(plan) === 'goal' ? t('pdtCustomizeSubGoal', 'Cel treningowy') : t('pdtCustomizeSub', 'Cel, poziom, sprzęt i dni'), onSelect: ()=> openPlanCustomizeV2(id) });   // wejście do arkusza „Dostosuj plan” (E6), tylko dla planów, które da się dostosować
   if(canDeletePlanV2(plan)) items.push({ icon: PDT_ICON_TRASH, label: t('pdtDelete', 'Usuń plan'), danger: true, onSelect: ()=>{ if(requestPlanDeleteV2(id)) performPlanDeleteV2(id); } });
   mPopover.open({ anchor: btn, label: t('pdtMenuA11y', 'Menu planu'), items });
 }

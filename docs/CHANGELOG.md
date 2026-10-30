@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.105.1 (2026-10-30)
+- **Aktualna wersja:** 4.105.2 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.105.2 · PATCH · 2026-10-30
+
+Plany: „Dostosuj” (zmiana celu: serie, powtórzenia, przerwy) jest dostępne także w planie zmodyfikowanym w edytorze i w planie własnym. Wcześniej pierwsza edycja planu Mekkio tworzyła kopię bez `customizationV2`, więc `planCustomizeKind()` zwracał `null` i pozycja znikała z menu. Plany bez dni (treningi) nadal jej nie mają. Podpis pozycji w wersji lekkiej: „Cel treningowy”.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-30 — Plany: Dostosuj w planach zmodyfikowanych i własnych
 
 ### 4.105.1 · PATCH · 2026-10-30
 
