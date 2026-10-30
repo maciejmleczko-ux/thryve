@@ -143,6 +143,10 @@ Każdy popup z polem tekstowym lub liczbowym (nowy szkielet `.m-sheet2`) przy ot
 
 **Ikony po lewej stronie nagłówka (← wstecz i ✕ zamknij) to same znaki bez koła**, w polu 40 px, glif ok. 22 px (jak w iOS). Ikony po prawej (✕ w tytule okna, zębatka, ✓, udostępnij) to **koło 40 px** (pole dotyku 44 px, glif 18 px) w jednej z dwóch wersji. **Drugorzędne** (✕, zębatka): ramka **1 px** `var(--m-orange)` (jedna grubość i kolor dla wszystkich okrągłych przycisków, także filtr w Postępach i „…” w Planach), białe tło 60% (cieńsza ramka ginie na zdjęciu tła), ikona w kolorze tekstu (wzór: `.x-ring`). **Główne** (✓ zatwierdź, udostępnij): pełne pomarańczowe koło, biała ikona. Na zdjęciu lub ciemnym tle ramka i ikona są białe (`.rl-x`, `.wn-close`, `.ai-popup-close`). Nie wprowadzaj trzeciego wyglądu ani samej ikony bez koła; blok „Przyciski ikon w nagłówkach” jest na końcu `<style>`.
 
+### Kolor ikon (reguła, 2026-10-30)
+
+Ikony sterowania (←, ✕, zębatka, filtr, „…”, szewrony) i ikony informacyjne (zegar, hantla, rodzaj treningu, „+” w kaflach) mają kolor tekstu `var(--m-ink)`. **Pomarańcz oznacza wyróżnienie:** puchar i rekord, trend (↑), aktywny element (ikona aktywnej zakładki, wybrany stan) oraz obrys okrągłych przycisków. Na pełnym pomarańczu ikona jest biała. Nie dawaj pomarańczowego koloru zwykłej ikonie opisującej treść. Blok „Kolor ikon” jest na końcu `<style>`.
+
 ### Odstępy między kartami i kaflami (reguła, 2026-10-22)
 
 Sąsiednie karty i kafle (siatki ćwiczeń, karty Pulpitu, przyciski w hero, stos kart Profilu, rząd kafli w Postępach) mają odstęp **`var(--m-gap-card)` = 8 px**, nigdy 4 px. Powód: kafle są klikalne (min. 8 px między celami dotyku), a karty ze szkła przy 4 px zlewają się w jedną płytę. 4 px zostaje tylko wewnątrz elementów (ikona + tekst, pastylki, kółka dni, segmenty) i w gęstych listach (wiersze serii, siatka kalendarza); 1 px między „Dziś” i „Jutro” jest z Figmy. Hierarchia: wewnątrz karty 4–6 px, między kartami 8 px, między sekcjami 16–24 px. Nowa siatka lub stos kart bierze token, nie liczbę.

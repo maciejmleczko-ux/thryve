@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.99.13 (2026-10-30)
+- **Aktualna wersja:** 4.99.14 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.99.14 · PATCH · 2026-10-30
+
+Jedna zasada koloru ikon: sterowanie i ikony informacyjne w kolorze tekstu (`--m-ink`), pomarańcz tylko dla wyróżnień (puchar, rekord, trend, aktywny element). Zmienione: ikony w kaflach planów i szczegółach planu (`.plc--own`, `.plc--new`, `.pdt-day-m`, `.pdt-chev`), w Historii (`.histv2-card-kind`, `.histv2-ex-ico`, `.histv2-row-ico`, pusty stan), chipy w oknie ćwiczenia (`.lg-chip`), kafel własnego ćwiczenia, ikony w panelu konta (`.ac-ico`) i filtr w Postępach (`.stv2-cust`). Reguła w `CLAUDE.md`.
+
+**Commity (1):**
+
+- (hash po commicie)
 
 ### 4.99.13 · PATCH · 2026-10-30
 
