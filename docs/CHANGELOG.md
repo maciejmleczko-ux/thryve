@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.103.6 (2026-10-30)
+- **Aktualna wersja:** 4.104.0 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.104.0 · MINOR · 2026-10-30
+
+**Dla użytkownika (wpis „Co nowego”):** brak osobnego wpisu (rozszerza „Trening bez planu na dziś”).
+
+Ekran Trening w stanie pustym, cztery ścieżki: kafel planu + Start; „Moje treningi” (sesje elastyczne + karta „Ostatni trening”); nowy rząd „Trenuj dzisiaj” z partiami (Nogi, Klatka, Plecy, Barki, Ręce, Brzuch): dotknięcie układa gotowy trening do 5 ćwiczeń (`startGymQuickV2`, wielostawowe najpierw, kolejność jak w BUILDER) i go startuje; „Treningi z planów” schowane pod przyciskiem Pokaż/Ukryj (`gymWsToggleV2`); pusty trening z kreatorem. Chipy partii to istniejące `pal-chip`.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-30 — Trenuj dzisiaj (partie), treningi z planów pod przyciskiem
 
 ### 4.103.6 · PATCH · 2026-10-30
 

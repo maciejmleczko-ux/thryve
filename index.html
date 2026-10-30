@@ -3080,7 +3080,8 @@ body.gymv2-bg .pg-bg{display:block;}
 .gymv2-empty{display:flex;flex-direction:column;gap:var(--m-gap-card);padding-bottom:120px;}
 .gymv2-empty[hidden]{display:none;}
 .gymv2-empty{--plansv2-gutter:10px;}
-#gymV2WsSec[hidden],#gymV2WsSec2[hidden]{display:none;}
+#gymV2WsSec[hidden],#gymV2WsSec2[hidden],.gymv2-ws-sm .plansv2-row[hidden]{display:none;}
+#gymV2QuickChips{margin-top:8px;}
 .gymv2-ws-g{white-space:normal;}
 .gymv2-plan-tile{margin-bottom:var(--m-gap-card);}
 .gymv2-plan-tile[hidden]{display:none;}
@@ -4354,9 +4355,14 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <div class="plansv2-sec-head"><p class="plansv2-sec-label" id="gymV2WsLabel">Moje treningi</p></div>
           <div class="plansv2-row" id="gymV2WsRow"></div>
         </section>
+        <section class="plansv2-sec" id="gymV2QuickSec" aria-labelledby="gymV2QuickLabel">
+          <div class="plansv2-sec-head"><p class="plansv2-sec-label" id="gymV2QuickLabel">Trenuj dzisiaj</p></div>
+          <div class="pal-chips" id="gymV2QuickChips"></div>
+        </section>
         <section class="plansv2-sec gymv2-ws-sm" id="gymV2WsSec2" aria-labelledby="gymV2WsLabel2" hidden>
-          <div class="plansv2-sec-head"><p class="plansv2-sec-label" id="gymV2WsLabel2">Treningi z planów</p></div>
-          <div class="plansv2-row" id="gymV2WsRow2"></div>
+          <div class="plansv2-sec-head"><p class="plansv2-sec-label" id="gymV2WsLabel2">Treningi z planów</p>
+            <div class="plansv2-sec-links"><button type="button" class="plansv2-link m-press" id="gymV2WsToggle" aria-expanded="false" aria-controls="gymV2WsRow2" onclick="gymWsToggleV2()"></button></div></div>
+          <div class="plansv2-row" id="gymV2WsRow2" hidden></div>
         </section>
         <button type="button" class="gymv2-blank m-press" id="gymV2BlankBtn" onclick="openExercisePickerV2()">
           <span class="gymv2-blank-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
@@ -6278,7 +6284,7 @@ const T_EN = {
   gymV2Done: 'Completed',
   gymV2SaveWorkout: 'SAVE WORKOUT',
   gymV2PickOther: 'Pick another exercise',
-  gymEmptyStart: 'Start an empty workout', gymWsTitle: 'Your workouts', gymWsOwn: 'My workouts', gymWsLast: 'Last workout', gymWsPlans: 'Workouts from plans', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
+  gymEmptyStart: 'Start an empty workout', gymWsTitle: 'Your workouts', gymWsOwn: 'My workouts', gymQuickTitle: 'Train today', gymQuickNone: 'No exercises for this muscle group', gymWsShow: 'Show', gymWsHide: 'Hide', gymWsLast: 'Last workout', gymWsPlans: 'Workouts from plans', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
   gymWsToday: 'last: today', gymWsYesterday: 'last: yesterday', gymWsAgo: n=>`last: ${n} days ago`,
   flexBadge: 'Flexible', flexNoStar: 'A flexible plan has no star: you pick the workout on the Workout screen',
   exerciseAddedToList: 'New exercise added to the list',
@@ -10557,7 +10563,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.103.6";
+const APP_VERSION = "4.104.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21580,7 +21586,7 @@ function renderGymEmptyV2(animate){
       label: t('gymWsLast', 'Ostatni trening'), name: t('gymWsLast', 'Ostatni trening'),
       names: lw.exercises.map(e=>e.name).filter(n=> !BOOKEND_EX_NAMES.has(n)), lastDate: lw.date, lastWorkout: lw,
       groups: pdtDayTitle(lw.exercises.filter(e=> !BOOKEND_EX_NAMES.has(e.name)).map(e=> ({...e, group: e.group || (byLib.get(e.name) || {}).group})), 1) };
-    if(lastEn.names.length) (own.length ? own : fromPlans).unshift(lastEn);
+    if(lastEn.names.length) own.unshift(lastEn);
   }   // bez limitu: wszystkie treningi ze wszystkich planów
   gymWsList = own.concat(fromPlans);
   const fill = (secId, rowId, labelId, labelKey, labelPl, list, offset)=>{
@@ -21592,6 +21598,38 @@ function renderGymEmptyV2(animate){
   };
   fill('gymV2WsSec', 'gymV2WsRow', 'gymV2WsLabel', 'gymWsOwn', 'Moje treningi', own, 0);
   fill('gymV2WsSec2', 'gymV2WsRow2', 'gymV2WsLabel2', 'gymWsPlans', 'Treningi z planów', fromPlans, own.length);
+  renderGymQuickV2();
+  gymWsSyncToggleV2();
+}
+/* Treningi z planów są schowane pod przyciskiem (przeglądanie planów jest w Planach); domyślnie zwinięte. */
+let gymWsOpen = false;
+function gymWsSyncToggleV2(){
+  const row = document.getElementById('gymV2WsRow2'), btn = document.getElementById('gymV2WsToggle');
+  row.hidden = !gymWsOpen;
+  btn.setAttribute('aria-expanded', gymWsOpen ? 'true' : 'false');
+  btn.innerHTML = (gymWsOpen ? t('gymWsHide', 'Ukryj') : t('gymWsShow', 'Pokaż')) + ph('caret-down');
+}
+function gymWsToggleV2(){ gymWsOpen = !gymWsOpen; gymWsSyncToggleV2(); }
+/* „Trenuj dzisiaj”: dotknięcie partii układa gotowy trening (do 5 ćwiczeń, najpierw wielostawowe, kolejność jak w BUILDER) i startuje go. */
+const GYM_QUICK_GROUPS = [
+  {k:'Nogi', keys:['Nogi'], pl:'Nogi', en:'Legs'},
+  {k:'Klatka', keys:['Klatka'], pl:'Klatka', en:'Chest'},
+  {k:'Plecy', keys:['Plecy'], pl:'Plecy', en:'Back'},
+  {k:'Barki', keys:['Barki'], pl:'Barki', en:'Shoulders'},
+  {k:'Rece', keys:['Biceps','Triceps'], pl:'Ręce', en:'Arms'},
+  {k:'Brzuch', keys:['Brzuch'], pl:'Brzuch', en:'Abs'},
+];
+function renderGymQuickV2(){
+  document.getElementById('gymV2QuickLabel').textContent = t('gymQuickTitle', 'Trenuj dzisiaj');
+  document.getElementById('gymV2QuickChips').innerHTML = GYM_QUICK_GROUPS.map(g=>
+    `<button type="button" class="pal-chip m-press" onclick="startGymQuickV2('${g.k}')"><span class="pal-chip-i">${LANG === 'en' ? g.en : g.pl}</span></button>`).join('');
+}
+function startGymQuickV2(k){
+  const g = GYM_QUICK_GROUPS.find(x=> x.k === k); if(!g) return;
+  const lib = orderedExerciseLibrary().filter(ex=> ex.type !== 'checklist' && !BOOKEND_EX_NAMES.has(ex.name) && g.keys.includes(muscleGroupBucket(ex.group).key));
+  const list = sortExercisesByKey(lib).slice(0, 5);
+  if(!list.length){ toast(t('gymQuickNone', 'Brak ćwiczeń dla tej partii')); return; }
+  startGymWorkoutFromList({ names: list.map(e=> e.name), prefill: {}, label: LANG === 'en' ? g.en : g.pl });
 }
 function startGymWorkoutFromCatalogV2(i){ startGymEntryV2(gymWsList[i]); }
 /* „Start” w Planach (karta planu i szczegół): uruchamia trening tego planu także w dzień, w którym go nie ma w kalendarzu.
