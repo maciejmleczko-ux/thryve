@@ -141,7 +141,7 @@ Każdy popup z polem tekstowym lub liczbowym (nowy szkielet `.m-sheet2`) przy ot
 
 ### Przyciski ikon w nagłówkach (reguła, 2026-10-30)
 
-**Ikony po lewej stronie nagłówka (← wstecz i ✕ zamknij) to same znaki bez koła**, w polu 40 px, glif ok. 22 px (jak w iOS). Ikony po prawej (✕ w tytule okna, zębatka, ✓, udostępnij) to **koło 40 px** (pole dotyku 44 px, glif 18 px) w jednej z dwóch wersji. **Drugorzędne** (✕, zębatka): ramka 1 px `var(--m-orange)`, białe tło 60% (cieńsza ramka ginie na zdjęciu tła), ikona w kolorze tekstu (wzór: `.x-ring`). **Główne** (✓ zatwierdź, udostępnij): pełne pomarańczowe koło, biała ikona. Na zdjęciu lub ciemnym tle ramka i ikona są białe (`.rl-x`, `.wn-close`, `.ai-popup-close`). Nie wprowadzaj trzeciego wyglądu ani samej ikony bez koła; blok „Przyciski ikon w nagłówkach” jest na końcu `<style>`.
+**Ikony po lewej stronie nagłówka (← wstecz i ✕ zamknij) to same znaki bez koła**, w polu 40 px, glif ok. 22 px (jak w iOS). Ikony po prawej (✕ w tytule okna, zębatka, ✓, udostępnij) to **koło 40 px** (pole dotyku 44 px, glif 18 px) w jednej z dwóch wersji. **Drugorzędne** (✕, zębatka): ramka **1 px** `var(--m-orange)` (jedna grubość i kolor dla wszystkich okrągłych przycisków, także filtr w Postępach i „…” w Planach), białe tło 60% (cieńsza ramka ginie na zdjęciu tła), ikona w kolorze tekstu (wzór: `.x-ring`). **Główne** (✓ zatwierdź, udostępnij): pełne pomarańczowe koło, biała ikona. Na zdjęciu lub ciemnym tle ramka i ikona są białe (`.rl-x`, `.wn-close`, `.ai-popup-close`). Nie wprowadzaj trzeciego wyglądu ani samej ikony bez koła; blok „Przyciski ikon w nagłówkach” jest na końcu `<style>`.
 
 ### Odstępy między kartami i kaflami (reguła, 2026-10-22)
 
