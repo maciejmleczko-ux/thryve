@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.106.3 (2026-10-31)
+- **Aktualna wersja:** 4.107.0 (2026-10-31)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,22 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.107.0 · MINOR · 2026-10-31
+
+**Dla użytkownika (wpis „Co nowego”):** brak osobnego wpisu.
+
+Cel treningowy wpływa teraz na **dobór ćwiczeń** w generatorze planów, nie tylko na serie i powtórzenia (research: `docs/research-cwiczenia-a-cel-treningowy.md`).
+
+- `planv2GoalTier()` ocenia ćwiczenie względem celu (reguły po sprzęcie, wielostawowe/izolacja, statyczne + wyjątki z nazw: `GOAL_EXOTIC`, `GOAL_HEAVY_BARBELL`, `GOAL_HARD_TECH`, listy `GOAL_TOP`). W partii wybierane jest najlepsze; poziom 0 („unikać”) tylko, gdy nic innego nie ma. Siła: ćwiczenia ze sztangą i wielostawowe, kolejność partii z wielkimi mięśniami na początku. Wytrzymałość i Sprawność: masa ciała, kettlebell, gumy, maszyny.
+- Wytrzymałość i Sprawność dostają jedno kardio na sesję (`planv2PickCardio`, poza liczbą ćwiczeń z poziomu; bez pasującego sprzętu nic nie dodaje).
+- Nowy cel **Sprawność** (`general`: 3×10–15, przerwa 60 s): chip w „Dostosuj” i mapowanie z Profilu (`PROFILE_GOAL_TO_PLAN.ogolna`).
+- Popup po zmianie celu w Profilu ma trzy przyciski dla planów z generatora: „Serie i powtórzenia”, „Nowy plan pod cel” (`planv2RegenerateForGoal`: poziom, sprzęt i dni z planu, ćwiczenia od nowa), „Zostaw plan”. Plany ułożone ręcznie mają dwa przyciski, jak w 4.106.0. `mConfirm` dostał opcjonalny trzeci przycisk `alt`.
+- Ćwiczenia z `day:'E'` nadal poza automatycznymi planami (do decyzji).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-31 — Cel wpływa na dobór ćwiczeń, Sprawność, popup z wyborem
 
 ### 4.106.3 · PATCH · 2026-10-31
 

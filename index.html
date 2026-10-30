@@ -712,6 +712,7 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
 /* mConfirm() is opened from inside the account panel (z 95) and its sheets
    (9600) — e.g. "Usuń konto" — so it must sit above them, below the toast. */
 #mConfirmOverlay{z-index:9650;}
+#mConfirmAlt[hidden]{display:none;}
 /* ---- cloud account (Supabase) — Faza 2 / E0 ---- */
 /* Przypomnienie o treningu — iOS-style toggle. Ciągle używany element =
    bez wow-efektu (pkt 1 checklisty): kolor przez `ease`, pozycja gałki
@@ -4450,7 +4451,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="m2-body pcz-body">
           <div class="pcz-sec" id="planCustomizeGoalSection">
             <p class="pcz-l" data-i18n="pczGoal">Cel</p>
-            <div class="ai-seg pcz-seg" role="radiogroup" data-group="goal" aria-label="Cel"><button type="button" class="ai-chip" role="radio" aria-checked="false" data-group="goal" data-value="strength" onclick="pickPlanCustomizeChipV2(this)"><span data-i18n="pcV2GoalStrength">Siła</span></button><button type="button" class="ai-chip" role="radio" aria-checked="false" data-group="goal" data-value="mass" onclick="pickPlanCustomizeChipV2(this)"><span data-i18n="pcV2GoalMass">Masa</span></button><button type="button" class="ai-chip" role="radio" aria-checked="false" data-group="goal" data-value="endurance" onclick="pickPlanCustomizeChipV2(this)"><span data-i18n="pcV2GoalEndurance">Wytrzymałość</span></button></div>
+            <div class="ai-seg pcz-seg" role="radiogroup" data-group="goal" aria-label="Cel"><button type="button" class="ai-chip" role="radio" aria-checked="false" data-group="goal" data-value="strength" onclick="pickPlanCustomizeChipV2(this)"><span data-i18n="pcV2GoalStrength">Siła</span></button><button type="button" class="ai-chip" role="radio" aria-checked="false" data-group="goal" data-value="mass" onclick="pickPlanCustomizeChipV2(this)"><span data-i18n="pcV2GoalMass">Masa</span></button><button type="button" class="ai-chip" role="radio" aria-checked="false" data-group="goal" data-value="endurance" onclick="pickPlanCustomizeChipV2(this)"><span data-i18n="pcV2GoalEndurance">Wytrzymałość</span></button><button type="button" class="ai-chip" role="radio" aria-checked="false" data-group="goal" data-value="general" onclick="pickPlanCustomizeChipV2(this)"><span data-i18n="pcV2GoalGeneral">Sprawność</span></button></div>
           </div>
           <p class="pcz-hint hidden" id="planCustomizeGoalHint" data-i18n="pcV2GoalOnlyHint">Zmienia tylko serie, powtórzenia i przerwy. Ćwiczenia, dni i kolejność zostają takie, jak w planie.</p>
           <div class="pcz-sec" id="planCustomizeDiffSection">
@@ -5437,6 +5438,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     <p id="mConfirmText"></p>
     <div class="onboard-actions">
       <button class="skip" id="mConfirmCancel"></button>
+      <button class="skip" id="mConfirmAlt" hidden></button>
       <button class="save" id="mConfirmOk"></button>
     </div>
   </div>
@@ -6334,6 +6336,7 @@ const T_EN = {
   pcV2GoalStrength: 'Strength',
   pcV2GoalMass: 'Mass',
   pcV2GoalEndurance: 'Endurance',
+  pcV2GoalGeneral: 'Fitness',
   pcV2DiffLabel: 'Difficulty',
   pcV2DiffEasy: 'Easy',
   pcV2DiffMid: 'Medium',
@@ -9867,7 +9870,7 @@ async function clearCachedCloudResponses(){
    prostsze i bezpieczniejsze niż dorenderowywanie każdego widoku z osobna. */
 const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/delete-account';
 
-function mConfirm({ title, text, ok, cancel = 'Anuluj', danger = false, gym = false }){
+function mConfirm({ title, text, ok, cancel = 'Anuluj', danger = false, gym = false, alt = '' }){
   return new Promise(resolve=>{
     const ov = document.getElementById('mConfirmOverlay');
     const okBtn = document.getElementById('mConfirmOk');
@@ -9876,9 +9879,12 @@ function mConfirm({ title, text, ok, cancel = 'Anuluj', danger = false, gym = fa
     document.getElementById('mConfirmText').textContent = text;
     okBtn.textContent = ok;
     cancelBtn.textContent = cancel;
+    const altBtn = document.getElementById('mConfirmAlt');
+    altBtn.textContent = alt; altBtn.hidden = !alt;   // trzeci przycisk: rozwiązuje 'alt' (reszta wywołań nie ma alt)
     okBtn.classList.toggle('danger', danger);
     ov.classList.toggle('mc-gym', !!gym);   // wariant w stylu okna GYM (323 px); bez flagi dialog wygląda jak dawniej
-    const done = v=>{ ov.classList.add('hidden'); ov.classList.remove('mc-gym'); okBtn.onclick = cancelBtn.onclick = null; resolve(v); };
+    const done = v=>{ ov.classList.add('hidden'); ov.classList.remove('mc-gym'); okBtn.onclick = cancelBtn.onclick = altBtn.onclick = null; altBtn.hidden = true; resolve(v); };
+    altBtn.onclick = ()=>done('alt');
     okBtn.onclick = ()=>done(true);
     cancelBtn.onclick = ()=>done(false);
     ov.classList.remove('hidden');
@@ -10561,7 +10567,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.106.3";
+const APP_VERSION = "4.107.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -17599,8 +17605,9 @@ const PLANSV2_GOAL_PARAMS = {
   strength: {sets:4, repLow:4, repHigh:6, rest:'150s'},
   mass:     {sets:3, repLow:8, repHigh:12, rest:'75s'},
   endurance:{sets:3, repLow:15, repHigh:20, rest:'40s'},
+  general:  {sets:3, repLow:10, repHigh:15, rest:'60s'},
 };
-const PLANSV2_GOAL_LABEL = {strength:'Siła', mass:'Masa', endurance:'Wytrzymałość'};
+const PLANSV2_GOAL_LABEL = {strength:'Siła', mass:'Masa', endurance:'Wytrzymałość', general:'Sprawność'};
 // Target number of real exercises (bookends excluded) per difficulty.
 const PLANSV2_DIFFICULTY_COUNT = {easy:6, medium:8, hard:11};
 const PLANSV2_DIFFICULTY_LABEL_CUSTOMIZE = {easy:'Łatwy', medium:'Średni', hard:'Trudny'};
@@ -17711,10 +17718,57 @@ function sortExercisesByKey(list, pinnedName){
 // role-specific subset instead (see planv2PickExercisesForRole()).
 // timed cardio / warm-up / stretching never goes into an auto-generated strength plan, whatever its day
 const NON_STRENGTH_GROUPS = new Set(['Kardio','Rozgrzewka','Rozciąganie']);
-function planv2PickExercises(count, equipment, buckets){
+/* Cel a dobór ćwiczeń (docs/research-cwiczenia-a-cel-treningowy.md). W każdej partii kandydaci są układani po (poziom celu, lista
+   „najlepsze na ten cel”, kolejność biblioteki); poziom 0 = „unikać”, wchodzi tylko, gdy w partii nie ma nic innego.
+   Reguły po cechach (sprzęt, wielostawowe, izolacja, statyczne) + wyjątki z nazw; ćwiczenie własne bez cech = neutralne (1). */
+const GOAL_EXOTIC = new Set(['Pistol Squat','Handstand Push-up','Nordic Curl','Sissy Squat','Turkish Get-Up','Kettlebell Snatch','Kettlebell Windmill']);
+const GOAL_HEAVY_BARBELL = new Set(['Barbell Deadlift','Barbell Back Squat','Rack Pull','Good Morning','Front Squat','Sumo Deadlift']);
+const GOAL_HARD_TECH = new Set(['Rack Pull','Front Squat','Good Morning','Sumo Deadlift']);   // początkujący: dopiero, gdy nie ma nic łatwiejszego
+const GOAL_TOP = {
+  strength: ['Barbell Back Squat','Barbell Bench Press','Barbell Deadlift','Overhead Press','T-Bar Row','Chin-up','Pull-up','Romanian Deadlift','Hip Thrust','Close-Grip Bench Press','Incline Bench Press'],
+  endurance: ['Bodyweight Squat','Push-up','Inverted Row','Kettlebell Swing','Lunge','Plank'],
+  general: ['Kettlebell Goblet Squat','Push-up','Inverted Row','Dumbbell Romanian Deadlift','Dumbbell Shoulder Press','Kettlebell Swing','Plank','Hip Thrust'],
+};
+const GOAL_BUCKET_ORDER = {   // kolejność partii przy doborze (nie rusza PLANSV2_MUSCLE_BUCKETS, od którego zależy kolejność w sesji)
+  strength: ['Nogi','Klatka piersiowa','Plecy','Barki','Triceps','Biceps','Brzuch'],
+  endurance: ['Nogi','Klatka piersiowa','Plecy','Barki','Brzuch','Biceps','Triceps'],
+  general: ['Nogi','Klatka piersiowa','Plecy','Barki','Brzuch','Biceps','Triceps'],
+};
+const GOAL_CARDIO_PREF = {
+  endurance: ['Rowing Machine','Stationary Bike','Jump Rope','Elliptical','Treadmill','Air Bike','Ski Erg','Stair Climber'],
+  general:   ['Stationary Bike','Rowing Machine','Elliptical','Treadmill','Jump Rope','Air Bike','Ski Erg','Stair Climber'],
+};
+function planv2GoalTier(ex, goal, difficulty){
+  if(GOAL_EXOTIC.has(ex.name)) return 0;
+  const eq = ex.equipment, timed = ex.mode === 'time', iso = !ex.compound && !timed;
+  if(goal === 'strength'){
+    if(difficulty === 'easy' && GOAL_HARD_TECH.has(ex.name)) return 0;
+    if(eq === 'sztanga' && ex.compound) return 2;
+    return iso ? 0 : 1;
+  }
+  if(goal === 'mass') return (ex.compound || (iso && eq === 'maszyny')) ? 2 : 1;
+  if(goal === 'endurance'){
+    if(GOAL_HEAVY_BARBELL.has(ex.name)) return 0;
+    return (eq === 'masa ciała' || eq === 'kettlebell' || eq === 'gumy' || eq === 'maszyny' || timed) ? 2 : 1;
+  }
+  if(goal === 'general'){
+    if(GOAL_HEAVY_BARBELL.has(ex.name) && ex.name !== 'Barbell Deadlift' && ex.name !== 'Barbell Back Squat') return 0;
+    if(GOAL_HEAVY_BARBELL.has(ex.name)) return 1;
+    if(timed || eq === 'kettlebell' || eq === 'masa ciała' || (eq === 'hantle' && ex.compound)) return 2;
+    return iso ? 0 : 1;
+  }
+  return 1;
+}
+function planv2PickExercises(count, equipment, buckets, goal, difficulty){
   buckets = buckets || PLANSV2_MUSCLE_BUCKETS;
+  const order = GOAL_BUCKET_ORDER[goal];
+  if(order) buckets = [...buckets].sort((a, b)=> order.indexOf(a.label) - order.indexOf(b.label));
+  const top = GOAL_TOP[goal] || [];
   // day:'E' = GYM_PLAN_EXTRA_V2 (estimated sets/reps, no timed mode yet) — kept out of auto plans until reviewed.
-  const pool = getExerciseLibrary().filter(ex=>ex.day!=='E' && !(ex.mode==='time' && NON_STRENGTH_GROUPS.has(ex.group)) && !BOOKEND_EX_NAMES.has(ex.name) && planv2MatchesEquipment(ex, equipment));
+  const lib = getExerciseLibrary();
+  const pool = lib.filter(ex=>ex.day!=='E' && !(ex.mode==='time' && NON_STRENGTH_GROUPS.has(ex.group)) && !BOOKEND_EX_NAMES.has(ex.name) && planv2MatchesEquipment(ex, equipment));
+  const rank = new Map(pool.map((ex, i)=> [ex.name, [goal ? -planv2GoalTier(ex, goal, difficulty) : 0, top.indexOf(ex.name) === -1 ? 999 : top.indexOf(ex.name), i]]));
+  const best = (a, b)=> { const x = rank.get(a.name), y = rank.get(b.name); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
   const used = new Set();
   const picked = [];
   let guard = 0; // laps guard — bails instead of spinning forever if every bucket is exhausted
@@ -17722,7 +17776,7 @@ function planv2PickExercises(count, equipment, buckets){
     let addedThisLap = false;
     for(const bucket of buckets){
       if(picked.length >= count) break;
-      const next = pool.find(ex=>!used.has(ex.name) && bucket.match(ex.group));
+      const next = pool.filter(ex=>!used.has(ex.name) && bucket.match(ex.group)).sort(best)[0];
       if(next){ used.add(next.name); picked.push(next); addedThisLap = true; }
     }
     guard++;
@@ -17730,10 +17784,18 @@ function planv2PickExercises(count, equipment, buckets){
   }
   return picked;
 }
-function planv2PickExercisesForRole(count, equipment, role){
+// Wytrzymałość i Sprawność dostają jedno kardio na sesję (poza liczbą ćwiczeń z poziomu); bez pasującego sprzętu nic nie dodajemy.
+function planv2PickCardio(equipment, goal){
+  const pref = GOAL_CARDIO_PREF[goal];
+  if(!pref) return null;
+  const pool = getExerciseLibrary().filter(ex=> ex.group === 'Kardio' && ex.mode === 'time' && pref.includes(ex.name) && planv2MatchesEquipment(ex, equipment));
+  pool.sort((a, b)=> pref.indexOf(a.name) - pref.indexOf(b.name));
+  return pool[0] || null;
+}
+function planv2PickExercisesForRole(count, equipment, role, goal, difficulty){
   const labels = PLANSV2_SPLIT_ROLE_LABELS[role] || [];
   const buckets = PLANSV2_MUSCLE_BUCKETS.filter(b=> labels.includes(b.label));
-  return planv2PickExercises(count, equipment, buckets);
+  return planv2PickExercises(count, equipment, buckets, goal, difficulty);
 }
 function planv2ExerciseEntry(ex, params){
   const base = { name: ex.name, group: ex.group, icon: ex.icon, compound: ex.compound, equipment: ex.equipment };
@@ -17745,7 +17807,9 @@ function generatePlanScheduleV2(goal, difficulty, equipment, frequency){
   const params = PLANSV2_GOAL_PARAMS[goal];
   const count = PLANSV2_DIFFICULTY_COUNT[difficulty];
   const days = PLANSV2_FREQUENCY_DAYS[frequency] || PLANSV2_FREQUENCY_DAYS[3];
-  const exercises = sortExercisesByKey(planv2PickExercises(count, equipment).map(ex=> planv2ExerciseEntry(ex, params)));   // big-before-small, compound-before-isolation within a group
+  const picked = planv2PickExercises(count, equipment, null, goal, difficulty), cardio = planv2PickCardio(equipment, goal);
+  if(cardio) picked.push(cardio);
+  const exercises = sortExercisesByKey(picked.map(ex=> planv2ExerciseEntry(ex, params)));   // big-before-small, compound-before-isolation within a group
   const schedule = scheduleOnDays(days, exercises); // same full exercise list every session — still genuinely fullbody, only the day count changes
   ensureWarmupStretch(schedule);
   return schedule;
@@ -17764,7 +17828,9 @@ function generateSplitPlanScheduleV2(splitId, goal, difficulty, equipment){
   const count = PLANSV2_DIFFICULTY_COUNT[difficulty];
   const schedule = emptySchedule();
   Object.keys(dayRoles).forEach(day=>{
-    const exercises = sortExercisesByKey(planv2PickExercisesForRole(count, equipment, dayRoles[day]).map(ex=> planv2ExerciseEntry(ex, params)));
+    const picked = planv2PickExercisesForRole(count, equipment, dayRoles[day], goal, difficulty), cardio = planv2PickCardio(equipment, goal);
+    if(cardio) picked.push(cardio);
+    const exercises = sortExercisesByKey(picked.map(ex=> planv2ExerciseEntry(ex, params)));
     schedule[day] = exercises;
   });
   ensureWarmupStretch(schedule);
@@ -17881,13 +17947,8 @@ function applyPlanCustomizeV2(){
 /* Zmiana celu w Profilu dotyka też aktywnego planu: lekko, jak „Dostosuj” w wersji z samym celem (serie, powtórzenia, przerwy;
    ćwiczenia, dni i kolejność zostają). Plan Mekkio zostaje nietknięty, powstaje kopia. Pełny plan (generator) zachowuje
    poziom, sprzęt i dni, zmienia się tylko `goal`. Sprawność (`ogolna`) nie ma odpowiednika w planach, więc nic nie pyta. */
-const PROFILE_GOAL_TO_PLAN = { masa:'mass', sila:'strength', wytrzymalosc:'endurance' };
-function planv2ApplyProfileGoal(plan, goal){
-  const prev = plan.customizationV2 || {};
-  const schedule = planv2ApplyGoalToSchedule(plan.schedule, goal);
-  const customizationV2 = prev.goalOnly || !plan.customizationV2
-    ? { goal, goalOnly:true, sourceId: prev.sourceId || plan.id, difficulty: prev.difficulty || planLevelKey(plan) || planDifficultyKey(planAvgExercisesPerDay(plan)) }
-    : { ...prev, goal };
+const PROFILE_GOAL_TO_PLAN = { masa:'mass', sila:'strength', wytrzymalosc:'endurance', ogolna:'general' };
+function planv2CommitCustomized(plan, schedule, customizationV2){
   if(plan.builtin){
     const newId = 'plan_' + Date.now();
     trainingPlans.push({id:newId, name: planDisplayName(plan), builtin:false, schedule, customizationV2, meta: planMetaForEdit(plan)});
@@ -17902,19 +17963,56 @@ function planv2ApplyProfileGoal(plan, goal){
   updateTodayPlanBanner();
   renderPlansList();
 }
+function planv2ApplyProfileGoal(plan, goal){
+  const prev = plan.customizationV2 || {};
+  const schedule = planv2ApplyGoalToSchedule(plan.schedule, goal);
+  const customizationV2 = prev.goalOnly || !plan.customizationV2
+    ? { goal, goalOnly:true, sourceId: prev.sourceId || plan.id, difficulty: prev.difficulty || planLevelKey(plan) || planDifficultyKey(planAvgExercisesPerDay(plan)) }
+    : { ...prev, goal };
+  planv2CommitCustomized(plan, schedule, customizationV2);
+}
+/* „Nowy plan pod ten cel”: generator od nowa z poziomem, sprzętem i dniami z planu (ćwiczenia się zmieniają). Tylko dla planów
+   z generatora; plany ułożone ręcznie mają stały skład, tam zostaje samo „serie i powtórzenia”. */
+function planv2CanRegenerate(plan){
+  return planCustomizeKind(plan) === 'full' && !planIsFlexible(plan);
+}
+function planv2RegenerateForGoal(plan, goal){
+  const prev = plan.customizationV2 || {};
+  const difficulty = PLANSV2_DIFFICULTY_SLIDER.indexOf(prev.difficulty) !== -1 ? prev.difficulty : (planLevelKey(plan) || planDifficultyKey(planAvgExercisesPerDay(plan)));
+  const equipment = prev.equipment || (plan.meta && plan.meta.equipment) || [];
+  const splitId = planv2SplitRoleId(plan);
+  let schedule, customizationV2;
+  if(splitId){
+    schedule = generateSplitPlanScheduleV2(splitId, goal, difficulty, equipment);
+    customizationV2 = {goal, difficulty, equipment, splitOf: splitId};
+  } else {
+    const n = planActiveDays(plan).length;
+    const frequency = PLANSV2_FREQUENCY_SLIDER.indexOf(n) === -1 ? 3 : n;
+    schedule = generatePlanScheduleV2(goal, difficulty, equipment, frequency);
+    customizationV2 = {goal, difficulty, equipment, frequency};
+  }
+  if(!schedule) return planv2ApplyProfileGoal(plan, goal);
+  planv2CommitCustomized(plan, schedule, customizationV2);
+}
 async function offerProfileGoalToPlan(profileGoal){
   const goal = PROFILE_GOAL_TO_PLAN[profileGoal];
   const plan = goal && starredPlanId ? trainingPlans.find(p=>p.id===starredPlanId) : null;
   if(!plan || isPlanHidden(plan) || planCustomizeKind(plan) === null) return;
   if(plan.customizationV2 && plan.customizationV2.goal === goal) return;
   const name = planDisplayName(plan), label = PLANSV2_GOAL_LABEL[goal];
-  if(!await mConfirm({
+  const canNew = planv2CanRegenerate(plan);
+  const choice = await mConfirm({
     title: t('pgoTitle', 'Zmienić też plan?'),
-    text: plTypo(t('pgoText', `Cel to teraz: ${label}. Dostosować serie, powtórzenia i przerwy w planie „${name}”? Ćwiczenia i dni zostają.`, label, name)),
-    ok: t('pgoOk', 'Dostosuj plan'), cancel: t('pgoNo', 'Zostaw plan'), gym: true
-  })) return;
+    text: plTypo(canNew
+      ? t('pgoTextNew', `Cel to teraz: ${label}. Plan „${name}” możesz tylko dostosować (serie i powtórzenia, ćwiczenia zostają) albo zbudować od nowa pod ten cel (ćwiczenia się zmienią, ręczne zmiany znikną).`, label, name)
+      : t('pgoText', `Cel to teraz: ${label}. Dostosować serie, powtórzenia i przerwy w planie „${name}”? Ćwiczenia i dni zostają.`, label, name)),
+    ok: canNew ? t('pgoOkSets', 'Serie i powtórzenia') : t('pgoOk', 'Dostosuj plan'),
+    alt: canNew ? t('pgoOkNew', 'Nowy plan pod cel') : '',
+    cancel: t('pgoNo', 'Zostaw plan'), gym: true
+  });
   const cur = trainingPlans.find(p=>p.id===plan.id);
-  if(cur) planv2ApplyProfileGoal(cur, goal);
+  if(!choice || !cur) return;
+  if(choice === 'alt') planv2RegenerateForGoal(cur, goal); else planv2ApplyProfileGoal(cur, goal);
 }
 function updatePlanPillLabel(){
   const label = document.getElementById('planPillLabel');
