@@ -10552,7 +10552,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.102.3";
+const APP_VERSION = "4.102.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21528,7 +21528,7 @@ function gymWorkoutCatalogV2(){
 }
 const GYM_WS_LIMIT = 6;
 function gymLastAgoText(iso){
-  if(!iso) return t('gymWsNever', 'jeszcze nie robiony');
+  if(!iso) return '';   // nigdy niewykonany: bez podpisu
   const days = Math.max(0, Math.round((new Date(todayStr() + 'T12:00:00') - new Date(iso + 'T12:00:00')) / 86400000));
   if(days === 0) return t('gymWsToday', 'ostatnio: dziś');
   if(days === 1) return t('gymWsYesterday', 'ostatnio: wczoraj');
@@ -21543,7 +21543,7 @@ function gymWsCardHtml(en, i, animate){
       <div class="plc-top"><span class="plc-src">${escHtml(en.label)}</span>${pill}</div>
       <p class="plc-name">${nm}</p>
       <div class="plc-stats"><span class="plc-stat">${ph('barbell')}${escHtml(planExCountText(n))}</span></div>
-      <p class="plc-sub">${gymLastAgoText(en.lastDate)}</p>
+      ${en.lastDate ? `<p class="plc-sub">${gymLastAgoText(en.lastDate)}</p>` : ''}
     </button>`;
 }
 /* Hierarchia jak na ekranie Plany (Figma 542:15828): treningi stworzone przez użytkownika (sesje planów elastycznych) wyżej i na pełnej karcie,
