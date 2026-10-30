@@ -10567,7 +10567,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.107.0";
+const APP_VERSION = "4.107.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -17765,8 +17765,9 @@ function planv2PickExercises(count, equipment, buckets, goal, difficulty){
   if(order) buckets = [...buckets].sort((a, b)=> order.indexOf(a.label) - order.indexOf(b.label));
   const top = GOAL_TOP[goal] || [];
   // day:'E' = GYM_PLAN_EXTRA_V2 (estimated sets/reps, no timed mode yet) — kept out of auto plans until reviewed.
+  // Wyjątek: Siła (decyzja 2026-10-31): jej rdzeń sztangowy (Overhead Press, RDL, T-Bar Row, Close-Grip Bench) jest w E, a serie i powtórzenia i tak ustawia cel.
   const lib = getExerciseLibrary();
-  const pool = lib.filter(ex=>ex.day!=='E' && !(ex.mode==='time' && NON_STRENGTH_GROUPS.has(ex.group)) && !BOOKEND_EX_NAMES.has(ex.name) && planv2MatchesEquipment(ex, equipment));
+  const pool = lib.filter(ex=>(ex.day!=='E' || goal === 'strength') && !(ex.mode==='time' && NON_STRENGTH_GROUPS.has(ex.group)) && !BOOKEND_EX_NAMES.has(ex.name) && planv2MatchesEquipment(ex, equipment));
   const rank = new Map(pool.map((ex, i)=> [ex.name, [goal ? -planv2GoalTier(ex, goal, difficulty) : 0, top.indexOf(ex.name) === -1 ? 999 : top.indexOf(ex.name), i]]));
   const best = (a, b)=> { const x = rank.get(a.name), y = rank.get(b.name); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
   const used = new Set();

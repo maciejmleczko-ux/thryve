@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.107.0 (2026-10-31)
+- **Aktualna wersja:** 4.107.1 (2026-10-31)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.107.1 · PATCH · 2026-10-31
+
+Generator planów: dla celu **Siła** do puli wchodzą też ćwiczenia z `day:'E'` (`GYM_PLAN_EXTRA_V2`): Overhead Press, Romanian Deadlift, T-Bar Row, Close-Grip Bench Press, Front Squat. Decyzja Macieja 2026-10-31: serie i powtórzenia i tak ustawia cel, więc „szacunkowe serie” z komentarza nie mają znaczenia; pozostałe cele bez zmian. Plan na Siłę ma pełny rdzeń sztangowy (przysiad, wyciskanie, martwy ciąg, OHP, RDL). Do przeglądu trenera: Upright Row bywa wybierany w trudnym planie na Siłę.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-31 — Siła: ćwiczenia z day E w automatycznych planach
 
 ### 4.107.0 · MINOR · 2026-10-31
 
