@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.99.6 (2026-10-30)
+- **Aktualna wersja:** 4.99.7 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.99.7 · PATCH · 2026-10-30
+
+Okno ćwiczenia nie pokazuje już zapisanego tekstu „Trener AI” z dawnej analizy, gdy Trener AI jest wyłączony (`getAiActionFor` zwraca `null` przy `AI_COACH_ENABLED=false`): tekst („dobić do 15 powtórzeń”) przeczył celowi z reguł (57,5 kg × 10 przy zakresie 8–10). Cel w przypadku serii z różnymi ciężarami (`suggestUpMixed`), gdy wszystkie serie były na górze zakresu, to teraz cięższy ciężar × dolna granica zakresu, a nie krok wstecz do górnej granicy.
+
+**Commity (1):**
+
+- (hash po commicie)
 
 ### 4.99.6 · PATCH · 2026-10-30
 
