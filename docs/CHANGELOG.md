@@ -119,6 +119,14 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.106.6 · PATCH · 2026-10-31
+
+Trening: Rozgrzewka i Rozciąganie to kafle w siatce ćwiczeń (ten sam rozmiar, `buildExerciseTileV2` + klasa `gymv2-block-tile`, jasnoniebieskie tło, pastylka z minutami w rogu, ptaszek po wykonaniu) zamiast szerokich belek. Rozgrzewka jest pierwszym kaflem, Rozciąganie ostatnim, przed „Wybierz inne” i „Dodaj”. Dotyk otwiera to samo okno z krokami. Usunięto reguły `.gymv2-block*`.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-31 — Trening: Rozgrzewka i Rozciąganie jako kafle w siatce
+
 ### 4.106.5 · PATCH · 2026-10-31
 
 Trening: po wybraniu treningu (slider, Plany, „Powtórz ostatni”), dopóki nic nie zalogowano, lewy górny przycisk to strzałka wstecz zamiast X i wraca do wyboru treningu (czyści `repeatMode`, bez okna „Przerwać trening?”). Belka „Dotknij, żeby wrócić do planu” w tym stanie jest ukryta. Po pierwszej zalogowanej serii wraca X (przerwanie z pytaniem) i belka. Logika w `updateGymV2RepeatBtn()` (`backMode`) i na początku `gymAbortV2()`; przycisk `#gymV2XBtn` ma dwie ikony (`.gy-x-ico`, `.gy-back-ico`).
