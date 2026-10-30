@@ -4017,6 +4017,10 @@ button.stv2-bt{cursor:pointer;}
 .profil-back .ph.ph,.profil-back .ph.ph svg,.v2-hdr-back .ph.ph,.v2-hdr-back .ph.ph svg{width:22px;height:22px;}   /* .ph.ph: wyższa specyficzność niż reguły 18 px per ekran */
 .ob-back svg{width:24px;height:24px;}
 .gy-circ.gy-x svg{width:28px;height:28px;}
+.gy-circ.gy-x .gy-back-ico{display:none;}
+.gy-circ.gy-x.is-back .gy-back-ico{display:inline-flex;}
+.gy-circ.gy-x.is-back .gy-x-ico{display:none;}
+.gy-circ.gy-x.is-back .ph.ph,.gy-circ.gy-x.is-back .ph.ph svg{width:22px;height:22px;}   /* wybrany trening bez postępu: strzałka wstecz zamiast X (jak .v2-hdr-back) */
 .opk-x svg{width:26px;height:26px;}
 /* obrys okrągłych przycisków: wszędzie 1 px pełny pomarańcz (było .5 px blady lub 1 px) */
 .stv2-cust{box-sizing:border-box;border:1px solid var(--m-orange);box-shadow:none;}
@@ -4325,7 +4329,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   <section class="view gymv2-root" id="view-gym-v2">
     <div class="gymv2-panel">
       <div class="gy-topbar">
-        <button type="button" class="gy-circ gy-x" onclick="gymAbortV2()" aria-label="Przerwij trening" data-i18n-title="gymAbortTitle"><svg viewBox="0 0 28 28" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.4 6.4 6.4 22.4M6.4 6.4l16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+        <button type="button" class="gy-circ gy-x" id="gymV2XBtn" onclick="gymAbortV2()" aria-label="Przerwij trening" data-i18n-title="gymAbortTitle"><svg class="gy-x-ico" viewBox="0 0 28 28" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.4 6.4 6.4 22.4M6.4 6.4l16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="ph gy-back-ico" data-ph="caret-left"></span></button>
         <span class="gy-title" data-i18n="gymTitleTraining">TRENING</span>
         <button type="button" class="gy-circ gy-ok" onclick="gymFinishTapV2()" aria-label="Zakończ trening" data-i18n-title="gymFinishTitle"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
@@ -21829,6 +21833,14 @@ function updateGymV2RepeatBtn(){
   if(!btn) return;
   const tEl = btn.querySelector('.gymv2-repeat-t');
   const sEl = document.getElementById('gymV2RepeatSub');
+  const backMode = !!repeatMode && !backfillDate && !gymHasProgress();
+  const xBtn = document.getElementById('gymV2XBtn');
+  if(xBtn){
+    xBtn.classList.toggle('is-back', backMode);
+    const lbl = backMode ? t('navBack', 'Wstecz') : t('gymAbortTitle', 'Przerwij trening');
+    xBtn.setAttribute('aria-label', lbl); xBtn.title = lbl;
+  }
+  if(backMode){ btn.hidden = true; return; }   // belka „wróć do planu” zbędna: strzałka u góry robi to samo
   if(repeatMode){
     btn.classList.add('is-active');
     tEl.textContent = repeatMode.label || t('repeatActive', `Trening z ${fmtDateHuman(repeatMode.date)}`, fmtDateHuman(repeatMode.date));
@@ -22202,6 +22214,7 @@ function gymHasProgress(){
 /* X — abort the workout (asks first when there is anything to lose). */
 function gymAbortV2(){
   if(popupExercise) return;
+  if(repeatMode && !backfillDate && !gymHasProgress()){ repeatMode = null; persistGymSession(); renderGymV2(); return; }   // strzałka: z powrotem do wyboru treningu
   if(!gymHasProgress()){ backfillDate = null; persistGymSession(); goRoute('dashboard'); return; }
   gymConfirmV2({
     title: t('gymAbortTitleDlg','Przerwać trening?'),

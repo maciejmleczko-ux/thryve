@@ -119,6 +119,14 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.106.5 · PATCH · 2026-10-31
+
+Trening: po wybraniu treningu (slider, Plany, „Powtórz ostatni”), dopóki nic nie zalogowano, lewy górny przycisk to strzałka wstecz zamiast X i wraca do wyboru treningu (czyści `repeatMode`, bez okna „Przerwać trening?”). Belka „Dotknij, żeby wrócić do planu” w tym stanie jest ukryta. Po pierwszej zalogowanej serii wraca X (przerwanie z pytaniem) i belka. Logika w `updateGymV2RepeatBtn()` (`backMode`) i na początku `gymAbortV2()`; przycisk `#gymV2XBtn` ma dwie ikony (`.gy-x-ico`, `.gy-back-ico`).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-31 — Trening: strzałka wstecz zamiast X po wyborze treningu, bez belki powrotu
+
 ### 4.106.4 · PATCH · 2026-10-31
 
 Trening: po wybraniu treningu ze slidera (np. Push / Pull / Legs) tytuł u góry pokazywał nazwę planu oznaczonego gwiazdką (np. „Fullbody M.”). `renderGymV2()` brał nazwę tylko z `todayPlanId()`. Teraz, gdy trwa trening z `repeatMode.planId`, tytuł to nazwa tego planu.
