@@ -119,6 +119,19 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.107.0 · MINOR · 2026-10-31
+
+Okna Rozgrzewka i Rozciąganie (`renderBlockSheet`, `renderBlockRun`):
+
+- Podgląd: bez dużego tytułu pod paskiem, zostaje tytuł w nagłówku okna i pastylki (liczba ćwiczeń, czas).
+- Ćwiczenie: odliczanie widać też w kreskach u góry. Kreska bieżącego ćwiczenia wypełnia się płynnie (`transform: scaleX`, `bkExFrac()` liczy przygotowanie, ćwiczenie i zmianę strony), zrobione są pełne. W nagłówku licznik „2/7”.
+- Typografia: nazwa ćwiczenia cienka wersalikami (jak nazwy planów), nad licznikiem pomarańczowy podpis fazy („Przygotuj się”, „Ćwicz”, „Strona 1 z 2”, „Zmień stronę”), opis pod etykietą „Jak ćwiczyć”.
+- Przyciski: koła jak w timerze serii (`lg-tm-ic`, `lg-tm-play`): Przerwij, duże Pauza/Wznów, Pomiń krok z podpisami. Pasek ze szkłem (70% bieli + rozmycie 20 px) przypięty do dołu, treść przewija się pod nim.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-31 — Rozgrzewka i Rozciąganie: kreski odliczają, nowa typografia i przyciski
+
 ### 4.106.7 · PATCH · 2026-10-31
 
 Trening: kafle Rozgrzewka i Rozciąganie są białe jak zwykłe ćwiczenia (bez niebieskiego tła). Odróżnia je pastylka z czasem w kolorze licznika czasu (`--m-metric-time`, biały tekst). Zmiana tylko w CSS (`.gymv2-block-min`).

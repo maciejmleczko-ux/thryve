@@ -3247,15 +3247,21 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-tm{gap:10px;}
 .bk-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--m-gap-card);margin:4px 0 12px;}
 .bk-tiles .ex-tile{pointer-events:none;}
-.bk-prog{display:flex;gap:4px;margin:2px 0 8px;}
-.bk-prog i{flex:1;height:4px;border-radius:2px;background:var(--m-switch-off);transition:background-color var(--m-dur-quick) ease;}
-.bk-prog i.on{background:var(--m-orange);}
-.bk-run{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;}
+.bk-prog{display:flex;gap:4px;margin:2px 0 14px;}
+.bk-prog i{position:relative;flex:1;height:4px;border-radius:2px;background:var(--m-switch-off);overflow:hidden;}
+.bk-prog i b{position:absolute;inset:0;background:var(--m-orange);transform:scaleX(0);transform-origin:left;transition:transform var(--m-dur-fade) linear;}   /* kreska wypełnia się wraz z odliczaniem ćwiczenia */
+.bk-count{font-size:var(--m-fs-xs);font-weight:600;letter-spacing:.08em;color:var(--m-muted-text);font-variant-numeric:tabular-nums;min-width:40px;text-align:right;}
+.bk-ctrl{align-items:flex-start;position:sticky;bottom:0;z-index:2;margin:0 -20px;padding:14px 20px calc(18px + env(safe-area-inset-bottom));background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);}   /* pasek ze szkłem: treść przewija się pod nim */
+.bk-ctrl-s{display:flex;flex-direction:column;align-items:center;gap:6px;width:64px;margin-top:23px;}   /* małe koła na środku wysokości dużego (87 px) */
+.bk-ctrl-s span{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--m-muted-text);text-align:center;line-height:1.2;}
+.bk-run{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;}
 .bk-run img{width:210px;height:210px;object-fit:contain;}
-.bk-how{width:100%;text-align:left;display:flex;flex-direction:column;gap:6px;margin:4px 0 2px;}
+.bk-how{width:100%;text-align:left;display:flex;flex-direction:column;gap:6px;margin:14px 0 18px;}
 .bk-how p{margin:0;font-size:var(--m-fs-sm);line-height:1.45;color:var(--m-ink);}
 .bk-how ol{margin:0;padding-left:20px;font-size:var(--m-fs-sm);line-height:1.45;color:var(--m-ink);}
-.bk-run-n{font-size:var(--m-fs-lg);font-weight:700;color:var(--m-ink);}
+.bk-run-n{margin-top:4px;font-size:var(--m-fs-xl);font-weight:200;line-height:1.15;letter-spacing:.01em;text-transform:uppercase;color:var(--m-ink);}
+.bk-run .bk-run-msg{margin-top:6px;color:var(--m-orange);}
+.bk-run .lg-tm-clock{margin:2px 0 4px;}
 .bk-run-next{margin:0;font-size:var(--m-fs-xs);color:var(--m-muted);min-height:1.2em;}
 .bk-done-note{margin:0 0 8px;font-size:var(--m-fs-xs);color:var(--m-muted);}
 .cg-box{display:flex;flex-direction:column;gap:10px;align-items:stretch;}
@@ -6208,7 +6214,7 @@ const T_EN = {
   loadLabelExtra: 'Extra weight', loadLabelAssist: 'Assistance', loadHint: 'Using a band or machine? Slide left.', loadA11y: 'Extra weight or assistance',
   timeLabel: 'Time', timeLabelSide: 'Time per side', perSideShort: '/side',
   tmStart: 'Start', tmPause: 'Pause', tmResume: 'Resume', tmEnd: 'Finish', tmSkip: 'Skip', tmResetA11y: 'Discard and start over', tmDiscarded: 'Attempt discarded',
-  bkWarmup: 'Warm-up', bkStretch: 'Stretching', bkMin: 'min', bkMore: n=>`+${n} more`, bkStart: 'Start', bkRepeat: 'Do it again', bkUndo: 'Mark as not done', bkSkipStep: 'Skip step', bkStop: 'Stop', bkDoneNote: 'Done today.', bkNext: n=>`Next: ${n}`, bkNotifDone: 'Block finished', bkGetReady: 'Get ready',
+  bkWarmup: 'Warm-up', bkStretch: 'Stretching', bkMin: 'min', bkMore: n=>`+${n} more`, bkStart: 'Start', bkRepeat: 'Do it again', bkUndo: 'Mark as not done', bkSkipStep: 'Skip step', bkStop: 'Stop', bkDoneNote: 'Done today.', bkNext: n=>`Next: ${n}`, bkNotifDone: 'Block finished', bkGetReady: 'Get ready', bkGo: 'Go',
   cm_distanceKm: 'Distance', cm_distanceM: 'Distance', cm_inclinePct: 'Incline', cm_level: 'Level', cm_floors: 'Floors', cm_jumps: 'Jumps',
   cgTitle: 'Goal for today', cgTime: 'Time', cgDist: 'Distance', cgNone: 'No goal', cgParams: 'Settings', cgSpeed: 'Speed',
   cgEstSpeed: (sp, min) => `At ${sp} ${speedUnit()} that is about ${min} min. I'll let you know when the time is up.`,
@@ -15689,11 +15695,11 @@ function closeBlockSheet(viaDrag){
   bkOpen = null;
   mSheetClose('blockOverlayV2', viaDrag);
 }
-function bkBar(kind){
+function bkBar(kind, count){
   return `<div class="lg-bar">
       <button type="button" class="lg-circ" onclick="closeBlockSheet()" aria-label="${escHtml(t('cancel','Anuluj'))}">${LG_ICONS.x}</button>
       <span class="lg-bar-title">${escHtml(bkTitle(kind).toUpperCase())}</span>
-      <div class="lg-bar-end"></div>
+      <div class="lg-bar-end">${count ? `<span class="bk-count" id="bkCount">${escHtml(count)}</span>` : ''}</div>
     </div>`;
 }
 function renderBlockSheet(){
@@ -15704,7 +15710,6 @@ function renderBlockSheet(){
   const tiles = list.map(e=> buildExerciseTileV2(e, 'plain').outerHTML).join('');   // same tiles as the main exercises
   box.innerHTML = `${bkBar(kind)}
     <div class="lg-scroll lg-sub-scroll">
-      <div class="lg-name-row"><div class="lg-name">${escHtml(bkTitle(kind))}</div></div>
       <div class="lg-chips"><span class="lg-chip c-sets">${ph('stack')}<span>${list.length}</span></span><span class="lg-chip c-time">${ph('clock-countdown')}<span>${escHtml(bkMinTxt(list))}</span></span></div>
       <div class="gymv2-grid bk-tiles">${tiles}</div>
       ${done ? `<p class="bk-done-note">${escHtml(t('bkDoneNote','Zrobione dziś.'))}</p>` : ''}
@@ -15720,27 +15725,33 @@ function renderBlockRun(){
   const list = gymBlocks[kind], ph0 = bkPhase(), sg = bk.segs[Math.min(ph0.i, bk.segs.length - 1)];
   const e = list[sg.ei], nextEx = list[sg.ei + 1];
   const how = (LANG === 'en' ? EXERCISE_HOWTO_EN : EXERCISE_HOWTO)[e.name];
-  const prog = list.map((_, i)=> `<i class="${i <= sg.ei ? 'on' : ''}"></i>`).join('');
-  box.innerHTML = `${bkBar(kind)}
+  const prog = list.map((_, i)=> `<i><b style="transform:scaleX(${i < sg.ei ? 1 : 0})"></b></i>`).join('');
+  box.innerHTML = `${bkBar(kind, `${sg.ei + 1}/${list.length}`)}
     <div class="lg-scroll lg-sub-scroll">
       <div class="bk-prog">${prog}</div>
       <div class="bk-run">
         ${bkImg(e)}
         <div class="bk-run-n">${escHtml(e.name)}</div>
+        <p class="lg-tm-msg bk-run-msg" id="bkMsg" aria-live="polite"></p>
         <div class="lg-tm-clock" id="bkClock"></div>
-        <p class="lg-tm-msg" id="bkMsg" aria-live="polite"></p>
         <p class="bk-run-next">${nextEx ? escHtml(t('bkNext', `Dalej: ${nextEx.name}`, nextEx.name)) : ''}</p>
       </div>
-      ${how ? `<div class="bk-how"><p>${escHtml(how.setup)}</p><ol>${how.steps.map(x=>`<li>${escHtml(x)}</li>`).join('')}</ol></div>` : ''}
-      <div class="lg-tm-btns">
-        <button type="button" class="lg-add lg-tm-main m-press" id="bkMain" onclick="bkMain()"></button>
-        <div class="lg-tm-row">
-          <button type="button" class="lg-add m-press" onclick="bkSkipStep()">${escHtml(t('bkSkipStep','Pomiń krok'))}</button>
-          <button type="button" class="lg-add m-press" onclick="bkAbort()">${escHtml(t('bkStop','Przerwij'))}</button>
-        </div>
+      ${how ? `<div class="bk-how"><span class="lg-lab">${escHtml(t('exHowtoSheetTitle','JAK ĆWICZYĆ'))}</span><p>${escHtml(how.setup)}</p><ol>${how.steps.map(x=>`<li>${escHtml(x)}</li>`).join('')}</ol></div>` : ''}
+      <div class="lg-tm-ctrl bk-ctrl">
+        <div class="bk-ctrl-s"><button type="button" class="lg-tm-ic m-press" onclick="bkAbort()" aria-label="${escHtml(t('bkStop','Przerwij'))}">${LG_ICONS.x}</button><span>${escHtml(t('bkStop','Przerwij'))}</span></div>
+        <button type="button" class="lg-tm-play m-press" id="bkMain" onclick="bkMain()"></button>
+        <div class="bk-ctrl-s"><button type="button" class="lg-tm-ic m-press" onclick="bkSkipStep()" aria-label="${escHtml(t('bkSkipStep','Pomiń krok'))}">${BK_SKIP_SVG}</button><span>${escHtml(t('bkSkipStep','Pomiń krok'))}</span></div>
       </div>
     </div>`;
   bkPaint();
+}
+const BK_SKIP_SVG = '<svg viewBox="0 0 18 18" fill="none"><path d="M4 3.8v10.4a.5.5 0 0 0 .77.42l7.6-5.2a.5.5 0 0 0 0-.84l-7.6-5.2A.5.5 0 0 0 4 3.8Z" fill="currentColor"/><path d="M14.25 3.5v11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+// how far through the current exercise (prep + work + side switch), 0..1: fills that exercise's bar at the top
+function bkExFrac(ei){
+  const own = bk.segs.filter(sg=> sg.ei === ei);
+  if(!own.length) return 0;
+  const a = own[0].start, b = own[own.length - 1].start + own[own.length - 1].ms;
+  return Math.min(1, Math.max(0, (bkNow() - bk.t0 - a) / (b - a)));
 }
 function bkPaint(){
   const clock = document.getElementById('bkClock');
@@ -15750,9 +15761,15 @@ function bkPaint(){
   const sg = bk.segs[ph0.i];
   clock.textContent = fmtClock(Math.max(0, Math.ceil(ph0.left / 1000)));
   clock.classList.toggle('is-run', bk.pausedAt === null && sg.kind !== 'prep');
+  const fill = document.querySelectorAll('#blockBoxV2 .bk-prog i b')[sg.ei];
+  if(fill) fill.style.transform = `scaleX(${bkExFrac(sg.ei).toFixed(3)})`;
   const msg = document.getElementById('bkMsg'), main = document.getElementById('bkMain');
-  if(msg) msg.textContent = sg.kind === 'prep' ? t('bkGetReady','Przygotuj się') : sg.kind === 'sw' ? t('tmSwitchSides','Zmień stronę') : (sg.sides === 2 ? t('tmSideN', `Strona ${sg.side} z 2`, sg.side, 2) : '');
-  if(main) main.textContent = bk.pausedAt !== null ? t('tmResume','Wznów') : t('tmPause','Pauza');
+  if(msg) msg.textContent = sg.kind === 'prep' ? t('bkGetReady','Przygotuj się') : sg.kind === 'sw' ? t('tmSwitchSides','Zmień stronę') : (sg.sides === 2 ? t('tmSideN', `Strona ${sg.side} z 2`, sg.side, 2) : t('bkGo','Ćwicz'));
+  if(main){
+    const paused = bk.pausedAt !== null, key = paused ? 'play' : 'pause';
+    if(main.dataset.ic !== key){ main.dataset.ic = key; main.innerHTML = LG_ICONS[key]; }
+    main.setAttribute('aria-label', paused ? t('tmResume','Wznów') : t('tmPause','Pauza'));
+  }
 }
 function bkStart(){
   if(bk || !bkOpen) return;
