@@ -21607,6 +21607,7 @@ const GYMV2_DAY_NAMES_PL = LANG==='en'
 function renderGymV2(){
   const iso = backfillDate || todayStr();
   const plan = todayPlanId() ? trainingPlans.find(p=>p.id===todayPlanId()) : null;
+  const repeatPlan = (repeatMode && repeatMode.planId) ? trainingPlans.find(p=>p.id===repeatMode.planId) : null;
   const nameEl = document.getElementById('gymV2PlanName');
   const noPlan = document.getElementById('gymV2NoPlan');
   document.getElementById('view-gym-v2').classList.toggle('is-backfill', !!backfillDate);
@@ -21614,8 +21615,8 @@ function renderGymV2(){
     nameEl.textContent = t('backfillBanner', `Trening z dnia ${histDayMonthV2(new Date(backfillDate + 'T12:00:00'))}`, histDayMonthV2(new Date(backfillDate + 'T12:00:00')));
     nameEl.hidden = false;
     noPlan.classList.add('hidden');
-  } else if(plan){
-    nameEl.textContent = planDisplayName(plan);
+  } else if(repeatPlan || plan){
+    nameEl.textContent = planDisplayName(repeatPlan || plan);   // trening wybrany ze slidera/z Planów: nazwa jego planu, nie planu oznaczonego gwiazdką
     nameEl.hidden = false;
     noPlan.classList.add('hidden');
   } else {

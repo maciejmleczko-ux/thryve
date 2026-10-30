@@ -119,6 +119,14 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
 
+### 4.106.4 · PATCH · 2026-10-31
+
+Trening: po wybraniu treningu ze slidera (np. Push / Pull / Legs) tytuł u góry pokazywał nazwę planu oznaczonego gwiazdką (np. „Fullbody M.”). `renderGymV2()` brał nazwę tylko z `todayPlanId()`. Teraz, gdy trwa trening z `repeatMode.planId`, tytuł to nazwa tego planu.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-31 — Trening: tytuł pokazuje plan wybranego treningu, nie plan z gwiazdką
+
 ### 4.107.1 · PATCH · 2026-10-31
 
 Generator planów: dla celu **Siła** do puli wchodzą też ćwiczenia z `day:'E'` (`GYM_PLAN_EXTRA_V2`): Overhead Press, Romanian Deadlift, T-Bar Row, Close-Grip Bench Press, Front Squat. Decyzja Macieja 2026-10-31: serie i powtórzenia i tak ustawia cel, więc „szacunkowe serie” z komentarza nie mają znaczenia; pozostałe cele bez zmian. Plan na Siłę ma pełny rdzeń sztangowy (przysiad, wyciskanie, martwy ciąg, OHP, RDL). Do przeglądu trenera: Upright Row bywa wybierany w trudnym planie na Siłę.
