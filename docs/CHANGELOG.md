@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.106.2 (2026-10-31)
+- **Aktualna wersja:** 4.106.3 (2026-10-31)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.106.3 · PATCH · 2026-10-31
+
+Plany → szczegół własnego planu: zniknęło jasne tło pod całym ekranem (pod pastylkami, nazwą i kartami). `#pdtBody` dostaje klasę tonu `tn--own` (własny/import), a ta ma szklane tło z `!important` (blok szkła kart), więc cały ekran był jedną szklaną kartą. Reguła `#pdtBody.tn--own` zdejmuje tło i rozmycie; kolory zmiennych `--plc-*` zostają.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-31 — Szczegół własnego planu: bez szklanego tła pod całym ekranem
 
 ### 4.106.2 · PATCH · 2026-10-31
 
