@@ -2961,7 +2961,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .hist-card.collapsed:active,.acct-photo-pick:active,.acct-oauth-btn:active,
 .dash-chat-btn:active,.gymv2-chat-btn:active,.plansv2-chat-btn:active,.histv2-chat-btn:active,.statsv2-chat-btn:active,
 .profil-back:active,.profil-gear:active,.pf-sheet-x:active,.pf-rm-seg:active,.pf-rm-arw:active,.profil-av:active,.pf-link:active,.pf-row:active,.pf-btn:active,.pf-body-c:active,.profil-id-txt:active,
-.v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-edit-plan:active,
+.v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-ws-card:active,.gymv2-blank:active,.gymv2-edit-plan:active,
 .gymv2-tile:active,.gymv2-tile-swap:active,.gymv2-done-row:active,.gymv2-save:active,
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pl-settings:active,.pl-card:active,.pl-hero:active,.pl-pick:active,.pl-cta:active,.opk-btn:active,.pl-check:active,.pev2-day-chip:active,.pev2-more:active,.pev2-ok:active,.pev2-save:active,.equip-chip:active,.ob-back:active,.ob-cta:not(:disabled):active,.ob-gender-chip:active,.onb-goal-chip:active,.onb-equip:active,
@@ -3074,6 +3074,31 @@ body.gymv2-bg .pg-bg{display:block;}
 .gymv2-save-wrap{padding:22px 10px 0;}
 #view-gym-v2 .gymv2-save{height:55px;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;}
 
+/* Ekran Trening bez treningu na dziś (4.102.0): Powtórz ostatni, slider „Twoje treningi”, pusty trening. Bez nazwy planu, pigułek i „Zakończ”. */
+#view-gym-v2.is-empty .gy-ok,#view-gym-v2.is-empty .gy-pills,#view-gym-v2.is-empty .gymv2-save-wrap,#view-gym-v2.is-empty .gymv2-no-plan,#view-gym-v2.is-empty #gymV2SectionHead,#view-gym-v2.is-empty #gymV2RestNote,#view-gym-v2.is-empty #gymGridV2,#view-gym-v2.is-empty #gymDoneV2Section,#view-gym-v2.is-empty #gymDoneV2,#view-gym-v2.is-empty:not(.is-backfill) .gy-plan-name{display:none;}
+#view-gym-v2.is-empty .gymv2-repeat{margin-bottom:var(--m-gap-card);}
+.gymv2-empty{display:flex;flex-direction:column;gap:var(--m-gap-card);padding-bottom:120px;}
+.gymv2-empty[hidden]{display:none;}
+.gymv2-ws[hidden]{display:none;}
+.gymv2-ws-label{margin:8px 0 8px;font-size:var(--m-fs-sm);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--m-ink);}
+.gymv2-ws-row{display:flex;gap:var(--m-gap-card);overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -10px;padding:2px 10px;scroll-padding:0 10px;touch-action:pan-x pan-y;}
+.gymv2-ws-row::-webkit-scrollbar{display:none;}
+.gymv2-ws-card{flex:0 0 190px;scroll-snap-align:start;display:flex;flex-direction:column;gap:4px;text-align:left;min-height:132px;padding:14px;box-sizing:border-box;font-family:inherit;color:var(--m-ink);background:rgba(255,255,255,.6);border:.5px solid var(--m-orange-tint);border-radius:var(--m-r-md);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.gymv2-ws-card.is-next{border:1px solid var(--m-orange);}
+.gymv2-ws-tag{align-self:flex-start;padding:2px 8px;border-radius:54px;background:var(--m-orange);color:var(--m-white);font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.06em;line-height:1.3;}
+.gymv2-ws-plan{font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--m-orange);}
+.gymv2-ws-name{font-size:var(--m-fs-base);font-weight:600;line-height:1.25;}
+.gymv2-ws-meta,.gymv2-ws-last{font-size:var(--m-fs-xs,12px);color:var(--m-muted);line-height:1.35;}
+.gymv2-ws-last{margin-top:auto;}
+.gymv2-ws-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;}
+.gymv2-ws-dots:empty{display:none;}
+.gymv2-ws-dots i{width:6px;height:6px;border-radius:50%;background:var(--m-border);transition:background-color var(--m-dur-quick) ease;}
+.gymv2-ws-dots i.on{background:var(--m-orange);}
+.gymv2-blank{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;padding:10px 14px;box-sizing:border-box;font-family:inherit;color:var(--m-ink);background:transparent;border:1.5px dashed var(--m-orange);border-radius:var(--m-r-md);cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
+.gymv2-blank-ico svg{width:22px;height:22px;display:block;color:var(--m-orange);}
+.gymv2-blank-t{font-size:var(--m-fs-base);font-weight:500;letter-spacing:.04em;}
+.plc-flex{display:inline-block;margin:6px 0 0;padding:2px 8px;border-radius:54px;border:1px solid var(--m-orange);font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
+#newExerciseOverlayV2{z-index:95;}
 /* --- set-logging sheet --- */
 #exercisePopupOverlayV2{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
 #exercisePopupSheetV2{height:calc(100% - var(--m-sheet-top) - var(--m-sheet-gap));max-height:none;padding-bottom:0;background:var(--m-white);}
@@ -4331,6 +4356,18 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
           <span class="gymv2-repeat-s" id="gymV2RepeatSub"></span>
         </span>
       </button>
+
+      <div class="gymv2-empty" id="gymV2Empty" hidden>
+        <section class="gymv2-ws" id="gymV2WsSec" aria-labelledby="gymV2WsLabel" hidden>
+          <p class="gymv2-ws-label" id="gymV2WsLabel">Twoje treningi</p>
+          <div class="gymv2-ws-row" id="gymV2WsRow"></div>
+          <div class="gymv2-ws-dots" id="gymV2WsDots" aria-hidden="true"></div>
+        </section>
+        <button type="button" class="gymv2-blank m-press" id="gymV2BlankBtn" onclick="openExercisePickerV2()">
+          <span class="gymv2-blank-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          <span class="gymv2-blank-t" data-i18n="gymEmptyStart">Rozpocznij pusty trening</span>
+        </button>
+      </div>
 
       <div class="gymv2-section-head" id="gymV2SectionHead">
         <p id="gymV2SectionLabel" data-i18n="gymV2YourExercises">Twoje ćwiczenia</p>
@@ -6246,6 +6283,10 @@ const T_EN = {
   gymV2Done: 'Completed',
   gymV2SaveWorkout: 'SAVE WORKOUT',
   gymV2PickOther: 'Pick another exercise',
+  gymEmptyStart: 'Start an empty workout', gymWsTitle: 'Your workouts', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
+  gymWsToday: 'last: today', gymWsYesterday: 'last: yesterday', gymWsAgo: n=>`last: ${n} days ago`,
+  flexBadge: 'Flexible', flexNoStar: 'A flexible plan has no star: you pick the workout on the Workout screen',
+  exerciseAddedToList: 'New exercise added to the list',
   gymV2Swap: 'Swap for today',
   swapV2Title: 'Swap exercise',
   swapV2Instead: 'Instead of',
@@ -10521,9 +10562,17 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.101.0";
+const APP_VERSION = "4.102.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "4.102.0": {
+    pl: [
+      {icon:'sparks', badge:'Nowość', title:'Trening bez planu na dziś', text:'Gdy na dziś nic nie masz zaplanowane, ekran Trening pokazuje Twoje treningi ze wszystkich planów (najdawniej robiony na początku), powtórzenie ostatniego treningu i pusty trening. W oknie wyboru ćwiczeń możesz dodać własne ćwiczenie i od razu je zaznaczyć. Plan bez dni tygodnia jest elastyczny: treningi wybierasz, kiedy chcesz.' },
+    ],
+    en: [
+      {icon:'sparks', badge:'New', title:'Workout without a plan for today', text:'When nothing is planned for today, the Workout screen shows your workouts from all plans (the one you did longest ago first), repeating your last workout and an empty workout. In the exercise picker you can add your own exercise and select it right away. A plan without weekdays is flexible: you pick the workout whenever you want.' },
+    ],
+  },
   "4.96.0": {
     pl: [
       {icon:'sparks', badge:'Nowość', title:'Masa ciała z obciążeniem', text:'Przy podciąganiu, pompkach i innych ćwiczeniach z masą ciała ustawisz suwakiem dodatkowy ciężar albo wspomaganie (guma, maszyna). Liczy się do objętości, kalorii i rekordów, a rekordy są osobno dla każdego wariantu.' },
@@ -15907,6 +15956,14 @@ function saveNewExerciseV2(){
     toast(t('exerciseAddedToPlan','Dodano nowe ćwiczenie do listy i do planu'));
     return;
   }
+  const pickerOpen = !document.getElementById('pickExerciseOverlayV2').classList.contains('hidden');
+  if(pickerOpen){   // dodane z okna wyboru: wracamy do niego z nowym ćwiczeniem zaznaczonym
+    pickerSelectedV2.add(name);
+    setTimeout(()=> document.documentElement.classList.add('modal-lock'), 300);   // po zamknięciu formularza (zdejmuje blokadę po 260 ms)
+    renderExercisePickerGridV2();
+    toast(t('exerciseAddedToList','Dodano nowe ćwiczenie do listy'));
+    return;
+  }
   onTileTapV2({...newEx, day:'Własne'});
   toast(t('exerciseAdded','Dodano nowe ćwiczenie do listy i do sesji'));
 }
@@ -15985,7 +16042,7 @@ function renderExercisePickerGridV2(animate){
     container, lib, query: pickExerciseSearchV2, collapsed: pickExerciseV2Collapsed,
     selected: ex=> pickerSelectedV2.has(ex.name),
     onTile: togglePickerExerciseV2, onSection: togglePickExerciseV2Section,
-    animate, addTile: false,
+    animate, addTile: true, addContext: 'gym',
   });
   const addBtn = document.getElementById('pickExerciseAddBtnV2');
   addBtn.disabled = pickerSelectedV2.size === 0;
@@ -16008,7 +16065,7 @@ function confirmExercisePickerV2(){
   pickerSelectedV2 = new Set();
   persistGymSession();
   closeExercisePickerV2();
-  renderGymGridV2();
+  renderGymV2();   // pusty trening: ze stanu pustego przechodzimy na zwykły ekran
 }
 
 function classifySession(exNames){
@@ -16038,6 +16095,7 @@ function workoutStartDateNow(){
 }
 // id aktywnego (oznaczonego gwiazdką) planu, o ile ten plan nadal istnieje; inaczej null
 function activePlanIdNow(){
+  if(repeatMode && repeatMode.planId && trainingPlans.some(p=>p.id===repeatMode.planId)) return repeatMode.planId;   // trening wybrany ze slidera: plan, z którego pochodzi
   const id = todayPlanId();
   return (id && trainingPlans.some(p=>p.id===id)) ? id : null;
 }
@@ -17039,7 +17097,19 @@ function cleanPlanMeta(m){
     level: str(m.level, 30),
     equipment: Array.isArray(m.equipment) ? m.equipment.map(x=> str(x, 60)).filter(Boolean).slice(0, 12) : [],
     description: str(m.description, 400),
+    ...(cleanPlanSessions(m.sessions).length ? {sessions: cleanPlanSessions(m.sessions)} : {}),
   };
+}
+/* Plan elastyczny (4.102.0): treningi bez dnia tygodnia żyją w plan.meta.sessions = [{id, name, exercises:[...]}]
+   (meta już się synchronizuje, więc bez zmiany schematu chmury). Odczyt tylko przez planSessions(). */
+function cleanPlanSessions(list){
+  if(!Array.isArray(list)) return [];
+  return list.slice(0, 20).map((s, i)=>{
+    if(!s || typeof s !== 'object' || !Array.isArray(s.exercises)) return null;
+    const name = typeof s.name === 'string' ? s.name.replace(/[<>"`\\]/g, '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, 60) : '';
+    const exercises = s.exercises.filter(e=> e && typeof e === 'object' && typeof e.name === 'string' && e.name).slice(0, 30);
+    return exercises.length ? {id: String(s.id || ('s' + (i + 1))).slice(0, 40), name: name || ('Trening ' + (i + 1)), exercises} : null;
+  }).filter(Boolean);
 }
 // jedyny odczyt meta planu: zapisane pole albo (plan Mekkio bez pola) meta z definicji; null = nieznane
 function planMetaOf(p){ return p ? (p.meta || builtinMetaFor(p.id) || null) : null; }
@@ -17287,6 +17357,9 @@ function planExercisesFor(plan, iso){ return planDayExercises(plan, dayKeyFromDa
 function planActiveDays(p){
   return PLAN_DAYS.filter(d=>planDayExercises(p, d).length>0);
 }
+function planSessions(p){ const m = planMetaOf(p); return (m && Array.isArray(m.sessions)) ? m.sessions : []; }
+// plan bez żadnego dnia = elastyczny: wybierasz trening, kiedy chcesz (nie może mieć gwiazdki)
+function planIsFlexible(p){ return !!p && planActiveDays(p).length === 0 && planSessions(p).length > 0; }
 /* Historia planu z istniejących danych (bez nowych kluczy): plan, wg którego liczymy tydzień
    w przeszłości, bierzemy z workout.planId treningów z tego tygodnia (pn–nd).
    planHistoryIndex(): Map poniedziałek tygodnia -> [{date, planId}] posortowane po dacie
@@ -17809,6 +17882,7 @@ function updatePlanPillLabel(){
 }
 function toggleStarredPlan(id){
   if(isPlanHidden(trainingPlans.find(p=>p.id===id)) && starredPlanId !== id) return;   // a hidden plus plan can't be picked
+  if(starredPlanId !== id && planIsFlexible(trainingPlans.find(p=>p.id===id))){ toast(t('flexNoStar','Plan elastyczny nie ma gwiazdki: treningi wybierasz na ekranie Trening')); return; }
   starredPlanId = (starredPlanId === id) ? null : id;
   if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId);
   else localStorage.removeItem(LS_STARRED_PLAN);
@@ -18130,6 +18204,7 @@ function buildPlanCardV2(p){
   const label = `${name}, ${plcLevelText(lvl)}, ${planExCountText(plcPerDay(f))}`;
   return `<div class="plc ${cls} m-press" role="button" tabindex="0" data-pa="detail" data-id="${escHtml(p.id)}" aria-label="${escHtml(label)}">
     <div class="plc-top"><span class="plc-src">${escHtml(plcSourceLabel(f.source))}</span>${pill}</div>
+    ${planIsFlexible(p) ? `<span class="plc-flex">${t('flexBadge','Elastyczny')}</span>` : ''}
     <p class="plc-name">${name}</p>
     <div class="plc-stats"><span class="plc-stat">${ph('calendar-dots')}${escHtml(palDaysText(f.daysCount))}</span><span class="plc-stat">${ph('barbell')}${escHtml(planExCountText(plcPerDay(f)))}</span><span class="plc-stat">${ph('clock-countdown')}~${f.minutes} min</span></div>
   </div>`;
@@ -19135,7 +19210,7 @@ function renderExAccordion(o){
         tile.onclick = ()=> o.onTile(ex);
         grid.appendChild(tile);
       });
-      if(o.addTile && !q && b.strength !== false) grid.appendChild(buildAddCustomExerciseTile('planEditor', label));
+      if(o.addTile && !q && b.strength !== false) grid.appendChild(buildAddCustomExerciseTile(o.addContext || 'planEditor', label));
       section.appendChild(grid);
     }
     container.appendChild(section);
@@ -21399,9 +21474,112 @@ function renderGymV2(){
 
   updateGymV2RepeatBtn();
   renderGymGridV2(true);
+  syncGymEmptyV2(true);
   renderGymDoneV2(true);
   updateGymPillsV2();
   liveRender();
+}
+/* ---------- Stan pusty ekranu Trening (4.102.0) ----------
+   Dziś nic do wykonania (brak planu na ten dzień, brak wybranego treningu, nic dodanego): Powtórz ostatni,
+   slider „Twoje treningi” ze wszystkich planów i „Rozpocznij pusty trening”. Wskaźniki i „Zakończ” dopiero po wyborze. */
+function gymEmptyStateV2(){
+  if(repeatMode || sessionExercises.length || extraGymTiles.length || Object.keys(popupDrafts).length) return false;
+  const planned = (todayPlanExerciseNames() || []).filter(e=> !BOOKEND_EX_NAMES.has(e.name));
+  return planned.length === 0;
+}
+function syncGymEmptyV2(force){
+  const root = document.getElementById('view-gym-v2'), box = document.getElementById('gymV2Empty');
+  if(!root || !box) return;
+  const empty = gymEmptyStateV2();
+  const was = root.classList.contains('is-empty');
+  root.classList.toggle('is-empty', empty);
+  box.hidden = !empty;
+  if(empty && (force || !was)) renderGymEmptyV2(!was);
+}
+/* Katalog treningów do slidera: dni planów z dniami + sesje planów elastycznych. „Ostatnio” liczone z historii:
+   trening z historii pasuje do pozycji, gdy co najmniej połowa ćwiczeń jest wspólna w obie strony. */
+function gymWorkoutCatalogV2(){
+  const entries = [];
+  visiblePlans().forEach(p=>{
+    const pName = planDisplayName(p);
+    PLAN_DAYS.forEach(d=>{
+      const names = planDayExercises(p, d).map(e=>e.name).filter(n=> !BOOKEND_EX_NAMES.has(n));
+      if(names.length) entries.push({ key: p.id + ':' + d, planId: p.id, label: `${pName} · ${planDayLabel(d)}`, name: PDT_DAY_FULL[d], names });
+    });
+    planSessions(p).forEach(se=>{
+      const names = se.exercises.map(e=>e.name).filter(n=> !BOOKEND_EX_NAMES.has(n));
+      if(names.length) entries.push({ key: p.id + ':' + se.id, planId: p.id, label: pName, planLabel: `${pName} · ${se.name}`, name: se.name, names });
+    });
+  });
+  const done = (workouts || []).filter(w=> w && w.exercises && w.exercises.length && typeof w.date === 'string');
+  entries.forEach(en=>{
+    const set = new Set(en.names);
+    let best = null;
+    done.forEach(w=>{
+      const wn = w.exercises.map(x=>x.name);
+      const common = wn.filter(n=> set.has(n)).length;
+      if(common * 2 < en.names.length || common * 2 < wn.length) return;
+      if(!best || w.date > best.date || (w.date === best.date && String(w.id) > String(best.id))) best = w;
+    });
+    en.lastDate = best ? best.date : '';
+    en.lastWorkout = best;
+  });
+  return entries.map((en, i)=> ({...en, _i: i}))
+    .sort((a, b)=> a.lastDate === b.lastDate ? a._i - b._i : (a.lastDate < b.lastDate ? -1 : 1));
+}
+const GYM_WS_LIMIT = 6;
+function gymLastAgoText(iso){
+  if(!iso) return t('gymWsNever', 'jeszcze nie robiony');
+  const days = Math.max(0, Math.round((new Date(todayStr() + 'T12:00:00') - new Date(iso + 'T12:00:00')) / 86400000));
+  if(days === 0) return t('gymWsToday', 'ostatnio: dziś');
+  if(days === 1) return t('gymWsYesterday', 'ostatnio: wczoraj');
+  return t('gymWsAgo', `ostatnio: ${days} dni temu`, days);
+}
+let gymWsList = [];
+function renderGymEmptyV2(animate){
+  const sec = document.getElementById('gymV2WsSec'), row = document.getElementById('gymV2WsRow'), dots = document.getElementById('gymV2WsDots');
+  document.getElementById('gymV2WsLabel').textContent = t('gymWsTitle', 'Twoje treningi');
+  gymWsList = gymWorkoutCatalogV2().slice(0, GYM_WS_LIMIT);
+  sec.hidden = !gymWsList.length;
+  row.innerHTML = gymWsList.map((en, i)=>{
+    const n = en.names.length;
+    const nm = escHtml(plTypo(en.name));
+    return `<button type="button" class="gymv2-ws-card m-press${i === 0 ? ' is-next' : ''}${animate ? ' m-rise' : ''}"${animate ? ` style="--i:${i}"` : ''} aria-pressed="${i === 0 ? 'true' : 'false'}" aria-label="${nm}, ${escHtml(en.label)}, ${planExCountText(n)}" onclick="startGymWorkoutFromCatalogV2(${i})">
+      ${i === 0 ? `<span class="gymv2-ws-tag">${t('gymWsNext', 'Proponowany')}</span>` : `<span class="gymv2-ws-plan">${escHtml(en.label)}</span>`}
+      ${i === 0 ? `<span class="gymv2-ws-plan">${escHtml(en.label)}</span>` : ''}
+      <span class="gymv2-ws-name">${nm}</span>
+      <span class="gymv2-ws-meta">${planExCountText(n)}</span>
+      <span class="gymv2-ws-last">${gymLastAgoText(en.lastDate)}</span>
+    </button>`;
+  }).join('');
+  dots.innerHTML = gymWsList.length > 1 ? gymWsList.map((_, i)=> `<i${i === 0 ? ' class="on"' : ''}></i>`).join('') : '';
+  row.scrollLeft = 0;
+  row.onscroll = ()=>{
+    const cards = row.children; if(!cards.length) return;
+    const step = cards[0].offsetWidth + 8;
+    const idx = Math.max(0, Math.min(cards.length - 1, Math.round(row.scrollLeft / step)));
+    Array.from(dots.children).forEach((d, i)=> d.classList.toggle('on', i === idx));
+  };
+}
+function startGymWorkoutFromCatalogV2(i){
+  const en = gymWsList[i];
+  if(!en) return;
+  const prefill = {};
+  if(en.lastWorkout) en.lastWorkout.exercises.forEach(ex=>{
+    if(!en.names.includes(ex.name)) return;
+    const sv = (ex.sets || []).map(s=>({ weight: s.weight > 0 ? String(s.weight) : '', reps: s.reps > 0 ? String(s.reps) : '' }));
+    if(sv.length) prefill[ex.name] = sv;
+  });
+  startGymWorkoutFromList({ names: en.names, prefill, date: en.lastDate || null, label: en.planLabel || en.label, planId: en.planId });
+}
+/* Jedna ścieżka startu treningu z listy nazw ćwiczeń (+ opcjonalny prefill): „Powtórz ostatni” i karty ze slidera. */
+function startGymWorkoutFromList(o){
+  repeatMode = { date: o.date || null, names: o.names, prefill: o.prefill || {}, label: o.label || null, planId: o.planId || null };
+  sessionExercises = [];
+  extraGymTiles = [];
+  persistGymSession();
+  if(currentRoute !== 'gym-v2') goRoute('gym-v2');
+  else renderGymV2();
 }
 /* #1 — "Powtórz ostatni trening": the most recent SAVED workout, by date
    then id (so multiple same-day workouts still order right). */
@@ -21417,7 +21595,7 @@ function updateGymV2RepeatBtn(){
   const sEl = document.getElementById('gymV2RepeatSub');
   if(repeatMode){
     btn.classList.add('is-active');
-    tEl.textContent = t('repeatActive', `Trening z ${fmtDateHuman(repeatMode.date)}`, fmtDateHuman(repeatMode.date));
+    tEl.textContent = repeatMode.label || t('repeatActive', `Trening z ${fmtDateHuman(repeatMode.date)}`, fmtDateHuman(repeatMode.date));
     sEl.textContent = t('repeatBackToPlan', 'Dotknij, żeby wrócić do planu');
     btn.hidden = false;
     return;
@@ -21532,16 +21710,11 @@ function applyRepeatLastWorkout(){
     }));
     prefill[ex.name] = sv.length ? sv : [{ weight:'', reps:'' }];
   });
-  repeatMode = { date: last.date, names, prefill };
-  sessionExercises = [];
-  extraGymTiles = [];
   // Loading a repeat only arranges the grid — it isn't training yet. The
   // session clock starts on the first real tile tap (onTileTapV2 →
   // markGymActivity), same as a fresh session; calling it here made the
   // plan card jump straight to "1 min".
-  persistGymSession();
-  if(currentRoute !== 'gym-v2') goRoute('gym-v2');
-  else renderGymV2();
+  startGymWorkoutFromList({ date: last.date, names, prefill });
   toast(t('repeatDone', `Wczytano trening z ${fmtDateHuman(last.date)}`, fmtDateHuman(last.date)));
 }
 /* GYM 5.0 tiles "Wybierz inne ćwiczenie" / "Dodaj ćwiczenie" (Figma 461:7507 / 461:7528):
@@ -21633,6 +21806,7 @@ function renderGymGridV2(animate){
   });
   gymGridStats = { done: gridDone, total: gridTotal };
   updateGymPillsV2();
+  syncGymEmptyV2();
   const searchBtn = document.createElement('button');
   searchBtn.type = 'button';
   searchBtn.className = 'gymv2-tile gymv2-search-tile';

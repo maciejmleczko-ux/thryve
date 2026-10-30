@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.101.0 (2026-10-30)
+- **Aktualna wersja:** 4.102.0 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,18 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.102.0 · MINOR · 2026-10-30
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Gdy na dziś nic nie masz zaplanowane, ekran Trening pokazuje Twoje treningi ze wszystkich planów (najdawniej robiony na początku), powtórzenie ostatniego treningu i pusty trening. W oknie wyboru ćwiczeń możesz dodać własne ćwiczenie i od razu je zaznaczyć. Plan bez dni tygodnia jest elastyczny: treningi wybierasz, kiedy chcesz.
+
+Stan pusty ekranu Trening (`gymEmptyStateV2`, `renderGymEmptyV2`): Powtórz ostatni, slider „Twoje treningi” (`gymWorkoutCatalogV2`: dni planów + sesje planów elastycznych, „ostatnio” z historii po wspólnych ćwiczeniach, najdawniej wykonany pierwszy z „Proponowany”, limit 6), „Rozpocznij pusty trening”. Jedna ścieżka startu `startGymWorkoutFromList` dla „Powtórz ostatni” i kart slidera (`repeatMode` dostał `label` i `planId`; zapisany trening dostaje `planId` planu karty). Picker ćwiczeń: kafel „Dodaj ćwiczenie” w każdej sekcji (`addContext:'gym'`), nowe własne ćwiczenie wraca zaznaczone do pickera. Plan elastyczny = plan bez dni; sesje w `plan.meta.sessions` (bez zmiany schematu chmury, `cleanPlanSessions`), odczyt przez `planSessions`; plan elastyczny nie dostaje gwiazdki, karta ma znaczek „Elastyczny”.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-30 — stan pusty ekranu Trening, slider treningów, plan elastyczny (dane)
 
 ### 4.101.0 · MINOR · 2026-10-30
 
