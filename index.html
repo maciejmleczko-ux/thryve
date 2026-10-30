@@ -3081,6 +3081,7 @@ body.gymv2-bg .pg-bg{display:block;}
 .gymv2-empty[hidden]{display:none;}
 .gymv2-empty{--plansv2-gutter:10px;}
 #gymV2WsSec[hidden],#gymV2WsSec2[hidden]{display:none;}
+.gymv2-ws-g{white-space:normal;}
 .gymv2-plan-tile{margin-bottom:var(--m-gap-card);}
 .gymv2-plan-tile[hidden]{display:none;}
 .gymv2-ws-sm .plc{flex-basis:218px;}   /* węższa karta jak w „Plany Mekkio” (Figma 542:15828) */
@@ -10556,7 +10557,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.103.1";
+const APP_VERSION = "4.103.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21496,12 +21497,8 @@ function syncGymEmptyV2(force){
 function gymWorkoutCatalogV2(){
   const entries = [];
   const byLib = new Map(orderedExerciseLibrary().map(e=>[e.name, e]));
-  // partie mięśni treningu (do 3), w kolejności pierwszego wystąpienia
-  const groupsOf = list=>{
-    const out = [];
-    list.forEach(e=>{ if(BOOKEND_EX_NAMES.has(e.name)) return; const b = muscleGroupBucket(e.group || (byLib.get(e.name) || {}).group); const l = LANG === 'en' ? b.en : b.pl; if(!out.includes(l)) out.push(l); });
-    return out.slice(0, 3);
-  };
+  // partie mięśni jak w szczegółach planu: „Klatka, plecy, nogi” (pdtDayTitle)
+  const groupsOf = (list, n)=> pdtDayTitle(list.filter(e=> !BOOKEND_EX_NAMES.has(e.name)).map(e=> e.group ? e : {...e, group: (byLib.get(e.name) || {}).group}), n);
   visiblePlans().forEach(p=>{
     const pName = planDisplayName(p);
     const f = planFacts(p), tone = planTone(p, f);
@@ -21513,11 +21510,11 @@ function gymWorkoutCatalogV2(){
       const sig = names.slice().sort().join('|');
       if(!names.length || seen.has(sig)) return;
       seen.add(sig);
-      entries.push({ key: p.id + ':' + d, tone: tone.cls, pill, planId: p.id, label: pName, groups: groupsOf(planDayExercises(p, d)), name: pName, names });
+      entries.push({ key: p.id + ':' + d, tone: tone.cls, pill, planId: p.id, label: pName, groups: groupsOf(planDayExercises(p, d), entries.length + 1), name: pName, names });
     });
     planSessions(p).forEach(se=>{
       const names = se.exercises.map(e=>e.name).filter(n=> !BOOKEND_EX_NAMES.has(n));
-      if(names.length) entries.push({ key: p.id + ':' + se.id, tone: tone.cls, pill, planId: p.id, label: pName, groups: groupsOf(se.exercises), planLabel: `${pName} · ${se.name}`, name: se.name, names, session: true });
+      if(names.length) entries.push({ key: p.id + ':' + se.id, tone: tone.cls, pill, planId: p.id, label: pName, groups: groupsOf(se.exercises, entries.length + 1), planLabel: `${pName} · ${se.name}`, name: se.name, names, session: true });
     });
   });
   const done = (workouts || []).filter(w=> w && w.exercises && w.exercises.length && typeof w.date === 'string');
@@ -21548,16 +21545,15 @@ let gymWsList = [];
 function gymWsCardHtml(en, i, animate){
   const n = en.names.length;
   const nm = escHtml(plTypo(en.name));
-  const tags = (en.groups || []).map(g=> `<span class="pal-tag">${escHtml(g)}</span>`).join('');
-  return `<button type="button" class="plc ${en.tone} m-press${animate ? ' m-rise-tile' : ''}"${animate ? ` style="--i:${i}"` : ''} aria-label="${nm}, ${escHtml((en.groups || []).join(', '))}, ${planExCountText(n)}" onclick="startGymWorkoutFromCatalogV2(${i})">
+  return `<button type="button" class="plc ${en.tone} m-press${animate ? ' m-rise-tile' : ''}"${animate ? ` style="--i:${i}"` : ''} aria-label="${nm}, ${escHtml(en.groups || '')}, ${planExCountText(n)}" onclick="startGymWorkoutFromCatalogV2(${i})">
       <p class="plc-name">${nm}</p>
-      ${tags ? `<div class="pal-tags">${tags}</div>` : ''}
+      ${en.groups ? `<p class="plc-sub gymv2-ws-g">${escHtml(en.groups)}</p>` : ''}
       <div class="plc-stats"><span class="plc-stat">${ph('barbell')}${escHtml(planExCountText(n))}</span></div>
       ${en.lastDate ? `<p class="plc-sub">${gymLastAgoText(en.lastDate)}</p>` : ''}
     </button>`;
 }
 /* Hierarchia jak na ekranie Plany (Figma 542:15828): treningi stworzone przez użytkownika (sesje planów elastycznych) wyżej i na pełnej karcie,
-   dni z planów niżej na węższych kartach; nazwa jest największa, dzień tylko małą etykietą. Kolejność na karcie: nazwa, partie w pastylkach, liczba ćwiczeń; bez znaczka „Proponowany” (kolejność: najdawniej robiony pierwszy). */
+   dni z planów niżej na węższych kartach; nazwa jest największa, dzień tylko małą etykietą. Kolejność na karcie: nazwa, partie po przecinku (jak w szczegółach planu), liczba ćwiczeń; bez znaczka „Proponowany” (kolejność: najdawniej robiony pierwszy). */
 /* Pierwszy kafel stanu pustego: wybrany (z gwiazdką) plan, ten sam kafel „Twój plan” co w Planach; Start uruchamia jego trening także poza dniem z kalendarza. */
 function renderGymPlanTileV2(animate){
   const box = document.getElementById('gymV2PlanTile');
