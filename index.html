@@ -10557,7 +10557,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.103.4";
+const APP_VERSION = "4.103.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21633,7 +21633,7 @@ function updateGymV2RepeatBtn(){
   }
   btn.classList.remove('is-active');
   const last = lastSavedWorkout();
-  if(!last){ btn.hidden = true; return; }
+  if(!last || gymEmptyStateV2()){ btn.hidden = true; return; }   // stan pusty: karty treningów robią to samo, „Powtórz ostatni” zostaje na Pulpicie
   const n = last.exercises.length;
   const vol = Math.round(workoutVolumeKg(last));
   tEl.textContent = t('repeatLastWorkout','Powtórz ostatni trening');
