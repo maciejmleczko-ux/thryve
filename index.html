@@ -4491,6 +4491,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         <div class="pev2-anim-tile pev2-anim-tile-2">
           <p class="pev2-lab" id="planDaysLabelV2" data-i18n="peV2DaysLabel">DNI TYGODNIA</p>
           <div class="pev2-day-row" id="planDayRowV2" role="group" aria-labelledby="planDaysLabelV2"></div>
+          <p class="pev2-fork-hint hidden" id="planFreeHintV2" role="status" data-i18n="peFreeHint">Bez dni: wybierasz trening, kiedy chcesz.</p>
           <button type="button" class="pev2-periodize-toggle" id="planPeriodizeToggleV2" role="switch" aria-checked="false" onclick="togglePlanPeriodization()">
             <span>
               <span class="pev2-periodize-toggle-title" data-i18n="peV2PeriodizeTitle">ZMIENNA INTENSYWNOŚĆ</span>
@@ -6276,7 +6277,7 @@ const T_EN = {
   gymV2PickOther: 'Pick another exercise',
   gymEmptyStart: 'Build a workout', gymWsTitle: 'Your workouts', gymWsOwn: 'My workouts', gymWsShow: 'Show', gymWsHide: 'Hide', gymWsLast: 'Last workout', gymWsPlans: 'Workouts from plans', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
   gymWsToday: 'last: today', gymWsYesterday: 'last: yesterday', gymWsAgo: n=>`last: ${n} days ago`,
-  flexBadge: 'Flexible', flexNoStar: 'A flexible plan has no star: you pick the workout on the Workout screen',
+  flexBadge: 'Workout', plansV2MyTrainings: 'My workouts', peTrainTitle: 'No days selected', peTrainBody: 'Without weekdays this will be saved as a workout you pick whenever you want.', peTrainYes: 'Save workout', peTrainNo: 'Back', trainingSaved: 'Workout saved', flexNoStar: 'A workout has no star: you pick it on the Workout screen',
   exerciseAddedToList: 'New exercise added to the list',
   gymV2Swap: 'Swap for today',
   swapV2Title: 'Swap exercise',
@@ -6474,7 +6475,7 @@ stV2SessionsSub: 'with cardio exercises',
   palNoResT: 'No plans for these filters', palNoResD: 'Try another level or number of days.', palClearFilters: 'Clear filters',
   palSwitched: n => `Active plan: "${n}"`, palFAny: 'All', palFApply: 'APPLY',
   exOne: 'exercise', exFew: 'exercises', exMany: 'exercises',
-  peDayEmpty: 'no exercises', pcpSource: 'source workout', peMoreA11y: 'More options for this day', peMenuA11y: 'Day menu',
+  peDayEmpty: 'no exercises', pcpSource: 'source workout', peMoreA11y: 'More options for this day', peFreeHint: 'No days: you pick the workout whenever you want.', peMenuA11y: 'Day menu',
   peMenuCopy: 'Copy to other days…', peMenuCopySub: 'E.g. to Monday and Wednesday',
   peMenuDelete: day => `Delete ${day} workout`, peMenuDeleteSub: 'We will ask you to confirm',
   peDelTitle: 'Delete this workout?',
@@ -10553,7 +10554,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.104.3";
+const APP_VERSION = "4.105.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -17437,6 +17438,8 @@ function planFacts(plan){
   const exercises = [];
   days.forEach(d=> planDayExercises(plan, d).forEach(e=>{ if(!BOOKEND_EX_NAMES.has(e.name)) exercises.push(e); }));
   const equipment = PLAN_EQUIP_FILTERS.map(f=>f.key).filter(k=> k !== 'all' && exercises.some(e=> e.equipment === k));
+  const training = !days.length && planSessions(plan).length > 0;   // trening: jedna lista bez dni
+  if(training) planSessions(plan).forEach(se=> se.exercises.forEach(e=>{ if(!BOOKEND_EX_NAMES.has(e.name)) exercises.push(e); }));
   const exerciseCount = exercises.length;
   const cz = plan.customizationV2 || null;
   let level = PLAN_LEVEL_FACT[meta.level] || (cz && PLAN_LEVEL_FACT[cz.difficulty]) || null;
@@ -17447,7 +17450,7 @@ function planFacts(plan){
     equipment,
     days,
     daysCount: days.length,
-    minutes: exerciseCount ? Math.max(15, planAvgMinutesPerDay(plan)) : 0,
+    minutes: exerciseCount ? (training ? Math.max(1, pdtDayMinutes(exercises)) : Math.max(15, planAvgMinutesPerDay(plan))) : 0,
     exerciseCount,
     source: PLAN_META_SOURCES.includes(meta.source) ? meta.source : (plan.builtin ? 'mekkio' : 'own'),
     description: meta.description || null,
@@ -17873,7 +17876,7 @@ function updatePlanPillLabel(){
 }
 function toggleStarredPlan(id){
   if(isPlanHidden(trainingPlans.find(p=>p.id===id)) && starredPlanId !== id) return;   // a hidden plus plan can't be picked
-  if(starredPlanId !== id && planIsFlexible(trainingPlans.find(p=>p.id===id))){ toast(t('flexNoStar','Plan elastyczny nie ma gwiazdki: treningi wybierasz na ekranie Trening')); return; }
+  if(starredPlanId !== id && planIsFlexible(trainingPlans.find(p=>p.id===id))){ toast(t('flexNoStar','Trening nie ma gwiazdki: wybierasz go na ekranie Trening')); return; }
   starredPlanId = (starredPlanId === id) ? null : id;
   if(starredPlanId) localStorage.setItem(LS_STARRED_PLAN, starredPlanId);
   else localStorage.removeItem(LS_STARRED_PLAN);
@@ -18190,13 +18193,14 @@ function buildPlanCardV2(p){
   const own = !p.builtin && f.source !== 'mekkio';
   const lvl = f.level || 'mid';
   const cls = (own ? 'plc--own ' : '') + planTone(p, f).cls;
-  const pill = planIsFlexible(p) ? `<span class="plc-lvl">${t('flexBadge','Elastyczny')}</span>` : plcPillHtml(own, lvl);
+  const flex = planIsFlexible(p);
+  const pill = flex ? `<span class="plc-lvl">${t('flexBadge','Trening')}</span>` : plcPillHtml(own, lvl);
   const name = escHtml(planDisplayName(p));
   const label = `${name}, ${plcLevelText(lvl)}, ${planExCountText(plcPerDay(f))}`;
   return `<div class="plc ${cls} m-press" role="button" tabindex="0" data-pa="detail" data-id="${escHtml(p.id)}" aria-label="${escHtml(label)}">
     <div class="plc-top"><span class="plc-src">${escHtml(plcSourceLabel(f.source))}</span>${pill}</div>
     <p class="plc-name">${name}</p>
-    <div class="plc-stats"><span class="plc-stat">${ph('calendar-dots')}${escHtml(palDaysText(f.daysCount))}</span><span class="plc-stat">${ph('barbell')}${escHtml(planExCountText(plcPerDay(f)))}</span><span class="plc-stat">${ph('clock-countdown')}~${f.minutes} min</span></div>
+    <div class="plc-stats">${flex ? '' : `<span class="plc-stat">${ph('calendar-dots')}${escHtml(palDaysText(f.daysCount))}</span>`}<span class="plc-stat">${ph('barbell')}${escHtml(planExCountText(plcPerDay(f)))}</span><span class="plc-stat">${ph('clock-countdown')}~${f.minutes} min</span></div>
   </div>`;
 }
 const PLC_LOCK_SVG = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 80h-32V56a48 48 0 0 0-96 0v24H48a16 16 0 0 0-16 16v112a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16ZM96 56a32 32 0 0 1 64 0v24H96Z"/></svg>';
@@ -18374,6 +18378,7 @@ const PDT_DAY_FULL = LANG === 'en'
 function openPlanDetailV2(id){
   const p = trainingPlans.find(x=>x.id === id);
   if(!p || isPlanHidden(p)) return;
+  if(planIsFlexible(p)){ openPlanEditorV2(id); return; }   // trening (plan bez dni): od razu edytor, szczegół z dniami byłby pusty
   pdt = { id, back: currentRoute === 'plans-all-v2' ? 'plans-all-v2' : 'plans-v2', tab: 0, open: null };
   goRoute('plan-detail-v2');
 }
@@ -18802,12 +18807,14 @@ function renderPlansListV2(animate){
   rowsEl.querySelectorAll('[data-row]').forEach(r=>{ kept[r.dataset.row] = r.scrollLeft; });
   const rc = i => animate ? ` m-rise-tile" style="--i:${i}` : '';
   const listed = visiblePlans();
-  const own = listed.filter(p=> !p.builtin);
+  const own = listed.filter(p=> !p.builtin && !planIsFlexible(p));
+  const trainings = listed.filter(p=> planIsFlexible(p));
   const mekkio = plansV2OnbOrder(listed.filter(p=> p.builtin));
   heroEl.innerHTML = plansV2HeroHtml(animate);
   const newCard = `<div class="plc plc--new m-press" role="button" tabindex="0" data-pa="new" aria-label="${t('plansV2AddTitle', 'Dodaj plan')}">${ph('plus-icon')}<span class="plc-newl">${t('plansV2NewPlan', 'Nowy plan')}</span></div>`;
   const importLink = `<button type="button" class="plansv2-link m-press" data-pa="import">${t('plansV2Import', 'Importuj')}</button>`;
   let html = plansV2SectionHtml('own', t('plansV2MyPlans', 'Moje plany'), own.map(buildPlanCardV2).join('') + newCard, rc(1), importLink);
+  if(trainings.length) html += plansV2SectionHtml('trainings', t('plansV2MyTrainings', 'Moje treningi'), trainings.map(buildPlanCardV2).join(''), rc(2), '', true);
   if(mekkio.length) html += plansV2SectionHtml('mekkio', t('plansV2MekkioPlans', 'Plany Mekkio'), mekkio.map(buildPlanCardV2).join(''), rc(2));
   html += plansV2AiSectionHtml(rc(3));
   rowsEl.innerHTML = html;
@@ -18852,15 +18859,19 @@ function openPlanEditorV2(id, seed){
   stripWarmupStretch(schedule);
   const withEx = PLAN_DAYS.filter(d=> schedule[d].length > 0);
   const today = dayKeyFromDate(todayStr());
-  const activeDay = (schedule[today].length || !withEx.length) ? today : withEx[0];   // edytujemy dzisiejszy dzień, a gdy plan ma treningi tylko w inne dni, pierwszy z nich
+  // trening (plan bez dni): edytujemy jedną listę bez dnia; reszta jak dla planu
+  const isTraining = !!(existing && !seed && planIsFlexible(existing));
+  const activeDay = isTraining ? null : ((schedule[today].length || !withEx.length) ? today : withEx[0]);   // edytujemy dzisiejszy dzień, a gdy plan ma treningi tylko w inne dni, pierwszy z nich
   editingPlan = {
+    training: isTraining,
+    free: isTraining ? planSessions(existing).flatMap(se=> se.exercises).filter(e=> !BOOKEND_EX_NAMES.has(e.name)).map(e=>({...e})) : [],
     id: existing && !seed ? existing.id : null,
     name: existing ? planDisplayName(existing) : '',
     builtin: existing && !seed ? !!existing.builtin : false,
     periodized: existing ? !!existing.periodized : false,
     schedule,
     activeDay,
-    marked: new Set(withEx.concat(activeDay)),
+    marked: new Set(activeDay ? withEx.concat(activeDay) : withEx),
   };
   if(currentRoute !== 'plan-editor-v2'){
     planEditorBackRoute = (currentRoute === 'plan-detail-v2' || currentRoute === 'plans-all-v2') ? currentRoute : 'plans-v2';
@@ -19215,18 +19226,16 @@ function renderPlanEditorGridV2(animate){
   if(planEditorEquipmentFilter !== 'all'){
     lib = lib.filter(ex => exMatchesEquipFilter(ex, planEditorEquipmentFilter));
   }
-  const day = editingPlan.activeDay;
-  const dayExercises = day ? editingPlan.schedule[day] : [];
+  const dayExercises = planEditorList();
   renderExAccordion({
     container, lib, query: planEditorSearch, collapsed: planEditorV2Collapsed,
     selected: ex=> dayExercises.some(e=>e.name===ex.name),
     onTile: togglePlanExercise, onSection: togglePlanEditorV2Section,
     animate, addTile: true,
   });
-  // Żaden dzień nie jest zaznaczony: lista widoczna, ale zablokowana, z podpowiedzią nad nią
-  container.classList.toggle('is-locked', !day);
-  container.toggleAttribute('inert', !day);
-  if(!day) container.insertAdjacentHTML('afterbegin', `<p class="exs-empty pev2-pickday" role="status">${t('pePickDay', 'Wybierz dzień, żeby dodać ćwiczenia.')}</p>`);
+  // Żaden dzień nie jest zaznaczony: lista jest wolna (zapisze się jako trening), podpowiedź pod chipami dni
+  const hint = document.getElementById('planFreeHintV2');
+  if(hint) hint.classList.toggle('hidden', !!editingPlan.activeDay);
   refreshPlanEditorV2Scroll();
 }
 // Same "only grant scroll when content genuinely overflows" technique as
@@ -19262,9 +19271,10 @@ function refreshPlanEditorV2Scroll(){
     document.body.scrollTop = 0;
   }
 }
+// lista edytowana teraz: ćwiczenia wybranego dnia, a bez zaznaczonego dnia lista wolna (po zapisie: trening)
+function planEditorList(){ return editingPlan.activeDay ? editingPlan.schedule[editingPlan.activeDay] : editingPlan.free; }
 function togglePlanExercise(ex){
-  if(!editingPlan.activeDay) return;   // bez edytowanego dnia lista jest zablokowana
-  const dayExercises = editingPlan.schedule[editingPlan.activeDay];
+  const dayExercises = planEditorList();
   const idx = dayExercises.findIndex(e=>e.name===ex.name);
   if(idx !== -1){ dayExercises.splice(idx,1); }
   else {
@@ -19289,9 +19299,34 @@ function togglePlanExercise(ex){
 function savePlanEditor(){
   const name = (editingPlan.name || '').trim();
   if(!name){ toast(t('planNameRequired','Podaj nazwę planu')); return; }
-  if(!planTotalExercises(editingPlan)){ toast(t('planNeedsExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
+  const hasDays = planTotalExercises(editingPlan) > 0;
+  const freeN = editingPlan.free.filter(e=> !BOOKEND_EX_NAMES.has(e.name)).length;
+  if(!hasDays && !freeN){ toast(t('planNeedsExercise','Dodaj przynajmniej jedno ćwiczenie')); return; }
   editingPlan.name = name;
-  ensureWarmupStretch(editingPlan.schedule);
+  if(hasDays){ savePlanEditorCommit(false); return; }
+  // brak dni: to będzie trening (plan bez dni tygodnia); nowy lub przerobiony z planu pytamy, zapisany trening zapisujemy od razu
+  if(editingPlan.training){ savePlanEditorCommit(true); return; }
+  gymConfirmV2({
+    title: t('peTrainTitle', 'Nie zaznaczono dni'),
+    body: t('peTrainBody', 'Bez dni tygodnia zapiszemy to jako trening, który wybierasz, kiedy chcesz.'),
+    yes: t('peTrainYes', 'Zapisz trening'),
+    no: t('peTrainNo', 'Wróć'),
+    onYes: ()=> savePlanEditorCommit(true),
+  });
+}
+function savePlanEditorCommit(asTraining){
+  if(asTraining){
+    editingPlan.schedule = emptySchedule();
+  } else {
+    ensureWarmupStretch(editingPlan.schedule);
+  }
+  // trening: jedna lista ćwiczeń w plan.meta.sessions (bez zmiany schematu chmury)
+  const withSessions = m=>{
+    const meta = {...m, equipment: [...(m.equipment || [])]};
+    if(asTraining) meta.sessions = [{ id: 's1', name: editingPlan.name, exercises: editingPlan.free.filter(e=> !BOOKEND_EX_NAMES.has(e.name)).map(e=>({...e})) }];
+    else delete meta.sessions;
+    return meta;
+  };
   let savedId;
   if(editingPlan.id){
     const idx = trainingPlans.findIndex(p=>p.id===editingPlan.id);
@@ -19308,20 +19343,26 @@ function savePlanEditor(){
       // (2026-08-29). See PLANSV2_CUSTOMIZABLE_IDS / planIsDostosujable()
       // for the equivalent fork done by "Dostosuj plan".
       savedId = 'plan_' + Date.now();
-      trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule, meta: planMetaForEdit(original)});
+      trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule, meta: withSessions(planMetaForEdit(original))});
       if(starredPlanId === original.id){ starredPlanId = savedId; localStorage.setItem(LS_STARRED_PLAN, savedId); }
     } else {
-      trainingPlans[idx] = {...original, name: editingPlan.name, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule, meta: planMetaForEdit(original)};
+      trainingPlans[idx] = {...original, name: editingPlan.name, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule, meta: withSessions(planMetaForEdit(original))};
       savedId = editingPlan.id;
     }
   } else {
     savedId = 'plan_'+Date.now();
-    trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule, meta: blankPlanMeta('own')});
+    trainingPlans.push({id:savedId, name: editingPlan.name, builtin:false, periodized: !!editingPlan.periodized, schedule: editingPlan.schedule, meta: withSessions(blankPlanMeta('own'))});
   }
+  // plan z gwiazdką, który zapisano jako trening, traci gwiazdkę (trening nie ma gwiazdki)
+  if(asTraining && starredPlanId === savedId){ starredPlanId = null; localStorage.removeItem(LS_STARRED_PLAN); scheduleCloudPush(); }
   saveTrainingPlansList();
-  toast(t('planSaved','Plan zapisany'));
+  toast(asTraining ? t('trainingSaved','Trening zapisany') : t('planSaved','Plan zapisany'));
   updateTodayPlanBanner();
   updatePlanPillLabel();
+  if(asTraining){
+    goRoute('plans-v2');   // trening nie ma szczegółu z dniami: wracamy na listę Plany
+    return;
+  }
   if(planOnboardingActive && starredPlanId !== savedId){
     toggleStarredPlan(savedId); // stars it and, since we're mid plan-onboarding, carries the user onward
   } else {
