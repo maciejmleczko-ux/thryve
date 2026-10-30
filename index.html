@@ -6278,7 +6278,7 @@ const T_EN = {
   gymV2Done: 'Completed',
   gymV2SaveWorkout: 'SAVE WORKOUT',
   gymV2PickOther: 'Pick another exercise',
-  gymEmptyStart: 'Start an empty workout', gymWsTitle: 'Your workouts', gymWsOwn: 'My workouts', gymWsPlans: 'Workouts from plans', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
+  gymEmptyStart: 'Start an empty workout', gymWsTitle: 'Your workouts', gymWsOwn: 'My workouts', gymWsLast: 'Last workout', gymWsPlans: 'Workouts from plans', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
   gymWsToday: 'last: today', gymWsYesterday: 'last: yesterday', gymWsAgo: n=>`last: ${n} days ago`,
   flexBadge: 'Flexible', flexNoStar: 'A flexible plan has no star: you pick the workout on the Workout screen',
   exerciseAddedToList: 'New exercise added to the list',
@@ -10557,7 +10557,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.103.5";
+const APP_VERSION = "4.103.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21571,7 +21571,17 @@ function renderGymPlanTileV2(animate){
 function renderGymEmptyV2(animate){
   renderGymPlanTileV2(animate);
   const all = gymWorkoutCatalogV2();
-  const own = all.filter(e=> e.session), fromPlans = all.filter(e=> !e.session);   // bez limitu: wszystkie treningi ze wszystkich planów
+  const own = all.filter(e=> e.session), fromPlans = all.filter(e=> !e.session);
+  // „Ostatni trening”: zwykła karta na początku pierwszego widocznego rzędu (powtórka z ostatnimi ciężarami, także treningu spoza planów)
+  const lw = lastSavedWorkout();
+  if(lw){
+    const byLib = new Map(orderedExerciseLibrary().map(e=>[e.name, e]));
+    const lastEn = { key: 'last', tone: 'tn tn--own', planId: (lw.planId && trainingPlans.some(p=>p.id===lw.planId)) ? lw.planId : null,
+      label: t('gymWsLast', 'Ostatni trening'), name: t('gymWsLast', 'Ostatni trening'),
+      names: lw.exercises.map(e=>e.name).filter(n=> !BOOKEND_EX_NAMES.has(n)), lastDate: lw.date, lastWorkout: lw,
+      groups: pdtDayTitle(lw.exercises.filter(e=> !BOOKEND_EX_NAMES.has(e.name)).map(e=> ({...e, group: e.group || (byLib.get(e.name) || {}).group})), 1) };
+    if(lastEn.names.length) (own.length ? own : fromPlans).unshift(lastEn);
+  }   // bez limitu: wszystkie treningi ze wszystkich planów
   gymWsList = own.concat(fromPlans);
   const fill = (secId, rowId, labelId, labelKey, labelPl, list, offset)=>{
     document.getElementById(labelId).textContent = t(labelKey, labelPl);

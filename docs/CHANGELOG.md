@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.103.5 (2026-10-30)
+- **Aktualna wersja:** 4.103.6 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.103.6 · PATCH · 2026-10-30
+
+Ekran Trening w stanie pustym: „Powtórz ostatni trening” wraca jako zwykła karta „Ostatni trening” na początku pierwszego widocznego rzędu slidera (styl `plc` + `tn--own`, nazwa, partie po przecinku, liczba ćwiczeń). Dotknięcie = ta sama ścieżka startu `startGymEntryV2` z ostatnimi ciężarami; działa też dla treningu spoza planów.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-30 — karta „Ostatni trening” w sliderze
 
 ### 4.103.5 · PATCH · 2026-10-30
 
