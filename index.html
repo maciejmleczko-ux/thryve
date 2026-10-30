@@ -3080,7 +3080,8 @@ body.gymv2-bg .pg-bg{display:block;}
 .gymv2-empty{display:flex;flex-direction:column;gap:var(--m-gap-card);padding-bottom:120px;}
 .gymv2-empty[hidden]{display:none;}
 .gymv2-empty{--plansv2-gutter:10px;}
-#gymV2WsSec[hidden]{display:none;}
+#gymV2WsSec[hidden],#gymV2WsSec2[hidden]{display:none;}
+.gymv2-ws-sm .plc{flex-basis:218px;}   /* węższa karta jak w „Plany Mekkio” (Figma 542:15828) */
 .gymv2-blank{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;padding:10px 14px;box-sizing:border-box;font-family:inherit;color:var(--m-ink);background:transparent;border:1.5px dashed var(--m-orange);border-radius:var(--m-r-md);cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
 .gymv2-blank-ico svg{width:22px;height:22px;display:block;color:var(--m-orange);}
 .gymv2-blank-t{font-size:var(--m-fs-base);font-weight:500;letter-spacing:.04em;}
@@ -4345,8 +4346,12 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
 
       <div class="gymv2-empty" id="gymV2Empty" hidden>
         <section class="plansv2-sec" id="gymV2WsSec" aria-labelledby="gymV2WsLabel" hidden>
-          <div class="plansv2-sec-head"><p class="plansv2-sec-label" id="gymV2WsLabel">Twoje treningi</p></div>
+          <div class="plansv2-sec-head"><p class="plansv2-sec-label" id="gymV2WsLabel">Moje treningi</p></div>
           <div class="plansv2-row" id="gymV2WsRow"></div>
+        </section>
+        <section class="plansv2-sec gymv2-ws-sm" id="gymV2WsSec2" aria-labelledby="gymV2WsLabel2" hidden>
+          <div class="plansv2-sec-head"><p class="plansv2-sec-label" id="gymV2WsLabel2">Treningi z planów</p></div>
+          <div class="plansv2-row" id="gymV2WsRow2"></div>
         </section>
         <button type="button" class="gymv2-blank m-press" id="gymV2BlankBtn" onclick="openExercisePickerV2()">
           <span class="gymv2-blank-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
@@ -6268,7 +6273,7 @@ const T_EN = {
   gymV2Done: 'Completed',
   gymV2SaveWorkout: 'SAVE WORKOUT',
   gymV2PickOther: 'Pick another exercise',
-  gymEmptyStart: 'Start an empty workout', gymWsTitle: 'Your workouts', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
+  gymEmptyStart: 'Start an empty workout', gymWsTitle: 'Your workouts', gymWsOwn: 'My workouts', gymWsPlans: 'Workouts from plans', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
   gymWsToday: 'last: today', gymWsYesterday: 'last: yesterday', gymWsAgo: n=>`last: ${n} days ago`,
   flexBadge: 'Flexible', flexNoStar: 'A flexible plan has no star: you pick the workout on the Workout screen',
   exerciseAddedToList: 'New exercise added to the list',
@@ -10547,7 +10552,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.102.1";
+const APP_VERSION = "4.102.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21490,11 +21495,11 @@ function gymWorkoutCatalogV2(){
     const pill = plcPillHtml(tone.own, (f && f.level) || 'mid');
     PLAN_DAYS.forEach(d=>{
       const names = planDayExercises(p, d).map(e=>e.name).filter(n=> !BOOKEND_EX_NAMES.has(n));
-      if(names.length) entries.push({ key: p.id + ':' + d, tone: tone.cls, pill, planId: p.id, label: `${pName} · ${planDayLabel(d)}`, name: PDT_DAY_FULL[d], names });
+      if(names.length) entries.push({ key: p.id + ':' + d, tone: tone.cls, pill, planId: p.id, label: PDT_DAY_FULL[d], name: pName, names });
     });
     planSessions(p).forEach(se=>{
       const names = se.exercises.map(e=>e.name).filter(n=> !BOOKEND_EX_NAMES.has(n));
-      if(names.length) entries.push({ key: p.id + ':' + se.id, tone: tone.cls, pill, planId: p.id, label: pName, planLabel: `${pName} · ${se.name}`, name: se.name, names });
+      if(names.length) entries.push({ key: p.id + ':' + se.id, tone: tone.cls, pill, planId: p.id, label: pName, planLabel: `${pName} · ${se.name}`, name: se.name, names, session: true });
     });
   });
   const done = (workouts || []).filter(w=> w && w.exercises && w.exercises.length && typeof w.date === 'string');
@@ -21522,22 +21527,33 @@ function gymLastAgoText(iso){
   return t('gymWsAgo', `ostatnio: ${days} dni temu`, days);
 }
 let gymWsList = [];
-function renderGymEmptyV2(animate){
-  const sec = document.getElementById('gymV2WsSec'), row = document.getElementById('gymV2WsRow');
-  document.getElementById('gymV2WsLabel').textContent = t('gymWsTitle', 'Twoje treningi');
-  gymWsList = gymWorkoutCatalogV2().slice(0, GYM_WS_LIMIT);
-  sec.hidden = !gymWsList.length;
-  row.innerHTML = gymWsList.map((en, i)=>{
-    const n = en.names.length;
-    const nm = escHtml(plTypo(en.name));
-    const pill = i === 0 ? `<span class="plc-lvl">${t('gymWsNext', 'Proponowany')}</span>` : en.pill;
-    return `<button type="button" class="plc ${en.tone} m-press${animate ? ' m-rise-tile' : ''}"${animate ? ` style="--i:${i}"` : ''} aria-pressed="${i === 0 ? 'true' : 'false'}" aria-label="${nm}, ${escHtml(en.label)}, ${planExCountText(n)}${i === 0 ? ', ' + t('gymWsNext', 'Proponowany') : ''}" onclick="startGymWorkoutFromCatalogV2(${i})">
+function gymWsCardHtml(en, i, animate){
+  const n = en.names.length;
+  const nm = escHtml(plTypo(en.name));
+  const pill = en._prop ? `<span class="plc-lvl">${t('gymWsNext', 'Proponowany')}</span>` : en.pill;
+  return `<button type="button" class="plc ${en.tone} m-press${animate ? ' m-rise-tile' : ''}"${animate ? ` style="--i:${i}"` : ''} aria-pressed="${en._prop ? 'true' : 'false'}" aria-label="${nm}, ${escHtml(en.label)}, ${planExCountText(n)}${en._prop ? ', ' + t('gymWsNext', 'Proponowany') : ''}" onclick="startGymWorkoutFromCatalogV2(${i})">
       <div class="plc-top"><span class="plc-src">${escHtml(en.label)}</span>${pill}</div>
       <p class="plc-name">${nm}</p>
       <div class="plc-stats"><span class="plc-stat">${ph('barbell')}${escHtml(planExCountText(n))}</span></div>
       <p class="plc-sub">${gymLastAgoText(en.lastDate)}</p>
     </button>`;
-  }).join('');
+}
+/* Hierarchia jak na ekranie Plany (Figma 542:15828): treningi stworzone przez użytkownika (sesje planów elastycznych) wyżej i na pełnej karcie,
+   dni z planów niżej na węższych kartach; nazwa jest największa, dzień tylko małą etykietą. Proponowany (najdawniej robiony) dostaje pastylkę tam, gdzie wypadnie. */
+function renderGymEmptyV2(animate){
+  const all = gymWorkoutCatalogV2();
+  const own = all.filter(e=> e.session).slice(0, GYM_WS_LIMIT), fromPlans = all.filter(e=> !e.session).slice(0, GYM_WS_LIMIT);
+  const propKey = all.length ? all[0].key : null;
+  gymWsList = own.concat(fromPlans);
+  const fill = (secId, rowId, labelId, labelKey, labelPl, list, offset)=>{
+    document.getElementById(labelId).textContent = t(labelKey, labelPl);
+    document.getElementById(secId).hidden = !list.length;
+    const row = document.getElementById(rowId);
+    row.innerHTML = list.map((en, j)=> gymWsCardHtml({...en, _prop: en.key === propKey}, offset + j, animate)).join('');
+    row.scrollLeft = 0;
+  };
+  fill('gymV2WsSec', 'gymV2WsRow', 'gymV2WsLabel', 'gymWsOwn', 'Moje treningi', own, 0);
+  fill('gymV2WsSec2', 'gymV2WsRow2', 'gymV2WsLabel2', 'gymWsPlans', 'Treningi z planów', fromPlans, own.length);
 }
 function startGymWorkoutFromCatalogV2(i){
   const en = gymWsList[i];
