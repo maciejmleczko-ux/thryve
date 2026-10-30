@@ -10552,7 +10552,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.102.2";
+const APP_VERSION = "4.102.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21489,13 +21489,21 @@ function syncGymEmptyV2(force){
    trening z historii pasuje do pozycji, gdy co najmniej połowa ćwiczeń jest wspólna w obie strony. */
 function gymWorkoutCatalogV2(){
   const entries = [];
+  const byLib = new Map(orderedExerciseLibrary().map(e=>[e.name, e]));
   visiblePlans().forEach(p=>{
     const pName = planDisplayName(p);
     const f = planFacts(p), tone = planTone(p, f);
     const pill = plcPillHtml(tone.own, (f && f.level) || 'mid');
+    // dni tygodnia tu nie niosą informacji: identyczne treningi z różnych dni to jedna karta, a etykieta mówi, co się trenuje (partie), nie kiedy
+    const seen = new Set();
     PLAN_DAYS.forEach(d=>{
       const names = planDayExercises(p, d).map(e=>e.name).filter(n=> !BOOKEND_EX_NAMES.has(n));
-      if(names.length) entries.push({ key: p.id + ':' + d, tone: tone.cls, pill, planId: p.id, label: PDT_DAY_FULL[d], name: pName, names });
+      const sig = names.slice().sort().join('|');
+      if(!names.length || seen.has(sig)) return;
+      seen.add(sig);
+      const groups = [];
+      planDayExercises(p, d).forEach(e=>{ if(BOOKEND_EX_NAMES.has(e.name)) return; const b = muscleGroupBucket(e.group || (byLib.get(e.name) || {}).group); const l = LANG === 'en' ? b.en : b.pl; if(!groups.includes(l)) groups.push(l); });
+      entries.push({ key: p.id + ':' + d, tone: tone.cls, pill, planId: p.id, label: groups.slice(0, 3).join(' · ') || pName, name: pName, names });
     });
     planSessions(p).forEach(se=>{
       const names = se.exercises.map(e=>e.name).filter(n=> !BOOKEND_EX_NAMES.has(n));

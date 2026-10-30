@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.102.2 (2026-10-30)
+- **Aktualna wersja:** 4.102.3 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.102.3 · PATCH · 2026-10-30
+
+Slider treningów na ekranie Trening: bez dni tygodnia. Identyczne treningi z różnych dni planu (np. Fullbody pn/śr/pt) to jedna karta; mała etykieta nad nazwą planu pokazuje partie (do 3, np. „Klatka · Barki · Triceps”), a nie dzień.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-30 — slider treningów bez dni tygodnia
 
 ### 4.102.2 · PATCH · 2026-10-30
 
