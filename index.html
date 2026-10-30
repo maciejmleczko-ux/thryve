@@ -3221,7 +3221,8 @@ body.gymv2-bg .pg-bg{display:block;}
   .lg-set.is-just .lg-set-c svg{animation:lgSetTick var(--m-dur-pop) var(--m-ease-spring) backwards;}
   @keyframes lgSetTick{from{opacity:0;transform:scale(.4);}to{opacity:1;transform:scale(1);}}
 }
-.lg-hint{margin:0;text-align:center;font-size:var(--m-fs-2xs);letter-spacing:.07em;text-transform:uppercase;color:var(--m-black);}
+.lg-hint{margin:0;min-height:1.4em;text-align:center;font-size:var(--m-fs-2xs);letter-spacing:.07em;text-transform:uppercase;color:var(--m-black);transition:opacity var(--m-dur-fade) ease;}
+.lg-hint.is-out{opacity:0;}
 .lg-hint[hidden]{display:none;}
 .lg-warn{font-size:var(--m-fs-xs);line-height:1.4;color:var(--m-danger);text-align:center;}
 .lg-tm{gap:10px;}
@@ -5937,7 +5938,7 @@ const T_EN = {
   gymFinishDlgTitle: 'Finish workout?', gymFinishBody: (n, kg)=>`We'll save ${n} and ${kg} ${wUnit()}.`, gymFinishPartial: 'Some exercises have incomplete sets; we will save them as they are.', gymFinishYes: 'Finish and save', gymFinishNo: 'Back',
   gymUnsavedTitle: 'Changes not saved', gymUnsavedBody: 'This exercise was already done. To save your changes, go back and tap ✓.', gymUnsavedYes: 'Leave without saving', gymUnsavedNo: 'Back',
   gymEmptyTitle: 'The workout is empty', gymEmptyBody: "You haven't logged an exercise yet. Add the first one?", gymEmptyYes: 'Add exercise',
-  gymLeaveLogging: 'Leave logging', gymAddExerciseDone: 'Add exercise to workout', gymSwipeHint: 'Swipe a set left to delete it', gymLogWarn: 'Log at least one set to add the exercise.', gymExtraSet: '+ Extra set', gymTickSet: 'Save set',
+  gymLeaveLogging: 'Leave logging', gymAddExerciseDone: 'Add exercise to workout', gymSwipeHint: 'Swipe a set left to delete it', gymLogWarn: 'Log at least one set to add the exercise.', gymExtraSet: '+ Extra set', gymTickSet: 'Save set', gymHintAdd: 'Tap the check to add a set', gymHintEditTip: 'Tap a set to edit it', gymHintEditA: 'Change the values and confirm with the check', gymHintEditB: 'Tap the set again to leave without changes', gymHintAuto: 'The set saves on its own, the check saves it now', gymHintAutoEdit: 'The change saves on its own, the check saves it now', gymHintSet: 'Set the weight and reps, the set saves on its own',
   lgOvGoal: 'Goal for today', lgOvLast: 'Last time', lgOvRecord: 'RECORD', lgOvRecordE1rm: 'PROJECTED MAX', lgOvFrom: 'from', lgOvRepsWord: 'reps', lgOvWeeks: 'in 4 wks', lgOvSets: 'Sets', lgOvReps: 'Reps', lgOvRest: 'Rest',
   trainerAi: 'AI COACH', exNoteSheetTitle: 'NOTE', exHowtoTitle: 'How to do it', exHowtoSheetTitle: 'HOW TO DO IT', exHowtoSetup: 'SETUP', exHowtoMove: 'MOVEMENT', exHowtoMistake: 'COMMON MISTAKE',
   planPill: 'Training plans',
@@ -10520,7 +10521,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.100.5";
+const APP_VERSION = "4.101.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
@@ -14329,6 +14330,7 @@ function lgBarSync(){
   if(!row) return;
   row.classList.remove('is-counting');
   if(lg && lg.timer && lgReady()){ void row.offsetWidth; row.classList.add('is-counting'); }
+  lgHintSync();
 }
 /* czy ptaszek może zapisać serię od razu: wartości są sensowne i pochodzą z historii albo od użytkownika */
 function lgCanCommit(){
@@ -14344,12 +14346,48 @@ function lgLiveVal(){
 /* wiersz, który właśnie wypełniamy (nowa seria albo edycja), pokazuje wartości na żywo */
 function lgRowPaint(){
   const row = document.querySelector('#lgSets .lg-set.is-live');
-  if(!row || !lg) return;
+  if(!lg) return;
+  if(!row){ lgHintSync(); return; }   // wszystkie serie zapisane, brak wiersza do wypełnienia
   const can = lgCanCommit();
   const v = row.querySelector('.lg-set-v');
   if(v) v.innerHTML = (can || lg.editIdx !== null) ? lgLiveVal() : '—';
   row.classList.toggle('can', can);
   row.classList.toggle('is-set', lgReady());
+  lgHintSync();
+}
+/* podpis pod listą serii zależy od dostępnej akcji i rotuje, gdy akcji jest kilka */
+let lgHintKey = '', lgHintI = 0, lgHintT = null;
+function lgHintMsgs(){
+  if(!popupExercise || !lg) return [];
+  const bw = lgBw(), logged = popupExercise.setValues.some(s => setIsLogged(s, bw));
+  const live = document.querySelector('#lgSets .lg-set.is-live');
+  const counting = !!(live && live.classList.contains('is-counting'));
+  if(lg.editIdx !== null) return counting ? [t('gymHintAutoEdit','Zmiana zapisze się sama, ptaszek zapisze ją od razu')] : [t('gymHintEditA','Zmień wartości i zatwierdź ptaszkiem'), t('gymHintEditB','Dotknij serii ponownie, żeby wyjść bez zmian')];
+  if(counting) return [t('gymHintAuto','Seria zapisze się sama, ptaszek zapisze ją od razu')];
+  const m = [];
+  if(live && lgCanCommit()) m.push(t('gymHintAdd','Dotknij ptaszka, żeby dodać serię'));
+  if(logged) m.push(t('gymHintEditTip','Dotknij serii, żeby ją poprawić'), t('gymSwipeHint','Przesuń serię w lewo, żeby ją usunąć'));
+  if(!m.length && !isTimeEx(popupExercise)) m.push(t('gymHintSet','Ustaw ciężar i powtórzenia, a seria zapisze się sama'));
+  return m;
+}
+function lgHintShow(el, msgs){ el.textContent = LANG === 'en' ? msgs[lgHintI % msgs.length] : plTypo(msgs[lgHintI % msgs.length]); }
+function lgHintSync(){
+  const el = document.getElementById('lgHint');
+  if(!el){ clearInterval(lgHintT); lgHintT = null; lgHintKey = ''; return; }
+  const msgs = lgHintMsgs(), key = msgs.join('|');
+  if(!msgs.length){ el.hidden = true; clearInterval(lgHintT); lgHintT = null; lgHintKey = ''; return; }
+  if(key === lgHintKey && !el.hidden) return;
+  lgHintKey = key; lgHintI = 0; el.hidden = false; el.classList.remove('is-out');
+  lgHintShow(el, msgs);
+  clearInterval(lgHintT); lgHintT = null;
+  if(msgs.length > 1) lgHintT = setInterval(()=>{
+    const h = document.getElementById('lgHint');
+    if(!h){ clearInterval(lgHintT); lgHintT = null; return; }
+    const cur = lgHintMsgs();
+    if(cur.join('|') !== lgHintKey) return lgHintSync();
+    h.classList.add('is-out');
+    setTimeout(()=>{ lgHintI++; lgHintShow(h, cur); h.classList.remove('is-out'); }, 240);   // == --m-dur-fade
+  }, 4000);
 }
 function lgTickSet(i){
   if(!popupExercise || !lg) return;
@@ -14540,8 +14578,6 @@ function lgRenderSets(){
     const i = Number(w.dataset.i);
     if(setIsLogged(popupExercise.setValues[i], lgBw())) lgAttachSwipe(w, i);
   });
-  const hint = document.getElementById('lgHint');
-  if(hint) hint.hidden = !popupExercise.setValues.some(s => setIsLogged(s, lgBw()));
   lgRowPaint();
 }
 /* swipe a logged set left → it slides out and is deleted (past 35% of its width or a quick flick) */
