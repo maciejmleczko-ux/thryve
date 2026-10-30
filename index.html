@@ -8901,6 +8901,7 @@ function openAiPrefsSheet(){
   $('aiGuest').textContent = t('aiGuest', 'Zaloguj się, żeby zapisać preferencje.');
   $('aiGuest').hidden = !!(cloudSession && cloudSession.user);
   $('aiSave').textContent = t('bdSave', 'ZAPISZ');
+  ['aiSub','aiAvoidL','aiAvoidInput','aiNote'].forEach(id=>{ $(id).hidden = !AI_COACH_ENABLED; });   // bez Trenera AI zostaje sam wybór celu
   document.querySelectorAll('#aiGoalSeg .ai-chip span').forEach(sp=>{
     const g = sp.parentNode.dataset.goal;
     sp.textContent = g === 'ogolna' ? t('aiGoalShort_ogolna', 'Sprawność') : t('aiGoal_' + g, AI_GOAL_LABELS[g]);
@@ -8916,7 +8917,7 @@ function closeAiPrefsSheet(viaDrag){
 }
 function saveAiPrefsSheet(){
   if(!cloudSession || !cloudSession.user){ toast('Zaloguj się, żeby zapisać preferencje'); return; }
-  const avoid = document.getElementById('aiAvoidInput').value.trim();
+  const avoid = AI_COACH_ENABLED ? document.getElementById('aiAvoidInput').value.trim() : (aiPrefs.avoid || '');
   aiPrefs = { goal: _pickAiGoal || undefined, avoid: avoid || undefined };
   supabaseClient.from('profiles').update({ ai_preferences: aiPrefs }).eq('id', cloudSession.user.id)
     .then(({error})=>{ if(error) console.error('saveAiPrefsSheet: push', error); });
@@ -10554,7 +10555,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.105.0";
+const APP_VERSION = "4.105.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -12363,8 +12364,8 @@ function profileHtml(m, animate){
   const goalTxt = AI_GOAL_LABELS[aiPrefs.goal] ? t('aiGoal_' + aiPrefs.goal, AI_GOAL_LABELS[aiPrefs.goal]) : fillTxt;
   const avoidTxt = aiPrefs.avoid ? (aiPrefs.avoid.length > 24 ? aiPrefs.avoid.slice(0, 24) + '…' : aiPrefs.avoid) : fillTxt;
   const aiRow = (n, v, id)=> `<button type="button" class="pf-row pf-row--help m-press" onclick="openAiPrefsSheet()"><span class="pf-row-l"><span class="pf-row-n">${n}</span><span class="pf-row-s" id="${id}">${E(v)}</span></span>${chev}</button>`;
-  const aiSec = `<section class="pf-sec${rc(5)}"${(m.isNew || !AI_COACH_ENABLED) ? ' hidden' : ''}><div class="pf-sec-h"><h2 class="pf-sec-lbl">${t('pfGoals', 'CELE I TRENER')}</h2></div>
-    <div class="pf-card"><div class="pf-rows pf-rows--dyn">${aiRow(t('pfGoal', 'Cel treningowy'), goalTxt, 'acctAiGoalV')}${aiRow(t('pfAvoid', 'Czego unikać'), avoidTxt, 'acctAiAvoidV')}<button type="button" class="pf-row pf-row--help m-press" onclick="openAiConsent()"><span class="pf-row-l"><span class="pf-row-n">${t('pfCoach', 'Trener AI')}</span><span class="pf-row-s">${hasAiConsent() ? t('pfCoachOn', 'Włączony') : t('pfCoachOff', 'Wyłączony, wymaga zgody')}</span></span>${chev}</button></div></div><p class="set-hint" id="pfCoachNote">${t('pfCoachNote', 'Trener AI patrzy na Twoje treningi i preferencje. To nie porada medyczna.')}</p></section>`;
+  const aiSec = `<section class="pf-sec${rc(5)}"${m.isNew ? ' hidden' : ''}><div class="pf-sec-h"><h2 class="pf-sec-lbl">${AI_COACH_ENABLED ? t('pfGoals', 'CELE I TRENER') : t('pfGoalOnly', 'CEL')}</h2></div>
+    <div class="pf-card"><div class="pf-rows pf-rows--dyn">${aiRow(t('pfGoal', 'Cel treningowy'), goalTxt, 'acctAiGoalV')}${AI_COACH_ENABLED ? aiRow(t('pfAvoid', 'Czego unikać'), avoidTxt, 'acctAiAvoidV') : ''}${AI_COACH_ENABLED ? `<button type="button" class="pf-row pf-row--help m-press" onclick="openAiConsent()"><span class="pf-row-l"><span class="pf-row-n">${t('pfCoach', 'Trener AI')}</span><span class="pf-row-s">${hasAiConsent() ? t('pfCoachOn', 'Włączony') : t('pfCoachOff', 'Wyłączony, wymaga zgody')}</span></span>${chev}</button>` : ''}</div></div>${AI_COACH_ENABLED ? `<p class="set-hint" id="pfCoachNote">${t('pfCoachNote', 'Trener AI patrzy na Twoje treningi i preferencje. To nie porada medyczna.')}</p>` : ''}</section>`;
   // ---- Połączenia: widoczne tylko w apce na iPhone'ie (jak dawne renderHealthRow / renderReminderRow) ----
   const showHealth = IS_NATIVE && !!capPlugin('HealthPlugin'), showRem = IS_NATIVE;
   const remTxt = reminderPillText();

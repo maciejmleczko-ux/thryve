@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.105.0 (2026-10-30)
+- **Aktualna wersja:** 4.105.1 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.105.1 · PATCH · 2026-10-30
+
+Profil: wiersz „Cel treningowy” znów jest widoczny przy wyłączonym Trenerze AI (wcześniej cała sekcja „CELE I TRENER” chowała się z flagą `AI_COACH_ENABLED`). Bez Trenera AI sekcja nazywa się „CEL” i ma jeden wiersz; „Czego unikać”, „Trener AI” i podpis o poradzie medycznej wracają razem z flagą. Okno celu bez Trenera AI pokazuje tylko wybór celu, a zapis nie rusza pola „Czego unikać”.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-30 — Profil: cel treningowy niezależnie od Trenera AI
 
 ### 4.105.0 · MINOR · 2026-10-30
 
