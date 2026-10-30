@@ -145,7 +145,7 @@ Każdy popup z polem tekstowym lub liczbowym (nowy szkielet `.m-sheet2`) przy ot
 
 ### Kolor ikon (reguła, 2026-10-30)
 
-Ikony sterowania (←, ✕, zębatka, filtr, „…”, szewrony) i ikony informacyjne (zegar, hantla, rodzaj treningu, „+” w kaflach) mają kolor tekstu `var(--m-ink)`. **Pomarańcz oznacza wyróżnienie:** puchar i rekord, trend (↑), aktywny element (ikona aktywnej zakładki, wybrany stan) oraz obrys okrągłych przycisków. Na pełnym pomarańczu ikona jest biała. Nie dawaj pomarańczowego koloru zwykłej ikonie opisującej treść. Blok „Kolor ikon” jest na końcu `<style>`.
+Ikony informacyjne na jasnym tle (zegar, hantla, rodzaj treningu, „+” w kaflach, ikony w panelach) są pomarańczowe `var(--m-orange)`. Ikony sterowania (←, ✕, zębatka, filtr, „…”, szewrony) mają kolor tekstu `var(--m-ink)`. Na pełnym kolorze (pomarańcz, chipy) ikona jest biała. Blok „Kolor ikon” jest na końcu `<style>`.
 
 ### Odstępy między kartami i kaflami (reguła, 2026-10-22)
 
