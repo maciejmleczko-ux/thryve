@@ -10552,7 +10552,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.102.5";
+const APP_VERSION = "4.103.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -18260,7 +18260,7 @@ function plansV2HeroHtml(animate){
     <p class="plansv2-today">${escHtml(today)}</p>
     ${dashPlanStats(plcPerDay(f), f.minutes)}
     <div class="plansv2-hero-btns">
-      <button type="button" class="dash-hero-btn m-press" data-pa="start">${t('dashStart', 'Start')}</button>
+      <button type="button" class="dash-hero-btn m-press" data-pa="start" data-id="${escHtml(plan.id)}">${t('dashStart', 'Start')}</button>
       <button type="button" class="dash-hero-btn dash-hero-btn--ghost m-press" data-pa="edit" data-id="${escHtml(plan.id)}">${t('plansV2Edit', 'Edytuj')}</button>
     </div>
   </div>`;
@@ -18509,7 +18509,7 @@ function pdtAct(e){
   switch(el.dataset.pa){
     case 'day': pdtToggleDay(el.dataset.d); break;
     case 'tab': pdtSetTab(Number(el.dataset.i)); break;
-    case 'start': goRoute('gym-v2'); break;
+    case 'start': startPlanWorkoutV2(pdt.id); break;
     case 'edit': openPlanEditorV2(pdt.id); break;
     case 'pick': palPick(pdt.id); break;
   }
@@ -18775,7 +18775,8 @@ function plansV2Act(e){
   switch(el.dataset.pa){
     case 'detail': openPlanDetailV2(id); break;
     case 'choose': onbChoosePlan(id); break;   // tylko w onboardingu (polecany plan w hero)
-    case 'start': case 'free': goRoute('gym-v2'); break;
+    case 'start': startPlanWorkoutV2(id || starredPlanId); break;
+    case 'free': goRoute('gym-v2'); break;
     case 'edit': openPlanEditorV2(id); break;
     case 'new': openPlanEditorV2(null); break;
     case 'import': openImportPlanCodeModal(); break;
@@ -21566,8 +21567,17 @@ function renderGymEmptyV2(animate){
   fill('gymV2WsSec', 'gymV2WsRow', 'gymV2WsLabel', 'gymWsOwn', 'Moje treningi', own, 0);
   fill('gymV2WsSec2', 'gymV2WsRow2', 'gymV2WsLabel2', 'gymWsPlans', 'Treningi z planów', fromPlans, own.length);
 }
-function startGymWorkoutFromCatalogV2(i){
-  const en = gymWsList[i];
+function startGymWorkoutFromCatalogV2(i){ startGymEntryV2(gymWsList[i]); }
+/* „Start” w Planach (karta planu i szczegół): uruchamia trening tego planu także w dzień, w którym go nie ma w kalendarzu.
+   Trwający trening i dzień treningowy aktywnego planu: po prostu ekran Trening (jak dotąd); inaczej startuje trening planu, który robiłeś najdawniej. */
+function startPlanWorkoutV2(planId){
+  const busy = repeatMode || sessionExercises.length || extraGymTiles.length || Object.keys(popupDrafts).length;
+  if(busy || (planId === todayPlanId() && !gymEmptyStateV2())){ goRoute('gym-v2'); return; }
+  const en = gymWorkoutCatalogV2().find(e=> e.planId === planId);
+  if(!en){ goRoute('gym-v2'); return; }
+  startGymEntryV2(en);
+}
+function startGymEntryV2(en){
   if(!en) return;
   const prefill = {};
   if(en.lastWorkout) en.lastWorkout.exercises.forEach(ex=>{

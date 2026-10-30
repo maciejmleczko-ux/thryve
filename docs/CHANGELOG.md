@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.102.5 (2026-10-30)
+- **Aktualna wersja:** 4.103.0 (2026-10-30)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.103.0 · MINOR · 2026-10-30
+
+**Dla użytkownika (wpis „Co nowego”):** brak osobnego wpisu (rozszerza „Trening bez planu na dziś” z 4.102.0).
+
+„Start” w Planach (karta aktywnego planu i szczegół planu) uruchamia trening tego planu także w dzień, w którym nie ma go w kalendarzu: `startPlanWorkoutV2` → `startGymEntryV2` (ta sama ścieżka co karty slidera, z ostatnimi ciężarami, `planId` zapisanego treningu = plan z karty). Wybiera trening planu robiony najdawniej. Trwający trening albo dzień treningowy aktywnego planu: po prostu ekran Trening, jak dotąd.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-10-30 — Start w Planach uruchamia trening
 
 ### 4.102.5 · PATCH · 2026-10-30
 
