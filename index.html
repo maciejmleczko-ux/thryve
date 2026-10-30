@@ -2961,7 +2961,7 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .hist-card.collapsed:active,.acct-photo-pick:active,.acct-oauth-btn:active,
 .dash-chat-btn:active,.gymv2-chat-btn:active,.plansv2-chat-btn:active,.histv2-chat-btn:active,.statsv2-chat-btn:active,
 .profil-back:active,.profil-gear:active,.pf-sheet-x:active,.pf-rm-seg:active,.pf-rm-arw:active,.profil-av:active,.pf-link:active,.pf-row:active,.pf-btn:active,.pf-body-c:active,.profil-id-txt:active,
-.v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-blank:active,.gymv2-edit-plan:active,
+.v2-hdr-back:active,.gymv2-plan-card:active,.gymv2-repeat:active,.gymv2-edit-plan:active,
 .gymv2-tile:active,.gymv2-tile-swap:active,.gymv2-done-row:active,.gymv2-save:active,
 .plansv2-customize-cancel:active,.plansv2-customize-apply:active,.newex-v2-add-fab:active,
 .pl-settings:active,.pl-card:active,.pl-hero:active,.pl-pick:active,.pl-cta:active,.opk-btn:active,.pl-check:active,.pev2-day-chip:active,.pev2-more:active,.pev2-ok:active,.pev2-save:active,.equip-chip:active,.ob-back:active,.ob-cta:not(:disabled):active,.ob-gender-chip:active,.onb-goal-chip:active,.onb-equip:active,
@@ -3085,9 +3085,7 @@ body.gymv2-bg .pg-bg{display:block;}
 .gymv2-plan-tile{margin-bottom:var(--m-gap-card);}
 .gymv2-plan-tile[hidden]{display:none;}
 .gymv2-ws-sm .plc{flex-basis:218px;}   /* węższa karta jak w „Plany Mekkio” (Figma 542:15828) */
-.gymv2-blank{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;padding:10px 14px;box-sizing:border-box;font-family:inherit;color:var(--m-ink);background:transparent;border:1.5px dashed var(--m-orange);border-radius:var(--m-r-md);cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
-.gymv2-blank-ico svg{width:22px;height:22px;display:block;color:var(--m-orange);}
-.gymv2-blank-t{font-size:var(--m-fs-base);font-weight:500;letter-spacing:.04em;}
+#view-gym-v2 .gymv2-build{max-width:none;margin-top:var(--m-gap-card);}
 #newExerciseOverlayV2{z-index:95;}
 /* --- set-logging sheet --- */
 #exercisePopupOverlayV2{background:rgba(65,65,65,.85);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
@@ -4359,10 +4357,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
             <div class="plansv2-sec-links"><button type="button" class="plansv2-link m-press" id="gymV2WsToggle" aria-expanded="false" aria-controls="gymV2WsRow2" onclick="gymWsToggleV2()"></button></div></div>
           <div class="plansv2-row" id="gymV2WsRow2" hidden></div>
         </section>
-        <button type="button" class="gymv2-blank m-press" id="gymV2BlankBtn" onclick="openExercisePickerV2()">
-          <span class="gymv2-blank-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
-          <span class="gymv2-blank-t" data-i18n="gymEmptyStart">Rozpocznij pusty trening</span>
-        </button>
+        <button type="button" class="gymv2-save gymv2-build m-press" id="gymV2BlankBtn" onclick="openExercisePickerV2()" data-i18n="gymEmptyStart">Zbuduj trening</button>
       </div>
 
       <div class="gymv2-section-head" id="gymV2SectionHead">
@@ -6279,7 +6274,7 @@ const T_EN = {
   gymV2Done: 'Completed',
   gymV2SaveWorkout: 'SAVE WORKOUT',
   gymV2PickOther: 'Pick another exercise',
-  gymEmptyStart: 'Start an empty workout', gymWsTitle: 'Your workouts', gymWsOwn: 'My workouts', gymWsShow: 'Show', gymWsHide: 'Hide', gymWsLast: 'Last workout', gymWsPlans: 'Workouts from plans', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
+  gymEmptyStart: 'Build a workout', gymWsTitle: 'Your workouts', gymWsOwn: 'My workouts', gymWsShow: 'Show', gymWsHide: 'Hide', gymWsLast: 'Last workout', gymWsPlans: 'Workouts from plans', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
   gymWsToday: 'last: today', gymWsYesterday: 'last: yesterday', gymWsAgo: n=>`last: ${n} days ago`,
   flexBadge: 'Flexible', flexNoStar: 'A flexible plan has no star: you pick the workout on the Workout screen',
   exerciseAddedToList: 'New exercise added to the list',
@@ -10558,7 +10553,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.104.2";
+const APP_VERSION = "4.104.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
