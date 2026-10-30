@@ -3956,13 +3956,15 @@ button.stv2-bt{cursor:pointer;}
 .ms-banner:disabled{opacity:.7;}
 /* ---- Przyciski ikon w nagłówkach: jeden styl (2026-10-30) ----
    Strzałka ← (nawigacja wstecz) zostaje samym znakiem, bez koła (.profil-back, .v2-hdr-back, .ob-back).
-   Drugorzędne (✕, zębatka): koło 40 px, ramka .5 px w pomarańczu, bez wypełnienia, ikona w kolorze tekstu (wzór: .x-ring).
+   Drugorzędne (✕, zębatka): koło 40 px, ramka 1 px w pomarańczu, białe tło 60%, ikona w kolorze tekstu (wzór: .x-ring).
    Główne (✓, udostępnij): pełne pomarańczowe koło 40 px, biała ikona. Na zdjęciu i ciemnym tle: ramka i ikona białe.
    Pole dotyku 44 px (::after / opakowanie 44 px), glify 18 px. Nowy przycisk ikony bierze jedną z tych dwóch wersji. */
-.m2-x::before{background:none;border:.5px solid var(--m-orange);}
+/* ramka 1 px + lekkie białe tło: przy .5 px koło ginęło na zdjęciu tła (✕ wyglądał jak sam znak) */
+.x-ring,.plansv2-customize-close,.newex-v2-close,.exv2-close,.plansv2-close,.histv2-card-close,.gy-circ.gy-x,.profil-gear{border:1px solid var(--m-orange);background:rgba(255,255,255,.6);}
+.m2-x::before,.opk-x::before{background:rgba(255,255,255,.6);border:1px solid var(--m-orange);}
 .m2-x svg path{stroke:var(--m-ink);}
-.profil-gear{box-sizing:border-box;background:none;box-shadow:none;border:.5px solid var(--m-orange);color:var(--m-ink);-webkit-backdrop-filter:none;backdrop-filter:none;}
-.opk-x::before{inset:2px;border-width:.5px;}
+.profil-gear{box-sizing:border-box;box-shadow:none;color:var(--m-ink);-webkit-backdrop-filter:none;backdrop-filter:none;}
+.opk-x::before{inset:2px;}
 .opk-btn svg{width:18px;height:18px;}
 .wn-close,.rl-x,.ai-popup-close{box-sizing:border-box;width:40px;height:40px;top:16px;right:16px;padding:0;border:.5px solid rgba(255,255,255,.7);border-radius:50%;background:none;color:var(--m-white);}
 .ai-popup-close .ph,.wn-hero .wn-close.ph svg{width:18px;height:18px;}
@@ -10479,7 +10481,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.99.10";
+const APP_VERSION = "4.99.11";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.96.0": {
