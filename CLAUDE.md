@@ -141,7 +141,7 @@ Każdy popup z polem tekstowym lub liczbowym (nowy szkielet `.m-sheet2`) przy ot
 
 ### Przyciski ikon w nagłówkach (reguła, 2026-10-30)
 
-Każdy przycisk ikony w nagłówku ekranu lub okna (✕, ←, zębatka, ✓, udostępnij) to **koło 40 px** (pole dotyku 44 px, glif 18 px) w jednej z dwóch wersji. **Drugorzędne** (✕, ←, zębatka): ramka .5 px `var(--m-orange)`, bez wypełnienia, ikona w kolorze tekstu (wzór: `.x-ring`). **Główne** (✓ zatwierdź, udostępnij): pełne pomarańczowe koło, biała ikona. Na zdjęciu lub ciemnym tle ramka i ikona są białe (`.rl-x`, `.wn-close`, `.ai-popup-close`). Nie wprowadzaj trzeciego wyglądu ani samej ikony bez koła; blok „Przyciski ikon w nagłówkach” jest na końcu `<style>`.
+Strzałka wstecz **←** to sam znak bez koła (nawigacja, jak w iOS). Każdy inny przycisk ikony w nagłówku ekranu lub okna (✕, zębatka, ✓, udostępnij) to **koło 40 px** (pole dotyku 44 px, glif 18 px) w jednej z dwóch wersji. **Drugorzędne** (✕, zębatka): ramka .5 px `var(--m-orange)`, bez wypełnienia, ikona w kolorze tekstu (wzór: `.x-ring`). **Główne** (✓ zatwierdź, udostępnij): pełne pomarańczowe koło, biała ikona. Na zdjęciu lub ciemnym tle ramka i ikona są białe (`.rl-x`, `.wn-close`, `.ai-popup-close`). Nie wprowadzaj trzeciego wyglądu ani samej ikony bez koła; blok „Przyciski ikon w nagłówkach” jest na końcu `<style>`.
 
 ### Odstępy między kartami i kaflami (reguła, 2026-10-22)
 
