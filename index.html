@@ -10615,7 +10615,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.108.3";
+const APP_VERSION = "4.108.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -16144,7 +16144,8 @@ function renderExercisePickerGridV2(animate){
   const container = document.getElementById('pickExerciseGridV2');
   if(!container) return;
   const planEx = todayGridExerciseNames() || [];
-  const alreadyVisible = new Set([...planEx.map(e=>e.name), ...extraGymTiles.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
+  // na kaflu widać zamiennik („Zamień na dziś”), nie ćwiczenie z planu: tylko to, co widać, znika z listy, więc zamienione ćwiczenie można dodać z powrotem
+  const alreadyVisible = new Set([...planEx.map(e=> todaySwaps[e.name] ? todaySwaps[e.name].name : e.name), ...extraGymTiles.map(e=>e.name), ...sessionExercises.map(e=>e.name)]);
   let lib = orderedExerciseLibrary().filter(ex=>!alreadyVisible.has(ex.name));
   if(pickExerciseEquipFilterV2 !== 'all'){
     lib = lib.filter(ex => exMatchesEquipFilter(ex, pickExerciseEquipFilterV2));
