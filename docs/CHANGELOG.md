@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.108.2 (2026-11-02)
+- **Aktualna wersja:** 4.108.3 (2026-11-02)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,15 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.108.3 · PATCH · 2026-11-02
+
+Pulpit znów się przewija (błąd z 4.108.0: blokada przewijania nie wyłączała się, bo `dashRefreshScroll` mierzył kontener `#dashBlocks` o wysokości 0). Build 77 (4.108.2) tej poprawki nie ma, dlatego Build 78.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-11-02 — 4.108.3: poprawka przewijania Pulpitu, wersja pod Build 78
+
 
 ### 4.108.2 · PATCH · 2026-11-02
 
