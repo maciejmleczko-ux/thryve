@@ -20,6 +20,35 @@ Pełna historia wersji (także PATCH) z commitami. **Przy każdym bumpie `APP_VE
 
 Hash commita, który sam dodaje wpis, jest znany dopiero po commicie, więc ten jeden commit wpisz przy następnej wersji albo pomiń. Zaktualizuj też „Aktualna wersja” w nagłówku. Przy większym etapie dopisz wiersz w „Oś czasu”, a przy nowym pliku, kluczu localStorage albo tabeli Supabase zaktualizuj „Architektura w skrócie”.
 
+## Popup „Co nowego”: trzy sekcje (reguła, 2026-11-02)
+
+Każdy nowy wpis w obiekcie `CHANGELOG` (bump MAJOR/MINOR) ma postać trzech sekcji, a nie kafli z tytułem i opisem:
+
+```js
+"4.108.0": {
+  pl: { headline:'Tytuł do nagłówka (opcjonalny)', added:[…], improved:[…], fixed:[…] },
+  en: { headline:'…', added:[…], improved:[…], fixed:[…] },
+},
+```
+
+| Sekcja | Klucz | Co tu trafia |
+|---|---|---|
+| Dodano / Added | `added` | nowa funkcja, której wcześniej nie było |
+| Ulepszono / Improved | `improved` | istniejąca funkcja działa lepiej, jest wygodniejsza albo czytelniejsza |
+| Naprawiono / Fixed | `fixed` | błąd, który użytkownik mógł zauważyć |
+
+- Pusta sekcja nie jest pokazywana, nie wpisuj pustych tablic z wypełniaczami.
+- Styl jak w Blitzit: jedno zdanie na punkt, od razu o tym, co użytkownik może teraz zrobić albo co zyskuje („Wybierz…”, „Znajdź…”, „Zobacz…”). Bez nazw wewnętrznych, wersji, tokenów i żargonu. Przy naprawach opisz objaw, który ktoś zauważył („Naprawiono …”), nie przyczynę w kodzie. Wymieniaj konkretne miejsca (ekrany, ćwiczenia), nie „różne poprawki”.
+- Punkty tej samej sekcji grupuj tematycznie, najważniejszy pierwszy. Zwykle 1–4 punkty na sekcję.
+- Teksty PL przepuść przez `/człowiek`, „aplikacja”, nie „apka”, bez sierot (`plTypo()`). EN pisz równolegle.
+- Stare wpisy (tablica kafli) zostają bez zmian i nadal się wyświetlają; „Historia zmian” spłaszcza nowy format do listy zdań.
+- Wpis `release` (karta wydania) działa jak dotąd, osobno.
+- Układ okna: każda wersja to rozwijany wiersz „Mekkio - wersja v.X” (16 px) ze strzałką, a pod nim stałe sekcje (bez dodatkowego rozwijania). Otwarta jest tylko najnowsza wersja, starsze zaległe są zwinięte. Rozwinięta treść wchodzi klasą `.m-rise`, wysokość nie jest animowana.
+
+Przykład (styl):
+
+> **Dodano:** Ustaw dla ćwiczenia z masą ciała dodatkowy ciężar albo wspomaganie. · **Ulepszono:** Wybierz cel treningowy i zobacz ćwiczenia, które do niego pasują. · **Naprawiono:** Naprawiono zapis serii, który czasem znikał po zamknięciu aplikacji w trakcie treningu.
+
 ## App Store: wydania, review i zasady Apple
 
 Aplikacja iOS to Capacitor (`native/`) z kodem wbudowanym w paczkę (`native/www`, brak `server.url` w `capacitor.config.json`). Dlatego:

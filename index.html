@@ -751,7 +751,7 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
 .wn-headline{margin:0;font-size:var(--m-fs-headline);font-weight:300;line-height:1.04;letter-spacing:-.02em;overflow-wrap:anywhere;}
 .wn-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:22px 27px calc(28px + max(14px, env(safe-area-inset-bottom)));color:var(--m-ink);}
 /* Wersja = przycisk rozwijający listę zmian pod spodem (najnowsza otwarta, starsze zwinięte). */
-.wn-ver{display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;margin:0;padding:12px 0;border:0;border-top:1px solid rgba(0,0,0,.08);background:none;font:inherit;font-size:var(--m-fs-2xs);font-weight:600;color:var(--m-ink);text-align:left;cursor:pointer;}
+.wn-ver{display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;margin:0;padding:12px 0;border:0;border-top:1px solid rgba(0,0,0,.08);background:none;font:inherit;font-size:var(--m-fs-md);font-weight:600;color:var(--m-ink);text-align:left;cursor:pointer;}
 .wn-ver:first-child{border-top:0;padding-top:0;}
 .wn-ver .ph{display:flex;width:16px;height:16px;flex-shrink:0;transition:transform var(--m-dur-in) var(--m-ease);}
 .wn-ver .ph svg{display:block;width:16px;height:16px;}
@@ -6110,7 +6110,7 @@ const T_EN = {
   save: 'Save',
   whatsnewVersion: v => `Version ${v}`,
   whatsnewTitle: "WHAT'S NEW",
-  whatsnewVer: v => `Mekkio version v.${v}`,
+  whatsnewVer: v => `Mekkio - version v.${v}`,
   whatsnewFallbackHeadline: "What's new in Mekkio",
   whatsnewAdded: 'Added',
   whatsnewImproved: 'Improved',
@@ -10615,7 +10615,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.108.1";
+const APP_VERSION = "4.108.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -11366,7 +11366,7 @@ function pendingChangelogItems(){
 }
 // "Co nowego" (Figma 500:19077). The hero shows the name of the newest
 // pending version's biggest feature (first featured entry); the list below
-// repeats every pending version, newest first: "wersja mekkio v.X", then
+// repeats every pending version, newest first: "Mekkio - wersja v.X", then
 // each entry as TITLE + short text (plain-string entries: text only).
 // Hero photo: one of WHATSNEW_IMAGES, picked at random on each opening —
 // add files to icons/whatsnew/ (wn-N.jpg) and add N to the list here.
@@ -11396,7 +11396,7 @@ function renderWhatsNew(){
           ? `<div class="wn-item"><p class="wn-item-text">${i}</p></div>`
           : `<div class="wn-item"><p class="wn-item-title">${i.title}</p><p class="wn-item-text">${i.text}</p></div>`).join('');
     const open = i === 0;
-    return `<button type="button" class="wn-ver" aria-expanded="${open}" onclick="toggleWnVer(this)"><span>${t('whatsnewVer','wersja mekkio v.' + v, v)}</span><span class="ph">${PH['caret-down']}</span></button><div class="wn-ver-body"${open ? '' : ' hidden'}>${items}</div>`;
+    return `<button type="button" class="wn-ver" aria-expanded="${open}" onclick="toggleWnVer(this)"><span>${t('whatsnewVer','Mekkio - wersja v.' + v, v)}</span><span class="ph">${PH['caret-down']}</span></button><div class="wn-ver-body"${open ? '' : ' hidden'}>${items}</div>`;
   }).join('');
   list.scrollTop = 0;
 }

@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.108.1 (2026-11-02)
+- **Aktualna wersja:** 4.108.2 (2026-11-02)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.108.2 · PATCH · 2026-11-02
+
+Okno „Co nowego” w nowym układzie: wpis CHANGELOG może mieć trzy sekcje (`added`, `improved`, `fixed`, opcjonalnie `headline`), a każda wersja jest rozwijanym wierszem „Mekkio - wersja v.X” (16 px) ze strzałką. Najnowsza wersja otwarta, starsze zwinięte, treść wchodzi klasą `.m-rise`. Stare wpisy (kafle) działają bez zmian, „Historia zmian” spłaszcza nowy format do listy zdań. Reguła zapisana w CLAUDE.md.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-11-02 — 4.108.2: Co nowego w trzech sekcjach, rozwijana wersja
 
 ### 4.108.1 · PATCH · 2026-11-02
 
