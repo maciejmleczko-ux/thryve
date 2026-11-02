@@ -3052,6 +3052,14 @@ body.gymv2-bg{background:transparent;}
   background-position:-95px 300px, 0 0;
   background-size:566px 1007px, 100% 100%;}   /* Pulpit, Plany, GYM, Historia, Postępy, Profil: gotowe zdjęcie (już z białą poświatą) na stałej warstwie wystającej 300 px poza ekran; odbicie góra/dół pokazuje kolory brzegów zdjęcia */
 body.dashboard-bg .pg-bg, body.profil-bg .pg-bg, body.plansv2-bg .pg-bg{display:block;}
+/* Desktop (okno szersze niż kolumna .app 440 px): zdjęcie jest kadrem pod telefon, więc rysujemy je w wycentrowanej kolumnie, z miękkimi bokami; pasma obok kolumny mają sam gradient z kolorów brzegów */
+@media (min-width:441px){
+  .pg-bg{background-image:linear-gradient(180deg, var(--bgc-top) 0, var(--bgc-top) 300px, var(--bgc-bot) 1307px, var(--bgc-bot) 100%);background-size:100% 100%;background-position:0 0;}
+  .pg-bg::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:440px;margin-left:-220px;
+    background:var(--bg-photo) -95px 300px/566px 1007px no-repeat;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 56px,#000 calc(100% - 56px),transparent 100%);
+            mask-image:linear-gradient(90deg,transparent 0,#000 56px,#000 calc(100% - 56px),transparent 100%);}
+}
 html.dashboard-lock, html.profil-lock, html.plansv2-bg{background:var(--bgc-bot);}
 html.histv2-bg{background:var(--bgc-bot);}
 html.statsv2-bg{background:var(--m-page-bot);}   /* dół strony = kolor tła body za gradientem, więc gumka iOS nie pokazuje szwu */
@@ -10007,7 +10015,7 @@ function clearAllLocalUserData(){
    LS_DELETED_BUILTIN_PLANS, LS_WEIGHT_LOG, LS_BODY_DATA, LS_AVATAR, LS_EXERCISE_NOTES,
    LS_EXERCISE_ORDER, LS_KCAL_FACTOR, LS_GYM_SESSION_TIMING,
    LS_GYM_SESSION_DRAFT, LS_GYM_TODAY_SWAPS, LS_AI_LAST_WORKOUT_SUMMARY, LS_CLOUD_REMINDER_LAST,
-   LS_CLOUD_SYNC_STATE,
+   LS_CLOUD_SYNC_STATE, LS_STALL_EVENTS,
   ].forEach(k => localStorage.removeItem(k));
 }
 
@@ -10651,7 +10659,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.108.5";
+const APP_VERSION = "4.108.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -16949,6 +16957,7 @@ function saveWorkoutV2(){
   w.bodyweightKg = kc.bodyweightKg;
   w.kcalModelVersion = KCAL_MODEL_VERSION;
   saveWorkouts(workouts);
+  try{ stallEventsRecord(); }catch(e){}   // A3: zapis zdarzeń zastoju (bez UI)
 
   // --- "Vs poprzedni": volume (reps for a masa ciała workout) against the previous workout, in % ---
   const vm = prevStats ? vsPrevMetric(isBw, { volume, reps: repsTotal }, prevStats) : null;
@@ -23670,7 +23679,7 @@ function statsV2Rows(){
    Periodyzacja: wynik porównujemy tylko z sesjami z tym samym tagiem wersji (`version` zapisane w ćwiczeniu treningu co
    ostatnia sesja; brak tagu = sesje bez tagu). OGRANICZENIE: wewnątrz jednej wersji nie ma osobnego rozróżnienia
    poziomów obciążenia, a trening sprzed wprowadzenia tagów (4.5x) liczy się jako „bez tagu”. Max 5, malejąco po `weeks`. */
-function statsV2Stalled(todayIso){
+function statsV2Stalled(todayIso, all){
   const today = statsV2TodayIso(todayIso);
   const flags = statsV2NameFlags();
   const byName = new Map();   // nazwa -> [{date, ver, w, r, t}]
@@ -23707,7 +23716,65 @@ function statsV2Stalled(todayIso){
     }catch(e){}
   });
   out.sort((a, b)=> b.weeks - a.weeks || (a.name < b.name ? -1 : 1));
-  return out.slice(0, 5);
+  return all ? out : out.slice(0, 5);
+}
+
+/* ---- Zdarzenia zastoju (roadmapa Mekkio+, A3). BEZ UI: tylko zapis, z którego później korzysta baner i propozycja zamiennika.
+   Klucz `mekkio_stall_events_v1` = { [nazwa ćwiczenia]: { first, last, value, unit, weeks, status, statusAt, ended } }, tylko lokalnie
+   (jak układy Pulpitu i Postępów: bez synca i kopii; dane da się wyliczyć z historii, tracimy najwyżej status „odrzucone”).
+   Jedno zdarzenie na ćwiczenie (odcinek zastoju): `first` = dzień wykrycia, `last` = ostatnie potwierdzenie, `ended` = dzień, w którym
+   rekord znów urósł albo zastój minął. Kolejny zastój tego ćwiczenia ożywia to samo zdarzenie i ZACHOWUJE status oraz `statusAt`,
+   żeby limity z roadmapy działały między odcinkami.
+   status: 'new' (wykryty, nie pokazany) | 'shown' (pokazany) | 'dismissed' (odrzucony) | 'accepted' (przyjęty).
+   Limity: odrzucone nie wraca przez 8 tygodni (56 dni), pokazane lub przyjęte nie wraca przez 6 tygodni (42 dni) od `statusAt`. */
+const LS_STALL_EVENTS = 'mekkio_stall_events_v1';
+const STALL_COOLDOWN_DAYS = { dismissed: 56, shown: 42, accepted: 42 };
+function stallEventsLoad(){
+  try{ const o = JSON.parse(localStorage.getItem(LS_STALL_EVENTS)); return (o && typeof o === 'object' && !Array.isArray(o)) ? o : {}; }
+  catch(e){ return {}; }
+}
+function stallEventsSave(o){ try{ localStorage.setItem(LS_STALL_EVENTS, JSON.stringify(o)); }catch(e){} }
+/* Wyliczony stan zastojów -> zapis. Wywołanie jest tanie i idempotentne (po treningu i raz po starcie). */
+function stallEventsRecord(todayIso){
+  const today = statsV2TodayIso(todayIso);
+  let cur = [];
+  try{ cur = statsV2Stalled(today, true); }catch(e){ return; }
+  const ev = stallEventsLoad(), now = new Set();
+  let changed = false;
+  cur.forEach(s=>{
+    now.add(s.name);
+    const e = ev[s.name];
+    if(!e){ ev[s.name] = { first: today, last: today, value: s.value, unit: s.unit, weeks: s.weeks, status: 'new', statusAt: null, ended: null }; changed = true; return; }
+    if(e.ended){ e.ended = null; e.first = today; changed = true; }   // nowy odcinek: status i statusAt zostają
+    if(e.last !== today || e.value !== s.value || e.weeks !== s.weeks || e.unit !== s.unit){ e.last = today; e.value = s.value; e.unit = s.unit; e.weeks = s.weeks; changed = true; }
+  });
+  Object.keys(ev).forEach(name=>{
+    if(!now.has(name) && !ev[name].ended){ ev[name].ended = today; changed = true; }
+  });
+  if(changed) stallEventsSave(ev);
+}
+function stallEventSetStatus(name, status){
+  const ev = stallEventsLoad();
+  if(!ev[name]) return false;
+  ev[name].status = status; ev[name].statusAt = todayStr();
+  stallEventsSave(ev);
+  return true;
+}
+function stallEventShown(name){ return stallEventSetStatus(name, 'shown'); }
+function stallEventDismiss(name){ return stallEventSetStatus(name, 'dismissed'); }
+function stallEventAccept(name){ return stallEventSetStatus(name, 'accepted'); }
+/* Zdarzenia, o których wolno teraz przypomnieć: trwają (bez `ended`) i minął limit od ostatniego statusu. Najdłuższy zastój pierwszy. */
+function stallEventsDue(todayIso){
+  const today = statsV2TodayIso(todayIso), ev = stallEventsLoad(), out = [];
+  Object.keys(ev).forEach(name=>{
+    const e = ev[name];
+    if(!e || e.ended) return;
+    const cd = STALL_COOLDOWN_DAYS[e.status];
+    if(cd && e.statusAt && dashDaysBetween(e.statusAt, today) < cd) return;
+    out.push(Object.assign({ name }, e));
+  });
+  out.sort((a, b)=> b.weeks - a.weeks || (a.name < b.name ? -1 : 1));
+  return out;
 }
 
 /* 5. Historia celu tygodniowego: n tygodni kończąc na bieżącym (ostatni element current:true). done = dni z treningiem lub
@@ -27669,7 +27736,8 @@ checkForImportedPlan();
 // plan onboarding steps (see afterOnboardingStep / exitPlanOnboarding) so
 // two dialogs never show at once.
 if(onboardSeen) checkInstallPrompt();
-setTimeout(maybeShowCloudReminder, 400); // after any of the above have had their chance to claim modal-lock
+setTimeout(maybeShowCloudReminder, 400);
+setTimeout(()=>{ try{ stallEventsRecord(); }catch(e){} }, 3000);   // A3: zdarzenia zastoju po starcie, już po pierwszym malowaniu // after any of the above have had their chance to claim modal-lock
 // Best-effort native orientation lock — only actually works in a handful of
 // contexts (mainly an installed Android PWA in standalone display mode).
 // iOS Safari/home-screen apps don't implement this API at all, and the

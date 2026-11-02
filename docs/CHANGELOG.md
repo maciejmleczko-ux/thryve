@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.108.5 (2026-11-02)
+- **Aktualna wersja:** 4.108.6 (2026-11-02)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.108.6 · PATCH · 2026-11-02
+
+Bez zmian dla użytkownika (zapis w tle, bez ekranu). Roadmapa Mekkio+, A3: zdarzenia zastoju. Po zapisaniu treningu (`saveWorkoutV2`) i raz po starcie (3 s) `stallEventsRecord()` zapisuje wyniki `statsV2Stalled(today, true)` (nowy parametr `all` zdejmuje limit 5) w `localStorage` `mekkio_stall_events_v1` = `{ [ćwiczenie]: { first, last, value, unit, weeks, status, statusAt, ended } }`. Jedno zdarzenie na ćwiczenie; gdy rekord znów urośnie, zdarzenie dostaje `ended`, a kolejny zastój ożywia je, zachowując `status` i `statusAt`, żeby limity działały między odcinkami. Statusy: `new`, `shown`, `dismissed`, `accepted` (`stallEventShown/Dismiss/Accept`). `stallEventsDue()` zwraca zdarzenia, o których wolno przypomnieć: odrzucone wraca po 56 dniach, pokazane lub przyjęte po 42 (limity 8 i 6 tygodni z roadmapy). Dane tylko lokalnie, bez synca i kopii zapasowej (da się je wyliczyć z historii, tracimy najwyżej status „odrzucone”); klucz czyści `clearAllLocalUserData` (RODO). Brak zmian w bazie i w chmurze.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-11-02 — 4.108.6: zdarzenia zastoju (zapis w tle)
 
 ### 4.108.5 · PATCH · 2026-11-02
 
