@@ -21868,13 +21868,7 @@ function updateGymV2RepeatBtn(){
     xBtn.setAttribute('aria-label', lbl); xBtn.title = lbl;
   }
   if(backMode){ btn.hidden = true; return; }   // belka „wróć do planu” zbędna: strzałka u góry robi to samo
-  if(repeatMode){
-    btn.classList.add('is-active');
-    tEl.textContent = repeatMode.label || t('repeatActive', `Trening z ${fmtDateHuman(repeatMode.date)}`, fmtDateHuman(repeatMode.date));
-    sEl.textContent = t('repeatBackToPlan', 'Dotknij, żeby wrócić do planu');
-    btn.hidden = false;
-    return;
-  }
+  if(repeatMode){ btn.hidden = true; return; }   // po wyborze treningu belka znika: zostaje tylko „Powtórz ostatni trening”
   btn.classList.remove('is-active');
   const last = lastSavedWorkout();
   if(!last || gymEmptyStateV2()){ btn.hidden = true; return; }   // stan pusty: karty treningów robią to samo, „Powtórz ostatni” zostaje na Pulpicie
