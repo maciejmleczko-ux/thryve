@@ -3256,9 +3256,18 @@ body.gymv2-bg .pg-bg{display:block;}
 .bk-ctrl-s span{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--m-muted-text);text-align:center;line-height:1.2;}
 .bk-run{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;}
 .bk-run img{width:210px;height:210px;object-fit:contain;}
-.bk-how{width:100%;text-align:left;display:flex;flex-direction:column;gap:6px;margin:14px 0 18px;}
+.bk-how{width:100%;text-align:left;margin:6px 0 18px;border-top:.5px solid var(--m-border);border-bottom:.5px solid var(--m-border);}
+.bk-how-h{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 2px;background:none;border:0;font-family:inherit;color:var(--m-ink);cursor:pointer;}
+.bk-how-h .ph.ph,.bk-how-h .ph.ph svg{width:18px;height:18px;color:var(--m-ink);transition:transform var(--m-dur-in) var(--m-ease);}
+.bk-how.is-open .bk-how-h .ph{transform:rotate(180deg);}
+.bk-how-b{display:none;flex-direction:column;gap:6px;padding:0 2px 16px;}
+.bk-how.is-open .bk-how-b{display:flex;}
 .bk-how p{margin:0;font-size:var(--m-fs-sm);line-height:1.45;color:var(--m-ink);}
 .bk-how ol{margin:0;padding-left:20px;font-size:var(--m-fs-sm);line-height:1.45;color:var(--m-ink);}
+@media (prefers-reduced-motion:no-preference){
+  @keyframes bkHowIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .bk-how.is-open .bk-how-b{animation:bkHowIn var(--m-dur-in) var(--m-ease) backwards;}
+}
 .bk-run-n{margin-top:4px;font-size:var(--m-fs-xl);font-weight:200;line-height:1.15;letter-spacing:.01em;text-transform:uppercase;color:var(--m-ink);}
 .bk-run .bk-run-msg{margin-top:6px;color:var(--m-orange);}
 .bk-run .lg-tm-clock{margin:2px 0 4px;}
@@ -15736,7 +15745,7 @@ function renderBlockRun(){
         <div class="lg-tm-clock" id="bkClock"></div>
         <p class="bk-run-next">${nextEx ? escHtml(t('bkNext', `Dalej: ${nextEx.name}`, nextEx.name)) : ''}</p>
       </div>
-      ${how ? `<div class="bk-how"><span class="lg-lab">${escHtml(t('exHowtoSheetTitle','JAK ĆWICZYĆ'))}</span><p>${escHtml(how.setup)}</p><ol>${how.steps.map(x=>`<li>${escHtml(x)}</li>`).join('')}</ol></div>` : ''}
+      ${how ? `<div class="bk-how${bkHowOpen ? ' is-open' : ''}" id="bkHow"><button type="button" class="bk-how-h m-press" onclick="bkToggleHow()" aria-expanded="${bkHowOpen}"><span class="lg-lab">${escHtml(t('exHowtoSheetTitle','JAK ĆWICZYĆ'))}</span>${ph('caret-down')}</button><div class="bk-how-b"><p>${escHtml(how.setup)}</p><ol>${how.steps.map(x=>`<li>${escHtml(x)}</li>`).join('')}</ol></div></div>` : ''}
       <div class="lg-tm-ctrl bk-ctrl">
         <div class="bk-ctrl-s"><button type="button" class="lg-tm-ic m-press" onclick="bkAbort()" aria-label="${escHtml(t('bkStop','Przerwij'))}">${LG_ICONS.x}</button><span>${escHtml(t('bkStop','Przerwij'))}</span></div>
         <button type="button" class="lg-tm-play m-press" id="bkMain" onclick="bkMain()"></button>
@@ -15745,7 +15754,16 @@ function renderBlockRun(){
     </div>`;
   bkPaint();
 }
-const BK_SKIP_SVG = '<svg viewBox="0 0 18 18" fill="none"><path d="M4 3.8v10.4a.5.5 0 0 0 .77.42l7.6-5.2a.5.5 0 0 0 0-.84l-7.6-5.2A.5.5 0 0 0 4 3.8Z" fill="currentColor"/><path d="M14.25 3.5v11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+let bkHowOpen = false;   // „Jak ćwiczyć” zwinięte, wybór zostaje na kolejne ćwiczenia
+function bkToggleHow(){
+  bkHowOpen = !bkHowOpen;
+  const box = document.getElementById('bkHow');
+  if(!box) return;
+  box.classList.toggle('is-open', bkHowOpen);
+  box.querySelector('.bk-how-h').setAttribute('aria-expanded', bkHowOpen);
+  haptic('light');
+}
+const BK_SKIP_SVG = '<svg viewBox="0 0 94 94" fill="none"><path d="M73.4369 11.7502C72.6578 11.7502 71.9106 12.0597 71.3598 12.6106C70.8089 13.1615 70.4994 13.9087 70.4994 14.6877V40.1081L26.5948 12.6499C25.7106 12.0948 24.6941 11.7862 23.6506 11.756C22.6071 11.7257 21.5744 11.975 20.6596 12.4779C19.7447 12.9808 18.981 13.7191 18.4473 14.6164C17.9137 15.5136 17.6295 16.5372 17.6244 17.5812V76.4193C17.6354 77.4609 17.9231 78.4809 18.458 79.3747C18.993 80.2685 19.756 81.004 20.6688 81.5058C21.5817 82.0076 22.6115 82.2577 23.6528 82.2304C24.6941 82.2032 25.7095 81.8995 26.5948 81.3506L70.4994 53.8924V79.3127C70.4994 80.0918 70.8089 80.839 71.3598 81.3899C71.9106 81.9408 72.6578 82.2502 73.4369 82.2502C74.216 82.2502 74.9631 81.9408 75.514 81.3899C76.0649 80.839 76.3744 80.0918 76.3744 79.3127V14.6877C76.3744 13.9087 76.0649 13.1615 75.514 12.6106C74.9631 12.0597 74.216 11.7502 73.4369 11.7502ZM23.4994 76.3495V17.6436L70.4406 47.0186L23.4994 76.3495Z" fill="currentColor"/></svg>';   // Figma 721:7588 SkipForward
 // how far through the current exercise (prep + work + side switch), 0..1: fills that exercise's bar at the top
 function bkExFrac(ei){
   const own = bk.segs.filter(sg=> sg.ei === ei);
@@ -16911,7 +16929,7 @@ const STRETCH_MUSCLES = {
   'Biceps Wall Stretch':['Biceps'], 'Cobra Stretch':['Brzuch'], 'Standing Side Bend':['Brzuch'], 'Figure-Four Stretch':['Nogi'],
   'Seated Glute Stretch':['Nogi'], 'Wrist Flexor Stretch':['Biceps'], 'Wrist Extensor Stretch':['Biceps'], 'Neck Side Stretch':['Plecy'],
 };
-const BLOCK_MIN_EX = 5, BLOCK_MAX_EX = 7, BLOCK_BUDGET_SEC = 330, FULLBODY_MIN_GROUPS = 4;
+const BLOCK_EX = 6, FULLBODY_MIN_GROUPS = 4;   // Rozgrzewka i Rozciąganie: zawsze 6 ćwiczeń
 /* muscle-group keys a day's main exercises actually train (timed blocks and custom ones don't count) */
 function dayWorkedGroups(exercises){
   const worked = [];
@@ -16943,7 +16961,7 @@ function buildWarmupBlock(exercises){
   for(let i = 0; per.some(l=> l.length > i); i++) per.forEach(l=>{ if(l[i] && !local.includes(l[i])) local.push(l[i]); });
   const universal = names.filter(n=> WARMUP_MUSCLES[n].includes('any'));
   // whole-body moves open the block (all of them on a fullbody day, one otherwise), then moves for the worked groups
-  const pick = [...(full ? general : general.slice(0,1)), ...local, ...general, ...universal];
+  const pick = [...(full ? general : general.slice(0,1)), ...local, ...general, ...universal, ...names];   // ...names: dopełnienie do 6, gdy dzień ćwiczy mało partii
   return blockFromNames(capBlock(pick));
 }
 /* Only groups that were worked; no filler, so a short day gets a short block. One stretch per group in
@@ -16956,18 +16974,13 @@ function buildStretchBlock(exercises){
   const per = sorted.map(g=> Object.keys(STRETCH_MUSCLES).filter(n=> STRETCH_MUSCLES[n].includes(g)));
   const pick = [];
   for(let i = 0; per.some(l=> l.length > i); i++) per.forEach(l=>{ if(l[i] && !pick.includes(l[i])) pick.push(l[i]); });
-  return blockFromNames(capBlock(pick));
+  return blockFromNames(capBlock([...pick, ...Object.keys(STRETCH_MUSCLES)]));   // dopełnienie do 6 rozciągnięciami innych partii
 }
-/* first BLOCK_MIN_EX always stay; more only while the block fits BLOCK_BUDGET_SEC and BLOCK_MAX_EX */
+/* first BLOCK_EX distinct names */
 function capBlock(names){
   const out = [];
-  let sec = 0;
   names.forEach(n=>{
-    if(out.includes(n) || out.length >= BLOCK_MAX_EX) return;
-    const e = BUILTIN_EXERCISES_BY_NAME.get(n);
-    const add = e ? blockSeconds([e]) : 0;
-    if(out.length >= BLOCK_MIN_EX && sec + add > BLOCK_BUDGET_SEC) return;
-    out.push(n); sec += add;
+    if(!out.includes(n) && BUILTIN_EXERCISES_BY_NAME.get(n) && out.length < BLOCK_EX) out.push(n);
   });
   return out;
 }
