@@ -22244,15 +22244,16 @@ function gymHasLogged(){
     || Object.keys(popupDrafts).some(n => (popupDrafts[n].setValues || []).some(sv => setIsLogged(sv, bwOf(n))));
 }
 /* Zajrzenie bez zalogowanych serii: wybór treningu, daty wstecz, szkice i licznik znikają po cichu. */
-function gymDiscardPeek(){
+function gymDiscardPeek(full){
   repeatMode = null; backfillDate = null; popupDrafts = {};
+  if(full){ extraGymTiles = []; todaySwaps = {}; persistTodaySwaps(); }   // jawne wyjście: zbudowane kafle i zamiany na dziś też znikają
   persistGymSession(); resetGymSessionTiming(); liveReset(); restStop();
 }
 /* X — wyjście z treningu (pyta tylko wtedy, gdy jest co stracić). */
 function gymAbortV2(){
   if(popupExercise) return;
-  if(repeatMode && !backfillDate && !gymHasLogged()){ gymDiscardPeek(); renderGymV2(); return; }   // strzałka: z powrotem do wyboru treningu
-  if(!gymHasLogged()){ gymDiscardPeek(); goRoute('dashboard'); return; }
+  if(repeatMode && !backfillDate && !gymHasLogged()){ gymDiscardPeek(true); renderGymV2(); return; }   // strzałka: z powrotem do wyboru treningu
+  if(!gymHasLogged()){ gymDiscardPeek(true); goRoute('dashboard'); return; }
   const sum = gymFinishSummary();
   gymConfirmV2({
     title: t('gymAbortTitleDlg','Wyjść z treningu?'),
@@ -22317,7 +22318,7 @@ function gymFinishTapV2(){
       yes: t('gymEmptyYes','Dodaj ćwiczenie'),
       no: t('gymEmptyLeave','Wyjdź z treningu'),
       onYes: ()=> openExercisePickerV2(),
-      onNo: ()=>{ gymDiscardPeek(); goRoute('dashboard'); }
+      onNo: ()=>{ gymDiscardPeek(true); goRoute('dashboard'); }
     });
     return;
   }
