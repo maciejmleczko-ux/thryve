@@ -22222,12 +22222,8 @@ function gymConfirmCloseV2(ok){
   if(ok && cb) cb();
   else if(!ok && noCb) noCb();
 }
-function gymHasProgress(){
-  const bwOf = n => { const d = orderedExerciseLibrary().find(e => e.name === n); return !!d && d.equipment === 'masa ciała'; };
-  return sessionExercises.length > 0
-    || Object.keys(popupDrafts).some(n => (popupDrafts[n].setValues || []).some(sv => setIsLogged(sv, bwOf(n))))
-    || gymLive.started;
-}
+/* Jedna definicja „postępu” dla Treningu, Pulpitu i dopisywania wstecz: zaliczone ćwiczenia albo zalogowane serie. Sam licznik (ruszył po dotknięciu kafla) to tylko zajrzenie. */
+function gymHasProgress(){ return gymHasLogged(); }
 /* Prawdziwy postęp = zaliczone ćwiczenia albo zalogowane serie. Sam licznik czasu (ruszył po dotknięciu kafla) to tylko zajrzenie. */
 function gymHasLogged(){
   const bwOf = n => { const d = orderedExerciseLibrary().find(e => e.name === n); return !!d && d.equipment === 'masa ciała'; };
