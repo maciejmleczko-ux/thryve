@@ -6294,7 +6294,7 @@ const T_EN = {
   gymV2Done: 'Completed',
   gymV2SaveWorkout: 'SAVE WORKOUT',
   gymV2PickOther: 'Pick another exercise',
-  gymEmptyStart: 'Workout for today', gymWsTitle: 'Your workouts', gymWsOwn: 'My workouts', gymWsShow: 'Show', gymWsHide: 'Hide', gymWsLast: 'Last workout', gymWsPlans: 'Workouts from plans', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
+  gymEmptyStart: 'Workout for today', gymFreeTitle: 'Workout', gymWsTitle: 'Your workouts', gymWsOwn: 'My workouts', gymWsShow: 'Show', gymWsHide: 'Hide', gymWsLast: 'Last workout', gymWsPlans: 'Workouts from plans', gymWsNext: 'Suggested', gymWsNever: 'not done yet',
   gymWsToday: 'last: today', gymWsYesterday: 'last: yesterday', gymWsAgo: n=>`last: ${n} days ago`,
   flexBadge: 'Workout', plansV2MyTrainings: 'My workouts', peTrainTitle: 'No days selected', peTrainBody: 'Without weekdays this will be saved as a workout you pick whenever you want.', peTrainYes: 'Save workout', peTrainNo: 'Back', trainingSaved: 'Workout saved', flexNoStar: 'A workout has no star: you pick it on the Workout screen',
   exerciseAddedToList: 'New exercise added to the list',
@@ -21635,6 +21635,7 @@ function renderGymV2(){
   const iso = backfillDate || todayStr();
   const plan = todayPlanId() ? trainingPlans.find(p=>p.id===todayPlanId()) : null;
   const repeatPlan = (repeatMode && repeatMode.planId) ? trainingPlans.find(p=>p.id===repeatMode.planId) : null;
+  const planToday = plan ? planExercisesFor(plan, iso).filter(e=>!BOOKEND_EX_NAMES.has(e.name)).length : 0;
   const nameEl = document.getElementById('gymV2PlanName');
   const noPlan = document.getElementById('gymV2NoPlan');
   document.getElementById('view-gym-v2').classList.toggle('is-backfill', !!backfillDate);
@@ -21645,8 +21646,12 @@ function renderGymV2(){
     nameEl.textContent = t('backfillTitle', 'Mój trening');   // data siedzi w pastylce obok ćwiczeń i ciężaru
     nameEl.hidden = false;
     noPlan.classList.add('hidden');
-  } else if(repeatPlan || plan){
-    nameEl.textContent = planDisplayName(repeatPlan || plan);   // trening wybrany ze slidera/z Planów: nazwa jego planu, nie planu oznaczonego gwiazdką
+  } else if(repeatPlan || (!repeatMode && plan && planToday > 0)){
+    nameEl.textContent = planDisplayName(repeatPlan || plan);   // trening wybrany ze slidera/z Planów albo dzień planu: nazwa jego planu, nie planu oznaczonego gwiazdką
+    nameEl.hidden = false;
+    noPlan.classList.add('hidden');
+  } else if(plan || repeatMode || sessionExercises.length || extraGymTiles.length){
+    nameEl.textContent = t('gymFreeTitle', 'Trening');   // trening na dziś / powtórzony / zbudowany ręcznie: domyślna nazwa, nie nazwa planu
     nameEl.hidden = false;
     noPlan.classList.add('hidden');
   } else {
@@ -21658,7 +21663,6 @@ function renderGymV2(){
   /* "Ćwiczenia w planie" only makes sense when today HAS plan exercises.
      On a rest day: if there's a repeat set or a session going, relabel it
      neutrally; otherwise hide the header + grid and show a rest-day note. */
-  const planToday = plan ? planExercisesFor(plan, iso).filter(e=>!BOOKEND_EX_NAMES.has(e.name)).length : 0;
   const hasWork = sessionExercises.length || extraGymTiles.length;
   const head = document.getElementById('gymV2SectionHead');
   const label = document.getElementById('gymV2SectionLabel');
