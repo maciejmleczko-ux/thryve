@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.107.4 (2026-11-02)
+- **Aktualna wersja:** 4.108.0 (2026-11-02)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,17 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.108.0 · MINOR · 2026-11-02
+
+Pulpit do własnego ułożenia: Ustawienia → Wygląd → Pulpit otwiera okno „Dostosuj pulpit”. Dziewięć niezależnych bloków (Ten tydzień, Rekord, Odznaka, Konsystencja, Ostatni trening, Trener, Plan tygodnia, Waga, Kalorie), każdy z przełącznikiem i uchwytem do przeciągania, plus „Przywróć domyślne”. Plan i START zawsze zostają na górze. Rekord i Odznaka obok „Tego tygodnia” stoją w kolumnie po prawej, pozostałe małe kafle (Rekord, Odznaka, Waga, Kalorie) układają się po dwa w rzędzie albo same na całą szerokość. Blok bez danych nadal się nie pokazuje. W Ustawieniach nowa sekcja „Wygląd” z wierszami „Pulpit” i „Postępy”.
+
+**Zakres techniczny:** `renderDashCards` składa teraz bloki przez `dashComposeBlocks(htmlById, order)` w jednym kontenerze `#dashBlocks` (zamiast sześciu `<section>`); `dashWeekParts` i `dashBodyParts` zwracają osobne kafle. Układ: `localStorage` `mekkio_dash_layout_v1` = `{order, hidden}` (jak `mekkio_stats_layout_v1`, tylko lokalnie, bez chmury), `dashLayoutAllowed()` to przyszła bramka Mekkio+ (dziś zawsze `true`). Okno `#dashCustSheet` (`.m-sheet2`, klasy `.std-*`) używa przeciągania z Postępów, uogólnionego o kontekst (`statsDGripDown(e,row,ctx)`). Klasa układu `.dash-smalls` (nazwa `.dash-pair` jest zajęta przez hero). Slot Trenera `#dashCoachSlot` odświeża się cicho po odpowiedzi AI.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-11-02 — 4.108.0: Dostosuj pulpit (Ustawienia → Wygląd), bloki i układ małych kafli
+
 
 ### 4.107.4 · PATCH · 2026-11-02
 

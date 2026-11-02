@@ -753,6 +753,8 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
 .wn-item:last-child{margin-bottom:0;}
 .wn-item-title{margin:0 0 6px;font-size:var(--m-fs-base);font-weight:400;letter-spacing:.04em;text-transform:uppercase;line-height:1.3;}
 .wn-item-text{margin:0;font-size:var(--m-fs-xs);line-height:1.5;}
+.wn-list{margin:0;padding:0 0 0 18px;font-size:var(--m-fs-xs);line-height:1.5;}
+.wn-list li+li{margin-top:8px;}
 /* Karta wydania: 355 px, zdjęcie 252 px na górze (Figma: 388 px z przesunięciem −17/−131), pod nim etykieta 12/700, tytuł 32/300, tekst 11 */
 #releaseSheet.rl-sheet{background:var(--m-white);}
 .rl-sheet{position:relative;overflow:hidden;border-radius:33px;padding:0;background:var(--m-white);max-height:none;}
@@ -1756,11 +1758,14 @@ button.dash-coach{cursor:pointer;}
 .dash-pw-chip svg{display:block;flex:none;width:16px;height:16px;}
 
 /* weight + calories (533:8721) */
-.dash-body{display:flex;gap:var(--m-gap-card);align-items:stretch;}
+.dash-blocks{display:contents;}
+.dash-blocks > :empty{display:none;}
+.dash-smalls{display:flex;gap:var(--m-gap-card);align-items:stretch;}
+.dash-smalls > .dash-card{flex:1 1 0;min-width:0;}
+.dash-smalls--bt > .dash-bt--w{flex:137 1 137px;}
+.dash-smalls--bt > .dash-bt--k{flex:214 1 214px;}
 .dash-bt{display:flex;flex-direction:column;gap:10px;min-width:0;}
 .dash-bt-top{display:flex;flex-direction:column;gap:4px;}
-.dash-bt--w{flex:137 1 137px;}
-.dash-bt--k{flex:214 1 214px;}
 .dash-bt-v{display:flex;align-items:baseline;gap:4px;white-space:nowrap;}
 .dash-bt-v .dash-num{font-size:var(--m-fs-headline);}
 .dash-bt-v small{margin-bottom:-4px;font-size:var(--m-fs-2xs);font-weight:400;line-height:14px;color:var(--m-muted-text);}
@@ -3875,6 +3880,7 @@ button.stv2-bt{cursor:pointer;}
 .std-mvb{width:44px;height:44px;padding:0;border:0;background:none;font:inherit;font-size:var(--m-fs-xs);color:var(--m-ink);cursor:pointer;}
 .std-mvb:disabled{opacity:.3;cursor:default;}
 /* przeciąganie: wiersz unosi się, reszta ustępuje miejsca */
+.std-pinrow#dcReset{justify-content:center;font-size:var(--m-fs-base);font-weight:500;color:var(--m-orange);}
 .std-row--drag{z-index:3;background:var(--m-white);border-radius:var(--m-r-sm);box-shadow:0 8px 24px rgba(0,0,0,.16);}
 .std-row--drag + .std-row,.std-row--drag{border-top-color:transparent;}
 .std-list--dragging .std-row:not(.std-row--drag){transition:transform var(--m-dur-fade) var(--m-ease);}
@@ -4318,17 +4324,11 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       </div>
 
       <!-- Content column. #dashHero is filled by renderDashHero() (7 hero states).
-           The <section>s below are Phase 3's slots, in Figma 01's order; empty ones
-           collapse (.dash-col > :empty). #dashSecCoach is the single Trener AI card
+           #dashBlocks is filled by renderDashCards() from the user's layout (dashComposeBlocks). #dashCoachSlot is the single Trener AI card
            (rule line + optional AI layer). -->
       <div class="dash-col" id="dashCol">
         <div id="dashHero"></div>
-        <section id="dashSecWeek" aria-label="Ten tydzień, rekord, odznaka"></section>
-        <section id="dashSecConsistency" aria-label="Konsystencja"></section>
-        <section id="dashSecLast" aria-label="Ostatni trening"></section>
-        <section id="dashSecCoach" aria-label="Podpowiedź"></section>
-        <section id="dashSecPlanWeek" aria-label="Plan tygodnia"></section>
-        <section id="dashSecBody" aria-label="Waga i kalorie"></section>
+        <div class="dash-blocks" id="dashBlocks"></div>
       </div>
     </div>
   </section>
@@ -4975,6 +4975,28 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
     </div>
     <div class="m2-actions">
       <button type="button" class="m2-btn m-press" id="stdCustSave" onclick="statsDCustSave()">ZAPISZ</button>
+    </div>
+  </div>
+</div>
+
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="dashCustSheet" onclick="if(event.target===this) dashCustClose()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="dcTitle">DOSTOSUJ PULPIT</h1>
+          <button type="button" class="m2-x" id="dcX" aria-label="Zamknij" onclick="dashCustClose()"><svg viewBox="0 0 18 18" width="18" height="18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="dcSub"></p>
+      </div>
+      <div class="m2-body">
+        <div class="std-list" id="dcList"></div>
+        <button type="button" class="std-pinrow m-press" id="dcReset" onclick="dashCustReset()"></button>
+      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn m-press" id="dcSave" onclick="dashCustSave()">ZAPISZ</button>
     </div>
   </div>
 </div>
@@ -6081,6 +6103,9 @@ const T_EN = {
   whatsnewTitle: "WHAT'S NEW",
   whatsnewVer: v => `Mekkio version v.${v}`,
   whatsnewFallbackHeadline: "What's new in Mekkio",
+  whatsnewAdded: 'Added',
+  whatsnewImproved: 'Improved',
+  whatsnewFixed: 'Fixed',
   whatsnewClose: 'Great, close',
   whatsnewFeaturedBadge: 'New',
   chlSheetTitle: 'CHANGE LOG',
@@ -8442,7 +8467,7 @@ function fmtKg(n){ const s = Number(kgToDisp(Number(n))).toFixed(1); return LANG
    Entry point: the account badge top-right of the Dashboard. Header is
    name-driven off profileName — "Gość" until a name is set. No login yet;
    the "Konto w chmurze" card is a teaser for roadmap phase 2. */
-const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','wnameSheet','planTodaySheet','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','monthSumSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet'];
+const ACCT_SHEETS = ['unitsSheet','nameEditOverlay','wnameSheet','planTodaySheet','weightListSheet','weightSheet','bodyDataSheet','aiPrefsSheet','aiConsentSheet','editKcalSheet','editTimeSheet','changelogHistorySheet','authSheet','newPasswordSheet','reminderSheet','healthSheet','profileBadgesSheet','profileRecordsSheet','badgeDetailSheet','monthSumSheet','recordDetailSheet','newBadgeSheet','langSheet','statsExSortSheet','statsCustSheet','statsPinSheet','statsShareSheet','palFilterSheet','planImportSheet','planImportConfirmSheet','planShareSheet','planCopySheet','dashCustSheet'];
 function acctLockCheck(){
   const anyOpen = ACCT_SHEETS.some(x=>{ const e = document.getElementById(x); return e && !e.classList.contains('hidden'); });
   if(!anyOpen) document.documentElement.classList.remove('modal-lock');
@@ -10581,7 +10606,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.107.4";
+const APP_VERSION = "4.108.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -11307,7 +11332,15 @@ const CHANGELOG = {
     ],
   },
 };
-function changelogEntries(v){ return CHANGELOG[v][LANG] || CHANGELOG[v].pl; }
+/* Wpis może mieć dwie postacie: tablica (stary format: kafle tytuł + tekst albo zwykłe zdania)
+   albo obiekt trzech sekcji {headline?, added:[], improved:[], fixed:[]} — nowy standard "Co nowego"
+   (zasada w CLAUDE.md). Dla obiektu changelogEntries zwraca płaską listę zdań (Historia zmian). */
+function changelogRaw(v){ return CHANGELOG[v][LANG] || CHANGELOG[v].pl; }
+function changelogSections(v){ const r = changelogRaw(v); return Array.isArray(r) ? null : r; }
+function changelogEntries(v){
+  const r = changelogRaw(v);
+  return Array.isArray(r) ? r : [...(r.added||[]), ...(r.improved||[]), ...(r.fixed||[])];
+}
 function versionGt(a, b){
   const pa = a.split('.').map(Number), pb = b.split('.').map(Number);
   for(let i=0;i<3;i++){ if((pa[i]||0) !== (pb[i]||0)) return (pa[i]||0) > (pb[i]||0); }
@@ -11331,6 +11364,8 @@ function pendingChangelogItems(){
 const WHATSNEW_IMAGES = [1,3,4,7,9,11,14,16,17,19].map(n => `icons/whatsnew/wn-${n}.jpg`);
 function whatsNewHeadline(versions){
   for(const v of versions){
+    const sec = changelogSections(v);
+    if(sec && sec.headline) return sec.headline;
     const f = changelogEntries(v).find(i => i && typeof i === 'object' && i.featured);
     if(f) return f.title;
   }
@@ -11343,9 +11378,14 @@ function renderWhatsNew(){
   document.getElementById('whatsnewHero').style.backgroundImage = `url("${img}")`;
   const list = document.getElementById('whatsnewList');
   list.innerHTML = versions.map(v=>{
-    const items = changelogEntries(v).map(i => typeof i === 'string'
-      ? `<div class="wn-item"><p class="wn-item-text">${i}</p></div>`
-      : `<div class="wn-item"><p class="wn-item-title">${i.title}</p><p class="wn-item-text">${i.text}</p></div>`).join('');
+    const sec = changelogSections(v);
+    const items = sec
+      ? [['added','whatsnewAdded','Dodano'],['improved','whatsnewImproved','Ulepszono'],['fixed','whatsnewFixed','Naprawiono']]
+          .filter(([k]) => (sec[k]||[]).length)
+          .map(([k, key, pl]) => `<div class="wn-item"><p class="wn-item-title">${t(key, pl)}</p><ul class="wn-list">${sec[k].map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')
+      : changelogEntries(v).map(i => typeof i === 'string'
+          ? `<div class="wn-item"><p class="wn-item-text">${i}</p></div>`
+          : `<div class="wn-item"><p class="wn-item-title">${i.title}</p><p class="wn-item-text">${i.text}</p></div>`).join('');
     return `<p class="wn-ver">${t('whatsnewVer','wersja mekkio v.' + v, v)}</p>${items}`;
   }).join('');
   list.scrollTop = 0;
@@ -12452,30 +12492,33 @@ function buildProfileSettingsV2(animate){
   };
   const sec = (id, label, rows, i, hint)=> `<section class="pf-sec${rc(i)}"${id ? ` id="${id}"` : ''}><div class="pf-sec-h"><h2 class="pf-sec-lbl">${label}</h2></div><div class="pf-card"><div class="pf-rows pf-rows--dyn">${rows}</div></div>${hint || ''}</section>`;
   const showHealth = IS_NATIVE && !!capPlugin('HealthPlugin');
+  const sec0 = sec('', t('setLook', 'WYGLĄD'),
+    row({ on: 'dashOpenCustomize()', n: t('setLookDash', 'Pulpit'), s: t('setLookDashSub', 'Co widzisz i w jakiej kolejności') }) +
+    row({ on: 'statsV2OpenCustomize()', n: t('setLookStats', 'Postępy'), s: t('setLookStatsSub', 'Sekcje ekranu Postępy') }), 0);
   const sec1 = sec('', t('setNotif', 'POWIADOMIENIA I DŹWIĘK'),
     row({ id: 'acctReminderRows', on: 'openReminderSheet()', n: t('setReminder', 'Przypomnienie o treningu'), hidden: !IS_NATIVE, help: true, under: '<span class="pf-pill" id="setReminderV" hidden></span>' }) +
     row({ id: 'setSoundRow', on: 'setSoundOn(!soundOn)', n: t('setSounds', 'Dźwięki'), s: t('setSoundsSub', 'Odliczanie przerwy i koniec treningu'),
       extra: ` role="switch" aria-checked="${soundOn ? 'true' : 'false'}"`, right: `<span class="acct-toggle acct-toggle--s${soundOn ? ' on' : ''}" id="acctSoundToggle"><span class="acct-toggle-knob"></span></span>` }) +
     row({ id: 'setLangRow', on: 'openLangSheet()', n: t('setLang', 'Język'), right: `<span class="pf-row-r"><span id="setLangV">${E(langRowLabel())}</span>${chev}</span>` }) +
-    row({ id: 'setUnitsRow', on: 'openUnitsSheet()', n: t('setUnits', 'Jednostki'), right: `<span class="pf-row-r"><span id="setUnitsV">${E(unitsRowLabel())}</span>${chev}</span>` }), 0);
+    row({ id: 'setUnitsRow', on: 'openUnitsSheet()', n: t('setUnits', 'Jednostki'), right: `<span class="pf-row-r"><span id="setUnitsV">${E(unitsRowLabel())}</span>${chev}</span>` }), 1);
   const sec2 = sec('', t('setData', 'DANE I PRYWATNOŚĆ'),
     row({ id: 'acctHealthRows', on: 'openHealthSheet()', n: t('setHealth', 'Apple Zdrowie'), s: t('setHealthSub', 'Waga i kalorie z zegarka'), hidden: !showHealth }) +
     row({ on: 'exportData()', n: t('setExportLocal', 'Utwórz kopię zapasową'), nId: 'acctExportLabel', s: t('setExportLocalSub', 'Plik .json'), sId: 'setExportSub' }) +
     row({ id: 'acctImportRow', on: "document.getElementById('importFile').click()", n: t('setImport', 'Wczytaj kopię'), s: t('setImportSub', 'Plik z kopią zapasową') }) +
     row({ id: 'setImportAppRow', on: 'openImportAppSheet()', n: t('setImportApp', 'Importuj z innej aplikacji'), s: t('setImportAppSub', 'Strong, Hevy (plik CSV)') }) +
-    row({ href: './polityka-prywatnosci.html', n: t('setPrivacy', 'Polityka prywatności') }), 1,
+    row({ href: './polityka-prywatnosci.html', n: t('setPrivacy', 'Polityka prywatności') }), 2,
     `<p class="set-hint" id="acctBackupHint"></p>`);
   // id acctBackupSec zostaje na etykiecie sekcji (hook z dawnego panelu)
   const sec3 = sec('', t('setHelp', 'POMOC'),
     row({ on: 'openFeedbackV2()', n: t('setWrite', 'Napisz do nas'), s: t('setWriteSub', 'Opinia i pomysły') }) +
     row({ on: 'openChangelogHistorySheet()', n: t('setWhatsNew', 'Co nowego'), s: t('setWhatsNewSub', 'Historia zmian'),
-      right: `<span class="pf-row-r"><span class="pf-pill pf-pill--tint" id="acctChlVer">${E(APP_VERSION)}</span>${chev}</span>` }), 2);
+      right: `<span class="pf-row-r"><span class="pf-pill pf-pill--tint" id="acctChlVer">${E(APP_VERSION)}</span>${chev}</span>` }), 3);
   const sec4 = sec('setAccountSec', t('setAccount', 'KONTO'),
     row({ id: 'setLoginRow', on: "openAuthSheet('login')", n: t('setLogin', 'Zaloguj się'), s: t('setLoginSub', 'Zapisz dane w chmurze'), hidden: true }) +
     row({ id: 'acctCloudSignedIn', info: true, n: '', nId: 'acctCloudEmail', s: '', sId: 'setProvider', right: '', hidden: true }) +
     row({ id: 'setSignOutRow', on: 'signOutCloud()', n: t('setLogout', 'Wyloguj się'), hidden: true }) +
-    row({ id: 'acctDangerZone', on: 'deleteAccountV2()', n: t('setDelete', 'Usuń konto'), s: t('setDeleteSub', 'Trwale usuwa konto i dane w chmurze'), danger: true, hidden: true }), 3);
-  host.innerHTML = `<div class="set-stack">${sec1}${sec2.replace('<h2 class="pf-sec-lbl">', '<h2 class="pf-sec-lbl" id="acctBackupSec">')}${sec3}${sec4}</div><p class="pf-foot">Mekkio <span id="setVer">${E(APP_VERSION)}</span><span id="acctFootData" hidden></span></p>`;
+    row({ id: 'acctDangerZone', on: 'deleteAccountV2()', n: t('setDelete', 'Usuń konto'), s: t('setDeleteSub', 'Trwale usuwa konto i dane w chmurze'), danger: true, hidden: true }), 4);
+  host.innerHTML = `<div class="set-stack">${sec0}${sec1}${sec2.replace('<h2 class="pf-sec-lbl">', '<h2 class="pf-sec-lbl" id="acctBackupSec">')}${sec3}${sec4}</div><p class="pf-foot">Mekkio <span id="setVer">${E(APP_VERSION)}</span><span id="acctFootData" hidden></span></p>`;
 }
 function renderProfileSettingsV2(animate){
   if(animate){ document.body.scrollTop = 0; document.documentElement.scrollTop = 0; }
@@ -13692,6 +13735,7 @@ mSheetDrag('planShareSheet', closePlanShareSheet);
 mSheetDrag('planCopySheet', closePlanCopySheet);
 mSheetDrag('statsExSortSheet', closeStatsExSort);
 mSheetDrag('statsCustSheet', statsDCustClose);
+mSheetDrag('dashCustSheet', dashCustClose);
 mSheetDrag('statsPinSheet', statsDPinClose);
 mSheetDrag('recordDetailSheet', closeRecordDetail);
 mSheetDrag('profileRecordsSheet', closeProfileRecordsSheet);   // zamknięcie przeciągnięciem kończy też trwający slajd miesięcy
@@ -20812,8 +20856,8 @@ function dashShortDate(iso){
 // the number inside a count-up element: final text first, animateDashNumber() runs it only on entrance
 const dashNum = (v, animate, extra)=> `<span class="dash-num"${animate && v > 0 ? ` data-countup="${v}"` : ''}${extra || ''}>${animate && v > 0 ? '0' : formatDashNum(v, 0)}</span>`;
 
-// ---- week + record + badge (Figma 533:8472) ----
-function dashWeekHtml(m, animate, rc){
+// ---- week + record + badge (Figma 533:8472): trzy osobne bloki ----
+function dashWeekParts(m, animate, rc){
   const w = m.week, last = w.mode === 'lastweek';
   const showRange = !last && w.compare && w.compare.days > 0;
   const range = showRange ? (w.compare.days === 1 ? DASH_DAY_ABBR_UP[1] : `${DASH_DAY_ABBR_UP[1]}–${DASH_DAY_ABBR_UP[dashDow(dashAddDays(w.from, w.compare.days - 1))]}`) : '';
@@ -20849,8 +20893,7 @@ function dashWeekHtml(m, animate, rc){
       <span class="dash-hd"><span class="dash-lbl">${t('dashBadge', 'Odznaka')}</span>${dashCaret()}</span>
       <span class="dash-bdg-body"><img src="${badgeIconSrc(b.id)}" width="51" height="51" alt="" decoding="async"><span class="dash-bdg-name">${escHtml(b.name)}</span></span>
     </button>` : '';
-  const col = recHtml || bdgHtml ? `<div class="dash-wkcol">${recHtml}${bdgHtml}</div>` : '';
-  return `<div class="dash-wkrow${col ? '' : ' dash-wkrow--solo'}">${tile}${col}</div>`;
+  return { week: tile, record: recHtml, badge: bdgHtml };   // układ (kolumna obok tygodnia, pary) składa dashComposeBlocks()
 }
 
 // ---- consistency (Figma 542:10833) ----
@@ -20912,7 +20955,7 @@ function dashCoachHtml(m, animate, rc){
 }
 // silent refresh of the coach slot only (AI arrived / failed): never animates
 function dashRenderCoach(){
-  const sec = document.getElementById('dashSecCoach');
+  const sec = document.getElementById('dashCoachSlot');
   if(!sec || !dashLastModel) return;
   sec.innerHTML = dashLastModel.hasHistory ? dashCoachHtml(dashLastModel, false, ()=> '') : '';
   dashRefreshScroll();
@@ -20952,7 +20995,7 @@ function dashSparkHtml(cls, pts, W, H, delay){   // pts: [{x 0..1, y value}]
   const xy = pts.map(p=> ({ x: +(p.x * W).toFixed(2), y: +(span ? H - 1.5 - ((p.y - mn) / span) * (H - 3) : H / 2).toFixed(2) }));
   return `<svg class="dash-spark ${cls}" viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" aria-hidden="true"><path class="statsv2-draw-path" data-draw-delay="${delay}" d="${statsV2SmoothPath(xy)}"/></svg>`;
 }
-function dashBodyHtml(m, animate, rc){
+function dashBodyParts(m, animate, rc){
   const wt = m.weight, k = m.kcal;
   const delay = 0;   // dashStartCardFx() sets the real draw delay from the tile's own entrance
   // weight
@@ -21002,7 +21045,7 @@ function dashBodyHtml(m, animate, rc){
       <span class="dash-bt-top"><span class="dash-bt-v"><span class="dash-num">~${formatDashNum(k.thisWeek, 0)}</span><small>kcal</small></span>${dHtml}</span>${chart}
     </button>`;
   }
-  return `<div class="dash-body">${wHtml}${kHtml}</div>`;
+  return { weight: wHtml, kcal: kHtml };
 }
 
 // run the entrance extras ONLY for an "opened" render: count-up numbers + chart line draw-in.
@@ -21028,17 +21071,77 @@ function dashStartCardFx(root){
   statsV2AnimateDrawPaths(root);
 }
 
+/* ---------- Układ Pulpitu (Ustawienia → Wygląd → Pulpit) ----------
+   mekkio_dash_layout_v1 = { order:[id...], hidden:[id...] }, id: week | record | badge | consistency | last | coach | planweek | weight | kcal.
+   Hero (plan + START) jest zawsze na górze i nie podlega układowi. Dane wygrywają z układem: blok bez danych się nie pokazuje.
+   Jak Postępy: zapis tylko lokalny. dashLayoutAllowed() to miejsce na przyszłą bramkę Mekkio+ (dziś zawsze true, bez UI płatności). */
+const DASH_LAYOUT_KEY = 'mekkio_dash_layout_v1';
+const DASH_BLOCKS = ['week', 'record', 'badge', 'consistency', 'last', 'coach', 'planweek', 'weight', 'kcal'];
+const DASH_SMALL = { record: 1, badge: 1, weight: 1, kcal: 1 };   // małe kafle parują się po dwa; reszta zajmuje cały wiersz
+const DASH_LABELS = { week: ['dashBlkWeek', 'Ten tydzień'], record: ['dashRecord', 'Rekord'], badge: ['dashBadge', 'Odznaka'], consistency: ['dashConsistency', 'Konsystencja'],
+  last: ['dashLastWorkout', 'Ostatni trening'], coach: ['dashBlkCoach', 'Trener'], planweek: ['dashPlanWeek', 'Plan tygodnia'], weight: ['dashWeight', 'Waga'], kcal: ['dashKcal', 'Kalorie'] };
+function dashLayoutAllowed(){ return true; }
+function dashNormLayout(raw){
+  const r = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const order = [], hidden = [];
+  (Array.isArray(r.order) ? r.order : []).forEach(id=>{ if(DASH_BLOCKS.indexOf(id) >= 0 && order.indexOf(id) < 0) order.push(id); });
+  DASH_BLOCKS.forEach(id=>{ if(order.indexOf(id) < 0) order.push(id); });
+  (Array.isArray(r.hidden) ? r.hidden : []).forEach(id=>{ if(DASH_BLOCKS.indexOf(id) >= 0 && hidden.indexOf(id) < 0) hidden.push(id); });
+  return { order, hidden };
+}
+function dashLayout(){
+  if(!dashLayoutAllowed()) return dashNormLayout(null);
+  try{ const raw = localStorage.getItem(DASH_LAYOUT_KEY); return dashNormLayout(raw ? JSON.parse(raw) : null); }
+  catch(e){ return dashNormLayout(null); }
+}
+function dashSetLayout(obj){
+  const v = dashNormLayout(obj);
+  try{ localStorage.setItem(DASH_LAYOUT_KEY, JSON.stringify(v)); }catch(e){}
+  return v;
+}
+// Składanie: tylko widoczne bloki z danymi, w zapisanej kolejności.
+// 1) „Ten tydzień” + bezpośrednio po nim Rekord i/lub Odznaka = duży kafel po lewej, mała kolumna (do dwóch wierszy) po prawej
+// 2) pozostałe małe kafle parują się po dwa w rzędzie (Waga i Kalorie zachowują swoje proporcje), pojedynczy mały zajmuje cały wiersz
+// 3) duże bloki zawsze na całą szerokość
+function dashComposeBlocks(htmlById, order){
+  const seq = order.filter(id=> htmlById[id] != null && htmlById[id] !== '');
+  const out = [];
+  for(let i = 0; i < seq.length; i++){
+    const id = seq[i];
+    if(id === 'week'){
+      const col = [];
+      while(col.length < 2 && (seq[i + 1] === 'record' || seq[i + 1] === 'badge')) col.push(seq[++i]);
+      out.push(`<div class="dash-wkrow${col.length ? '' : ' dash-wkrow--solo'}">${htmlById.week}${col.length ? `<div class="dash-wkcol">${col.map(c=> htmlById[c]).join('')}</div>` : ''}</div>`);
+    } else if(DASH_SMALL[id]){
+      const pair = [id];
+      if(DASH_SMALL[seq[i + 1]]) pair.push(seq[++i]);
+      const bt = pair.length === 2 && pair[0] === 'weight' && pair[1] === 'kcal' ? ' dash-smalls--bt' : '';
+      out.push(`<div class="dash-smalls${bt}">${pair.map(c=> htmlById[c]).join('')}</div>`);
+    } else out.push(htmlById[id]);
+  }
+  return out.join('');
+}
+
 function renderDashCards(m, animate){
   const rich = !!m.hasHistory;
   const rc = i => animate ? ` m-rise-tile" style="--i:${i}` : '';
-  const put = (id, html)=>{ const el = document.getElementById(id); if(el) el.innerHTML = html; };
-  put('dashSecWeek', rich ? dashWeekHtml(m, animate, rc) : '');
-  put('dashSecConsistency', rich ? dashConsistencyHtml(m, animate, rc) : '');
-  put('dashSecLast', rich ? dashLastHtml(m, animate, rc) : '');
-  put('dashSecCoach', rich ? dashCoachHtml(m, animate, rc) : '');
   const early = !rich && m.hasPlan;   // plan wybrany, zero treningów: Plan tygodnia i Waga mają dane od pierwszego dnia, reszta (Ten tydzień, Rekord, Trener…) czeka na pierwszy trening
-  put('dashSecPlanWeek', rich || early ? dashPlanWeekHtml(m, animate, rc) : '');
-  put('dashSecBody', rich || early ? dashBodyHtml(m, animate, rc) : '');
+  const by = {};
+  if(rich){
+    const wp = dashWeekParts(m, animate, rc);
+    by.week = wp.week; by.record = wp.record; by.badge = wp.badge;
+    by.consistency = dashConsistencyHtml(m, animate, rc);
+    by.last = dashLastHtml(m, animate, rc);
+    by.coach = `<div id="dashCoachSlot">${dashCoachHtml(m, animate, rc)}</div>`;
+  }
+  if(rich || early){
+    by.planweek = dashPlanWeekHtml(m, animate, rc);
+    const bp = dashBodyParts(m, animate, rc);
+    by.weight = bp.weight; by.kcal = bp.kcal;
+  }
+  const lay = dashLayout();
+  const host = document.getElementById('dashBlocks');
+  if(host) host.innerHTML = dashComposeBlocks(by, lay.order.filter(id=> lay.hidden.indexOf(id) < 0));
   if(animate) dashStartCardFx(document.getElementById('dashCol'));
 }
 
@@ -24354,6 +24457,8 @@ const STATSD_MAX_PINS = 5;
 const STATSD_SECTIONS = ['chart', 'records', 'stalled', 'muscles', 'cardio', 'body'];   // kolejność domyślna wg listy w Figmie 04: ..., Rozkład mięśni, Kardio, Ciało
 const STATSD_LABELS = { chart: ['stDSecChart', 'Wykres główny'], records: ['stDSecRecords', 'Rekordy'], stalled: ['stDSecStalled', 'Bez postępu'], muscles: ['stDSecMuscles', 'Rozkład mięśni'], body: ['stDSecBody', 'Ciało'], cardio: ['stDSecCardio', 'Kardio'] };
 Object.assign(T_EN, {
+  setLook: 'APPEARANCE', setLookDash: 'Dashboard', setLookDashSub: 'What you see and in which order', setLookStats: 'Progress', setLookStatsSub: 'Sections of the Progress screen',
+  dashCustTitle: 'CUSTOMIZE DASHBOARD', dashCustSub: 'Your plan and the START button always stay on top. For the rest, drag to reorder and choose what you see.', dashCustReset: 'Restore defaults', dashBlkWeek: 'This week', dashBlkCoach: 'Coach',
   stDCustTitle: 'CUSTOMIZE SCREEN', stDCustSub: 'Choose what you see in Progress. Drag to change the order.',
   stDSecChart: 'Main chart', stDSecRecords: 'Records', stDSecStalled: 'No progress', stDSecMuscles: 'Muscle split', stDSecBody: 'Body', stDSecCardio: 'Cardio',
   stDGrip: n => `Drag to reorder: ${n}`, stDUp: n => `Move up: ${n}`, stDDown: n => `Move down: ${n}`,
@@ -24479,14 +24584,15 @@ function statsDCustMove(id, dir, viaGrip){
 }
 // przeciąganie wiersza za uchwyt: transform 1:1 z palcem, reszta wierszy przesuwa się o krok; po puszczeniu dociągnięcie do slotu
 let statsDDragSt = null;
-function statsDGripDown(e, row){
+const STATSD_CTX = { draft: ()=> statsDDraft, paint: (id, d)=> statsDCustPaint(id, d) };
+function statsDGripDown(e, row, ctx){
   if(statsDDragSt || (e.pointerType === 'mouse' && e.button > 0)) return;
   const list = row.parentElement, rows = Array.from(list.children);
   const idx = rows.indexOf(row);
   if(rows.length < 2) return;
   const step = rows[1].offsetTop - rows[0].offsetTop;
   const grip = e.currentTarget;
-  statsDDragSt = { row, rows, idx, cur: idx, step, y0: e.clientY, list, pid: e.pointerId, grip };
+  statsDDragSt = { row, rows, idx, cur: idx, step, y0: e.clientY, list, pid: e.pointerId, grip, ctx: ctx || STATSD_CTX };
   try{ grip.setPointerCapture(e.pointerId); }catch(_){}
   row.classList.add('std-row--drag');
   list.classList.add('std-list--dragging');
@@ -24516,9 +24622,9 @@ function statsDGripUp(){
   const commit = ()=>{
     if(done) return; done = true;
     statsDDragSt = null;
-    const d = statsDDraft;
+    const d = s.ctx.draft();
     if(d && s.cur !== s.idx) d.order.splice(s.cur, 0, d.order.splice(s.idx, 1)[0]);
-    statsDCustPaint(s.row.dataset.id, 'grip');   // przemalowanie bez przejść: wiersze wracają do pozycji 0 już w nowej kolejności
+    s.ctx.paint(s.row.dataset.id, 'grip');   // przemalowanie bez przejść: wiersze wracają do pozycji 0 już w nowej kolejności
   };
   s.row.classList.add('std-row--settle');
   s.row.style.transform = `translateY(${(s.cur - s.idx) * s.step}px)`;
@@ -24539,6 +24645,69 @@ function statsDCustToPin(){
   statsDRefreshScreens();
   setTimeout(()=> statsV2OpenPin('overview'), stgTok('--m-dur-snap'));   // po zamknięciu Dostosuj (--m-dur-exit .26 s), o jeden token dłużej
 }
+
+/* ---------- Dostosuj Pulpit (Ustawienia → Wygląd): ten sam szkielet i przeciąganie co Dostosuj ekran ---------- */
+let dashDraft = null;   // { order:[id...], hidden:Set } do ZAPISZ
+const DASH_CTX = { draft: ()=> dashDraft, paint: (id, d)=> dashCustPaint(id, d) };
+function dashBlockName(id){
+  if(id === 'coach') return AI_COACH_ENABLED ? t('dashCoach', 'Trener AI') : t('dashTip', 'Podpowiedź');
+  const lb = DASH_LABELS[id]; return t(lb[0], lb[1]);
+}
+function dashOpenCustomize(){
+  const lay = dashLayout();
+  dashDraft = { order: lay.order.slice(), hidden: new Set(lay.hidden) };
+  const $ = id => document.getElementById(id);
+  $('dcTitle').textContent = t('dashCustTitle', 'DOSTOSUJ PULPIT');
+  $('dcSub').textContent = t('dashCustSub', 'Plan i przycisk START są zawsze na górze. Reszta: przeciągnij, żeby zmienić kolejność, i wybierz, co widzisz.');
+  $('dcX').setAttribute('aria-label', t('stDClose', 'Zamknij'));
+  $('dcSave').textContent = t('stDSave', 'ZAPISZ');
+  $('dcReset').textContent = t('dashCustReset', 'Przywróć domyślne');
+  dashCustPaint();
+  acctSheetOpen('dashCustSheet');
+}
+function dashCustPaint(focusId){
+  const d = dashDraft, list = document.getElementById('dcList');
+  if(!d || !list) return;
+  list.innerHTML = d.order.map(id=>{
+    const nm = escHtml(dashBlockName(id)), on = !d.hidden.has(id);
+    return `<div class="std-row" data-id="${id}"><button type="button" class="std-grip" aria-label="${escHtml(t('stDGrip', `Zmień kolejność: ${dashBlockName(id)}`, dashBlockName(id)))}">${STATSD_GRIP}</button>`
+      + `<span class="std-name">${nm}</span>`
+      + `<button type="button" class="std-sw m-press" role="switch" aria-checked="${on}" aria-label="${nm}" onclick="dashCustToggle('${id}', this)"><i></i></button></div>`;
+  }).join('');
+  list.querySelectorAll('.std-row').forEach(row=>{
+    const id = row.dataset.id, grip = row.querySelector('.std-grip');
+    grip.addEventListener('pointerdown', e=> statsDGripDown(e, row, DASH_CTX));
+    grip.addEventListener('touchstart', e=> e.stopPropagation(), { passive: true });
+    grip.addEventListener('touchmove', e=> e.stopPropagation(), { passive: true });
+    grip.addEventListener('keydown', e=>{
+      if(e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      const i = d.order.indexOf(id), j = i + (e.key === 'ArrowUp' ? -1 : 1);
+      if(j < 0 || j >= d.order.length) return;
+      d.order.splice(j, 0, d.order.splice(i, 1)[0]);
+      dashCustPaint(id);
+      const g = list.querySelector(`.std-row[data-id="${id}"] .std-grip`); if(g) try{ g.focus({ preventScroll: true }); }catch(_){}
+    });
+  });
+  if(focusId){ const g = list.querySelector(`.std-row[data-id="${focusId}"] .std-grip`); if(g) try{ g.focus({ preventScroll: true }); }catch(_){} }
+}
+function dashCustToggle(id, btn){
+  const d = dashDraft; if(!d) return;
+  if(d.hidden.has(id)) d.hidden.delete(id); else d.hidden.add(id);
+  if(btn) btn.setAttribute('aria-checked', String(!d.hidden.has(id)));
+}
+function dashCustReset(){
+  dashDraft = { order: DASH_BLOCKS.slice(), hidden: new Set() };
+  dashCustPaint();
+}
+function dashCustSave(){
+  if(!dashDraft) return;
+  dashSetLayout({ order: dashDraft.order, hidden: Array.from(dashDraft.hidden) });
+  dashCustClose();
+  if(currentRoute === 'dashboard' && dashLastModel) renderDashCards(dashLastModel, false);
+  toast(t('stDSaved', 'Zapisano'));
+}
+function dashCustClose(viaDrag){ statsDDragSt = null; acctSheetClose('dashCustSheet', viaDrag); }
 
 /* ---------- Przypnij ćwiczenia ---------- */
 let statsDPin = null;   // { sel:[nazwy w kolejności wyboru], rows:[...], q:'' }
