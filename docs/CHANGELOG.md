@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.107.2 (2026-11-02)
+- **Aktualna wersja:** 4.107.3 (2026-11-02)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.107.3 · PATCH · 2026-11-02
+
+Trening dopisywany wstecz: tytuł to „Mój trening”, a data (np. „1 listopada”) jest w pastylce obok ćwiczeń i ciężaru, w miejscu licznika czasu, którego tu nie ma (`#gymV2PillDate`). Pasek „wróć do planu” nie dubluje już nazwy, gdy sesja nazywa się tak samo jak plan („Mój trening · Mój trening” → „Mój trening”, `gymWorkoutCatalogV2`).
+
+**Commity (1):**
+
+- (hash po commicie) 2026-11-02 — Trening wstecz: tytuł Mój trening, data w pastylce, bez zdublowanej nazwy
 
 ### 4.107.2 · PATCH · 2026-11-02
 

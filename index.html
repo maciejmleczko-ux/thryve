@@ -2685,6 +2685,8 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 #backfillOverlay .histv2-cal-nav-month{gap:4px;}
 #backfillOverlay .onboard-box.new-ex-form>.onboard-actions{margin-top:16px;}
 #view-gym-v2.is-backfill #gymV2PillTime{display:none;}
+#view-gym-v2 .gy-pill-date{flex:1;min-width:0;}
+#view-gym-v2 .gy-pill-date .ph{color:var(--m-orange);}
 .histv2-recpill .ph{width:16px;height:16px;color:var(--m-ink);}
 .histv2-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin-bottom:4px;}
 .histv2-label-row .histv2-section-label{margin:0;}
@@ -4343,6 +4345,7 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
       <div class="gy-pills" id="gymV2Pills">
         <div class="gy-pill" id="gymV2PillEx"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 12.6 10 17l8.6-9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="gymV2PillExTxt">0/0</span></div>
         <div class="gy-pill" id="gymV2PillKg"><span class="ph" data-ph="barbell"></span><span id="gymV2PillKgTxt">0 kg</span></div>
+        <div class="gy-pill gy-pill-date" id="gymV2PillDate" hidden><span class="ph" data-ph="calendar-dots"></span><span id="gymV2PillDateTxt"></span></div>
         <button type="button" class="gy-pill gy-pill-time" id="gymV2PillTime" onclick="openLiveTime()" aria-label="Czas treningu"><span class="ph" data-ph="clock-countdown"></span><span id="gymV2PillTimeTxt">0:00</span></button>
       </div>
 
@@ -6312,6 +6315,7 @@ const T_EN = {
   backfillBusy: 'You have a workout in progress. Finish or abort it first.',
   backfillBadDate: 'Pick a day in the past',
   backfillBanner: d => `Workout from ${d}`,
+  backfillTitle: 'My workout',
   backfillRestDay: 'No workout was planned that day. You can still log something.',
   repeatNoWorkout: 'No saved workout to repeat yet',
   repeatDone: d => `Loaded your workout from ${d}`,
@@ -10576,7 +10580,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.107.2";
+const APP_VERSION = "4.107.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -21633,8 +21637,11 @@ function renderGymV2(){
   const nameEl = document.getElementById('gymV2PlanName');
   const noPlan = document.getElementById('gymV2NoPlan');
   document.getElementById('view-gym-v2').classList.toggle('is-backfill', !!backfillDate);
+  const datePill = document.getElementById('gymV2PillDate');
+  datePill.hidden = !backfillDate;
+  if(backfillDate) document.getElementById('gymV2PillDateTxt').textContent = histDayMonthV2(new Date(backfillDate + 'T12:00:00'));
   if(backfillDate){
-    nameEl.textContent = t('backfillBanner', `Trening z dnia ${histDayMonthV2(new Date(backfillDate + 'T12:00:00'))}`, histDayMonthV2(new Date(backfillDate + 'T12:00:00')));
+    nameEl.textContent = t('backfillTitle', 'Mój trening');   // data siedzi w pastylce obok ćwiczeń i ciężaru
     nameEl.hidden = false;
     noPlan.classList.add('hidden');
   } else if(repeatPlan || plan){
@@ -21721,7 +21728,7 @@ function gymWorkoutCatalogV2(){
     });
     planSessions(p).forEach(se=>{
       const names = se.exercises.map(e=>e.name).filter(n=> !BOOKEND_EX_NAMES.has(n));
-      if(names.length) entries.push({ key: p.id + ':' + se.id, tone: tone.cls, pill, planId: p.id, label: pName, groups: groupsOf(se.exercises, entries.length + 1), planLabel: `${pName} · ${se.name}`, name: se.name, names, session: true });
+      if(names.length) entries.push({ key: p.id + ':' + se.id, tone: tone.cls, pill, planId: p.id, label: pName, groups: groupsOf(se.exercises, entries.length + 1), planLabel: se.name.trim().toLowerCase() === pName.trim().toLowerCase() ? pName : `${pName} · ${se.name}`, name: se.name, names, session: true });
     });
   });
   const done = (workouts || []).filter(w=> w && w.exercises && w.exercises.length && typeof w.date === 'string');
