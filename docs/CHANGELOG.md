@@ -121,7 +121,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 ### 4.107.4 · PATCH · 2026-11-02
 
-Trening: wyjście z samego zajrzenia. Dotknięcie kafla (start licznika) nie jest już „postępem”: X wraca bez ostrzeżenia i zeruje licznik. Okno przy zalogowanych seriach mówi, co zniknie („Wyjść z treningu? Masz 2 ćwiczenia i 1 240 kg”, „Przerwij i usuń”). Pusty „ZAKOŃCZ TRENING” ma przycisk „Wyjdź z treningu”. Wyjście zakładką z samego zajrzenia czyści wybór treningu, datę wstecz i licznik.
+Trening: wyjście z samego zajrzenia. Dotknięcie kafla (start licznika) nie jest już „postępem”: X wraca bez ostrzeżenia i zeruje licznik. Okno przy zalogowanych seriach mówi, co zniknie („Wyjść z treningu? Masz 2 ćwiczenia i 1 240 kg”, „Przerwij i usuń”). Pusty „ZAKOŃCZ TRENING” ma przycisk „Wyjdź z treningu”. Wyjście zakładką z samego zajrzenia czyści wybór treningu, datę wstecz i licznik. Poprawka z 4.107.3: pusta pastylka z datą nie pokazuje się już w zwykłym treningu (atrybut `hidden` przegrywał z `display:flex`).
 
 **Commity (1):**
 
