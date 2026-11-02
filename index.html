@@ -5981,7 +5981,7 @@ const T_EN = {
   wlTitle: 'WEIGHT LOG', wlSub: 'Tap a measurement to change it.', wlAdd: 'ADD MEASUREMENT', wlEmpty: 'No measurements yet. Add the first one with the button below.', wlManual: 'Manual', pfWeightAll: 'All weight measurements',
   gymTitleTraining: 'WORKOUT', gymAbortTitle: 'Abort workout', gymFinishTitle: 'Finish workout',
   gymV2YourExercises: 'Your exercises', gymV2FinishWorkout: 'FINISH WORKOUT', gymPillExercises: 'exercises', gymPaused: 'Paused',
-  gymAbortTitleDlg: 'Abort workout?', gymAbortBody: 'Everything you logged in this workout today will be deleted.', gymAbortYes: 'Abort', gymAbortNo: 'Back to workout',
+  gymAbortTitleDlg: 'Leave workout?', gymAbortBody: 'Everything you logged in this workout today will be deleted.', gymAbortYes: 'Abort and delete', gymAbortBodyN: (n, kg)=>`You have ${n} and ${kg} ${wUnit()}. If you leave, it will be deleted.`, gymEmptyLeave: 'Leave workout', gymAbortNo: 'Back to workout',
   gymFinishDlgTitle: 'Finish workout?', gymFinishBody: (n, kg)=>`We'll save ${n} and ${kg} ${wUnit()}.`, gymFinishPartial: 'Some exercises have incomplete sets; we will save them as they are.', gymFinishYes: 'Finish and save', gymFinishNo: 'Back',
   gymUnsavedTitle: 'Changes not saved', gymUnsavedBody: 'This exercise was already done. To save your changes, go back and tap ✓.', gymUnsavedYes: 'Leave without saving', gymUnsavedNo: 'Back',
   gymEmptyTitle: 'The workout is empty', gymEmptyBody: "You haven't logged an exercise yet. Add the first one?", gymEmptyYes: 'Add exercise',
@@ -10580,7 +10580,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.107.3";
+const APP_VERSION = "4.107.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -12570,6 +12570,7 @@ function positionNavBlob(animate){
 }
 window.addEventListener('resize', ()=> positionNavBlob(false));
 function goRoute(route){
+  if(currentRoute === 'gym-v2' && route !== 'gym-v2' && !popupExercise && !gymHasLogged() && (repeatMode || backfillDate || gymLive.started || Object.keys(popupDrafts).length)) gymDiscardPeek();   // wyjście zakładką z samego zajrzenia nie zostawia szkicu
   if(window.mPopover) mPopover.close({restoreFocus:false, instant:true});   // menu „…” nie przeżywa zmiany ekranu
   if(onbPick && onbPick.inEditor){
     if(route === 'plans-v2' && currentRoute === 'plan-editor-v2'){ opkReturnFromEditor(); return; }   // strzałka wstecz w edytorze wraca na wybór planu z onboardingu
@@ -21858,7 +21859,7 @@ function updateGymV2RepeatBtn(){
   if(!btn) return;
   const tEl = btn.querySelector('.gymv2-repeat-t');
   const sEl = document.getElementById('gymV2RepeatSub');
-  const backMode = !!repeatMode && !backfillDate && !gymHasProgress();
+  const backMode = !!repeatMode && !backfillDate && !gymHasLogged();
   const xBtn = document.getElementById('gymV2XBtn');
   if(xBtn){
     xBtn.classList.toggle('is-back', backMode);
@@ -22235,15 +22236,29 @@ function gymHasProgress(){
     || Object.keys(popupDrafts).some(n => (popupDrafts[n].setValues || []).some(sv => setIsLogged(sv, bwOf(n))))
     || gymLive.started;
 }
-/* X — abort the workout (asks first when there is anything to lose). */
+/* Prawdziwy postęp = zaliczone ćwiczenia albo zalogowane serie. Sam licznik czasu (ruszył po dotknięciu kafla) to tylko zajrzenie. */
+function gymHasLogged(){
+  const bwOf = n => { const d = orderedExerciseLibrary().find(e => e.name === n); return !!d && d.equipment === 'masa ciała'; };
+  return sessionExercises.length > 0
+    || Object.keys(popupDrafts).some(n => (popupDrafts[n].setValues || []).some(sv => setIsLogged(sv, bwOf(n))));
+}
+/* Zajrzenie bez zalogowanych serii: wybór treningu, daty wstecz, szkice i licznik znikają po cichu. */
+function gymDiscardPeek(){
+  repeatMode = null; backfillDate = null; popupDrafts = {};
+  persistGymSession(); resetGymSessionTiming(); liveReset(); restStop();
+}
+/* X — wyjście z treningu (pyta tylko wtedy, gdy jest co stracić). */
 function gymAbortV2(){
   if(popupExercise) return;
-  if(repeatMode && !backfillDate && !gymHasProgress()){ repeatMode = null; persistGymSession(); renderGymV2(); return; }   // strzałka: z powrotem do wyboru treningu
-  if(!gymHasProgress()){ backfillDate = null; persistGymSession(); goRoute('dashboard'); return; }
+  if(repeatMode && !backfillDate && !gymHasLogged()){ gymDiscardPeek(); renderGymV2(); return; }   // strzałka: z powrotem do wyboru treningu
+  if(!gymHasLogged()){ gymDiscardPeek(); goRoute('dashboard'); return; }
+  const sum = gymFinishSummary();
   gymConfirmV2({
-    title: t('gymAbortTitleDlg','Przerwać trening?'),
-    body: t('gymAbortBody','Wszystko, co dziś zalogowałeś w tym treningu, zniknie.'),
-    yes: t('gymAbortYes','Przerwij'),
+    title: t('gymAbortTitleDlg','Wyjść z treningu?'),
+    body: sum.exercises
+      ? t('gymAbortBodyN', `Masz ${planExCountText(sum.exercises)} i ${Math.round(kgToDisp(sum.kg))} ${wUnit()}. Jeśli wyjdziesz, to zniknie.`, planExCountText(sum.exercises), Math.round(kgToDisp(sum.kg)))
+      : t('gymAbortBody','Wszystko, co dziś zalogowałeś w tym treningu, zniknie.'),
+    yes: t('gymAbortYes','Przerwij i usuń'),
     no: t('gymAbortNo','Wróć do treningu'),
     onYes: ()=>{
       sessionExercises = []; extraGymTiles = []; repeatMode = null; popupDrafts = {}; backfillDate = null;
@@ -22299,8 +22314,9 @@ function gymFinishTapV2(){
       title: t('gymEmptyTitle','Trening jest pusty'),
       body: t('gymEmptyBody','Nie ma jeszcze ani jednego ćwiczenia. Dodać pierwsze?'),
       yes: t('gymEmptyYes','Dodaj ćwiczenie'),
-      no: t('cancel','Anuluj'),
-      onYes: ()=> openExercisePickerV2()
+      no: t('gymEmptyLeave','Wyjdź z treningu'),
+      onYes: ()=> openExercisePickerV2(),
+      onNo: ()=>{ gymDiscardPeek(); goRoute('dashboard'); }
     });
     return;
   }
