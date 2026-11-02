@@ -1509,7 +1509,7 @@ a.pf-row{text-decoration:none;}
 /* Content column: hero first, then one <section> per card group (filled by
    Phase 3, empty ones collapse). Figma gap 4; states 06/07 use 20. */
 .dash-col{display:flex;flex-direction:column;gap:var(--m-gap-card);}   /* odstęp między kartami Pulpitu: 8 px (było 4, decyzja Macieja 2026-10-22) */
-.dash-col[data-state="planready"],.dash-col[data-state="noplan-new"]{gap:20px;}
+.dash-col[data-state="noplan-new"]{gap:20px;}
 #dashHero{display:flex;flex-direction:column;gap:inherit;}   /* hero + its attached lists keep the column's own gap */
 .dash-col > :empty{display:none;}
 
@@ -20578,7 +20578,7 @@ function dashboardModelCore(now){
     hero = hasHistory
       ? { state:'noplan-history', ...base }
       : { state:'noplan-new', ...base, recommended: recommendedPlanFor(null) };
-  } else if(!hasHistory){
+  } else if(!hasHistory && todayInfo.exerciseCount > 0){   // plan wybrany, zero treningów, dziś dzień treningowy; w dzień wolny działa zwykły hero „Dziś wolne / Jutro plan”
     hero = { state:'planready', ...base, today: todayInfo, todayIsTraining: todayInfo.exerciseCount > 0, next: dashNextPlanDay(plan, todayIso, todayIso) };
   } else if(todayInfo.exerciseCount > 0){
     hero = { state:'train', ...base, ...todayInfo };
@@ -20666,14 +20666,7 @@ function dashHeroHtml(m, animate){
         ${dashPlanStats(info.exerciseCount, info.estMin)}
         ${btn(h.state, t('dashStart', 'Start'))}
       </div>`;
-      if(h.state !== 'planready') return html;
-      const row = (done, label, kind) => `<button type="button" class="dash-step m-press${done ? ' is-done' : ''}" onclick="dashCta('${kind}')"><span class="dash-step-dot">${done ? DASH_SVG_CHECK(12, 12, 10.67) : ''}</span><span>${label}</span></button>`;
-      return html + `<div class="dash-steps${rc(2)}">
-        <p class="dash-steps-h">${t('dashSteps', 'Pierwsze kroki')}</p>
-        ${row(true, t('dashStep1', 'Wybierz plan'), 'planready-plans')}
-        ${row(false, t('dashStep2', 'Zrób pierwszy trening'), 'planready-gym')}
-        ${row(false, t('dashStep3', 'Zobacz swój progres'), 'planready-stats')}
-      </div>`;
+      return html;
     }
     case 'inprogress': {
       return `<div class="dash-hero dash-hero--prog${rc(1)}">
@@ -21043,8 +21036,9 @@ function renderDashCards(m, animate){
   put('dashSecConsistency', rich ? dashConsistencyHtml(m, animate, rc) : '');
   put('dashSecLast', rich ? dashLastHtml(m, animate, rc) : '');
   put('dashSecCoach', rich ? dashCoachHtml(m, animate, rc) : '');
-  put('dashSecPlanWeek', rich ? dashPlanWeekHtml(m, animate, rc) : '');
-  put('dashSecBody', rich ? dashBodyHtml(m, animate, rc) : '');
+  const early = !rich && m.hasPlan;   // plan wybrany, zero treningów: Plan tygodnia i Waga mają dane od pierwszego dnia, reszta (Ten tydzień, Rekord, Trener…) czeka na pierwszy trening
+  put('dashSecPlanWeek', rich || early ? dashPlanWeekHtml(m, animate, rc) : '');
+  put('dashSecBody', rich || early ? dashBodyHtml(m, animate, rc) : '');
   if(animate) dashStartCardFx(document.getElementById('dashCol'));
 }
 
