@@ -7459,8 +7459,44 @@ const EXERCISE_META = {
   "Band Pull-Apart (Light)":{p:"rear_delt",m:["rdelt"],a:["back"],s:1,f:1},
   "Glute Bridge Hold":{p:"hip_thrust",m:["glutes"],a:["hams"],s:1,f:1},
   "Bodyweight Good Morning":{p:"hinge",m:["hams","glutes"],a:["back"],s:1,f:1},
-  "Overhead Triceps Stretch":{p:"overhead_ext",m:["triceps"],a:[],s:1,f:1}
+  "Overhead Triceps Stretch":{p:"overhead_ext",m:["triceps"],a:[],s:1,f:1},
+  "Band Chest Fly":{p:"chest_fly",m:["chest"],a:[],s:1,f:1},
+  "Band Pulldown":{p:"vertical_pull",m:["back"],a:["biceps"],s:1,f:1}
 };
+
+/* Rodziny wariantów (roadmapa Mekkio+, A2). Wzorce w EXERCISE_META są drobne (np. curl_supinated i curl_neutral osobno),
+   więc „rodzina” skleja te, które da się rozsądnie zamienić jedno na drugie. Wzorzec bez wpisu tworzy własną rodzinę.
+   Ćwiczenie bez wpisu w EXERCISE_META (własne, kardio, rozgrzewka, rozciąganie) nie ma wzorca, rodziny ani wariantów. */
+const MOVE_FAMILY_OF_PATTERN = {
+  horizontal_press:'press_h', incline_press:'press_h',
+  squat:'squat', leg_press:'squat',
+  hip_thrust:'glute', glute_kickback:'glute', abduction:'glute',
+  lateral_raise:'sdelt_raise', front_raise:'sdelt_raise', upright_row:'sdelt_raise',
+  curl_supinated:'curl', curl_neutral:'curl', curl_stretch:'curl',
+  pushdown:'triceps', overhead_ext:'triceps', lying_ext:'triceps', kickback:'triceps', close_press:'triceps',
+  crunch:'core_flex', leg_raise:'core_flex',
+  anti_extension:'core_stab', anti_lateral:'core_stab', anti_rotation:'core_stab'
+};
+function movePatternOf(name){ const m = EXERCISE_META[name]; return m ? m.p : null; }
+function moveFamilyOf(name){ const p = movePatternOf(name); return p ? (MOVE_FAMILY_OF_PATTERN[p] || p) : null; }
+/* 0 = ten sam wzorzec ruchu, 1 = ta sama rodzina, 2 = reszta (także gdy któreś ćwiczenie nie ma wzorca). */
+function moveRank(originName, candName){
+  const po = movePatternOf(originName), pc = movePatternOf(candName);
+  if(!po || !pc) return 2;
+  if(po === pc) return 0;
+  return moveFamilyOf(originName) === moveFamilyOf(candName) ? 1 : 2;
+}
+/* Warianty tego samego ruchu: { same: [...nazwy z tym samym wzorcem], related: [...nazwy z tej samej rodziny, inny wzorzec] }. */
+function variantsOf(name){
+  const out = { same: [], related: [] };
+  if(!movePatternOf(name)) return out;
+  Object.keys(EXERCISE_META).forEach(n=>{
+    if(n === name) return;
+    const r = moveRank(name, n);
+    if(r === 0) out.same.push(n); else if(r === 1) out.related.push(n);
+  });
+  return out;
+}
 
 const BUILTIN_EXERCISES = [
   ...GYM_PLAN.A.map(e => ({...e, day:'A', compound: COMPOUND_EXERCISES.has(e.name)})),
@@ -10615,7 +10651,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.108.4";
+const APP_VERSION = "4.108.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -13836,6 +13872,8 @@ function swapAlternatives(){
   if(swapEquipFilter !== 'all'){
     list = list.filter(e=> e.name === swapPickName || exMatchesEquipFilter(e, swapEquipFilter));
   }
+  // Ten sam ruch najpierw, potem ta sama rodzina, potem reszta grupy (sort jest stabilny: kolejność biblioteki zostaje w obrębie rangi).
+  list = list.map(e=>({ e, r: moveRank(swapOriginName, e.name) })).sort((a, b)=> a.r - b.r).map(x=>x.e);
   return { origin, bucket, list };
 }
 // E7b: okno na szkielecie .m-sheet2 (jak „Wybierz ćwiczenie”): tytuł + ✕, filtr sprzętu, wyszukiwarka, akordeon grup z kaflami, dolny przycisk w szkle.

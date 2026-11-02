@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.108.4 (2026-11-02)
+- **Aktualna wersja:** 4.108.5 (2026-11-02)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.108.5 · PATCH · 2026-11-02
+
+Okno „Zamień ćwiczenie”: na górze listy są ćwiczenia z tym samym wzorcem ruchu (np. przy Shoulder Press inne wyciskania nad głowę), potem z tej samej rodziny (np. przy Barbell Curl inne uginania), na końcu reszta grupy. Kolejność w obrębie rangi zostaje jak w bibliotece, filtr sprzętu i wyszukiwarka działają jak dotąd. Wygląd okna bez zmian.
+
+Roadmapa Mekkio+, A2 (rodziny wariantów): `MOVE_FAMILY_OF_PATTERN` skleja drobne wzorce z `EXERCISE_META` w rodziny (wyciskanie klatki poziome i skośne, przysiad i wyciskanie nogami, uginania biceps, triceps, barki boczne, brzuch zginanie i stabilizacja, pośladki). Funkcje `movePatternOf`, `moveFamilyOf`, `moveRank`, `variantsOf(name)` zwracają `{ same, related }`; ćwiczenie bez wpisu (własne, kardio, rozgrzewka, rozciąganie) nie ma wariantów i w oknie zamiany ląduje na końcu. `EXERCISE_META` dostał brakujące Band Chest Fly i Band Pulldown (153 wpisy). Bez zmian w danych, sync i bazie.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-11-02 — 4.108.5: rodziny wariantów, okno zamiany ćwiczenia podpowiada ten sam ruch
 
 ### 4.108.4 · PATCH · 2026-11-02
 
