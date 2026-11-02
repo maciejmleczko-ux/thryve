@@ -488,6 +488,9 @@ html.dashboard-lock .app-glow, html.profil-lock .app-glow, html.plansv2-lock .ap
   border-radius:var(--m-r-pill);box-shadow:0 10px 30px rgba(0,0,0,.35);
   display:flex;align-items:center;justify-content:space-between;
   padding:15px 19px;z-index:20;}
+.bottom-nav{transform-origin:50% 100%;will-change:transform;transition:transform var(--m-dur-in) var(--m-ease-spring);}   /* powrót: miękko, z małym przeskokiem */
+.bottom-nav.is-scrolling{transform:scale(.85);transition:transform var(--m-dur-fade) var(--m-ease);}   /* menu kurczy się o 15% podczas przewijania (szybko, miękkie lądowanie) i wraca po jego zakończeniu */
+@media (prefers-reduced-motion:reduce){ .bottom-nav.is-scrolling{transform:none;} }
 .nav-item{background:none;border:none;display:flex;align-items:center;justify-content:center;width:55px;height:55px;border-radius:50%;cursor:pointer;flex-shrink:0;}
 .nav-item .ph{width:27px;height:27px;color:var(--light);}
 /* Without this, an icon's own <svg> (no width/height attrs, sized only
@@ -747,8 +750,14 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
 .wn-label{margin:0;font-size:var(--m-fs-xs);font-weight:700;letter-spacing:0;line-height:1.02;text-transform:uppercase;}
 .wn-headline{margin:0;font-size:var(--m-fs-headline);font-weight:300;line-height:1.04;letter-spacing:-.02em;overflow-wrap:anywhere;}
 .wn-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:22px 27px calc(28px + max(14px, env(safe-area-inset-bottom)));color:var(--m-ink);}
-.wn-ver{margin:0 0 14px;font-size:var(--m-fs-2xs);font-weight:600;color:var(--m-ink);}
-.wn-ver:not(:first-child){margin-top:30px;}
+/* Wersja = przycisk rozwijający listę zmian pod spodem (najnowsza otwarta, starsze zwinięte). */
+.wn-ver{display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;margin:0;padding:12px 0;border:0;border-top:1px solid rgba(0,0,0,.08);background:none;font:inherit;font-size:var(--m-fs-2xs);font-weight:600;color:var(--m-ink);text-align:left;cursor:pointer;}
+.wn-ver:first-child{border-top:0;padding-top:0;}
+.wn-ver .ph{display:flex;width:16px;height:16px;flex-shrink:0;transition:transform var(--m-dur-in) var(--m-ease);}
+.wn-ver .ph svg{display:block;width:16px;height:16px;}
+.wn-ver[aria-expanded="true"] .ph{transform:rotate(180deg);}
+.wn-ver-body{padding:6px 0 10px;}
+.wn-ver-body[hidden]{display:none;}
 .wn-item{margin-bottom:22px;}
 .wn-item:last-child{margin-bottom:0;}
 .wn-item-title{margin:0 0 6px;font-size:var(--m-fs-base);font-weight:400;letter-spacing:.04em;text-transform:uppercase;line-height:1.3;}
@@ -10606,7 +10615,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.108.0";
+const APP_VERSION = "4.108.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -11377,7 +11386,7 @@ function renderWhatsNew(){
   const img = WHATSNEW_IMAGES[Math.floor(Math.random() * WHATSNEW_IMAGES.length)];
   document.getElementById('whatsnewHero').style.backgroundImage = `url("${img}")`;
   const list = document.getElementById('whatsnewList');
-  list.innerHTML = versions.map(v=>{
+  list.innerHTML = versions.map((v, i)=>{
     const sec = changelogSections(v);
     const items = sec
       ? [['added','whatsnewAdded','Dodano'],['improved','whatsnewImproved','Ulepszono'],['fixed','whatsnewFixed','Naprawiono']]
@@ -11386,9 +11395,16 @@ function renderWhatsNew(){
       : changelogEntries(v).map(i => typeof i === 'string'
           ? `<div class="wn-item"><p class="wn-item-text">${i}</p></div>`
           : `<div class="wn-item"><p class="wn-item-title">${i.title}</p><p class="wn-item-text">${i.text}</p></div>`).join('');
-    return `<p class="wn-ver">${t('whatsnewVer','wersja mekkio v.' + v, v)}</p>${items}`;
+    const open = i === 0;
+    return `<button type="button" class="wn-ver" aria-expanded="${open}" onclick="toggleWnVer(this)"><span>${t('whatsnewVer','wersja mekkio v.' + v, v)}</span><span class="ph">${PH['caret-down']}</span></button><div class="wn-ver-body"${open ? '' : ' hidden'}>${items}</div>`;
   }).join('');
   list.scrollTop = 0;
+}
+function toggleWnVer(btn){
+  const body = btn.nextElementSibling, open = btn.getAttribute('aria-expanded') !== 'true';
+  btn.setAttribute('aria-expanded', open);
+  body.hidden = !open;
+  body.classList.toggle('m-rise', open);   // wejście tylko przy rozwijaniu
 }
 function openRelease(){
   const v = pendingChangelogVersions().find(x=> CHANGELOG[x].release);
@@ -12543,6 +12559,20 @@ function profileRefreshScroll(){
   document.documentElement.classList.toggle('profil-scrollable', needsScroll);
   if(!needsScroll){ document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }
 }
+// Przewijanie ekranu: menu na czas ruchu zmniejsza się do 85% (transform), po 220 ms bez przewijania wraca
+// Mały próg ruchu (6 px) odsiewa drgania i końcówkę rozpędu; opóźnienie 220 ms jest dłuższe niż przerwy między zdarzeniami scroll, więc menu nie pulsuje
+let navScrollTimer = 0, navScrollY = 0, navScrollMute = 0;
+window.addEventListener('scroll', e=>{
+  if(document.documentElement.classList.contains('modal-lock') || Date.now() < navScrollMute) return;
+  const nav = document.getElementById('bottomNav'); if(!nav) return;
+  const tg = e.target, y = (tg && tg.scrollTop != null && tg !== document) ? tg.scrollTop : (window.scrollY || document.body.scrollTop || 0);
+  const moved = Math.abs(y - navScrollY) >= 6;
+  if(moved){ navScrollY = y; nav.classList.add('is-scrolling'); }
+  if(nav.classList.contains('is-scrolling')){
+    clearTimeout(navScrollTimer);
+    navScrollTimer = setTimeout(()=>{ nav.classList.remove('is-scrolling'); navScrollY = y; }, 220);
+  }
+}, { capture: true, passive: true });
 function navTap(route){
   const target = (previewMode && PREVIEW_ROUTES[route]) ? PREVIEW_ROUTES[route] : route;
   // Maciej: the History nav icon always lands on today — after browsing
@@ -12614,6 +12644,7 @@ function positionNavBlob(animate){
 }
 window.addEventListener('resize', ()=> positionNavBlob(false));
 function goRoute(route){
+  navScrollMute = Date.now() + 500;   // reset przewinięcia przy zmianie ekranu nie jest przewijaniem użytkownika (menu nie mruga)
   if(window.mPopover) mPopover.close({restoreFocus:false, instant:true});   // menu „…” nie przeżywa zmiany ekranu
   if(onbPick && onbPick.inEditor){
     if(route === 'plans-v2' && currentRoute === 'plan-editor-v2'){ opkReturnFromEditor(); return; }   // strzałka wstecz w edytorze wraca na wybór planu z onboardingu

@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.108.0 (2026-11-02)
+- **Aktualna wersja:** 4.108.1 (2026-11-02)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,15 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.108.1 · PATCH · 2026-11-02
+
+Menu na dole kurczy się do 85% podczas przewijania ekranu i wraca do pełnego rozmiaru 220 ms po zatrzymaniu. Kurczenie jest szybkie (`--m-dur-fade`, `--m-ease`), powrót wolniejszy i miękki z małym przeskokiem (`--m-dur-in`, `--m-ease-spring`). Próg ruchu 6 px odsiewa drgania, a zmiana ekranu (reset przewinięcia) nie uruchamia kurczenia. Tylko `transform`, bez ruchu przy ograniczeniu ruchu i przy otwartym oknie.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-11-02 — 4.108.1: menu kurczy się podczas przewijania
+
 
 ### 4.108.0 · MINOR · 2026-11-02
 
