@@ -587,7 +587,7 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
    not the plain .gymv2-tile one (115.667/122) — every exercise tile in
    this grid has an icon PNG now, so .png-icon is what it actually
    lines up against. */
-#view-plan-editor-v2 .ex-tile.ex-tile-add{aspect-ratio:115.667/136;}
+#view-plan-editor-v2 .ex-tile.ex-tile-add{aspect-ratio:115.667/150;}
 
 .add-pill{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);
   color:var(--m-white);border:none;border-radius:var(--m-r-pill);padding:14px 20px;margin-top:16px;font-size:var(--m-fs-xs);
@@ -1900,7 +1900,7 @@ button.dash-coach{cursor:pointer;}
    buildExerciseTileV2's .png-icon exercise tiles — match their taller
    aspect-ratio (115.667/136, not the plain .gymv2-tile 115.667/122) so
    it lines up with its neighbours instead of sitting visibly shorter. */
-.gymv2-tile.gymv2-search-tile{aspect-ratio:115.667/136;}
+.gymv2-tile.gymv2-search-tile{aspect-ratio:115.667/150;}
 /* height was a fixed 70px — fine on a full-width screen (GYM's own
    grid, plan editor v2, ~108px-wide tiles) but the exercise picker's
    tiles sit inside a narrower modal card and shrink to ~90px wide;
@@ -1920,8 +1920,8 @@ button.dash-coach{cursor:pointer;}
    reads small if it's squeezed into the same 58%/50% zone the thin
    line icons used. Tile grows a bit taller and the icon zone grows
    with it; label keeps its own space so long names still fit. */
-.ex-tile.png-icon{aspect-ratio:115.667/136;gap:9px;}
-.ex-tile.png-icon .gymv2-tile-icon{height:66%;}
+.ex-tile.png-icon{aspect-ratio:115.667/150;gap:9px;}   /* jedna proporcja dla każdego kafla ćwiczenia (Trening, edytor, picker, Plany, blok) */
+.ex-tile.png-icon .gymv2-tile-icon{height:58%;}
 /* The picker's tiles are narrower still than plan editor v2's (the
    .plansv2-customize-card's own 18px padding, stacked on the overlay's
    inset, eats more width than the full-screen editor's), so even 65%
@@ -1941,7 +1941,7 @@ button.dash-coach{cursor:pointer;}
 /* Same reasoning as .gymv2-search-tile above — matches
    buildExerciseTileV2's .png-icon tile height, not the plain
    .gymv2-tile one. */
-.gymv2-tile.gymv2-add-tile{aspect-ratio:115.667/136;}
+.gymv2-tile.gymv2-add-tile{aspect-ratio:115.667/150;}
 
 .gymv2-done-head{margin:40px 0 12px;}
 .gymv2-done-head.hidden{display:none;}
@@ -2184,7 +2184,6 @@ button.dash-coach{cursor:pointer;}
 .pdt-day-b[hidden]{display:none;}
 .pdt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--m-gap-card);}
 .pdt-grid .ex-tile{background:rgba(236,234,241,.5);border:0;border-radius:var(--m-r-md);cursor:default;pointer-events:none;}   /* kafel tylko do podglądu (nieklikalny); tło jak w edytorze i oknie wyboru ćwiczenia */
-.pdt-grid .ex-tile.png-icon .gymv2-tile-icon{height:62%;}
 .pdt-none{margin:0;font-size:var(--m-fs-xs);color:var(--m-muted-text);}
 .pdt-cta{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
 .pdt-btn{width:100%;height:55px;padding:0 30px;border:1px solid transparent;border-radius:var(--m-r-pill);font-family:inherit;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease);}
@@ -2262,7 +2261,6 @@ button.dash-coach{cursor:pointer;}
 .pickex-body .exs-field{border-color:var(--m-orange-tint);}
 .pickex-body .pev2-section.collapsed{background:var(--m-panel);}
 .pickex-body .gymv2-tile{background:rgba(236,234,241,.5);}   /* #ECEAF1 w 50% (decyzja Macieja 2026-10-21) */
-.pickex-body .ex-tile.png-icon .gymv2-tile-icon{height:56%;}   /* kafel w oknie jest węższy niż w edytorze (padding arkusza), więc ikona o 10 pkt niższa, żeby 3-wierszowe nazwy się mieściły */
 .plansv2-customize-close{width:24px;height:24px;flex-shrink:0;color:var(--m-ink);cursor:pointer;}
 .plansv2-customize-close.ph{display:block;}
 .plansv2-customize-close svg{display:block;width:100%;height:100%;}
@@ -3247,6 +3245,7 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-tm{gap:10px;}
 .bk-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--m-gap-card);margin:4px 0 12px;}
 .bk-tiles .ex-tile{pointer-events:none;}
+.bk-tiles .gymv2-tile-label{letter-spacing:.2px;padding:0 4px;}
 .bk-prog{display:flex;gap:4px;margin:2px 0 14px;}
 .bk-prog i{position:relative;flex:1;height:4px;border-radius:2px;background:var(--m-switch-off);overflow:hidden;}
 .bk-prog i b{position:absolute;inset:0;background:var(--m-orange);transform:scaleX(0);transform-origin:left;transition:transform var(--m-dur-fade) linear;}   /* kreska wypełnia się wraz z odliczaniem ćwiczenia */
@@ -10577,7 +10576,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.107.1";
+const APP_VERSION = "4.107.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {

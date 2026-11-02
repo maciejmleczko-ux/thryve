@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.107.1 (2026-11-02)
+- **Aktualna wersja:** 4.107.2 (2026-11-02)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.107.2 · PATCH · 2026-11-02
+
+Kafle ćwiczeń mają wszędzie tę samą proporcję: `115.667/150` zamiast 136, ikona 58% wysokości (Trening, edytor planu, okno wyboru ćwiczeń, Plany, okno Rozgrzewka/Rozciąganie). Usunięte osobne wyjątki dla `.pdt-grid`, `.pickex-body` i `.bk-tiles`; kafle „Wybierz inne” i „Dodaj ćwiczenie” dopasowane do tej samej wysokości. Powód: trzywierszowe nazwy (np. „World's Greatest Stretch”) wychodziły poza kafel.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-11-02 — Rozgrzewka: trzywierszowe nazwy mieszczą się w kafelku
 
 ### 4.107.1 · PATCH · 2026-11-02
 
