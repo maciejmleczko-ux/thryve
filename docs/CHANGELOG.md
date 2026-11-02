@@ -129,7 +129,7 @@ Okno „Co nowego” w nowym układzie: wpis CHANGELOG może mieć trzy sekcje (
 
 ### 4.108.1 · PATCH · 2026-11-02
 
-Menu na dole kurczy się do 85% podczas przewijania ekranu i wraca do pełnego rozmiaru 220 ms po zatrzymaniu. Kurczenie jest szybkie (`--m-dur-fade`, `--m-ease`), powrót wolniejszy i miękki z małym przeskokiem (`--m-dur-in`, `--m-ease-spring`). Próg ruchu 6 px odsiewa drgania, a zmiana ekranu (reset przewinięcia) nie uruchamia kurczenia. Tylko `transform`, bez ruchu przy ograniczeniu ruchu i przy otwartym oknie.
+Menu na dole kurczy się do 85% podczas przewijania ekranu i wraca do pełnego rozmiaru 220 ms po zatrzymaniu. Kurczenie jest szybkie (`--m-dur-fade`, `--m-ease`), powrót wolniejszy i miękki z małym przeskokiem (`--m-dur-in`, `--m-ease-spring`). Próg ruchu 6 px odsiewa drgania, a zmiana ekranu (reset przewinięcia) nie uruchamia kurczenia. Tylko `transform`, bez ruchu przy ograniczeniu ruchu i przy otwartym oknie. Poprawka z 4.108.0: Pulpit znów się przewija. `dashRefreshScroll` mierzył ostatnią kartę w kolumnie, a nowy kontener `#dashBlocks` (`display:contents`) ma wysokość 0, więc blokada przewijania nie wyłączała się; teraz mierzy jego dzieci.
 
 **Commity (1):**
 

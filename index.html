@@ -21231,8 +21231,10 @@ function dashRefreshScroll(){
   const root = document.getElementById('dashRoot'), col = document.getElementById('dashCol'), nav = document.getElementById('bottomNav');
   if(!root || !col || !nav || root.offsetParent === null) return;
   let last = null;
-  for(let i = col.children.length - 1; i >= 0; i--){
-    const c = col.children[i];
+  const blocks = document.getElementById('dashBlocks');   // display:contents: jego dzieci układają się wprost w kolumnie, sam kontener ma wysokość 0
+  const kids = Array.from(col.children).flatMap(c=> c === blocks ? Array.from(c.children) : [c]);
+  for(let i = kids.length - 1; i >= 0; i--){
+    const c = kids[i];
     if(!c.hidden && c.offsetHeight > 0){ last = c; break; }
   }
   const sy = document.body.scrollTop || document.documentElement.scrollTop || window.scrollY || 0;
