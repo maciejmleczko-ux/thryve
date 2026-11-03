@@ -3628,6 +3628,13 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 
 /* tło wszystkich kroków = tło dashboardu (jedna receptura) */
 .ob-bgl{background-color:#ebebec;background-image:url(icons/backgrounds/bg_onboarding.webp),linear-gradient(180deg,#f9f9fa 0,#ebebec 1007px,#ebebec 100%);background-repeat:no-repeat;background-position:-95px 0,0 0;background-size:566px 1007px,100% 100%;}   /* wzór z onboardingu (bg_onboarding): zdjęcie z gotową poświatą */
+@media (min-width:441px){
+  .ob-bgl{background-image:linear-gradient(180deg,#f9f9fa 0,#ebebec 1007px,#ebebec 100%);background-size:100% 100%;background-position:0 0;}
+  .ob-bgl::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:440px;margin-left:-220px;
+    background:url(icons/backgrounds/bg_onboarding.webp) -95px 0/566px 1007px no-repeat;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 56px,#000 calc(100% - 56px),transparent 100%);
+            mask-image:linear-gradient(90deg,transparent 0,#000 56px,#000 calc(100% - 56px),transparent 100%);}
+}
 .ob-screen{overflow:hidden;will-change:auto;}
 .ob-screen.onb-under{z-index:0;}
 .ob-screen.onb-over{z-index:2;}
@@ -10659,7 +10666,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.108.6";
+const APP_VERSION = "4.108.7";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
