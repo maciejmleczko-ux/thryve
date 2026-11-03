@@ -464,12 +464,14 @@ section{position:relative;}
 .story-sb .ic{display:flex; gap:5px; align-items:center;}
 .story .soon{margin-top:6px;}
 @media (max-width:860px){
-  .story-panel{grid-template-columns:1fr; grid-template-rows:auto 1fr auto; align-items:stretch; gap:10px; padding:clamp(52px,8vh,80px) 20px 44px;}
-  .story-l{height:clamp(96px,15vh,140px);} .story-r{height:clamp(96px,15vh,140px);}
+  /* phones: heading on top, text below, the screen takes every pixel left between them, with air on both sides */
+  .story-panel{grid-template-columns:1fr; grid-template-rows:auto 1fr auto; align-items:stretch; gap:clamp(20px,3.4svh,32px); padding:clamp(28px,5svh,52px) 20px clamp(24px,4svh,40px);}
+  .story-l{height:calc(2 * clamp(1.7rem,7.4vw,2.2rem));} .story-r{height:calc(4 * 15px * 1.45 + 4px);}
   .story-l li,.story-r li{gap:8px; text-align:center; align-items:center;}
   .story-l li{justify-content:flex-end;} .story-r li{justify-content:flex-start;}
-  .story-l h3{font-size:clamp(1.8rem,8vw,2.4rem);}
-  .story-card{height:min(100%, 60svh); align-self:center; --r:calc(min(60svh,560px) * 660 / 1430 * .13);}
+  .story-l h3{font-size:clamp(1.7rem,7.4vw,2.2rem);}
+  .story-r p{font-size:15px; line-height:1.45;}
+  .story-card{height:min(100%, 74svh); align-self:center;}
   .story-sb{font-size:10px;}
   .story .soon{transform:scale(.9);}
 }
@@ -1149,6 +1151,9 @@ document.documentElement.classList.add('js');
     };
     var stTick = false;
     window.addEventListener('scroll', function(){ if(!stTick){ stTick = true; raf(function(){ storyScroll(); stTick = false; }); } }, {passive:true});
+    // the screen's corner follows its real width (on phones its height comes from the free space, not from a formula)
+    var fitR = function(){ cardEl.style.setProperty('--r', (cardEl.offsetWidth * .13).toFixed(1) + 'px'); };
+    window.addEventListener('resize', fitR); fitR();
     window.addEventListener('resize', storyScroll);
     storyScroll();
     if('IntersectionObserver' in window){
