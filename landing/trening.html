@@ -558,9 +558,9 @@ section{position:relative;}
 .t-sets .num span{display:block; height:100%; font-size:calc(107 * var(--u)); font-weight:200; color:#2c2727; letter-spacing:-.03em; line-height:1;}
 .t-sets .num .a{display:none;}
 .fx.anim .t-sets .num .a{display:block;}
-.t-sets .btn{top:calc(184 * var(--u)); width:calc(56 * var(--u)); height:calc(56 * var(--u)); border-radius:50%; background:#ff3300; transition:transform var(--m-dur-press-out) var(--m-ease);}
+.t-sets .sbtn{top:calc(184 * var(--u)); width:calc(56 * var(--u)); height:calc(56 * var(--u)); border-radius:50%; background:#ff3300; transition:transform var(--m-dur-press-out) var(--m-ease);}
 .t-sets .minus{left:calc(108 * var(--u));} .t-sets .plus{left:calc(205 * var(--u));}
-.t-sets .btn::before,.t-sets .plus::after{content:""; position:absolute; left:50%; top:50%; width:calc(18 * var(--u)); height:calc(2 * var(--u)); background:#fff; border-radius:2px; transform:translate(-50%,-50%);}
+.t-sets .sbtn::before,.t-sets .plus::after{content:""; position:absolute; left:50%; top:50%; width:calc(18 * var(--u)); height:calc(2 * var(--u)); background:#fff; border-radius:2px; transform:translate(-50%,-50%);}
 .t-sets .plus::after{transform:translate(-50%,-50%) rotate(90deg);}
 .t-sets .saved{left:0; right:0; top:calc(22 * var(--u)); text-align:center; font-size:calc(12 * var(--u)); font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:#ff3300; opacity:0;
   transition:opacity var(--m-dur-fade) ease, transform var(--m-dur-in) var(--m-ease);}
@@ -612,7 +612,7 @@ section{position:relative;}
 .t-sets.go .frame rect{stroke-dashoffset:0; transition:stroke-dashoffset var(--m-dur-trace) var(--m-ease-page, ease-in-out);}
 .t-sets.saved .saved{opacity:1;}
 .t-sets.saved .frame{animation:fx-flash var(--m-dur-pop) ease;}
-.t-sets .btn.press{transform:scale(.88); transition-duration:var(--m-dur-press-in);}
+.t-sets .sbtn.press{transform:scale(.88); transition-duration:var(--m-dur-press-in);}
 .t-sets.roll .num .a{display:block; animation:fx-up var(--m-dur-in) var(--m-ease) forwards;}
 .t-sets.roll .num .b{animation:fx-up var(--m-dur-in) var(--m-ease) forwards;}
 .fx.anim .t-rec:not(.go) .cup{transform:scale(.5) rotate(-12deg); opacity:0; transition:none;}
@@ -933,7 +933,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 .gt{position:relative; aspect-ratio:1; border-radius:var(--m-r-lg); padding:clamp(18px,1.8vw,28px); overflow:hidden; isolation:isolate; display:flex; flex-direction:column; container-type:inline-size;}
 .gt .k{font-size:clamp(11px,4.2cqw,15px); font-weight:500; letter-spacing:.06em; text-transform:uppercase;}
 .gt p{margin-top:clamp(10px,5cqw,22px); font-size:clamp(16px,7.2cqw,30px); line-height:1.15; letter-spacing:-.02em; font-weight:400;}
-.gt svg{margin-top:auto; width:34%; height:auto; transform-origin:0 100%;}
+.gt svg{flex:none; margin-top:auto; width:34cqw; height:34cqw; transform-origin:0 100%;}   /* explicit square size: Safari draws an unsized SVG in a flex column at its own size */
 .gt.o{background:#ff3300; color:#fff;}   /* on orange: white text and icons, always */ .gt.d{background:#0e0f12; color:#fff;} .gt.l{background:#ebe8f1; color:#1f2329;} .gt.c{background:#fbece3; color:#1f2329;}
 .gt.g{background:#efe4dc; color:#1f2329;}
 .gt.g::before{content:""; position:absolute; inset:-20%; z-index:-1; filter:blur(36px);
@@ -967,6 +967,12 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 }
 @media (max-width:560px){
   .sp-ben ul{grid-template-columns:1fr;}
+  /* two narrow tiles side by side: the text keeps a readable size, the tile grows with it (both tiles in a row share the height), every icon the same size */
+  .gt{aspect-ratio:auto; min-height:44vw; padding:18px 16px;}
+  .gt .k{font-size:11px;}
+  .gt p{margin-top:10px; margin-bottom:20px; font-size:16px; line-height:1.2;}
+  .gt svg{width:36px; height:36px;}
+  .sp-vis .gt{aspect-ratio:1; min-height:0; padding:clamp(18px,1.8vw,28px);} .sp-vis .gt p{margin-bottom:0;} .sp-vis .gt svg{width:34cqw; height:34cqw;}
   .sp-media{height:clamp(460px,72svh,640px);}
 }
 /* a single glyph tile as a row visual: one big square, not half of a pair */
@@ -1011,7 +1017,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 <section class="sp-sec"><div class="sp-row rv"><div class="sp-txt"><span class="sp-k">Logowanie serii</span><p>Ciężar kręcisz na tarczy, powtórzenia dodajesz plusem. Ptaszek od razu zapisuje serię, a&nbsp;jeśli nic nie klikniesz, zapisze się sama po trzech&nbsp;sekundach.</p></div><div class="sp-vis"><div class="fx"><div class="fx-box t-sets" role="img" aria-label="Powtórzenia: stuknięcie plusa zmienia 11 na 12, obrys obiega kafel i seria się zapisuje">
         <svg class="frame" viewBox="0 0 368 289" preserveAspectRatio="none" aria-hidden="true"><rect x="3.5" y="3.5" width="361" height="282" rx="32.5" pathLength="1"/></svg>
         <div class="num"><span class="a">11</span><span class="b">12</span></div>
-        <span class="btn minus"></span><span class="btn plus"></span><span class="saved">Seria zapisana</span>
+        <span class="sbtn minus"></span><span class="sbtn plus"></span><span class="saved">Seria zapisana</span>
       </div></div></div></div><div class="sp-row rv flip"><div class="sp-txt"><span class="sp-k">Zamiana na dziś</span><p>Stuknij ikonkę w&nbsp;rogu kafla i&nbsp;wybierz zamiennik na ten sam ruch. Zmiana dotyczy tylko dzisiejszego treningu, plan zostaje, jak&nbsp;był.</p></div><div class="sp-vis"><div class="fx"><div class="fx-box t-swap" role="img" aria-label="Zamienniki na ten sam ruch: leg press, hack squat, przysiad na suwnicy Smitha i przysiad ze sztangą przewijają się jak karty">
         <div class="stack">
           <div class="card" data-s="0"><img src="img/fx/sw-leg_press.png" alt="" width="360" height="360"></div>
