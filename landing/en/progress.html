@@ -958,6 +958,20 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
   @keyframes gt-in{from{opacity:0; transform:translateY(12px) scale(.85);}}
 }
 
+/* benefits: pinned while you scroll, the four tiles come in one by one (orange, blue, amber, plum), then the page moves on */
+.sp-pin{position:relative; height:calc(100svh + 5 * 45svh); padding-top:0; max-width:none;}
+.pin-sticky{position:sticky; top:0; height:100svh; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center;
+  max-width:1360px; margin:0 auto; padding:0 clamp(20px,4vw,56px);}
+.pin-tiles .gt.p1{background:#ff3300; color:#fff;} .pin-tiles .gt.p2{background:#3b63cb; color:#fff;}
+.pin-tiles .gt.p3{background:#ffbb00; color:#1f2329;} .pin-tiles .gt.p4{background:#8e0045; color:#fff;}
+.js .pin-tiles .gt svg{animation:none;}
+@media (prefers-reduced-motion: no-preference){
+  .js .pin-tiles .gt{opacity:0; transform:translateY(44px) scale(.95);
+    transition:opacity var(--m-dur-in) ease, transform var(--m-dur-tile) var(--m-ease);}
+  .js .pin-tiles .gt.on{opacity:1; transform:none;}
+}
+@media (prefers-reduced-motion: reduce){ .sp-pin{height:auto;} .pin-sticky{position:static; height:auto; padding-top:clamp(64px,8vw,120px);} }
+
 .sp-faq{display:grid; grid-template-columns:.8fr 1.2fr; gap:clamp(28px,5vw,80px); align-items:start;}
 .sp-faq summary{font-size:clamp(1.05rem,1.4vw,1.25rem);}
 
@@ -1030,7 +1044,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
   <div class="sp-media rv" style="--i:2; background:#050505"><div class="pm-stage" aria-hidden="true"><img src="/img/en/hero/progress-photo.jpg" width="2418" height="1799" alt="">
 <div class="pm-screen"><video src="/img/en/story/en-stats.mp4" poster="/img/en/story/en-stats-first.jpg" muted playsinline loop autoplay preload="metadata"></video><i class="pm-island"></i><i class="pm-glare"></i></div></div>
 <div class="pm-txt"><h1 id="sp-h">Progress you can&nbsp;see.</h1><p>A weekly ring, charts since January, a workout calendar and records in every&nbsp;exercise.</p></div></div></section>
-<section class="sp-sec"><div class="sp-head rv"><h2>Everything that counts at the&nbsp;gym</h2></div><div class="gtiles seq"><div class="gt d" style="--i:0"><span class="k">Weekly ring</span><p>How many planned workouts are left this&nbsp;week.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="88" opacity=".35"/><path d="M128 40a88 88 0 1 1-83.7 115.2"/></svg></div><div class="gt o" style="--i:1"><span class="k">Charts</span><p>Volume, strength and calories since the start of the&nbsp;year.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M32 208h192M40 168l48-48 40 32 80-80"/></svg></div><div class="gt g" style="--i:2"><span class="k">Records</span><p>A record in every&nbsp;exercise.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M232,64H208V48a8,8,0,0,0-8-8H56a8,8,0,0,0-8,8V64H24A16,16,0,0,0,8,80V96a40,40,0,0,0,40,40h3.65A80.13,80.13,0,0,0,120,191.61V216H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V191.58c31.94-3.23,58.44-25.64,68.08-55.58H208a40,40,0,0,0,40-40V80A16,16,0,0,0,232,64ZM48,120A24,24,0,0,1,24,96V80H48v32q0,4,.39,8Zm144-8.9c0,35.52-29,64.64-64,64.9a64,64,0,0,1-64-64V56H192ZM232,96a24,24,0,0,1-24,24h-.5a81.81,81.81,0,0,0,.5-8.9V80h24Z"/></svg></div><div class="gt l" style="--i:3"><span class="k">Calendar</span><p>Your whole history in a&nbsp;calendar.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="40" y="48" width="176" height="168" rx="16"/><path d="M40 96h176M88 32v32M168 32v32"/></svg></div></div></section>
+<section class="sp-sec sp-pin"><div class="pin-sticky"><div class="sp-head"><h2>Everything that counts at the&nbsp;gym</h2></div><div class="gtiles pin-tiles"><div class="gt p1" style="--i:0"><span class="k">Weekly ring</span><p>How many planned workouts are left this&nbsp;week.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="88" opacity=".35"/><path d="M128 40a88 88 0 1 1-83.7 115.2"/></svg></div><div class="gt p2" style="--i:1"><span class="k">Charts</span><p>Volume, strength and calories since the start of the&nbsp;year.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M32 208h192M40 168l48-48 40 32 80-80"/></svg></div><div class="gt p3" style="--i:2"><span class="k">Records</span><p>A record in every&nbsp;exercise.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M232,64H208V48a8,8,0,0,0-8-8H56a8,8,0,0,0-8,8V64H24A16,16,0,0,0,8,80V96a40,40,0,0,0,40,40h3.65A80.13,80.13,0,0,0,120,191.61V216H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V191.58c31.94-3.23,58.44-25.64,68.08-55.58H208a40,40,0,0,0,40-40V80A16,16,0,0,0,232,64ZM48,120A24,24,0,0,1,24,96V80H48v32q0,4,.39,8Zm144-8.9c0,35.52-29,64.64-64,64.9a64,64,0,0,1-64-64V56H192ZM232,96a24,24,0,0,1-24,24h-.5a81.81,81.81,0,0,0,.5-8.9V80h24Z"/></svg></div><div class="gt p4" style="--i:3"><span class="k">Calendar</span><p>Your whole history in a&nbsp;calendar.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="40" y="48" width="176" height="168" rx="16"/><path d="M40 96h176M88 32v32M168 32v32"/></svg></div></div></div></section>
 <section class="sp-sec"><div class="sp-row rv"><div class="sp-txt"><span class="sp-k">Weekly ring</span><p>How many planned workouts you’ve done and how many are left. The dots below show the weeks you completed the whole&nbsp;plan.</p></div><div class="sp-vis"><div class="fx"><div class="fx-box t-ring" role="img" aria-label="Weekly progress: the ring grows from 4 to 5 of 6 days and another week dot lights up">
         <span class="k">WEEKLY PROGRESS</span>
         <div class="ring"><i class="arc"></i><b><span class="rn">4</span>/6</b><small>DAYS</small></div>
@@ -1306,6 +1320,20 @@ document.documentElement.classList.add('js');
     var tx = Math.min(0, Math.max(cw - W * s, cw * (narrow ? .5 : .7) - PX * s)), ty = Math.min(0, Math.max(ch - H * s, ch * (narrow ? .4 : .5) - PY * s));
     st.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + s.toFixed(5) + ')'; st.classList.add('on'); }
   fit(); addEventListener('resize', fit);
+})();
+</script>
+<script>
+/* benefits: one more tile per step of scroll while the section is pinned */
+(function(){
+  var sec = document.querySelector('.sp-pin'); if(!sec) return;
+  var tiles = sec.querySelectorAll('.pin-tiles .gt'), N = tiles.length, tick = false;
+  var upd = function(){ tick = false;
+    var r = sec.getBoundingClientRect(), st = sec.querySelector('.pin-sticky').offsetHeight;
+    var p = Math.max(0, Math.min(1, -r.top / Math.max(1, r.height - st)));
+    var k = Math.min(N, Math.floor(p * (N + 1)));   // 0 tiles when it pins, then one per step, the last step just holds all four
+    tiles.forEach(function(t, i){ t.classList.toggle('on', i < k); }); };
+  addEventListener('scroll', function(){ if(!tick){ tick = true; requestAnimationFrame(upd); } }, {passive:true});
+  addEventListener('resize', upd); upd();
 })();
 </script>
 <!-- Cloudflare Web Analytics (cookieless) --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "77b9c16a394547e3a92308281b28cea9"}'></script>

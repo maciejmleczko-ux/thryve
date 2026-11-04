@@ -958,6 +958,20 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
   @keyframes gt-in{from{opacity:0; transform:translateY(12px) scale(.85);}}
 }
 
+/* benefits: pinned while you scroll, the four tiles come in one by one (orange, blue, amber, plum), then the page moves on */
+.sp-pin{position:relative; height:calc(100svh + 5 * 45svh); padding-top:0; max-width:none;}
+.pin-sticky{position:sticky; top:0; height:100svh; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center;
+  max-width:1360px; margin:0 auto; padding:0 clamp(20px,4vw,56px);}
+.pin-tiles .gt.p1{background:#ff3300; color:#fff;} .pin-tiles .gt.p2{background:#3b63cb; color:#fff;}
+.pin-tiles .gt.p3{background:#ffbb00; color:#1f2329;} .pin-tiles .gt.p4{background:#8e0045; color:#fff;}
+.js .pin-tiles .gt svg{animation:none;}
+@media (prefers-reduced-motion: no-preference){
+  .js .pin-tiles .gt{opacity:0; transform:translateY(44px) scale(.95);
+    transition:opacity var(--m-dur-in) ease, transform var(--m-dur-tile) var(--m-ease);}
+  .js .pin-tiles .gt.on{opacity:1; transform:none;}
+}
+@media (prefers-reduced-motion: reduce){ .sp-pin{height:auto;} .pin-sticky{position:static; height:auto; padding-top:clamp(64px,8vw,120px);} }
+
 .sp-faq{display:grid; grid-template-columns:.8fr 1.2fr; gap:clamp(28px,5vw,80px); align-items:start;}
 .sp-faq summary{font-size:clamp(1.05rem,1.4vw,1.25rem);}
 
@@ -1034,7 +1048,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
   <div class="sp-media pm-right rv" style="--i:2; background:#2a221c"><div class="pm-stage" data-w="2000" data-h="1406" data-px="615" data-py="772" style="width:2000px; height:1406px" aria-hidden="true"><img src="img/hero/trening-photo.jpg" width="2000" height="1406" alt="">
 <div class="pm-screen" style="transform:matrix3d(0.381983307,0.0652418273,0,5.40518419e-05,-0.0235093037,0.321724182,0,-6.34605672e-05,0,0,1,0,487.015,487.36,0,1)"><video src="img/story/pl-gymtour.mp4" poster="img/story/pl-gymtour-first.jpg" muted playsinline loop autoplay preload="metadata"></video><i class="pm-notch"></i><i class="pm-glare"></i></div></div>
 <div class="pm-txt"><h1 id="sp-h">Trening, który liczy za&nbsp;Ciebie.</h1><p>Na siłowni masz pod ręką plan, zegar i&nbsp;każdą serię. Wpisujesz ciężar, resztę liczy&nbsp;aplikacja.</p></div></div></section>
-<section class="sp-sec"><div class="sp-head rv"><h2>Na siłowni bez&nbsp;zeszytu</h2></div><div class="gtiles seq"><div class="gt d" style="--i:0"><span class="k">Auto-zapis</span><p>Seria zapisuje się sama po trzech sekundach.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg></div><div class="gt o" style="--i:1"><span class="k">Zamiennik</span><p>Maszyna zajęta? Zamiennik na ten sam ruch.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M176 40l40 40-40 40M216 80H72M80 216l-40-40 40-40M40 176h144"/></svg></div><div class="gt g" style="--i:2"><span class="k">Rozgrzewka</span><p>Rozgrzewka dobrana do dzisiejszych partii.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M183.89,153.34a57.6,57.6,0,0,1-46.56,46.55A8.75,8.75,0,0,1,136,200a8,8,0,0,1-1.32-15.89c16.57-2.79,30.63-16.85,33.44-33.45a8,8,0,0,1,15.78,2.68ZM216,144a88,88,0,0,1-176,0c0-27.92,11-56.47,32.66-84.85a8,8,0,0,1,11.93-.89l24.12,23.41,22-60.41a8,8,0,0,1,12.63-3.41C165.21,36,216,84.55,216,144Zm-16,0c0-46.09-35.79-85.92-58.21-106.33L119.52,98.74a8,8,0,0,1-13.09,3L80.06,76.16C64.09,99.21,56,122,56,144a72,72,0,0,0,144,0Z"/></svg></div><div class="gt l" style="--i:3"><span class="k">Trening nie przepada</span><p>Wpisane serie zostają, nawet gdy padnie bateria.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,56H32A24,24,0,0,0,8,80v96a24,24,0,0,0,24,24H200a24,24,0,0,0,24-24V80A24,24,0,0,0,200,56Zm8,120a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H200a8,8,0,0,1,8,8ZM144,96v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0Zm-40,0v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0ZM64,96v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0Zm192,0v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0Z"/></svg></div></div></section>
+<section class="sp-sec sp-pin"><div class="pin-sticky"><div class="sp-head"><h2>Na siłowni bez&nbsp;zeszytu</h2></div><div class="gtiles pin-tiles"><div class="gt p1" style="--i:0"><span class="k">Auto-zapis</span><p>Seria zapisuje się sama po trzech sekundach.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg></div><div class="gt p2" style="--i:1"><span class="k">Zamiennik</span><p>Maszyna zajęta? Zamiennik na ten sam ruch.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M176 40l40 40-40 40M216 80H72M80 216l-40-40 40-40M40 176h144"/></svg></div><div class="gt p3" style="--i:2"><span class="k">Rozgrzewka</span><p>Rozgrzewka dobrana do dzisiejszych partii.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M183.89,153.34a57.6,57.6,0,0,1-46.56,46.55A8.75,8.75,0,0,1,136,200a8,8,0,0,1-1.32-15.89c16.57-2.79,30.63-16.85,33.44-33.45a8,8,0,0,1,15.78,2.68ZM216,144a88,88,0,0,1-176,0c0-27.92,11-56.47,32.66-84.85a8,8,0,0,1,11.93-.89l24.12,23.41,22-60.41a8,8,0,0,1,12.63-3.41C165.21,36,216,84.55,216,144Zm-16,0c0-46.09-35.79-85.92-58.21-106.33L119.52,98.74a8,8,0,0,1-13.09,3L80.06,76.16C64.09,99.21,56,122,56,144a72,72,0,0,0,144,0Z"/></svg></div><div class="gt p4" style="--i:3"><span class="k">Trening nie przepada</span><p>Wpisane serie zostają, nawet gdy padnie bateria.</p><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,56H32A24,24,0,0,0,8,80v96a24,24,0,0,0,24,24H200a24,24,0,0,0,24-24V80A24,24,0,0,0,200,56Zm8,120a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H200a8,8,0,0,1,8,8ZM144,96v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0Zm-40,0v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0ZM64,96v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0Zm192,0v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0Z"/></svg></div></div></div></section>
 <section class="sp-sec"><div class="sp-row rv"><div class="sp-txt"><span class="sp-k">Logowanie serii</span><p>Ciężar kręcisz na tarczy, powtórzenia dodajesz plusem. Ptaszek od razu zapisuje serię, a&nbsp;jeśli nic nie klikniesz, zapisze się sama po trzech&nbsp;sekundach.</p></div><div class="sp-vis"><div class="fx"><div class="fx-box t-sets" role="img" aria-label="Powtórzenia: stuknięcie plusa zmienia 11 na 12, obrys obiega kafel i seria się zapisuje">
         <svg class="frame" viewBox="0 0 368 289" aria-hidden="true"><rect x="0" y="0" width="368" height="289" rx="36" pathLength="1"/></svg>
         <div class="num"><span class="a">11</span><span class="b">12</span></div>
@@ -1300,6 +1314,20 @@ document.documentElement.classList.add('js');
     var right = box.classList.contains('pm-right'), tx = Math.min(0, Math.max(cw - W * s, cw * (narrow ? .5 : right ? .3 : .7) - PX * s)), ty = Math.min(0, Math.max(ch - H * s, ch * (narrow ? .4 : .5) - PY * s));
     st.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + s.toFixed(5) + ')'; st.classList.add('on'); }
   fit(); addEventListener('resize', fit);
+})();
+</script>
+<script>
+/* benefits: one more tile per step of scroll while the section is pinned */
+(function(){
+  var sec = document.querySelector('.sp-pin'); if(!sec) return;
+  var tiles = sec.querySelectorAll('.pin-tiles .gt'), N = tiles.length, tick = false;
+  var upd = function(){ tick = false;
+    var r = sec.getBoundingClientRect(), st = sec.querySelector('.pin-sticky').offsetHeight;
+    var p = Math.max(0, Math.min(1, -r.top / Math.max(1, r.height - st)));
+    var k = Math.min(N, Math.floor(p * (N + 1)));   // 0 tiles when it pins, then one per step, the last step just holds all four
+    tiles.forEach(function(t, i){ t.classList.toggle('on', i < k); }); };
+  addEventListener('scroll', function(){ if(!tick){ tick = true; requestAnimationFrame(upd); } }, {passive:true});
+  addEventListener('resize', upd); upd();
 })();
 </script>
 <!-- Cloudflare Web Analytics (cookieless) --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "77b9c16a394547e3a92308281b28cea9"}'></script>
