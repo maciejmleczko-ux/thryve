@@ -586,9 +586,11 @@ section{position:relative;}
 /* cash.app stack: the front card slides down and fades out, the one behind moves into its place, a new one appears at the back */
 .t-swap .card.out{z-index:4; transform:translateY(calc(96 * var(--u))); opacity:0; transition:transform var(--m-dur-tile) var(--m-ease), opacity var(--m-dur-pop) ease;}
 .t-swap .card.jump{transition:none;}
-.t-swap .swap{position:absolute; z-index:5; left:calc(267 * var(--u)); top:calc(73 * var(--u)); width:calc(33 * var(--u)); height:calc(33 * var(--u)); border-radius:50%; background:#fff;
-  display:grid; place-items:center; transition:transform var(--m-dur-pop) var(--m-ease);}
-.t-swap .swap svg{width:100%; height:100%;}
+/* app tile 4.109: 32 px white button in a round notch at the card corner (Figma 746:7599), scaled 2.2x */
+.t-swap .swap{position:absolute; z-index:5; left:calc(257 * var(--u)); top:calc(47 * var(--u)); width:calc(70 * var(--u)); height:calc(70 * var(--u)); border-radius:50%; background:#fff;
+  box-shadow:0 calc(2 * var(--u)) calc(9 * var(--u)) rgba(0,0,0,.14); display:grid; place-items:center; transition:transform var(--m-dur-pop) var(--m-ease);}
+.t-swap .swap svg{width:50%; height:50%; display:block;}
+.t-swap .card[data-s="0"]{-webkit-mask:radial-gradient(circle at calc(100% - 20 * var(--u)) calc(19 * var(--u)), transparent calc(43 * var(--u)), #000 calc(44 * var(--u))); mask:radial-gradient(circle at calc(100% - 20 * var(--u)) calc(19 * var(--u)), transparent calc(43 * var(--u)), #000 calc(44 * var(--u)));}
 
 /* 6. record */
 .t-rec{background:#fff; border-radius:12px; color:#343941;}
@@ -1018,7 +1020,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
           <div class="card" data-s="1"><img src="img/fx/sw-hack_squat.png" alt="" width="360" height="360"></div>
           <div class="card" data-s="2"><img src="img/fx/sw-smith_machine_squat.png" alt="" width="360" height="360"></div>
           <div class="card" data-s="3"><img src="img/fx/sw-barbell_back_squat.png" alt="" width="360" height="360"></div>
-          <span class="swap"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M22.88 11.36v6.89a.93.93 0 0 1-.93.92h-7.52l.91.92a.4.4 0 0 1-.56.56l-1.59-1.59a.4.4 0 0 1 0-.56l1.59-1.59a.4.4 0 0 1 .56.56l-.91.91h7.52a.13.13 0 0 0 .13-.13v-6.89a.13.13 0 0 0-.13-.13h-7.42a.13.13 0 0 0-.13.13v.53a.4.4 0 0 1-.8 0v-.53a.93.93 0 0 1 .93-.93h7.42a.93.93 0 0 1 .93.93Zm-3.58 9.67a.4.4 0 0 0-.4.4v.53a.13.13 0 0 1-.13.13h-7.42a.13.13 0 0 1-.13-.13v-6.89a.13.13 0 0 1 .13-.13h7.52l-.91.91a.4.4 0 0 0 .56.56l1.59-1.59a.4.4 0 0 0 0-.56l-1.59-1.59a.4.4 0 0 0-.56.56l.91.91h-7.52a.93.93 0 0 0-.93.93v6.89a.93.93 0 0 0 .93.93h7.42a.93.93 0 0 0 .93-.93v-.53a.4.4 0 0 0-.4-.4Z" fill="#FF3300"/></svg></span>
+          <span class="swap"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M11.6849 9.93478L9.93488 11.6848C9.85278 11.7669 9.74144 11.813 9.62534 11.813C9.50925 11.813 9.39791 11.7669 9.31581 11.6848C9.23372 11.6027 9.1876 11.4913 9.1876 11.3752C9.1876 11.2591 9.23372 11.1478 9.31581 11.0657L10.3193 10.0627H2.62534C2.50931 10.0627 2.39803 10.0167 2.31599 9.9346C2.23394 9.85256 2.18784 9.74128 2.18784 9.62524C2.18784 9.50921 2.23394 9.39793 2.31599 9.31588C2.39803 9.23384 2.50931 9.18774 2.62534 9.18774H10.3193L9.31581 8.18477C9.23372 8.10268 9.1876 7.99134 9.1876 7.87524C9.1876 7.75915 9.23372 7.6478 9.31581 7.56571C9.39791 7.48362 9.50925 7.4375 9.62534 7.4375C9.74144 7.4375 9.85278 7.48362 9.93488 7.56571L11.6849 9.31571C11.7256 9.35634 11.7578 9.40459 11.7798 9.45771C11.8019 9.51082 11.8132 9.56775 11.8132 9.62524C11.8132 9.68274 11.8019 9.73967 11.7798 9.79278C11.7578 9.84589 11.7256 9.89414 11.6849 9.93478ZM4.06581 6.43477C4.14791 6.51687 4.25925 6.56299 4.37534 6.56299C4.49144 6.56299 4.60278 6.51687 4.68488 6.43477C4.76697 6.35268 4.81309 6.24134 4.81309 6.12524C4.81309 6.00915 4.76697 5.8978 4.68488 5.81571L3.68136 4.81274H11.3753C11.4914 4.81274 11.6027 4.76665 11.6847 4.6846C11.7668 4.60256 11.8128 4.49128 11.8128 4.37524C11.8128 4.25921 11.7668 4.14793 11.6847 4.06588C11.6027 3.98384 11.4914 3.93774 11.3753 3.93774H3.68136L4.68488 2.93477C4.76697 2.85268 4.81309 2.74134 4.81309 2.62524C4.81309 2.50915 4.76697 2.3978 4.68488 2.31571C4.60278 2.23362 4.49144 2.1875 4.37534 2.1875C4.25925 2.1875 4.14791 2.23362 4.06581 2.31571L2.31581 4.06571C2.27514 4.10634 2.24287 4.1546 2.22085 4.20771C2.19883 4.26082 2.1875 4.31775 2.1875 4.37524C2.1875 4.43274 2.19883 4.48967 2.22085 4.54278C2.24287 4.59589 2.27514 4.64414 2.31581 4.68477L4.06581 6.43477Z" fill="#5b5555"/></svg></span>
         </div>
       </div><h3>Zamiana na&nbsp;dziś</h3><p>Zamiennik na ten sam ruch tylko na dzisiejszy trening. Plan zostaje, jak&nbsp;był.</p></article>
 
