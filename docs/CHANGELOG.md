@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.109.0 (2026-11-04)
-- **Liczba wersji:** 268 · **commitów:** 644
+- **Aktualna wersja:** 4.109.1 (2026-11-04)
+- **Liczba wersji:** 269 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.109.1 · PATCH · 2026-11-04
+
+Postępy: tytuły nad kartami karuzeli (Siła, Objętość, Treningi i czas) miały 18 px odstępu od karty zamiast 8 px jak Rekordy i Ciało. `.stv2-eyebrow{margin:0 0 10px}` (niżej w pliku) wygrywał z `.stv2-slide-t{margin:0}` i do `gap` 8 px dokładał 10 px; reguła jest teraz `.stv2-slide > .stv2-slide-t{margin:0}`, więc wygrywa specyficznością.
+
+**Commity (1):**
+
+- _ten commit_ 2026-11-04 — 4.109.1: Postępy, równy odstęp tytułu nad kartą karuzeli (8 px)
 
 ### 4.109.0 · MINOR · 2026-11-04
 
