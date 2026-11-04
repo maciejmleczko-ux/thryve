@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.108.8 (2026-11-04)
+- **Aktualna wersja:** 4.109.0 (2026-11-04)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,19 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.109.0 · MINOR · 2026-11-04
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Ulepszono: nowy wygląd kafelków ćwiczeń (okrągły przycisk zmiany w rogu, czerwony ptaszek przy zrobionym albo wybranym ćwiczeniu); podpisy mieszczą się w kaflu na małych ekranach. Naprawiono: nakładanie się ikon na zrobionym ćwiczeniu dodanym ręcznie.
+
+Kafelek wg Figmy 746:7598: wycięcie 40 px w prawym górnym rogu (maska na `::before`), kółko 32 px, strzałki 16 px (`#5B5555`), ptaszek 14 px biały na `--m-orange`; ten sam ptaszek dla stanów „zrobione” (GYM), „wybrane” (edytor planu, okno zamiany). Ikony ćwiczeń w skali 1,0 (było 1,12), podpisy 10 px poniżej 380 px szerokości. Zrobione ćwiczenie dodane ręcznie nie dostaje już przycisku zamiany (brakowało `!inSession` w warunku).
+
+**Commity (1):**
+
+- _ten commit_ 2026-11-04 — 4.109.0: nowy kafelek ćwiczenia z przyciskiem w wycięciu
+
 
 ### 4.108.8 · PATCH · 2026-11-04
 

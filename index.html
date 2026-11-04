@@ -572,8 +572,6 @@ html.pev2-on .view-stack{overflow:clip;}   /* edytor planu ma przyklejony nagł�
    white tile blended it into the lilac panel and made it read smaller.
    The full-colour check carries the "done" signal instead. */
 .ex-tile.custom-tile.added :is(.gymv2-tile-icon,.gymv2-tile-label,.ph,.t){filter:grayscale(1);opacity:.28;}
-.gymv2-tile-done{position:absolute;top:6px;right:6px;width:22px;height:22px;z-index:1;pointer-events:none;}
-.gymv2-tile-done svg{display:block;width:22px;height:22px;}
 /* Per-section "add your own exercise" tile in the old grouped exercise
    grid (renderGroupedExerciseGrid) — Maciej's own design, dashed
    border + plus baked into the SVG, appended once at the end of every
@@ -1832,7 +1830,7 @@ button.dash-coach{cursor:pointer;}
 .v2-hdr-back,.gy-circ,.gymv2-chat-btn,.histv2-chat-btn,.plansv2-chat-btn,.statsv2-chat-btn,.gymv2-acct-btn,.histv2-acct-btn,.statsv2-acct-btn,.bottom-nav.bottom-nav-light .nav-item{position:relative;}
 .v2-hdr-back::after,.gy-circ::after,.gymv2-chat-btn::after,.histv2-chat-btn::after,.plansv2-chat-btn::after,.statsv2-chat-btn::after,.gymv2-acct-btn::after,.histv2-acct-btn::after,.statsv2-acct-btn::after{content:"";position:absolute;inset:-2px;}
 .bottom-nav.bottom-nav-light .nav-item::after{content:"";position:absolute;inset:-4px;}
-.gymv2-tile-swap::after{content:"";position:absolute;inset:0 0 -12px -12px;}   /* 32 px wizualnie (ikona 19 px, środek jak dawniej), 44 px do kliknięcia, w głąb kafla */
+.gymv2-tile-swap::after{content:"";position:absolute;inset:-6px;}   /* 32 px wizualnie, 44 px do kliknięcia */
 .gy-circ::after{inset:-3px;}
 .histv2-cal-nav-month .ph,.histv2-cal-nav-year .ph{position:relative;}
 .histv2-cal-nav-month .ph::after{content:"";position:absolute;inset:-10px;}   /* 24 px -> 44 px */
@@ -1884,19 +1882,13 @@ button.dash-coach{cursor:pointer;}
 .gymv2-block-min{position:absolute;top:6px;left:6px;z-index:1;font-size:var(--m-fs-2xs);font-weight:600;padding:2px 8px;border-radius:var(--m-r-pill);background:var(--m-metric-time);color:var(--m-white);}   /* kafel biały jak ćwiczenia; odróżnia go pastylka w kolorze licznika czasu */
 /* "Assigned to the active plan day" state — plan editor v2 only, see
    buildExerciseTileV2()'s 'selected' state. */
-.gymv2-tile.gymv2-tile-selected{border:2px solid var(--m-orange);}
-.gymv2-tile-check{position:absolute;top:6px;right:6px;width:18px;height:18px;z-index:1;}
-.gymv2-tile-check svg{display:block;width:100%;height:100%;}
 /* "Zamień na dziś" corner control on a GYM plan tile */
-.gymv2-tile-swap{position:absolute;top:0;right:0;width:32px;height:32px;z-index:2;display:flex;align-items:center;justify-content:center;background:none;color:var(--m-grey-700);cursor:pointer;transition:transform var(--m-dur-press-out) var(--m-ease),color var(--m-dur-quick) ease;}
-.gymv2-tile-swap svg{display:block;width:19px;height:19px;}
+.gymv2-tile-swap{cursor:pointer;color:var(--m-grey-700);transition:transform var(--m-dur-press-out) var(--m-ease),color var(--m-dur-quick) ease;}
 @media (hover:hover) and (pointer:fine){.gymv2-tile-swap:hover{color:var(--m-ink);}}
 .gymv2-tile-swap:active{transform:scale(.85);}
-/* swapped: the whole tile gets an inset orange stroke; the corner glyph
-   just turns orange, no backing. */
+/* swapped: the corner glyph just turns orange. */
 .gymv2-tile-swap.is-swapped{color:var(--m-orange);}
-.gymv2-tile.gymv2-tile-swapped{box-shadow:inset 0 0 0 2px var(--m-orange);}
-.gymv2-tile-swap:focus-visible{outline:2px solid var(--m-orange);outline-offset:1px;border-radius:6px;}
+.gymv2-tile-swap:focus-visible{outline:2px solid var(--m-orange);outline-offset:1px;}
 .gymv2-tile img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;}
 .gymv2-tile.custom-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--m-white);}
 .gymv2-tile.custom-tile .ph{width:24px;height:24px;color:var(--m-orange);}
@@ -1927,7 +1919,7 @@ button.dash-coach{cursor:pointer;}
    giving 2-3 line exercise names room instead of the icon. */
 .gymv2-tile-icon{width:100%;height:58%;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box;}
 .gymv2-tile-icon svg{width:100%;height:100%;display:block;}
-.gymv2-tile-icon img{width:100%;height:100%;object-fit:contain;display:block;-webkit-user-drag:none;pointer-events:none;transform:scale(1.12);}
+.gymv2-tile-icon img{width:100%;height:100%;object-fit:contain;display:block;-webkit-user-drag:none;pointer-events:none;}
 .gymv2-tile-label{font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.4px;text-transform:uppercase;text-align:center;color:var(--m-ink);line-height:1.15;padding:0 6px;}
 /* PNG 3D icon set (buildExerciseTileV2's .png-icon modifier) needs a
    little more height than the flat SVG glyphs it replaced — the render
@@ -3095,8 +3087,6 @@ body.gymv2-bg .pg-bg{display:block;}
 #view-gym-v2 .gymv2-repeat.is-active .gymv2-repeat-t{color:var(--m-white);}
 #view-gym-v2 .gymv2-tile:not(.gymv2-search-tile):not(.gymv2-add-tile){background:rgba(255,255,255,.6);border:.5px solid var(--m-orange-tint);-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);border-radius:var(--m-r-sm);}
 #view-gym-v2 .gymv2-tile.is-partial{border:1px solid var(--m-orange);}
-#view-gym-v2 .gymv2-tile-done{top:9px;right:9px;width:14px;height:14px;}
-#view-gym-v2 .gymv2-tile-done svg{width:14px;height:14px;}
 .gymv2-tile-partial{position:absolute;top:7px;right:7px;z-index:1;padding:2px 8px;border-radius:54px;background:var(--m-plan-easy);color:var(--m-white);font-size:var(--m-fs-2xs);font-weight:500;letter-spacing:.06em;line-height:1.3;pointer-events:none;}
 .gymv2-save-wrap{padding:22px 10px 0;}
 #view-gym-v2 .gymv2-save{height:55px;font-size:var(--m-fs-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;}
@@ -4068,6 +4058,26 @@ button.stv2-bt{cursor:pointer;}
 .dash-pcard-meta .dash-stat .ph,.dash-pcard-meta .dash-stat svg{color:var(--m-orange);}
 .gy-pill:not(.gy-pill-time) svg,.gy-pill:not(.gy-pill-time) .ph{color:var(--m-orange);}
 .pdt-chev,.stv2-cust,.stv2-cust .ph,.stv2-cust svg{color:var(--m-ink);}
+/* Wąskie ekrany (iPhone SE, mini: 375 px): podpisy kafli o 1 px mniejsze i z mniejszym odstępem liter, żeby trzy linie („Smith machine bench press”) mieściły się w kaflu */
+@media (max-width:380px){
+  .gymv2-tile-label,.ex-tile.custom-tile .t{font-size:calc(var(--m-fs-2xs) - 1px);letter-spacing:.2px;padding:0 3px;}
+}
+/* Kafelek ćwiczenia z okrągłym przyciskiem w prawym górnym rogu (Figma 746:7598, 2026-11-04):
+   biały „Zamień ćwiczenie” albo czerwony ptaszek (ćwiczenie zrobione / wybrane w edytorze i oknie zamiany).
+   Kafel dostaje okrągłe wycięcie 40 px pod przycisk 32 px: tło i obrys są na ::before z maską, bo maska na samym kaflu ucięłaby też przycisk. */
+.gymv2-tile{--tile-bg:var(--m-white);--tile-bd:0;}
+.pickex-body .gymv2-tile{--tile-bg:rgba(236,234,241,.5);}
+#view-gym-v2 .gymv2-tile{--tile-bg:rgba(255,255,255,.6);--tile-bd:.5px solid var(--m-orange-tint);}
+.gymv2-tile:is(:has(>.gymv2-tile-swap),:has(>.gymv2-tile-done),:has(>.gymv2-tile-check)){overflow:visible!important;background:none!important;border:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;isolation:isolate;}
+.gymv2-tile:is(:has(>.gymv2-tile-swap),:has(>.gymv2-tile-done),:has(>.gymv2-tile-check))::before{content:"";position:absolute;inset:0;z-index:-1;box-sizing:border-box;background:var(--tile-bg);border:var(--tile-bd);border-radius:var(--m-r-sm);
+  -webkit-mask:radial-gradient(circle 20px at calc(100% - 9px) 8.56px,transparent 19.5px,#000 20px);mask:radial-gradient(circle 20px at calc(100% - 9px) 8.56px,transparent 19.5px,#000 20px);}   /* środek wycięcia = środek kółka (prawy brzeg −9 px, góra +8,56 px): równy odstęp 4 px dookoła */
+#view-gym-v2 .gymv2-tile:is(:has(>.gymv2-tile-swap),:has(>.gymv2-tile-done),:has(>.gymv2-tile-check))::before{-webkit-backdrop-filter:blur(5.6px);backdrop-filter:blur(5.6px);}
+.gymv2-tile-swap,.gymv2-tile-done,.gymv2-tile-check{position:absolute;top:-7.44px;right:-7px;width:32px;height:32px;border-radius:50%;z-index:2;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.14);}
+.gymv2-tile-swap{background:var(--m-white);}
+.gymv2-tile:has(>.gymv2-tile-done) .gymv2-tile-swap{display:none;}   /* zrobione ćwiczenie ma tylko ptaszek, nigdy dwa przyciski w jednym rogu */
+.gymv2-tile-done,.gymv2-tile-check{background:var(--m-orange);color:var(--m-white);pointer-events:none;}
+.gymv2-tile-swap svg,.gymv2-tile-done svg,.gymv2-tile-check svg{display:block;width:14px;height:14px;}
+.gymv2-tile-swap svg{width:16px;height:16px;}   /* strzałki 16 px: figura w polu 14×14 ma ok. 10 px, przy 14 px były mało wyraźne */
 </style>
 <script data-goatcounter="https://thryve.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <!-- Pinned + SRI: a floating @2 would run any future release with access to the session token. To upgrade: bump the version and recompute the hash (openssl dgst -sha384 -binary supabase.js | openssl base64 -A). -->
@@ -10661,9 +10671,13 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.108.8";
+const APP_VERSION = "4.109.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "4.109.0": {
+    pl: { headline:'Nowy kafelek ćwiczenia', improved:['Zobacz nowy wygląd kafelków ćwiczeń: w rogu jest okrągły przycisk zmiany ćwiczenia, a przy zrobionym albo wybranym ćwiczeniu czerwony ptaszek.','Przeczytaj podpisy ćwiczeń na małych ekranach, na przykład w iPhonie SE, bo teraz mieszczą się w kaflu.'], fixed:['Naprawiono nakładanie się ikon na zrobionym ćwiczeniu dodanym ręcznie.'] },
+    en: { headline:'New exercise tile', improved:['See the new look of exercise tiles: a round swap button in the corner, and a red tick on an exercise you have done or picked.','Read exercise names on small screens, such as the iPhone SE, because they now fit in the tile.'], fixed:['Fixed overlapping icons on an exercise you added by hand once it was done.'] },
+  },
   "4.102.0": {
     pl: [
       {icon:'sparks', badge:'Nowość', title:'Trening bez planu na dziś', text:'Gdy na dziś nic nie masz zaplanowane, ekran Trening pokazuje Twoje treningi ze wszystkich planów (najdawniej robiony na początku), powtórzenie ostatniego treningu i pusty trening. W oknie wyboru ćwiczeń możesz dodać własne ćwiczenie i od razu je zaznaczyć. Plan bez dni tygodnia jest elastyczny: treningi wybierasz, kiedy chcesz.' },
@@ -13449,11 +13463,11 @@ function orderedExerciseLibrary(){
   return ordered;
 }
 
-const PLAN_EX_CHECK_SVG = `<svg width="365" height="365" viewBox="0 0 365 365" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M327.93 182.5C327.93 211.263 319.4 239.381 303.42 263.296C287.44 287.212 264.727 305.852 238.153 316.86C211.58 327.867 182.339 330.747 154.128 325.135C125.917 319.524 100.004 305.673 79.6656 285.334C59.3269 264.996 45.4761 239.083 39.8646 210.872C34.2532 182.661 37.1332 153.42 48.1404 126.846C59.1477 100.273 77.7877 77.5597 101.704 61.5796C125.619 45.5996 153.737 37.0703 182.5 37.0703C221.056 37.1156 258.021 52.4521 285.284 79.7157C312.548 106.979 327.884 143.944 327.93 182.5Z" fill="#F15A23"/><path d="M248.078 148.282C248.078 146.015 247.179 143.84 245.576 142.236C243.972 140.634 241.798 139.734 239.531 139.734C237.264 139.734 235.09 140.634 233.486 142.236L159.687 216.02L131.514 187.861C129.892 186.35 127.747 185.527 125.531 185.567C123.315 185.606 121.2 186.503 119.633 188.071C118.066 189.638 117.168 191.753 117.129 193.969C117.09 196.185 117.912 198.33 119.423 199.952L153.642 234.171C155.246 235.773 157.42 236.672 159.687 236.672C161.954 236.672 164.129 235.773 165.733 234.171L245.576 154.327C247.179 152.723 248.078 150.549 248.078 148.282Z" fill="white"/></svg>`;
+const PLAN_EX_CHECK_SVG = `<svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.716 4.40239L5.71598 11.4024C5.65501 11.4636 5.58257 11.5121 5.5028 11.5452C5.42303 11.5784 5.33751 11.5954 5.25114 11.5954C5.16477 11.5954 5.07924 11.5784 4.99948 11.5452C4.91971 11.5121 4.84726 11.4636 4.78629 11.4024L1.72379 8.33989C1.66275 8.27884 1.61433 8.20637 1.58129 8.12662C1.54825 8.04686 1.53125 7.96137 1.53125 7.87504C1.53125 7.78872 1.54825 7.70323 1.58129 7.62347C1.61433 7.54372 1.66275 7.47125 1.72379 7.4102C1.78484 7.34916 1.85731 7.30073 1.93707 7.2677C2.01682 7.23466 2.10231 7.21766 2.18864 7.21766C2.27497 7.21766 2.36045 7.23466 2.44021 7.2677C2.51997 7.30073 2.59244 7.34916 2.65348 7.4102L5.25169 10.0084L11.7874 3.47379C11.9107 3.35051 12.0779 3.28125 12.2522 3.28125C12.4266 3.28125 12.5938 3.35051 12.7171 3.47379C12.8404 3.59708 12.9096 3.76429 12.9096 3.93864C12.9096 4.11299 12.8404 4.2802 12.7171 4.40348L12.716 4.40239Z" fill="currentColor"/></svg>`;
 /* Corner action on a GYM plan tile — "Zamień ćwiczenie" (Maciej's icon,
    two-way arrows into a doc). Only shown on a plain, not-yet-logged plan
    exercise (see renderGymGridV2). */
-const GYMV2_SWAP_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.8125 4.5V14.25C20.8125 14.5981 20.6742 14.9319 20.4281 15.1781C20.1819 15.4242 19.8481 15.5625 19.5 15.5625H8.85844L10.1475 16.8525C10.2028 16.904 10.2471 16.9661 10.2778 17.0351C10.3086 17.1041 10.3251 17.1786 10.3264 17.2541C10.3278 17.3296 10.3139 17.4047 10.2856 17.4747C10.2573 17.5447 10.2152 17.6084 10.1618 17.6618C10.1084 17.7152 10.0447 17.7573 9.9747 17.7856C9.90466 17.8139 9.82964 17.8278 9.75411 17.8264C9.67858 17.8251 9.6041 17.8086 9.5351 17.7778C9.4661 17.7471 9.404 17.7028 9.3525 17.6475L7.1025 15.3975C6.99716 15.292 6.93799 15.1491 6.93799 15C6.93799 14.8509 6.99716 14.708 7.1025 14.6025L9.3525 12.3525C9.45913 12.2531 9.60017 12.199 9.74589 12.2016C9.89162 12.2042 10.0307 12.2632 10.1337 12.3663C10.2368 12.4693 10.2958 12.6084 10.2984 12.7541C10.301 12.8998 10.2469 13.0409 10.1475 13.1475L8.85844 14.4375H19.5C19.5497 14.4375 19.5974 14.4177 19.6326 14.3826C19.6677 14.3474 19.6875 14.2997 19.6875 14.25V4.5C19.6875 4.45027 19.6677 4.40258 19.6326 4.36742C19.5974 4.33225 19.5497 4.3125 19.5 4.3125H9C8.95027 4.3125 8.90258 4.33225 8.86742 4.36742C8.83225 4.40258 8.8125 4.45027 8.8125 4.5V5.25C8.8125 5.39918 8.75324 5.54226 8.64775 5.64775C8.54226 5.75324 8.39918 5.8125 8.25 5.8125C8.10082 5.8125 7.95774 5.75324 7.85225 5.64775C7.74676 5.54226 7.6875 5.39918 7.6875 5.25V4.5C7.6875 4.1519 7.82578 3.81806 8.07192 3.57192C8.31806 3.32578 8.6519 3.1875 9 3.1875H19.5C19.8481 3.1875 20.1819 3.32578 20.4281 3.57192C20.6742 3.81806 20.8125 4.1519 20.8125 4.5ZM15.75 18.1875C15.6008 18.1875 15.4577 18.2468 15.3523 18.3523C15.2468 18.4577 15.1875 18.6008 15.1875 18.75V19.5C15.1875 19.5497 15.1677 19.5974 15.1326 19.6326C15.0974 19.6677 15.0497 19.6875 15 19.6875H4.5C4.45027 19.6875 4.40258 19.6677 4.36742 19.6326C4.33225 19.5974 4.3125 19.5497 4.3125 19.5V9.75C4.3125 9.70027 4.33225 9.65258 4.36742 9.61742C4.40258 9.58225 4.45027 9.5625 4.5 9.5625H15.1416L13.8525 10.8525C13.7972 10.904 13.7529 10.9661 13.7222 11.0351C13.6914 11.1041 13.6749 11.1786 13.6736 11.2541C13.6722 11.3296 13.6861 11.4047 13.7144 11.4747C13.7427 11.5447 13.7848 11.6084 13.8382 11.6618C13.8916 11.7152 13.9553 11.7573 14.0253 11.7856C14.0953 11.8139 14.1704 11.8278 14.2459 11.8264C14.3214 11.8251 14.3959 11.8086 14.4649 11.7778C14.5339 11.7471 14.596 11.7028 14.6475 11.6475L16.8975 9.3975C17.0028 9.29203 17.062 9.14906 17.062 9C17.062 8.85094 17.0028 8.70797 16.8975 8.6025L14.6475 6.3525C14.5409 6.25314 14.3998 6.19905 14.2541 6.20162C14.1084 6.20419 13.9693 6.26322 13.8663 6.36628C13.7632 6.46934 13.7042 6.60838 13.7016 6.75411C13.699 6.89983 13.7531 7.04087 13.8525 7.1475L15.1416 8.4375H4.5C4.1519 8.4375 3.81806 8.57578 3.57192 8.82192C3.32578 9.06806 3.1875 9.4019 3.1875 9.75V19.5C3.1875 19.8481 3.32578 20.1819 3.57192 20.4281C3.81806 20.6742 4.1519 20.8125 4.5 20.8125H15C15.3481 20.8125 15.6819 20.6742 15.9281 20.4281C16.1742 20.1819 16.3125 19.8481 16.3125 19.5V18.75C16.3125 18.6008 16.2532 18.4577 16.1477 18.3523C16.0423 18.2468 15.8992 18.1875 15.75 18.1875Z" fill="currentColor"/></svg>`;
+const GYMV2_SWAP_SVG = `<svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.6849 9.93478L9.93488 11.6848C9.85278 11.7669 9.74144 11.813 9.62534 11.813C9.50925 11.813 9.39791 11.7669 9.31581 11.6848C9.23372 11.6027 9.1876 11.4913 9.1876 11.3752C9.1876 11.2591 9.23372 11.1478 9.31581 11.0657L10.3193 10.0627H2.62534C2.50931 10.0627 2.39803 10.0167 2.31599 9.9346C2.23394 9.85256 2.18784 9.74128 2.18784 9.62524C2.18784 9.50921 2.23394 9.39793 2.31599 9.31588C2.39803 9.23384 2.50931 9.18774 2.62534 9.18774H10.3193L9.31581 8.18477C9.23372 8.10268 9.1876 7.99134 9.1876 7.87524C9.1876 7.75915 9.23372 7.6478 9.31581 7.56571C9.39791 7.48362 9.50925 7.4375 9.62534 7.4375C9.74144 7.4375 9.85278 7.48362 9.93488 7.56571L11.6849 9.31571C11.7256 9.35634 11.7578 9.40459 11.7798 9.45771C11.8019 9.51082 11.8132 9.56775 11.8132 9.62524C11.8132 9.68274 11.8019 9.73967 11.7798 9.79278C11.7578 9.84589 11.7256 9.89414 11.6849 9.93478ZM4.06581 6.43477C4.14791 6.51687 4.25925 6.56299 4.37534 6.56299C4.49144 6.56299 4.60278 6.51687 4.68488 6.43477C4.76697 6.35268 4.81309 6.24134 4.81309 6.12524C4.81309 6.00915 4.76697 5.8978 4.68488 5.81571L3.68136 4.81274H11.3753C11.4914 4.81274 11.6027 4.76665 11.6847 4.6846C11.7668 4.60256 11.8128 4.49128 11.8128 4.37524C11.8128 4.25921 11.7668 4.14793 11.6847 4.06588C11.6027 3.98384 11.4914 3.93774 11.3753 3.93774H3.68136L4.68488 2.93477C4.76697 2.85268 4.81309 2.74134 4.81309 2.62524C4.81309 2.50915 4.76697 2.3978 4.68488 2.31571C4.60278 2.23362 4.49144 2.1875 4.37534 2.1875C4.25925 2.1875 4.14791 2.23362 4.06581 2.31571L2.31581 4.06571C2.27514 4.10634 2.24287 4.1546 2.22085 4.20771C2.19883 4.26082 2.1875 4.31775 2.1875 4.37524C2.1875 4.43274 2.19883 4.48967 2.22085 4.54278C2.24287 4.59589 2.27514 4.64414 2.31581 4.68477L4.06581 6.43477Z" fill="currentColor"/></svg>`;
 /* GYM/plan-editor tile: real icon (from EXERCISE_ICON_SVG_V3) + separate
    label below. Falls back to a generic barbell + name for any exercise
    without a v3 icon yet. state 'selected' = "assigned to the active day"
@@ -22257,7 +22271,7 @@ function renderGymGridV2(animate){
     const canSwap = slot.swapOrigin && !slot.bookend && ex.type !== 'checklist' && !inSession && !partial;
     const tileOpts = {};
     if(canSwap){ tileOpts.swapOrigin = slot.swapOrigin; tileOpts.swapped = slot.swapped; }
-    else if(isExtra && !slot.swapOrigin && !partial && ex.type !== 'checklist'){ tileOpts.swapOrigin = ex.name; tileOpts.swapped = false; }
+    else if(isExtra && !slot.swapOrigin && !inSession && !partial && ex.type !== 'checklist'){ tileOpts.swapOrigin = ex.name; tileOpts.swapped = false; }
     if(partial) tileOpts.partial = partial;
     if(ex.type !== 'checklist' && !slot.bookend){ gridTotal++; if(inSession) gridDone++; }
     const btn = buildExerciseTileV2(ex, state, Object.keys(tileOpts).length ? tileOpts : null);
