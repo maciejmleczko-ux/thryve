@@ -10666,7 +10666,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.108.7";
+const APP_VERSION = "4.108.8";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.102.0": {
@@ -13947,7 +13947,7 @@ function setSwapEquipV2(key){
 }
 function openSwapSheetV2(originName){
   const planEx = todayGridExerciseNames() || [];
-  if(!planEx.some(e=>e.name===originName)) return;
+  if(!planEx.some(e=>e.name===originName) && !extraGymTiles.some(e=>e.name===originName)) return;
   if(sessionExercises.some(e=>{
     const disp = todaySwaps[originName] ? todaySwaps[originName].name : originName;
     return e.name === disp;
@@ -13971,6 +13971,15 @@ function closeSwapSheetV2(viaDrag){
 }
 function confirmSwapV2(){
   if(!swapOriginName) return;
+  const extraI = extraGymTiles.findIndex(e=>e.name===swapOriginName);
+  if(extraI >= 0){
+    // kafel dodany ręcznie nie ma „oryginału z planu”: zamiennik po prostu zajmuje jego miejsce
+    const ex = swapPickName && swapPickName !== swapOriginName ? orderedExerciseLibrary().find(e=>e.name===swapPickName) : null;
+    if(ex){ extraGymTiles[extraI] = {...ex}; extraGymTiles = sortExercisesByKey(extraGymTiles); persistGymSession(); }
+    closeSwapSheetV2();
+    renderGymGridV2();
+    return;
+  }
   if(swapPickName && swapPickName !== swapOriginName){
     const ex = orderedExerciseLibrary().find(e=>e.name===swapPickName);
     if(ex) todaySwaps[swapOriginName] = { name: ex.name, group: ex.group, equipment: ex.equipment || null, icon: ex.icon || null };
@@ -22254,6 +22263,7 @@ function renderGymGridV2(animate){
     const canSwap = slot.swapOrigin && !slot.bookend && ex.type !== 'checklist' && !inSession && !partial;
     const tileOpts = {};
     if(canSwap){ tileOpts.swapOrigin = slot.swapOrigin; tileOpts.swapped = slot.swapped; }
+    else if(isExtra && !slot.swapOrigin && !partial && ex.type !== 'checklist'){ tileOpts.swapOrigin = ex.name; tileOpts.swapped = false; }
     if(partial) tileOpts.partial = partial;
     if(ex.type !== 'checklist' && !slot.bookend){ gridTotal++; if(inSession) gridDone++; }
     const btn = buildExerciseTileV2(ex, state, Object.keys(tileOpts).length ? tileOpts : null);

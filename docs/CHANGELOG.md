@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.108.7 (2026-11-03)
+- **Aktualna wersja:** 4.108.8 (2026-11-04)
 - **Liczba wersji:** 268 · **commitów:** 644
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,14 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.108.8 · PATCH · 2026-11-04
+
+Bez wpisu „Co nowego”. Ćwiczenie dodane ręcznie do treningu na dziś („Dodaj ćwiczenie”, np. przy treningu bez planu) ma teraz na kaflu ikonę „Zamień na dziś”, tak jak ćwiczenia z planu. Zamiennik zajmuje miejsce kafla (nie ma „oryginału z planu”, więc bez „Przywróć oryginał”). Powód: trening ułożony w domu, a na siłowni brakuje sprzętu albo jest zajęty.
+
+**Commity (1):**
+
+- (hash po commicie) 2026-11-04 — 4.108.8: zamiana ćwiczenia na kaflach dodanych ręcznie
 
 ### 4.108.7 · PATCH · 2026-11-03
 
