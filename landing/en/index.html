@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mekkio · workout log for iPhone</title>
-<meta name="description" content="Build your plan, log weight and reps at the gym, and Mekkio shows whether you're moving forward. Free, and no account needed.">
+<meta name="description" content="Build a plan, log weight and reps at the gym, and Mekkio shows whether you’re moving forward. Free, and no account needed.">
 <meta name="theme-color" content="#ff3300">
 <meta property="og:title" content="Mekkio · workout log for iPhone">
 <meta property="og:description" content="You lift. Mekkio counts.">
@@ -21,7 +21,7 @@
 <link rel="alternate" hreflang="pl" href="https://mekkio.app/">
 <link rel="alternate" hreflang="en" href="https://mekkio.app/en/">
 <link rel="alternate" hreflang="x-default" href="https://mekkio.app/">
-<link rel="preload" as="image" href="/img/en/r-orbit.webp">
+<link rel="preload" as="image" href="/img/r-orbit.webp">
 <script>
   /* reload always starts at the hero (the browser would otherwise restore the old scroll position, mid-page);
      links with a #section still jump to that section */
@@ -289,39 +289,6 @@ section{position:relative;}
   .hero-panel::before{background-size:cover; background-position:50% 50%;}
 }
 
-/* ---------- SPLIT: two phones slide apart and reveal the line ---------- */
-.split{position:relative; height:250vh; margin-top:clamp(24px,4vw,56px);}
-.split-sticky{position:sticky; top:0; height:100vh; height:100svh; overflow:hidden; display:grid; place-items:center;}
-.split-copy{
-  position:relative; z-index:1; text-align:center; width:min(620px, calc(100% - 2 * var(--gutter)));
-  display:grid; gap:22px; justify-items:center;
-  opacity:var(--t,0); transform:translateY(calc((1 - var(--t,0)) * 34px)) scale(calc(.94 + var(--t,0) * .06));
-}
-.split-kicker{display:flex; gap:10px; align-items:center; font-size:14px; color:var(--m-muted);}
-.split-kicker b{font-weight:500; color:var(--m-ink);}
-.split-copy h2{font-size:clamp(2.2rem,4.3vw,4.1rem); line-height:1.02; letter-spacing:-.05em;}
-.split-copy h2 em{font-style:normal; color:var(--m-orange);}
-.split-copy p{color:var(--m-muted); max-width:42ch;}
-.split-phones{position:absolute; inset:0; z-index:2; pointer-events:none;}
-.split-phone{position:absolute; left:50%; top:50%; perspective:1800px; --gap0:clamp(56px,6vw,96px); --spread:clamp(220px,30vw,470px);}
-.split-phone{width:clamp(210px,20.4vw,300px);}
-.split-phone img{filter:drop-shadow(6px 10px 8px rgba(31,35,41,.28)) drop-shadow(30px 50px 50px rgba(31,35,41,.26));}
-.split-gl{inset:0; width:100%; height:100%;}
-.split.gl-on .split-phones{visibility:hidden;}
-.split-phone.l{transform:translate(-50%,-50%) translateX(calc(-1 * (var(--gap0) + var(--p,0) * var(--spread))));}
-.split-phone.r{transform:translate(-50%,-50%) translateX(calc(var(--gap0) + var(--p,0) * var(--spread))) translateY(24px); z-index:1;}
-@media (max-width:700px){
-  .split-phone{--spread:78vw; --gap0:40px;}
-  .split-phone{width:170px;}
-}
-@media (prefers-reduced-motion: reduce){
-  .split{height:auto;}
-  .split-sticky{position:relative; height:auto; padding:40px 0; display:flex; flex-direction:column; gap:40px;}
-  .split-phones{position:relative; inset:auto; display:flex; justify-content:center; gap:24px;}
-  .split-phone{position:relative; left:auto; top:auto; transform:none !important;}
-  .split-phone{width:clamp(150px,22vw,260px);}
-}
-
 /* ---------- SCREENS carousel: phones on a dark panel ---------- */
 .dark-panel{
   margin:0 var(--frame); border-radius:var(--m-r-xl); background:var(--m-dark); color:var(--m-on-dark);
@@ -334,41 +301,6 @@ section{position:relative;}
 .dark-panel .lede{color:var(--m-on-dark-muted);}
 .dark-head{text-align:center; display:grid; justify-items:center; gap:18px;}
 .dark-head .pill-label{border-color:rgba(255,255,255,.18); color:var(--m-on-dark-muted); justify-self:center;}
-.caro{position:relative; margin-top:clamp(40px,6vw,72px); touch-action:pan-y; user-select:none;}
-.caro-track{
-  display:flex; gap:clamp(8px,1.6vw,24px); align-items:center; list-style:none; margin:0; padding:0;
-  transform:translateX(var(--x,0px)); transition:transform var(--m-dur-draw) var(--m-ease);
-}
-.caro-slide{
-  flex:none; opacity:.34; transform:scale(.84); cursor:pointer;
-  transition:transform var(--m-dur-draw) var(--m-ease), opacity var(--m-dur-draw) ease;
-}
-.caro-slide img{width:clamp(200px,20vw,270px);}
-.caro-slide.on{opacity:1; transform:none; cursor:default;}
-.caro-cap{width:min(560px,100%); margin:40px auto 0; text-align:center; display:grid; gap:8px; min-height:112px;}
-.caro-cap .k{font-size:13px; font-weight:500; color:#ff6a45; letter-spacing:.02em;}
-.caro-cap h3{font-size:clamp(1.6rem,2.6vw,2.1rem);}
-.caro-cap p{color:var(--m-on-dark-muted); font-size:16px;}
-.caro-cap > *{transition:opacity var(--m-dur-fade) ease, transform var(--m-dur-fade) var(--m-ease);}
-.caro-cap.swap > *{opacity:0; transform:translateY(6px);}
-.caro-ctrl{display:flex; justify-content:center; align-items:center; gap:10px; margin-top:22px;}
-.sq-btn{
-  width:52px; height:52px; border-radius:50%; border:0; display:grid; place-items:center; cursor:pointer;
-  transition:transform var(--m-dur-press-out) var(--m-ease), background-color var(--m-dur-quick) ease;
-}
-.sq-btn:active{transform:scale(.94);}
-.sq-btn svg{width:20px; height:20px; display:block;}
-.sq-prev{background:#fff; color:var(--m-ink-2);}
-.sq-next{background:var(--m-cta); color:#fff;}
-@media (hover:hover) and (pointer:fine){ .sq-next:hover{background:var(--m-cta-hover);} }
-.dots{display:flex; gap:10px; margin:0 14px;}
-.dots button{
-  position:relative; width:8px; height:8px; padding:0; border:0; border-radius:50%; cursor:pointer;
-  background:rgba(255,255,255,.28); transition:transform var(--m-dur-in) var(--m-ease-spring), background-color var(--m-dur-quick) ease;
-}
-.dots button::after{content:""; position:absolute; inset:-18px -5px;} /* 44px touch target */
-.dots button.on{background:#fff; transform:scale(1.4);}
-
 /* ---------- FEATURES ---------- */
 .feat-head{display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:end; margin-bottom:clamp(40px,5vw,64px);}
 .feat-head .pill-label{margin-bottom:22px;}
@@ -487,6 +419,344 @@ section{position:relative;}
   .more article:nth-child(2n){border-left:0 !important;}
 }
 
+:root{
+  --m-dur-page:.8s;                         /* landing only: chapter change in the story (cash.app-like page move) */
+  --m-ease-page:cubic-bezier(.65,0,.25,1);  /* landing only: slow start, long soft landing for that move */
+}
+/* ---------- HERO: solid orange, no photo texture (2026-11-03) ---------- */
+.hero-panel{background:var(--m-orange);}
+.hero-panel::before,.hero-panel::after{display:none;}
+
+/* ---------- STORY: one screen in the middle, six chapters (the cash.app pattern) ----------
+   Each chapter is a viewport of scroll while the stage stays pinned (no scroll-jacking). The screen frame stays
+   put and always shows the app from the very top. On a chapter change the new screen slides up into the frame
+   and the new texts ride up with it while the old ones leave upwards; then the panel colour follows. Scrolling
+   back mirrors it. Colours come from the app palette. */
+.story{position:relative; height:calc(var(--chs,6) * 100svh + 100svh); margin-top:clamp(24px,4vw,56px);}
+.story-sticky{position:sticky; top:0; height:100svh; padding:var(--frame); box-sizing:border-box;}
+.story-panel{
+  position:relative; height:100%; border-radius:var(--m-r-xl); overflow:hidden; isolation:isolate;
+  background:var(--st-bg); color:var(--st-fg);
+  transition:color var(--m-dur-page) var(--m-ease-page);   /* the background swaps at once: the old colour is the shrinking layer below */
+  display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:clamp(16px,3vw,56px); padding:0 clamp(20px,4vw,64px);
+}
+.story{--st-bg:#fbece3; --st-fg:#1f2329; --st-mute:rgba(31,35,41,.7); --st-acc:#c42600;}
+.story[data-ch="1"]{--st-bg:#3b63cb; --st-fg:#fff; --st-mute:rgba(255,255,255,.84); --st-acc:#fff;}
+.story[data-ch="2"]{--st-bg:#ff3300; --st-fg:#fff; --st-mute:rgba(255,255,255,.9); --st-acc:#fff;}
+.story[data-ch="3"]{--st-bg:#8e0045; --st-fg:#fff; --st-mute:rgba(255,255,255,.84); --st-acc:#ffd885;}
+.story[data-ch="4"]{--st-bg:#0e0f12; --st-fg:#f5f3f8; --st-mute:rgba(245,243,248,.74); --st-acc:#ff6a45;}
+.story[data-ch="5"]{--st-bg:#ffd885; --st-fg:#1f2329; --st-mute:rgba(31,35,41,.74); --st-acc:#c42600;}
+.story-l,.story-r{position:relative; z-index:1; height:clamp(220px,40vh,420px); list-style:none; margin:0; padding:0;}
+.story-l li,.story-r li{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; gap:18px; visibility:hidden;}
+.story-l li.on,.story-r li.on,.story-l li.out,.story-r li.out{visibility:visible;}
+.story-k,.story-l h3,.story-r p{transition:color var(--m-dur-page) var(--m-ease-page);}
+.story-l h3{margin:0; font-size:clamp(2.2rem,4.4vw,4.2rem); font-weight:300; letter-spacing:-.045em; line-height:1;}
+.story-k{font-size:13px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--st-acc);}
+.story-r p{margin:0; max-width:34ch; font-size:clamp(1rem,1.3vw,1.18rem); line-height:1.5; color:var(--st-mute);}
+.story-card{position:relative; z-index:1; justify-self:center; height:min(80svh,780px); aspect-ratio:660/1430;
+  --r:calc(min(80svh,780px) * 660 / 1430 * .13); border-radius:var(--r); overflow:hidden; background:#fff; isolation:isolate;}
+.story-card video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 0; display:block; visibility:hidden; border-radius:var(--r);}
+.story-card video.on,.story-card video.out{visibility:visible;}
+.story-card video.on{z-index:2;}
+/* old chapter colour: covers the panel, then shrinks into the screen (behind it) and is gone */
+.story-shrink{position:absolute; inset:0; z-index:0; pointer-events:none; visibility:hidden;}
+.story-shrink.on{visibility:visible;}
+/* iOS status bar over the empty top of the recordings */
+.story-sb{position:absolute; z-index:3; left:0; right:0; top:0; height:6.9%; display:flex; align-items:center; justify-content:space-between;
+  padding:3.2% 9% 0 11%; color:#1f2329; font-size:clamp(11px,1vw,14px); font-weight:600; letter-spacing:-.01em; pointer-events:none;}
+.story-sb svg{height:1em; width:auto; display:block;}
+.story-sb .ic{display:flex; gap:5px; align-items:center;}
+.story .soon{margin-top:6px;}
+@media (max-width:860px){
+  /* phones: heading on top, text below, the screen takes every pixel left between them, with air on both sides */
+  .story-panel{grid-template-columns:1fr; grid-template-rows:auto 1fr auto; align-items:stretch; gap:clamp(20px,3.4svh,32px); padding:clamp(28px,5svh,52px) 20px clamp(24px,4svh,40px);}
+  .story-l{height:calc(2 * clamp(1.7rem,7.4vw,2.2rem));} .story-r{height:calc(4 * 15px * 1.45 + 4px);}
+  .story-l li,.story-r li{gap:8px; text-align:center; align-items:center;}
+  .story-l li{justify-content:flex-end;} .story-r li{justify-content:flex-start;}
+  .story-l h3{font-size:clamp(1.7rem,7.4vw,2.2rem);}
+  .story-r p{font-size:15px; line-height:1.45;}
+  .story-card{height:min(100%, 74svh); align-self:center;}
+  .story-sb{font-size:10px;}
+  .story .soon{transform:scale(.9);}
+}
+
+/* ---------- FEATURES: six designed tiles (Figma 36:159), built from real layers so every part can move ----------
+   Sizes are the Figma values in a 368-wide box (--u = 1/368 of the box width). Without JS or with reduced motion
+   each tile shows the designed state; with motion a small story loops while the tile is on screen. */
+:root{ --m-dur-trace:1.6s; }   /* landing only: the frame running once round the reps tile after a change */
+@property --p{ syntax:'<angle>'; inherits:false; initial-value:240deg; }
+.fx{display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(20px,2.2vw,32px) clamp(16px,1.8vw,28px); margin-top:clamp(48px,6vw,88px);}
+.fx-c{margin:0;}
+.fx-c h3{margin:20px 0 0; font-size:1.2rem; font-weight:400; letter-spacing:-.02em; line-height:1.2;}
+.fx-c p{margin:6px 0 0; color:var(--m-muted); font-size:.98rem; line-height:1.45; max-width:34ch;}
+.fx-box{position:relative; aspect-ratio:368/289; overflow:hidden; isolation:isolate; container-type:inline-size; font-family:var(--m-font); line-height:1;}
+.fx-box *{--u:calc(100cqw / 368);}
+.fx-box > *{position:absolute;}
+.fx-box .k{font-size:calc(11 * var(--u)); font-weight:500; letter-spacing:.06em;}
+
+/* 1. weekly ring */
+.t-ring{background:#000; border-radius:16px; color:#fff;}
+.t-ring .k{left:calc(16 * var(--u)); top:calc(16 * var(--u)); color:#ff3300;}
+.t-ring .ring{left:calc(7 * var(--u)); top:calc(47 * var(--u)); width:calc(150 * var(--u)); height:calc(150 * var(--u)); display:grid; place-content:center; text-align:center;}
+.t-ring .ring::before,.t-ring .arc{content:""; position:absolute; inset:0; border-radius:50%;
+  -webkit-mask:radial-gradient(closest-side, transparent 76%, #000 76.5%, #000 99%, transparent 100%); mask:radial-gradient(closest-side, transparent 76%, #000 76.5%, #000 99%, transparent 100%);}
+.t-ring .ring::before{background:rgba(255,255,255,.16);}
+.t-ring .arc{inset:calc(2 * var(--u)); background:conic-gradient(#ff3300 0deg, #ffcc00 calc(var(--p) * .64), rgba(255,204,0,0) var(--p), transparent 0);
+  -webkit-mask:radial-gradient(closest-side, transparent 80%, #000 80.5%, #000 99%, transparent 100%); mask:radial-gradient(closest-side, transparent 80%, #000 80.5%, #000 99%, transparent 100%);
+  filter:drop-shadow(0 0 calc(4 * var(--u)) rgba(255,80,0,.55)); transition:--p 1.2s var(--m-ease);}
+.t-ring .ring b{position:relative; font-size:calc(30 * var(--u)); font-weight:300; letter-spacing:-.02em;}
+.t-ring .ring small{position:relative; margin-top:calc(4 * var(--u)); font-size:calc(11 * var(--u)); font-weight:500; color:#96959b;}
+.t-ring .side{left:calc(220 * var(--u)); top:calc(60 * var(--u)); display:grid; gap:calc(30 * var(--u));}
+.t-ring .side > div{display:flex; align-items:center; gap:calc(30 * var(--u));}
+.t-ring .side > div > span{display:grid; gap:calc(4 * var(--u)); font-size:calc(11 * var(--u)); font-weight:500; color:#96959b; letter-spacing:.04em;}
+.t-ring .side b{white-space:nowrap; font-size:calc(30 * var(--u)); font-weight:300; color:#fff; letter-spacing:-.02em;}
+.t-ring .dot{width:calc(13 * var(--u)); height:calc(13 * var(--u)); border-radius:50%; background:#474748;}
+.t-ring .dot.on{background:#ff3804;}
+.t-ring hr{left:calc(16 * var(--u)); right:calc(16 * var(--u)); top:calc(200 * var(--u)); margin:0; border:0; border-top:1px solid rgba(150,149,155,.5);}
+.t-ring .goal{left:calc(16 * var(--u)); top:calc(215 * var(--u)); font-size:calc(11 * var(--u)); font-weight:500; letter-spacing:.06em;}
+.t-ring .pill{left:calc(225 * var(--u)); top:calc(212 * var(--u)); width:calc(109 * var(--u)); height:calc(19 * var(--u)); border-radius:99px; background:#ffe9e3; color:#8a1f00;
+  display:grid; place-items:center; font-size:calc(11 * var(--u)); letter-spacing:.02em;}
+.t-ring .weeks{left:calc(16 * var(--u)); top:calc(246 * var(--u)); display:flex; gap:calc(6.4 * var(--u));}
+.t-ring .weeks i{width:calc(23 * var(--u)); height:calc(23 * var(--u)); border-radius:50%; background:#ff3804; transition:background-color var(--m-dur-in) ease, transform var(--m-dur-pop) var(--m-ease-spring);}
+.t-ring .weeks i.dim{background:rgba(255,56,4,.4);}
+.t-ring .weeks i.now{background:transparent; box-shadow:inset 0 0 0 1px #ff3804;}
+.t-ring .weeks i.now.fill{background:#ff3804;}
+
+/* 2. volume chart */
+.t-chart{background:#ff3300; border-radius:16px; color:#fff;}
+.t-chart .big{left:calc(16 * var(--u)); top:calc(22 * var(--u)); display:flex; align-items:baseline; gap:calc(18 * var(--u));}
+.t-chart .num{font-size:calc(72.5 * var(--u)); font-weight:200; letter-spacing:-.02em; font-variant-numeric:tabular-nums;}
+.t-chart .big small{font-size:calc(29 * var(--u)); font-weight:400;}
+.t-chart .delta{left:calc(16 * var(--u)); top:calc(117 * var(--u)); font-size:calc(11 * var(--u)); font-weight:500; color:#ffd885; letter-spacing:.04em;}
+.t-chart svg{left:calc(16 * var(--u)); top:calc(152 * var(--u)); width:calc(337 * var(--u)); height:calc(94 * var(--u)); overflow:visible;}
+.t-chart .line{stroke-dasharray:1; stroke-dashoffset:0; transition:stroke-dashoffset 1.6s var(--m-ease);}
+.t-chart .area{clip-path:inset(0 0 0 0); transition:clip-path 1.6s var(--m-ease);}
+.t-chart .end{left:calc(334 * var(--u)); top:calc(141 * var(--u)); width:calc(19 * var(--u)); height:calc(19 * var(--u)); border-radius:50%; background:#ff3300; box-shadow:inset 0 0 0 calc(3.5 * var(--u)) #fff;
+  transition:transform var(--m-dur-pop) var(--m-ease-spring), opacity var(--m-dur-fade) ease;}
+.t-chart .end::after{content:""; position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 calc(2 * var(--u)) #fff; opacity:0;}
+.t-chart .d{top:calc(254 * var(--u)); font-size:calc(13 * var(--u)); font-weight:500;}
+.t-chart .d1{left:calc(18 * var(--u));} .t-chart .d2{left:calc(164 * var(--u));} .t-chart .d3{left:calc(302 * var(--u));}
+
+/* 3. calendar */
+.t-cal{background:#3b63cb; border-radius:16px; color:#fff;}
+.t-cal .head{left:calc(45 * var(--u)); right:calc(46 * var(--u)); top:calc(23 * var(--u)); display:flex; justify-content:space-between; align-items:center;}
+.t-cal .m{font-size:calc(16.6 * var(--u)); font-weight:500;} .t-cal .y{font-size:calc(10.6 * var(--u)); font-weight:500;}
+.t-cal .grid{left:calc(45 * var(--u)); top:calc(56 * var(--u)); width:calc(278 * var(--u)); display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:calc(20 * var(--u)) repeat(5, calc(39.75 * var(--u)));}   /* Figma: day names 56–76, weeks 76–274 */
+.t-cal .grid b{height:calc(20 * var(--u)); display:grid; place-items:center; font-size:calc(11.6 * var(--u)); font-weight:400; color:#708fe1;}
+.t-cal .grid i{position:relative; display:grid; place-items:center; font-style:normal; font-size:calc(15.5 * var(--u)); font-weight:400; z-index:0;}
+.t-cal .grid i::before{content:""; position:absolute; z-index:-1; width:calc(36 * var(--u)); height:calc(36 * var(--u)); border-radius:50%; opacity:0;}
+.t-cal .grid i.o{color:#708fe1;}
+.t-cal .grid i[data-k]::before{opacity:1; transition:transform var(--m-dur-pop) var(--m-ease-spring), opacity var(--m-dur-fade) ease;}
+.t-cal .grid i.sel::before{background:#6891ff;}
+.t-cal .grid i.plan::before{box-shadow:inset 0 0 0 1.3px #6891ff; border:1px dashed transparent;}
+.t-cal .grid i.plan::before{background:none; outline:1.3px dashed #a8bcff; outline-offset:-1.3px; box-shadow:none;}
+.t-cal .grid i.ring::before{box-shadow:inset 0 0 0 1.3px #fff;}
+.t-cal .grid i.today{color:#2642a4;}
+.t-cal .grid i.today::before{background:#fff; box-shadow:0 0 0 calc(3 * var(--u)) #3b63cb, 0 0 0 calc(4.3 * var(--u)) #fff;}
+
+/* 4. reps + auto-save frame */
+.t-sets{background:#fff; border-radius:36px;}
+.t-sets .frame{inset:0; width:100%; height:100%;}
+.t-sets .frame rect{fill:none; stroke:#ff3300; stroke-width:7; stroke-dasharray:1 2; stroke-dashoffset:.55; vector-effect:non-scaling-stroke;}
+.t-sets .num{left:0; right:0; top:calc(49 * var(--u)); height:calc(107 * var(--u)); overflow:hidden; text-align:center;}
+.t-sets .num span{display:block; height:100%; font-size:calc(107 * var(--u)); font-weight:200; color:#2c2727; letter-spacing:-.03em; line-height:1;}
+.t-sets .num .a{display:none;}
+.fx.anim .t-sets .num .a{display:block;}
+.t-sets .sbtn{top:calc(184 * var(--u)); width:calc(56 * var(--u)); height:calc(56 * var(--u)); border-radius:50%; background:#ff3300; transition:transform var(--m-dur-press-out) var(--m-ease);}
+.t-sets .minus{left:calc(108 * var(--u));} .t-sets .plus{left:calc(205 * var(--u));}
+.t-sets .sbtn::before,.t-sets .plus::after{content:""; position:absolute; left:50%; top:50%; width:calc(18 * var(--u)); height:calc(2 * var(--u)); background:#fff; border-radius:2px; transform:translate(-50%,-50%);}
+.t-sets .plus::after{transform:translate(-50%,-50%) rotate(90deg);}
+.t-sets .saved{left:0; right:0; top:calc(22 * var(--u)); text-align:center; font-size:calc(12 * var(--u)); font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:#ff3300; opacity:0;
+  transition:opacity var(--m-dur-fade) ease, transform var(--m-dur-in) var(--m-ease);}
+
+/* 5. swap: a stack of alternatives for the same movement */
+.t-swap{background:#fbece3; border-radius:36px;}
+.t-swap .stack{inset:0;}
+.t-swap .card{position:absolute; left:calc(57 * var(--u)); top:calc(63 * var(--u)); width:calc(255 * var(--u)); height:calc(200 * var(--u)); border-radius:calc(8.3 * var(--u));
+  background:#fffefd; display:grid; place-items:center; transform-origin:0 0;
+  transition:transform var(--m-dur-tile) var(--m-ease), opacity var(--m-dur-in) ease, background-color var(--m-dur-in) ease;}
+.t-swap .card img{width:86%; height:86%; object-fit:contain; transition:opacity var(--m-dur-in) ease;}
+.t-swap .card[data-s="0"]{z-index:3;}
+.t-swap .card[data-s="1"]{z-index:2; background:#fef9f6; transform:translate(calc(20 * var(--u)), calc(-22 * var(--u))) scale(.843);}
+.t-swap .card[data-s="1"] img{opacity:.42;}
+.t-swap .card[data-s="2"]{z-index:1; background:#fff3ec; transform:translate(calc(46 * var(--u)), calc(-44 * var(--u))) scale(.635);}
+.t-swap .card[data-s="2"] img{opacity:.22;}
+.t-swap .card[data-s="3"]{z-index:0; background:#fff3ec; transform:translate(calc(62 * var(--u)), calc(-60 * var(--u))) scale(.5); opacity:0;}
+.t-swap .card[data-s="3"] img{opacity:0;}
+/* cash.app stack: the front card slides down and fades out, the one behind moves into its place, a new one appears at the back */
+.t-swap .card.out{z-index:4; transform:translateY(calc(96 * var(--u))); opacity:0; transition:transform var(--m-dur-tile) var(--m-ease), opacity var(--m-dur-pop) ease;}
+.t-swap .card.jump{transition:none;}
+/* app tile 4.109: 32 px white button in a round notch at the card corner (Figma 746:7599), scaled 2.2x */
+.t-swap .swap{position:absolute; z-index:5; left:calc(257 * var(--u)); top:calc(47 * var(--u)); width:calc(70 * var(--u)); height:calc(70 * var(--u)); border-radius:50%; background:#fff;
+  box-shadow:0 calc(2 * var(--u)) calc(9 * var(--u)) rgba(0,0,0,.14); display:grid; place-items:center; transition:transform var(--m-dur-pop) var(--m-ease);}
+.t-swap .swap svg{width:50%; height:50%; display:block;}
+.t-swap .card[data-s="0"]{-webkit-mask:radial-gradient(circle at calc(100% - 20 * var(--u)) calc(19 * var(--u)), transparent calc(43 * var(--u)), #000 calc(44 * var(--u))); mask:radial-gradient(circle at calc(100% - 20 * var(--u)) calc(19 * var(--u)), transparent calc(43 * var(--u)), #000 calc(44 * var(--u)));}
+
+/* 6. record */
+.t-rec{background:#fff; border-radius:12px; color:#343941;}
+.t-rec .k{left:calc(27 * var(--u)); top:calc(47 * var(--u)); font-size:calc(10.4 * var(--u)); color:#343941;}
+.t-rec .ex{left:calc(27 * var(--u)); top:calc(103 * var(--u)); font-size:calc(20 * var(--u)); color:#2642a4; letter-spacing:.04em;}
+.t-rec .cup{left:calc(27 * var(--u)); top:calc(140 * var(--u)); width:calc(93 * var(--u)); height:calc(74 * var(--u)); overflow:visible; transform-origin:50% 100%;
+  transition:transform var(--m-dur-pop) var(--m-ease-spring), opacity var(--m-dur-fade) ease;}
+.t-rec .big{left:calc(142 * var(--u)); top:calc(140 * var(--u)); line-height:.72; display:flex; align-items:baseline; gap:calc(10 * var(--u));}
+.t-rec .num{font-size:calc(103.7 * var(--u)); font-weight:200; letter-spacing:-.03em; font-variant-numeric:tabular-nums;}
+.t-rec .big small{font-size:calc(18.7 * var(--u)); color:#6c6b78;}
+.t-rec .ex,.t-rec .num{transition:opacity var(--m-dur-fade) ease, transform var(--m-dur-in) var(--m-ease);}
+.t-rec.swap .ex,.t-rec.swap .num{opacity:0; transform:translateY(-8px); transition-duration:var(--m-dur-quick);}
+.t-rec .d{left:calc(142 * var(--u)); top:calc(226 * var(--u)); font-size:calc(12.4 * var(--u)); color:rgba(52,57,65,.6); transition:opacity var(--m-dur-in) ease, transform var(--m-dur-in) var(--m-ease);}
+
+/* start states of the loops (only when JS runs them; see v6.js) */
+.fx.anim .t-chart:not(.go) .line{stroke-dashoffset:1; transition:none;}
+.fx.anim .t-chart:not(.go) .area{clip-path:inset(0 100% 0 0); transition:none;}
+.fx.anim .t-chart:not(.go) .end{transform:scale(0); opacity:0;}
+.t-chart.go .end::after{animation:fx-pulse 1.6s var(--m-ease) 1.4s 2 backwards;}
+.fx.anim .t-cal:not(.go) .grid i[data-k]::before{transform:scale(.4); opacity:0; transition:none;}
+.t-cal.go .grid i[data-k]::before{transition-delay:calc(var(--k) * 160ms + 200ms);}
+.t-cal.go .grid i.today::after{content:""; position:absolute; z-index:-2; width:calc(36 * var(--u)); height:calc(36 * var(--u)); border-radius:50%; box-shadow:0 0 0 2px #fff; animation:fx-pulse 1.8s var(--m-ease) 1.4s 2 backwards;}
+.fx.anim .t-sets .num .a{display:block;}
+.fx.anim .t-sets:not(.go) .frame rect{stroke-dashoffset:1; transition:none;}
+.t-sets.go .frame rect{stroke-dashoffset:0; transition:stroke-dashoffset var(--m-dur-trace) var(--m-ease-page, ease-in-out);}
+.t-sets.saved .saved{opacity:1;}
+.t-sets.saved .frame{animation:fx-flash var(--m-dur-pop) ease;}
+.t-sets .sbtn.press{transform:scale(.88); transition-duration:var(--m-dur-press-in);}
+.t-sets.roll .num .a{display:block; animation:fx-up var(--m-dur-in) var(--m-ease) forwards;}
+.t-sets.roll .num .b{animation:fx-up var(--m-dur-in) var(--m-ease) forwards;}
+.fx.anim .t-rec:not(.go) .cup{transform:scale(.5) rotate(-12deg); opacity:0; transition:none;}
+.fx.anim .t-rec:not(.go) .d{opacity:0; transform:translateY(8px); transition:none;}
+.t-rec.go .d{transition-delay:1.1s;}
+.t-rec.go .cup{animation:fx-wiggle 1.2s var(--m-ease) 1.2s 1 backwards;}
+@keyframes fx-pulse{from{transform:scale(1); opacity:.9;} to{transform:scale(2.4); opacity:0;}}
+@keyframes fx-flash{50%{opacity:.35;}}
+@keyframes fx-up{from{transform:translateY(0);} to{transform:translateY(-100%);}}
+@keyframes fx-wiggle{0%,100%{rotate:0deg;} 25%{rotate:-7deg;} 60%{rotate:5deg;}}
+
+@media (max-width:980px){ .fx{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:640px){
+  .fx{display:flex; overflow-x:auto; scroll-snap-type:x mandatory; margin-left:calc(-1 * var(--gutter)); margin-right:calc(-1 * var(--gutter));
+    padding:0 var(--gutter) 6px; scroll-padding:0 var(--gutter); scrollbar-width:none;}
+  .fx::-webkit-scrollbar{display:none;}
+  .fx-c{flex:0 0 84%; scroll-snap-align:start;}
+}
+.more{margin-top:clamp(56px,6vw,96px);}
+
+/* ---------- the 9 smaller features: separate boxes, icon on top, then title and description ---------- */
+.more{background:none; box-shadow:none; border-radius:0; gap:8px;}   /* = app --m-gap-card */
+.more article{padding:clamp(22px,2vw,30px); background:var(--m-card); border-radius:var(--m-r-lg); border:0 !important;
+  grid-template-columns:1fr; gap:0; align-content:start;}
+.more .ico{grid-row:auto; width:auto; height:auto; justify-self:start; background:none; border-radius:0; color:var(--m-orange); margin-bottom:clamp(22px,2.4vw,34px);}
+.more .ico svg{width:32px; height:32px;}
+.more h3{margin:0 0 6px;}
+@media (max-width:980px){ .more{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:640px){ .more{grid-template-columns:1fr;} }
+
+/* "Twoje dane" cards: same icon treatment (no background, orange, Phosphor) */
+.priv article .ico{width:auto; height:auto; justify-self:start; background:none; border-radius:0; color:var(--m-orange); margin-bottom:clamp(14px,1.6vw,22px);}
+.priv article .ico svg{width:32px; height:32px;}
+/* "Twoje dane" cards in the app palette: orange, plan blue, amber, plum */
+.sec .priv article{--pc-bg:var(--m-orange); --pc-fg:#fff; --pc-sub:rgba(255,255,255,.86);
+  background:var(--pc-bg); box-shadow:none; color:var(--pc-fg);}
+.sec .priv article:nth-child(2){--pc-bg:#3b63cb;}
+.sec .priv article:nth-child(3){--pc-bg:#ffbb00; --pc-fg:#1f2329; --pc-sub:rgba(31,35,41,.78);}
+.sec .priv article:nth-child(4){--pc-bg:#8e0045;}
+.sec .priv article .ico{color:var(--pc-fg);}
+.sec .priv article h3{color:var(--pc-fg);}
+.sec .priv article p{color:var(--pc-sub);}
+
+/* ---------- FINAL + FOOTER: one black block, cash.app style ---------- */
+.f2{padding:clamp(56px,6vw,86px) var(--frame) var(--frame);}
+.f2-panel{background:#0e0f12; color:#f5f3f8; border-radius:var(--m-r-xl); padding:clamp(48px,6vw,88px) clamp(20px,4vw,56px) clamp(28px,3vw,40px);}
+/* the creature peeks over the top edge of the black block: its head rises from behind the edge once, the paws stay draped over it.
+   One picture, two layers: above the edge (clipped, slides up) and the paws below the edge (fade in after). The edge sits 81.7% down the picture. */
+.f2-panel{position:relative;}
+.f2-peek{--pk:clamp(150px,16vw,290px); position:absolute; right:clamp(64px,8vw,140px); top:0; width:var(--pk); aspect-ratio:640/288; transform:translateY(-81.7%); pointer-events:none;}
+.f2-peek img{position:absolute; left:0; top:0; width:100%; height:auto; display:block;}
+.f2-peek .pk-up{position:absolute; inset:0 0 18.3% 0; overflow:hidden;}
+.f2-peek .pk-hands{clip-path:inset(80.5% 0 0 0);}   /* starts a hair above the edge: the two layers overlap, no hairline between them */
+.js .f2-peek.rv, .js .f2-peek.rv.in{opacity:1; transform:translateY(-81.7%); transition:none;}
+@media (prefers-reduced-motion: no-preference){
+  .js .f2-peek .pk-up img{transform:translateY(100%);}
+  .js .f2-peek.in .pk-up img{transform:none; transition:transform var(--m-dur-tile) var(--m-ease) .15s;}
+  .js .f2-peek .pk-hands{opacity:0; transform:translateY(-6px);}
+  .js .f2-peek.in .pk-hands{opacity:1; transform:none; transition:opacity var(--m-dur-in) ease .7s, transform var(--m-dur-in) var(--m-ease) .7s;}
+}
+.f2 h2{font-size:clamp(2.4rem,5vw,4.4rem); max-width:14ch;}
+.f2-tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:clamp(36px,4vw,56px);}
+.f2-t{aspect-ratio:1/.82; border-radius:var(--m-r-lg); box-shadow:inset 0 0 0 1px #2c2f36; padding:clamp(18px,1.8vw,26px); display:flex; flex-direction:column; justify-content:space-between;}
+.f2-t b{font-size:clamp(1.9rem,3vw,2.8rem); font-weight:300; letter-spacing:-.04em; line-height:1;}
+.f2-t span{color:#a3a2ab; font-size:15px; line-height:1.4; max-width:22ch;}
+.f2-cta{background:#ff3300; box-shadow:none; color:#fff;}
+.f2-cta svg{width:34px; height:34px;}
+.f2-cta b{font-size:clamp(1.6rem,2.4vw,2.2rem);}
+.f2-foot{display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:24px; margin-top:clamp(64px,7vw,104px); padding-top:clamp(28px,3vw,40px); border-top:1px solid #2c2f36;}
+.f2-logo{display:block; color:#fff;} .f2-logo svg{width:108px; height:27px; display:block;}
+.f2-brand p{margin-top:18px; color:#a3a2ab; font-size:15px; line-height:1.45;}
+.f2-col{display:grid; align-content:start; gap:10px;}
+.f2-col h4{margin:0 0 4px; font-size:13px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:#fff;}
+.f2-col a{color:#a3a2ab; text-decoration:none; font-size:15px; width:fit-content; transition:color var(--m-dur-quick) ease;}
+@media (hover:hover) and (pointer:fine){ .f2-col a:hover{color:#fff;} }
+.f2-copy{display:block; margin-top:clamp(40px,4vw,64px); color:#6c6b78; font-size:13px;}
+@media (max-width:980px){ .f2-tiles{grid-template-columns:repeat(2,1fr);} .f2-foot{grid-template-columns:1fr 1fr;} .f2-brand{grid-column:1 / -1;} }
+@media (max-width:520px){
+  .f2-t{aspect-ratio:auto; min-height:148px; padding:16px; gap:14px;}
+  .f2-t b{font-size:1.55rem;} .f2-t span{font-size:13.5px;} .f2-cta b{font-size:1.35rem;} .f2-cta svg{width:26px; height:26px;}
+  .f2-foot{grid-template-columns:1fr 1fr; row-gap:32px;}
+}
+
+/* ---------- site menu (phones / tablets): Menu button in the nav, full-screen list of pages ---------- */
+.menu-btn,.menu-close{display:none; width:44px; height:44px; border-radius:50%; border:0; padding:0; place-items:center; cursor:pointer; color:inherit; background:rgba(255,255,255,.16);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.32); transition:transform var(--m-dur-press-out) var(--m-ease), background-color var(--m-dur-quick) ease;}
+.menu-btn:active,.menu-close:active{transform:scale(.92); transition-duration:var(--m-dur-press-in);}
+.menu-btn svg,.menu-close svg{width:22px; height:22px; display:block;}
+.sp-nav .menu-btn{background:none; box-shadow:inset 0 0 0 1px var(--m-line); color:var(--m-ink);}
+/* the Menu button is always there (cash.app); below 900px it is the only way to the pages */
+.menu-btn{display:grid;}
+@media (max-width:900px){ .nav .nav-links{display:none;} }
+.site-menu{position:fixed; inset:0; z-index:50; color:#f5f3f8; display:flex; flex-direction:column; overflow-y:auto;
+  padding:calc(var(--frame) + clamp(16px,2vw,26px)) calc(var(--frame) + clamp(20px,4vw,56px)) calc(28px + env(safe-area-inset-bottom));   /* = the nav, so × sits where the Menu button was */
+  background:rgba(14,15,18,.8); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);   /* black 80% + blur, like the app's glass bars */
+  opacity:0; transition:opacity var(--m-dur-fade) ease;}
+.site-menu.open{opacity:1;}
+.site-menu[hidden]{display:none;}
+.sm-head{display:flex; justify-content:space-between; align-items:center; min-height:44px;}
+.sm-home{display:block; color:#fff;} .sm-home svg{width:108px; height:27px; display:block;}
+.site-menu .menu-close{display:grid; color:#fff; background:rgba(255,255,255,.1); box-shadow:inset 0 0 0 1px rgba(255,255,255,.24);}
+.sm-links{display:grid; margin-top:clamp(28px,6vh,56px); border-top:1px solid rgba(255,255,255,.12);}
+.sm-links a{display:block; padding:clamp(15px,2.42vh,22px) 0; border-bottom:1px solid rgba(255,255,255,.12); color:#fff; text-decoration:none;
+  font-size:clamp(2.3rem,9.6vw,3.4rem); font-weight:300; letter-spacing:-.04em; line-height:1.05; transition:color var(--m-dur-quick) ease;}
+.sm-links a[aria-current="page"]{color:#ff6a45;}
+@media (hover:hover) and (pointer:fine){ .sm-links a:hover{color:#ffb39e;} }
+.sm-foot{margin-top:auto; padding-top:36px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:20px;}
+.sm-foot div{display:flex; gap:22px;}
+.sm-foot a{color:#a3a2ab; text-decoration:none; font-size:15px;}
+html.menu-open{overflow:hidden;}
+@media (prefers-reduced-motion: no-preference){
+  .site-menu.open .sm-links a,.site-menu.open .sm-foot{animation:sm-in var(--m-dur-in) var(--m-ease) backwards; animation-delay:calc(var(--i,0) * 45ms + 60ms);}
+  .site-menu.open .sm-foot{--i:7;}
+  @keyframes sm-in{from{opacity:0; transform:translateY(12px);}}
+}
+@media (max-width:520px){ .nav .soon.sm,.sp-nav .soon.sm{display:none;} }   /* phones: nav = logo, EN, Menu; the App Store note stays in the hero and the final block */
+
+/* on orange: white text and icons, always (hero copy included) */
+.hero-copy,.hero-copy h1{color:#fff;}
+.hero-copy h1{background:none; -webkit-text-fill-color:currentColor;}
+.hero-lede{color:rgba(255,255,255,.92);}
+
+/* hero: the loop fills the whole panel (its orange and vignette are the panel), copy sits on top; one screen high */
+.hero-panel{background:#f53d00; display:flex; flex-direction:column; min-height:calc(100svh - 2 * var(--frame));}
+.hero-video{position:absolute; inset:0; z-index:-1; width:100%; height:100%; object-fit:cover; object-position:50% 50%; display:block; pointer-events:none;}
+.hero-stage{position:static; flex:1; height:auto; min-height:clamp(380px,36vw,560px);}
+.hero-copy{margin-top:0;}
+.hero-copy::before{content:""; position:absolute; z-index:-1; left:calc(-1 * clamp(20px,4vw,56px)); right:calc(-1 * clamp(20px,4vw,56px)); bottom:calc(-1 * clamp(48px,6.6vw,95px)); height:calc(100% + 160px);
+  background:radial-gradient(60% 100% at 18% 100%, rgba(90,18,0,.55), rgba(90,18,0,0) 72%), linear-gradient(180deg, rgba(222,55,0,0), rgba(222,55,0,.45)); pointer-events:none;}
+.hero-copy h1,.hero-lede{text-shadow:0 1px 24px rgba(80,16,0,.28);}
+/* phones: the camera comes close to the screen, so the copy goes under the film, on the same orange */
+@media (max-width:700px){
+  .hero-panel{min-height:0;}
+  .hero-stage{position:relative; flex:none; min-height:0; height:min(118vw,540px); margin:0 calc(-1 * clamp(20px,4vw,56px));}
+  .hero-video{-webkit-mask-image:linear-gradient(180deg,transparent,#000 12%,#000 72%,transparent); mask-image:linear-gradient(180deg,transparent,#000 12%,#000 72%,transparent);}
+  .hero-copy{margin-top:-28px;}
+  .hero-copy::before{display:none;}
+}
 /* ---------- AI ---------- */
 .ai{display:grid; grid-template-columns:1fr 1fr; gap:clamp(48px,8vw,140px); align-items:center; padding:clamp(24px,4vw,64px) clamp(20px,5vw,72px);}
 .ai .pill-label{border-color:rgba(255,255,255,.18); color:var(--m-on-dark-muted);}
@@ -637,6 +907,11 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 </style>
 </head>
 <body>
+<div class="site-menu" id="siteMenu" hidden role="dialog" aria-modal="true" aria-label="Menu">
+  <div class="sm-head"><a class="sm-home" href="/en/" aria-label="Mekkio, home"><svg viewBox="0 0 236 58" width="108" height="27" aria-hidden="true" fill="currentColor"><path d="M214.412 58.0003C210.234 58.0003 206.557 57.1011 203.384 55.3027C200.263 53.4513 197.829 50.8594 196.084 47.527C194.391 44.1945 193.545 40.3067 193.545 35.8634C193.545 31.3673 194.391 27.4795 196.084 24.1999C197.829 20.8675 200.263 18.302 203.384 16.5036C206.557 14.6522 210.234 13.7266 214.412 13.7266C218.591 13.7266 222.241 14.6522 225.362 16.5036C228.483 18.302 230.889 20.8675 232.582 24.1999C234.328 27.4795 235.2 31.3673 235.2 35.8634C235.2 40.3067 234.328 44.1945 232.582 47.527C230.889 50.8594 228.483 53.4513 225.362 55.3027C222.241 57.1011 218.591 58.0003 214.412 58.0003ZM214.412 49.7486C217.692 49.7486 220.204 48.532 221.95 46.0988C223.748 43.6656 224.648 40.2538 224.648 35.8634C224.648 31.526 223.748 28.1407 221.95 25.7075C220.204 23.2214 217.692 21.9783 214.412 21.9783C211.133 21.9783 208.594 23.2214 206.795 25.7075C204.997 28.1407 204.098 31.526 204.098 35.8634C204.098 40.2538 204.997 43.6656 206.795 46.0988C208.594 48.532 211.133 49.7486 214.412 49.7486Z" /><path d="M178.97 57.0481C178.127 57.0481 177.444 56.365 177.444 55.5223V16.2044C177.444 15.3617 178.127 14.6786 178.97 14.6786H186.074C186.917 14.6786 187.6 15.3617 187.6 16.2044V55.5223C187.6 56.365 186.917 57.0481 186.074 57.0481H178.97ZM178.811 9.04518C177.968 9.04518 177.285 8.36204 177.285 7.51934V1.52584C177.285 0.68314 177.968 0 178.811 0H186.312C187.155 0 187.838 0.683142 187.838 1.52584V7.51934C187.838 8.36204 187.155 9.04518 186.312 9.04518H178.811Z" /><path d="M87.5634 58.0003C83.3318 58.0003 79.6555 57.1011 76.5347 55.3027C73.4138 53.4513 71.0071 50.8594 69.3144 47.527C67.6217 44.1945 66.7754 40.3067 66.7754 35.8634C66.7754 31.4202 67.6217 27.5588 69.3144 24.2793C71.0071 20.9468 73.3874 18.3549 76.4553 16.5036C79.5762 14.6522 83.1995 13.7266 87.3254 13.7266C91.3455 13.7266 94.8631 14.6258 97.8781 16.4242C100.946 18.2227 103.3 20.8146 104.94 24.1999C106.579 27.5853 107.399 31.6582 107.399 36.4189V37.194C107.399 38.0367 106.716 38.7198 105.874 38.7198H78.9436C78.0667 38.7198 77.3633 39.459 77.4773 40.3285C77.8597 43.2449 78.815 45.5122 80.3432 47.1303C82.1945 48.9816 84.6277 49.9073 87.6428 49.9073C89.9173 49.9073 91.7951 49.4048 93.2762 48.3998C94.4884 47.5637 95.4033 46.48 96.021 45.1484C96.3159 44.5125 96.9412 44.0658 97.6408 44.1086L104.955 44.5552C105.926 44.6145 106.598 45.5587 106.245 46.4656C104.966 49.7513 102.864 52.406 99.9411 54.4299C96.5557 56.8102 92.4298 58.0003 87.5634 58.0003ZM77.6238 30.1866C77.4253 31.0851 78.1433 31.8963 79.0635 31.8963H95.3034C96.1829 31.8963 96.8887 31.1523 96.7607 30.2821C96.374 27.6519 95.4505 25.651 93.9903 24.2793C92.2447 22.5866 90.0231 21.7403 87.3254 21.7403C84.6277 21.7403 82.3796 22.6131 80.5812 24.3586C79.1524 25.7874 78.1666 27.73 77.6238 30.1866Z" /><path d="M1.52584 57.0469C0.683143 57.0469 0 56.3638 0 55.5211V2.23873C0 1.39603 0.683142 0.712891 1.52584 0.712891H12.8091C13.4543 0.712891 14.0298 1.11874 14.2464 1.72653L27.9992 40.3187C28.4808 41.6702 30.3922 41.6702 30.8738 40.3187L44.6266 1.72653C44.8432 1.11874 45.4187 0.712891 46.0639 0.712891H57.3472C58.1899 0.712891 58.873 1.39603 58.873 2.23873V55.5211C58.873 56.3638 58.1899 57.0469 57.3472 57.0469H50.0842C49.2415 57.0469 48.5583 56.3638 48.5583 55.5211V26.7757C48.5583 25.0702 46.1859 24.6496 45.5996 26.2512L34.7224 55.9662C34.5022 56.5676 33.9299 56.9676 33.2895 56.9676H25.5835C24.9431 56.9676 24.3708 56.5676 24.1507 55.9662L13.2734 26.2512C12.6871 24.6496 10.3147 25.0702 10.3147 26.7757V55.5211C10.3147 56.3638 9.63154 57.0469 8.78884 57.0469H1.52584Z" /><path d="M114.631 57.167C113.789 57.167 113.105 56.4839 113.105 55.6412V2.35885C113.105 1.51615 113.789 0.833008 114.631 0.833008H121.736C122.578 0.833008 123.261 1.51615 123.261 2.35885V29.9714C123.261 31.3662 124.978 32.0298 125.917 30.9975L140.184 15.2972C140.473 14.9789 140.883 14.7975 141.313 14.7975H149.642C150.979 14.7975 151.67 16.3956 150.753 17.3692L137.438 31.5127C136.944 32.037 136.884 32.835 137.294 33.4271L152.072 54.7727C152.772 55.7846 152.048 57.167 150.817 57.167H143.124C142.612 57.167 142.134 56.9099 141.852 56.4826L130.988 40.0476C130.445 39.2273 129.28 39.1265 128.605 39.8417L123.678 45.0625C123.41 45.3457 123.261 45.7204 123.261 46.1099V55.6412C123.261 56.4839 122.578 57.167 121.736 57.167H114.631Z" /><path d="M145.039 30.9989L159.306 15.2985C159.595 14.9803 160.005 14.7988 160.435 14.7988H168.764C170.101 14.7988 170.792 16.3969 169.875 17.3706L156.56 31.514C156.066 32.0383 156.006 32.8364 156.416 33.4284L171.194 54.774C171.895 55.786 171.17 57.1684 169.939 57.1684H162.247C161.734 57.1684 161.256 56.9113 160.974 56.4839L150.11 40.049C149.568 39.2286 148.402 39.1279 147.727 39.843L143.29 44.2723C141.054 44.2723 137.881 42.7079 137.471 41.0778C136.916 38.8726 140.089 35.9482 145.039 30.9989Z" /></svg></a><button type="button" class="menu-close" aria-label="Close menu"><svg aria-hidden="true" width="22" height="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button></div>
+  <nav class="sm-links" aria-label="Pages"><a href="/en/">Home</a><a href="/en/training">Workout</a><a href="/en/plans">Plans</a><a href="/en/progress">Progress</a><a href="/en/your-data">Privacy</a><a href="/en/contact">Contact</a></nav>
+  <div class="sm-foot"><span class="soon white" role="img" aria-label="iPhone app coming soon to the App Store"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.33-3.5zM14.2 6.13c.6-.74 1.02-1.76.9-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.99-.5 2.6-1.24z"/></svg><span><small>Coming soon to the</small>App Store</span></span><div><a href="/" hreflang="pl" lang="pl">Polski</a><a href="mailto:support@mekkio.app">support@mekkio.app</a></div></div>
+</div>
 
 <main id="top">
 
@@ -646,81 +921,51 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
     <header class="nav" id="nav">
       <a class="logo" href="#top" aria-label="Mekkio, home"><svg viewBox="0 0 236 58" width="108" height="27" aria-hidden="true" fill="currentColor"><path d="M214.412 58.0003C210.234 58.0003 206.557 57.1011 203.384 55.3027C200.263 53.4513 197.829 50.8594 196.084 47.527C194.391 44.1945 193.545 40.3067 193.545 35.8634C193.545 31.3673 194.391 27.4795 196.084 24.1999C197.829 20.8675 200.263 18.302 203.384 16.5036C206.557 14.6522 210.234 13.7266 214.412 13.7266C218.591 13.7266 222.241 14.6522 225.362 16.5036C228.483 18.302 230.889 20.8675 232.582 24.1999C234.328 27.4795 235.2 31.3673 235.2 35.8634C235.2 40.3067 234.328 44.1945 232.582 47.527C230.889 50.8594 228.483 53.4513 225.362 55.3027C222.241 57.1011 218.591 58.0003 214.412 58.0003ZM214.412 49.7486C217.692 49.7486 220.204 48.532 221.95 46.0988C223.748 43.6656 224.648 40.2538 224.648 35.8634C224.648 31.526 223.748 28.1407 221.95 25.7075C220.204 23.2214 217.692 21.9783 214.412 21.9783C211.133 21.9783 208.594 23.2214 206.795 25.7075C204.997 28.1407 204.098 31.526 204.098 35.8634C204.098 40.2538 204.997 43.6656 206.795 46.0988C208.594 48.532 211.133 49.7486 214.412 49.7486Z" /><path d="M178.97 57.0481C178.127 57.0481 177.444 56.365 177.444 55.5223V16.2044C177.444 15.3617 178.127 14.6786 178.97 14.6786H186.074C186.917 14.6786 187.6 15.3617 187.6 16.2044V55.5223C187.6 56.365 186.917 57.0481 186.074 57.0481H178.97ZM178.811 9.04518C177.968 9.04518 177.285 8.36204 177.285 7.51934V1.52584C177.285 0.68314 177.968 0 178.811 0H186.312C187.155 0 187.838 0.683142 187.838 1.52584V7.51934C187.838 8.36204 187.155 9.04518 186.312 9.04518H178.811Z" /><path d="M87.5634 58.0003C83.3318 58.0003 79.6555 57.1011 76.5347 55.3027C73.4138 53.4513 71.0071 50.8594 69.3144 47.527C67.6217 44.1945 66.7754 40.3067 66.7754 35.8634C66.7754 31.4202 67.6217 27.5588 69.3144 24.2793C71.0071 20.9468 73.3874 18.3549 76.4553 16.5036C79.5762 14.6522 83.1995 13.7266 87.3254 13.7266C91.3455 13.7266 94.8631 14.6258 97.8781 16.4242C100.946 18.2227 103.3 20.8146 104.94 24.1999C106.579 27.5853 107.399 31.6582 107.399 36.4189V37.194C107.399 38.0367 106.716 38.7198 105.874 38.7198H78.9436C78.0667 38.7198 77.3633 39.459 77.4773 40.3285C77.8597 43.2449 78.815 45.5122 80.3432 47.1303C82.1945 48.9816 84.6277 49.9073 87.6428 49.9073C89.9173 49.9073 91.7951 49.4048 93.2762 48.3998C94.4884 47.5637 95.4033 46.48 96.021 45.1484C96.3159 44.5125 96.9412 44.0658 97.6408 44.1086L104.955 44.5552C105.926 44.6145 106.598 45.5587 106.245 46.4656C104.966 49.7513 102.864 52.406 99.9411 54.4299C96.5557 56.8102 92.4298 58.0003 87.5634 58.0003ZM77.6238 30.1866C77.4253 31.0851 78.1433 31.8963 79.0635 31.8963H95.3034C96.1829 31.8963 96.8887 31.1523 96.7607 30.2821C96.374 27.6519 95.4505 25.651 93.9903 24.2793C92.2447 22.5866 90.0231 21.7403 87.3254 21.7403C84.6277 21.7403 82.3796 22.6131 80.5812 24.3586C79.1524 25.7874 78.1666 27.73 77.6238 30.1866Z" /><path d="M1.52584 57.0469C0.683143 57.0469 0 56.3638 0 55.5211V2.23873C0 1.39603 0.683142 0.712891 1.52584 0.712891H12.8091C13.4543 0.712891 14.0298 1.11874 14.2464 1.72653L27.9992 40.3187C28.4808 41.6702 30.3922 41.6702 30.8738 40.3187L44.6266 1.72653C44.8432 1.11874 45.4187 0.712891 46.0639 0.712891H57.3472C58.1899 0.712891 58.873 1.39603 58.873 2.23873V55.5211C58.873 56.3638 58.1899 57.0469 57.3472 57.0469H50.0842C49.2415 57.0469 48.5583 56.3638 48.5583 55.5211V26.7757C48.5583 25.0702 46.1859 24.6496 45.5996 26.2512L34.7224 55.9662C34.5022 56.5676 33.9299 56.9676 33.2895 56.9676H25.5835C24.9431 56.9676 24.3708 56.5676 24.1507 55.9662L13.2734 26.2512C12.6871 24.6496 10.3147 25.0702 10.3147 26.7757V55.5211C10.3147 56.3638 9.63154 57.0469 8.78884 57.0469H1.52584Z" /><path d="M114.631 57.167C113.789 57.167 113.105 56.4839 113.105 55.6412V2.35885C113.105 1.51615 113.789 0.833008 114.631 0.833008H121.736C122.578 0.833008 123.261 1.51615 123.261 2.35885V29.9714C123.261 31.3662 124.978 32.0298 125.917 30.9975L140.184 15.2972C140.473 14.9789 140.883 14.7975 141.313 14.7975H149.642C150.979 14.7975 151.67 16.3956 150.753 17.3692L137.438 31.5127C136.944 32.037 136.884 32.835 137.294 33.4271L152.072 54.7727C152.772 55.7846 152.048 57.167 150.817 57.167H143.124C142.612 57.167 142.134 56.9099 141.852 56.4826L130.988 40.0476C130.445 39.2273 129.28 39.1265 128.605 39.8417L123.678 45.0625C123.41 45.3457 123.261 45.7204 123.261 46.1099V55.6412C123.261 56.4839 122.578 57.167 121.736 57.167H114.631Z" /><path d="M145.039 30.9989L159.306 15.2985C159.595 14.9803 160.005 14.7988 160.435 14.7988H168.764C170.101 14.7988 170.792 16.3969 169.875 17.3706L156.56 31.514C156.066 32.0383 156.006 32.8364 156.416 33.4284L171.194 54.774C171.895 55.786 171.17 57.1684 169.939 57.1684H162.247C161.734 57.1684 161.256 56.9113 160.974 56.4839L150.11 40.049C149.568 39.2286 148.402 39.1279 147.727 39.843L143.29 44.2723C141.054 44.2723 137.881 42.7079 137.471 41.0778C136.916 38.8726 140.089 35.9482 145.039 30.9989Z" /></svg></a>
       <div class="nav-right">
-        <nav class="nav-links" aria-label="Page sections">
-          <a href="#ekrany">How it works</a>
-          <a href="#funkcje">Features</a>
-          <a href="#faq">FAQ</a>
-          <a href="/en/contact">Contact</a>
-        </nav>
         <a class="lang-switch" href="/" hreflang="pl" lang="pl" aria-label="Polski">PL</a>
-        <span class="soon sm" role="img" aria-label="iPhone app coming soon to the App Store"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.33-3.5zM14.2 6.13c.6-.74 1.02-1.76.9-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.99-.5 2.6-1.24z"/></svg><span><small>Coming soon to</small>App Store</span></span>
-      </div>
+        <span class="soon sm" role="img" aria-label="iPhone app coming soon to the App Store"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.33-3.5zM14.2 6.13c.6-.74 1.02-1.76.9-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.99-.5 2.6-1.24z"/></svg><span><small>Coming soon to the</small>App Store</span></span>
+      <button type="button" class="menu-btn" aria-controls="siteMenu" aria-expanded="false" aria-label="Menu"><svg aria-hidden="true" width="22" height="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"/></svg></button></div>
     </header>
 
-    <div class="hero-stage" id="stage">
-      <div class="hero-giant" aria-hidden="true"><span class="l1">every rep</span><span class="l2">counts</span></div>
-      <div class="hero-orbit" id="heroOrbit" data-screens="/img/en/scr-dashboard.webp /img/en/scr-gym.webp /img/en/scr-logset.webp">
-        <img class="orbit-poster gl-poster" src="/img/en/r-orbit.webp" alt="Three iPhones running Mekkio: the dashboard with today's plan and weekly summary, the workout screen with the exercises from your plan, and set logging with weight and reps" width="1440" height="1040" fetchpriority="high">
-        <canvas class="gl-canvas" aria-hidden="true"></canvas><canvas class="gl-canvas" aria-hidden="true"></canvas><canvas class="gl-canvas" aria-hidden="true"></canvas>
-      </div>
-      <div class="orbit-nav">
-        <button type="button" class="orbit-arrow prev" data-dir="-1" aria-label="Previous screen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-        <button type="button" class="orbit-arrow next" data-dir="1" aria-label="Next screen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-      </div>
-    </div>
+    <div class="hero-stage" id="stage"><video class="hero-video" src="/img/hero/hero-loop.mp4" poster="/img/hero/hero-loop.jpg" muted playsinline loop autoplay preload="auto" aria-hidden="true"></video></div>
 
     <div class="hero-copy">
-      <h1 id="hero-h">You lift.<br>Mekkio counts.</h1>
-      <p class="hero-lede" style="--i:1">Build your plan, log weight and reps at the gym, and the app shows whether you're moving forward. No spreadsheets, no notes app.</p>
+      <h1 id="hero-h">You lift.<br>Mekkio&nbsp;counts.</h1>
+      <p class="hero-lede" style="--i:1">Build a plan, log weight and reps at the gym, and the app shows whether you’re moving forward. No spreadsheets, no notes&nbsp;app.</p>
     </div>
   </div>
 </section>
 
-<!-- ================= SPLIT ================= -->
-<section class="split" id="split" aria-labelledby="split-h">
-  <div class="split-sticky">
-    <div class="split-copy">
-      <p class="split-kicker"><b>01 /</b>Why it matters</p>
-      <h2 id="split-h">A notes app won't tell you if you're making progress. <em>Mekkio tells you right away.</em></h2>
-      <p>Log your sets on the left, see the result on the right. Mekkio compares every set with your previous workout and shows what changed the moment you save.</p>
-    </div>
-    <div class="split-phones">
-      <div class="split-phone l"><img class="phone-img" src="/img/en/r-split-l.webp" data-screen="/img/en/scr-logset.webp" alt="Set logging: Incline Chest, 27 kg set on the dial, reps and a list of three sets" width="643" height="1348" loading="lazy"></div>
-      <div class="split-phone r"><img class="phone-img" src="/img/en/r-split-r.webp" data-screen="/img/en/scr-gym-finish.webp" alt="After the workout: new 75 kg record on Leg Press Machine, 46 min, 7 exercises, 412 kcal, 5,693 kg volume, +8% vs the previous workout" width="643" height="1348" loading="lazy"></div>
-    </div>
-    <canvas class="gl-canvas split-gl" id="splitGL" aria-hidden="true"></canvas>
-  </div>
-</section>
-
-<!-- ================= SCREENS ================= -->
-<section class="sec" id="ekrany" aria-labelledby="ekrany-h">
-  <div class="dark-panel">
-    <div class="wrap dark-head rv">
-      <span class="pill-label">How it works</span>
-      <h2 id="ekrany-h">From plan to personal record.<br><span style="color:var(--m-on-dark-muted)">Six screens, zero spreadsheets.</span></h2>
-    </div>
-
-    <div class="caro rv" id="caro" aria-roledescription="carousel" aria-label="App screens">
-      <ul class="caro-track" id="caroTrack">
-        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-0.webp" alt="Dashboard: today's plan with a Start button, this week's summary, latest record and badge" width="640" height="1327" loading="lazy"></li>
-        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-1.webp" alt="Workout: Fullbody Workout, timer, Repeat last workout, warm-up and exercise tiles" width="640" height="1327" loading="lazy"></li>
-        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-2.webp" alt="Set logging: weight on a dial, reps with plus and minus, list of sets" width="640" height="1327" loading="lazy"></li>
-        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-3.webp" alt="After the workout: new record, time, exercises, calories, volume and a comparison with the previous workout" width="640" height="1327" loading="lazy"></li>
-        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-4.webp" alt="History: an October calendar with workouts marked and a summary of the selected day" width="640" height="1327" loading="lazy"></li>
-        <li class="caro-slide"><img class="phone-img" src="/img/en/r-caro-5.webp" alt="Progress: weekly ring, calories, body weight and volume year to date" width="640" height="1327" loading="lazy"></li>
-      </ul>
-      <div class="wrap">
-        <div class="caro-cap" id="caroCap" aria-live="polite">
-          <span class="k" id="capK"></span>
-          <h3 id="capH"></h3>
-          <p id="capP"></p>
-        </div>
-        <div class="caro-ctrl">
-          <button class="sq-btn sq-prev" id="caroPrev" type="button" aria-label="Previous screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-          <div class="dots" id="caroDots"></div>
-          <button class="sq-btn sq-next" id="caroNext" type="button" aria-label="Next screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-        </div>
+<!-- ================= STORY: one screen, six chapters ================= -->
+<section class="story" id="ekrany" data-ch="0" aria-labelledby="story-h" style="--chs:6">
+  <h2 id="story-h" class="sr-only">How Mekkio works: one workout, step by&nbsp;step</h2>
+  <div class="story-sticky">
+    <div class="story-panel">
+      <div class="story-shrink" aria-hidden="true"></div>
+      <ol class="story-l">
+        <li class="on"><h3>You know what’s&nbsp;next.</h3></li>
+        <li><h3>Machine taken? No&nbsp;problem.</h3></li>
+        <li><h3>You log, it&nbsp;counts.</h3></li>
+        <li><h3>Results right&nbsp;away.</h3></li>
+        <li><h3>Progress you can&nbsp;see.</h3></li>
+        <li><h3>Mekkio is on its way to the App&nbsp;Store.</h3></li>
+      </ol>
+      <div class="story-card" id="storyCard" role="img" aria-label="Screen recordings of the Mekkio app for each step of a workout">
+        <video class="on" data-src="/img/en/story/en-dashboard.mp4?v=1793786554" poster="/img/en/story/en-dashboard-first.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video data-src="/img/en/story/en-gym.mp4?v=1793792077" poster="/img/en/story/en-gym-first.jpg?v=1793792077" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video data-src="/img/en/story/en-logset.mp4?v=1793786554" poster="/img/en/story/en-logset-first.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video data-src="/img/en/story/en-finish.mp4?v=1793786554" poster="/img/en/story/en-finish-first.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video data-src="/img/en/story/en-stats.mp4?v=1793786554" poster="/img/en/story/en-stats-first.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video data-src="/img/story/stwor.mp4?v=1793786554" poster="/img/story/stwor-poster.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <div class="story-sb" aria-hidden="true"><span>9:41</span><span class="ic"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5c2.3 0 4.4.9 6 2.4l1.3-1.4A10.6 10.6 0 0 0 8 .6 10.6 10.6 0 0 0 .7 3.5L2 4.9a8.7 8.7 0 0 1 6-2.4zm0 3.8c1.3 0 2.5.5 3.4 1.3l1.3-1.4A6.8 6.8 0 0 0 8 4.4c-1.8 0-3.5.7-4.7 1.8l1.3 1.4c.9-.8 2.1-1.3 3.4-1.3zm0 3.8L10.1 8a3 3 0 0 0-4.2 0z"/></svg><svg viewBox="0 0 27 12" fill="none"><rect x=".5" y=".5" width="23" height="11" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="8" rx="2" fill="currentColor"/><path d="M25 4v4c.8-.3 1.3-1.1 1.3-2S25.8 4.3 25 4z" fill="currentColor" opacity=".5"/></svg></span></div>
       </div>
+      <ol class="story-r">
+        <li class="on"><p>Today’s plan waits on the Dashboard, next to your week, your latest record and badges. One tap starts the&nbsp;workout.</p></li>
+        <li><p>You get a warm-up for today’s muscle groups, the exercises from your plan and a timer. Tap the icon in a tile’s corner for an alternative that trains the same movement. Your plan stays the&nbsp;same.</p></li>
+        <li><p>Dial in the weight, add reps with the plus. The tick saves the set right away. Forgot to tap? It saves itself after three&nbsp;seconds.</p></li>
+        <li><p>Right after your last set you see your record, time and calories, and how this workout compares with the previous&nbsp;one.</p></li>
+        <li><p>A weekly ring, volume since the start of the year, strength in every exercise. The charts draw themselves when you open&nbsp;them.</p></li>
+        <li><p>We’re on the final touches. The link will appear here as soon as the app is in the&nbsp;store.</p><span class="soon white" role="img" aria-label="iPhone app coming soon to the App Store"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.33-3.5zM14.2 6.13c.6-.74 1.02-1.76.9-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.99-.5 2.6-1.24z"/></svg><span><small>Coming soon to the</small>App Store</span></span></li>
+      </ol>
     </div>
   </div>
 </section>
@@ -731,102 +976,106 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
     <div class="feat-head">
       <div class="rv">
         <span class="pill-label">Features</span>
-        <h2 id="funkcje-h">Built for what actually <span class="dim">happens at the gym.</span></h2>
+        <h2 id="funkcje-h">Built for what really <span class="dim">happens at the gym.</span></h2>
       </div>
-      <p class="lede rv" style="--i:1">A machine that's taken, a forgotten seat setting, a phone that died mid-workout. Mekkio has an answer for each of them.</p>
+      <p class="lede rv" style="--i:1">A machine that’s taken, a seat setting you forgot, a phone that died mid-workout. Mekkio has an answer for each of&nbsp;them.</p>
     </div>
 
-    <div class="feat">
-      <div class="fcell c5 rv"><article class="fcard">
-        <h3>Records and projected max</h3>
-        <p>Your record is the heaviest weight you've lifted. But one more rep at the same weight is progress too, and it shows in your projected max.</p>
-        <div class="plus1" role="img" aria-label="Example: Chest Press 35 kg. Last time 8 reps, today 9. Projected max goes from 44.3 to 45.5 kg.">
-          <div class="p1-row"><span>Last workout</span><b>35 kg × 8</b></div>
-          <div class="p1-pips"><i class="on" style="--j:0"></i><i class="on" style="--j:1"></i><i class="on" style="--j:2"></i><i class="on" style="--j:3"></i><i class="on" style="--j:4"></i><i class="on" style="--j:5"></i><i class="on" style="--j:6"></i><i class="on" style="--j:7"></i><i class="empty" style="--j:8"></i></div>
-          <div class="p1-row now"><span>Today</span><span class="plus">+1 rep</span><b>35 kg × 9</b></div>
-          <div class="p1-pips now"><i class="on" style="--j:0"></i><i class="on" style="--j:1"></i><i class="on" style="--j:2"></i><i class="on" style="--j:3"></i><i class="on" style="--j:4"></i><i class="on" style="--j:5"></i><i class="on" style="--j:6"></i><i class="on" style="--j:7"></i><i class="new" style="--j:8"></i></div>
-          <div class="p1-res"><span class="k">Projected max · e1RM</span><span class="v"><span class="p1-num" data-from="44.3" data-to="45.5">45.5</span><small>kg</small></span><span class="d">+1.2 kg · Chest Press</span><svg class="tr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></div>
-          <ul class="p1-types" aria-label="What Mekkio counts as a record"><li class="on">Heaviest weight</li><li>Most reps</li><li>Longest time</li><li>Workout volume</li></ul>
+    <div class="fx">
+      <article class="fx-c rv" style="--i:0"><div class="fx-box t-ring" role="img" aria-label="Weekly progress: the ring grows from 4 to 5 of 6 days and another week dot lights up">
+        <span class="k">WEEKLY PROGRESS</span>
+        <div class="ring"><i class="arc"></i><b><span class="rn">4</span>/6</b><small>DAYS</small></div>
+        <div class="side"><div><i class="dot on"></i><span>DONE<b><span class="rd">4</span> DAYS</b></span></div><div><i class="dot"></i><span>TO GO<b><span class="rl">2</span> <span class="rlw">DAYS</span></b></span></div></div>
+        <hr><span class="goal">GOAL REACHED</span><span class="pill">8 OF&nbsp;11 WEEKS</span>
+        <div class="weeks"><i></i><i></i><i class="dim"></i><i></i><i></i><i class="now"></i><i></i><i></i><i class="dim"></i><i></i><i></i></div>
+      </div><h3>Weekly&nbsp;ring</h3><p>How many planned workouts you’ve done this week and how many are&nbsp;left.</p></article>
+
+      <article class="fx-c rv" style="--i:1"><div class="fx-box t-chart" role="img" aria-label="Volume chart: 48,920 kg, 6,130 kg more than in August, the line rises from October 1 to 13">
+        <div class="big"><span class="num">48,920</span><small>kg</small></div><span class="delta">+6,130 KG SINCE AUGUST</span>
+        <svg viewBox="0 0 337 94" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="fxArea" x1="230.6" y1="-4.1" x2="230.6" y2="124.4" gradientUnits="userSpaceOnUse"><stop offset=".3476" stop-color="#FFBB00"/><stop offset=".7416" stop-color="#FFBB00" stop-opacity="0"/></linearGradient></defs>
+          <path class="area" opacity=".5" d="M34.74 70.97C27.39 76.25 7.85 79.37 0 79.97V93l328.95-.59V1.26c-6.32 0-28.16-2.4-61.49 20.43-7.1 4.86-33.9 33.05-66.08 14.42-32.18-18.63-50.57 3.01-68.38 24.64-17.81 21.63-35.05 10.22-54.59 0-19.54-10.22-34.48 3.61-43.67 10.22Z" fill="url(#fxArea)"/>
+          <path class="line" pathLength="1" d="M2.06 79.38c7.85-.6 25.39-3.13 32.75-8.41 9.19-6.61 24.13-20.43 43.66-10.22 19.53 10.22 36.77 21.63 54.58 0 17.81-21.63 36.19-43.27 68.37-24.64 32.17 18.63 58.97-9.56 66.07-14.42 33.32-22.84 55.15-20.43 61.47-20.43" stroke="#FFBB00" stroke-width="2.37" stroke-linecap="round" fill="none"/></svg>
+        <i class="end"></i><span class="d d1">Oct 1</span><span class="d d2">Oct 7</span><span class="d d3">Oct 13</span>
+      </div><h3>Swipeable&nbsp;charts</h3><p>Strength, volume and calories since January. Each chart has its own&nbsp;card.</p></article>
+
+      <article class="fx-c rv" style="--i:2"><div class="fx-box t-cal" role="img" aria-label="August calendar: done and planned workouts light up one by one, today pulses">
+        <div class="head"><span class="m">‹&nbsp;&nbsp;AUGUST&nbsp;&nbsp;›</span><span class="y">‹&nbsp;&nbsp;2026&nbsp;&nbsp;›</span></div>
+        <div class="grid"><b>Mo</b><b>Tu</b><b>We</b><b>Th</b><b>Fr</b><b>Sa</b><b>Su</b>
+          <i class="e"></i><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i>
+          <i>7</i><i>8</i><i class="sel" data-k="0">9</i><i class="plan" data-k="1">10</i><i>11</i><i class="today" data-k="4">12</i><i class="ring" data-k="3">13</i>
+          <i>14</i><i>15</i><i>16</i><i>17</i><i>18</i><i>19</i><i>20</i>
+          <i>21</i><i class="ring" data-k="2">22</i><i>23</i><i class="ring" data-k="2">24</i><i>25</i><i>26</i><i>27</i>
+          <i>28</i><i>29</i><i>30</i><i class="o">1</i><i class="o">2</i><i class="o">3</i><i class="o">4</i></div>
+      </div><h3>History in a&nbsp;calendar</h3><p>See what’s done, what’s planned and what you missed. Swipe to change the&nbsp;month.</p></article>
+
+      <article class="fx-c rv" style="--i:0"><div class="fx-box t-sets" role="img" aria-label="Reps: tapping plus changes 11 to 12, an outline runs around the tile and the set saves">
+        <svg class="frame" viewBox="0 0 368 289" preserveAspectRatio="none" aria-hidden="true"><rect x="3.5" y="3.5" width="361" height="282" rx="32.5" pathLength="1"/></svg>
+        <div class="num"><span class="a">11</span><span class="b">12</span></div>
+        <span class="sbtn minus"></span><span class="sbtn plus"></span><span class="saved">Set saved</span>
+      </div><h3>Sets save&nbsp;themselves</h3><p>Three seconds and the set is in your log. In a hurry? Tap the&nbsp;tick.</p></article>
+
+      <article class="fx-c rv" style="--i:1"><div class="fx-box t-swap" role="img" aria-label="Alternatives for the same movement: leg press, hack squat, Smith machine squat and barbell back squat shuffle like cards">
+        <div class="stack">
+          <div class="card" data-s="0"><img src="/img/fx/sw-leg_press.png" alt="" width="360" height="360"></div>
+          <div class="card" data-s="1"><img src="/img/fx/sw-hack_squat.png" alt="" width="360" height="360"></div>
+          <div class="card" data-s="2"><img src="/img/fx/sw-smith_machine_squat.png" alt="" width="360" height="360"></div>
+          <div class="card" data-s="3"><img src="/img/fx/sw-barbell_back_squat.png" alt="" width="360" height="360"></div>
+          <span class="swap"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M11.6849 9.93478L9.93488 11.6848C9.85278 11.7669 9.74144 11.813 9.62534 11.813C9.50925 11.813 9.39791 11.7669 9.31581 11.6848C9.23372 11.6027 9.1876 11.4913 9.1876 11.3752C9.1876 11.2591 9.23372 11.1478 9.31581 11.0657L10.3193 10.0627H2.62534C2.50931 10.0627 2.39803 10.0167 2.31599 9.9346C2.23394 9.85256 2.18784 9.74128 2.18784 9.62524C2.18784 9.50921 2.23394 9.39793 2.31599 9.31588C2.39803 9.23384 2.50931 9.18774 2.62534 9.18774H10.3193L9.31581 8.18477C9.23372 8.10268 9.1876 7.99134 9.1876 7.87524C9.1876 7.75915 9.23372 7.6478 9.31581 7.56571C9.39791 7.48362 9.50925 7.4375 9.62534 7.4375C9.74144 7.4375 9.85278 7.48362 9.93488 7.56571L11.6849 9.31571C11.7256 9.35634 11.7578 9.40459 11.7798 9.45771C11.8019 9.51082 11.8132 9.56775 11.8132 9.62524C11.8132 9.68274 11.8019 9.73967 11.7798 9.79278C11.7578 9.84589 11.7256 9.89414 11.6849 9.93478ZM4.06581 6.43477C4.14791 6.51687 4.25925 6.56299 4.37534 6.56299C4.49144 6.56299 4.60278 6.51687 4.68488 6.43477C4.76697 6.35268 4.81309 6.24134 4.81309 6.12524C4.81309 6.00915 4.76697 5.8978 4.68488 5.81571L3.68136 4.81274H11.3753C11.4914 4.81274 11.6027 4.76665 11.6847 4.6846C11.7668 4.60256 11.8128 4.49128 11.8128 4.37524C11.8128 4.25921 11.7668 4.14793 11.6847 4.06588C11.6027 3.98384 11.4914 3.93774 11.3753 3.93774H3.68136L4.68488 2.93477C4.76697 2.85268 4.81309 2.74134 4.81309 2.62524C4.81309 2.50915 4.76697 2.3978 4.68488 2.31571C4.60278 2.23362 4.49144 2.1875 4.37534 2.1875C4.25925 2.1875 4.14791 2.23362 4.06581 2.31571L2.31581 4.06571C2.27514 4.10634 2.24287 4.1546 2.22085 4.20771C2.19883 4.26082 2.1875 4.31775 2.1875 4.37524C2.1875 4.43274 2.19883 4.48967 2.22085 4.54278C2.24287 4.59589 2.27514 4.64414 2.31581 4.68477L4.06581 6.43477Z" fill="#5b5555"/></svg></span>
         </div>
-      </article></div>
+      </div><h3>Swap for&nbsp;today</h3><p>An alternative for the same movement, just for today’s workout. Your plan stays as it&nbsp;was.</p></article>
 
-      <div class="fcell c7 rv" style="--i:1"><article class="fcard">
-        <h3>Your whole year on one chart</h3>
-        <p>Volume since January, month by month, plus calories, body weight and a weight line for every exercise. Swipe between the charts.</p>
-        <div class="shot"><div class="shot-in"><img src="/img/en/crop-ytd.webp" alt="Volume year to date card: a chart rising from January to September" width="741" height="544" loading="lazy"><span class="wipe"></span></div></div>
-      </article></div>
-
-      <div class="fcell c4 rv"><article class="fcard">
-        <h3>Weekly ring</h3>
-        <p>How many of this week's planned workouts are done and how many are left.</p>
-        <div class="shot"><div class="shot-in"><img src="/img/en/crop-ring.webp" alt="Weekly progress: 2 of 5 days done" width="741" height="402" loading="lazy"><span class="ring-mask"></span></div></div>
-      </article></div>
-
-      <div class="fcell c4 rv" style="--i:1"><article class="fcard">
-        <h3>History in a calendar</h3>
-        <p>Done, planned and missed workouts. Open any entry for the full summary.</p>
-        <div class="shot"><div class="shot-in"><img src="/img/en/crop-cal.webp" alt="Calendar with workouts marked" width="741" height="757" loading="lazy">
-          <span class="strip" style="top:24.57%; --k:0"></span><span class="strip" style="top:39.1%; --k:1"></span><span class="strip" style="top:53.37%; --k:2"></span><span class="strip" style="top:67.9%; --k:3"></span><span class="strip" style="top:82.43%; --k:4"></span>
-        </div></div>
-      </article></div>
-
-      <div class="fcell c4 rv" style="--i:2"><article class="fcard blue">
-        <h3>Changing intensity</h3>
-        <p>One switch in the Builder and your exercises change version every week, from max weight to high reps. The app suggests today's weight.</p>
-        <div class="wave" aria-hidden="true">
-          <span></span><em class="wk">wk 1</em><em class="wk">wk 2</em><em class="wk">wk 3</em><em class="wk">wk 4</em>
-          <em>Squat</em><i class="max pop">Max</i><i class="vol pop">Medium</i><i class="str pop">Heavy</i><i class="pop">High&nbsp;reps</i>
-          <em>Bench</em><i class="vol pop">Medium</i><i class="str pop">Heavy</i><i class="pop">High&nbsp;reps</i><i class="max pop">Max</i>
-          <em>Row</em><i class="str pop">Heavy</i><i class="pop">High&nbsp;reps</i><i class="max pop">Max</i><i class="vol pop">Medium</i>
-        </div>
-      </article></div>
+      <article class="fx-c rv" style="--i:2"><div class="fx-box t-rec" role="img" aria-label="New record: Triceps Pushdown 123 kg, 2.5 kg more than last time">
+        <span class="k">NEW RECORD</span><span class="ex">TRICEPS PUSHDOWN</span>
+        <svg class="cup" viewBox="0 0 94 75" aria-hidden="true"><path d="M87.85 9.5H77.56V2.37A2.37 2.37 0 0 0 75.19 0H18.2a2.37 2.37 0 0 0-2.37 2.37V9.5H5.54A5.54 5.54 0 0 0 0 15.04v6.33a15.04 15.04 0 0 0 15.04 15.04h2.03a29.4 29.4 0 0 0 27.25 22.06v11.18H34.03a2.37 2.37 0 0 0 0 4.75h25.33a2.37 2.37 0 0 0 0-4.75H49.07V58.47c12.84-1 23.52-10.01 27.15-22.06h2.13a15.04 15.04 0 0 0 15.04-15.04v-6.33a5.54 5.54 0 0 0-5.54-5.54ZM15.04 31.66A10.29 10.29 0 0 1 4.75 21.37v-6.33a.79.79 0 0 1 .79-.79h10.29V27.7c0 1.32.09 2.64.26 3.96Zm57.77-4.31c0 14.49-11.63 26.37-25.92 26.47A26.35 26.35 0 0 1 20.58 27.7V4.75h52.23Zm15.83-5.98a10.29 10.29 0 0 1-10.29 10.29h-1.1c.2-1.43.3-2.87.3-4.31v-13.1h10.3a.79.79 0 0 1 .79.79Z" fill="#FF3300"/></svg>
+        <div class="big"><span class="num">123</span><small>kg</small></div><span class="d">+2.5&nbsp;kg over last time</span>
+      </div><h3>Record after&nbsp;record</h3><p>Every exercise has its own record. Beat it and you’ll see by how much right&nbsp;away.</p></article>
     </div>
 
     <div class="more">
-      <article class="rv">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l4 4-4 4M21 7H9M7 21l-4-4 4-4M3 17h12"/></svg></div>
-        <h3>Swap for today</h3>
-        <p>Machine taken? Get a swap for the same muscle group. Your plan stays as it is.</p>
-      </article>
       <article class="rv" style="--i:1">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v12H8l-4 4V4z"/><path d="M8 9h8M8 12h5"/></svg></div>
-        <h3>Exercise notes</h3>
-        <p>Seat height, grip, machine number. They're back the next time you open the exercise.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,58.34l-32-32a8,8,0,0,0-11.32,0l-96,96A8,8,0,0,0,88,128v32a8,8,0,0,0,8,8h32a8,8,0,0,0,5.66-2.34l96-96A8,8,0,0,0,229.66,58.34ZM124.69,152H104V131.31l64-64L188.69,88ZM200,76.69,179.31,56,192,43.31,212.69,64ZM224,128v80a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32h80a8,8,0,0,1,0,16H48V208H208V128a8,8,0,0,1,16,0Z"/></svg></div>
+        <h3>Exercise&nbsp;notes</h3>
+        <p>Seat height, grip, machine number. They’re there next time you open the&nbsp;exercise.</p>
       </article>
       <article class="rv" style="--i:2">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></div>
-        <h3>Nothing gets lost</h3>
-        <p>Close the app or run out of battery. Your logged sets wait right where you left them.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/></svg></div>
+        <h3>Nothing gets&nbsp;lost</h3>
+        <p>Close the app or run out of battery. Your logged sets will be waiting for&nbsp;you.</p>
       </article>
       <article class="rv" style="--i:0">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1.5 3 4 4.5 4 8a4 4 0 0 1-8 0c0-1.5.6-2.6 1.4-3.6C10 9 11 10 11 11c1-1.5 1-4 1-8z"/><path d="M8 17.5a4 4 0 0 0 8 0"/></svg></div>
-        <h3>Warm-up and stretching</h3>
-        <p>Picked automatically for the muscles you train today. A timer walks you through each step.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M183.89,153.34a57.6,57.6,0,0,1-46.56,46.55A8.75,8.75,0,0,1,136,200a8,8,0,0,1-1.32-15.89c16.57-2.79,30.63-16.85,33.44-33.45a8,8,0,0,1,15.78,2.68ZM216,144a88,88,0,0,1-176,0c0-27.92,11-56.47,32.66-84.85a8,8,0,0,1,11.93-.89l24.12,23.41,22-60.41a8,8,0,0,1,12.63-3.41C165.21,36,216,84.55,216,144Zm-16,0c0-46.09-35.79-85.92-58.21-106.33L119.52,98.74a8,8,0,0,1-13.09,3L80.06,76.16C64.09,99.21,56,122,56,144a72,72,0,0,0,144,0Z"/></svg></div>
+        <h3>Warm-up and&nbsp;stretching</h3>
+        <p>Picked for the muscle groups you train today. A timer guides you step by&nbsp;step.</p>
       </article>
       <article class="rv" style="--i:1">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.2-2.5 3.6"/><path d="M12 17h.01"/></svg></div>
-        <h3>How to do it</h3>
-        <p>Every exercise comes with an illustration, setup, movement and the most common mistake. Just swipe.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M140,180a12,12,0,1,1-12-12A12,12,0,0,1,140,180ZM128,72c-22.06,0-40,16.15-40,36v4a8,8,0,0,0,16,0v-4c0-11,10.77-20,24-20s24,9,24,20-10.77,20-24,20a8,8,0,0,0-8,8v8a8,8,0,0,0,16,0v-.72c18.24-3.35,32-17.9,32-35.28C168,88.15,150.06,72,128,72Zm104,56A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg></div>
+        <h3>How to do&nbsp;it</h3>
+        <p>Every exercise comes with an illustration, setup, movement and the most common mistake. Just&nbsp;swipe.</p>
       </article>
       <article class="rv" style="--i:2">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 13.9L7 21l5-2.6 5 2.6-1.5-7.1"/></svg></div>
-        <h3>Records and badges</h3>
-        <p>Browse your records month by month in your Profile and see how close you are to the next badge.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,96A88,88,0,1,0,72,163.83V240a8,8,0,0,0,11.58,7.16L128,225l44.43,22.21A8.07,8.07,0,0,0,176,248a8,8,0,0,0,8-8V163.83A87.85,87.85,0,0,0,216,96ZM56,96a72,72,0,1,1,72,72A72.08,72.08,0,0,1,56,96ZM168,227.06l-36.43-18.21a8,8,0,0,0-7.16,0L88,227.06V174.37a87.89,87.89,0,0,0,80,0ZM128,152A56,56,0,1,0,72,96,56.06,56.06,0,0,0,128,152Zm0-96A40,40,0,1,1,88,96,40,40,0,0,1,128,56Z"/></svg></div>
+        <h3>Records and&nbsp;badges</h3>
+        <p>In Profile you can browse your records month by month and see how close you are to the next&nbsp;badge.</p>
       </article>
       <article class="rv" style="--i:0">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M12 14V7M9 10l3-3 3 3M9 17h6"/></svg></div>
-        <h3>Workout card</h3>
-        <p>Your workout as a graphic for Stories, 4:5 or 1:1. Share it straight from the end-of-workout screen.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M237.66,106.35l-80-80A8,8,0,0,0,144,32V72.35c-25.94,2.22-54.59,14.92-78.16,34.91-28.38,24.08-46.05,55.11-49.76,87.37a12,12,0,0,0,20.68,9.58h0c11-11.71,50.14-48.74,107.24-52V192a8,8,0,0,0,13.66,5.65l80-80A8,8,0,0,0,237.66,106.35ZM160,172.69V144a8,8,0,0,0-8-8c-28.08,0-55.43,7.33-81.29,21.8a196.17,196.17,0,0,0-36.57,26.52c5.8-23.84,20.42-46.51,42.05-64.86C99.41,99.77,127.75,88,152,88a8,8,0,0,0,8-8V51.32L220.69,112Z"/></svg></div>
+        <h3>Workout&nbsp;card</h3>
+        <p>Your workout as a graphic for Stories, in 4:5 or 1:1. Share it straight from the Congrats&nbsp;screen.</p>
       </article>
       <article class="rv" style="--i:1">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></div>
-        <h3>Share a plan by link</h3>
-        <p>Send a plan by text or WhatsApp. The other person doesn't need an account.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z"/></svg></div>
+        <h3>Share a plan by&nbsp;link</h3>
+        <p>Send a plan by text or WhatsApp. The other person doesn’t need an&nbsp;account.</p>
       </article>
       <article class="rv" style="--i:2">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/></svg></div>
-        <h3>Any equipment</h3>
-        <p>Barbell, dumbbells, machines, kettlebells, resistance bands and calisthenics. Planks and cardio run on a timer.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M248,120h-8V88a16,16,0,0,0-16-16H208V64a16,16,0,0,0-16-16H168a16,16,0,0,0-16,16v56H104V64A16,16,0,0,0,88,48H64A16,16,0,0,0,48,64v8H32A16,16,0,0,0,16,88v32H8a8,8,0,0,0,0,16h8v32a16,16,0,0,0,16,16H48v8a16,16,0,0,0,16,16H88a16,16,0,0,0,16-16V136h48v56a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,16-16V136h8a8,8,0,0,0,0-16ZM32,168V88H48v80Zm56,24H64V64H88V192Zm104,0H168V64h24V175.82c0,.06,0,.12,0,.18s0,.12,0,.18V192Zm32-24H208V88h16Z"/></svg></div>
+        <h3>Any&nbsp;equipment</h3>
+        <p>Barbell, dumbbells, machines, kettlebell, resistance bands and calisthenics. A timer handles planks and&nbsp;cardio.</p>
+      </article>
+      <article class="rv" style="--i:2">
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M240,56v64a8,8,0,0,1-16,0V75.31l-82.34,82.35a8,8,0,0,1-11.32,0L96,123.31,29.66,189.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0L136,140.69,212.69,64H168a8,8,0,0,1,0-16h64A8,8,0,0,1,240,56Z"/></svg></div>
+        <h3>Variable&nbsp;intensity</h3>
+        <p>One switch in the Builder and your exercises change version every week. The app suggests today’s&nbsp;weight.</p>
       </article>
     </div>
   </div>
@@ -838,32 +1087,32 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
   <div class="dark-panel">
     <div class="ai">
       <div class="rv">
-        <span class="pill-label">AI Coach</span>
-        <h2 id="trener-h">After every workout you get a concrete tip <span style="color:var(--m-on-dark-muted)">for the next one.</span></h2>
-        <p class="lede">AI Coach reviews your saved workout and compares it with the previous ones. Instead of generic advice, it tells you exactly what to do with a specific exercise.</p>
+        <span class="pill-label">Trener AI</span>
+        <h2 id="trener-h">Po treningu dostajesz konkretną wskazówkę <span style="color:var(--m-on-dark-muted)">na następny.</span></h2>
+        <p class="lede">Trener AI przegląda zapisany trening i&nbsp;porównuje go z&nbsp;poprzednimi. Zamiast ogólników mówi wprost, co zrobić przy konkretnym&nbsp;ćwiczeniu.</p>
         <ul class="ai-points">
-          <li><span class="n">01</span><span>A short workout summary, plus the exercises where you're losing strength or making real progress.</span></li>
-          <li><span class="n">02</span><span>Next time you open that exercise, the tip is waiting in the overview, together with today's target.</span></li>
-          <li><span class="n">03</span><span>Set your goal and what to avoid, like an injured shoulder. The suggestions take it into account.</span></li>
+          <li><span class="n">01</span><span>Krótkie podsumowanie treningu i&nbsp;ćwiczenia, w&nbsp;których widać spadek sił albo realny postęp.</span></li>
+          <li><span class="n">02</span><span>Kiedy następnym razem otworzysz to ćwiczenie, podpowiedź będzie czekać w&nbsp;przeglądzie, razem z&nbsp;celem na dziś.</span></li>
+          <li><span class="n">03</span><span>Ustawiasz cel i&nbsp;to, czego unikać, na przykład kontuzjowany bark. Sugestie biorą to pod uwagę.</span></li>
         </ul>
       </div>
       <div class="ai-stage rv" style="--i:1">
         <div class="ai-phone" id="aiPhone">
-          <img class="phone-img gl-poster" src="/img/en/r-ai.webp" data-screen="/img/en/scr-ai.webp" data-blur="/img/en/scr-ai-blur.webp" alt="" width="641" height="1335" loading="lazy">
-          <img class="phone-img ai-blur gl-poster" src="/img/en/r-ai-blur.webp" alt="" width="641" height="1335" loading="lazy">
+          <img class="phone-img gl-poster" src="/img/r-ai.webp" data-screen="/img/scr-ai.webp" data-blur="/img/scr-ai-blur.webp" alt="" width="641" height="1335" loading="lazy">
+          <img class="phone-img ai-blur gl-poster" src="/img/r-ai-blur.webp" alt="" width="641" height="1335" loading="lazy">
           <canvas class="gl-canvas" id="aiGL" aria-hidden="true"></canvas>
-          <div class="ai-pop" role="img" aria-label="Example AI Coach window with a workout summary and tips for the next workout">
-            <div class="ai-pop-head"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2v6M12 16v6M2 12h6M16 12h6M12 8c0 2.2 1.8 4 4 4-2.2 0-4 1.8-4 4 0-2.2-1.8-4-4-4 2.2 0 4-1.8 4-4z"/></svg>AI COACH</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
-            <p><b>A full-body workout with 8 exercises and over 10,800 kg of total volume, with two new records, for abs and biceps.</b><br><br>Shoulders and chest clearly faded towards the end of your sets: on Shoulder Press and Chest Press you couldn't match the same reps in the last sets, so those lifts are close to your limit. Preacher Curl shows real progress over the last few sessions, not just a one-off jump. Over the past week you've also trained pushing muscles much more often than pulling ones, so it would be good to add some back work.</p>
-            <div><h4>For your next workout</h4>
+          <div class="ai-pop" role="img" aria-label="Przykładowe okno Trenera AI z podsumowaniem treningu i wskazówkami na następny trening">
+            <div class="ai-pop-head"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2v6M12 16v6M2 12h6M16 12h6M12 8c0 2.2 1.8 4 4 4-2.2 0-4 1.8-4 4 0-2.2-1.8-4-4-4 2.2 0 4-1.8 4-4z"/></svg>TRENER AI</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+            <p><b>Trening obejmował 8 ćwiczeń na całe ciało przy łącznej objętości ponad 10800&nbsp;kg, z&nbsp;dwoma nowymi rekordami w&nbsp;brzuchu i&nbsp;biceps.</b><br><br>Barki i&nbsp;klatka wyraźnie osłabły pod koniec serii, w&nbsp;Shoulder Press i&nbsp;Chest Press zabrakło Ci sił na te same powtórzenia w&nbsp;ostatnich seriach, więc te ćwiczenia są blisko granicy wysiłku. Preacher Curl pokazuje realny postęp w&nbsp;kilku ostatnich sesjach, nie tylko jednorazowy skok. Warto też zauważyć, że w&nbsp;ostatnim tygodniu wyraźnie częściej trenujesz mięśnie, które pchają, niż te, które ciągną, więc dobrze byłoby dołożyć trochę pracy na&nbsp;plecy.</p>
+            <div><h4>Na następny trening</h4>
               <dl>
-                <dt>Preacher Curl</dt><dd>Add 2.5 kg next time, your reps at this weight have been going up for several sessions</dd>
-                <dt>Shoulder Press</dt><dd>Stay at this weight and work on form, the set clearly loses power towards the end</dd>
-                <dt>Leg Extension</dt><dd>Keep the current weight and control your technique, going easy on your right knee</dd>
+                <dt>Preacher Curl</dt><dd>Dołóż 2,5&nbsp;kg przy następnym treningu, bo od kilku sesji rośnie liczba powtórzeń przy tym samym ciężarze</dd>
+                <dt>Shoulder Press</dt><dd>Zostań przy tym ciężarze i&nbsp;popracuj nad formą, seria wyraźnie traci na sile pod koniec</dd>
+                <dt>Leg Extension</dt><dd>Trzymaj obecny ciężar i&nbsp;kontroluj technikę, pamiętając o&nbsp;ostrożności wobec prawego kolana</dd>
               </dl></div>
           </div>
         </div>
-        <p class="ai-disclaimer">AI Coach works when you're signed in. These are training tips, not medical advice: if you're in pain or injured, see a physiotherapist. The text on screen is an example.</p>
+        <p class="ai-disclaimer">Trener AI działa po zalogowaniu. To podpowiedzi treningowe, a&nbsp;nie porada medyczna: przy bólu albo kontuzji idź do fizjoterapeuty. Tekst na ekranie jest&nbsp;przykładowy.</p>
       </div>
     </div>
   </div>
@@ -879,24 +1128,24 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
     </div>
     <div class="priv seq">
       <article style="--i:0">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
-        <h3>No account to start</h3>
-        <p>Open it and train. Your data stays on your phone until you decide to create an account.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"/></svg></div>
+        <h3>No account to&nbsp;start</h3>
+        <p>Open the app and train. Your data stays on your phone until you create an&nbsp;account.</p>
       </article>
       <article style="--i:1">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
-        <h3>Sign in with Apple</h3>
-        <p>One tap and Face ID. You can hide your email and still see your workouts on every device.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="2.6 2.4 19 19" fill="currentColor"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.33-3.5zM14.2 6.13c.6-.74 1.02-1.76.9-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.99-.5 2.6-1.24z"/></svg></div>
+        <h3>Sign in with&nbsp;Apple</h3>
+        <p>One tap and Face ID. You can hide your e-mail and still see your workouts on every&nbsp;device.</p>
       </article>
       <article style="--i:2">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg></div>
-        <h3>Download everything</h3>
-        <p>Plans, workouts, weight and notes, with one button in your Profile under Settings and account.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg></div>
+        <h3>Download&nbsp;everything</h3>
+        <p>Download your plans, workouts, weight and notes with one button in Profile, under Settings and&nbsp;account.</p>
       </article>
       <article style="--i:3">
-        <div class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></svg></div>
-        <h3>Delete your account in the app</h3>
-        <p>No emails to support. Your account and cloud data disappear from every device.</p>
+        <div class="ico"><svg aria-hidden="true" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></svg></div>
+        <h3>Delete your account in the&nbsp;app</h3>
+        <p>No need to e-mail anyone. Your account and cloud data disappear from all your&nbsp;devices.</p>
       </article>
     </div>
     <a class="sec-link rv" href="/en/privacy">Read the privacy policy <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -907,11 +1156,11 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 <section class="sec" id="cena" aria-labelledby="cena-h">
   <div class="wrap">
     <div class="price rv">
-      <div class="price-tag" aria-hidden="true"><span style="margin:0 .04em 0 0">$</span>0</div>
+      <div class="price-tag" aria-hidden="true"><span>$</span>0</div>
       <div>
         <span class="pill-label">Price</span>
-        <h2 id="cena-h" style="margin-top:20px; font-size:clamp(2rem,4vw,3.2rem)">Right now it costs nothing.</h2>
-        <p class="lede" style="margin-top:18px">Every feature is free right now. If a paid version ever arrives, you'll hear about it in the app before anything changes.</p>
+        <h2 id="cena-h" style="margin-top:20px; font-size:clamp(2rem,4vw,3.2rem)">Right now it costs&nbsp;nothing.</h2>
+        <p class="lede" style="margin-top:18px">Every feature is free. If a paid version ever comes along, you’ll hear about it in the app before anything&nbsp;changes.</p>
       </div>
     </div>
   </div>
@@ -921,38 +1170,38 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 <section class="sec" id="faq" aria-labelledby="faq-h">
   <div class="wrap faq">
     <div class="sec-head rv" style="margin-bottom:0">
-      <span class="pill-label">FAQ</span>
+      <span class="pill-label">Questions</span>
       <h2 id="faq-h">Before <span class="dim">you start</span></h2>
-      <p class="lede">Can't find your question? Check the <a href="/en/contact">help page</a> or write to <a href="mailto:support@mekkio.app">support@mekkio.app</a>.</p>
+      <p class="lede">Don’t see your question? Check the <a href="/en/contact">help page</a> or write to <a href="mailto:support@mekkio.app">support@mekkio.app</a>.</p>
     </div>
     <div class="faq-list rv" style="--i:1">
       <details>
-        <summary>What phone does Mekkio run on?</summary>
-        <div><p>Mekkio is an iPhone app. It's coming to the App Store soon.</p></div>
+        <summary>Which phones does Mekkio run&nbsp;on?</summary>
+        <div><p>Mekkio is an iPhone app. It will be available on the App&nbsp;Store&nbsp;soon.</p></div>
       </details>
       <details>
-        <summary>When will Mekkio be on the App Store?</summary>
-        <div><p>Soon, we're wrapping up the last details. As soon as it's available, the App Store link will appear on this page.</p></div>
+        <summary>When will Mekkio be on the App&nbsp;Store?</summary>
+        <div><p>Soon. We’re wrapping up the final details. As soon as the app is available, the App Store link will appear on this&nbsp;page.</p></div>
       </details>
       <details>
-        <summary>Do I need an account?</summary>
-        <div><p>No. Everything works without one, and your data stays on this one phone. An account helps when you want your workouts on several devices, or don't want to lose them when you switch phones.</p></div>
+        <summary>Do I need an&nbsp;account?</summary>
+        <div><p>No. Everything works without one, and your data stays on that one phone. An account helps when you want your workouts on several devices or don’t want to lose them when you switch&nbsp;phones.</p></div>
       </details>
       <details>
-        <summary>What happens to my data when I switch phones?</summary>
-        <div><p>With an account, sign in on the new phone and everything is there. Without one, create a backup in your Profile (Settings and account) and restore it on the new phone. If you trained as a guest and only now create an account, nothing is lost: your plans, workouts and notes move into the account.</p></div>
+        <summary>What happens to my data when I get a new&nbsp;phone?</summary>
+        <div><p>With an account, sign in on the new phone and everything is there. Without one, create a backup in Profile (Settings and account) and restore it on the new phone. Creating an account after training as a guest? Nothing is lost: your plans, workouts and notes move into the&nbsp;account.</p></div>
       </details>
       <details>
-        <summary>Does Mekkio connect to Apple Health?</summary>
-        <div><p>Yes, if you want it to. Turn it on in your Profile and Mekkio reads your weight and the workout calories your watch measured from Apple Health. You can revoke access anytime in your iPhone's Settings.</p></div>
+        <summary>Does Mekkio work with Apple&nbsp;Health?</summary>
+        <div><p>Yes, if you want it to. Once you turn it on in Profile, Mekkio reads your weight from the Health app and the workout calories your watch measured. You can revoke access at any time in your iPhone’s&nbsp;Settings.</p></div>
       </details>
       <details>
-        <summary>I already have a plan. Do I have to build it from scratch?</summary>
-        <div><p>You can copy it into the Builder in a few minutes: pick the days, add exercises, set your sets. If someone already has the plan in Mekkio, they can just send it to you as a link.</p></div>
+        <summary>I already have a plan. Do I have to build it from&nbsp;scratch?</summary>
+        <div><p>You can copy it into the Builder in a few minutes: pick the days, add exercises, set the sets. If someone already has the plan in Mekkio, they can just send it to you as a&nbsp;link.</p></div>
       </details>
       <details>
-        <summary>Can I add an exercise that isn't in the library?</summary>
-        <div><p>Yes. Create your own exercise, assign a muscle group and equipment, then use it in plans like any other.</p></div>
+        <summary>Can I add an exercise that isn’t in the&nbsp;library?</summary>
+        <div><p>Yes. Create your own exercise, assign a muscle group and equipment, then use it in your plans like any&nbsp;other.</p></div>
       </details>
     </div>
   </div>
@@ -961,39 +1210,23 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 </main>
 
 <!-- ================= FINAL + FOOTER ================= -->
-<footer class="final" aria-labelledby="final-h">
-  <div class="final-panel">
-    <div class="final-top">
-      <div class="rv final-copy">
-        <h2 id="final-h">Log your next workout<br>in Mekkio.</h2>
-        <p class="lede">Open it, pick a plan and head to the gym. No sign-up needed.</p>
-        <span class="soon white" role="img" aria-label="iPhone app coming soon to the App Store"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.33-3.5zM14.2 6.13c.6-.74 1.02-1.76.9-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.99-.5 2.6-1.24z"/></svg><span><small>Coming soon to</small>App Store</span></span>
-      </div>
+<footer class="f2" aria-labelledby="final-h">
+  <div class="f2-panel">
+    <div class="f2-peek rv" aria-hidden="true"><span class="pk-up"><img src="/img/stwor/peek.webp?v=2" width="640" height="288" alt="" loading="lazy" decoding="async"></span><img class="pk-hands" src="/img/stwor/peek.webp?v=2" width="640" height="288" alt="" loading="lazy" decoding="async"></div>
+    <h2 id="final-h" class="rv">Mekkio makes training&nbsp;simple.</h2>
+    <div class="f2-tiles">
+      <div class="f2-t rv" style="--i:0"><b>$0</b><span>Every feature is free.</span></div>
+      <div class="f2-t rv" style="--i:1"><b>No account</b><span>Open the app and train, no sign-up&nbsp;needed.</span></div>
+      <div class="f2-t rv" style="--i:2"><b>iPhone</b><span>An iOS app that works with Apple&nbsp;Health.</span></div>
+      <div class="f2-t f2-cta rv" style="--i:3" role="img" aria-label="iPhone app coming soon to the App Store"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.33-3.5zM14.2 6.13c.6-.74 1.02-1.76.9-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.99-.5 2.6-1.24z"/></svg><b>Soon<br>on the App&nbsp;Store</b></div>
     </div>
-
-    <div class="wordmark rv" aria-hidden="true">
-      <svg viewBox="0 0 236 58" width="236" height="58" fill="currentColor"><path d="M214.412 58.0003C210.234 58.0003 206.557 57.1011 203.384 55.3027C200.263 53.4513 197.829 50.8594 196.084 47.527C194.391 44.1945 193.545 40.3067 193.545 35.8634C193.545 31.3673 194.391 27.4795 196.084 24.1999C197.829 20.8675 200.263 18.302 203.384 16.5036C206.557 14.6522 210.234 13.7266 214.412 13.7266C218.591 13.7266 222.241 14.6522 225.362 16.5036C228.483 18.302 230.889 20.8675 232.582 24.1999C234.328 27.4795 235.2 31.3673 235.2 35.8634C235.2 40.3067 234.328 44.1945 232.582 47.527C230.889 50.8594 228.483 53.4513 225.362 55.3027C222.241 57.1011 218.591 58.0003 214.412 58.0003ZM214.412 49.7486C217.692 49.7486 220.204 48.532 221.95 46.0988C223.748 43.6656 224.648 40.2538 224.648 35.8634C224.648 31.526 223.748 28.1407 221.95 25.7075C220.204 23.2214 217.692 21.9783 214.412 21.9783C211.133 21.9783 208.594 23.2214 206.795 25.7075C204.997 28.1407 204.098 31.526 204.098 35.8634C204.098 40.2538 204.997 43.6656 206.795 46.0988C208.594 48.532 211.133 49.7486 214.412 49.7486Z" /><path d="M178.97 57.0481C178.127 57.0481 177.444 56.365 177.444 55.5223V16.2044C177.444 15.3617 178.127 14.6786 178.97 14.6786H186.074C186.917 14.6786 187.6 15.3617 187.6 16.2044V55.5223C187.6 56.365 186.917 57.0481 186.074 57.0481H178.97ZM178.811 9.04518C177.968 9.04518 177.285 8.36204 177.285 7.51934V1.52584C177.285 0.68314 177.968 0 178.811 0H186.312C187.155 0 187.838 0.683142 187.838 1.52584V7.51934C187.838 8.36204 187.155 9.04518 186.312 9.04518H178.811Z" /><path d="M87.5634 58.0003C83.3318 58.0003 79.6555 57.1011 76.5347 55.3027C73.4138 53.4513 71.0071 50.8594 69.3144 47.527C67.6217 44.1945 66.7754 40.3067 66.7754 35.8634C66.7754 31.4202 67.6217 27.5588 69.3144 24.2793C71.0071 20.9468 73.3874 18.3549 76.4553 16.5036C79.5762 14.6522 83.1995 13.7266 87.3254 13.7266C91.3455 13.7266 94.8631 14.6258 97.8781 16.4242C100.946 18.2227 103.3 20.8146 104.94 24.1999C106.579 27.5853 107.399 31.6582 107.399 36.4189V37.194C107.399 38.0367 106.716 38.7198 105.874 38.7198H78.9436C78.0667 38.7198 77.3633 39.459 77.4773 40.3285C77.8597 43.2449 78.815 45.5122 80.3432 47.1303C82.1945 48.9816 84.6277 49.9073 87.6428 49.9073C89.9173 49.9073 91.7951 49.4048 93.2762 48.3998C94.4884 47.5637 95.4033 46.48 96.021 45.1484C96.3159 44.5125 96.9412 44.0658 97.6408 44.1086L104.955 44.5552C105.926 44.6145 106.598 45.5587 106.245 46.4656C104.966 49.7513 102.864 52.406 99.9411 54.4299C96.5557 56.8102 92.4298 58.0003 87.5634 58.0003ZM77.6238 30.1866C77.4253 31.0851 78.1433 31.8963 79.0635 31.8963H95.3034C96.1829 31.8963 96.8887 31.1523 96.7607 30.2821C96.374 27.6519 95.4505 25.651 93.9903 24.2793C92.2447 22.5866 90.0231 21.7403 87.3254 21.7403C84.6277 21.7403 82.3796 22.6131 80.5812 24.3586C79.1524 25.7874 78.1666 27.73 77.6238 30.1866Z" /><path d="M1.52584 57.0469C0.683143 57.0469 0 56.3638 0 55.5211V2.23873C0 1.39603 0.683142 0.712891 1.52584 0.712891H12.8091C13.4543 0.712891 14.0298 1.11874 14.2464 1.72653L27.9992 40.3187C28.4808 41.6702 30.3922 41.6702 30.8738 40.3187L44.6266 1.72653C44.8432 1.11874 45.4187 0.712891 46.0639 0.712891H57.3472C58.1899 0.712891 58.873 1.39603 58.873 2.23873V55.5211C58.873 56.3638 58.1899 57.0469 57.3472 57.0469H50.0842C49.2415 57.0469 48.5583 56.3638 48.5583 55.5211V26.7757C48.5583 25.0702 46.1859 24.6496 45.5996 26.2512L34.7224 55.9662C34.5022 56.5676 33.9299 56.9676 33.2895 56.9676H25.5835C24.9431 56.9676 24.3708 56.5676 24.1507 55.9662L13.2734 26.2512C12.6871 24.6496 10.3147 25.0702 10.3147 26.7757V55.5211C10.3147 56.3638 9.63154 57.0469 8.78884 57.0469H1.52584Z" /><path d="M114.631 57.167C113.789 57.167 113.105 56.4839 113.105 55.6412V2.35885C113.105 1.51615 113.789 0.833008 114.631 0.833008H121.736C122.578 0.833008 123.261 1.51615 123.261 2.35885V29.9714C123.261 31.3662 124.978 32.0298 125.917 30.9975L140.184 15.2972C140.473 14.9789 140.883 14.7975 141.313 14.7975H149.642C150.979 14.7975 151.67 16.3956 150.753 17.3692L137.438 31.5127C136.944 32.037 136.884 32.835 137.294 33.4271L152.072 54.7727C152.772 55.7846 152.048 57.167 150.817 57.167H143.124C142.612 57.167 142.134 56.9099 141.852 56.4826L130.988 40.0476C130.445 39.2273 129.28 39.1265 128.605 39.8417L123.678 45.0625C123.41 45.3457 123.261 45.7204 123.261 46.1099V55.6412C123.261 56.4839 122.578 57.167 121.736 57.167H114.631Z" /><path d="M145.039 30.9989L159.306 15.2985C159.595 14.9803 160.005 14.7988 160.435 14.7988H168.764C170.101 14.7988 170.792 16.3969 169.875 17.3706L156.56 31.514C156.066 32.0383 156.006 32.8364 156.416 33.4284L171.194 54.774C171.895 55.786 171.17 57.1684 169.939 57.1684H162.247C161.734 57.1684 161.256 56.9113 160.974 56.4839L150.11 40.049C149.568 39.2286 148.402 39.1279 147.727 39.843L143.29 44.2723C141.054 44.2723 137.881 42.7079 137.471 41.0778C136.916 38.8726 140.089 35.9482 145.039 30.9989Z" /></svg>
+    <div class="f2-foot">
+      <div class="f2-brand"><span class="f2-logo" aria-hidden="true"><svg viewBox="0 0 236 58" width="108" height="27" aria-hidden="true" fill="currentColor"><path d="M214.412 58.0003C210.234 58.0003 206.557 57.1011 203.384 55.3027C200.263 53.4513 197.829 50.8594 196.084 47.527C194.391 44.1945 193.545 40.3067 193.545 35.8634C193.545 31.3673 194.391 27.4795 196.084 24.1999C197.829 20.8675 200.263 18.302 203.384 16.5036C206.557 14.6522 210.234 13.7266 214.412 13.7266C218.591 13.7266 222.241 14.6522 225.362 16.5036C228.483 18.302 230.889 20.8675 232.582 24.1999C234.328 27.4795 235.2 31.3673 235.2 35.8634C235.2 40.3067 234.328 44.1945 232.582 47.527C230.889 50.8594 228.483 53.4513 225.362 55.3027C222.241 57.1011 218.591 58.0003 214.412 58.0003ZM214.412 49.7486C217.692 49.7486 220.204 48.532 221.95 46.0988C223.748 43.6656 224.648 40.2538 224.648 35.8634C224.648 31.526 223.748 28.1407 221.95 25.7075C220.204 23.2214 217.692 21.9783 214.412 21.9783C211.133 21.9783 208.594 23.2214 206.795 25.7075C204.997 28.1407 204.098 31.526 204.098 35.8634C204.098 40.2538 204.997 43.6656 206.795 46.0988C208.594 48.532 211.133 49.7486 214.412 49.7486Z" /><path d="M178.97 57.0481C178.127 57.0481 177.444 56.365 177.444 55.5223V16.2044C177.444 15.3617 178.127 14.6786 178.97 14.6786H186.074C186.917 14.6786 187.6 15.3617 187.6 16.2044V55.5223C187.6 56.365 186.917 57.0481 186.074 57.0481H178.97ZM178.811 9.04518C177.968 9.04518 177.285 8.36204 177.285 7.51934V1.52584C177.285 0.68314 177.968 0 178.811 0H186.312C187.155 0 187.838 0.683142 187.838 1.52584V7.51934C187.838 8.36204 187.155 9.04518 186.312 9.04518H178.811Z" /><path d="M87.5634 58.0003C83.3318 58.0003 79.6555 57.1011 76.5347 55.3027C73.4138 53.4513 71.0071 50.8594 69.3144 47.527C67.6217 44.1945 66.7754 40.3067 66.7754 35.8634C66.7754 31.4202 67.6217 27.5588 69.3144 24.2793C71.0071 20.9468 73.3874 18.3549 76.4553 16.5036C79.5762 14.6522 83.1995 13.7266 87.3254 13.7266C91.3455 13.7266 94.8631 14.6258 97.8781 16.4242C100.946 18.2227 103.3 20.8146 104.94 24.1999C106.579 27.5853 107.399 31.6582 107.399 36.4189V37.194C107.399 38.0367 106.716 38.7198 105.874 38.7198H78.9436C78.0667 38.7198 77.3633 39.459 77.4773 40.3285C77.8597 43.2449 78.815 45.5122 80.3432 47.1303C82.1945 48.9816 84.6277 49.9073 87.6428 49.9073C89.9173 49.9073 91.7951 49.4048 93.2762 48.3998C94.4884 47.5637 95.4033 46.48 96.021 45.1484C96.3159 44.5125 96.9412 44.0658 97.6408 44.1086L104.955 44.5552C105.926 44.6145 106.598 45.5587 106.245 46.4656C104.966 49.7513 102.864 52.406 99.9411 54.4299C96.5557 56.8102 92.4298 58.0003 87.5634 58.0003ZM77.6238 30.1866C77.4253 31.0851 78.1433 31.8963 79.0635 31.8963H95.3034C96.1829 31.8963 96.8887 31.1523 96.7607 30.2821C96.374 27.6519 95.4505 25.651 93.9903 24.2793C92.2447 22.5866 90.0231 21.7403 87.3254 21.7403C84.6277 21.7403 82.3796 22.6131 80.5812 24.3586C79.1524 25.7874 78.1666 27.73 77.6238 30.1866Z" /><path d="M1.52584 57.0469C0.683143 57.0469 0 56.3638 0 55.5211V2.23873C0 1.39603 0.683142 0.712891 1.52584 0.712891H12.8091C13.4543 0.712891 14.0298 1.11874 14.2464 1.72653L27.9992 40.3187C28.4808 41.6702 30.3922 41.6702 30.8738 40.3187L44.6266 1.72653C44.8432 1.11874 45.4187 0.712891 46.0639 0.712891H57.3472C58.1899 0.712891 58.873 1.39603 58.873 2.23873V55.5211C58.873 56.3638 58.1899 57.0469 57.3472 57.0469H50.0842C49.2415 57.0469 48.5583 56.3638 48.5583 55.5211V26.7757C48.5583 25.0702 46.1859 24.6496 45.5996 26.2512L34.7224 55.9662C34.5022 56.5676 33.9299 56.9676 33.2895 56.9676H25.5835C24.9431 56.9676 24.3708 56.5676 24.1507 55.9662L13.2734 26.2512C12.6871 24.6496 10.3147 25.0702 10.3147 26.7757V55.5211C10.3147 56.3638 9.63154 57.0469 8.78884 57.0469H1.52584Z" /><path d="M114.631 57.167C113.789 57.167 113.105 56.4839 113.105 55.6412V2.35885C113.105 1.51615 113.789 0.833008 114.631 0.833008H121.736C122.578 0.833008 123.261 1.51615 123.261 2.35885V29.9714C123.261 31.3662 124.978 32.0298 125.917 30.9975L140.184 15.2972C140.473 14.9789 140.883 14.7975 141.313 14.7975H149.642C150.979 14.7975 151.67 16.3956 150.753 17.3692L137.438 31.5127C136.944 32.037 136.884 32.835 137.294 33.4271L152.072 54.7727C152.772 55.7846 152.048 57.167 150.817 57.167H143.124C142.612 57.167 142.134 56.9099 141.852 56.4826L130.988 40.0476C130.445 39.2273 129.28 39.1265 128.605 39.8417L123.678 45.0625C123.41 45.3457 123.261 45.7204 123.261 46.1099V55.6412C123.261 56.4839 122.578 57.167 121.736 57.167H114.631Z" /><path d="M145.039 30.9989L159.306 15.2985C159.595 14.9803 160.005 14.7988 160.435 14.7988H168.764C170.101 14.7988 170.792 16.3969 169.875 17.3706L156.56 31.514C156.066 32.0383 156.006 32.8364 156.416 33.4284L171.194 54.774C171.895 55.786 171.17 57.1684 169.939 57.1684H162.247C161.734 57.1684 161.256 56.9113 160.974 56.4839L150.11 40.049C149.568 39.2286 148.402 39.1279 147.727 39.843L143.29 44.2723C141.054 44.2723 137.881 42.7079 137.471 41.0778C136.916 38.8726 140.089 35.9482 145.039 30.9989Z" /></svg></span><p>We’re happy to reply<br>to every&nbsp;message.</p></div>
+      <nav class="f2-col" aria-label="Mekkio"><h4>Mekkio</h4><a href="/en/training">Workout</a><a href="/en/plans">Plans</a><a href="/en/progress">Progress</a><a href="/en/your-data">Privacy</a></nav>
+      <div class="f2-col"><h4>Contact</h4><a href="/en/contact">Help and&nbsp;contact</a><a href="mailto:support@mekkio.app">support@mekkio.app</a></div>
+      <div class="f2-col"><h4>Legal</h4><a href="/en/privacy">Privacy policy</a><a href="/" hreflang="pl" lang="pl">Polski</a></div>
     </div>
-
-    <div class="foot">
-      <div>
-        <p class="big">We're happy to reply<br>to every message.</p>
-        <small>© 2026 Mekkio</small>
-      </div>
-      <div>
-        <h4>App</h4>
-        <span class="foot-soon">App Store · coming soon</span>
-      </div>
-      <div>
-        <h4>Contact</h4>
-        <a href="/en/contact">Help and contact</a>
-        <a href="mailto:support@mekkio.app">support@mekkio.app</a>
-      </div>
-      <div>
-        <h4>Legal</h4>
-        <a href="/en/privacy">Privacy policy</a>
-      </div>
-    </div>
+    <small class="f2-copy">© 2026 Mekkio</small>
   </div>
 </footer>
 
@@ -1013,17 +1246,12 @@ document.documentElement.classList.add('js');
     els.forEach(function(e){ io.observe(e); });
   } else { els.forEach(function(e){ e.classList.add('in'); }); }
 
-  /* ---- scroll-linked: split phones, AI popup ---- */
-  var split = document.getElementById('split'), aiPhone = document.getElementById('aiPhone');
+  /* ---- scroll-linked: AI popup ---- */
+  var aiPhone = document.getElementById('aiPhone');
   function clamp01(v){ return Math.max(0, Math.min(1, v)); }
   function ease(v){ return v*v*(3-2*v); }
   function onScroll(){
     var vh = window.innerHeight;
-    var r = split.getBoundingClientRect();
-    var p = clamp01(-r.top / Math.max(1, r.height - vh));
-    split.style.setProperty('--p', ease(clamp01(p / .7)).toFixed(4));
-    var narrow = window.innerWidth < 700;  // phones leave the screen first, then the line comes in
-    split.style.setProperty('--t', ease(clamp01((p - (narrow ? .4 : .34)) / (narrow ? .3 : .4))).toFixed(4));
     if(!aiPhone) return;
     var a = aiPhone.getBoundingClientRect();
     var d = Math.abs(a.top + a.height/2 - vh/2) / (vh * .5);
@@ -1036,82 +1264,166 @@ document.documentElement.classList.add('js');
     window.addEventListener('scroll', function(){ if(!sTick){ sTick = true; raf(function(){ onScroll(); sTick = false; }); } }, {passive:true});
     window.addEventListener('resize', onScroll);
     onScroll();
-  } else { split.style.setProperty('--p','1'); split.style.setProperty('--t','1'); }
+  }
 
   /* ---- bento: stagger index for the little pop-in pieces ---- */
   document.querySelectorAll('.fcell').forEach(function(c){
     c.querySelectorAll('.pop').forEach(function(el, j){ el.style.setProperty('--j', j); });
   });
 
-  /* ---- screens carousel (autoplay every 3 s, pausable) ---- */
-  var CAPS = [
-    ['Dashboard','Your week on one screen','Start today\'s plan with one tap. Right next to it: your week, your latest record and badges.'],
-    ['Workout','Today\'s plan','Warm-up, the exercises from your plan and the workout timer on one screen. Exercise taken? The icon in the tile\'s corner shows a swap.'],
-    ['Set by set','You log, it counts','Set the weight on the dial, reps with plus and minus. Set saved, on to the next one.'],
-    ['After the workout','Results right away','See right away whether you hit a record, how long it took, how much you burned and how you did against your last workout.'],
-    ['History','The whole month in a calendar','Done, planned and missed workouts. Tap a day to see the details.'],
-    ['Progress','Progress you can see','Weekly ring, calories, body weight and volume year to date.']
-  ];
-  var DELAY = 3000;
-  var caro = document.getElementById('caro'), track = document.getElementById('caroTrack');
-  var slides = track.children, dotsBox = document.getElementById('caroDots'), cap = document.getElementById('caroCap');
-  var idx = 1, timer = null, userPaused = reduce, hovering = false, visible = false;
-  for(var d=0; d<slides.length; d++){
-    (function(i){
-      var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label','Screen '+(i+1)+': '+CAPS[i][0]);
-      b.addEventListener('click', function(){ go(i); restart(); }); dotsBox.appendChild(b);
-      slides[i].addEventListener('click', function(){ if(i !== idx){ go(i); restart(); } });
-    })(d);
-  }
-  function layout(){
-    var s = slides[idx];
-    track.style.setProperty('--x', (caro.clientWidth/2 - (s.offsetLeft + s.offsetWidth/2)) + 'px');
-  }
-  function setCap(first){
-    var c = CAPS[idx];
-    function put(){ document.getElementById('capK').textContent = String(idx+1).padStart(2,'0')+' · '+c[0];
-      document.getElementById('capH').textContent = c[1]; document.getElementById('capP').textContent = c[2]; }
-    if(first || reduce){ put(); return; }
-    cap.classList.add('swap'); setTimeout(function(){ put(); cap.classList.remove('swap'); }, 200);
-  }
-  function go(i, first){
-    idx = (i + slides.length) % slides.length;
-    for(var j=0;j<slides.length;j++){
-      slides[j].classList.toggle('on', j===idx); dotsBox.children[j].classList.toggle('on', j===idx);
-      slides[j].setAttribute('aria-hidden', j===idx ? 'false' : 'true');
+  /* ---- STORY: chapter from the scroll position. The new screen slides up into the fixed frame (down when
+     scrolling back) and its texts ride up with it; the old texts leave upwards; the colour follows in CSS ---- */
+  var story = document.getElementById('ekrany');
+  if(story){
+    var lis = story.querySelectorAll('.story-l li'), ris = story.querySelectorAll('.story-r li');
+    var vids = story.querySelectorAll('.story-card video');
+    var N = lis.length, cur = -1, seen = false;
+    var panel = story.querySelector('.story-panel'), cardEl = story.querySelector('.story-card'), shrink = story.querySelector('.story-shrink');
+    var css = getComputedStyle(document.documentElement), EASE = css.getPropertyValue('--m-ease-page').trim() || 'ease-in-out';
+    var DUR = (parseFloat(css.getPropertyValue('--m-dur-page')) || .9) * 1000;
+    var COLORS = ['#fbece3','#3b63cb','#ff3300','#8e0045','#0e0f12','#ffd885'];   // = .story[data-ch] in CSS
+    var stop = function(el){ if(el.getAnimations) el.getAnimations().forEach(function(a){ a.cancel(); }); };
+    var load = function(i){ var v = vids[i]; if(v && !v.getAttribute('src')){ v.src = v.dataset.src; v.preload = 'auto'; } };
+    var play = function(){ if(!seen || reduce) return; vids.forEach(function(v, i){ if(i !== cur) v.pause(); });
+      var v = vids[cur]; load(cur); load(cur + 1); try{ v.currentTime = 0; }catch(e){} var p = v.play(); if(p && p.catch) p.catch(function(){}); };
+    var setCh = function(n){
+      if(n === cur) return;
+      var prev = cur, dir = n > prev ? 1 : -1;
+      [lis, ris].forEach(function(list){ list.forEach(function(li, i){ li.classList.toggle('on', i === n); li.classList.toggle('out', i === prev && prev !== -1); }); });
+      vids.forEach(function(v, i){ v.classList.toggle('on', i === n); v.classList.toggle('out', i === prev); });
+      story.dataset.ch = n; cur = n;
+      var nv = vids[n];
+      var H = story.querySelector('.story-card').offsetHeight;
+      if(prev !== -1 && !reduce && nv.animate){
+        var opt = {duration:DUR, easing:EASE};
+        // three moves, taken in turn (fixed per chapter boundary, so scrolling back plays the same one):
+        // shrink = the old colour closes into the screen; rise = the new colour comes up from the bottom;
+        // fade = the old colour fades away. Only the background varies: the screen and texts always slide up together.
+        var kind = ['shrink', 'rise', 'fade'][Math.min(prev, n) % 3];
+        var ov = vids[prev]; stop(ov); stop(nv);
+        // the screen underneath washes out towards the white card (cash.app), so the incoming edge reads clearly
+        ov.animate([{opacity:1}, {opacity:.25}], {duration:DUR * .6, easing:'ease-out', fill:'forwards'});
+        nv.animate([{transform:'translateY(' + (dir * 100) + '%)'}, {transform:'none'}], opt);
+        setTimeout(function(){ if(cur === n) vids.forEach(function(v, i){ if(i !== n){ v.classList.remove('out'); stop(v); } }); }, DUR + 30);
+        // the old colour stays as a layer over the new one and leaves with the screen
+        var pr = panel.getBoundingClientRect(), cr = cardEl.getBoundingClientRect(), pR = getComputedStyle(panel).borderTopLeftRadius;
+        var full = 'inset(0 0 0 0 round ' + pR + ')', to;
+        if(kind === 'shrink') to = [{clipPath:full}, {clipPath:'inset(' + (cr.top - pr.top) + 'px ' + (pr.right - cr.right) + 'px ' + (pr.bottom - cr.bottom) + 'px ' + (cr.left - pr.left) + 'px round ' + getComputedStyle(cardEl).borderTopLeftRadius + ')'}];
+        else if(kind === 'rise') to = [{clipPath:full}, {clipPath:dir > 0 ? 'inset(0 0 100% 0 round ' + pR + ')' : 'inset(100% 0 0 0 round ' + pR + ')'}];
+        else to = [{opacity:1}, {opacity:0}];
+        shrink.style.background = COLORS[prev]; shrink.classList.add('on'); stop(shrink);
+        shrink.animate(to, opt).onfinish = function(){ if(cur === n) shrink.classList.remove('on'); };
+        // the new texts ride up with the screen, the old ones leave upwards and fade
+        [lis[n], ris[n]].forEach(function(li){ stop(li); li.animate([{transform:'translateY(' + (dir * H) + 'px)', opacity:0}, {opacity:1, offset:.45}, {transform:'none', opacity:1}], opt); });
+        [lis[prev], ris[prev]].forEach(function(li){ stop(li); li.animate([{transform:'none', opacity:1}, {transform:'translateY(' + (-dir * H * .4) + 'px)', opacity:0}], {duration:DUR * .5, easing:EASE, fill:'forwards'})
+          .onfinish = function(){ li.classList.remove('out'); li.getAnimations().forEach(function(a){ a.cancel(); }); }; });
+      } else { vids.forEach(function(v, i){ if(i !== n) v.classList.remove('out'); }); [lis, ris].forEach(function(list){ list.forEach(function(li){ li.classList.remove('out'); }); }); }
+      play();
+    };
+    var storyScroll = function(){
+      var r = story.getBoundingClientRect(), vh = window.innerHeight;
+      setCh(Math.min(N - 1, Math.floor(clamp01(-r.top / Math.max(1, r.height - vh)) * N * .999)));
+    };
+    var stTick = false;
+    window.addEventListener('scroll', function(){ if(!stTick){ stTick = true; raf(function(){ storyScroll(); stTick = false; }); } }, {passive:true});
+    // the screen's corner follows its real width (on phones its height comes from the free space, not from a formula)
+    var fitR = function(){ cardEl.style.setProperty('--r', (cardEl.offsetWidth * .13).toFixed(1) + 'px'); };
+    window.addEventListener('resize', fitR); fitR();
+    window.addEventListener('resize', storyScroll);
+    storyScroll();
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(en){
+        if(en[0].isIntersecting){ if(!seen){ seen = true; play(); } else if(vids[cur].paused && !reduce){ var p = vids[cur].play(); if(p && p.catch) p.catch(function(){}); } }
+        else vids.forEach(function(v){ v.pause(); });
+      }, {threshold:0}).observe(story);
     }
-    layout(); setCap(first);
   }
-  function running(){ return !userPaused && !hovering && visible && !document.hidden; }
-  function schedule(){ clearTimeout(timer); if(running()) timer = setTimeout(function(){ go(idx+1); schedule(); }, DELAY); }
-  // no pause button: once someone steers the carousel themselves, autoplay stops for good (WCAG 2.2.2)
-  function restart(){ userPaused = true; schedule(); }
-  document.getElementById('caroPrev').addEventListener('click', function(){ go(idx-1); restart(); });
-  document.getElementById('caroNext').addEventListener('click', function(){ go(idx+1); restart(); });
-  caro.addEventListener('keydown', function(e){ if(e.key==='ArrowLeft'){ go(idx-1); restart(); } if(e.key==='ArrowRight'){ go(idx+1); restart(); } });
-  caro.addEventListener('pointerenter', function(e){ if(e.pointerType === 'mouse'){ hovering = true; schedule(); } });
-  caro.addEventListener('pointerleave', function(e){ if(e.pointerType === 'mouse'){ hovering = false; schedule(); } });
-  caro.addEventListener('focusin', function(){ hovering = true; schedule(); });
-  caro.addEventListener('focusout', function(){ hovering = false; schedule(); });
-  document.addEventListener('visibilitychange', schedule);
-  if('IntersectionObserver' in window){
-    new IntersectionObserver(function(en){ visible = en[0].isIntersecting; schedule(); }, {threshold:.35}).observe(caro);
-  } else { visible = true; }
-  var sx = null, sy = null;
-  caro.addEventListener('pointerdown', function(e){ sx = e.clientX; sy = e.clientY; });
-  caro.addEventListener('pointerup', function(e){
-    if(sx === null) return; var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
-    if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)){ go(idx + (dx < 0 ? 1 : -1)); restart(); }
-  });
-  window.addEventListener('resize', layout);
-  go(idx, true); schedule();
+
+
+  /* ---- FEATURES: each designed tile plays a short story on a loop while it is on screen ----
+     Without motion (or JS) the tiles simply show the designed state. */
+  var fxWrap = document.querySelector('.fx');   // home: one grid of tiles; subpages: one .fx per feature row
+  if(fxWrap && !reduce && 'IntersectionObserver' in window){
+    [].forEach.call(document.querySelectorAll('.fx'), function(w){ w.classList.add('anim'); });
+    var count = function(el, from, to, ms, fmt){ var t0 = performance.now();
+      (function step(now){ var k = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (to - from) * e); if(k < 1) requestAnimationFrame(step); })(t0); };
+    var sp = function(v){ return String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
+    var STORY = {
+      // ring draws to 4/6, then one more workout: 5/6 and the open dot of this week fills in
+      ring: { period: 9000, run: function(b, at){
+        var arc = b.querySelector('.arc'), rn = b.querySelector('.rn'), rd = b.querySelector('.rd'), rl = b.querySelector('.rl'), rlw = b.querySelector('.rlw'), now = b.querySelector('.weeks .now');
+        arc.style.transition = 'none'; arc.style.setProperty('--p', '0deg'); rn.textContent = rd.textContent = '0'; rl.textContent = '6'; rlw.textContent = 'DAYS'; now.classList.remove('fill'); void arc.offsetWidth; arc.style.transition = '';
+        at(150, function(){ arc.style.setProperty('--p', '240deg'); count(rn, 0, 4, 1100, Math.round); count(rd, 0, 4, 1100, Math.round); count(rl, 6, 2, 1100, Math.round); });
+        at(3000, function(){ arc.style.setProperty('--p', '300deg'); rn.textContent = rd.textContent = '5'; rl.textContent = '1'; rlw.textContent = 'DAY'; now.classList.add('fill'); });
+      } },
+      // the line draws left to right, the total counts up, the end point pulses
+      chart: { period: 8000, run: function(b, at){
+        var n = b.querySelector('.num'); b.classList.remove('go'); n.textContent = '42 790';
+        at(150, function(){ b.classList.add('go'); count(n, 42790, 48920, 1600, sp); });
+      } },
+      // workouts mark themselves day by day, today pulses
+      cal: { period: 8000, run: function(b, at){ b.classList.remove('go'); at(150, function(){ b.classList.add('go'); }); } },
+      // + changes 11 to 12, the frame runs once round the tile, the set is saved
+      sets: { period: 6000, run: function(b, at){
+        var plus = b.querySelector('.plus'); b.classList.remove('go', 'saved', 'roll');
+        at(700, function(){ plus.classList.add('press'); });
+        at(820, function(){ plus.classList.remove('press'); b.classList.add('roll'); });
+        at(1150, function(){ b.classList.add('go'); });
+        at(2900, function(){ b.classList.add('saved'); });
+      } },
+      // the front alternative dissolves, the next one steps forward (cross-fading stack)
+      swap: { period: 1600, run: function(b, at){
+        var cards = [].slice.call(b.querySelectorAll('.card')), sw = b.querySelector('.swap');
+        // tidy a card left halfway by an interrupted round (tab in the background, tile scrolled away)
+        cards.forEach(function(c){ if(c.classList.contains('out')){ c.classList.add('jump'); c.classList.remove('out'); c.dataset.s = '3'; void c.offsetWidth; c.classList.remove('jump'); } });
+        cards.sort(function(x, y){ return (+x.dataset.s) - (+y.dataset.s); }).forEach(function(c, i){ c.dataset.s = String(i); });
+        var front = cards[0];
+        at(300, function(){ front.classList.add('out'); sw.dataset.r = (+sw.dataset.r || 0) + 180; sw.style.transform = 'rotate(' + sw.dataset.r + 'deg)';
+          cards.forEach(function(c){ if(c !== front) c.dataset.s = String(+c.dataset.s - 1); }); });
+        at(1000, function(){ front.classList.add('jump'); front.classList.remove('out'); front.dataset.s = '3'; void front.offsetWidth; front.classList.remove('jump'); });
+      } },
+      // a new record each round, on a different exercise: the name swaps, the trophy pops, the weight counts up
+      rec: { period: 4500, i: 0, list: [['TRICEPS PUSHDOWN', 123, '2,5'], ['LEG PRESS MACHINE', 210, '10'], ['BARBELL BENCH PRESS', 85, '2,5'], ['BARBELL DEADLIFT', 140, '5'], ['LAT PULLDOWN', 72, '2']],
+        run: function(b, at){
+          var s = STORY.rec, r = s.list[s.i++ % s.list.length], n = b.querySelector('.num'), ex = b.querySelector('.ex'), d = b.querySelector('.d');
+          b.classList.remove('go'); b.classList.add('swap');
+          at(250, function(){ ex.textContent = r[0]; d.textContent = '+' + r[2] + '\u00a0kg over last\u00a0time'; n.textContent = String(r[1] - 6); b.classList.remove('swap'); b.classList.add('go'); count(n, r[1] - 6, r[1], 1000, Math.round); });
+      } },
+    };
+    [].forEach.call(document.querySelectorAll('.fx .fx-box'), function(b){
+      var key = (b.className.match(/t-(\w+)/) || [])[1], s = STORY[key]; if(!s) return;
+      var timers = [], on = false;
+      var at = function(ms, fn){ timers.push(setTimeout(fn, ms)); };
+      // each round schedules the next one itself, so a round never cuts the previous one short
+      var cycle = function(){ timers = []; s.run(b, at); at(s.period, cycle); };
+      var start = function(){ if(on) return; on = true; cycle(); };
+      var stop = function(){ on = false; timers.forEach(clearTimeout); timers = []; };
+      new IntersectionObserver(function(en){ if(en[0].isIntersecting) start(); else stop(); }, {threshold:.4}).observe(b);
+    });
+  }
+
+  /* ---- site menu: open / close, Escape and links close it, focus goes to the close button and back ---- */
+  var menu = document.getElementById('siteMenu'), mBtns = document.querySelectorAll('.menu-btn');
+  if(menu && mBtns.length){
+    var here = location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+    [].forEach.call(menu.querySelectorAll('.sm-links a'), function(a, i){ a.style.setProperty('--i', i); if((a.getAttribute('href').replace(/\/$/, '') || '/') === here) a.setAttribute('aria-current', 'page'); });
+    var opener = null, mDur = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--m-dur-fade')) || .24) * 1000;
+    var openMenu = function(btn){ opener = btn; menu.hidden = false; void menu.offsetWidth; menu.classList.add('open'); document.documentElement.classList.add('menu-open');
+      mBtns.forEach(function(b){ b.setAttribute('aria-expanded', 'true'); }); menu.querySelector('.menu-close').focus(); };
+    var closeMenu = function(){ menu.classList.remove('open'); document.documentElement.classList.remove('menu-open'); mBtns.forEach(function(b){ b.setAttribute('aria-expanded', 'false'); });
+      setTimeout(function(){ if(!menu.classList.contains('open')) menu.hidden = true; }, mDur); if(opener) opener.focus(); };
+    mBtns.forEach(function(b){ b.addEventListener('click', function(){ openMenu(b); }); });
+    menu.querySelector('.menu-close').addEventListener('click', closeMenu);
+    menu.addEventListener('click', function(e){ if(e.target.closest('a')) closeMenu(); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && menu.classList.contains('open')) closeMenu(); });
+  }
 })();
 
 /* records card: the e1RM counts up once the rep pips have filled in */
 (function(){
   var el = document.querySelector('.p1-num'); if(!el) return;
   if(matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
-  var from = +el.dataset.from, to = +el.dataset.to, fmt = function(x){ return x.toFixed(1); };
+  var from = +el.dataset.from, to = +el.dataset.to, fmt = function(x){ return x.toFixed(1).replace('.', ','); };
   el.textContent = fmt(from);
   var io = new IntersectionObserver(function(en){
     if(!en[0].isIntersecting) return; io.disconnect();
@@ -1126,7 +1438,7 @@ document.documentElement.classList.add('js');
 </script>
 <script type="module">
 /* ---- Rendered iPhones: one GLB, three live WebGL views (hero, split, AI).
-   Static renders of the same model (img/r-*.webp) are the posters and the fallback. ---- */
+   Static renders of the same model (/img/r-*.webp) are the posters and the fallback. ---- */
 (async function(){
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var saveData = navigator.connection && navigator.connection.saveData;
@@ -1367,29 +1679,6 @@ document.documentElement.classList.add('js');
     items.forEach(function(it){ it.v.r.render(it.v.scene, it.v.cam); });
     lastTurn = performance.now() - AUTO_MS + 800;           // first turn right after load: shows the orbit can be turned
     box.classList.add('gl-on'); kick();
-  })();
-
-  /* SPLIT — two phones follow --p set by the scroll script (0 together, 1 apart) */
-  (async function(){
-    var split = document.getElementById('split'), canvas = document.getElementById('splitGL');
-    if(!split || !canvas) return;
-    var imgs = split.querySelectorAll('.split-phone img');
-    var v = makeView(canvas), L = await makePhone(imgs[0].dataset.screen, null, .9), R = await makePhone(imgs[1].dataset.screen, null, 1);
-    v.scene.add(L.pivot); v.scene.add(R.pivot);
-    // the (hidden) poster images keep moving with CSS, so the 3D phones simply sit where they are
-    // depth: the right phone sits in front, the left one behind, so their inner edges never cut through each other
-    function place(ph, img, k, c, z){ var r = img.getBoundingClientRect();
-      ph.pivot.position.set((r.left + r.width / 2 - c.x) * k, -(r.top + r.height / 2 - c.y) * k, z * r.width * k);
-      sizePhone(v, ph, r.height * .982); }
-    v.update = function(t){
-      var p = cssVar(split, '--p', 0), k = v.pxToWorld, cr = canvas.getBoundingClientRect();
-      var c = { x: cr.left + cr.width / 2, y: cr.top + cr.height / 2 };
-      place(L, imgs[0], k, c, -.35 * (1 - p)); place(R, imgs[1], k, c, .35 * (1 - p));
-      L.pivot.rotation.set(.08, .28 + p * .2, -.05 - p * .07);
-      R.pivot.rotation.set(.08, -.28 - p * .2, .05 + p * .07);
-    };
-    v.fit(); v.update(0); v.r.render(v.scene, v.cam);
-    split.classList.add('gl-on'); kick();
   })();
 
   /* AI — the screen blurs as the popup (HTML, over the canvas) grows; --pp / --ary come from the scroll script */
