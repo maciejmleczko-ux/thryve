@@ -650,6 +650,20 @@ section{position:relative;}
 /* ---------- FINAL + FOOTER: one black block, cash.app style ---------- */
 .f2{padding:clamp(56px,6vw,86px) var(--frame) var(--frame);}
 .f2-panel{background:#0e0f12; color:#f5f3f8; border-radius:var(--m-r-xl); padding:clamp(48px,6vw,88px) clamp(20px,4vw,56px) clamp(28px,3vw,40px);}
+/* the creature peeks over the top edge of the black block: its head rises from behind the edge once, the paws stay draped over it.
+   One picture, two layers: above the edge (clipped, slides up) and the paws below the edge (fade in after). The edge sits 81.7% down the picture. */
+.f2-panel{position:relative;}
+.f2-peek{--pk:clamp(118px,12vw,210px); position:absolute; right:clamp(64px,8vw,140px); top:0; width:var(--pk); aspect-ratio:640/288; transform:translateY(-81.7%); pointer-events:none;}
+.f2-peek img{position:absolute; left:0; top:0; width:100%; height:auto; display:block;}
+.f2-peek .pk-up{position:absolute; inset:0 0 18.3% 0; overflow:hidden;}
+.f2-peek .pk-hands{clip-path:inset(81.7% 0 0 0);}
+.js .f2-peek.rv, .js .f2-peek.rv.in{opacity:1; transform:translateY(-81.7%); transition:none;}
+@media (prefers-reduced-motion: no-preference){
+  .js .f2-peek .pk-up img{transform:translateY(100%);}
+  .js .f2-peek.in .pk-up img{transform:none; transition:transform var(--m-dur-tile) var(--m-ease) .15s;}
+  .js .f2-peek .pk-hands{opacity:0; transform:translateY(-6px);}
+  .js .f2-peek.in .pk-hands{opacity:1; transform:none; transition:opacity var(--m-dur-in) ease .7s, transform var(--m-dur-in) var(--m-ease) .7s;}
+}
 .f2 h2{font-size:clamp(2.4rem,5vw,4.4rem); max-width:14ch;}
 .f2-tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:clamp(36px,4vw,56px);}
 .f2-t{aspect-ratio:1/.82; border-radius:var(--m-r-lg); box-shadow:inset 0 0 0 1px #2c2f36; padding:clamp(18px,1.8vw,26px); display:flex; flex-direction:column; justify-content:space-between;}
@@ -1031,6 +1045,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 <!-- ================= FINAL + FOOTER ================= -->
 <footer class="f2" aria-labelledby="final-h">
   <div class="f2-panel">
+    <div class="f2-peek rv" aria-hidden="true"><span class="pk-up"><img src="/img/stwor/peek.webp" width="640" height="288" alt="" loading="lazy" decoding="async"></span><img class="pk-hands" src="/img/stwor/peek.webp" width="640" height="288" alt="" loading="lazy" decoding="async"></div>
     <h2 id="final-h" class="rv">Mekkio upraszcza&nbsp;trening.</h2>
     <div class="f2-tiles">
       <div class="f2-t rv" style="--i:0"><b>0&nbsp;zł</b><span>Wszystkie funkcje są za darmo.</span></div>

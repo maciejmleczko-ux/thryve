@@ -654,6 +654,20 @@ section{position:relative;}
 /* ---------- FINAL + FOOTER: one black block, cash.app style ---------- */
 .f2{padding:clamp(56px,6vw,86px) var(--frame) var(--frame);}
 .f2-panel{background:#0e0f12; color:#f5f3f8; border-radius:var(--m-r-xl); padding:clamp(48px,6vw,88px) clamp(20px,4vw,56px) clamp(28px,3vw,40px);}
+/* the creature peeks over the top edge of the black block: its head rises from behind the edge once, the paws stay draped over it.
+   One picture, two layers: above the edge (clipped, slides up) and the paws below the edge (fade in after). The edge sits 81.7% down the picture. */
+.f2-panel{position:relative;}
+.f2-peek{--pk:clamp(118px,12vw,210px); position:absolute; right:clamp(64px,8vw,140px); top:0; width:var(--pk); aspect-ratio:640/288; transform:translateY(-81.7%); pointer-events:none;}
+.f2-peek img{position:absolute; left:0; top:0; width:100%; height:auto; display:block;}
+.f2-peek .pk-up{position:absolute; inset:0 0 18.3% 0; overflow:hidden;}
+.f2-peek .pk-hands{clip-path:inset(81.7% 0 0 0);}
+.js .f2-peek.rv, .js .f2-peek.rv.in{opacity:1; transform:translateY(-81.7%); transition:none;}
+@media (prefers-reduced-motion: no-preference){
+  .js .f2-peek .pk-up img{transform:translateY(100%);}
+  .js .f2-peek.in .pk-up img{transform:none; transition:transform var(--m-dur-tile) var(--m-ease) .15s;}
+  .js .f2-peek .pk-hands{opacity:0; transform:translateY(-6px);}
+  .js .f2-peek.in .pk-hands{opacity:1; transform:none; transition:opacity var(--m-dur-in) ease .7s, transform var(--m-dur-in) var(--m-ease) .7s;}
+}
 .f2 h2{font-size:clamp(2.4rem,5vw,4.4rem); max-width:14ch;}
 .f2-tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:clamp(36px,4vw,56px);}
 .f2-t{aspect-ratio:1/.82; border-radius:var(--m-r-lg); box-shadow:inset 0 0 0 1px #2c2f36; padding:clamp(18px,1.8vw,26px); display:flex; flex-direction:column; justify-content:space-between;}
@@ -925,12 +939,12 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
         <li><h3>Mekkio już idzie do&nbsp;App&nbsp;Store.</h3></li>
       </ol>
       <div class="story-card" id="storyCard" role="img" aria-label="Nagrania ekranów aplikacji Mekkio do kolejnych kroków treningu">
-        <video class="on" data-src="img/story/pl-dashboard.mp4?v=1793742824" poster="img/story/pl-dashboard-first.jpg?v=1793742824" muted playsinline loop preload="none" aria-hidden="true"></video>
-        <video data-src="img/story/pl-gym.mp4?v=1793742824" poster="img/story/pl-gym-first.jpg?v=1793742824" muted playsinline loop preload="none" aria-hidden="true"></video>
-        <video data-src="img/story/pl-logset.mp4?v=1793742824" poster="img/story/pl-logset-first.jpg?v=1793742824" muted playsinline loop preload="none" aria-hidden="true"></video>
-        <video data-src="img/story/pl-finish.mp4?v=1793742824" poster="img/story/pl-finish-first.jpg?v=1793742824" muted playsinline loop preload="none" aria-hidden="true"></video>
-        <video data-src="img/story/pl-stats.mp4?v=1793742824" poster="img/story/pl-stats-first.jpg?v=1793742824" muted playsinline loop preload="none" aria-hidden="true"></video>
-        <video data-src="img/story/stwor.mp4?v=1793742824" poster="img/story/stwor-poster.jpg?v=1793742824" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video class="on" data-src="img/story/pl-dashboard.mp4?v=1793786554" poster="img/story/pl-dashboard-first.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video data-src="img/story/pl-gym.mp4?v=1793786554" poster="img/story/pl-gym-first.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video data-src="img/story/pl-logset.mp4?v=1793786554" poster="img/story/pl-logset-first.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video data-src="img/story/pl-finish.mp4?v=1793786554" poster="img/story/pl-finish-first.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video data-src="img/story/pl-stats.mp4?v=1793786554" poster="img/story/pl-stats-first.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
+        <video data-src="img/story/stwor.mp4?v=1793786554" poster="img/story/stwor-poster.jpg?v=1793786554" muted playsinline loop preload="none" aria-hidden="true"></video>
         <div class="story-sb" aria-hidden="true"><span>9:41</span><span class="ic"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5c2.3 0 4.4.9 6 2.4l1.3-1.4A10.6 10.6 0 0 0 8 .6 10.6 10.6 0 0 0 .7 3.5L2 4.9a8.7 8.7 0 0 1 6-2.4zm0 3.8c1.3 0 2.5.5 3.4 1.3l1.3-1.4A6.8 6.8 0 0 0 8 4.4c-1.8 0-3.5.7-4.7 1.8l1.3 1.4c.9-.8 2.1-1.3 3.4-1.3zm0 3.8L10.1 8a3 3 0 0 0-4.2 0z"/></svg><svg viewBox="0 0 27 12" fill="none"><rect x=".5" y=".5" width="23" height="11" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="8" rx="2" fill="currentColor"/><path d="M25 4v4c.8-.3 1.3-1.1 1.3-2S25.8 4.3 25 4z" fill="currentColor" opacity=".5"/></svg></span></div>
       </div>
       <ol class="story-r">
@@ -1187,6 +1201,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 <!-- ================= FINAL + FOOTER ================= -->
 <footer class="f2" aria-labelledby="final-h">
   <div class="f2-panel">
+    <div class="f2-peek rv" aria-hidden="true"><span class="pk-up"><img src="/img/stwor/peek.webp" width="640" height="288" alt="" loading="lazy" decoding="async"></span><img class="pk-hands" src="/img/stwor/peek.webp" width="640" height="288" alt="" loading="lazy" decoding="async"></div>
     <h2 id="final-h" class="rv">Mekkio upraszcza&nbsp;trening.</h2>
     <div class="f2-tiles">
       <div class="f2-t rv" style="--i:0"><b>0&nbsp;zł</b><span>Wszystkie funkcje są za darmo.</span></div>
