@@ -959,8 +959,9 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 }
 
 /* benefits: pinned while you scroll, the four tiles come in one by one (orange, blue, amber, plum), then the page moves on */
-.sp-pin{position:relative; height:calc(100svh + 4 * 45svh); padding-top:0; max-width:none;}
-.pin-sticky{position:sticky; top:0; height:100svh; box-sizing:border-box; display:flex; flex-direction:column; justify-content:flex-start;
+.sp-pin{position:relative; padding-top:0; max-width:none;}
+.sp-pin::after{content:""; display:block; height:calc(4 * 45svh);}   /* scroll room under the pinned block: it ends right under the tiles, no empty screen */
+.pin-sticky{position:sticky; top:0; box-sizing:border-box; display:flex; flex-direction:column; justify-content:flex-start;
   max-width:1360px; margin:0 auto; padding:clamp(64px,8vw,120px) clamp(20px,4vw,56px) 0;}   /* same top gap as the other sections */
 .pin-tiles{flex:none; width:100%;}   /* in the flex column the squares would shrink to the leftover height */
 .pin-tiles .gt.p1{background:#ff3300; color:#fff;} .pin-tiles .gt.p2{background:#3b63cb; color:#fff;}
@@ -971,7 +972,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
     transition:opacity var(--m-dur-in) ease, transform var(--m-dur-tile) var(--m-ease);}
   .js .pin-tiles .gt.on, .js .pin-tiles .gt:first-child{opacity:1; transform:none;}
 }
-@media (prefers-reduced-motion: reduce){ .sp-pin{height:auto;} .pin-sticky{position:static; height:auto;} }
+@media (prefers-reduced-motion: reduce){ .sp-pin::after{display:none;} .pin-sticky{position:static;} }
 
 .sp-faq{display:grid; grid-template-columns:.8fr 1.2fr; gap:clamp(28px,5vw,80px); align-items:start;}
 .sp-faq summary{font-size:clamp(1.05rem,1.4vw,1.25rem);}
