@@ -936,7 +936,7 @@ details > div{padding:0 60px 26px 0; color:var(--m-muted); font-size:16px;}
 </section>
 
 <!-- ================= STORY: one screen, six chapters ================= -->
-<section class="story" id="ekrany" data-ch="0" aria-labelledby="story-h" style="--chs:6">
+<section class="story" id="ekrany" data-ch="0" aria-labelledby="story-h" style="--chs:6.6">
   <h2 id="story-h" class="sr-only">Jak działa Mekkio: jeden trening krok po&nbsp;kroku</h2>
   <div class="story-sticky">
     <div class="story-panel">
@@ -1320,9 +1320,20 @@ document.documentElement.classList.add('js');
       } else { vids.forEach(function(v, i){ if(i !== n) v.classList.remove('out'); }); [lis, ris].forEach(function(list){ list.forEach(function(li){ li.classList.remove('out'); }); }); }
       play();
     };
+    // scroll room per chapter, in screens (sum = --chs on the section). Progress gets more, so a quick flick
+    // past the plum chapter doesn't jump straight to the last one. A small dead zone at each boundary keeps
+    // the screen from flipping back and forth when the scroll stops right on it.
+    var W = [1, 1, 1, 1, 1.6, 1], WSUM = W.reduce(function(a, b){ return a + b; }, 0);
+    var stickyEl = story.querySelector('.story-sticky');
     var storyScroll = function(){
-      var r = story.getBoundingClientRect(), vh = window.innerHeight;
-      setCh(Math.min(N - 1, Math.floor(clamp01(-r.top / Math.max(1, r.height - vh)) * N * .999)));
+      var r = story.getBoundingClientRect();
+      var x = clamp01(-r.top / Math.max(1, r.height - stickyEl.offsetHeight)) * WSUM, n = 0, acc = 0;
+      for(; n < N - 1 && x >= acc + W[n]; n++) acc += W[n];
+      if(cur !== -1 && n !== cur){
+        var edge = n > cur ? acc : acc + W[n];   // the boundary just crossed
+        if(Math.abs(x - edge) < .06) return;
+      }
+      setCh(n);
     };
     var stTick = false;
     window.addEventListener('scroll', function(){ if(!stTick){ stTick = true; raf(function(){ storyScroll(); stTick = false; }); } }, {passive:true});
