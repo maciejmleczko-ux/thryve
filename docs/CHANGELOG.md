@@ -121,7 +121,7 @@ Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika 
 
 ### 4.108.8 · PATCH · 2026-11-04
 
-Bez wpisu „Co nowego”. Ćwiczenie dodane ręcznie do treningu na dziś („Dodaj ćwiczenie”, np. przy treningu bez planu) ma teraz na kaflu ikonę „Zamień na dziś”, tak jak ćwiczenia z planu. Zamiennik zajmuje miejsce kafla (nie ma „oryginału z planu”, więc bez „Przywróć oryginał”). Powód: trening ułożony w domu, a na siłowni brakuje sprzętu albo jest zajęty.
+Bez wpisu „Co nowego”. Ćwiczenie dodane ręcznie do treningu na dziś („Dodaj ćwiczenie”, np. przy treningu bez planu) ma teraz na kaflu ikonę „Zamień na dziś”, tak jak ćwiczenia z planu. Zamiennik zajmuje miejsce kafla (nie ma „oryginału z planu”, więc bez „Przywróć oryginał”). Powód: trening ułożony w domu, a na siłowni brakuje sprzętu albo jest zajęty. W oknie „Zamień ćwiczenie” usunięta linijka „Zamiast: … · Ta sama grupa: …” (zbędna: tytuł i dotknięty kafel mówią, co się zamienia).
 
 **Commity (1):**
 

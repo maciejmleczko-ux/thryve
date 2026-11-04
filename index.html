@@ -2571,8 +2571,6 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 }
 
 /* "Zamień ćwiczenie" (E7b): okno na .m-sheet2 jak „Wybierz ćwiczenie”; kafle, akordeon i wyszukiwarka z .pickex-body. Tu tylko linia „Zamiast”. */
-.swapv2-instead{margin:0 2px;font-size:var(--m-fs-sm);color:var(--m-muted-text);line-height:1.35;}
-.swapv2-instead b{color:var(--m-ink);font-weight:600;}
 
 .gymv2-root .ph{display:block;}
 .gymv2-root .ph svg{display:block;width:100%;height:100%;}
@@ -5899,7 +5897,6 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
         </div>
       </div>
       <div class="m2-body pickex-body">
-        <p class="swapv2-instead" id="swapInsteadV2"></p>
         <p class="plansv2-section-label" id="swapEquipLabelV2">WYBIERZ SWÓJ SPRZĘT</p>
         <div class="equip-row" id="swapEquipRowV2"></div>
         <div class="exs-wrap" id="swapSearchWrapV2"></div>
@@ -6349,8 +6346,6 @@ const T_EN = {
   exerciseAddedToList: 'New exercise added to the list',
   gymV2Swap: 'Swap for today',
   swapV2Title: 'Swap exercise',
-  swapV2Instead: 'Instead of',
-  swapV2SameGroup: 'Same group',
   swapV2Original: 'Original from the plan',
   swapV2AnyEquip: 'Any equipment',
   swapV2Empty: 'No other exercises for this group with this filter.',
@@ -13896,11 +13891,10 @@ function swapAlternatives(){
 let swapSearchV2 = '';
 let swapCollapsedV2 = new Set();
 function renderSwapSheetV2(){
-  const { origin, bucket } = swapAlternatives();
+  const { origin } = swapAlternatives();
   if(!origin) return;
   document.getElementById('swapTitleV2').textContent = t('swapV2Title','Zamień ćwiczenie');
   document.getElementById('swapCloseV2').setAttribute('aria-label', t('wsClose','Zamknij'));
-  document.getElementById('swapInsteadV2').innerHTML = `${t('swapV2Instead','Zamiast')}: <b>${escHtml(swapOriginName)}</b> · ${t('swapV2SameGroup','Ta sama grupa')}: ${LANG==='en' ? bucket.en : bucket.pl}`;
   document.getElementById('swapEquipLabelV2').textContent = t('peV2EquipLabel','WYBIERZ SWÓJ SPRZĘT');
   document.getElementById('swapEquipRowV2').innerHTML = equipRowInnerHtml(swapEquipFilter, 'setSwapEquipV2');
   document.getElementById('swapSubmitV2').textContent = t('swapV2Apply','Zamień na dziś');
