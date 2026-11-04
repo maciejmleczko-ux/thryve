@@ -72,6 +72,18 @@ body{background:var(--bg); color:#fff; font-family:var(--m-font); overflow:hidde
     <p style="--i:1">Adres prowadzi donikąd, ale stwór i&nbsp;tak nie przerywa serii.</p>
     <a class="home" href="/" style="--i:2">Wróć na stronę główną</a>
   </div>
+  <script>
+  /* one 404 page for the whole site: under /en/ it switches to English before the first paint */
+  (function(){
+    if(!/^\/en(\/|$)/.test(location.pathname)) return;
+    document.documentElement.lang = 'en'; document.title = 'Page not found · Mekkio';
+    var q = function(s){ return document.querySelector(s); };
+    q('.copy h1').textContent = 'This page isn\u2019t here.';
+    q('.copy p').textContent = 'The address leads nowhere, but the creature isn\u2019t skipping a set.';
+    var h = q('.copy .home'); h.textContent = 'Back to the home page'; h.href = '/en/';
+    var l = q('.top .logo'); l.href = '/en/'; l.setAttribute('aria-label', 'Mekkio, home');
+  })();
+  </script>
 </main>
 <!-- Cloudflare Web Analytics (cookieless) --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "77b9c16a394547e3a92308281b28cea9"}'></script>
 </body>
