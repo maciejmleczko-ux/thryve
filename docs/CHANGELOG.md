@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.109.2 (2026-11-05)
+- **Aktualna wersja:** 4.109.3 (2026-11-05)
 - **Liczba wersji:** 269 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,11 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.109.3 · PATCH · 2026-11-05
+
+Nowe ćwiczenie **Hex Bar Deadlift** (martwy ciąg ze sztangą heksagonalną): grupa Plecy (dół, całość), 3 × 5–8, przerwa 150 s, wzorzec `hinge`. Ikony męska i kobieca (`icons/exercises/hex_bar_deadlift.png`, `…/female/…`), opis wykonania PL/EN, słowa kluczowe wyszukiwania („hex bar”, „trap bar”) i aliasy importu (Hevy/Strong: „trap bar deadlift”). Bez wpisu „Co nowego”.
+
 
 ### 4.109.2 · PATCH · 2026-11-05
 
