@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.109.3 (2026-11-05)
+- **Aktualna wersja:** 4.110.0 (2026-11-05)
 - **Liczba wersji:** 269 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,21 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.110.0 · MINOR · 2026-11-05
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Dodano: ćwiczenie Hex Bar Deadlift (ikona, opis); zamiana na dziś także dla ćwiczeń dodanych ręcznie. Ulepszono: wyszukiwanie „low row”; okno zamian podpowiada ten sam ruch. Naprawiono: zamienione ćwiczenie znów można dodać z listy.
+
+Wpis zbiera zmiany 4.108.4, 4.108.5, 4.108.8, 4.109.2 i 4.109.3 widoczne dla użytkownika, które nie miały własnego wpisu. Bez zmian w kodzie poza obiektem `CHANGELOG` i `APP_VERSION`.
+
+**Commity (3):**
+
+- `d792d5f` 2026-11-05 — 4.109.2: wyszukiwarka ćwiczeń znajduje „low row”
+- `3b8ffe3` 2026-11-05 — 4.109.3: nowe ćwiczenie Hex Bar Deadlift
+- `c2e9420` 2026-11-05 — 4.109.3: ikony Hex Bar, dokładniejsze wycięcie tła
+
 
 ### 4.109.3 · PATCH · 2026-11-05
 
