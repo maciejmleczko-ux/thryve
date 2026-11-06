@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.110.0 (2026-11-05)
+- **Aktualna wersja:** 4.110.1 (2026-11-06)
 - **Liczba wersji:** 269 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,10 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.110.1 · PATCH · 2026-11-06
+
+Naprawa fałszywych próśb o logowanie zaraz po starcie: przypomnienie „Nie zgub swoich treningów / Załóż konto” oraz karta „Zapisz swoje dane” w Profilu pokazywały się zalogowanym, bo `cloudSession` jest pusta do czasu odpowiedzi `getSession()`. Dodano flagę `cloudAuthReady`; przypomnienie czeka na nią i nie pokazuje się, gdy w `localStorage` leży zapisana sesja Supabase (start bez internetu). Bez wpisu „Co nowego”.
 
 ### 4.110.0 · MINOR · 2026-11-05
 

@@ -9102,18 +9102,21 @@ let supabaseClient = (SUPABASE_CONFIGURED && window.supabase)
   : null;
 
 let cloudSession = null;
+let cloudAuthReady = false; // false do pierwszej odpowiedzi getSession: wcześniej nie wiemy, czy ktoś jest zalogowany
 let authMode = 'login'; // 'login' | 'signup'
 
 function initSupabaseAuth(){
   if(!supabaseClient) return;
   supabaseClient.auth.getSession().then(({data})=>{
     cloudSession = data && data.session ? data.session : null;
+    cloudAuthReady = true;
     renderAcctCloudCard();
-    if(cloudSession) syncCloudData();
+    if(cloudSession) syncCloudData(); else setTimeout(maybeShowCloudReminder, 400);
   });
   supabaseClient.auth.onAuthStateChange((_event, session)=>{
     const hadNoSession = !cloudSession;
     cloudSession = session;
+    cloudAuthReady = true;
     renderAcctCloudCard();
     if(cloudSession && hadNoSession) syncCloudData(); // only on a fresh sign-in, not every token refresh
     // Back from the reset-password email link: the user is signed in with a
@@ -9646,6 +9649,8 @@ const LS_CLOUD_REMINDER_LAST = 'fitlog_cloud_reminder_last_v1';
 const CLOUD_REMINDER_INTERVAL_DAYS = 12;
 function maybeShowCloudReminder(){
   if(!SUPABASE_CONFIGURED || cloudSession) return;
+  if(!cloudAuthReady) return;   // stan logowania jeszcze nieznany (getSession w drodze): wywoła nas initSupabaseAuth
+  try{ if(localStorage.getItem('sb-ajxsguyjewxzmnfphjze-auth-token')) return; }catch(e){}   // zapisana sesja = konto jest, tylko jej nie odświeżono (np. brak sieci)
   if(!workouts.length) return;
   if(document.documentElement.classList.contains('modal-lock')) return;
   const last = parseInt(localStorage.getItem(LS_CLOUD_REMINDER_LAST) || '0', 10);
@@ -9664,7 +9669,7 @@ function renderAcctCloudCard(){
   const el = id => document.getElementById(id);
   const cta = el('acctCloudCta'), card = cta && cta.closest('[data-pf-login]');
   const inCloud = !!(cloudSession && cloudSession.user);
-  const guestShown = SUPABASE_CONFIGURED && !inCloud, accShown = SUPABASE_CONFIGURED && inCloud;
+  const guestShown = SUPABASE_CONFIGURED && cloudAuthReady && !inCloud, accShown = SUPABASE_CONFIGURED && inCloud;
   if(card) card.hidden = !guestShown;
   const loginRow = el('setLoginRow'); if(loginRow) loginRow.hidden = !guestShown;
   ['acctCloudSignedIn', 'setSignOutRow', 'acctDangerZone'].forEach(id=>{ const e = el(id); if(e) e.hidden = !accShown; });
@@ -10673,7 +10678,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.110.0";
+const APP_VERSION = "4.110.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.110.0": {
@@ -12458,7 +12463,7 @@ function profileHtml(m, animate){
   const idHtml = `<div class="profil-id${animate ? ' m-rise' : ''}">${av}<button type="button" class="profil-id-txt m-press" onclick="openNameEdit()"><h2 class="profil-name" id="acctName">${named ? E(m.name) : t('pfHello', 'Cześć')}</h2><p class="profil-since" id="acctSub"${subTxt ? '' : ' hidden'}>${E(subTxt)}</p></button></div>`;
   // ---- karta logowania (gość) + statystyki ----
   // karta jest zawsze w DOM (ID acctCloudCta = kontrakt hooka); renderAcctCloudCard chowa ją po zalogowaniu
-  const loginCard = `<div class="pf-card pf-card--12${rc(0)}" data-pf-login${(!m.signedIn && SUPABASE_CONFIGURED) ? '' : ' hidden'}><h3 class="pf-empty-t">${t('pfSaveTitle', 'Zapisz swoje dane')}</h3><p class="pf-empty-d">${t('pfSaveText', 'Zaloguj się, żeby nie stracić treningów po zmianie telefonu.')}</p><button type="button" class="pf-btn m-press" id="acctCloudCta" onclick="openAuthSheet('login')">${t('pfLogin', 'ZALOGUJ SIĘ')}</button></div>`;
+  const loginCard = `<div class="pf-card pf-card--12${rc(0)}" data-pf-login${(!m.signedIn && SUPABASE_CONFIGURED && cloudAuthReady) ? '' : ' hidden'}><h3 class="pf-empty-t">${t('pfSaveTitle', 'Zapisz swoje dane')}</h3><p class="pf-empty-d">${t('pfSaveText', 'Zaloguj się, żeby nie stracić treningów po zmianie telefonu.')}</p><button type="button" class="pf-btn m-press" id="acctCloudCta" onclick="openAuthSheet('login')">${t('pfLogin', 'ZALOGUJ SIĘ')}</button></div>`;
   const wc = m.workoutCount, rcnt = m.recordCount;
   const wLbl = wc === 1 ? t('pfWorkoutsOne', 'TRENING') : t('pfWorkoutsMany', plTreningWord(wc).toUpperCase());
   const rLbl = rcnt === 1 ? t('pfRecordsOne', 'REKORD') : t('pfRecordsMany', plRekordWord(rcnt).toUpperCase());
