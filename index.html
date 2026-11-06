@@ -6541,7 +6541,7 @@ stV2SessionsSub: 'with cardio exercises',
   pdtCycle: 'Intensity cycle', pdtDaysPlan: 'Plan days', pdtSaveEdit: 'Save and edit', pdtPick: 'Choose this plan',
   pdtMoreA11y: 'More options', pdtCopyName: n => `${n} (copy)`, pdtCopied: 'Copied to your plans',
   pdtEditSub: 'Saves a copy', pdtDuplicate: 'Duplicate', pdtDuplicateSub: 'The copy goes to your plans', pdtShare: 'Share',
-  pdtCustomize: 'Customize', pdtCustomizeSub: 'Goal, level, equipment and days', pdtDelete: 'Delete plan', plcDeleteTraining: 'Delete workout', plansV2MoreA11y: 'More options', pdtMenuA11y: 'Plan menu',
+  pdtCustomize: 'Customize', pdtCustomizeSub: 'Goal, level, equipment and days', pdtDelete: 'Delete plan', planLimitReached: (n)=>`You already have ${n} plans of your own. Delete one to add a new one.`, plcDeleteTraining: 'Delete workout', plansV2MoreA11y: 'More options', pdtMenuA11y: 'Plan menu',
   palCount: n => `${n} plan${n===1?'':'s'}`, palDaysN: n => `${n} day${n===1?'':'s'}`,
   palFLevel: 'Level', palFGoal: 'Goal', palFDays: 'Days', palFEquip: 'Equipment',
   palFT_level: 'LEVEL', palFT_goal: 'GOAL', palFT_days: 'DAYS', palFT_equip: 'EQUIPMENT',
@@ -10681,7 +10681,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.110.2";
+const APP_VERSION = "4.110.3";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.110.0": {
@@ -18115,6 +18115,7 @@ function applyPlanCustomizeV2(){
     customizationV2 = {goal, difficulty, equipment, frequency};
   }
   if(plan.builtin){
+    if(planLimitReached()) return;
     // First customization of an automatic plan forks it, same rule as
     // the manual editor (savePlanEditor()) — the automatic template
     // stays untouched, this becomes the user's own plan, and takes over
@@ -18140,6 +18141,7 @@ function applyPlanCustomizeV2(){
    poziom, sprzęt i dni, zmienia się tylko `goal`. Sprawność (`ogolna`) nie ma odpowiednika w planach, więc nic nie pyta. */
 const PROFILE_GOAL_TO_PLAN = { masa:'mass', sila:'strength', wytrzymalosc:'endurance', ogolna:'general' };
 function planv2CommitCustomized(plan, schedule, customizationV2){
+  if(plan.builtin && planLimitReached()) return;
   if(plan.builtin){
     const newId = 'plan_' + Date.now();
     trainingPlans.push({id:newId, name: planDisplayName(plan), builtin:false, schedule, customizationV2, meta: planMetaForEdit(plan)});
@@ -18273,6 +18275,15 @@ function closePlansv2Swipe(){
    przycisku i swipe’a; zwraca true, gdy plan można usunąć od razu (swipe kończy wtedy wyjazd karty),
    false, gdy jest dialog albo usunięcie niedozwolone. */
 function canDeletePlanV2(plan){ return !!plan && !plan.builtin; }
+// Limit własnych planów i treningów (bez planów Mekkio). Import i udostępnianie planu wyłączone flagą, kod zostaje.
+const MAX_OWN_PLANS = 3;
+const PLAN_SHARE_ENABLED = false;
+function ownPlansCount(){ return trainingPlans.filter(p=> !p.builtin).length; }
+function planLimitReached(){
+  if(ownPlansCount() < MAX_OWN_PLANS) return false;
+  toast(t('planLimitReached', `Masz już ${MAX_OWN_PLANS} własne plany. Usuń jeden, żeby dodać nowy.`, MAX_OWN_PLANS));
+  return true;
+}
 function requestPlanDeleteV2(id){
   const plan = trainingPlans.find(p=>p.id===id);
   if(!canDeletePlanV2(plan)) return false;
@@ -18861,7 +18872,7 @@ function pdtAct(e){
 // Powiel: nowy plan własny z kopią tygodnia, nazwa „… (kopia)”; zapis i chmura jak przy innych zmianach listy planów (scheduleCloudPush w saveTrainingPlansList).
 function duplicatePlanV2(id){
   const src = trainingPlans.find(p=>p.id === id);
-  if(!src) return null;
+  if(!src || planLimitReached()) return null;
   const schedule = emptySchedule();
   PLAN_DAYS.forEach(d=>{ schedule[d] = (src.schedule[d] || []).map(e=> ({...e})); });
   const newId = 'plan_' + Date.now();
@@ -18881,7 +18892,7 @@ function pdtOpenMenu(btn){
   const items = [
     { icon: PDT_ICON_EDIT, label: t('plansV2Edit', 'Edytuj'), sub: plan.builtin ? t('pdtEditSub', 'Zapisze kopię') : '', onSelect: ()=> openPlanEditorV2(id) },
     { icon: PDT_ICON_COPY, label: t('pdtDuplicate', 'Powiel'), sub: t('pdtDuplicateSub', 'Kopia trafi do Twoich planów'), onSelect: ()=> duplicatePlanV2(id) },
-    { icon: PDT_ICON_SHARE, label: t('pdtShare', 'Udostępnij'), onSelect: ()=> openPlanShareSheet(plan) },
+    ...(PLAN_SHARE_ENABLED ? [{ icon: PDT_ICON_SHARE, label: t('pdtShare', 'Udostępnij'), onSelect: ()=> openPlanShareSheet(plan) }] : []),
   ];
   if(planIsDostosujable(plan)) items.splice(2, 0, { icon: PDT_ICON_EDIT, label: t('pdtCustomize', 'Dostosuj'), sub: planCustomizeKind(plan) === 'goal' ? t('pdtCustomizeSubGoal', 'Cel treningowy') : t('pdtCustomizeSub', 'Cel, poziom, sprzęt i dni'), onSelect: ()=> openPlanCustomizeV2(id) });   // wejście do arkusza „Dostosuj plan” (E6), tylko dla planów, które da się dostosować
   if(canDeletePlanV2(plan)) items.push({ icon: PDT_ICON_TRASH, label: t('pdtDelete', 'Usuń plan'), danger: true, onSelect: ()=>{ if(requestPlanDeleteV2(id)) performPlanDeleteV2(id); } });
@@ -18971,7 +18982,7 @@ function palEmptyHtml(kind, rc){
     <p class="pal-empty-t">${t('palOwnEmptyT', 'Nie masz jeszcze własnych planów')}</p>
     <p class="pal-empty-d">${t('palOwnEmptyD', 'Zbuduj plan od zera albo zapisz plan Mekkio do swoich i dostosuj go.')}</p>
     <button type="button" class="m2-btn m-press" data-pa="new">${t('palBuildOwn', 'Zbuduj własny plan')}</button>
-    <button type="button" class="m2-btn m2-btn--ghost m-press" data-pa="import">${t('palImportPlan', 'Importuj plan')}</button>
+    ${PLAN_SHARE_ENABLED ? `<button type="button" class="m2-btn m2-btn--ghost m-press" data-pa="import">${t('palImportPlan', 'Importuj plan')}</button>` : ''}
   </div>`;
   return `<div class="pal-empty${rc}">
     <p class="pal-empty-t">${t('palNoResT', 'Brak planów dla tych filtrów')}</p>
@@ -19160,7 +19171,7 @@ function renderPlansListV2(animate){
   const mekkio = plansV2OnbOrder(listed.filter(p=> p.builtin));
   heroEl.innerHTML = plansV2HeroHtml(animate);
   const newCard = `<div class="plc plc--new m-press" role="button" tabindex="0" data-pa="new" aria-label="${t('plansV2AddTitle', 'Dodaj plan')}">${ph('plus-icon')}<span class="plc-newl">${t('plansV2NewPlan', 'Nowy plan')}</span></div>`;
-  const importCard = `<div class="plc plc--new plc--import m-press" role="button" tabindex="0" data-pa="import" aria-label="${t('plansV2ImportTitle', 'Importuj plan')}">${ph('download-simple')}<span class="plc-newl">${t('plansV2Import', 'Importuj')}</span></div>`;
+  const importCard = !PLAN_SHARE_ENABLED ? '' : `<div class="plc plc--new plc--import m-press" role="button" tabindex="0" data-pa="import" aria-label="${t('plansV2ImportTitle', 'Importuj plan')}">${ph('download-simple')}<span class="plc-newl">${t('plansV2Import', 'Importuj')}</span></div>`;
   let html = plansV2SectionHtml('own', t('plansV2MyPlans', 'Moje plany'), own.map(buildPlanCardV2).join('') + newCard + importCard, rc(1));
   if(trainings.length) html += plansV2SectionHtml('trainings', t('plansV2MyTrainings', 'Moje treningi'), trainings.map(buildPlanCardV2).join(''), rc(2), '', true);
   if(mekkio.length) html += plansV2SectionHtml('mekkio', t('plansV2MekkioPlans', 'Plany Mekkio'), mekkio.map(buildPlanCardV2).join(''), rc(2));
@@ -19202,6 +19213,7 @@ let planEditorSearch = '';
 function openPlanEditorV2(id, seed){
   const existing = seed || (id ? trainingPlans.find(p=>p.id===id) : null);
   if(isPlanHidden(existing)) return;   // hidden plus plan: not reachable by id either
+  if((!existing || existing.builtin || seed) && planLimitReached()) return;   // nowy plan albo kopia planu Mekkio zajmuje miejsce na liście własnych
   const schedule = emptySchedule();
   if(existing) PLAN_DAYS.forEach(d=>{ schedule[d] = (existing.schedule[d]||[]).map(e=>({...e})); });
   stripWarmupStretch(schedule);
@@ -19676,6 +19688,8 @@ function savePlanEditorCommit(asTraining){
     return meta;
   };
   let savedId;
+  const forksOrAdds = !editingPlan.id || (trainingPlans.find(p=>p.id===editingPlan.id) || {}).builtin;
+  if(forksOrAdds && planLimitReached()) return;
   if(editingPlan.id){
     const idx = trainingPlans.findIndex(p=>p.id===editingPlan.id);
     const original = trainingPlans[idx];
@@ -19942,6 +19956,7 @@ function decodePlanPayload(code){
   return out;
 }
 function checkForImportedPlan(){
+  if(!PLAN_SHARE_ENABLED) return;
   const encoded = new URLSearchParams(location.search).get('importPlan');
   if(!encoded) return;
   history.replaceState(null, '', location.pathname);
@@ -19963,6 +19978,7 @@ function setImportPlanErr(on){
 }
 function onImportPlanCodeInput(){ setImportPlanErr(false); }
 function openImportPlanCodeModal(){
+  if(!PLAN_SHARE_ENABLED) return;
   document.getElementById('importPlanCodeInput').value = '';
   setImportPlanErr(false);
   acctSheetOpen('planImportSheet');
