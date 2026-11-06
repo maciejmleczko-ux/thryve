@@ -2042,6 +2042,9 @@ button.dash-coach{cursor:pointer;}
 .tn--ai{--plc-bg:linear-gradient(47deg,var(--m-ai-fill-from) 9%,var(--m-ai-fill-mid) 66%,var(--m-ai-fill-to) 100%);--plc-fg:var(--m-white);--plc-on:var(--m-white);--plc-on-fg:var(--m-ai-fill-from);--plc-line:rgba(255,255,255,.45);--plc-chip:var(--m-on-dark-1);--plc-ring:transparent;}
 .plc{box-shadow:0 0 0 .5px var(--plc-ring,transparent);}
 .plc-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:19px;}
+.plc-end{display:inline-flex;align-items:center;gap:4px;}
+.plc-more{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;margin:-12px -12px -12px -4px;padding:0;border:0;background:transparent;color:var(--plc-fg);cursor:pointer;border-radius:50%;font-family:inherit;}   /* pole dotyku 40 px, a wiersz .plc-top zostaje 19 px: ujemne marginesy */
+.plc-more svg{display:block;width:20px;height:20px;}
 .plc-src{font-size:var(--m-fs-2xs);font-weight:600;letter-spacing:.0909em;text-transform:uppercase;}
 .plc-lvl{display:inline-flex;align-items:center;gap:6px;height:19px;padding:0 12px;border-radius:var(--m-r-pill);background:var(--m-white);color:var(--plc-acc,var(--m-plan-hard));font-size:var(--m-fs-2xs);font-weight:400;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
 .plc--own .plc-lvl{background:var(--m-plan-c-hard);color:var(--m-white);}
@@ -6538,7 +6541,7 @@ stV2SessionsSub: 'with cardio exercises',
   pdtCycle: 'Intensity cycle', pdtDaysPlan: 'Plan days', pdtSaveEdit: 'Save and edit', pdtPick: 'Choose this plan',
   pdtMoreA11y: 'More options', pdtCopyName: n => `${n} (copy)`, pdtCopied: 'Copied to your plans',
   pdtEditSub: 'Saves a copy', pdtDuplicate: 'Duplicate', pdtDuplicateSub: 'The copy goes to your plans', pdtShare: 'Share',
-  pdtCustomize: 'Customize', pdtCustomizeSub: 'Goal, level, equipment and days', pdtDelete: 'Delete plan', pdtMenuA11y: 'Plan menu',
+  pdtCustomize: 'Customize', pdtCustomizeSub: 'Goal, level, equipment and days', pdtDelete: 'Delete plan', plcDeleteTraining: 'Delete workout', plansV2MoreA11y: 'More options', pdtMenuA11y: 'Plan menu',
   palCount: n => `${n} plan${n===1?'':'s'}`, palDaysN: n => `${n} day${n===1?'':'s'}`,
   palFLevel: 'Level', palFGoal: 'Goal', palFDays: 'Days', palFEquip: 'Equipment',
   palFT_level: 'LEVEL', palFT_goal: 'GOAL', palFT_days: 'DAYS', palFT_equip: 'EQUIPMENT',
@@ -10678,7 +10681,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.110.1";
+const APP_VERSION = "4.110.2";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.110.0": {
@@ -18532,11 +18535,12 @@ function buildPlanCardV2(p){
   const name = escHtml(planDisplayName(p));
   const label = `${name}, ${plcLevelText(lvl)}, ${planExCountText(plcPerDay(f))}`;
   return `<div class="plc ${cls} m-press" role="button" tabindex="0" data-pa="detail" data-id="${escHtml(p.id)}" aria-label="${escHtml(label)}">
-    <div class="plc-top"><span class="plc-src">${escHtml(plcSourceLabel(f.source))}</span>${pill}</div>
+    <div class="plc-top"><span class="plc-src">${escHtml(plcSourceLabel(f.source))}</span><span class="plc-end">${pill}${canDeletePlanV2(p) ? `<button type="button" class="plc-more m-press" data-pa="menu" data-id="${escHtml(p.id)}" aria-haspopup="menu" aria-label="${t('plansV2MoreA11y', 'Więcej opcji')}">${PLC_MORE_SVG}</button>` : ''}</span></div>
     <p class="plc-name">${name}</p>
     <div class="plc-stats">${flex ? '' : `<span class="plc-stat">${ph('calendar-dots')}${escHtml(palDaysText(f.daysCount))}</span>`}<span class="plc-stat">${ph('barbell')}${escHtml(planExCountText(plcPerDay(f)))}</span><span class="plc-stat">${ph('clock-countdown')}~${f.minutes} min</span></div>
   </div>`;
 }
+const PLC_MORE_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg>';
 const PLC_LOCK_SVG = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 80h-32V56a48 48 0 0 0-96 0v24H48a16 16 0 0 0-16 16v112a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16ZM96 56a32 32 0 0 1 64 0v24H96Z"/></svg>';
 /* Karta „Mekkio AI / Mekkio+” (płatna, jeszcze nieistniejąca funkcja) jest ukryta w 1.0: Apple (2.1, 3.1.1) nie lubi niedziałających ani płatnych-bez-IAP elementów.
    Włączyć razem z bramką Mekkio+ (isPremium) i zakupem w aplikacji. */
@@ -19108,6 +19112,15 @@ function applyPalFilter(){
   renderAllPlansV2(false);
 }
 function closePalFilter(viaDrag){ palF = null; acctSheetClose('palFilterSheet', viaDrag); }
+// Menu „…” na karcie planu (tylko własne plany i treningi): mały popup z jedną pozycją, usunięcie jak ze szczegółu planu (potwierdzenie przy aktywnym, COFNIJ po usunięciu)
+function plansV2OpenCardMenu(btn, id){
+  const plan = trainingPlans.find(p=>p.id===id);
+  if(!canDeletePlanV2(plan)) return;
+  const label = planIsFlexible(plan) ? t('plcDeleteTraining', 'Usuń trening') : t('pdtDelete', 'Usuń plan');
+  mPopover.open({ anchor: btn, label: t('pdtMenuA11y', 'Menu planu'), items: [
+    { icon: PDT_ICON_TRASH, label, danger: true, onSelect: ()=>{ if(requestPlanDeleteV2(id)) performPlanDeleteV2(id); } },
+  ] });
+}
 function plansV2Act(e){
   const el = e.target.closest('[data-pa]');
   if(!el) return;
@@ -19122,6 +19135,7 @@ function plansV2Act(e){
     case 'import': openImportPlanCodeModal(); break;
     case 'all': openAllPlansV2(el.dataset.seg); break;
     case 'ai': toast(t('plansV2Soon', 'Wkrótce')); break;
+    case 'menu': plansV2OpenCardMenu(el, id); break;
   }
 }
 function renderPlansListV2(animate){

@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.110.1 (2026-11-06)
+- **Aktualna wersja:** 4.110.2 (2026-11-06)
 - **Liczba wersji:** 269 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,11 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.110.2 · PATCH · 2026-11-06
+
+Plany: na kartach własnych planów i treningów („Moje plany”, „Moje treningi”) w prawym górnym rogu są trzy kropki. Otwierają mały popup (`mPopover`) z jedną pozycją „Usuń plan” albo „Usuń trening” (dla planu bez dni). Usunięcie idzie tą samą drogą co ze szczegółu planu (`requestPlanDeleteV2` / `performPlanDeleteV2`): pytanie tylko przy aktywnym planie, potem komunikat z COFNIJ, kasowanie także z chmury. Plany Mekkio nie mają kropek (nieusuwalne). Wcześniej trening bez dni nie miał żadnej drogi do usunięcia, bo karta otwiera od razu edytor, a „Usuń plan” było tylko w szczegółach. Bez wpisu „Co nowego” (do decyzji). Dotyczy tylko ekranu Plany; lista „Wszystkie plany” bez zmian.
+
 
 ### 4.110.1 · PATCH · 2026-11-06
 
