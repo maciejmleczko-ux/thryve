@@ -2887,10 +2887,12 @@ html.pev2-typing .pev2-savebar{display:none;}   /* z klawiaturą dolny pasek nie
 .stf-yax span{position:absolute;right:0;transform:translateY(-50%);font-size:var(--m-fs-2xs);font-weight:400;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--m-muted-text);}
 .stf-chart{position:relative;height:120px;}
 .stf-chart svg{display:block;width:100%;height:120px;overflow:visible;}
-.statsv2-chart-head.stf-head{width:16px;height:16px;background:var(--m-orange);box-shadow:0 0 0 3px var(--m-orange-tint);}
+.statsv2-chart-head.stf-head{width:12.8px;height:12.8px;background:var(--m-orange);box-shadow:0 0 0 2.4px var(--m-orange-tint);}   /* ostatnia kropka o 20% mniejsza (było 16 px / obwódka 3 px) */
 .statsv2-chart-dot.stf-dot{width:6px;height:6px;background:var(--m-orange);border:2px solid var(--m-white);}
 .stf-chart--dense .statsv2-chart-dot.stf-dot{width:4px;height:4px;border:0;}   /* gęsta seria (> 24 sesji): mniejsze kropki bez obwódki, żeby nie zlewały się w kreskę */   /* kropka na każdej sesji; ostatnia to większa kropka .stf-head */
-.stf-axis{display:flex;justify-content:space-between;margin-top:8px;font-size:var(--m-fs-xs);font-weight:400;letter-spacing:.04em;color:var(--m-ink);}
+.stf-axis span{position:absolute;top:0;white-space:nowrap;transform:translateX(-50%);}
+.stf-axis i{position:absolute;top:5px;width:1px;height:6px;background:var(--m-ink);opacity:.3;transform:translateX(-50%);}   /* miesiąc bez podpisu */
+.stf-axis{position:relative;height:1.4em;margin-top:8px;font-size:var(--m-fs-xs);font-weight:400;letter-spacing:.04em;color:var(--m-ink);}
 .stf-nodata{display:flex;align-items:center;justify-content:center;height:120px;margin-top:20px;font-size:var(--m-fs-xs);text-align:center;color:var(--m-muted-text);}
 .stf-trend{padding:18px;}
 /* historia serii */
@@ -10681,7 +10683,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.110.3";
+const APP_VERSION = "4.110.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.110.0": {
@@ -25047,9 +25049,8 @@ function statsFSessionsAsc(name, metric, bwVol){
 }
 // punkty wykresu {date, v} dla segmentu i zakresu (miesiące wstecz; 0 = wszystko). „main” = najlepszy wynik do tej sesji
 // (trajektoria rekordu, z wartością sprzed okna jako punkt startowy); „proj” / „vol” = wartość z danej sesji.
-function statsFSeries(asc, seg, range){
-  let start = null;
-  if(range){ const d = new Date(todayStr() + 'T00:00:00'); d.setMonth(d.getMonth() - range); start = dateStr(d); }
+function statsFSeries(asc, seg, win){
+  const start = win ? win.startIso : null;
   const pts = [];
   if(seg === 'main'){
     let run = 0, carry = null;
@@ -25065,28 +25066,36 @@ function statsFSeries(asc, seg, range){
   }
   return pts;
 }
-function statsFAxisLabels(d0, d1){
-  const ms = iso=> Date.parse(iso + 'T00:00:00Z'), mid = new Date((ms(d0) + ms(d1)) / 2).toISOString().slice(0, 10);
-  const multi = d0.slice(0, 4) !== d1.slice(0, 4);
-  const mon = iso=>{ const m = STV2_MON[+iso.slice(5, 7) - 1] || ''; const s = m.charAt(0).toUpperCase() + m.slice(1); return multi ? `${s} ’${iso.slice(2, 4)}` : s; };
-  let labs = [mon(d0), mon(mid), mon(d1)];
-  if(labs[0] === labs[2]) labs = [stv2Dm(d0), '', stv2Dm(d1)];   // okno w jednym miesiącu: dzień i miesiąc
-  else if(labs[1] === labs[0] || labs[1] === labs[2]) labs[1] = '';
-  return labs;
+// okno wykresu = pełne miesiące kalendarzowe o równej szerokości: 3m = 3 ostatnie miesiące (z bieżącym), 6m = 6, 1r = 12, Wszystko = od
+// pierwszego treningu. Gdy danych jest krócej niż zakres, okno zaczyna się od miesiąca pierwszego treningu (4 miesiące danych = 4 miesiące).
+// Podpisy: do 4 miesięcy każdy, 5–6 co drugi, więcej co 3 (rok = zawsze 4), liczone od bieżącego miesiąca; miesiące bez podpisu to mała kreska.
+function statsFWindow(range, firstIso){
+  const now = new Date(todayStr() + 'T00:00:00'), cy = now.getFullYear(), cm = now.getMonth();
+  let idx = cy * 12 + cm - (range ? range - 1 : 1e4);
+  if(firstIso){ const fi = (+firstIso.slice(0, 4)) * 12 + (+firstIso.slice(5, 7) - 1); if(fi > idx) idx = fi; }
+  const n = cy * 12 + cm - idx + 1, slots = [];
+  for(let i = 0; i < n; i++) slots.push({ y: Math.floor((idx + i) / 12), m: (idx + i) % 12 });
+  const step = n <= 4 ? 1 : n <= 6 ? 2 : Math.ceil(n / 4), multi = slots[0].y !== slots[n - 1].y;
+  slots.forEach((k, i)=>{
+    if((n - 1 - i) % step === 0){ const nm = STV2_MON[k.m] || ''; k.lab = nm.charAt(0).toUpperCase() + nm.slice(1) + (multi ? ` ’${String(k.y).slice(2)}` : ''); }
+  });
+  const f = slots[0], l = slots[n - 1];
+  return { n, slots, a: Date.UTC(f.y, f.m, 1), b: Date.UTC(l.y, l.m + 1, 1), startIso: `${f.y}-${String(f.m + 1).padStart(2, '0')}-01` };
 }
 // wykres: pole z gradientem + linia komety + kropka końcowa; x proporcjonalnie do daty; mniej niż 2 różne daty = brak wykresu
-function statsFChartHtml(pts, yfmt){
+function statsFChartHtml(pts, yfmt, win){
   const ms = iso=> Date.parse(iso + 'T00:00:00Z');
   if(pts.length < 2 || pts[0].date === pts[pts.length - 1].date) return `<div class="stf-nodata">${t('stFNoData', 'Za mało danych w tym okresie.')}</div>`;
   if(pts.length > 48){ const step = (pts.length - 1) / 47; pts = Array.from({ length: 48 }, (_, i)=> pts[Math.round(i * step)]); }
   const W = 319, H = 120, PT = 10, PB = 8;
-  const t0 = ms(pts[0].date), t1 = ms(pts[pts.length - 1].date);
+  const t0 = ms(pts[0].date), t1 = ms(pts[pts.length - 1].date);   // wykres na całą szerokość: od pierwszego do ostatniego punktu
   const vals = pts.map(p=> p.v), lo = Math.min(...vals), hi = Math.max(...vals), sp = hi - lo;
   const xy = pts.map(p=>({ x: +((ms(p.date) - t0) / (t1 - t0) * W).toFixed(1), y: +(sp === 0 ? H / 2 : PT + (1 - (p.v - lo) / sp) * (H - PT - PB)).toFixed(1) }));
+  const dense = xy.length > 24;   // gęsta seria: kropki tylko na najniższym i najwyższym wyniku, reszta to sama linia
   const comet = statsV2CometLine(xy, STATSF_RAMP, 3), last = xy[xy.length - 1], fid = statsV2Uid();
-  const area = `${statsV2SmoothPath(xy)} L${W},${H} L0,${H} Z`;
-  const labs = statsFAxisLabels(pts[0].date, pts[pts.length - 1].date);
-  const aria = t('stFChartAria', `Wykres trendu od ${labs[0]} do ${labs[2]}`, labs[0], labs[2]);
+  const area = `${statsV2SmoothPath(xy)} L${last.x},${H} L${xy[0].x},${H} Z`;
+  const lab0 = win ? win.slots.find(k=> k.lab).lab : '', lab1 = win ? win.slots[win.n - 1].lab || '' : '';
+  const aria = t('stFChartAria', `Wykres trendu od ${lab0} do ${lab1}`, lab0, lab1);
   /* oś pionowa z lewej: wartość najwyższa, środkowa (gdy różni się po sformatowaniu) i najniższa; pozycje jak w rysunku (PT/PB) */
   const yf = typeof yfmt === 'function' ? yfmt : (v=> String(Math.round(v)));
   const yAt = v=> sp === 0 ? 50 : (PT + (1 - (v - lo) / sp) * (H - PT - PB)) / H * 100;
@@ -25097,8 +25106,12 @@ function statsFChartHtml(pts, yfmt){
   return `<div class="stf-plot">${yax}<div class="stf-plotmain"><div class="stf-chart${xy.length > 24 ? ' stf-chart--dense' : ''}" role="img" aria-label="${escHtml(aria)}"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" aria-hidden="true">
       <defs><linearGradient id="${fid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--m-orange)" stop-opacity=".3"/><stop offset="1" style="stop-color:var(--m-orange)" stop-opacity="0"/></linearGradient></defs>
       <path class="statsv2-comet-seg" style="--p:0" d="${area}" fill="url(#${fid})" stroke="none"/>${comet.svg}</svg>
-      <div class="statsv2-chart-head stf-head" style="left:${(last.x / W * 100).toFixed(1)}%;top:${(last.y / H * 100).toFixed(1)}%;"></div>${xy.slice(0, -1).map(p=> `<div class="statsv2-chart-dot stf-dot" style="left:${(p.x / W * 100).toFixed(1)}%;top:${(p.y / H * 100).toFixed(1)}%;"></div>`).join('')}</div>
-    <div class="stf-axis" aria-hidden="true">${labs.map(l=> `<span>${l}</span>`).join('')}</div></div></div>`;
+      <div class="statsv2-chart-head stf-head" style="left:${(last.x / W * 100).toFixed(1)}%;top:${(last.y / H * 100).toFixed(1)}%;"></div>${xy.slice(0, -1).filter((p, i)=> !dense || vals[i] === lo || vals[i] === hi).map(p=> `<div class="statsv2-chart-dot stf-dot" style="left:${(p.x / W * 100).toFixed(1)}%;top:${(p.y / H * 100).toFixed(1)}%;"></div>`).join('')}</div>
+    <div class="stf-axis" aria-hidden="true">${win ? win.slots.map((k, i)=>{
+      const pos = win.n < 2 ? 50 : i / (win.n - 1) * 100;   // podpisy równo od lewej do prawej krawędzi, niezależnie od tego, gdzie leżą daty
+      const sh = win.n < 2 ? -50 : i === 0 ? 0 : i === win.n - 1 ? -100 : -50;
+      return k.lab ? `<span style="left:${pos.toFixed(2)}%;transform:translateX(${sh}%)">${k.lab}</span>` : win.n > 18 ? '' : `<i style="left:${pos.toFixed(2)}%"></i>`;
+    }).join('') : ''}</div></div></div>`;
 }
 // odcień pastylki serii wg liczby powtórzeń względem najmniejszej w sesji (Figma: 10 / 11 / 12 powt. = jasny / średni / ciemny; równe = wszystkie jasne);
 // gdy powtórzenia są równe, a ciężary różne, rozstrzyga ciężar
@@ -25200,12 +25213,13 @@ function renderStatsV2Detail(name){
     const mainLbl = kind === 'time' ? t('stFSegTime', 'Czas') : kind === 'reps' ? t('stFSegReps', 'Powtórzenia') : t('stFSegMain', 'Ciężar');
     const segs = [['main', mainLbl]].concat(hasProj ? [['proj', t('stFSegProj', 'Prognoza')]] : [], [['vol', t('stFSegVol', 'Objętość')]]);
     const asc = statsFSessionsAsc(name, kind === 'weight' ? 'weight' : 'reps', bw);
-    const pts = statsFSeries(asc, statsFSeg, statsV2Range);
+    const win = statsFWindow(statsV2Range, asc.length ? asc[0].date : null);
+    const pts = statsFSeries(asc, statsFSeg, win);
     chartCard = `
       <div class="stc-card stf-chartcard statsv2-detail-chart-card statsv2-anim-card" style="--i:1">
         <div class="stv2-seg" role="radiogroup" aria-label="${escHtml(t('stFSegAria', 'Metryka wykresu'))}">${segs.map(([k, l])=> `<button type="button" class="stv2-seg-b" role="radio" aria-checked="${statsFSeg === k}" onclick="statsFSetSeg('${k}')">${l}</button>`).join('')}</div>
         <div class="stc-chips stf-chips" role="radiogroup" aria-label="${escHtml(t('stFRangeAria', 'Zakres wykresu'))}">${STATSF_RANGES.map(([m, k, pl])=> `<button type="button" class="stc-chip" role="radio" aria-checked="${statsV2Range === m}" onclick="statsFSetRange(${m})">${t(k, pl)}</button>`).join('')}</div>
-        ${statsFChartHtml(pts, statsFSeg === 'vol' ? (v=> stv2Num(v)) : kind === 'time' ? (v=> statsFVal('time', v).n) : kind === 'reps' ? (v=> String(Math.round(v))) : (v=> fmtGymWeight(v)))}
+        ${statsFChartHtml(pts, statsFSeg === 'vol' ? (v=> stv2Num(v)) : kind === 'time' ? (v=> statsFVal('time', v).n) : kind === 'reps' ? (v=> String(Math.round(v))) : (v=> fmtGymWeight(v)), win)}
       </div>`;
   }
 

@@ -2,8 +2,8 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.110.3 (2026-11-07)
-- **Liczba wersji:** 269 · **commitów:** 645
+- **Aktualna wersja:** 4.110.4 (2026-11-07)
+- **Liczba wersji:** 270 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
 ## Spis treści
@@ -118,6 +118,12 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.110.4 · PATCH · 2026-11-07
+
+Postępy, szczegół ćwiczenia: oś czasu wykresu liczy się teraz z pełnych miesięcy kalendarzowych (`statsFWindow`). 3m = 3 ostatnie miesiące, 6m = 6, 1r = 12, Wszystko = od pierwszego treningu; gdy danych jest krócej niż zakres, okno zaczyna się od miesiąca pierwszego treningu. Podpisy miesięcy są rozłożone równo od lewej do prawej krawędzi: do 4 miesięcy każdy, 5–6 co drugi, więcej co 3 (rok zawsze 4), a miesiące bez podpisu to mała kreska (`.stf-axis i`, powyżej 18 miesięcy bez kresek). Wykres rysuje się na całą szerokość od pierwszego do ostatniego punktu; pole pod linią kończy się na ostatniej kropce. Gęsta seria (> 24 punktów): kropki tylko na najwyższym i najniższym wyniku. Ostatnia kropka (`.stf-head`) o 20% mniejsza (12,8 px, obwódka 2,4 px). Naprawiło to znikający październik na osi 3m i identyczną oś przy 3m i 6m. Bez wpisu „Co nowego”.
+
+**Commity:** jeden commit tej wersji.
 
 ### 4.110.3 · PATCH · 2026-11-07
 
