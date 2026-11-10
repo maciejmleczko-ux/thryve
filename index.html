@@ -6236,6 +6236,10 @@ const T_EN = {
   suggestUp: (w, rh, next, rl) => `Last time ${w} ${wUnit()} × ${rh}+ across all sets. Try ${next} ${wUnit()} and drop back to ${rl} reps.`,
   suggestUpMixed: (rh, w, step) => `Last time you hit ${rh}+ reps on every set, heaviest at ${w} ${wUnit()}. Bring the lighter sets up to that, or add ${step} ${wUnit()} on your heaviest.`,
   suggestDown: (rl, n, down, w) => `Last time you missed ${rl} reps on ${n} set${n===1?'':'s'}. Try about ${down} ${wUnit()} (roughly 10% less than ${w} ${wUnit()}).`,
+  plateauDeloadSame: (k, w, light) => `No progress for ${k} workouts: still ${w} ${wUnit()} and the same reps. Do a lighter session today (about ${light} ${wUnit()}), get some sleep and come back to ${w} ${wUnit()} next week.`,
+  plateauDeload: (k, light, w) => `No progress on this exercise for ${k} workouts. Do a lighter session today (about ${light} ${wUnit()}), get some sleep and come back to ${w} ${wUnit()} next week.`,
+  plateauHoldSame: (k, w, rh) => `No progress for ${k} workouts: still ${w} ${wUnit()} and the same reps. Stay at ${w} ${wUnit()} and reach ${rh} reps on every set before adding weight.`,
+  plateauHold: (k, w, rh) => `No progress on this exercise for ${k} workouts. Stay at ${w} ${wUnit()} and reach ${rh} reps on every set before adding weight.`,
   suggestHold: (w, rh) => `Stay at ${w} ${wUnit()} and try to reach ${rh} reps on every set.`,
   suggestUpBw: (rh) => `Last time ${rh}+ reps on every set. Try a harder variation, or push to the top of the range with reps to spare.`,
   suggestDownBw: (rl, n) => `Last time you missed ${rl} reps on ${n} set${n===1?'':'s'}. Consider an easier variation or a longer rest between sets.`,
@@ -10683,7 +10687,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.110.5";
+const APP_VERSION = "4.110.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.110.0": {
@@ -13365,7 +13369,7 @@ function tipRepsLoc(lo, hi){   // "przy 8–10 powtórzeniach" / "for 8–10 rep
   const r = tipRepsRange(lo, hi);
   return LANG === 'en' ? `${r} reps` : (lo === hi && lo === 1 ? '1 powtórzeniu' : `${r} powtórzeniach`);
 }
-function buildSuggestion(exMeta, history){
+function buildSuggestionCore(exMeta, history){
   if(isTimeEx(exMeta)) return {cls:'', text: exMeta.group === 'Kardio'
     ? t('suggestCardio','Zacznij spokojnie i podkręcaj stopniowo. Następnym razem spróbuj dołożyć minutę albo trochę tempa.')
     : t('suggestTime','Spróbuj wytrzymać cały czas w każdej serii. Jak pójdzie łatwo, dołóż kilka sekund.')};
@@ -13465,6 +13469,43 @@ function buildSuggestion(exMeta, history){
     return {cls:'down', text:t('suggestDown', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach. Spróbuj ok. ${kgT(down)} ${wUnit()} (około 10% mniej niż ${kg(lastWeight)} ${wUnit()}).`, exMeta.repLow, lowFails, kgT(down), kg(lastWeight)), goal:{w:down, reps:exMeta.repLow}};
   }
   return {cls:'', text:t('suggestHold', `Zostań przy ${kg(lastWeight)} ${wUnit()} i spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, kg(lastWeight), exMeta.repHigh), goal:{w:lastWeight, reps:exMeta.repHigh}};
+}
+
+// Honest plateau check on top of the rule-based tip: looks at the last 3+ sessions of the exercise (any execution version,
+// compared by estimated 1RM so a heavy 8-rep day and a light 15-rep day are comparable). If no later session beat the oldest
+// one of the window by more than 1%, say so plainly instead of repeating "try +2,5 kg". Never fires for time / bodyweight
+// exercises, and never overrides a "you missed reps" (down) or "all sets at the top" (up) tip, which are the right call there.
+function buildSuggestion(exMeta, history){
+  const core = buildSuggestionCore(exMeta, history);
+  if(isTimeEx(exMeta) || exMeta.equipment === 'masa ciała' || core.cls === 'down' || core.cls === 'up') return core;
+  const sess = [];
+  for(const h of history.slice(0, 6)){
+    const sets = (h.sets || []).filter(x=> x.weight > 0 && x.reps > 0);
+    if(!sets.length) continue;
+    const el = sets.filter(statsV2E1rmEligible);
+    if(!el.length) return core;
+    sess.push({e1: Math.max(...el.map(x=> statsV2Epley(x.weight, x.reps))), top: Math.max(...sets.map(x=> x.weight))});
+  }
+  if(sess.length < 3) return core;
+  let k = 3;
+  const flat = n => Math.max(...sess.slice(0, n).map(x=> x.e1)) <= sess[n - 1].e1 * 1.01;
+  if(!flat(3)) return core;
+  while(k < sess.length && flat(k + 1)) k++;
+  const w = sess[0].top, kg = fmtGymWeight;
+  const kgT = x=> isImp() ? unitsDec(Math.round(x / KG_PER_LB / 5) * 5) : fmtGymWeight(x);
+  const same = sess.slice(0, k).every(x=> x.top === w);
+  const rh = exMeta.repHigh;
+  if(k >= 4){
+    const light = Math.round(w * 0.9 / 2.5) * 2.5;
+    return {cls:'', plateau:k, text: same
+      ? t('plateauDeloadSame', `Od ${k} treningów bez postępu: wciąż ${kg(w)} ${wUnit()} i tyle samo powtórzeń. Zrób dziś lżejszy trening (ok. ${kgT(light)} ${wUnit()}), wyśpij się i wróć do ${kg(w)} ${wUnit()} za tydzień.`, k, kg(w), kgT(light))
+      : t('plateauDeload', `Od ${k} treningów bez postępu w tym ćwiczeniu. Zrób dziś lżejszy trening (ok. ${kgT(light)} ${wUnit()}), wyśpij się i wróć do ${kg(w)} ${wUnit()} za tydzień.`, k, kgT(light), kg(w)),
+      goal:{w:light, reps:rh}};
+  }
+  return {cls:'', plateau:k, text: same
+    ? t('plateauHoldSame', `Od ${k} treningów bez postępu: wciąż ${kg(w)} ${wUnit()} i tyle samo powtórzeń. Zostań przy ${kg(w)} ${wUnit()} i dobij do ${rh} powt. w każdej serii, zanim dołożysz ciężar.`, k, kg(w), rh)
+    : t('plateauHold', `Od ${k} treningów bez postępu w tym ćwiczeniu. Zostań przy ${kg(w)} ${wUnit()} i dobij do ${rh} powt. w każdej serii, zanim dołożysz ciężar.`, k, kg(w), rh),
+    goal:{w, reps:rh}};
 }
 
 /* ---------- persisted, user-draggable exercise tile order ---------- */
