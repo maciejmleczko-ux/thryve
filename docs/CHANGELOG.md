@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.110.4 (2026-11-07)
+- **Aktualna wersja:** 4.110.5 (2026-11-10)
 - **Liczba wersji:** 270 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,12 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.110.5 · PATCH · 2026-11-10
+
+Wskazówka treningowa (`buildSuggestion`): przy włączonej zmiennej aktywności podpowiedź brała ostatnią sesję tej samej wersji wykonania, nawet gdy nowsza sesja (inna wersja) miała większy ciężar (62,5 kg × 15, a wskazówka proponowała 60 kg). Teraz, gdy nowsza sesja ma cięższą serię, wskazówka liczy od niej (ścieżka „inna wersja”). Bez wpisu Co nowego.
+
+**Commity:** jeden commit tej wersji.
 
 ### 4.110.4 · PATCH · 2026-11-07
 

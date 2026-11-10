@@ -10683,7 +10683,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.110.4";
+const APP_VERSION = "4.110.5";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.110.0": {
@@ -13383,7 +13383,10 @@ function buildSuggestion(exMeta, history){
   let last = history[0];
   if(exMeta.version){
     const atVersion = history.find(h => h.version === exMeta.version);
-    if(atVersion) last = atVersion;
+    // a newer session (other version) with a heavier weight is the real "last result": don't suggest going back below it (62,5 kg yesterday, tip said 60)
+    const maxW = h => Math.max(0, ...h.sets.filter(s=> s.reps > 0).map(s=> s.weight || 0));
+    const newerHeavier = !!atVersion && atVersion !== history[0] && maxW(history[0]) > maxW(atVersion);
+    if(atVersion && !newerHeavier) last = atVersion;
     else {
       const prior = history[0].sets.filter(s=> s.weight>0 || s.reps>0);
       if(!prior.length) return {cls:'', text:t('noCompletePriorData','Brak kompletnych danych z poprzedniej sesji.')};
