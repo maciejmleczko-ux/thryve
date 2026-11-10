@@ -10687,7 +10687,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.110.6";
+const APP_VERSION = "4.110.7";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.110.0": {
@@ -13349,6 +13349,18 @@ function tipStepUpKg(last){
   const cap = Math.floor(last * 0.05 / 1.25) * 1.25;
   return Math.max(1.25, Math.min(2.5, cap));
 }
+// Suggested weights must be settable on the equipment: snap to the plate/stack step (1,25 kg barbell, 2,5 kg machines/dumbbells; lb: 5).
+function tipStepKg(exMeta){ return isImp() ? weightStepFor(exMeta) * KG_PER_LB : weightStepFor(exMeta); }
+function tipSnap(x, exMeta, dir){
+  const st = tipStepKg(exMeta), q = x / st;
+  const n = dir === 'down' ? Math.floor(q + 1e-9) : dir === 'up' ? Math.ceil(q - 1e-9) : Math.round(q);
+  return Math.round(n * st * 100) / 100;
+}
+// next weight above `last`: one step up at least, snapped to what the equipment allows
+function tipNextWeight(last, exMeta){
+  const raw = last + tipStepUpKg(last), sn = tipSnap(raw, exMeta, 'nearest');
+  return sn > last ? sn : tipSnap(last, exMeta, 'nearest') + tipStepKg(exMeta);
+}
 function tipCapWeight(last, est){
   const capped = Math.min(est, last * 1.05);
   return capped >= last ? Math.max(last, Math.floor(capped / 2.5) * 2.5) : Math.round(capped / 2.5) * 2.5;
@@ -13402,7 +13414,7 @@ function buildSuggestionCore(exMeta, history){
       // the last weight already fit today's rep range (e.g. 10 kg × 15 for a 10–20 day): don't send the user back to fewer reps
       if((best.weight||0) > 0 && best.reps >= exMeta.repLow){
         if(best.reps >= exMeta.repHigh){
-          const next = Math.round((best.weight + tipStepUpKg(best.weight)) * 100) / 100;
+          const next = tipNextWeight(best.weight, exMeta);
           return {cls:'up', text:t('tipOtherVersionUp', `Ostatnio: ${kg(best.weight)} ${wUnit()} × ${best.reps}. Spróbuj ${kgT(next)} ${wUnit()} i wróć do ${exMeta.repLow} powt.`, kg(best.weight), best.reps, kgT(next), exMeta.repLow), goal:{w:next, reps:exMeta.repLow}};
         }
         const nextReps = best.reps + 1;
@@ -13412,7 +13424,7 @@ function buildSuggestionCore(exMeta, history){
       if(!est){
         return {cls:'', text:t('tipOtherVersionNoEst', `Ostatnio: ${kg(best.weight||0)} ${wUnit()} × ${best.reps}. Dobierz ciężar tak, by zmieścić ${range} powtórzeń z zapasem 1–2 powtórzeń.`, kg(best.weight||0), best.reps, range)};
       }
-      const target = tipCapWeight(best.weight || 0, est);
+      const target = tipSnap(tipCapWeight(best.weight || 0, est), exMeta, est >= (best.weight || 0) ? 'down' : 'nearest');
       // the 5% cap cut the estimate: the weight is only a safe starting point, so don't promise a reserve
       if(est > (best.weight || 0) * 1.05){
         return {cls:'', text:t('tipOtherVersionCapped', `Ostatnio: ${kg(best.weight||0)} ${wUnit()} × ${best.reps}. Przy ${loc} zacznij od ${kgT(target)} ${wUnit()} i dokładaj, jeśli poczujesz zapas.`, kg(best.weight||0), best.reps, loc, kgT(target)), goal:{w:target, reps:exMeta.repLow}};
@@ -13459,13 +13471,13 @@ function buildSuggestionCore(exMeta, history){
   // jest nieprawdą" — only the last of 3 sets was 140, the rest were 130).
   const weightWasUniform = validSets.every(s => (s.weight||0) === lastWeight);
   if(allTop){
-    const step = tipStepUpKg(lastWeight), next = Math.round((lastWeight + step) * 100) / 100;
+    const next = tipNextWeight(lastWeight, exMeta), step = Math.round((next - lastWeight) * 100) / 100;
     return weightWasUniform
       ? {cls:'up', text:t('suggestUp', `Ostatnio ${kg(lastWeight)} ${wUnit()} × ${exMeta.repHigh}+ we wszystkich seriach. Spróbuj ${kgT(next)} ${wUnit()} i wróć do ${exMeta.repLow} powt.`, kg(lastWeight), exMeta.repHigh, kgT(next), exMeta.repLow), goal:{w:next, reps:exMeta.repLow}}
-      : {cls:'up', text:t('suggestUpMixed', `Ostatnio dobiłeś do ${exMeta.repHigh}+ powt. w każdej serii, najciężej ${kg(lastWeight)} ${wUnit()}. Podciągnij lżejsze serie do tego ciężaru albo dołóż ${kgT(step)} ${wUnit()} na najcięższej.`, exMeta.repHigh, kg(lastWeight), kgT(step)), goal:{w:Math.round((lastWeight + step) * 100) / 100, reps:exMeta.repLow}};   // every set was already at the top of the range, so the goal is the heavier weight, not a step back to repHigh
+      : {cls:'up', text:t('suggestUpMixed', `Ostatnio dobiłeś do ${exMeta.repHigh}+ powt. w każdej serii, najciężej ${kg(lastWeight)} ${wUnit()}. Podciągnij lżejsze serie do tego ciężaru albo dołóż ${kgT(step)} ${wUnit()} na najcięższej.`, exMeta.repHigh, kg(lastWeight), kgT(step)), goal:{w:next, reps:exMeta.repLow}};   // every set was already at the top of the range, so the goal is the heavier weight, not a step back to repHigh
   }
   if(lowFails>=2){
-    const down = Math.round(lastWeight * 0.9 / 2.5) * 2.5;
+    const down = tipSnap(lastWeight * 0.9, exMeta, 'nearest');
     return {cls:'down', text:t('suggestDown', `Ostatnio nie osiągnięto ${exMeta.repLow} powt. w ${lowFails} seriach. Spróbuj ok. ${kgT(down)} ${wUnit()} (około 10% mniej niż ${kg(lastWeight)} ${wUnit()}).`, exMeta.repLow, lowFails, kgT(down), kg(lastWeight)), goal:{w:down, reps:exMeta.repLow}};
   }
   return {cls:'', text:t('suggestHold', `Zostań przy ${kg(lastWeight)} ${wUnit()} i spróbuj dobić do ${exMeta.repHigh} powt. w każdej serii.`, kg(lastWeight), exMeta.repHigh), goal:{w:lastWeight, reps:exMeta.repHigh}};
@@ -13496,7 +13508,7 @@ function buildSuggestion(exMeta, history){
   const same = sess.slice(0, k).every(x=> x.top === w);
   const rh = exMeta.repHigh;
   if(k >= 4){
-    const light = Math.round(w * 0.9 / 2.5) * 2.5;
+    const light = tipSnap(w * 0.9, exMeta, 'nearest');
     return {cls:'', plateau:k, text: same
       ? t('plateauDeloadSame', `Od ${k} treningów bez postępu: wciąż ${kg(w)} ${wUnit()} i tyle samo powtórzeń. Zrób dziś lżejszy trening (ok. ${kgT(light)} ${wUnit()}), wyśpij się i wróć do ${kg(w)} ${wUnit()} za tydzień.`, k, kg(w), kgT(light))
       : t('plateauDeload', `Od ${k} treningów bez postępu w tym ćwiczeniu. Zrób dziś lżejszy trening (ok. ${kgT(light)} ${wUnit()}), wyśpij się i wróć do ${kg(w)} ${wUnit()} za tydzień.`, k, kgT(light), kg(w)),
