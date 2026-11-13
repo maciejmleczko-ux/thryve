@@ -5421,6 +5421,30 @@ document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
   </div>
 </div>
 
+<div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="exportSheet" onclick="if(event.target===this) closeExportSheet()">
+  <div class="plansv2-customize-stack">
+    <div class="m-sheet-grab" aria-hidden="true"></div>
+    <div class="plansv2-customize-card">
+      <div class="m2-head">
+        <div class="m2-title-row">
+          <h1 class="m2-title" id="expTitle">EKSPORTUJ DANE</h1>
+          <button type="button" class="m2-x" id="expClose" aria-label="Zamknij" onclick="closeExportSheet()"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 3.5l11 11m0-11l-11 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+        <p class="m2-sub" id="expSub">Wybierz, do czego potrzebujesz pliku. Zawiera historię Twoich treningów.</p>
+      </div>
+      <div class="m2-body">
+        <div class="lng-list" id="expList" role="radiogroup" aria-labelledby="expTitle">
+          <button type="button" class="lng-row" role="radio" aria-checked="false" data-ex="sheet" onclick="exportPick('sheet')"><span class="lng-row-t"><span id="expSheetL">Arkusz</span><small id="expSheetS">Excel, Numbers, Google Sheets</small></span><span class="lng-dot"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 6.4l2.4 2.4 4.6-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="lng-row" role="radio" aria-checked="false" data-ex="move" onclick="exportPick('move')"><span class="lng-row-t"><span id="expMoveL">Inna aplikacja</span><small id="expMoveS">Przenieś historię w inne miejsce</small></span><span class="lng-dot"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 6.4l2.4 2.4 4.6-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="m2-actions">
+      <button type="button" class="m2-btn" id="expGo" onclick="saveExportSheet()">EKSPORTUJ</button>
+    </div>
+  </div>
+</div>
+
 <div class="onboard-overlay hidden plansv2-customize-overlay m-sheet2" id="importAppSheet" onclick="if(event.target===this) closeImportAppSheet()">
   <div class="plansv2-customize-stack">
     <div class="m-sheet-grab" aria-hidden="true"></div>
@@ -10687,12 +10711,12 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.111.5";
+const APP_VERSION = "4.111.6";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.111.0": {
-    pl: { headline:'Eksport danych do Excela', added:['Wyeksportuj historię swoich treningów do pliku CSV, który otworzysz w Excelu, Numbers albo Arkuszach Google: w Ustawieniach, w sekcji Dane i prywatność, wybierz „Eksportuj do arkusza”.','Zmieniasz aplikację? Wybierz „Eksportuj dane” i zaimportuj plik tam, dokąd się przenosisz.'] },
-    en: { headline:'Export your data to Excel', added:['Export your workout history to a CSV file you can open in Excel, Numbers or Google Sheets: in Settings, under Data and privacy, choose “Export to spreadsheet”.','Switching apps? Choose “Export data” and import the file where you are going.'] },
+    pl: { headline:'Eksport danych do Excela', added:['Wyeksportuj historię swoich treningów do pliku CSV: w Ustawieniach, w sekcji Dane i prywatność, wybierz „Eksportuj dane”.','Wybierz „Arkusz”, żeby otworzyć plik w Excelu, Numbers albo Arkuszach Google, albo „Inna aplikacja”, żeby przenieść historię tam, dokąd się przenosisz.'] },
+    en: { headline:'Export your data to Excel', added:['Export your workout history to a CSV file: in Settings, under Data and privacy, choose “Export data”.','Pick “Spreadsheet” to open the file in Excel, Numbers or Google Sheets, or “Another app” to move your history where you are going.'] },
   },
   "4.110.0": {
     pl: { headline:'Hex Bar Deadlift i drobne ulepszenia', added:['Wybierz nowe ćwiczenie Hex Bar Deadlift, czyli martwy ciąg ze sztangą heksagonalną, z ikoną i opisem wykonania.','Zamień na dziś także ćwiczenie dodane ręcznie do treningu, gdy na siłowni brakuje sprzętu.'], improved:['Znajdź Seated Row i Chest-Supported Row Machine, wpisując „low row”, czyli nazwę z maszyn Technogym.','Zobacz na górze listy zamian ćwiczenia z tym samym ruchem, a niżej z tej samej rodziny.'], fixed:['Naprawiono znikanie ćwiczenia z listy dodawania po zamianie go na dziś: oryginał można znów dodać.'] },
@@ -12569,7 +12593,7 @@ Object.assign(T_EN, {
   pfConn: 'CONNECTIONS', pfConnected: 'Connected', pfSettings: 'Settings and account', pfSettingsSub: 'Sounds, data, account', pfWeightUpd: d => `Last weight update: ${d}`,
   setTitle: 'SETTINGS', setNotif: 'NOTIFICATIONS AND SOUND', setData: 'DATA AND PRIVACY', setHelp: 'HELP', setAccount: 'ACCOUNT',
   setReminder: 'Workout reminder', setSounds: 'Sounds', setSoundsSub: 'Rest countdown and end of workout', setHealth: 'Apple Health', setHealthSub: 'Weight and calories from your watch',
-  setExportCloud: 'Download my data', setExportCloudSub: 'Backup in a file', setExportLocal: 'Create a backup', setExportLocalSub: '.json file', setExportCsv: 'Export to spreadsheet', setExportCsvSub: 'Workout history, .csv file (Excel)', setExportMove: 'Export data', setExportMoveSub: 'Workout history for another app (CSV)', csvShareTitleMove: 'Workout history from Mekkio', csvNoData: 'No workouts to export yet', csvShareTitle: 'Mekkio data (CSV)', csvDownloaded: 'CSV file downloaded', fileSaveFail: 'Could not save the file',
+  setExportCloud: 'Download my data', setExportCloudSub: 'Backup in a file', setExportLocal: 'Create a backup', setExportLocalSub: '.json file', setExportMove: 'Export data', setExportMoveSub: 'Workout history as a CSV file', expTitle: 'EXPORT DATA', expSub: 'Choose what the file is for. It contains your workout history.', expSheet: 'Spreadsheet', expSheetSub: 'Excel, Numbers, Google Sheets', expMove: 'Another app', expMoveSub: 'Move your history elsewhere', expGo: 'EXPORT', csvShareTitleMove: 'Workout history from Mekkio', csvNoData: 'No workouts to export yet', csvShareTitle: 'Mekkio data (CSV)', csvDownloaded: 'CSV file downloaded', fileSaveFail: 'Could not save the file',
   setImport: 'Restore a backup', setImportSub: 'Backup file', setPrivacy: 'Privacy policy',
   setBackupCloud: 'Your workouts and plans are in the cloud. Here you can download your data in one file.', setBackupLocal: 'Without an account your data stays on this phone only. Make a backup or create an account.',
   setFootCloud: 'Your data syncs with the cloud', setFootLocal: 'Your data stays on this phone only',
@@ -12604,8 +12628,7 @@ function buildProfileSettingsV2(animate){
   const sec2 = sec('', t('setData', 'DANE I PRYWATNOŚĆ'),
     row({ id: 'acctHealthRows', on: 'openHealthSheet()', n: t('setHealth', 'Apple Zdrowie'), s: t('setHealthSub', 'Waga i kalorie z zegarka'), hidden: !showHealth }) +
     row({ on: 'exportData()', n: t('setExportLocal', 'Utwórz kopię zapasową'), nId: 'acctExportLabel', s: t('setExportLocalSub', 'Plik .json'), sId: 'setExportSub' }) +
-    row({ on: 'exportCsv()', n: t('setExportCsv', 'Eksportuj do arkusza'), s: t('setExportCsvSub', 'Historia treningów, plik .csv (Excel)') }) +
-    row({ on: "exportCsv('strong')", n: t('setExportMove', 'Eksportuj dane'), s: t('setExportMoveSub', 'Historia treningów do innej aplikacji (CSV)') }) +
+    row({ on: 'openExportSheet()', n: t('setExportMove', 'Eksportuj dane'), s: t('setExportMoveSub', 'Historia treningów w pliku CSV') }) +
     row({ id: 'acctImportRow', on: "document.getElementById('importFile').click()", n: t('setImport', 'Wczytaj kopię'), s: t('setImportSub', 'Plik z kopią zapasową') }) +
     row({ id: 'setImportAppRow', on: 'openImportAppSheet()', n: t('setImportApp', 'Importuj z innej aplikacji'), s: t('setImportAppSub', 'Strong, Hevy (plik CSV)') }) +
     row({ href: './polityka-prywatnosci.html', n: t('setPrivacy', 'Polityka prywatności') }), 2,
@@ -13896,6 +13919,7 @@ mSheetDrag('monthSumSheet', msCloseSheet);
 mSheetDrag('newBadgeSheet', closeNewBadge);
 mSheetDrag('langSheet', closeLangSheet);
 mSheetDrag('unitsSheet', closeUnitsSheet);
+mSheetDrag('exportSheet', closeExportSheet);
 mSheetDrag('importAppSheet', closeImportAppSheet);
 mSheetDrag('palFilterSheet', closePalFilter);
 mSheetDrag('planImportSheet', closeImportPlanCodeModal);
@@ -27782,6 +27806,34 @@ function csvStrongFile(){
   });
   return { name: 'mekkio-historia-strong-' + todayStr() + '.csv', text: rows.join('\r\n') };
 }
+/* ---- Eksportuj dane: małe okno z wyborem formatu (jak Jednostki): Arkusz (PL, Excel) albo Inna aplikacja (układ międzynarodowy) ---- */
+let _exp = null;   // 'sheet' | 'move'
+function exportPaint(){
+  document.querySelectorAll('#exportSheet .lng-row').forEach(r=>{ const on = r.dataset.ex === _exp; r.classList.toggle('is-on', on); r.setAttribute('aria-checked', on ? 'true' : 'false'); });
+}
+function openExportSheet(){
+  if(!workouts.length){ toast(t('csvNoData', 'Nie ma jeszcze treningów do wyeksportowania')); return; }
+  _exp = 'sheet';
+  document.getElementById('expTitle').textContent = t('expTitle', 'EKSPORTUJ DANE');
+  document.getElementById('expSub').textContent = t('expSub', 'Wybierz, do czego potrzebujesz pliku. Zawiera historię Twoich treningów.');
+  document.getElementById('expSheetL').textContent = t('expSheet', 'Arkusz');
+  document.getElementById('expSheetS').textContent = t('expSheetSub', 'Excel, Numbers, Google Sheets');
+  document.getElementById('expMoveL').textContent = t('expMove', 'Inna aplikacja');
+  document.getElementById('expMoveS').textContent = t('expMoveSub', 'Przenieś historię w inne miejsce');
+  document.getElementById('expGo').textContent = t('expGo', 'EKSPORTUJ');
+  document.getElementById('expClose').setAttribute('aria-label', t('wsClose', 'Zamknij'));
+  exportPaint();
+  acctSheetOpen('exportSheet');
+}
+function closeExportSheet(viaDrag){ _exp = null; acctSheetClose('exportSheet', viaDrag); }
+function exportPick(k){ if(!_exp) return; _exp = k; exportPaint(); }
+function saveExportSheet(){
+  if(!_exp) return;
+  const k = _exp;
+  closeExportSheet();
+  exportCsv(k === 'move' ? 'strong' : undefined);
+}
+
 function exportCsv(kind){
   if(!workouts.length){ toast(t('csvNoData', 'Nie ma jeszcze treningów do wyeksportowania')); return; }
   const files = kind === 'strong' ? [csvStrongFile()] : csvExportFiles();
