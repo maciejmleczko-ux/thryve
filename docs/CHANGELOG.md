@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.111.1 (2026-11-13)
+- **Aktualna wersja:** 4.111.2 (2026-11-13)
 - **Liczba wersji:** 270 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,12 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.111.2 · PATCH · 2026-11-13
+
+Eksport CSV: drugi wiersz w Ustawieniach, „Przenieś historię do innej aplikacji” (`csvStrongFile`, `exportCsv('strong')`). Plik w układzie eksportu Strong (Date, Workout Name, Duration, Exercise Name, Set Order, Weight (kg), Reps, Distance, Seconds, Notes, Workout Notes, RPE), przecinek i kropka, data z godziną, ciężary w kg; służy do importu w Strong, Hevy i podobnych. Wczytuje się z powrotem przez własny import Mekkio (sprawdzone). Nie testowane w cudzych aplikacjach. Dopisane zdanie do niewydanego wpisu Co nowego 4.111.0.
+
+**Commity:** jeden commit tej wersji.
 
 ### 4.111.1 · PATCH · 2026-11-13
 
