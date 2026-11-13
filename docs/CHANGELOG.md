@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.110.8 (2026-11-10)
+- **Aktualna wersja:** 4.111.0 (2026-11-13)
 - **Liczba wersji:** 270 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,16 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.111.0 · MINOR · 2026-11-13
+
+**Dla użytkownika (wpis „Co nowego”):**
+
+> Dodano: Wyeksportuj swoje treningi i wagę do pliku CSV, który otworzysz w Excelu, Numbers albo Arkuszach Google: w Ustawieniach, w sekcji Dane i prywatność, wybierz „Eksportuj do arkusza”.
+
+Eksport do arkusza (`exportCsv`, `csvExportFiles`), prośba użytkownika. Wiersz = seria: data, trening, plan, ćwiczenie, grupa, numer serii, ciężar (kg), powtórzenia, dodatkowy ciężar, czas serii, wersja, notatka, czas treningu. Drugi plik z wagą ciała, jeśli jest wpisana. Polski układ (średnik, przecinek dziesiętny) albo angielski (przecinek, kropka) zależnie od języka aplikacji, BOM UTF-8, zabezpieczenie przed formułami w polach tekstowych. Natywnie przez istniejące wtyczki Filesystem i Share (arkusz udostępniania iOS), w przeglądarce zwykłe pobranie. Bez nowych wtyczek i uprawnień, bez nowego zbierania danych.
+
+**Commity:** jeden commit tej wersji.
 
 ### 4.110.8 · PATCH · 2026-11-10
 

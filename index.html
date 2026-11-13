@@ -10687,9 +10687,13 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.110.8";
+const APP_VERSION = "4.111.0";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
+  "4.111.0": {
+    pl: { headline:'Eksport danych do Excela', added:['Wyeksportuj swoje treningi i wagę do pliku CSV, który otworzysz w Excelu, Numbers albo Arkuszach Google: w Ustawieniach, w sekcji Dane i prywatność, wybierz „Eksportuj do arkusza”.'] },
+    en: { headline:'Export your data to Excel', added:['Export your workouts and weight to a CSV file you can open in Excel, Numbers or Google Sheets: in Settings, under Data and privacy, choose “Export to spreadsheet”.'] },
+  },
   "4.110.0": {
     pl: { headline:'Hex Bar Deadlift i drobne ulepszenia', added:['Wybierz nowe ćwiczenie Hex Bar Deadlift, czyli martwy ciąg ze sztangą heksagonalną, z ikoną i opisem wykonania.','Zamień na dziś także ćwiczenie dodane ręcznie do treningu, gdy na siłowni brakuje sprzętu.'], improved:['Znajdź Seated Row i Chest-Supported Row Machine, wpisując „low row”, czyli nazwę z maszyn Technogym.','Zobacz na górze listy zamian ćwiczenia z tym samym ruchem, a niżej z tej samej rodziny.'], fixed:['Naprawiono znikanie ćwiczenia z listy dodawania po zamianie go na dziś: oryginał można znów dodać.'] },
     en: { headline:'Hex Bar Deadlift and small improvements', added:['Pick the new Hex Bar Deadlift (trap bar deadlift), with an icon and a how-to.','Swap an exercise you added by hand to today\'s workout when the gym is missing the equipment.'], improved:['Find Seated Row and Chest-Supported Row Machine by typing "low row", the name used on Technogym machines.','See exercises with the same movement at the top of the swap list, then the ones from the same family.'], fixed:['Fixed an exercise vanishing from the add list after you swapped it for today: you can now add the original again.'] },
@@ -12565,7 +12569,7 @@ Object.assign(T_EN, {
   pfConn: 'CONNECTIONS', pfConnected: 'Connected', pfSettings: 'Settings and account', pfSettingsSub: 'Sounds, data, account', pfWeightUpd: d => `Last weight update: ${d}`,
   setTitle: 'SETTINGS', setNotif: 'NOTIFICATIONS AND SOUND', setData: 'DATA AND PRIVACY', setHelp: 'HELP', setAccount: 'ACCOUNT',
   setReminder: 'Workout reminder', setSounds: 'Sounds', setSoundsSub: 'Rest countdown and end of workout', setHealth: 'Apple Health', setHealthSub: 'Weight and calories from your watch',
-  setExportCloud: 'Download my data', setExportCloudSub: 'Backup in a file', setExportLocal: 'Create a backup', setExportLocalSub: '.json file',
+  setExportCloud: 'Download my data', setExportCloudSub: 'Backup in a file', setExportLocal: 'Create a backup', setExportLocalSub: '.json file', setExportCsv: 'Export to spreadsheet', setExportCsvSub: 'Workouts and weight, .csv file (Excel)', csvNoData: 'No workouts to export yet', csvShareTitle: 'Mekkio data (CSV)', csvDownloaded: 'CSV file downloaded', fileSaveFail: 'Could not save the file',
   setImport: 'Restore a backup', setImportSub: 'Backup file', setPrivacy: 'Privacy policy',
   setBackupCloud: 'Your workouts and plans are in the cloud. Here you can download your data in one file.', setBackupLocal: 'Without an account your data stays on this phone only. Make a backup or create an account.',
   setFootCloud: 'Your data syncs with the cloud', setFootLocal: 'Your data stays on this phone only',
@@ -12600,6 +12604,7 @@ function buildProfileSettingsV2(animate){
   const sec2 = sec('', t('setData', 'DANE I PRYWATNOŚĆ'),
     row({ id: 'acctHealthRows', on: 'openHealthSheet()', n: t('setHealth', 'Apple Zdrowie'), s: t('setHealthSub', 'Waga i kalorie z zegarka'), hidden: !showHealth }) +
     row({ on: 'exportData()', n: t('setExportLocal', 'Utwórz kopię zapasową'), nId: 'acctExportLabel', s: t('setExportLocalSub', 'Plik .json'), sId: 'setExportSub' }) +
+    row({ on: 'exportCsv()', n: t('setExportCsv', 'Eksportuj do arkusza'), s: t('setExportCsvSub', 'Treningi i waga, plik .csv (Excel)') }) +
     row({ id: 'acctImportRow', on: "document.getElementById('importFile').click()", n: t('setImport', 'Wczytaj kopię'), s: t('setImportSub', 'Plik z kopią zapasową') }) +
     row({ id: 'setImportAppRow', on: 'openImportAppSheet()', n: t('setImportApp', 'Importuj z innej aplikacji'), s: t('setImportAppSub', 'Strong, Hevy (plik CSV)') }) +
     row({ href: './polityka-prywatnosci.html', n: t('setPrivacy', 'Polityka prywatności') }), 2,
@@ -27719,6 +27724,67 @@ function exportData(){
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   toast(t('backupDownloaded','Kopia zapasowa pobrana'));
+}
+
+/* Eksport do arkusza (CSV, otwiera się w Excelu, Numbers i Arkuszach Google): jeden wiersz = jedna seria.
+   Polski Excel oczekuje średnika i przecinka dziesiętnego, angielski przecinka i kropki, stąd wybór po języku aplikacji.
+   BOM na początku, żeby polskie znaki nie zamieniły się w krzaki. Ciężary zawsze w kg (dane tak są zapisane). Pola tekstowe
+   zaczynające się od = + - @ dostają apostrof, żeby arkusz nie wykonał ich jak formuły. */
+function csvExportFiles(){
+  const pl = LANG !== 'en', sep = pl ? ';' : ',';
+  const num = n => { const v = Math.round((Number(n) || 0) * 100) / 100; return String(v).replace('.', pl ? ',' : '.'); };
+  const txt = v => {
+    let x = String(v == null ? '' : v).replace(/\r?\n/g, ' ');
+    if(/^[=+\-@\t]/.test(x)) x = "'" + x;
+    return /[";,\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x;
+  };
+  const line = a => a.join(sep);
+  const head = pl
+    ? ['Data','Trening','Plan','Ćwiczenie','Grupa mięśniowa','Seria','Ciężar (kg)','Powtórzenia','Dodatkowy ciężar (kg)','Czas serii (s)','Wersja','Notatka do ćwiczenia','Czas treningu (min)']
+    : ['Date','Workout','Plan','Exercise','Muscle group','Set','Weight (kg)','Reps','Extra weight (kg)','Set time (s)','Version','Exercise note','Workout duration (min)'];
+  const rows = [line(head)];
+  [...workouts].sort((a, b) => String(a.date).localeCompare(String(b.date))).forEach(w => {
+    const plan = trainingPlans.find(p => p.id === w.planId), planName = plan ? (plan.name || '') : '';
+    (w.exercises || []).forEach(e => (e.sets || []).forEach((st, i) => {
+      rows.push(line([
+        txt(w.date), txt(w.day), txt(planName), txt(e.name), txt(e.group), i + 1,
+        st.weight > 0 ? num(st.weight) : '', st.reps > 0 ? st.reps : '',
+        st.extraKg ? num(st.extraKg) : '', st.durationSec > 0 ? Math.round(st.durationSec) : '',
+        txt(e.version), i === 0 ? txt(e.notes) : '', i === 0 && w.durationMin ? Math.round(w.durationMin) : ''
+      ]));
+    }));
+  });
+  const files = [{ name: 'mekkio-treningi-' + todayStr() + '.csv', text: rows.join('\r\n') }];
+  const wl = [...weightLog].filter(x => x && x.date && x.kg > 0).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  if(wl.length) files.push({ name: 'mekkio-waga-' + todayStr() + '.csv',
+    text: [line(pl ? ['Data','Waga (kg)'] : ['Date','Weight (kg)'])].concat(wl.map(x => line([txt(x.date), num(x.kg)]))).join('\r\n') });
+  return files.map(f => ({ name: f.name, text: '\uFEFF' + f.text }));
+}
+function exportCsv(){
+  if(!workouts.length){ toast(t('csvNoData', 'Nie ma jeszcze treningów do wyeksportowania')); return; }
+  const files = csvExportFiles();
+  // WKWebView ignores <a download>: write to the cache dir and hand the files to the iOS share sheet (see exportData)
+  const FS = capPlugin('Filesystem'), SH = capPlugin('Share');
+  if(IS_NATIVE && FS && SH){
+    (async()=>{
+      try{
+        const uris = [];
+        for(const f of files) uris.push((await FS.writeFile({ path: f.name, data: f.text, directory: 'CACHE', encoding: 'utf8' })).uri);
+        await SH.share({ title: t('csvShareTitle', 'Dane z Mekkio (CSV)'), files: uris });
+      }catch(e){
+        if(!/cancel/i.test(String(e && e.message || e))){ console.error('exportCsv', e); toast(t('fileSaveFail', 'Nie udało się zapisać pliku')); }
+      }
+    })();
+    return;
+  }
+  files.forEach((f, i) => setTimeout(() => {
+    const url = URL.createObjectURL(new Blob([f.text], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = f.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }, i * 400));
+  toast(t('csvDownloaded', 'Plik CSV pobrany'));
 }
 
 /* A backup import used to run through a two-button confirm() where
