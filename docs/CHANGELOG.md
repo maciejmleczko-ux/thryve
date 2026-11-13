@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.111.7 (2026-11-13)
+- **Aktualna wersja:** 4.111.8 (2026-11-13)
 - **Liczba wersji:** 270 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,12 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.111.8 · PATCH · 2026-11-13
+
+Okno logowania serii: odliczanie do automatycznego zapisu to teraz obrys biegnący wokół wiersza (SVG, `stroke-dashoffset`, 3 s, od środka górnej krawędzi, `lgRingFit`) zamiast paska pod wierszem. Zapisana seria ma zielone tło jak pastylka Powtórzenia (`--m-reps`), biały tekst i sam biały ptaszek wielkości dawnego kółka (klasa `is-done`), a w chwili zapisu zielone koło rośnie spod ptaszka i zalewa wiersz (0,7 s, tokeny `--m-dur-fill`, `--m-ease-fill`), tekst robi się biały, gdy zieleń jest pod nim, a ptaszek wskakuje z lekkim obrotem. Edycja zostaje pomarańczowa, pozostałe serie podczas edycji białe i przygaszone. Makieta: `mockups/seria-odliczanie-obrys.html`. Bez wpisu Co nowego. Niesprawdzone w aplikacji na iPhonie.
+
+**Commity:** jeszcze nie zacommitowane.
 
 ### 4.111.7 · PATCH · 2026-11-13
 

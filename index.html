@@ -56,6 +56,7 @@
   --m-ease-throw:cubic-bezier(.32,.72,0,1);    /* sheet closed by a finger throw */
   --m-ease-land:cubic-bezier(0,0,.3,1);        /* swipe fly-in: arrives at speed, lands softly */
   --m-ease-spring:cubic-bezier(.22,1.2,.36,1); /* tiny overshoot: snap-to-page, check tick, tags */
+  --m-ease-fill:cubic-bezier(.5,0,.2,1);       /* rozlew zieleni po zapisie serii: wolny start, szybki środek, miękkie domknięcie */
   --m-dur-press-in:.1s;    /* finger down */
   --m-dur-press-out:.16s;  /* finger up (slower, soft) */
   --m-dur-quick:.15s;      /* colour / background state, small toggles */
@@ -66,6 +67,7 @@
   --m-dur-pop:.5s;         /* success pop, icon spin, finish-screen items */
   --m-dur-tile:.7s;        /* big tiles / hero */
   --m-dur-draw:.9s;        /* chart line draw */
+  --m-dur-fill:.7s;        /* rozlew zieleni po zapisie serii */
   --m-dur-auto:3s;         /* odliczanie do automatycznego zapisu serii (== LG_COMMIT_MS) */
   /* top inset + 5px extra so headers sit clear of the iOS 27 status-bar blur band (one knob) */
   --top-inset:calc(env(safe-area-inset-top, 0px) + 5px);
@@ -3222,15 +3224,24 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-set-wrap{position:relative;border-radius:16px;overflow:hidden;}
 .lg-set-del{position:absolute;inset:0;background:var(--m-orange);display:flex;align-items:center;justify-content:flex-end;padding-right:20px;color:var(--m-white);}
 .lg-set-del svg{width:22px;height:22px;display:block;}
-.lg-set{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box;min-height:52px;overflow:hidden;background:var(--m-white);border:1.5px solid var(--m-orange);border-radius:16px;padding:10px 16px;text-align:left;font-family:inherit;cursor:pointer;touch-action:pan-y;transition:background-color var(--m-dur-quick) ease,border-color var(--m-dur-quick) ease,opacity var(--m-dur-quick) ease;}
+.lg-set{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box;min-height:52px;background:var(--m-white);border:1.5px solid var(--m-orange);border-radius:16px;padding:10px 16px;text-align:left;font-family:inherit;cursor:pointer;touch-action:pan-y;transition:background-color var(--m-dur-fade) ease,border-color var(--m-dur-fade) ease,opacity var(--m-dur-quick) ease;}
 .lg-set-l{width:76px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(52,57,65,.71);transition:color var(--m-dur-quick) ease;}
 .lg-set-v{flex:1;min-width:0;font-size:var(--m-fs-md);color:var(--m-ink);font-variant-numeric:tabular-nums;transition:color var(--m-dur-quick) ease;}
 .lg-set-v b{font-weight:600;}
 /* ptaszek = osobny przycisk: pole dotyku 44 px, glif 24 px */
-.lg-set-c{position:relative;width:44px;height:44px;margin:-10px -10px -10px 0;flex:none;padding:0;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.lg-set-c{position:relative;z-index:1;width:44px;height:44px;margin:-10px -10px -10px 0;flex:none;padding:0;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
 .lg-set-c i{width:24px;height:24px;border-radius:50%;flex:none;box-sizing:border-box;background:var(--m-orange);border:1.5px solid var(--m-orange);color:var(--m-white);display:flex;align-items:center;justify-content:center;transition:transform var(--m-dur-press-out) var(--m-ease),background-color var(--m-dur-quick) ease,border-color var(--m-dur-quick) ease;}
 .lg-set-c svg{width:12px;height:12px;display:block;}
-.lg-set-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--m-orange);transform:scaleX(0);transform-origin:left;opacity:0;pointer-events:none;}
+.lg-set-l,.lg-set-v{position:relative;z-index:1;}   /* tekst i ptaszek nad zielonym kołem zapisu (iOS rysował koło na wierzchu) */
+/* odliczanie do automatycznego zapisu: obrys biegnie wokół wiersza od środka górnej krawędzi (ścieżkę dopasowuje lgRingFit) */
+.lg-set-ring{position:absolute;left:-1.5px;top:-1.5px;pointer-events:none;overflow:visible;}
+.lg-set-ring path{fill:none;stroke:var(--m-orange);stroke-width:3;stroke-linecap:round;opacity:0;stroke-dasharray:1;stroke-dashoffset:1;}
+/* seria zapisana: ciemna zieleń, biały tekst, sam biały ptaszek (bez kółka); odwrotność edycji, która jest pomarańczowa */
+.lg-set.is-done:not(.is-dim){background:var(--m-reps);border-color:var(--m-reps);}
+.lg-set.is-done:not(.is-dim) .lg-set-l,.lg-set.is-done:not(.is-dim) .lg-set-v{color:var(--m-white);}
+.lg-set.is-done:not(.is-dim) .lg-set-l{font-weight:500;}   /* mała etykieta na zieleni pastylki: półgruba dla kontrastu */
+.lg-set.is-done:not(.is-dim) .lg-set-c i{background:transparent;border-color:transparent;}
+.lg-set.is-done:not(.is-dim) .lg-set-c svg{width:24px;height:24px;}
 .lg-set.is-blank{background:var(--m-grey-75);border-color:transparent;}
 .lg-set.is-blank .lg-set-v{color:var(--m-grey-450);}
 .lg-set.is-blank .lg-set-c i{background:transparent;border-color:var(--m-grey-300);}
@@ -3245,16 +3256,23 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-set.is-editing .lg-set-l,.lg-set.is-editing .lg-set-v{color:var(--m-white);}
 .lg-set.is-editing .lg-set-c i{background:transparent;border-color:var(--m-white);}
 .lg-set.is-editing .lg-set-c svg{display:block;}
-.lg-set.is-editing .lg-set-bar{background:var(--m-white);}
+.lg-set.is-editing .lg-set-ring path{stroke:var(--m-white);}
 .lg-set.is-dim{border-color:var(--m-grey-200);}   /* podczas edycji pozostałe serie są przygaszone: 70% krycia tylko na zawartości, tło wiersza zostaje pełne (pod wierszem leży pomarańczowa warstwa kosza i przez przezroczysty wiersz dawała poświatę) */
 .lg-set.is-dim > *{opacity:.7;}
 .lg-set.is-dim .lg-set-c i{background:var(--m-grey-450);border-color:var(--m-grey-450);}
 .lg-set-x{margin-left:6px;}
 @media (prefers-reduced-motion: no-preference){
-  .lg-set.is-counting .lg-set-bar{opacity:1;animation:lgSetCount var(--m-dur-auto) linear forwards;}
-  @keyframes lgSetCount{to{transform:scaleX(1);}}
-  .lg-set.is-just .lg-set-c svg{animation:lgSetTick var(--m-dur-pop) var(--m-ease-spring) backwards;}
-  @keyframes lgSetTick{from{opacity:0;transform:scale(.4);}to{opacity:1;transform:scale(1);}}
+  .lg-set.is-counting .lg-set-ring path{opacity:1;animation:lgSetCount var(--m-dur-auto) linear forwards;}
+  @keyframes lgSetCount{to{stroke-dashoffset:0;}}
+  .lg-set.is-just{overflow:hidden;}
+  .lg-set.is-done.is-just:not(.is-dim){animation:lgSetSettle var(--m-dur-fill) forwards;}   /* tło zmienia kolor jednorazowo na końcu rozlewu */
+  @keyframes lgSetSettle{0%,99%{background-color:var(--m-white);}100%{background-color:var(--m-reps);}}
+  .lg-set.is-just::before{content:"";position:absolute;z-index:0;left:calc(100% - 28px);top:50%;width:760px;height:760px;margin:-380px 0 0 -380px;border-radius:50%;background:var(--m-reps);pointer-events:none;transform:scale(.03);animation:lgSetFill var(--m-dur-fill) var(--m-ease-fill) forwards;}   /* zielone koło rośnie spod ptaszka i zalewa wiersz */
+  @keyframes lgSetFill{0%{transform:scale(.03);opacity:1;}99%{opacity:1;}100%{transform:scale(1);opacity:0;}}   /* na końcu koło znika: kolor wiersza przejmuje tło (bez warstwy nad tekstem) */
+  .lg-set.is-just .lg-set-l,.lg-set.is-just .lg-set-v{animation:lgSetTxt .2s ease calc(var(--m-dur-fill) * .62) backwards;}   /* tekst robi się biały, gdy zieleń już pod nim jest */
+  @keyframes lgSetTxt{from{color:var(--m-ink);}}
+  .lg-set.is-just .lg-set-c svg{animation:lgSetTick var(--m-dur-pop) var(--m-ease-spring) calc(var(--m-dur-fill) * .35) backwards;}
+  @keyframes lgSetTick{from{opacity:0;transform:scale(.3) rotate(-25deg);}to{opacity:1;transform:none;}}
 }
 .lg-hint{margin:0;min-height:1.4em;text-align:center;font-size:var(--m-fs-2xs);letter-spacing:.07em;text-transform:uppercase;color:var(--m-black);transition:opacity var(--m-dur-fade) ease;}
 .lg-hint.is-out{opacity:0;}
@@ -10687,7 +10705,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.111.7";
+const APP_VERSION = "4.111.8";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.111.0": {
@@ -14526,7 +14544,7 @@ function lgBuildRuler(host, step, value, onUser, opts){
 
 /* ---- current-set composer state ---- */
 let lg = null; // { editIdx, timer, ruler, step, w, r, wt, rt, wPre, rPre }
-const LG_COMMIT_MS = 3000;   // == --m-dur-auto (pasek odliczania pod wierszem serii)
+const LG_COMMIT_MS = 3000;   // == --m-dur-auto (obrys odliczania wokół wiersza serii)
 function lgBw(){ return !!popupExercise && popupExercise.equipment === 'masa ciała'; }
 function lgFirstBlank(){
   const sv = popupExercise.setValues, bw = lgBw();
@@ -14616,10 +14634,18 @@ function lgSchedule(delay){
   }, delay === undefined ? LG_COMMIT_MS : delay);
   lgBarSync();
 }
-/* pasek pod wierszem, który się wypełnia: tylko gdy czeka zapis automatyczny (restart przy każdej zmianie) */
+/* obrys wiersza, który się wypełnia: tylko gdy czeka zapis automatyczny (restart przy każdej zmianie) */
+function lgRingFit(row){
+  const svg = row.querySelector('.lg-set-ring'); if(!svg) return;
+  const w = row.offsetWidth, h = row.offsetHeight, r = 16, a = 1.5, W = w - 3, H = h - 3;
+  if(!w) return;
+  svg.setAttribute('width', w); svg.setAttribute('height', h); svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.firstElementChild.setAttribute('d', `M${a + W/2},${a} H${a + W - r} A${r},${r} 0 0 1 ${a + W},${a + r} V${a + H - r} A${r},${r} 0 0 1 ${a + W - r},${a + H} H${a + r} A${r},${r} 0 0 1 ${a},${a + H - r} V${a + r} A${r},${r} 0 0 1 ${a + r},${a} Z`);
+}
 function lgBarSync(){
   const row = document.querySelector('#lgSets .lg-set.is-live');
   if(!row) return;
+  lgRingFit(row);
   row.classList.remove('is-counting');
   if(lg && lg.timer && lgReady()){ void row.offsetWidth; row.classList.add('is-counting'); }
   lgHintSync();
@@ -14855,10 +14881,10 @@ function lgSetsHtml(){
   ex.setValues.forEach((sv, i)=>{
     const logged = setIsLogged(sv, bw);
     const live = lg.editIdx === i || (lg.editIdx === null && !logged && i === active);
-    const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '') + (live ? ' is-live' : '') + (lg.editIdx !== null && lg.editIdx !== i ? ' is-dim' : '') + (just === i ? ' is-just' : '');
+    const cls = 'lg-set' + (logged ? '' : ' is-blank') + (!logged && i === active ? ' is-active' : '') + (lg.editIdx === i ? ' is-editing' : '') + (logged && lg.editIdx !== i ? ' is-done' : '') + (live ? ' is-live' : '') + (lg.editIdx !== null && lg.editIdx !== i ? ' is-dim' : '') + (just === i ? ' is-just' : '');
     const val = logged ? (sv.durationSec > 0 ? escHtml(ex.metrics && ex.metrics.length ? cardioSetLine(sv, ex.name) : fmtDur(sv.durationSec, sv.perSide)) : bw ? `${escHtml(String(sv.reps))} ${t('repsUnit','powt.')}${sv.extraKg ? `<span class="lg-set-x">${escHtml(fmtExtraKg(sv.extraKg))}</span>` : ''}` : `<b>${escHtml(fmtGymWeight(parseFloat(sv.weight)||0))}${wUnit()}</b> × ${escHtml(String(sv.reps))}`) : '—';
     html += `<div class="lg-set-wrap" data-i="${i}"><div class="lg-set-del" aria-hidden="true">${LG_ICONS.trash}</div>
-      <div class="${cls}" role="button" tabindex="0" onclick="lgTapSet(${i})"><span class="lg-set-l">${t('seriesLabel', `Seria ${i+1}`, i+1)}</span><span class="lg-set-v">${val}</span><button type="button" class="lg-set-c" onclick="event.stopPropagation();lgTickSet(${i})" aria-label="${escHtml(t('gymTickSet','Zapisz serię'))}"><i>${LG_ICONS.check}</i></button>${live ? '<span class="lg-set-bar"></span>' : ''}</div></div>`;
+      <div class="${cls}" role="button" tabindex="0" onclick="lgTapSet(${i})"><span class="lg-set-l">${t('seriesLabel', `Seria ${i+1}`, i+1)}</span><span class="lg-set-v">${val}</span><button type="button" class="lg-set-c" onclick="event.stopPropagation();lgTickSet(${i})" aria-label="${escHtml(t('gymTickSet','Zapisz serię'))}"><i>${LG_ICONS.check}</i></button>${live ? '<svg class="lg-set-ring" aria-hidden="true"><path pathLength="1"/></svg>' : ''}</div></div>`;
   });
   return html;
 }

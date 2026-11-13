@@ -106,6 +106,7 @@ Wszystkie krzywe i czasy siedzą w `:root` w `index.html` (blok „Mekkio motion
 | `--m-ease-throw` | zamknięcie sheetu rzutem palca | `MOTION.throw` |
 | `--m-ease-land` | wlot przy swipe (wpada szybko, miękko ląduje) | `MOTION.land` |
 | `--m-ease-spring` | mały overshoot: dociągnięcie strony, ptaszek, tagi | `MOTION.spring` |
+| `--m-ease-fill` | rozlew zieleni po zapisie serii (koło spod ptaszka) | — |
 | `ease` (słowo kluczowe) | zmiany koloru / tła / opacity | — |
 
 | Czas | Wartość | Do czego |
@@ -119,7 +120,8 @@ Wszystkie krzywe i czasy siedzą w `:root` w `index.html` (blok „Mekkio motion
 | `--m-dur-pop` | .5s | „sukces”, obrót ikony, elementy ekranu końca treningu |
 | `--m-dur-tile` | .7s | duże kafle / hero |
 | `--m-dur-draw` | .9s | rysowanie linii wykresu |
-| `--m-dur-auto` | 3s | odliczanie do automatycznego zapisu serii (pasek pod wierszem; równe `LG_COMMIT_MS`) |
+| `--m-dur-fill` | .7s | rozlew zieleni po zapisie serii (koło spod ptaszka zalewa wiersz) |
+| `--m-dur-auto` | 3s | odliczanie do automatycznego zapisu serii (obrys wokół wiersza; równe `LG_COMMIT_MS`) |
 
 Potrzebujesz innej wartości? Najpierw zapytaj, czy na pewno. Jeśli tak, dodaj nowy token do `:root` i do tej tabeli, nigdy lokalnej liczby.
 
