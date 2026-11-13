@@ -10687,12 +10687,12 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.111.3";
+const APP_VERSION = "4.111.4";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.111.0": {
-    pl: { headline:'Eksport danych do Excela', added:['Wyeksportuj swoje treningi i wagę do pliku CSV, który otworzysz w Excelu, Numbers albo Arkuszach Google: w Ustawieniach, w sekcji Dane i prywatność, wybierz „Eksportuj do arkusza”.','Zmieniasz aplikację? Wybierz „Eksportuj dane” i zaimportuj plik w formacie Strong tam, dokąd się przenosisz.'] },
-    en: { headline:'Export your data to Excel', added:['Export your workouts and weight to a CSV file you can open in Excel, Numbers or Google Sheets: in Settings, under Data and privacy, choose “Export to spreadsheet”.','Switching apps? Choose “Export data” and import the Strong-format file where you are going.'] },
+    pl: { headline:'Eksport danych do Excela', added:['Wyeksportuj swoje treningi i wagę do pliku CSV, który otworzysz w Excelu, Numbers albo Arkuszach Google: w Ustawieniach, w sekcji Dane i prywatność, wybierz „Eksportuj do arkusza”.','Zmieniasz aplikację? Wybierz „Eksportuj dane” i zaimportuj plik tam, dokąd się przenosisz.'] },
+    en: { headline:'Export your data to Excel', added:['Export your workouts and weight to a CSV file you can open in Excel, Numbers or Google Sheets: in Settings, under Data and privacy, choose “Export to spreadsheet”.','Switching apps? Choose “Export data” and import the file where you are going.'] },
   },
   "4.110.0": {
     pl: { headline:'Hex Bar Deadlift i drobne ulepszenia', added:['Wybierz nowe ćwiczenie Hex Bar Deadlift, czyli martwy ciąg ze sztangą heksagonalną, z ikoną i opisem wykonania.','Zamień na dziś także ćwiczenie dodane ręcznie do treningu, gdy na siłowni brakuje sprzętu.'], improved:['Znajdź Seated Row i Chest-Supported Row Machine, wpisując „low row”, czyli nazwę z maszyn Technogym.','Zobacz na górze listy zamian ćwiczenia z tym samym ruchem, a niżej z tej samej rodziny.'], fixed:['Naprawiono znikanie ćwiczenia z listy dodawania po zamianie go na dziś: oryginał można znów dodać.'] },
@@ -12569,7 +12569,7 @@ Object.assign(T_EN, {
   pfConn: 'CONNECTIONS', pfConnected: 'Connected', pfSettings: 'Settings and account', pfSettingsSub: 'Sounds, data, account', pfWeightUpd: d => `Last weight update: ${d}`,
   setTitle: 'SETTINGS', setNotif: 'NOTIFICATIONS AND SOUND', setData: 'DATA AND PRIVACY', setHelp: 'HELP', setAccount: 'ACCOUNT',
   setReminder: 'Workout reminder', setSounds: 'Sounds', setSoundsSub: 'Rest countdown and end of workout', setHealth: 'Apple Health', setHealthSub: 'Weight and calories from your watch',
-  setExportCloud: 'Download my data', setExportCloudSub: 'Backup in a file', setExportLocal: 'Create a backup', setExportLocalSub: '.json file', setExportCsv: 'Export to spreadsheet', setExportCsvSub: 'Workouts and weight, .csv file (Excel)', setExportMove: 'Export data', setExportMoveSub: 'History for another app, CSV in Strong format', csvShareTitleMove: 'Workout history from Mekkio', csvNoData: 'No workouts to export yet', csvShareTitle: 'Mekkio data (CSV)', csvDownloaded: 'CSV file downloaded', fileSaveFail: 'Could not save the file',
+  setExportCloud: 'Download my data', setExportCloudSub: 'Backup in a file', setExportLocal: 'Create a backup', setExportLocalSub: '.json file', setExportCsv: 'Export to spreadsheet', setExportCsvSub: 'Workouts and weight, .csv file (Excel)', setExportMove: 'Export data', setExportMoveSub: 'Workout history for another app (CSV)', csvShareTitleMove: 'Workout history from Mekkio', csvNoData: 'No workouts to export yet', csvShareTitle: 'Mekkio data (CSV)', csvDownloaded: 'CSV file downloaded', fileSaveFail: 'Could not save the file',
   setImport: 'Restore a backup', setImportSub: 'Backup file', setPrivacy: 'Privacy policy',
   setBackupCloud: 'Your workouts and plans are in the cloud. Here you can download your data in one file.', setBackupLocal: 'Without an account your data stays on this phone only. Make a backup or create an account.',
   setFootCloud: 'Your data syncs with the cloud', setFootLocal: 'Your data stays on this phone only',
@@ -12605,7 +12605,7 @@ function buildProfileSettingsV2(animate){
     row({ id: 'acctHealthRows', on: 'openHealthSheet()', n: t('setHealth', 'Apple Zdrowie'), s: t('setHealthSub', 'Waga i kalorie z zegarka'), hidden: !showHealth }) +
     row({ on: 'exportData()', n: t('setExportLocal', 'Utwórz kopię zapasową'), nId: 'acctExportLabel', s: t('setExportLocalSub', 'Plik .json'), sId: 'setExportSub' }) +
     row({ on: 'exportCsv()', n: t('setExportCsv', 'Eksportuj do arkusza'), s: t('setExportCsvSub', 'Treningi i waga, plik .csv (Excel)') }) +
-    row({ on: "exportCsv('strong')", n: t('setExportMove', 'Eksportuj dane'), s: t('setExportMoveSub', 'Historia do innej aplikacji, CSV w formacie Strong') }) +
+    row({ on: "exportCsv('strong')", n: t('setExportMove', 'Eksportuj dane'), s: t('setExportMoveSub', 'Historia treningów do innej aplikacji (CSV)') }) +
     row({ id: 'acctImportRow', on: "document.getElementById('importFile').click()", n: t('setImport', 'Wczytaj kopię'), s: t('setImportSub', 'Plik z kopią zapasową') }) +
     row({ id: 'setImportAppRow', on: 'openImportAppSheet()', n: t('setImportApp', 'Importuj z innej aplikacji'), s: t('setImportAppSub', 'Strong, Hevy (plik CSV)') }) +
     row({ href: './polityka-prywatnosci.html', n: t('setPrivacy', 'Polityka prywatności') }), 2,
