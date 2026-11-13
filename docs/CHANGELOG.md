@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.111.6 (2026-11-13)
+- **Aktualna wersja:** 4.111.7 (2026-11-13)
 - **Liczba wersji:** 270 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,12 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.111.7 · PATCH · 2026-11-13
+
+„Eksportuj dane”: zamiast okna od dołu małe menu przy wierszu (mPopover, Figma 479:15847) z dwiema pozycjami: Arkusz i Inna aplikacja; wybór od razu eksportuje. Bez osobnego wpisu Co nowego.
+
+**Commity:** jeden commit tej wersji.
 
 ### 4.111.6 · PATCH · 2026-11-13
 
