@@ -10687,7 +10687,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.111.0";
+const APP_VERSION = "4.111.1";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.111.0": {
@@ -27740,14 +27740,16 @@ function csvExportFiles(){
   };
   const line = a => a.join(sep);
   const head = pl
-    ? ['Data','Trening','Plan','Ćwiczenie','Grupa mięśniowa','Seria','Ciężar (kg)','Powtórzenia','Dodatkowy ciężar (kg)','Czas serii (s)','Wersja','Notatka do ćwiczenia','Czas treningu (min)']
-    : ['Date','Workout','Plan','Exercise','Muscle group','Set','Weight (kg)','Reps','Extra weight (kg)','Set time (s)','Version','Exercise note','Workout duration (min)'];
+    ? ['Data','Trening','Plan','Ćwiczenie','Grupa mięśniowa','Sprzęt','Seria','Ciężar (kg)','Powtórzenia','Dodatkowy ciężar (kg)','Czas serii (s)','Wersja','Notatka do ćwiczenia','Czas treningu (min)']
+    : ['Date','Workout','Plan','Exercise','Muscle group','Equipment','Set','Weight (kg)','Reps','Extra weight (kg)','Set time (s)','Version','Exercise note','Workout duration (min)'];
+  const EQ_EN = { 'maszyny':'machine', 'sztanga':'barbell', 'hantle':'dumbbells', 'gumy':'bands', 'kettlebell':'kettlebell', 'masa ciała':'bodyweight' };
+  const equipOf = name => { const x = getExerciseLibrary().find(l => l.name === name), q = x && x.equipment ? String(x.equipment) : ''; return pl ? q : (EQ_EN[q] || q); };
   const rows = [line(head)];
   [...workouts].sort((a, b) => String(a.date).localeCompare(String(b.date))).forEach(w => {
     const plan = trainingPlans.find(p => p.id === w.planId), planName = plan ? (plan.name || '') : '';
     (w.exercises || []).forEach(e => (e.sets || []).forEach((st, i) => {
       rows.push(line([
-        txt(w.date), txt(w.day), txt(planName), txt(e.name), txt(e.group), i + 1,
+        txt(w.date), txt(w.day), txt(planName), txt(e.name), txt(e.group), txt(equipOf(e.name)), i + 1,
         st.weight > 0 ? num(st.weight) : '', st.reps > 0 ? st.reps : '',
         st.extraKg ? num(st.extraKg) : '', st.durationSec > 0 ? Math.round(st.durationSec) : '',
         txt(e.version), i === 0 ? txt(e.notes) : '', i === 0 && w.durationMin ? Math.round(w.durationMin) : ''
