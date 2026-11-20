@@ -10705,7 +10705,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.111.8";
+const APP_VERSION = "4.111.9";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.111.0": {
@@ -20851,7 +20851,7 @@ function dashboardModelCore(now){
     const rec = todays.length ? workoutRecord(todays[todays.length-1]) : null;
     const recCount = todays.length ? workoutRecordCount(todays[todays.length-1]) : 0;
     hero = { state:'done', ...base, workouts: todays.length, runs: todaysRuns.length, volumeKg: Math.round(vol), reps, sets: nSets,
-             minutes: Math.round(min), exerciseCount: exs, kcal: kcalAny ? Math.round(kcalSum) : null,
+             minutes: Math.round(min), exerciseCount: exs, workoutName: todays.length ? dashWorkoutPlanName(todays[todays.length-1]) : null, kcal: kcalAny ? Math.round(kcalSum) : null,
              record: rec ? { kind:rec.kind, unit:rec.unit, name:rec.name, value:rec.value, delta:rec.delta, display: gymFinRecordFrom(rec) } : null, recordCount: recCount };
   } else if(!hasPlan){
     hero = hasHistory
@@ -20963,7 +20963,7 @@ function dashHeroHtml(m, animate){
       if(h.recordCount > 0) chips.push(dashStat(ph('trophy'), t('dashRecordsN', `${h.recordCount} ${plRekordWord(h.recordCount)}`, h.recordCount)));
       return `<div class="dash-hero dash-hero--done${rc(1)}">
         <p class="dash-hero-eyebrow">${DASH_SVG_CHECK(14, 12, 12)}${t('dashDoneToday', 'Dziś zaliczone')}</p>
-        <h2 class="dash-hero-title">${title}</h2>
+        <h2 class="dash-hero-title">${h.workoutName ? escHtml(dashPlanShortName(h.workoutName)) : title}</h2>
         <div class="dash-hero-meta">${chips.join('')}</div>
         ${btn('done', t('dashSummary', 'Podsumowanie'))}
       </div>`;
