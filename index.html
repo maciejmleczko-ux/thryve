@@ -3222,7 +3222,8 @@ body.gymv2-bg .pg-bg{display:block;}
 .lg-setsec{display:flex;flex-direction:column;gap:10px;}
 .lg-sets{display:flex;flex-direction:column;gap:4px;}
 .lg-set-wrap{position:relative;border-radius:16px;overflow:hidden;}
-.lg-set-del{position:absolute;inset:0;background:var(--m-orange);display:flex;align-items:center;justify-content:flex-end;padding-right:20px;color:var(--m-white);}
+.lg-set-del{position:absolute;inset:0;background:var(--m-orange);display:flex;align-items:center;justify-content:flex-end;padding-right:20px;color:var(--m-white);opacity:0;}   /* czerwień usuwania widać tylko podczas przesuwania wiersza, nie przy animacji zapisu */
+.lg-set-wrap.is-swp .lg-set-del{opacity:1;}
 .lg-set-del svg{width:22px;height:22px;display:block;}
 .lg-set{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box;min-height:52px;background:var(--m-white);border:1.5px solid var(--m-orange);border-radius:16px;padding:10px 16px;text-align:left;font-family:inherit;cursor:pointer;touch-action:pan-y;transition:background-color var(--m-dur-fade) ease,border-color var(--m-dur-fade) ease,opacity var(--m-dur-quick) ease;}
 .lg-set-l{width:76px;flex:none;font-size:var(--m-fs-2xs);letter-spacing:.0509em;text-transform:uppercase;color:rgba(52,57,65,.71);transition:color var(--m-dur-quick) ease;}
@@ -10706,7 +10707,7 @@ function weightTrend(days){
    PATCH — drobne poprawki, zauważone błędy — NIE dostają wpisu w CHANGELOG,
            popup "co nowego" nie pokazuje się dla wersji bez wpisu (patrz init).
    Dopisz nowy wpis na górze CHANGELOG tylko przy bumpie MAJOR lub MINOR. */
-const APP_VERSION = "4.111.11";
+const APP_VERSION = "4.111.12";
 const LS_LAST_SEEN_VERSION = "fitlog_last_seen_version_v1";
 const CHANGELOG = {
   "4.111.0": {
@@ -14903,7 +14904,8 @@ function lgRenderSets(){
 function lgAttachSwipe(wrap, idx){
   const row = wrap.querySelector('.lg-set');
   let sx = 0, sy = 0, dx = 0, axis = null, down = false, t0 = 0, moved = false;
-  const setX = (x, anim)=>{ row.style.transition = anim ? `transform var(--m-dur-snap) var(--m-ease)` : 'none'; row.style.transform = x ? `translateX(${x}px)` : ''; };
+  const setX = (x, anim)=>{ row.style.transition = anim ? `transform var(--m-dur-snap) var(--m-ease)` : 'none'; row.style.transform = x ? `translateX(${x}px)` : '';
+    if(x) wrap.classList.add('is-swp'); else if(anim) setTimeout(()=> wrap.classList.remove('is-swp'), 320); else wrap.classList.remove('is-swp'); };
   const start = (x, y)=>{ down = true; sx = x; sy = y; dx = 0; axis = null; moved = false; t0 = Date.now(); };
   const move = (x, y, ev)=>{
     if(!down) return;
