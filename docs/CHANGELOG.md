@@ -2,7 +2,7 @@
 
 Pełna historia aplikacji od pierwszego commita (2026-08-21) do teraz: każda wersja, data, co się zmieniło i który commit to zrobił. Służy do szybkiego odnalezienia, **kiedy i dlaczego** coś się zmieniło, oraz do cofnięcia zmiany, jeśli coś się zepsuje.
 
-- **Aktualna wersja:** 4.111.9 (2026-11-20)
+- **Aktualna wersja:** 4.111.10 (2026-11-20)
 - **Liczba wersji:** 270 · **commitów:** 645
 - Wpisy są ułożone od najnowszego. Nowy wpis dopisuje się na górze sekcji „Dziennik wersji” przy każdym bumpie `APP_VERSION`.
 
@@ -118,6 +118,12 @@ Stan na 4.44.0.
 Każdy wpis: numer wersji, typ (MAJOR/MINOR/PATCH), daty, opis dla użytkownika (jeśli wersja go ma), lista commitów od najnowszego. Pełne uzasadnienie zmian jest w opisie commita (`git show <hash>`).
 
 <!-- NOWE WPISY DOPISUJ PONIŻEJ TEJ LINII (najnowszy na górze) -->
+
+### 4.111.10 · PATCH · 2026-11-20
+
+Okno logowania serii, koniec animacji zapisu: tło wiersza przełącza się na zielony, gdy zielone koło już je zakrywa (90% czasu), a koło gaśnie dopiero na końcu nad takim samym tłem, więc nie ma błysku ani skoku koloru w ostatniej klatce (`lgSetSettle`, `lgSetFill`). Bez wpisu Co nowego.
+
+**Commity:** jeden commit tej wersji.
 
 ### 4.111.9 · PATCH · 2026-11-20
 
